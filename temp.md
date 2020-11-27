@@ -14,7 +14,7 @@ lib/
       miraComsSabotage.ts
       simpleDoors.ts
       polusDoors.ts
-    
+
     game/
       index.ts
       scan.ts
@@ -43,10 +43,10 @@ lib/
     gameDataPacketHandler.ts
     gameObjectHandler.ts
     serverPlayer.ts (extends Player)
-  
+
   player/
     index.ts
-    
+
   client/
     index.ts
     clientRoom.ts (extends Room)
@@ -55,13 +55,13 @@ lib/
   proxy/
     index.ts
     proxyRoom.ts (extends room)
-    
+
   util/
     roomCode.ts
     clientVersion.ts
     text.ts
     textMark.ts
-    
+
   types/
     alterGameTag.ts
     chatNoteType.ts
@@ -81,19 +81,19 @@ lib/
     killDista.ts
   protocol/
     connection.ts
-    
+
     entities/
       player/
         index.ts
         playerControl.ts
         playerPhysics.ts
         customNetworkTransform.ts
-        
+
     packets/
       index.ts
       types.ts
       ...
-      
+
       packetTypes/
         helloPacket.ts
         unreliablePacket.ts
@@ -118,7 +118,7 @@ lib/
         redirect.ts
         reselectServer.ts
         getGameList.ts
-        
+
         gameDataPackets/
           data.ts
           rpc.ts
@@ -127,6 +127,6 @@ lib/
           sceneChange.ts
           ready.ts
           changeSettings.ts
-      
+
       rootAnnouncementPackets/
         ...

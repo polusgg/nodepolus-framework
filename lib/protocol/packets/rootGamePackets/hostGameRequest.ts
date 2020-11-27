@@ -3,13 +3,13 @@ import { GameOptionsData } from "../../../types/gameOptionsData";
 import { RootGamePacketType } from "../types";
 import { BasePacket } from "../basePacket";
 
-export class HostGamePacket extends BasePacket {
+export class HostGameRequest extends BasePacket {
   constructor(public readonly options: GameOptionsData) {
     super(RootGamePacketType.HostGame);
   }
 
-  static deserialize(reader: MessageReader): HostGamePacket {
-    return new HostGamePacket(GameOptionsData.deserialize(reader));
+  static deserialize(reader: MessageReader): HostGameRequest {
+    return new HostGameRequest(GameOptionsData.deserialize(reader));
   }
 
   serialize(): MessageWriter {

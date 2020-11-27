@@ -4,13 +4,13 @@ import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 import { BasePacket } from "../basePacket";
 
-export class HostGamePacket extends BasePacket {
+export class HostGameResponse extends BasePacket {
   constructor(public readonly roomCode: string) {
     super(RootGamePacketType.HostGame);
   }
 
-  static deserialize(reader: MessageReader): HostGamePacket {
-    return new HostGamePacket(RoomCode.decode(reader.readInt32()));
+  static deserialize(reader: MessageReader): HostGameResponse {
+    return new HostGameResponse(RoomCode.decode(reader.readInt32()));
   }
 
   serialize(): MessageWriter {
