@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/NodePolus/NodePolusRewrite#readme",
   "dependencies": {
+    "emittery": "^0.7.2",
     "public-ip": "^4.0.2"
   },
   "devDependencies": {
@@ -36,5 +37,13 @@
     "ts-node": "^9.0.0",
     "typescript": "^4.1.2",
     "udp-proxy": "^1.2.0"
+  },
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
   }
 }
