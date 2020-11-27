@@ -90,6 +90,6 @@ export class GameOptionsData {
   }
 
   static deserialize(reader: MessageReader): GameOptionsDataInterface {
-    
+
   }
 }

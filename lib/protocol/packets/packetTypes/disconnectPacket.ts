@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { DisconnectReason } from "../../../types/DisconnectReason";
+import { DisconnectReason } from "../../../types/disconnectReason";
 import { BasePacket } from "../basePacket";
 import { PacketType } from "../types";
 

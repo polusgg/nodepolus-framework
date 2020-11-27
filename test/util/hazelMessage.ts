@@ -236,7 +236,7 @@ test("writes a string", (t) => {
 
 test("reads bytes", (t) => {
   const buf = MessageReader.fromMessage("0200010a0b", true);
-  
+
   t.is(buf.readBytes(2).buffer.toString("hex"), "0a0b");
 });
 
@@ -244,7 +244,7 @@ test("writes bytes", (t) => {
   const buf = new MessageWriter();
 
   buf.writeBytes([0, 1, 2, 3]);
-  
+
   t.is(buf.buffer.toString("hex"), "00010203");
 });
 
@@ -289,9 +289,8 @@ test("writes a message", (t) => {
 
 test("reads a bitfield", (t) => {
   let buf = MessageReader.fromRawBytes("6e", true);
-  let bitfield = buf.readBitfield();
-  
-  t.deepEqual([
+
+  t.deepEqual(buf.readBitfield(), [
     false,
     true,
     true,
@@ -300,7 +299,8 @@ test("reads a bitfield", (t) => {
     true,
     true,
     false
-  ], bitfield);
+  ]);
+  t.false(buf.hasBytesLeft());
 });
 
 test("writes a bitfield", (t) => {
@@ -316,15 +316,14 @@ test("writes a bitfield", (t) => {
     true,
     false
   ]);
-  
+
   t.is(buf.buffer.toString("hex"), "6e");
 });
 
 test("reads a long bitfield", (t) => {
-  let buf = MessageReader.fromRawBytes('a52e', true)
-  let bitfield = buf.readBitfield(16);
+  let buf = MessageReader.fromRawBytes('a52e', true);
 
-  t.deepEqual(bitfield, [
+  t.deepEqual(buf.readBitfield(16), [
     true,
     false,
     true,
@@ -340,9 +339,10 @@ test("reads a long bitfield", (t) => {
     true,
     true,
     true,
-    false
-  ])
-})
+    false,
+  ]);
+  t.false(buf.hasBytesLeft());
+});
 
 test("writes a long bitfield", (t) => {
   let buf = new MessageWriter();
@@ -363,8 +363,8 @@ test("writes a long bitfield", (t) => {
     true,
     true,
     true,
-    false
+    false,
   ]);
 
   t.is(buf.buffer.toString("hex"), "a52e");
-})
+});

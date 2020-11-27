@@ -1,13 +1,15 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 
-type RootGamePacketDataType;
+type RootGamePacketDataType = {
+
+};
 
 export class RootGamePacket {
   constructor(
     public readonly clientBound: boolean,
     public readonly packets: RootGamePacketDataType[]
   ) {
-    
+
   }
 
   // TODO: Make sure reader is fromRawBytes
@@ -15,7 +17,7 @@ export class RootGamePacket {
     let msg = reader.readMessage()
     while(msg) {
       switch(msg.tag) {
-        case 
+        case
       }
       msg = reader.readMessage();
     }

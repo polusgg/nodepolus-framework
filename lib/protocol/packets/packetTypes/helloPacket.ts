@@ -6,18 +6,18 @@ import { PacketType } from "../types";
 export class HelloPacket extends BasePacket {
   constructor(
     public nonce: number,
-    public hazelVersion: number, 
-    public clientVersion: ClientVersion, 
+    public hazelVersion: number,
+    public clientVersion: ClientVersion,
     public name: string
   ) {
     super(PacketType.Hello);
   }
-  
+
   static deserialize(reader: MessageReader): HelloPacket {
     return new HelloPacket(
       reader.readUInt16(true),
       reader.readByte(),
-      ClientVersion.deserialize(reader.readUInt32()),
+      ClientVersion.decode(reader.readUInt32()),
       reader.readString()
     );
   }
@@ -27,9 +27,9 @@ export class HelloPacket extends BasePacket {
 
     writer.writeUInt16(this.nonce);
     writer.writeByte(this.hazelVersion);
-    writer.writeUInt32(this.clientVersion.serialize());
+    writer.writeUInt32(this.clientVersion.encode());
     writer.writeString(this.name);
-    
+
     return writer;
   }
 }

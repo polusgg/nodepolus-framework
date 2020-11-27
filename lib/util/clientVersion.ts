@@ -6,7 +6,7 @@ export class ClientVersion {
     public readonly revision: number
   ) {}
 
-  static deserialize(version: number): ClientVersion {
+  static decode(version: number): ClientVersion {
     let year = Math.floor(version / 25000);
     version %= 25000;
     let month = Math.floor(version / 1800);
@@ -17,7 +17,7 @@ export class ClientVersion {
     return new this(year, month, day, revision);
   }
 
-  serialize(): number {
+  encode(): number {
     return (
       this.year * 25000 + this.month * 1800 + this.day * 50 + this.revision
     );

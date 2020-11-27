@@ -8,7 +8,7 @@ export class MessageWriter {
   buffer: Buffer;
 
   private messageStarts: number[] = [];
-  
+
   constructor(buildFrom: BuildFrom = 0, isHex?: boolean) {
     if (typeof buildFrom != "number") {
       if (typeof buildFrom === "string" && isHex) {
@@ -29,11 +29,11 @@ export class MessageWriter {
     }
 
     const newb = Buffer.alloc(newlen);
-    
+
     this.buffer.copy(newb);
     this.buffer = newb;
   }
-  
+
   writeBoolean(value: boolean) {
     this.writeByte(Number(value));
   }
@@ -163,6 +163,42 @@ export class MessageWriter {
     this.cursor += b.length;
   }
 
+  startMessage(flag:number) {
+    this.writeUInt16(0);
+    this.writeByte(flag);
+    this.messageStarts.push(this.cursor)
+  }
+
+  endMessage() {
+    let start = this.messageStarts.pop();
+
+    if(start) {
+      if (this.cursor - start > 65535) {
+        throw new Error("Message length longer than 65.535KiB! Will not fit into U16.")
+      }
+
+      this.buffer[start - 3] = (this.cursor - start) % 256
+      this.buffer[start - 2] = ((this.cursor - start) >> 8) % 256
+    } else {
+      throw new Error("endMessage called when there are no active messages")
+    }
+  }
+
+  writeBitfield(arr: boolean[]) {
+    for (let chunkidx = 0; chunkidx < arr.length; chunkidx += 8) {
+      let tmparr = arr.slice(chunkidx, chunkidx+8)
+      let n = 0;
+
+      for (let i = 0; i < tmparr.length; i++) {
+        if (tmparr[tmparr.length-(i+1)]) {
+          n |= 1 << i;
+        }
+      }
+
+      this.writeByte(n)
+    }
+  }
+
   hasBytesLeft(): boolean {
     return this.bytesRemainingLength() > 0;
   }
@@ -178,42 +214,6 @@ export class MessageWriter {
   get length(): number {
     return this.buffer.length;
   }
-
-  startMessage(flag:number) {
-    this.writeUInt16(0);
-    this.writeByte(flag);
-    this.messageStarts.push(this.cursor)
-  }
-
-  endMessage() {
-    let start = this.messageStarts.pop();
-    
-    if(start) {
-      if (this.cursor - start > 65535) {
-        throw new Error("Message length longer than 65.535KiB! Will not fit into U16.")
-      }
-  
-      this.buffer[start - 3] = (this.cursor - start) % 256
-      this.buffer[start - 2] = ((this.cursor - start) >> 8) % 256
-    } else {
-      throw new Error("endMessage called when there are no active messages")
-    }
-
-  }
-  writeBitfield(arr: boolean[]) {
-    for (let chunkidx = 0; chunkidx < arr.length; chunkidx += 8) {
-      let tmparr = arr.slice(chunkidx, chunkidx+8)
-      let n = 0;
-  
-      for (let i = 0; i < tmparr.length; i++) {
-        if (tmparr[tmparr.length-(i+1)]) {
-          n |= 1 << i;
-        }
-      }
-  
-      this.writeByte(n)
-    }
-  }
 }
 
 export class MessageReader {
@@ -224,7 +224,7 @@ export class MessageReader {
 
   static fromMessage(buildFrom: BuildFrom = 0, isHexString: boolean = true): MessageReader {
     let reader = new MessageReader();
-    
+
     reader.initialize(buildFrom, isHexString);
 
     reader.length = reader.buffer.readUInt16LE();
@@ -363,21 +363,21 @@ export class MessageReader {
     return reader;
   }
 
-  hasBytesLeft(): boolean {
-    return this.getReadableBytesLength() > 0;
-  }
-  
-  getReadableBytesLength(): number {
-    return this.buffer.length - this.cursor;
-  }
-
   readBitfield(padding: number = 8) {
-    return [...this.readBytes(Math.ceil(padding/8)).buffer].map(v => {
+    return [...this.readBytes(Math.ceil(padding / 8)).buffer].map((v) => {
       return v
         .toString(2)
         .padStart(8, "0")
         .split("")
         .map((c) => c === "1")
     }).flat().slice(0, padding)
+  }
+
+  hasBytesLeft(): boolean {
+    return this.getReadableBytesLength() > 0;
+  }
+
+  getReadableBytesLength(): number {
+    return this.buffer.length - this.cursor;
   }
 }
