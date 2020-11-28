@@ -1,5 +1,4 @@
 export enum Language {
-  All = 0,
   Other = 1 << 0,
   Spanish = 1 << 1,
   Korean = 1 << 2,
@@ -9,4 +8,4 @@ export enum Language {
   Filipino = 1 << 6,
   Polish = 1 << 7,
   English = 1 << 8,
-};
+}

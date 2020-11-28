@@ -3,19 +3,15 @@ import { BasePacket } from "../basePacket";
 import { PacketType } from "../types";
 
 export class PingPacket extends BasePacket {
-  constructor(public nonce: number) {
+  constructor() {
     super(PacketType.Ping);
   }
 
   static deserialize(reader: MessageReader): PingPacket {
-    return new PingPacket(reader.readUInt16(true));
+    return new PingPacket();
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter();
-
-    writer.writeUInt16(this.nonce);
-
-    return writer;
+    return new MessageWriter();
   }
 }

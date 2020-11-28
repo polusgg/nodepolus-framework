@@ -1,3 +1,9 @@
+export enum PacketDestination {
+  Server,
+  Host,
+  Client,
+}
+
 export enum PacketType {
   Unreliable = 0x00,
   Reliable = 0x01,
@@ -6,7 +12,7 @@ export enum PacketType {
   Acknowledgement = 0x0a,
   Fragment = 0x0b,
   Ping = 0x0c,
-};
+}
 
 export enum RootGamePacketType {
   HostGame = 0x00,
@@ -18,14 +24,14 @@ export enum RootGamePacketType {
   GameDataTo = 0x06,
   JoinedGame = 0x07,
   EndGame = 0x08,
-  GetGameList = 0x09,
+  GetGameListV1 = 0x09,
   AlterGame = 0x0a,
   KickPlayer = 0x0b,
   WaitForHost = 0x0c,
   Redirect = 0x0d,
   ReselectServer = 0x0e,
-  GetGameListV2 = 0x10,
-};
+  GetGameList = 0x10,
+}
 
 export enum GameDataPacketType {
   Data = 0x01,
@@ -34,7 +40,7 @@ export enum GameDataPacketType {
   Despawn = 0x05,
   SceneChange = 0x06,
   Ready = 0x07,
-};
+}
 
 export enum RpcPacketType {
   PlayAnimation = 0x00,
@@ -68,4 +74,4 @@ export enum RpcPacketType {
   RepairSabotage = 0x1c,
   SetTasks = 0x1d,
   UpdateGameData = 0x1e,
-};
+}

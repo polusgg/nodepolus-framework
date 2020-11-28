@@ -6,4 +6,4 @@ export enum GameOverReason {
   ImpostorsBySabotage = 4,
   ImpostorDisconnect = 5,
   CrewmateDisconnect = 6,
-};
+}

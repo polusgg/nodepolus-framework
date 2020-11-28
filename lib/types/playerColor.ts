@@ -11,4 +11,4 @@ export enum PlayerColor {
   Brown = 9,
   Cyan = 10,
   Lime = 11,
-};
+}

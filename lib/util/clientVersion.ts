@@ -3,7 +3,7 @@ export class ClientVersion {
     public readonly year: number,
     public readonly month: number,
     public readonly day: number,
-    public readonly revision: number
+    public readonly revision: number,
   ) {}
 
   static decode(version: number): ClientVersion {
@@ -18,9 +18,7 @@ export class ClientVersion {
   }
 
   encode(): number {
-    return (
-      this.year * 25000 + this.month * 1800 + this.day * 50 + this.revision
-    );
+    return this.year * 25000 + this.month * 1800 + this.day * 50 + this.revision;
   }
 
   equals(otherVersion: ClientVersion): boolean {

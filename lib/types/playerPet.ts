@@ -10,4 +10,4 @@ export enum PlayerPet {
   EllieRose = 8,
   Squig = 9,
   Bedcrab = 10,
-};
+}

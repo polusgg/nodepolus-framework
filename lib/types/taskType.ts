@@ -42,4 +42,4 @@ export enum Tasks {
   AlignTelescope = 40,
   RecordTemperature = 41,
   RebootWifi = 42,
-};
+}

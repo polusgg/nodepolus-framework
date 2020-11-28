@@ -1,9 +1,22 @@
+export enum RoomCodeVersion {
+  One = 4,
+  Two = 6,
+}
+
 export class RoomCode {
-  // prettier-ignore
-  static readonly CharSet: number[] = [
+  static readonly CharMap: number[] = [
     25, 21, 19, 10, 8, 11, 12, 13, 22, 15, 16, 6, 24, 23, 18, 7, 0, 3, 9, 4, 14, 20, 1, 2, 5, 17
-  ];
-  static readonly CharMap: string = "QWXRTYLPESDFGHUJKZOCVBINMA";
+];
+  static readonly CharSet: string = "QWXRTYLPESDFGHUJKZOCVBINMA";
+
+  static generate(version: RoomCodeVersion = RoomCodeVersion.Two) {
+    return Array(version)
+      .fill(0)
+      .map(() => {
+        return RoomCode.CharSet[Math.floor(Math.random() * RoomCode.CharSet.length)];
+      })
+      .join("");
+  }
 
   static encode(code: string): number {
     code = code.toUpperCase();
@@ -16,9 +29,7 @@ export class RoomCode {
       return RoomCode.encodeV2(code);
     }
 
-    throw new TypeError(
-      "Invalid room code length, expected 4 or 6 characters: " + code
-    );
+    throw new TypeError("Invalid room code length, expected 4 or 6 characters: " + code);
   }
 
   static encodeV1(code: string): number {
@@ -30,12 +41,12 @@ export class RoomCode {
   }
 
   static encodeV2(code: string): number {
-    const a = RoomCode.CharSet[code.charCodeAt(0) - 65];
-    const b = RoomCode.CharSet[code.charCodeAt(1) - 65];
-    const c = RoomCode.CharSet[code.charCodeAt(2) - 65];
-    const d = RoomCode.CharSet[code.charCodeAt(3) - 65];
-    const e = RoomCode.CharSet[code.charCodeAt(4) - 65];
-    const f = RoomCode.CharSet[code.charCodeAt(5) - 65];
+    const a = RoomCode.CharMap[code.charCodeAt(0) - 65];
+    const b = RoomCode.CharMap[code.charCodeAt(1) - 65];
+    const c = RoomCode.CharMap[code.charCodeAt(2) - 65];
+    const d = RoomCode.CharMap[code.charCodeAt(3) - 65];
+    const e = RoomCode.CharMap[code.charCodeAt(4) - 65];
+    const f = RoomCode.CharMap[code.charCodeAt(5) - 65];
 
     const one = (a + 26 * b) & 0x3ff;
     const two = c + 26 * (d + 26 * (e + 26 * f));
@@ -60,12 +71,12 @@ export class RoomCode {
     let b = (id >> 10) & 0xfffff;
 
     return [
-      RoomCode.CharMap[Math.floor(a % 26)],
-      RoomCode.CharMap[Math.floor(a / 26)],
-      RoomCode.CharMap[Math.floor(b % 26)],
-      RoomCode.CharMap[Math.floor((b /= 26) % 26)],
-      RoomCode.CharMap[Math.floor((b /= 26) % 26)],
-      RoomCode.CharMap[Math.floor((b / 26) % 26)],
+      RoomCode.CharSet[Math.floor(a % 26)],
+      RoomCode.CharSet[Math.floor(a / 26)],
+      RoomCode.CharSet[Math.floor(b % 26)],
+      RoomCode.CharSet[Math.floor((b /= 26) % 26)],
+      RoomCode.CharSet[Math.floor((b /= 26) % 26)],
+      RoomCode.CharSet[Math.floor((b / 26) % 26)],
     ].join("");
   }
 }

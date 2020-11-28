@@ -4,28 +4,24 @@ import { BasePacket } from "../basePacket";
 import { PacketType } from "../types";
 
 export class DisconnectPacket extends BasePacket {
-  constructor(public unknown: number, public reason?: DisconnectReason) {
+  constructor(public reason?: DisconnectReason) {
     super(PacketType.Acknowledgement);
   }
 
   static deserialize(reader: MessageReader): DisconnectPacket {
-    let unknown = reader.readByte();
+    reader.readBoolean(); // Fucking Forte
+
     let reason = reader.readMessage();
 
     if (reason) {
-      return new DisconnectPacket(
-        unknown,
-        DisconnectReason.deserialize(reason)
-      );
+      return new DisconnectPacket(DisconnectReason.deserialize(reason));
     }
 
-    return new DisconnectPacket(unknown);
+    return new DisconnectPacket();
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter();
-
-    writer.writeByte(this.unknown);
+    let writer = new MessageWriter().writeBoolean(true); // For real, though...
 
     if (this.reason) {
       this.reason.serialize(writer);

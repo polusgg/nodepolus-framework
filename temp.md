@@ -62,23 +62,12 @@ lib/
     text.ts
     textMark.ts
 
+  host/
+    index.ts
+
   types/
-    alterGameTag.ts
-    chatNoteType.ts
-    disconnectReason.ts
-    language.ts
-    gameOverReason.ts
-    level.ts
-    playerColor.ts
-    playerHat.ts
-    playerSkin.ts
-    playerPet.ts
-    systemTyp.ts
-    t7askType.ts
-    taskBarUp.ts
-    spawnType.ts
-    spawnFlag.ts
-    killDista.ts
+    {done}
+
   protocol/
     connection.ts
 
@@ -95,29 +84,10 @@ lib/
       ...
 
       packetTypes/
-        helloPacket.ts
-        unreliablePacket.ts
-        reliablePacket.ts
-        disconnectPacket.ts
-        acknowledgementPacket.ts
-        pingPacket.ts
+        {done}
 
       rootGamePackets/
-        hostGame.ts
-        joinGame.ts
-        startGame.ts
-        removeGame.ts
-        removePlayer.ts
-        gameData.ts
-        gameDataTo.ts
-        joinedGame.ts
-        endGame.ts
-        alterGame.ts
-        kickPlayer.ts
-        waitForHost.ts
-        redirect.ts
-        reselectServer.ts
-        getGameList.ts
+        {done}
 
         gameDataPackets/
           data.ts
@@ -130,3 +100,52 @@ lib/
 
       rootAnnouncementPackets/
         ...
+
+
+room.host.handlePlayerJoin();
+     \ Getter 
+        \ HostInstance
+           \ Connection
+           |
+           \ CustomHostInstance
+
+
+packet
+room (not saah)
+RPCRepairSystem
+ |
+\ /
+HostInstance 
+ |
+\ /
+Data (this is when we update state)
+
+==========
+
+room (saah)
+RPCRepairSystem
+ |
+\ /
+CustomHostInstance
+ |
+\ /
+Data (this is when we update state)
+
+==========
+
+room (not saah)
+RPCSetInfected (this is when we update state)
+ |
+\ /
+ClientInstance 
+
+
+
+
+
+
+
+
+
+
+

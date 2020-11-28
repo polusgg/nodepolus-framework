@@ -1,7 +1,7 @@
 /**
  * Core buffer type for reading and writing messages
  */
-type BuildFrom = number | Buffer | string | number[] | MessageReader;
+type BuildFrom = number | Buffer | string | number[] | MessageReader | MessageWriter;
 
 export class MessageWriter {
   cursor: number = 0;
@@ -34,101 +34,136 @@ export class MessageWriter {
     this.buffer = newb;
   }
 
-  writeBoolean(value: boolean) {
-    this.writeByte(Number(value));
+  startMessage(flag: number): this {
+    this.writeUInt16(0).writeByte(flag);
+
+    this.messageStarts.push(this.cursor);
+
+    return this;
   }
 
-  writeByte(value: number) {
+  endMessage(): this {
+    let start = this.messageStarts.pop();
+
+    if (start) {
+      if (this.cursor - start > 65535) {
+        throw new Error("Message length longer than 65.535KiB! Will not fit into U16.");
+      }
+
+      this.buffer[start - 3] = (this.cursor - start) % 256;
+      this.buffer[start - 2] = ((this.cursor - start) >> 8) % 256;
+    } else {
+      throw new Error("endMessage called when there are no active messages");
+    }
+
+    return this;
+  }
+
+  writeBoolean(value: boolean): this {
+    return this.writeByte(Number(value));
+  }
+
+  writeSByte(value: number): this {
+    this.resizeBuffer(1);
+
+    if (value > 127 || value < -128) {
+      throw new RangeError("Value " + value + " outside of UInt8 range [-128 - 127]");
+    }
+
+    this.buffer.writeInt8(value, this.cursor++);
+
+    return this;
+  }
+
+  writeByte(value: number): this {
     this.resizeBuffer(1);
 
     if (value > 255 || value < 0) {
-      return new RangeError(
-        "Value " + value + " outside of UInt8 Range [0 - 255]"
-      );
+      throw new RangeError("Value " + value + " outside of UInt8 range [0 - 255]");
     }
 
     this.buffer[this.cursor++] = value;
+
+    return this;
   }
 
-  writeUInt16(value: number, isBigEndian: boolean = false) {
-    this.resizeBuffer(2);
-
-    if (value > 65535 || value < 0) {
-      return new RangeError(
-        "Value " + value + " outside of UInt16 Range [0 - 65535]"
-      );
-    }
-
-    this.buffer[isBigEndian ? 'writeUInt16BE' : 'writeUInt16LE'](value, this.cursor);
-
-    this.cursor += 2;
-  }
-
-  writeUInt32(value: number, isBigEndian: boolean = false) {
-    this.resizeBuffer(4);
-
-    if (value > 4294967295 || value < 0) {
-      return new RangeError(
-        "Value " + value + " outside of UInt8 Range [0 - 4294967295]"
-      );
-    }
-
-    this.buffer[isBigEndian ? 'writeUInt32BE' : 'writeUInt32LE'](value, this.cursor);
-
-    this.cursor += 4;
-  }
-
-  writeSByte(value: number) {
-    this.resizeBuffer(1);
-    if (value > 127 || value < -128) {
-      return new RangeError(
-        "Value " + value + " outside of UInt8 Range [-128 - 127]"
-      );
-    }
-    this.buffer.writeInt8(value, this.cursor++);
-  }
-
-  writeInt16(value: number, isBigEndian: boolean = false) {
+  writeInt16(value: number, isBigEndian: boolean = false): this {
     this.resizeBuffer(2);
 
     if (value > 32767 || value < -32768) {
-      return new RangeError(
-        "Value " + value + " outside of UInt16 Range [-32768 - 32767]"
-      );
+      throw new RangeError("Value " + value + " outside of UInt16 range [-32768 - 32767]");
     }
 
-    this.buffer[isBigEndian ? 'writeInt16BE' : 'writeInt16LE'](value, this.cursor);
+    this.buffer[isBigEndian ? "writeInt16BE" : "writeInt16LE"](value, this.cursor);
 
     this.cursor += 2;
+
+    return this;
   }
 
-  writeInt32(value: number, isBigEndian: boolean = false) {
+  writeUInt16(value: number, isBigEndian: boolean = false): this {
+    this.resizeBuffer(2);
+
+    if (value > 65535 || value < 0) {
+      throw new RangeError("Value " + value + " outside of UInt16 range [0 - 65535]");
+    }
+
+    this.buffer[isBigEndian ? "writeUInt16BE" : "writeUInt16LE"](value, this.cursor);
+
+    this.cursor += 2;
+
+    return this;
+  }
+
+  writeInt32(value: number, isBigEndian: boolean = false): this {
     this.resizeBuffer(4);
 
     if (value > 2147483647 || value < -2147483648) {
-      return new RangeError(
-        "Value " + value + " outside of UInt8 Range [-2147483648 - 2147483647]"
-      );
+      throw new RangeError("Value " + value + " outside of UInt8 range [-2147483648 - 2147483647]");
     }
 
-    this.buffer[isBigEndian ? 'writeInt32BE' : 'writeInt32LE'](value, this.cursor);
+    this.buffer[isBigEndian ? "writeInt32BE" : "writeInt32LE"](value, this.cursor);
 
     this.cursor += 4;
+
+    return this;
   }
 
-  writeFloat32(value: number, isBigEndian = false) {
+  writeUInt32(value: number, isBigEndian: boolean = false): this {
     this.resizeBuffer(4);
 
-    this.buffer[isBigEndian ? 'writeFloatBE' : 'writeFloatLE'](value, this.cursor);
+    if (value > 4294967295 || value < 0) {
+      throw new RangeError("Value " + value + " outside of UInt8 range [0 - 4294967295]");
+    }
+
+    this.buffer[isBigEndian ? "writeUInt32BE" : "writeUInt32LE"](value, this.cursor);
 
     this.cursor += 4;
+
+    return this;
   }
 
-  writePackedInt32(value: number) {
-    this.writePackedUInt32(value >>> 0);
+  writeFloat32(value: number, isBigEndian = false): this {
+    this.resizeBuffer(4);
+
+    this.buffer[isBigEndian ? "writeFloatBE" : "writeFloatLE"](value, this.cursor);
+
+    this.cursor += 4;
+
+    return this;
   }
 
-  writePackedUInt32(value: number) {
+  writeString(value: string): this {
+    let bytes = Buffer.from(value);
+
+    return this.writePackedUInt32(bytes.length).writeBytes(bytes);
+  }
+
+  writePackedInt32(value: number): this {
+    return this.writePackedUInt32(value >>> 0);
+  }
+
+  writePackedUInt32(value: number): this {
     do {
       let b = value & 0xff;
 
@@ -141,62 +176,65 @@ export class MessageWriter {
 
       value >>>= 7;
     } while (value != 0);
+
+    return this;
   }
 
-  writeString(value: string) {
-    let bytes = Buffer.from(value);
-
-    this.writePackedUInt32(bytes.length);
-    this.writeBytes(bytes);
-  }
-
-  writeBytes(bytes: Buffer | Number[] | String | MessageWriter) {
-    if (bytes instanceof MessageWriter) {
+  writeBytes(bytes: Buffer | Number[] | String | MessageWriter | MessageReader): this {
+    if (bytes instanceof MessageWriter || bytes instanceof MessageReader) {
       bytes = bytes.buffer;
     }
 
     this.resizeBuffer(bytes.length);
 
-    const b = Buffer.from(bytes);
-    b.copy(this.buffer, this.cursor);
+    const buf = Buffer.from(bytes);
+    buf.copy(this.buffer, this.cursor);
 
-    this.cursor += b.length;
+    this.cursor += buf.length;
+
+    return this;
   }
 
-  startMessage(flag:number) {
-    this.writeUInt16(0);
-    this.writeByte(flag);
-    this.messageStarts.push(this.cursor)
-  }
-
-  endMessage() {
-    let start = this.messageStarts.pop();
-
-    if(start) {
-      if (this.cursor - start > 65535) {
-        throw new Error("Message length longer than 65.535KiB! Will not fit into U16.")
-      }
-
-      this.buffer[start - 3] = (this.cursor - start) % 256
-      this.buffer[start - 2] = ((this.cursor - start) >> 8) % 256
-    } else {
-      throw new Error("endMessage called when there are no active messages")
-    }
-  }
-
-  writeBitfield(arr: boolean[]) {
+  writeBitfield(arr: boolean[]): this {
     for (let chunkidx = 0; chunkidx < arr.length; chunkidx += 8) {
-      let tmparr = arr.slice(chunkidx, chunkidx+8)
+      let tmparr = arr.slice(chunkidx, chunkidx + 8);
       let n = 0;
 
       for (let i = 0; i < tmparr.length; i++) {
-        if (tmparr[tmparr.length-(i+1)]) {
+        if (tmparr[tmparr.length - (i + 1)]) {
           n |= 1 << i;
         }
       }
 
-      this.writeByte(n)
+      this.writeByte(n);
     }
+
+    return this;
+  }
+
+  writeList<T>(items: T[], writer: (subWriter: MessageWriter, item: T, idx: number) => void): this {
+    this.writePackedUInt32(items.length);
+
+    for (let i = 0; i < items.length; i++) {
+      writer(this, items[i], i);
+    }
+
+    return this;
+  }
+
+  /**
+   * @summary Each message will have a default tag of `0`, customizable via the
+   * `defaultTag` property. For a custom tag you may use `writeList` and
+   * create messages inside the callback.
+   */
+  writeMessageList<T>(items: T[], writer: (childWriter: MessageWriter, item: T) => void, defaultTag: number = 0): this {
+    return this.writeList(items, (subWriter, item) => {
+      let child = subWriter.startMessage(defaultTag % 256);
+
+      writer(child, item);
+
+      child.endMessage();
+    });
   }
 
   hasBytesLeft(): boolean {
@@ -207,8 +245,8 @@ export class MessageWriter {
     return this.buffer.length - this.cursor;
   }
 
-  static concat(...HazelMessages: MessageWriter[]) {
-    return new MessageWriter(Buffer.concat(HazelMessages.map((PB) => PB.buffer)));
+  static concat(...writers: MessageWriter[]): MessageWriter {
+    return new MessageWriter(Buffer.concat(writers.map(writer => writer.buffer)));
   }
 
   get length(): number {
@@ -217,15 +255,15 @@ export class MessageWriter {
 }
 
 export class MessageReader {
-  cursor: number = 0;
   buffer: Buffer = Buffer.alloc(0);
+  cursor: number = 0;
   tag: number = 0xff;
   length: number = 0;
 
-  static fromMessage(buildFrom: BuildFrom = 0, isHexString: boolean = true): MessageReader {
+  static fromMessage(source: BuildFrom = 0, isHex: boolean = true): MessageReader {
     let reader = new MessageReader();
 
-    reader.initialize(buildFrom, isHexString);
+    reader.initialize(source, isHex);
 
     reader.length = reader.buffer.readUInt16LE();
     reader.tag = reader.buffer.readUInt8(2);
@@ -234,10 +272,10 @@ export class MessageReader {
     return reader;
   }
 
-  static fromRawBytes(buildFrom: BuildFrom = 0, isHexString: boolean = true): MessageReader {
+  static fromRawBytes(source: BuildFrom = 0, isHex: boolean = true): MessageReader {
     let reader = new MessageReader();
 
-    reader.initialize(buildFrom, isHexString);
+    reader.initialize(source, isHex);
 
     reader.length = reader.buffer.length;
     reader.tag = 0xff;
@@ -363,14 +401,63 @@ export class MessageReader {
     return reader;
   }
 
-  readBitfield(padding: number = 8) {
-    return [...this.readBytes(Math.ceil(padding / 8)).buffer].map((v) => {
-      return v
-        .toString(2)
-        .padStart(8, "0")
-        .split("")
-        .map((c) => c === "1")
-    }).flat().slice(0, padding)
+  readBitfield(size: number = 8): boolean[] {
+    return [...this.readBytes(Math.ceil(size / 8)).buffer]
+      .map(v => {
+        return v
+          .toString(2)
+          .padStart(8, "0")
+          .split("")
+          .map(c => c === "1");
+      })
+      .flat()
+      .slice(0, size);
+  }
+
+  readList<T>(reader: (subReader: MessageReader) => T): T[] {
+    let length = this.readPackedUInt32();
+    let results: T[] = [];
+
+    for (let i = 0; i < length; i++) {
+      results.push(reader(this));
+    }
+
+    return results;
+  }
+
+  readMessageList<T>(reader: (subReader: MessageReader) => T): T[] {
+    return this.readList((sub: MessageReader) => {
+      let child = sub.readMessage();
+
+      if (!child) {
+        throw new Error(
+          `Could not read message from list: read length of ${sub.cursor + 3} is greater than buffer length of ${
+            sub.length
+          }`,
+        );
+      }
+
+      return reader(child);
+    });
+  }
+
+  readAllChildMessages(reader: (child: MessageReader, idx: number) => void): void {
+    this.getAllChildMessages().forEach((child, idx) => reader(child, idx));
+  }
+
+  readRemainingBytes(): MessageReader {
+    return this.readBytes(this.getReadableBytesLength());
+  }
+
+  getAllChildMessages(): MessageReader[] {
+    let messages: MessageReader[] = [];
+    let current: MessageReader | undefined;
+
+    while ((current = this.readMessage())) {
+      messages.push(current);
+    }
+
+    return messages;
   }
 
   hasBytesLeft(): boolean {
