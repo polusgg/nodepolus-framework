@@ -59,7 +59,7 @@ export class RPCHandler {
 
     switch (type) {
       case RPCPacketType.PlayAnimation: {
-        let packet: PlayAnimationPacket = <PlayAnimationPacket>rawPacket;
+        let packet: PlayAnimationPacket = rawPacket as PlayAnimationPacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received PlayAnimation from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -68,7 +68,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.CompleteTask: {
-        let packet: CompleteTaskPacket = <CompleteTaskPacket>rawPacket;
+        let packet: CompleteTaskPacket = rawPacket as CompleteTaskPacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received CompleteTask from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -77,7 +77,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SyncSettings: {
-        let packet: SyncSettingsPacket = <SyncSettingsPacket>rawPacket;
+        let packet: SyncSettingsPacket = rawPacket as SyncSettingsPacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received SyncSettings from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -86,7 +86,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetInfected: {
-        let packet: SetInfectedPacket = <SetInfectedPacket>rawPacket;
+        let packet: SetInfectedPacket = rawPacket as SetInfectedPacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received SetInfected from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -102,7 +102,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.CheckName: {
-        let packet: CheckNamePacket = <CheckNamePacket>rawPacket;
+        let packet: CheckNamePacket = rawPacket as CheckNamePacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received CheckName from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -111,7 +111,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetName: {
-        let packet: SetNamePacket = <SetNamePacket>rawPacket;
+        let packet: SetNamePacket = rawPacket as SetNamePacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received SetName from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -120,7 +120,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.CheckColor: {
-        let packet: CheckColorPacket = <CheckColorPacket>rawPacket;
+        let packet: CheckColorPacket = rawPacket as CheckColorPacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received CheckColor from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -129,7 +129,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetColor: {
-        let packet: SetColorPacket = <SetColorPacket>rawPacket;
+        let packet: SetColorPacket = rawPacket as SetColorPacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received SetColor from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -138,7 +138,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetHat: {
-        let packet: SetHatPacket = <SetHatPacket>rawPacket;
+        let packet: SetHatPacket = rawPacket as SetHatPacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received SetHat from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -147,7 +147,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetSkin: {
-        let packet: SetSkinPacket = <SetSkinPacket>rawPacket;
+        let packet: SetSkinPacket = rawPacket as SetSkinPacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received SetSkin from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -156,7 +156,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.ReportDeadBody: {
-        let packet: ReportDeadBodyPacket = <ReportDeadBodyPacket>rawPacket;
+        let packet: ReportDeadBodyPacket = rawPacket as ReportDeadBodyPacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received ReportDeadBody from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -165,7 +165,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.MurderPlayer: {
-        let packet: MurderPlayerPacket = <MurderPlayerPacket>rawPacket;
+        let packet: MurderPlayerPacket = rawPacket as MurderPlayerPacket;
 
         if (!(sender instanceof InnerPlayerControl))
           throw new Error("Received MurderPlayer from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -174,7 +174,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SendChat: {
-        let packet: SendChatPacket = <SendChatPacket>rawPacket;
+        let packet: SendChatPacket = rawPacket as SendChatPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl)
           throw new Error("Received SendChat from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -183,7 +183,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.StartMeeting: {
-        let packet: StartMeetingPacket = <StartMeetingPacket>rawPacket;
+        let packet: StartMeetingPacket = rawPacket as StartMeetingPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl)
           throw new Error("Received StartMeeting from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -192,7 +192,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetScanner: {
-        let packet: SetScannerPacket = <SetScannerPacket>rawPacket;
+        let packet: SetScannerPacket = rawPacket as SetScannerPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl)
           throw new Error("Received SetScanner from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -201,7 +201,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SendChatNote: {
-        let packet: SendChatNotePacket = <SendChatNotePacket>rawPacket;
+        let packet: SendChatNotePacket = rawPacket as SendChatNotePacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl)
           throw new Error("Received SendChatNote from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -210,7 +210,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetPet: {
-        let packet: SetPetPacket = <SetPetPacket>rawPacket;
+        let packet: SetPetPacket = rawPacket as SetPetPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl)
           throw new Error("Received SetPet from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -219,7 +219,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetStartCounter: {
-        let packet: SetStartCounterPacket = <SetStartCounterPacket>rawPacket;
+        let packet: SetStartCounterPacket = rawPacket as SetStartCounterPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl)
           throw new Error("Received SetStartCounter from invalid InnerNetObject: expected PlayerControl but got " + InnerNetObjectType[sender.type]);
@@ -228,7 +228,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.EnterVent: {
-        let packet: EnterVentPacket = <EnterVentPacket>rawPacket;
+        let packet: EnterVentPacket = rawPacket as EnterVentPacket;
 
         if (sender.type != InnerNetObjectType.PlayerPhysics)
           throw new Error("Received EnterVent from invalid InnerNetObject: expected PlayerPhysics but got " + InnerNetObjectType[sender.type]);
@@ -237,7 +237,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.ExitVent: {
-        let packet: ExitVentPacket = <ExitVentPacket>rawPacket;
+        let packet: ExitVentPacket = rawPacket as ExitVentPacket;
 
         if (sender.type != InnerNetObjectType.PlayerPhysics)
           throw new Error("Received ExitVent from invalid InnerNetObject: expected PlayerPhysics but got " + InnerNetObjectType[sender.type]);
@@ -246,7 +246,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SnapTo: {
-        let packet: SnapToPacket = <SnapToPacket>rawPacket;
+        let packet: SnapToPacket = rawPacket as SnapToPacket;
 
         if (sender.type != InnerNetObjectType.CustomNetworkTransform)
           throw new Error("Received SnapTo from invalid InnerNetObject: expected CustomNetworkTransform but got " + InnerNetObjectType[sender.type]);
@@ -262,7 +262,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.VotingComplete: {
-        let packet: VotingCompletePacket = <VotingCompletePacket>rawPacket;
+        let packet: VotingCompletePacket = rawPacket as VotingCompletePacket;
 
         if (sender.type != InnerNetObjectType.MeetingHud)
           throw new Error("Received VotingComplete from invalid InnerNetObject: expected MeetingHud but got " + InnerNetObjectType[sender.type]);
@@ -271,7 +271,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.CastVote: {
-        let packet: CastVotePacket = <CastVotePacket>rawPacket;
+        let packet: CastVotePacket = rawPacket as CastVotePacket;
 
         if (sender.type != InnerNetObjectType.MeetingHud)
           throw new Error("Received CastVote from invalid InnerNetObject: expected MeetingHud but got " + InnerNetObjectType[sender.type]);
@@ -287,7 +287,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.AddVote: {
-        let packet: AddVotePacket = <AddVotePacket>rawPacket;
+        let packet: AddVotePacket = rawPacket as AddVotePacket;
 
         if (sender.type != InnerNetObjectType.VoteBanSystem)
           throw new Error("Received AddVote from invalid InnerNetObject: expected VoteBanSystem but got " + InnerNetObjectType[sender.type]);
@@ -296,7 +296,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.CloseDoorsOfType: {
-        let packet: CloseDoorsOfTypePacket = <CloseDoorsOfTypePacket>rawPacket;
+        let packet: CloseDoorsOfTypePacket = rawPacket as CloseDoorsOfTypePacket;
 
         if (!(sender instanceof BaseShipStatus))
           throw new Error("Received CloseDoorsOfType from invalid InnerNetObject: expected BaseShipStatus but got " + InnerNetObjectType[sender.type]);
@@ -305,7 +305,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.RepairSystem: {
-        let packet: RepairSystemPacket = <RepairSystemPacket>rawPacket;
+        let packet: RepairSystemPacket = rawPacket as RepairSystemPacket;
 
         if (!(sender instanceof BaseShipStatus))
           throw new Error("Received RepairSystem from invalid InnerNetObject: expected BaseShipStatus but got " + InnerNetObjectType[sender.type]);
@@ -314,7 +314,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetTasks: {
-        let packet: SetTasksPacket = <SetTasksPacket>rawPacket;
+        let packet: SetTasksPacket = rawPacket as SetTasksPacket;
 
         if (sender.type != InnerNetObjectType.GameData)
           throw new Error("Received SetTasks from invalid InnerNetObject: expected GameData but got " + InnerNetObjectType[sender.type]);
@@ -323,7 +323,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.UpdateGameData: {
-        let packet: UpdateGameDataPacket = <UpdateGameDataPacket>rawPacket;
+        let packet: UpdateGameDataPacket = rawPacket as UpdateGameDataPacket;
 
         if (sender.type != InnerNetObjectType.GameData)
           throw new Error("Received UpdateGameData from invalid InnerNetObject: expected GameData but got " + InnerNetObjectType[sender.type]);
