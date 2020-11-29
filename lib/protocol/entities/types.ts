@@ -7,7 +7,6 @@ import { InnerMeetingHud } from "./meetingHud/innerMeetingHud";
 import { InnerShipStatus } from "./shipStatus/innerShipStatus";
 import { InnerPlanetMap } from "./planetMap/innerPlanetMap";
 import { InnerGameData } from "./gameData/innerGameData";
-import { Connection } from "../connection";
 import { EntityGameData } from "./gameData";
 import { EntityShipStatus } from "./shipStatus";
 import { EntityAprilShipStatus } from "./aprilShipStatus";
@@ -19,6 +18,7 @@ import { GameOptionsData } from "../../types/gameOptionsData";
 import { HostInstance } from "../../host/types";
 import { InnerLobbyBehaviour } from "./lobbyBehaviour/innerLobbyBehaviour";
 import { InnerAprilShipStatus } from "./aprilShipStatus/innerAprilShipStatus";
+import { Player } from "../../player";
 
 export enum InnerNetObjectType {
   LobbyBehaviour,
@@ -51,7 +51,7 @@ export type InnerLevel = InnerShipStatus
                        | InnerAprilShipStatus
 
 export interface RoomImplementation {
-  connections: Connection[];
+  players: Player[];
   gameData?: EntityGameData;
   shipStatus?: EntityShipStatus | EntityAprilShipStatus | EntityHeadquarters | EntityPlanetMap;
   meetingHud?: EntityMeetingHud;
@@ -59,5 +59,5 @@ export interface RoomImplementation {
   host: HostInstance;
   isHost: boolean;
 
-  sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void;
+  sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, sendTo?: (Player | HostInstance)[]): void;
 }

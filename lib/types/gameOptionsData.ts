@@ -97,7 +97,7 @@ export class GameOptionsData {
       inside the object definiton. This is OK because they are being
       defined in the if block below it.77
     */
-    //@ts-ignore
+    // @ts-ignore
     let opt: GameOptionsDataInterface = {
       length,
       version,

@@ -131,11 +131,11 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     gameData.gameData.players[gameDataPlayerIndex].isDead = true;
 
-    let thisConnection = this.parent.room.connections.find(c => c.player?.id == this.id)
+    let thisPlayer = this.parent.room.players.find(player => player.id == this.id)
 
-    if(!thisConnection) throw new Error("Exiled packet sent but the recipient has no connection / player")
+    if(!thisPlayer) throw new Error("Exiled packet sent but the recipient has no connection / player")
 
-    this.sendRPCPacketTo([thisConnection], new ExiledPacket())
+    this.sendRPCPacketTo([thisPlayer], new ExiledPacket())
   }
 
   exile(player: InnerPlayerControl) {
@@ -167,7 +167,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   checkColor(color: PlayerColor) {
     if (this.parent.room.isHost) return
 
-    this.sendRPCPacketTo([<Connection>this.parent.room.host], new CheckColorPacket(color))
+    this.sendRPCPacketTo([this.parent.room.host], new CheckColorPacket(color))
   }
 
   setColor(color: PlayerColor) {
@@ -223,7 +223,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   murderPlayer(victimPlayerControlNetId: number) {
-    let victimPlayerId: number | undefined = this.parent.room.connections.find(c => c.player?.gameObject.playerControl.id == victimPlayerControlNetId)?.player?.id
+    let victimPlayerId: number | undefined = this.parent.room.players.find(player => player?.gameObject.playerControl.id == victimPlayerControlNetId)?.id
     
     if(!victimPlayerId)
       throw new Error("AAAAAAAAAAAAAAAAAAAAAAAAAAA")

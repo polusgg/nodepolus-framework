@@ -4,6 +4,7 @@ import { MessageWriter, MessageReader } from "../../util/hazelMessage";
 import { InnerNetObjectType, RoomImplementation } from "./types";
 import { EntityAprilShipStatus } from "./aprilShipStatus";
 import { EntityLobbyBehaviour } from "./lobbyBehaviour";
+import { BaseRPCPacket } from "../packets/basePacket";
 import { EntityHeadquarters } from "./headquarters";
 import { SpawnFlag } from "../../types/spawnFlag";
 import { SpawnType } from "../../types/spawnType";
@@ -12,8 +13,8 @@ import { EntityShipStatus } from "./shipStatus";
 import { EntityPlanetMap } from "./planetMap";
 import { EntityGameData } from "./gameData";
 import { EntityPlayer } from "./player";
-import { BaseRPCPacket } from "../packets/basePacket";
-import { Connection } from "../connection";
+import { Player } from "../../player";
+import { HostInstance } from "../../host/types";
 
 export type Entity = EntityAprilShipStatus
                    | EntityGameData
@@ -66,7 +67,7 @@ export abstract class BaseGameObject<T> {
     this.parent.room.sendRPCPacket(this, packet)
   }
 
-  sendRPCPacketTo(to: Connection[], packet: BaseRPCPacket): void {
+  sendRPCPacketTo(to: (Player | HostInstance)[], packet: BaseRPCPacket): void {
     this.parent.room.sendRPCPacket(this, packet, to)
   }
 }

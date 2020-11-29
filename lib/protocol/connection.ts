@@ -20,13 +20,14 @@ import { SystemType } from "../types/systemType";
 import { RepairAmount } from "./packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { InnerPlayerControl } from "./entities/player/innerPlayerControl";
 import { InnerLevel } from "./entities/types";
+import dgram from 'dgram'
 
 interface ConnectionEvents {
   packet: RootGamePacketDataType;
   disconnected?: DisconnectReason
 }
 
-export class Connection extends Emittery.Typed<ConnectionEvents> implements HostInstance {
+export class Connection extends Emittery.Typed<ConnectionEvents> implements HostInstance, dgram.RemoteInfo {
   public initialized: boolean = false;
   public hazelVersion?: number;
   public clientVersion?: ClientVersion;
@@ -36,6 +37,10 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   public id: number = -1;
   public room?: Room;
   public player?: Player;
+  public address: string;
+  public port: number;
+  public family: 'IPv4' | 'IPv6'
+  public size: number = -1;
 
   private packetBuffer: RootGamePacketDataType[] = [];
   private nonceIndex: number = 0;
@@ -50,8 +55,12 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     return Date.now() - this.lastPingRecievedTime;
   }
 
-  constructor(public socket: Socket, public bound: PacketDestination) {
+  constructor(remoteInfo: dgram.RemoteInfo, public socket: Socket, public bound: PacketDestination) {
     super();
+
+    this.address = remoteInfo.address
+    this.port = remoteInfo.port
+    this.family = remoteInfo.family
 
     socket.on("message", buf => {
       let parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound != PacketDestination.Server, this.room?.options.options.levels[0]);

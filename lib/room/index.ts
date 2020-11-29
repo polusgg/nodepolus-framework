@@ -91,7 +91,7 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
     if (this.isHost) {
       if (this.customHostInstance) {
         // TODO: implement
-        //@ts-ignore REMOVE ONCE IMPLEMENTED
+        // @ts-expect-error
         return this.customHostInstance;
       } else {
         throw new Error("Room is host without a custom host instance");
@@ -242,9 +242,24 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
     }
   }
   
-  sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]) {
+  sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, sendTo?: (Player | HostInstance)[]) {
+    let sendToConnections: Connection[] = new Array(sendTo?.length);
+    
     if (!sendTo) {
-      sendTo = this.connections.filter(c => c.id != from.id);
+      sendToConnections = this.connections.filter(c => c.id != from.id);
+    } else {
+      for (let i = 0; i < sendTo.length; i++) {
+        if(sendTo[i] instanceof Connection) {
+          sendToConnections.push(<Connection>sendTo[i])
+        } else {
+          let con = this.connections.find(c => c.player?.id == sendTo[i].id)
+          if(con) {
+            sendToConnections.push(con)
+          } else {
+            throw new Error("Attempted to send packet to a player with no associated connection.")
+          }
+        }
+      }
     }
 
     this.sendRootGamePacket(new GameDataPacket([
