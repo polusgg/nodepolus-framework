@@ -4,7 +4,7 @@ import { BaseRootGamePacket } from "../basePacket";
 import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 
-export class SendLateRejectionPacket extends BaseRootGamePacket {
+export class LateRejectionPacket extends BaseRootGamePacket {
   constructor(
     public readonly roomCode: string,
     public readonly removedClientId: number,
@@ -13,8 +13,8 @@ export class SendLateRejectionPacket extends BaseRootGamePacket {
     super(RootGamePacketType.RemovePlayer);
   }
 
-  static deserialize(reader: MessageReader): SendLateRejectionPacket {
-    return new SendLateRejectionPacket(
+  static deserialize(reader: MessageReader): LateRejectionPacket {
+    return new LateRejectionPacket(
       RoomCode.decode(reader.readInt32()),
       reader.readPackedUInt32(),
       new DisconnectReason(reader.readByte()),

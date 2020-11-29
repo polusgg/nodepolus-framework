@@ -1,0 +1,29 @@
+import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
+import { SystemType } from "../../../types/systemType";
+import { BaseShipStatus } from "../baseShipStatus";
+import { InnerNetObjectType } from "../types";
+import { EntityPlanetMap } from ".";
+
+export class InnerPlanetMap extends BaseShipStatus<InnerPlanetMap, EntityPlanetMap> {
+  constructor(netId: number, parent: EntityPlanetMap) {
+    super(InnerNetObjectType.PlanetMap, netId, parent, [
+      SystemType.Electrical,
+      SystemType.Medbay,
+      SystemType.Security,
+      SystemType.Communications,
+      SystemType.Doors,
+      SystemType.Sabotage,
+      SystemType.Decontamination,
+      SystemType.Laboratory,
+      SystemType.Decontamination2,
+    ]);
+  }
+
+  static spawn(object: SpawnInnerNetObject, parent: EntityPlanetMap) {
+    let planetMap = new InnerPlanetMap(object.innerNetObjectID, parent);
+
+    planetMap.setSpawn(object.data);
+
+    return planetMap;
+  }
+}

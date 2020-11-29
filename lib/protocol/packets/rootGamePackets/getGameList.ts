@@ -1,4 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { GameOptionsData } from "../../../types/gameOptionsData";
 import { BaseRootGamePacket } from "../basePacket";
 import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
@@ -44,7 +45,32 @@ export class RoomListing {
   }
 };
 
-export class GetGameListResponse extends BaseRootGamePacket {
+export class GetGameListRequestPacket extends BaseRootGamePacket {
+  constructor(
+    public readonly includePrivate: boolean,
+    public readonly options: GameOptionsData,
+  ) {
+    super(RootGamePacketType.GetGameList);
+  }
+
+  static deserialize(reader: MessageReader): GetGameListRequestPacket {
+    return new GetGameListRequestPacket(
+      reader.readBoolean(),
+      GameOptionsData.deserialize(reader, true),
+    );
+  }
+
+  serialize(): MessageWriter {
+    let writer = new MessageWriter().writeBoolean(this.includePrivate);
+
+    this.options.serialize(writer, true);
+
+    return writer;
+  }
+}
+
+
+export class GetGameListResponsePacket extends BaseRootGamePacket {
   constructor(
     public readonly rooms: RoomListing[],
     public readonly skeldCount?: number,
@@ -54,7 +80,7 @@ export class GetGameListResponse extends BaseRootGamePacket {
     super(RootGamePacketType.GetGameList);
   }
 
-  static deserialize(reader: MessageReader): GetGameListResponse {
+  static deserialize(reader: MessageReader): GetGameListResponsePacket {
     let skeldCount: number | undefined;
     let miraCount: number | undefined;
     let polusCount: number | undefined;
@@ -72,7 +98,7 @@ export class GetGameListResponse extends BaseRootGamePacket {
       }
     });
 
-    return new GetGameListResponse(
+    return new GetGameListResponsePacket(
       rooms,
       skeldCount,
       miraCount,

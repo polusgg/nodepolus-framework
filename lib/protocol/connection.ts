@@ -10,6 +10,16 @@ import Emittery from "emittery";
 import { Socket } from "dgram";
 import { DisconnectReason } from "../types/disconnectReason";
 import { HostInstance } from "../host/types";
+import { KickPlayerPacket } from "./packets/rootGamePackets/kickPlayer";
+import { Room } from "../room";
+import { LateRejectionPacket } from "./packets/rootGamePackets/removePlayer";
+import { WaitForHostPacket } from "./packets/rootGamePackets/waitForHost";
+import { Player } from "../player";
+import { PlayerColor } from "../types/playerColor";
+import { SystemType } from "../types/systemType";
+import { RepairAmount } from "./packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
+import { InnerPlayerControl } from "./entities/player/innerPlayerControl";
+import { InnerLevel } from "./entities/types";
 
 interface ConnectionEvents {
   packet: RootGamePacketDataType;
@@ -24,6 +34,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   public timeoutLength: number = 6000;
   public isHost: boolean = false;
   public id: number = -1;
+  public room?: Room;
+  public player?: Player;
 
   private packetBuffer: RootGamePacketDataType[] = [];
   private nonceIndex: number = 0;
@@ -42,13 +54,13 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     super();
 
     socket.on("message", buf => {
-      let parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound != PacketDestination.Server);
+      let parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound != PacketDestination.Server, this.room?.options.options.levels[0]);
 
       switch (parsed.type) {
         case PacketType.Reliable:
           this.acknowledgePacket(parsed.nonce!);
         case PacketType.Fragment:
-        // Fragment types are handled unreliably in-game
+          // Fragment types are handled unreliably in-game
         case PacketType.Unreliable:
           (<RootGamePacket>parsed.data).packets.forEach(packet => {
             this.emit("packet", packet);
@@ -164,7 +176,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   private handleDisconnection(reason?: DisconnectReason) {
     if (!this.requestedDisconnect) {
       // No need to serialize a DisconnectReason object since there is no data
-      this.socket.send([PacketType.Disconnect]);
+      this.socket.send([ PacketType.Disconnect ]);
     }
 
     this.cleanup(reason);
@@ -180,4 +192,51 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
     this.emit("disconnected", reason);
   }
+
+  public sendKick(isBanned: boolean, reason?: DisconnectReason) {
+    if (!this.room)
+      throw new Error("Can not kick a connection not in a room.");
+
+    this.write(new KickPlayerPacket(
+      this.room.code,
+      this.id,
+      isBanned,
+      reason,
+    ));
+  }
+  
+  public sendLateRejection(reason: DisconnectReason) {
+    if (!this.room)
+      throw new Error("Can not send a lateRejection to a connection not in a room.");
+
+    this.write(new LateRejectionPacket(
+      this.room.code,
+      this.id,
+      reason,
+    ));
+  }
+
+  public sendWaitingForHost() {
+    if (!this.room)
+      throw new Error("Can not send a wait for host packet to a connection not in a room.");
+
+    this.write(new WaitForHostPacket(
+      this.room.code,
+      this.id,
+    ));
+  }
+
+  public handleReady(sender: Connection) {}
+
+  public handleSceneChange(sender: Connection, scene: string) {}
+
+  public handleCheckName(sender: InnerPlayerControl, name: string) {}
+
+  public handleCheckColor(sender: InnerPlayerControl, color: PlayerColor) {}
+
+  public handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId: number) {}
+
+  public handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount) {}
+
+  public handleCloseDoorsOfType(sender: InnerLevel, systemId: SystemType) {}
 }

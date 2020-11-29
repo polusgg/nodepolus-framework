@@ -7,7 +7,7 @@ import { RootGamePacketType } from "../types";
 export class EndGamePacket extends BaseRootGamePacket {
   constructor(
     public readonly roomCode: string,
-    public readonly gameOverReason: GameOverReason,
+    public readonly reason: GameOverReason,
     public readonly showAd: boolean,
   ) {
     super(RootGamePacketType.EndGame);
@@ -20,7 +20,7 @@ export class EndGamePacket extends BaseRootGamePacket {
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeInt32(RoomCode.encode(this.roomCode))
-      .writeByte(this.gameOverReason)
+      .writeByte(this.reason)
       .writeBoolean(this.showAd);
   }
 }

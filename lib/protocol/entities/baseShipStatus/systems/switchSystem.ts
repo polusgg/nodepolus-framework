@@ -1,0 +1,62 @@
+import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { SystemType } from "../../../../types/systemType";
+import { BaseSystem } from "./baseSystem";
+
+export class SwitchSystem extends BaseSystem<SwitchSystem> {
+  actualSwitches!: boolean[];
+  expectedSwitches!: boolean[];
+  visionModifier!: number;
+
+  constructor() {
+    super(SystemType.Electrical);
+  }
+
+  getData(old: SwitchSystem): MessageWriter {
+    return this.getSpawn();
+  }
+
+  setData(data: MessageReader): void {
+    this.setSpawn(data);
+  }
+
+  getSpawn(): MessageWriter {
+    return new MessageWriter()
+      .writeBitfield(this.expectedSwitches)
+      .writeBitfield(this.actualSwitches)
+      .writeByte(this.visionModifier);
+  }
+
+  setSpawn(data: MessageReader): void {
+    this.expectedSwitches = data.readBitfield(5);
+    this.actualSwitches = data.readBitfield(5);
+    this.visionModifier = data.readByte();
+  }
+
+  equals(old: SwitchSystem): boolean {
+    for (let i = 0; i < this.actualSwitches.length; i++) {
+      if (this.actualSwitches[i] != old.actualSwitches[i]) {
+        return false;
+      }
+    }
+
+    for (let i = 0; i < this.expectedSwitches.length; i++) {
+      if (this.expectedSwitches[i] != old.expectedSwitches[i]) {
+        return false;
+      }
+    }
+
+    if (this.visionModifier != old.visionModifier) {
+      return false;
+    }
+
+    return true;
+  }
+
+  static spawn(data: MessageReader): SwitchSystem {
+     let switchSystem = new SwitchSystem();
+
+     switchSystem.setSpawn(data);
+
+     return switchSystem;
+  }
+}

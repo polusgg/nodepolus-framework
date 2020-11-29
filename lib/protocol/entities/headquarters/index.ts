@@ -1,3 +1,48 @@
-import { BaseShipStatus } from "../baseShipStatus";
+import { SpawnPacket, SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
+import { InnerHeadquarters } from "./innerHeadquarters";
+import { SpawnFlag } from "../../../types/spawnFlag";
+import { SpawnType } from "../../../types/spawnType";
+import { BaseEntity } from "../baseEntity";
+import { RoomImplementation } from "../types";
 
-export class EntityHeadquarters extends BaseShipStatus {}
+export type HeadquartersInnerNetObjects = [ InnerHeadquarters ];
+
+export class EntityHeadquarters extends BaseEntity {
+  public owner!: number;
+  public flags: SpawnFlag = SpawnFlag.None;
+  public innerNetObjects!: HeadquartersInnerNetObjects;
+
+  get headquarters(): InnerHeadquarters {
+    return this.innerNetObjects[0];
+  }
+
+  private constructor(room: RoomImplementation) {
+    super(SpawnType.Headquarters, room);
+  }
+
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityHeadquarters {
+    let headquarters = new EntityHeadquarters(room);
+
+    headquarters.setSpawn(flags, owner, innerNetObjects);
+    
+    return headquarters
+  }
+
+  getSpawn(): SpawnPacket {
+    return new SpawnPacket(
+      SpawnType.Headquarters,
+      this.owner,
+      this.flags,
+      [
+        this.headquarters.spawn(),
+      ],
+    );
+  }
+
+  setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]) {
+    this.owner = owner;
+    this.innerNetObjects = [
+      InnerHeadquarters.spawn(innerNetObjects[0], this),
+    ];
+  }
+}

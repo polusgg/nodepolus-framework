@@ -1,5 +1,5 @@
 export enum KillDistance {
   Short = 0,
-  Normal = 1,
+  Medium = 1,
   Long = 2,
 }

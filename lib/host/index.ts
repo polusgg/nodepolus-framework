@@ -1,1 +1,3 @@
-class CustomHost {}
+class CustomHost {
+  
+}

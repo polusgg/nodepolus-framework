@@ -1,57 +1,49 @@
 import { SpawnPacket, SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
-import { CustomNetworkTransform } from "./customNetworkTransform";
+import { InnerCustomNetworkTransform } from "./innerCustomNetworkTransform";
+import { InnerPlayerControl } from "./innerPlayerControl";
+import { InnerPlayerPhysics } from "./innerPlayerPhysics";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
-import { PlayerPhysics } from "./playerPhysics";
-import { PlayerControl } from "./playerControl";
 import { BaseEntity } from "../baseEntity";
+import { RoomImplementation } from "../types";
 
-export type PlayerInnerNetObjects = [ PlayerControl, PlayerPhysics, CustomNetworkTransform ];
+export type PlayerInnerNetObjects = [ InnerPlayerControl, InnerPlayerPhysics, InnerCustomNetworkTransform ];
 
 export class EntityPlayer extends BaseEntity {
-  public innerNetObjects: PlayerInnerNetObjects;
+  public owner!: number;
+  public flags: SpawnFlag = SpawnFlag.IsClientCharacter;
+  public innerNetObjects!: PlayerInnerNetObjects;
 
-  get playerControl(): PlayerControl {
+  get playerControl(): InnerPlayerControl {
     return this.innerNetObjects[0];
   }
   
-  get playerPhysics(): PlayerPhysics {
+  get playerPhysics(): InnerPlayerPhysics {
     return this.innerNetObjects[1];
   }
   
-  get customNetworkTransform(): CustomNetworkTransform {
+  get customNetworkTransform(): InnerCustomNetworkTransform {
     return this.innerNetObjects[2];
   }
 
-  private constructor(
-    public owner: number,
-    public flags: SpawnFlag,
-    innerNetObjectsRaw: SpawnInnerNetObject[],
-  ) {
-    super(SpawnType.PlayerControl);
-
-    this.innerNetObjects = [
-      PlayerControl.spawn(innerNetObjectsRaw[0]),
-      PlayerPhysics.spawn(innerNetObjectsRaw[1]),
-      CustomNetworkTransform.spawn(innerNetObjectsRaw[2]),
-    ];
+  private constructor(room: RoomImplementation) {
+    super(SpawnType.PlayerControl, room);
   }
 
-  static spawn(packet: SpawnPacket): EntityPlayer {
-    if (packet.type != SpawnType.PlayerControl) {
-      throw new Error(`PlayerControl spawned with a ${packet.type} packet instead of a PlayerControl packet (4)`);
-    }
-    
-    return new EntityPlayer(packet.owner, packet.flags, packet.innerNetObjects);
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityPlayer {
+    let player = new EntityPlayer(room);
+
+    player.setSpawn(flags, owner, innerNetObjects);
+
+    return player;
   }
 
-  setSpawn(packet: SpawnPacket) {
-    this.owner = packet.owner;
-    this.flags = packet.flags;
+  setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]) {
+    this.owner = owner;
     this.innerNetObjects = [
-      PlayerControl.spawn(packet.innerNetObjects[0]),
-      PlayerPhysics.spawn(packet.innerNetObjects[1]),
-      CustomNetworkTransform.spawn(packet.innerNetObjects[2]),
+      InnerPlayerControl.spawn(innerNetObjects[0], this),
+      InnerPlayerPhysics.spawn(innerNetObjects[1], this),
+      InnerCustomNetworkTransform.spawn(innerNetObjects[2], this),
     ];
   }
 

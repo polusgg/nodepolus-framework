@@ -109,37 +109,52 @@ room.host.handlePlayerJoin();
            |
            \ CustomHostInstance
 
+packet
+ |
+\ /
+room (saah)
+ |
+\ /
+Update Data
+ |
+\ /
+server sends data
+
+
 
 packet
+ |
+\ /
 room (not saah)
-RPCRepairSystem
  |
 \ /
-HostInstance 
+player host
  |
 \ /
-Data (this is when we update state)
-
-==========
-
-room (saah)
-RPCRepairSystem
+Data to server
  |
 \ /
-CustomHostInstance
- |
-\ /
-Data (this is when we update state)
+server updates data
 
 ==========
 
 room (not saah)
-RPCSetInfected (this is when we update state)
+ |
+\ /
+GameData > RPCSetInfected (this is when we update state)
  |
 \ /
 ClientInstance 
 
+==========
 
+room (saah)
+ |
+\ /
+CustomHostInstance (this is when we update state)
+ |
+\ /
+Data
 
 
 

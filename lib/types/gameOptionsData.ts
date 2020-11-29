@@ -2,11 +2,12 @@ import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { TaskBarUpdate } from "./taskBarUpdate";
 import { KillDistance } from "./killDistance";
 import { Language } from "../types/language";
+import { Level } from "./level";
 
 export interface BaseGameOptionsData {
   maxPlayers: number;
   languages: Language[];
-  mapID: number;
+  levels: Level[];
   playerSpeedModifier: number;
   crewLightModifier: number;
   impostorLightModifier: number;
@@ -53,56 +54,18 @@ export interface GameOptionsDataV4 extends BaseGameOptionsData {
 
 export type GameOptionsDataInterface = GameOptionsDataV1 | GameOptionsDataV2 | GameOptionsDataV3 | GameOptionsDataV4;
 
+// TODO: Try and get rid of the TS error below
 export class GameOptionsData {
   constructor(public readonly options: GameOptionsDataInterface) {}
 
-  static serialize(options: GameOptionsDataInterface, writer: MessageWriter) {
-    new GameOptionsData(options).serialize(writer);
-  }
+  static deserialize(reader: MessageReader, isSearching: boolean = false): GameOptionsData {
+    let length = reader.readPackedUInt32();
 
-  serialize(writer: MessageWriter) {
-    writer.writePackedUInt32(this.options.length);
-    writer.writeByte(this.options.version);
-    writer.writeByte(this.options.maxPlayers);
-    writer.writeUInt32(this.options.languages.reduce((a, b) => a | b));
-    writer.writeByte(this.options.mapID);
-    writer.writeFloat32(this.options.playerSpeedModifier);
-    writer.writeFloat32(this.options.crewLightModifier);
-    writer.writeFloat32(this.options.impostorLightModifier);
-    writer.writeFloat32(this.options.killCooldown);
-    writer.writeByte(this.options.commonTasks);
-    writer.writeByte(this.options.longTasks);
-    writer.writeByte(this.options.shortTasks);
-    writer.writeInt32(this.options.emergencies);
-    writer.writeByte(this.options.impostorCount);
-    writer.writeByte(this.options.killDistance);
-    writer.writeInt32(this.options.discussionTime);
-    writer.writeInt32(this.options.votingTime);
-    writer.writeBoolean(this.options.isDefault);
-
-    if (this.options.version == 2 || this.options.version == 3 || this.options.version == 4) {
-      writer.writeByte(this.options.emergencyCooldown);
+    if (!(length == 41 || length == 42 || length == 44 || length == 46)) {
+      throw new Error("Invalid GameOptions length: " + length);
     }
 
-    if (this.options.version == 3 || this.options.version == 4) {
-      writer.writeBoolean(this.options.confirmEjects);
-      writer.writeBoolean(this.options.visualTasks);
-    }
-
-    if (this.options.version == 4) {
-      writer.writeBoolean(this.options.anonymousVoting);
-      writer.writeByte(this.options.taskBarUpdates);
-    }
-  }
-
-  static deserialize(reader: MessageReader): GameOptionsData {
-    let len = reader.readPackedUInt32();
-
-    if (!(len == 41 || len == 42 || len == 44 || len == 46)) {
-      throw new Error("Invalid GameOptions Length (" + len + ")");
-    }
-
-    let ver = reader.readByte();
+    let version = reader.readByte();
 
     /*
       we must write || 1 || 2 || 3 || 4 here because js Numbers
@@ -111,18 +74,22 @@ export class GameOptionsData {
       will always return a whole number, it fails to accept
       ver <= 4 && ver >= 1
     */
-    if (!(ver == 1 || ver == 2 || ver == 3 || ver == 4)) {
-      throw new Error("Invalid GameOptions Version (" + ver + ")");
+    if (!(version == 1 || version == 2 || version == 3 || version == 4)) {
+      throw new Error("Invalid GameOptions version: " + version);
     }
 
     let maxPlayers = reader.readByte();
     let languages: Language[] = reader
       .readBitfield(32)
       .reverse()
-      .map((bit, index) => {
-        return bit ? 1 << index : 0;
-      })
+      .map((bit, index) => bit ? 1 << index : 0)
       .filter(bit => bit);
+    let levels: Level[] = isSearching
+      ? reader.readBitfield(32)
+        .reverse()
+        .map((bit, index) => bit ? 1 << index : 0)
+        .filter(bit => bit)
+      : [reader.readByte()];
 
     /*
       Typescript is complaining that opt is missing the properties
@@ -132,11 +99,11 @@ export class GameOptionsData {
     */
     //@ts-ignore
     let opt: GameOptionsDataInterface = {
-      length: len,
-      version: ver,
-      maxPlayers: maxPlayers,
-      languages: languages,
-      mapID: reader.readByte(),
+      length,
+      version,
+      maxPlayers,
+      languages,
+      levels,
       playerSpeedModifier: reader.readFloat32(),
       crewLightModifier: reader.readFloat32(),
       impostorLightModifier: reader.readFloat32(),
@@ -167,5 +134,40 @@ export class GameOptionsData {
     }
 
     return new GameOptionsData(opt);
+  }
+
+  serialize(writer: MessageWriter, isSearching: boolean = false) {
+    writer.writePackedUInt32(this.options.length);
+    writer.writeByte(this.options.version);
+    writer.writeByte(this.options.maxPlayers);
+    writer.writeUInt32(this.options.languages.reduce((a, b) => a | b));
+    writer.writeByte(isSearching ? this.options.levels.reduce((a, b) => a | b) : this.options.levels[0]);
+    writer.writeFloat32(this.options.playerSpeedModifier);
+    writer.writeFloat32(this.options.crewLightModifier);
+    writer.writeFloat32(this.options.impostorLightModifier);
+    writer.writeFloat32(this.options.killCooldown);
+    writer.writeByte(this.options.commonTasks);
+    writer.writeByte(this.options.longTasks);
+    writer.writeByte(this.options.shortTasks);
+    writer.writeInt32(this.options.emergencies);
+    writer.writeByte(this.options.impostorCount);
+    writer.writeByte(this.options.killDistance);
+    writer.writeInt32(this.options.discussionTime);
+    writer.writeInt32(this.options.votingTime);
+    writer.writeBoolean(this.options.isDefault);
+
+    if (this.options.version == 2 || this.options.version == 3 || this.options.version == 4) {
+      writer.writeByte(this.options.emergencyCooldown);
+    }
+
+    if (this.options.version == 3 || this.options.version == 4) {
+      writer.writeBoolean(this.options.confirmEjects);
+      writer.writeBoolean(this.options.visualTasks);
+    }
+
+    if (this.options.version == 4) {
+      writer.writeBoolean(this.options.anonymousVoting);
+      writer.writeByte(this.options.taskBarUpdates);
+    }
   }
 }

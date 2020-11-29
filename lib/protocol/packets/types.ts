@@ -25,7 +25,7 @@ export enum RootGamePacketType {
   JoinedGame = 0x07,
   EndGame = 0x08,
   GetGameListV1 = 0x09,
-  AlterGame = 0x0a,
+  AlterGameTag = 0x0a,
   KickPlayer = 0x0b,
   WaitForHost = 0x0c,
   Redirect = 0x0d,
@@ -42,7 +42,7 @@ export enum GameDataPacketType {
   Ready = 0x07,
 }
 
-export enum RpcPacketType {
+export enum RPCPacketType {
   PlayAnimation = 0x00,
   CompleteTask = 0x01,
   SyncSettings = 0x02,
@@ -57,7 +57,7 @@ export enum RpcPacketType {
   ReportDeadBody = 0x0b,
   MurderPlayer = 0x0c,
   SendChat = 0x0d,
-  CallEmergencyMeeting = 0x0e,
+  StartMeeting = 0x0e,
   SetScanner = 0x0f,
   SendChatNote = 0x10,
   SetPet = 0x11,
@@ -65,13 +65,13 @@ export enum RpcPacketType {
   EnterVent = 0x13,
   ExitVent = 0x14,
   SnapTo = 0x15,
-  VotingClosed = 0x16,
+  Close = 0x16,
   VotingComplete = 0x17,
   CastVote = 0x18,
   ClearVote = 0x19,
-  CastVoteKick = 0x1a,
+  AddVote = 0x1a,
   CloseDoorsOfType = 0x1b,
-  RepairSabotage = 0x1c,
+  RepairSystem = 0x1c,
   SetTasks = 0x1d,
   UpdateGameData = 0x1e,
 }

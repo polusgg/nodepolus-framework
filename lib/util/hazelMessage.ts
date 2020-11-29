@@ -212,11 +212,21 @@ export class MessageWriter {
     return this;
   }
 
-  writeList<T>(items: T[], writer: (subWriter: MessageWriter, item: T, idx: number) => void): this {
-    this.writePackedUInt32(items.length);
+  writeList<T>(
+    items: Iterable<T>,
+    writer: (subWriter: MessageWriter, item: T, idx: number) => void,
+    lengthIsPacked: boolean = true,
+  ): this {
+    let arr = Array.from(items);
 
-    for (let i = 0; i < items.length; i++) {
-      writer(this, items[i], i);
+    if (lengthIsPacked) {
+      this.writePackedUInt32(arr.length);
+    } else {
+      this.writeByte(arr.length);
+    }
+
+    for (let i = 0; i < arr.length; i++) {
+      writer(this, arr[i], i);
     }
 
     return this;
@@ -227,14 +237,19 @@ export class MessageWriter {
    * `defaultTag` property. For a custom tag you may use `writeList` and
    * create messages inside the callback.
    */
-  writeMessageList<T>(items: T[], writer: (childWriter: MessageWriter, item: T) => void, defaultTag: number = 0): this {
+  writeMessageList<T>(
+    items: Iterable<T>,
+    writer: (childWriter: MessageWriter, item: T) => void,
+    lengthIsPacked: boolean = true,
+    defaultTag: number = 0,
+  ): this {
     return this.writeList(items, (subWriter, item) => {
       let child = subWriter.startMessage(defaultTag % 256);
 
       writer(child, item);
 
       child.endMessage();
-    });
+    }, lengthIsPacked);
   }
 
   hasBytesLeft(): boolean {
@@ -414,8 +429,8 @@ export class MessageReader {
       .slice(0, size);
   }
 
-  readList<T>(reader: (subReader: MessageReader) => T): T[] {
-    let length = this.readPackedUInt32();
+  readList<T>(reader: (subReader: MessageReader) => T, lengthIsPacked: boolean = true): T[] {
+    let length = lengthIsPacked ? this.readPackedUInt32() : this.readByte();
     let results: T[] = [];
 
     for (let i = 0; i < length; i++) {
@@ -425,7 +440,7 @@ export class MessageReader {
     return results;
   }
 
-  readMessageList<T>(reader: (subReader: MessageReader) => T): T[] {
+  readMessageList<T>(reader: (subReader: MessageReader) => T, lengthIsPacked: boolean = true): T[] {
     return this.readList((sub: MessageReader) => {
       let child = sub.readMessage();
 
@@ -438,7 +453,7 @@ export class MessageReader {
       }
 
       return reader(child);
-    });
+    }, lengthIsPacked);
   }
 
   readAllChildMessages(reader: (child: MessageReader, idx: number) => void): void {

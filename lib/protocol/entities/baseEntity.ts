@@ -1,44 +1,72 @@
-import { SpawnType } from "../../types/spawnType";
-import { InnerNetObjectType } from "./types";
-import { DataPacket } from "../packets/rootGamePackets/gameDataPackets/data";
 import { SpawnPacket, SpawnInnerNetObject } from "../packets/rootGamePackets/gameDataPackets/spawn";
+import { DataPacket } from "../packets/rootGamePackets/gameDataPackets/data";
+import { MessageWriter, MessageReader } from "../../util/hazelMessage";
+import { InnerNetObjectType, RoomImplementation } from "./types";
+import { EntityAprilShipStatus } from "./aprilShipStatus";
+import { EntityLobbyBehaviour } from "./lobbyBehaviour";
+import { EntityHeadquarters } from "./headquarters";
+import { SpawnFlag } from "../../types/spawnFlag";
+import { SpawnType } from "../../types/spawnType";
+import { EntityMeetingHud } from "./meetingHud";
+import { EntityShipStatus } from "./shipStatus";
+import { EntityPlanetMap } from "./planetMap";
+import { EntityGameData } from "./gameData";
+import { EntityPlayer } from "./player";
+import { BaseRPCPacket } from "../packets/basePacket";
+import { Connection } from "../connection";
+
+export type Entity = EntityAprilShipStatus
+                   | EntityGameData
+                   | EntityHeadquarters
+                   | EntityLobbyBehaviour
+                   | EntityMeetingHud
+                   | EntityPlanetMap
+                   | EntityPlayer
+                   | EntityShipStatus
 
 export abstract class BaseEntity {
-  constructor(public readonly type: SpawnType) {}
+  constructor(public readonly type: SpawnType, public readonly room: RoomImplementation) {}
 
-  abstract setSpawn(packet: SpawnPacket): void;
+  abstract setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void;
 
   abstract getSpawn(): SpawnPacket;
+
+  spawn(): SpawnPacket {
+    return this.getSpawn();
+  }
 }
 
-export abstract class BaseGameObject {
-  constructor(public readonly type: InnerNetObjectType, public id: number) {}
+export abstract class BaseGameObject<T> {
+  constructor(public readonly type: InnerNetObjectType, public id: number, public parent: Entity) {}
 
-  abstract setData(packet: DataPacket): void;
+  abstract getData(old: BaseGameObject<T>): DataPacket;
 
-  abstract getData(old: this): DataPacket;
+  abstract setData(packet: MessageReader | MessageWriter): void;
 
-  data(packet: DataPacket): void;
-  data(old: this): DataPacket;
-  data(arg0: DataPacket | this): DataPacket | void {
-    if (arg0 instanceof DataPacket) {
+  data(packet: MessageReader | MessageWriter): void;
+  data(old: BaseGameObject<T>): DataPacket;
+  data(arg0: MessageReader | MessageWriter | BaseGameObject<T>): DataPacket | void {
+    if (arg0 instanceof MessageReader || arg0 instanceof MessageWriter) {
       this.setData(arg0);
     } else {
       return this.getData(arg0);
     }
   }
 
-  abstract setSpawn(packet: SpawnInnerNetObject): void;
-
   abstract getSpawn(): SpawnInnerNetObject;
 
-  spawn(packet: SpawnInnerNetObject): void;
-  spawn(): SpawnInnerNetObject;
-  spawn(fromPacket?: SpawnInnerNetObject): SpawnInnerNetObject | void {
-    if (fromPacket) {
-      this.setSpawn(fromPacket);
-    } else {
-      return this.getSpawn();
-    }
+  abstract setSpawn(data: MessageReader | MessageWriter): void;
+
+  spawn(): SpawnInnerNetObject {
+    return this.getSpawn();
+  }
+
+  // TODO: Combine sendRPCPacket and sendRPCPacketTo with optional ending `to?` param
+  sendRPCPacket(packet: BaseRPCPacket): void {
+    this.parent.room.sendRPCPacket(this, packet)
+  }
+
+  sendRPCPacketTo(to: Connection[], packet: BaseRPCPacket): void {
+    this.parent.room.sendRPCPacket(this, packet, to)
   }
 }

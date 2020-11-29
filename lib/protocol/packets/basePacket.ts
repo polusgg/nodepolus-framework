@@ -1,13 +1,14 @@
-import { PacketType, RootGamePacketType, GameDataPacketType } from "./types";
+import { PacketType, RootGamePacketType, GameDataPacketType, RPCPacketType } from "./types";
 import { MessageWriter } from "../../util/hazelMessage";
 
-export abstract class BasePacket {
-  type: PacketType;
+export interface Bindable<T> {
+  bound(clientBound: boolean): T;
+}
+
+export abstract class BasePacket implements Bindable<BasePacket> {
   clientBound?: boolean;
 
-  constructor(type: PacketType) {
-    this.type = type;
-  }
+  constructor(public type: PacketType) {}
 
   abstract serialize(): MessageWriter;
 
@@ -18,13 +19,10 @@ export abstract class BasePacket {
   }
 }
 
-export abstract class BaseRootGamePacket {
-  type: RootGamePacketType;
+export abstract class BaseRootGamePacket implements Bindable<BaseRootGamePacket> {
   clientBound?: boolean;
 
-  constructor(type: RootGamePacketType) {
-    this.type = type;
-  }
+  constructor(public type: RootGamePacketType) {}
 
   abstract serialize(): MessageWriter;
 
@@ -35,13 +33,24 @@ export abstract class BaseRootGamePacket {
   }
 }
 
-export abstract class BaseGameDataPacket {
-  type: GameDataPacketType;
+export abstract class BaseGameDataPacket implements Bindable<BaseGameDataPacket> {
   clientBound?: boolean;
 
-  constructor(type: GameDataPacketType) {
-    this.type = type;
+  constructor(public type: GameDataPacketType) {}
+
+  abstract serialize(): MessageWriter;
+
+  bound(clientBound: boolean): this {
+    this.clientBound = clientBound;
+
+    return this;
   }
+}
+
+export abstract class BaseRPCPacket implements Bindable<BaseRPCPacket> {
+  clientBound?: boolean;
+
+  constructor(public type: RPCPacketType) {}
 
   abstract serialize(): MessageWriter;
 

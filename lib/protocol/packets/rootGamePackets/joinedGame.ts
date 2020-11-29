@@ -30,8 +30,8 @@ export class JoinedGamePacket extends BaseRootGamePacket {
       .writeInt32(RoomCode.encode(this.roomCode))
       .writeUInt32(this.joinedClientId)
       .writeUInt32(this.hostClientId)
-      .writeList(this.otherClientIds, (subWriter, id) => {
-        return subWriter.writePackedUInt32(id);
+      .writeList(this.otherClientIds, (sub, id) => {
+        return sub.writePackedUInt32(id);
       });
 
     this.disconnectReason.serialize(writer);

@@ -7,7 +7,7 @@ export enum SystemType {
   Navigation = 5,
   Admin = 6,
   Electrical = 7,
-  O2 = 8,
+  Oxygen = 8,
   Shields = 9,
   Medbay = 10,
   Security = 11,

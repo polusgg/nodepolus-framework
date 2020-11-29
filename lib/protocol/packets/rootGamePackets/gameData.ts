@@ -2,11 +2,16 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { RootGamePacketType, GameDataPacketType } from "../types";
 import { SceneChangePacket } from "./gameDataPackets/sceneChange";
 import { DespawnPacket } from "./gameDataPackets/despawn";
+import { DEFAULT_ROOM } from "../../../util/constants";
 import { ReadyPacket } from "./gameDataPackets/ready";
+import { SpawnPacket } from "./gameDataPackets/spawn";
+import { DataPacket } from "./gameDataPackets/data";
 import { BaseRootGamePacket } from "../basePacket";
 import { RoomCode } from "../../../util/roomCode";
+import { RPCPacket } from "./gameDataPackets/rpc";
+import { Level } from "../../../types/level";
 
-export type GameDataPacketDataType = DespawnPacket | ReadyPacket | SceneChangePacket;
+export type GameDataPacketDataType = DespawnPacket | ReadyPacket | SceneChangePacket | SpawnPacket | RPCPacket;
 
 export class GameDataPacket extends BaseRootGamePacket {
   constructor(
@@ -24,7 +29,7 @@ export class GameDataPacket extends BaseRootGamePacket {
     this.packets = packets;
   }
 
-  static deserialize(reader: MessageReader): GameDataPacket {
+  static deserialize(reader: MessageReader, level?: Level): GameDataPacket {
     let roomCode: string = RoomCode.decode(reader.readInt32());
     let targetClientId: number | undefined;
 
@@ -36,15 +41,20 @@ export class GameDataPacket extends BaseRootGamePacket {
 
     reader.readAllChildMessages(child => {
       switch (child.tag) {
+        case GameDataPacketType.Data:
+          return packets.push(DataPacket.deserialize(child));
+        case GameDataPacketType.RPC:
+          return packets.push(RPCPacket.deserialize(child, level));
+        case GameDataPacketType.Spawn:
+          return packets.push(SpawnPacket.deserialize(child));
         case GameDataPacketType.Despawn:
-          packets.push(DespawnPacket.deserialize(child));
-          break;
-        case GameDataPacketType.Ready:
-          packets.push(ReadyPacket.deserialize(child));
-          break;
+          return packets.push(DespawnPacket.deserialize(child));
         case GameDataPacketType.SceneChange:
-          packets.push(SceneChangePacket.deserialize(child));
-          break;
+          return packets.push(SceneChangePacket.deserialize(child));
+        case GameDataPacketType.Ready:
+          return packets.push(ReadyPacket.deserialize(child));
+        default:
+          throw new Error("Unhandled GameData(To) packet type: " + child.tag);
       }
     });
 
@@ -52,11 +62,12 @@ export class GameDataPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter()
+    let writer = new MessageWriter();
+
     if (this.roomCode) {
       writer.writeUInt32(RoomCode.encode(this.roomCode));
     } else {
-      writer.writeUInt32(32) // default room
+      writer.writeUInt32(DEFAULT_ROOM);
     }
 
     if (this.targetClientId) {

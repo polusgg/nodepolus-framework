@@ -4,15 +4,27 @@ import { DisconnectPacket } from "./packetTypes/disconnectPacket";
 import { RootGamePacket } from "./packetTypes/genericPacket";
 import { HelloPacket } from "./packetTypes/helloPacket";
 import { PingPacket } from "./packetTypes/pingPacket";
+import { Level } from "../../types/level";
 import { PacketType } from "./types";
 
-type PacketDataType = AcknowledgementPacket | DisconnectPacket | HelloPacket | PingPacket | RootGamePacket;
+type PacketDataType = AcknowledgementPacket
+                    | DisconnectPacket
+                    | HelloPacket
+                    | PingPacket
+                    | RootGamePacket;
 
 export class Packet {
   public readonly type: number;
-  clientBound: boolean | undefined;
+  public clientBound: boolean | undefined;
 
-  constructor(public readonly nonce: number | undefined, public readonly data: PacketDataType) {
+  public get isReliable(): boolean {
+    return Packet.isReliable(this.type);
+  }
+
+  constructor(
+    public readonly nonce: number | undefined,
+    public readonly data: PacketDataType,
+  ) {
     if (data instanceof AcknowledgementPacket) {
       this.type = PacketType.Acknowledgement;
     } else if (data instanceof DisconnectPacket) {
@@ -28,30 +40,37 @@ export class Packet {
     }
   }
 
-  static deserialize(reader: MessageReader, clientBound: boolean): Packet {
+  static isReliable(type: PacketType): boolean {
+    return type == PacketType.Reliable
+        || type == PacketType.Hello
+        || type == PacketType.Ping
+        || type == PacketType.Acknowledgement;
+  }
+
+  static deserialize(reader: MessageReader, clientBound: boolean, level?: Level): Packet {
     let type = reader.readByte();
     let data: PacketDataType;
     let nonce: number | undefined;
 
+    if (Packet.isReliable(type)) {
+      nonce = reader.readUInt16(true);
+    }
+
     switch (type) {
       case PacketType.Reliable:
-        nonce = reader.readUInt16(true);
       case PacketType.Unreliable:
-        data = RootGamePacket.deserialize(reader, clientBound);
+        data = RootGamePacket.deserialize(reader, clientBound, level);
         break;
       case PacketType.Hello:
-        nonce = reader.readUInt16(true);
         data = HelloPacket.deserialize(reader);
         break;
       case PacketType.Ping:
-        nonce = reader.readUInt16(true);
         data = PingPacket.deserialize(reader);
         break;
       case PacketType.Disconnect:
         data = DisconnectPacket.deserialize(reader);
         break;
       case PacketType.Acknowledgement:
-        nonce = reader.readUInt16(true);
         data = AcknowledgementPacket.deserialize(reader);
         break;
       default:
@@ -64,12 +83,7 @@ export class Packet {
   serialize(): MessageWriter {
     let writer = new MessageWriter().writeByte(this.type);
 
-    if (
-      this.type == PacketType.Reliable ||
-      this.type == PacketType.Hello ||
-      this.type == PacketType.Ping ||
-      this.type == PacketType.Acknowledgement
-    ) {
+    if (this.isReliable) {
       if (!this.nonce) {
         throw new Error("Missing nonce in reliable packet");
       }
