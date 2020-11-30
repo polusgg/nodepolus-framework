@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { RootGamePacketType, GameDataPacketType } from "../types";
 import { SceneChangePacket } from "./gameDataPackets/sceneChange";
+import { GameDataPacketType, RootGamePacketType } from "../types";
 import { DespawnPacket } from "./gameDataPackets/despawn";
 import { DEFAULT_ROOM } from "../../../util/constants";
 import { ReadyPacket } from "./gameDataPackets/ready";
@@ -15,9 +15,9 @@ export type GameDataPacketDataType = DespawnPacket | ReadyPacket | SceneChangePa
 
 export class GameDataPacket extends BaseRootGamePacket {
   constructor(
-    public readonly packets: GameDataPacketDataType[],
-    public readonly roomCode?: string,
-    public readonly targetClientId?: number,
+    readonly packets: GameDataPacketDataType[],
+    readonly roomCode?: string,
+    readonly targetClientId?: number,
   ) {
     super(RootGamePacketType[targetClientId ? "GameDataTo" : "GameData"]);
 
@@ -30,14 +30,14 @@ export class GameDataPacket extends BaseRootGamePacket {
   }
 
   static deserialize(reader: MessageReader, level?: Level): GameDataPacket {
-    let roomCode: string = RoomCode.decode(reader.readInt32());
+    const roomCode: string = RoomCode.decode(reader.readInt32());
     let targetClientId: number | undefined;
 
     if (reader.tag == RootGamePacketType.GameDataTo) {
       targetClientId = reader.readPackedUInt32();
     }
 
-    let packets: GameDataPacketDataType[] = [];
+    const packets: GameDataPacketDataType[] = [];
 
     reader.readAllChildMessages(child => {
       switch (child.tag) {
@@ -54,7 +54,7 @@ export class GameDataPacket extends BaseRootGamePacket {
         case GameDataPacketType.Ready:
           return packets.push(ReadyPacket.deserialize(child));
         default:
-          throw new Error("Unhandled GameData(To) packet type: " + child.tag);
+          throw new Error(`Unhandled GameData(To) packet type: ${child.tag}`);
       }
     });
 
@@ -62,7 +62,7 @@ export class GameDataPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter();
+    const writer = new MessageWriter();
 
     if (this.roomCode) {
       writer.writeUInt32(RoomCode.encode(this.roomCode));
@@ -77,7 +77,8 @@ export class GameDataPacket extends BaseRootGamePacket {
     for (let i = 0; i < this.packets.length; i++) {
       const packet = this.packets[i];
 
-      writer.startMessage(packet.type).writeBytes(packet.serialize()).endMessage();
+      writer.startMessage(packet.type).writeBytes(packet.serialize())
+        .endMessage();
     }
 
     return writer;

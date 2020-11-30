@@ -7,10 +7,10 @@ import { RootGamePacketType } from "../types";
 
 export class KickPlayerPacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
-    public readonly kickedClientId: AlterGameTag,
-    public readonly banned: boolean,
-    public readonly disconnectReason?: DisconnectReason,
+    readonly roomCode: string,
+    readonly kickedClientId: AlterGameTag,
+    readonly banned: boolean,
+    readonly disconnectReason?: DisconnectReason,
   ) {
     super(RootGamePacketType.KickPlayer);
   }
@@ -25,7 +25,7 @@ export class KickPlayerPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter()
+    const writer = new MessageWriter()
       .writeInt32(RoomCode.encode(this.roomCode))
       .writePackedUInt32(this.kickedClientId)
       .writeBoolean(this.banned);

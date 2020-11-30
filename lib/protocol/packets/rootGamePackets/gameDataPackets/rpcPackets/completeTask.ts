@@ -1,9 +1,9 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class CompleteTaskPacket extends BaseRPCPacket {
-  constructor(public readonly taskIndex: number) {
+  constructor(readonly taskIndex: number) {
     super(RPCPacketType.CompleteTask);
   }
 

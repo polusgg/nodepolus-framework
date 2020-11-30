@@ -1,27 +1,31 @@
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
-import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data"
-import { MessageWriter, MessageReader } from "../../../util/hazelMessage";
+import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
+import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseGameObject } from "../baseEntity";
 import { InnerNetObjectType } from "../types";
 import { EntityGameData } from ".";
 
 export class InnerVoteBanSystem extends BaseGameObject<InnerVoteBanSystem> {
-  votes: Map<number, number> = new Map<number, number>()
+  public votes: Map<number, number> = new Map<number, number>();
 
   constructor(netId: number, parent: EntityGameData) {
     super(InnerNetObjectType.VoteBanSystem, netId, parent);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityGameData) {
-    let voteBanSystem = new InnerVoteBanSystem(object.innerNetObjectID, parent);
+  static spawn(object: SpawnInnerNetObject, parent: EntityGameData): InnerVoteBanSystem {
+    const voteBanSystem = new InnerVoteBanSystem(object.innerNetObjectID, parent);
 
     voteBanSystem.setSpawn(object.data);
 
     return voteBanSystem;
   }
 
-  getData(old: InnerVoteBanSystem): DataPacket {
-    let writer = new MessageWriter();
+  addVote(votingClientId: number, targetClientId: number): void {
+    this.votes.set(votingClientId, targetClientId);
+  }
+
+  getData(): DataPacket {
+    const writer = new MessageWriter();
 
     return new DataPacket(this.id, writer);
   }
@@ -31,16 +35,12 @@ export class InnerVoteBanSystem extends BaseGameObject<InnerVoteBanSystem> {
   }
 
   getSpawn(): SpawnInnerNetObject {
-    let writer = new MessageWriter();
+    const writer = new MessageWriter();
 
     return new DataPacket(this.id, writer);
   }
 
   setSpawn(data: MessageReader | MessageWriter): void {
     MessageReader.fromMessage(data.buffer);
-  }
-
-  addVote(votingClientId: number, targetClientId: number) {
-    this.votes.set(votingClientId, targetClientId)
   }
 }

@@ -19,8 +19,8 @@ export class InnerPlanetMap extends BaseShipStatus<InnerPlanetMap, EntityPlanetM
     ]);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityPlanetMap) {
-    let planetMap = new InnerPlanetMap(object.innerNetObjectID, parent);
+  static spawn(object: SpawnInnerNetObject, parent: EntityPlanetMap): InnerPlanetMap {
+    const planetMap = new InnerPlanetMap(object.innerNetObjectID, parent);
 
     planetMap.setSpawn(object.data);
 

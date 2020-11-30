@@ -1,15 +1,23 @@
-import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class SabotageSystem extends BaseSystem<SabotageSystem> {
-  cooldown!: number;
+  public cooldown!: number;
 
   constructor() {
     super(SystemType.Sabotage);
   }
 
-  getData(old: SabotageSystem): MessageWriter {
+  static spawn(data: MessageReader): SabotageSystem {
+    const sabotageSystem = new SabotageSystem();
+
+    sabotageSystem.setSpawn(data);
+
+    return sabotageSystem;
+  }
+
+  getData(): MessageWriter {
     return this.getSpawn();
   }
 
@@ -31,13 +39,5 @@ export class SabotageSystem extends BaseSystem<SabotageSystem> {
     }
 
     return true;
-  }
-
-  static spawn(data: MessageReader): SabotageSystem {
-    let sabotageSystem = new SabotageSystem();
-    
-    sabotageSystem.setSpawn(data);
-    
-    return sabotageSystem;
   }
 }

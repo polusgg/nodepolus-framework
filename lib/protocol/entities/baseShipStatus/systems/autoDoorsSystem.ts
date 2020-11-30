@@ -1,16 +1,24 @@
-import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SKELD_DOOR_COUNT } from "../../../../util/constants";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class AutoDoorsSystem extends BaseSystem<AutoDoorsSystem> {
-  doors!: boolean[];
+  public doors!: boolean[];
 
   constructor() {
     super(SystemType.Doors);
   }
 
-  getData(old: AutoDoorsSystem): MessageWriter {
+  static spawn(data: MessageReader): AutoDoorsSystem {
+    const autoDoorsSystem = new AutoDoorsSystem();
+
+    autoDoorsSystem.setSpawn(data);
+
+    return autoDoorsSystem;
+  }
+
+  getData(): MessageWriter {
     return new MessageWriter().writeBitfield(this.doors);
   }
 
@@ -40,13 +48,5 @@ export class AutoDoorsSystem extends BaseSystem<AutoDoorsSystem> {
     }
 
     return true;
-  }
-
-  static spawn(data: MessageReader): AutoDoorsSystem {
-    let autoDoorsSystem = new AutoDoorsSystem();
-    
-    autoDoorsSystem.setSpawn(data);
-    
-    return autoDoorsSystem;
   }
 }

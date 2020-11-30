@@ -7,15 +7,15 @@ import { Level } from "../../../types/level";
 
 export class RoomListing {
   constructor(
-    public readonly ipAddress: string,
-    public readonly port: number,
-    public readonly roomCode: string,
-    public readonly hostName: string,
-    public readonly playerCount: number,
-    public readonly age: number,
-    public readonly level: Level,
-    public readonly impostorCount: number,
-    public readonly maxPlayers: number,
+    readonly ipAddress: string,
+    readonly port: number,
+    readonly roomCode: string,
+    readonly hostName: string,
+    readonly playerCount: number,
+    readonly age: number,
+    readonly level: Level,
+    readonly impostorCount: number,
+    readonly maxPlayers: number,
   ) {}
 
   static deserialize(reader: MessageReader): RoomListing {
@@ -33,7 +33,7 @@ export class RoomListing {
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writeBytes(this.ipAddress.split(".").map((octet) => parseInt(octet)))
+    writer.writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet, 10)))
       .writeUInt16(this.port)
       .writeInt32(RoomCode.encode(this.roomCode))
       .writeString(this.hostName)
@@ -43,12 +43,12 @@ export class RoomListing {
       .writeByte(this.impostorCount)
       .writeByte(this.maxPlayers);
   }
-};
+}
 
 export class GetGameListRequestPacket extends BaseRootGamePacket {
   constructor(
-    public readonly includePrivate: boolean,
-    public readonly options: GameOptionsData,
+    readonly includePrivate: boolean,
+    readonly options: GameOptionsData,
   ) {
     super(RootGamePacketType.GetGameList);
   }
@@ -61,7 +61,7 @@ export class GetGameListRequestPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter().writeBoolean(this.includePrivate);
+    const writer = new MessageWriter().writeBoolean(this.includePrivate);
 
     this.options.serialize(writer, true);
 
@@ -69,13 +69,12 @@ export class GetGameListRequestPacket extends BaseRootGamePacket {
   }
 }
 
-
 export class GetGameListResponsePacket extends BaseRootGamePacket {
   constructor(
-    public readonly rooms: RoomListing[],
-    public readonly skeldCount?: number,
-    public readonly miraCount?: number,
-    public readonly polusCount?: number,
+    readonly rooms: RoomListing[],
+    readonly skeldCount?: number,
+    readonly miraCount?: number,
+    readonly polusCount?: number,
   ) {
     super(RootGamePacketType.GetGameList);
   }
@@ -84,15 +83,15 @@ export class GetGameListResponsePacket extends BaseRootGamePacket {
     let skeldCount: number | undefined;
     let miraCount: number | undefined;
     let polusCount: number | undefined;
-    let rooms: RoomListing[] = [];
+    const rooms: RoomListing[] = [];
 
-    reader.readAllChildMessages((child) => {
+    reader.readAllChildMessages(child => {
       if (child.tag == 1) {
         skeldCount = reader.readUInt32();
         miraCount = reader.readUInt32();
         polusCount = reader.readUInt32();
       } else if (child.tag == 0) {
-        child.readAllChildMessages((roomMessage) => {
+        child.readAllChildMessages(roomMessage => {
           rooms.push(RoomListing.deserialize(roomMessage));
         });
       }
@@ -107,7 +106,7 @@ export class GetGameListResponsePacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter();
+    const writer = new MessageWriter();
 
     if (this.skeldCount && this.miraCount && this.polusCount) {
       writer.startMessage(1)
@@ -118,8 +117,8 @@ export class GetGameListResponsePacket extends BaseRootGamePacket {
     }
 
     writer.startMessage(0);
-    this.rooms.forEach((room) => room.serialize(writer));
+    this.rooms.forEach(room => room.serialize(writer));
 
     return writer.endMessage();
   }
-};
+}

@@ -1,83 +1,147 @@
-import dgram from 'dgram'
-import { Connection } from '../protocol/connection';
-import { RemoteInfo } from '../util/remoteInfo';
-import { PacketDestination, RootGamePacketType } from '../protocol/packets/types';
-import { Room } from '../room';
-import { JoinedGamePacket } from '../protocol/packets/rootGamePackets/joinedGame';
-import { BaseRootGamePacket } from '../protocol/packets/basePacket';
-import { HostGameResponsePacket } from '../protocol/packets/rootGamePackets/hostGame';
+import { GetGameListResponsePacket, RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
+import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
+import { HostGameResponsePacket } from "../protocol/packets/rootGamePackets/hostGame";
+import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
+import { BaseRootGamePacket } from "../protocol/packets/basePacket";
+import { DEFAULT_SERVER_PORT } from "../util/constants";
+import { MessageReader } from "../util/hazelMessage";
+import { Connection } from "../protocol/connection";
+import { RemoteInfo } from "../util/remoteInfo";
+import { Packet } from "../protocol/packets";
+import { Level } from "../types/level";
+import { Room } from "../room";
+import dgram from "dgram";
 
-enum ServerSAAHState {
-  Never,
-  Always,
-  Sometimes
+enum DefaultHostState {
+  Server,
+  Client,
 }
 
 interface ServerConfig {
-  port: number;
-  defaultSAAHState: ServerSAAHState;
+  defaultHost: DefaultHostState;
+  defaultRoomAddress: string;
+  defaultRoomPort: number;
 }
 
-let DefaultServerConfig: ServerConfig = {
-  port: 22023,
-  defaultSAAHState: ServerSAAHState.Always
-}
+const DEFAULT_SERVER_CONFIG: ServerConfig = {
+  defaultHost: DefaultHostState.Client,
+  defaultRoomAddress: "0.0.0.0",
+  defaultRoomPort: DEFAULT_SERVER_PORT,
+};
 
 export class Server {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public UDPServer: dgram.Socket;
-  public connections: Map<string, Connection> = new Map()
-  public connectionRoomMap: Map<string, Room> = new Map()
+  public connections: Map<string, Connection> = new Map();
+  public connectionRoomMap: Map<string, Room> = new Map();
   public rooms: Room[] = [];
 
-  constructor(public config: ServerConfig = DefaultServerConfig) {
-    this.UDPServer = dgram.createSocket('udp4')
+  // Starts at 1 to allow the Server host implementation's ID to be 0
+  private connectionIdx = 1;
 
-    this.UDPServer.on('message', (buf, remoteInfo) => {
+  constructor(
+    public config: ServerConfig = DEFAULT_SERVER_CONFIG,
+  ) {
+    this.UDPServer = dgram.createSocket("udp4");
 
-    })
+    this.UDPServer.on("message", (buf, remoteInfo) => {
+      const sender = this.getConnection(remoteInfo);
+      const packet = Packet.deserialize(MessageReader.fromRawBytes(buf), false);
+
+      this.handlePacket(packet, sender);
+    });
   }
 
-  getConnection(remoteInfo: string | dgram.RemoteInfo) {
-    if(typeof remoteInfo != 'string') {
-      remoteInfo = RemoteInfo.toString(remoteInfo)
+  async listen(port: number = DEFAULT_SERVER_PORT): Promise<void> {
+    return new Promise(resolve => {
+      this.UDPServer.bind(port, "0.0.0.0", resolve);
+    });
+  }
+
+  getConnection(remoteInfo: string | dgram.RemoteInfo): Connection {
+    if (typeof remoteInfo != "string") {
+      remoteInfo = RemoteInfo.toString(remoteInfo);
     }
 
-    if(this.connections.has(remoteInfo))
-      return this.connections.get(remoteInfo)
+    let con = this.connections.get(remoteInfo);
 
-    let newCon = this.initializeConnection(RemoteInfo.fromString(remoteInfo))
-    this.connections.set(remoteInfo, newCon)
-    return newCon
+    if (con) return con;
+
+    con = this.initializeConnection(RemoteInfo.fromString(remoteInfo));
+
+    this.connections.set(remoteInfo, con);
+
+    return con;
   }
 
   private initializeConnection(remoteInfo: dgram.RemoteInfo): Connection {
-    let newCon = new Connection(remoteInfo, dgram.createSocket(remoteInfo.family == "IPv4" ? 'udp4' : 'udp6'), PacketDestination.Client)
-    
-    /* connection init code goes here once i can be bothered */
+    const newCon = new Connection(remoteInfo, dgram.createSocket(remoteInfo.family == "IPv4" ? "udp4" : "udp6"), PacketDestination.Client);
 
-    return newCon
+    newCon.id = this.connectionIdx++;
+
+    newCon.on("packet", (evt: RootGamePacketDataType) => this.handlePacket(evt, newCon));
+
+    return newCon;
   }
 
-  private handlePacket(packet: BaseRootGamePacket, sender: Connection) {
-    switch(packet.type) {
-      case RootGamePacketType.HostGame:
-        let newRoom = new Room();
-        
-        this.rooms.push(newRoom)
+  private handlePacket(packet: BaseRootGamePacket, sender: Connection): void {
+    switch (packet.type) {
+      case RootGamePacketType.HostGame: {
+        const newRoom = new Room(this.config.defaultRoomAddress, this.config.defaultRoomPort, this.config.defaultHost == DefaultHostState.Server);
 
-        sender.send([new HostGameResponsePacket(newRoom.code)])
+        this.rooms.push(newRoom);
+
+        sender.send([ new HostGameResponsePacket(newRoom.code) ]);
         break;
-      case RootGamePacketType.JoinGame:
-        break;
-      case RootGamePacketType.GetGameList:
-        break;
-      default:
-        if(this.connectionRoomMap.has(RemoteInfo.toString(sender))) {
-          this.connectionRoomMap.get(RemoteInfo.toString(sender))!.handlePacket(packet, sender)
+      }
+      case RootGamePacketType.JoinGame: {
+        const room = this.connectionRoomMap.get(RemoteInfo.toString(sender));
+
+        if (room) {
+          this.connectionRoomMap.set(RemoteInfo.toString(sender), room);
+
+          room.handleJoin(sender);
         } else {
-          throw new Error(`Client [${sender.id}] sent a [${RootGamePacketType[packet.type]}] Packet while not mapped to the room, even though the server expects packets of this type to be handled on a room.`)
+          throw new Error(`Client ${sender.id} sent a ${RootGamePacketType[packet.type]} packet while not in a room`);
         }
+        break;
+      }
+      case RootGamePacketType.GetGameList: {
+        const rooms: RoomListing[] = [];
+        const counts: [number, number, number] = [0, 0, 0];
+
+        for (let i = 0; i < this.rooms.length; i++) {
+          const room = this.rooms[i];
+
+          counts[room.options.options.levels[0]]++;
+
+          //TODO: Filter pog?
+          rooms[i] = new RoomListing(
+            room.address,
+            room.port,
+            room.code,
+            "TODO: Player Name",
+            room.players.length,
+            // TODO: Age
+            0,
+            room.options.options.levels[0],
+            room.options.options.impostorCount,
+            room.options.options.maxPlayers,
+          );
+        }
+
+        sender.send([ new GetGameListResponsePacket(rooms, counts[Level.TheSkeld], counts[Level.MiraHq], counts[Level.Polus]) ]);
+        break;
+      }
+      default: {
+        const room = this.connectionRoomMap.get(RemoteInfo.toString(sender));
+
+        if (room) {
+          room.handlePacket(packet, sender);
+        } else {
+          throw new Error(`Client [${sender.id}] sent a [${RootGamePacketType[packet.type]}] Packet while not mapped to the room, even though the server expects packets of this type to be handled on a room.`);
+        }
+      }
     }
   }
 }
-7

@@ -1,4 +1,4 @@
-import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { BaseGameDataPacket } from "../../basePacket";
 import { GameDataPacketType } from "../../types";
 
@@ -12,6 +12,7 @@ export class SceneChangePacket extends BaseGameDataPacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writePackedUInt32(this.clientId).writeString(this.scene);
+    return new MessageWriter().writePackedUInt32(this.clientId)
+      .writeString(this.scene);
   }
 }

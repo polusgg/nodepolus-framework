@@ -1,17 +1,25 @@
-import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class SwitchSystem extends BaseSystem<SwitchSystem> {
-  actualSwitches!: boolean[];
-  expectedSwitches!: boolean[];
-  visionModifier!: number;
+  public actualSwitches!: boolean[];
+  public expectedSwitches!: boolean[];
+  public visionModifier!: number;
 
   constructor() {
     super(SystemType.Electrical);
   }
 
-  getData(old: SwitchSystem): MessageWriter {
+  static spawn(data: MessageReader): SwitchSystem {
+    const switchSystem = new SwitchSystem();
+
+    switchSystem.setSpawn(data);
+
+    return switchSystem;
+  }
+
+  getData(): MessageWriter {
     return this.getSpawn();
   }
 
@@ -50,13 +58,5 @@ export class SwitchSystem extends BaseSystem<SwitchSystem> {
     }
 
     return true;
-  }
-
-  static spawn(data: MessageReader): SwitchSystem {
-     let switchSystem = new SwitchSystem();
-
-     switchSystem.setSpawn(data);
-
-     return switchSystem;
   }
 }

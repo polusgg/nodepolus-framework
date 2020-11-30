@@ -3,7 +3,7 @@ import { BaseRootGamePacket } from "../basePacket";
 import { RootGamePacketType } from "../types";
 
 export class RedirectPacket extends BaseRootGamePacket {
-  constructor(public readonly ipAddress: string, public readonly port: number) {
+  constructor(readonly ipAddress: string, readonly port: number) {
     super(RootGamePacketType.Redirect);
   }
 
@@ -13,7 +13,7 @@ export class RedirectPacket extends BaseRootGamePacket {
 
   serialize(): MessageWriter {
     return new MessageWriter()
-      .writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet)))
+      .writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet, 10)))
       .writeUInt16(this.port);
   }
 }

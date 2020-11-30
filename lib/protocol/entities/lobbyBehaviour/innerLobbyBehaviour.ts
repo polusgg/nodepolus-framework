@@ -1,6 +1,6 @@
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
-import { MessageWriter, MessageReader } from "../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseGameObject } from "../baseEntity";
 import { InnerNetObjectType } from "../types";
 import { EntityLobbyBehaviour } from ".";
@@ -10,23 +10,25 @@ export class InnerLobbyBehaviour extends BaseGameObject<InnerLobbyBehaviour> {
     super(InnerNetObjectType.LobbyBehaviour, netId, parent);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityLobbyBehaviour) {
-    let playerControl = new InnerLobbyBehaviour(object.innerNetObjectID, parent);
+  static spawn(object: SpawnInnerNetObject, parent: EntityLobbyBehaviour): InnerLobbyBehaviour {
+    const lobbyBehaviour = new InnerLobbyBehaviour(object.innerNetObjectID, parent);
 
-    playerControl.setSpawn(object.data);
+    lobbyBehaviour.setSpawn(object.data);
 
-    return playerControl;
+    return lobbyBehaviour;
   }
 
-  getData(old: InnerLobbyBehaviour): DataPacket {
+  getData(): DataPacket {
     return new DataPacket(this.id, new MessageWriter());
   }
 
-  setData(packet: MessageReader | MessageWriter): void {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  setData(_packet: MessageReader | MessageWriter): void {}
 
   getSpawn(): SpawnInnerNetObject {
     return new DataPacket(this.id, new MessageWriter());
   }
 
-  setSpawn(data: MessageReader | MessageWriter): void {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+  setSpawn(_data: MessageReader | MessageWriter): void {}
 }

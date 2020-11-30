@@ -1,10 +1,10 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { SystemType } from "../../../../../types/systemType";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class CloseDoorsOfTypePacket extends BaseRPCPacket {
-  constructor(public readonly system: SystemType) {
+  constructor(readonly system: SystemType) {
     super(RPCPacketType.CloseDoorsOfType);
   }
 

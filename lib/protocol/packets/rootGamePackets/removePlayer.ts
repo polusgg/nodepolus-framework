@@ -6,9 +6,9 @@ import { RootGamePacketType } from "../types";
 
 export class LateRejectionPacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
-    public readonly removedClientId: number,
-    public readonly disconnectReason: DisconnectReason,
+    readonly roomCode: string,
+    readonly removedClientId: number,
+    readonly disconnectReason: DisconnectReason,
   ) {
     super(RootGamePacketType.RemovePlayer);
   }
@@ -22,7 +22,8 @@ export class LateRejectionPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter().writeInt32(RoomCode.encode(this.roomCode)).writePackedUInt32(this.removedClientId);
+    const writer = new MessageWriter().writeInt32(RoomCode.encode(this.roomCode))
+      .writePackedUInt32(this.removedClientId);
 
     this.disconnectReason.serialize(writer);
 
@@ -32,10 +33,10 @@ export class LateRejectionPacket extends BaseRootGamePacket {
 
 export class RemovePlayerPacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
-    public readonly removedClientId: number,
-    public readonly hostClientId: number,
-    public readonly disconnectReason?: DisconnectReason,
+    readonly roomCode: string,
+    readonly removedClientId: number,
+    readonly hostClientId: number,
+    readonly disconnectReason?: DisconnectReason,
   ) {
     super(RootGamePacketType.JoinGame);
   }
@@ -50,7 +51,7 @@ export class RemovePlayerPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter()
+    const writer = new MessageWriter()
       .writeInt32(RoomCode.encode(this.roomCode))
       .writeUInt32(this.removedClientId)
       .writeUInt32(this.hostClientId);

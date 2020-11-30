@@ -1,10 +1,10 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { GameOptionsData } from "../../../../../types/gameOptionsData";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SyncSettingsPacket extends BaseRPCPacket {
-  constructor(public readonly options: GameOptionsData) {
+  constructor(readonly options: GameOptionsData) {
     super(RPCPacketType.SyncSettings);
   }
 
@@ -13,7 +13,7 @@ export class SyncSettingsPacket extends BaseRPCPacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter();
+    const writer = new MessageWriter();
 
     this.options.serialize(new MessageWriter());
 

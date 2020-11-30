@@ -7,8 +7,8 @@ function isEqual(actual: number, expected: number, epsilon: number = 0.001): boo
 }
 
 test("it reads a vector2", t => {
-  let buf = MessageReader.fromMessage("040001ff7fff7f");
-  let vec = Vector2.deserialize(buf);
+  const buf = MessageReader.fromMessage("040001ff7fff7f");
+  const vec = Vector2.deserialize(buf);
 
   console.log(`x=${vec.x}, y = ${vec.y}`);
 
@@ -17,8 +17,8 @@ test("it reads a vector2", t => {
 });
 
 test("it writes a vector2", t => {
-  let buf = new MessageWriter().startMessage(1);
-  let vec = new Vector2(0, 0);
+  const buf = new MessageWriter().startMessage(1);
+  const vec = new Vector2(0, 0);
 
   vec.serialize(buf);
 

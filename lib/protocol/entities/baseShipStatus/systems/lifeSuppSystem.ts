@@ -1,16 +1,24 @@
-import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class LifeSuppSystem extends BaseSystem<LifeSuppSystem> {
-  timer!: number;
-  completedConsoles!: Set<number>;
+  public timer!: number;
+  public completedConsoles!: Set<number>;
 
   constructor() {
     super(SystemType.Oxygen);
   }
 
-  getData(old: LifeSuppSystem): MessageWriter {
+  static spawn(data: MessageReader): LifeSuppSystem {
+    const lifeSuppSystem = new LifeSuppSystem();
+
+    lifeSuppSystem.setSpawn(data);
+
+    return lifeSuppSystem;
+  }
+
+  getData(): MessageWriter {
     return this.getSpawn();
   }
 
@@ -19,9 +27,10 @@ export class LifeSuppSystem extends BaseSystem<LifeSuppSystem> {
   }
 
   getSpawn(): MessageWriter {
-    return new MessageWriter().writeFloat32(this.timer).writeList(this.completedConsoles, (writer, console) => {
-      writer.writePackedUInt32(console);
-    });
+    return new MessageWriter().writeFloat32(this.timer)
+      .writeList(this.completedConsoles, (writer, con) => {
+        writer.writePackedUInt32(con);
+      });
   }
 
   setSpawn(data: MessageReader): void {
@@ -38,8 +47,8 @@ export class LifeSuppSystem extends BaseSystem<LifeSuppSystem> {
       return false;
     }
 
-    let completedConsolesArray = new Array(this.completedConsoles);
-    let oldCompletedConsolesArray = new Array(old.completedConsoles);
+    const completedConsolesArray = new Array(this.completedConsoles);
+    const oldCompletedConsolesArray = new Array(old.completedConsoles);
 
     for (let i = 0; i < completedConsolesArray.length; i++) {
       if (completedConsolesArray[i] != oldCompletedConsolesArray[i]) {
@@ -48,13 +57,5 @@ export class LifeSuppSystem extends BaseSystem<LifeSuppSystem> {
     }
 
     return true;
-  }
-
-  static spawn(data: MessageReader): LifeSuppSystem {
-    let lifeSuppSystem = new LifeSuppSystem();
-    
-    lifeSuppSystem.setSpawn(data);
-    
-    return lifeSuppSystem;
   }
 }

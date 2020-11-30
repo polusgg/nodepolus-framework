@@ -1,3 +1,5 @@
+import { RepairAmount, RepairSystemPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
+import { CloseDoorsOfTypePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/closeDoorsOfType";
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
@@ -16,28 +18,26 @@ import { DoorsSystem } from "./systems/doorsSystem";
 import { HqHudSystem } from "./systems/hqHudSystem";
 import { InternalSystemType } from "./systems/type";
 import { BaseSystem } from "./systems/baseSystem";
+import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { Level } from "../../../types/level";
-import { Connection } from "../../connection";
-import { CloseDoorsOfTypePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/closeDoorsOfType";
-import { RepairAmount, RepairSystemPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 
 export type System = AutoDoorsSystem
-                   | DeconSystem
-                   | DoorsSystem
-                   | HqHudSystem
-                   | HudOverrideSystem
-                   | LifeSuppSystem
-                   | MedScanSystem
-                   | ReactorSystem
-                   | SabotageSystem
-                   | SecurityCameraSystem
-                   | SwitchSystem
+| DeconSystem
+| DoorsSystem
+| HqHudSystem
+| HudOverrideSystem
+| LifeSuppSystem
+| MedScanSystem
+| ReactorSystem
+| SabotageSystem
+| SecurityCameraSystem
+| SwitchSystem;
 
 export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject<T> {
   public systems: BaseSystem<System>[] = [];
-  
-  private level: Level;
+
+  private readonly level: Level;
 
   protected constructor(public type: InnerNetObjectType, netId: number, parent: U, public systemTypes: SystemType[]) {
     super(type, netId, parent);
@@ -53,16 +53,115 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
         this.level = Level.Polus;
         break;
       default:
-        throw new Error("Unsupported ShipStatus type: " + type);
+        throw new Error(`Unsupported ShipStatus type: ${type}`);
     }
 
     this.initializeSystems();
   }
 
-  private initializeSystems() {
+  closeDoorsOfType(systemId: SystemType): void {
+    if (this.parent.room.isHost) {
+      return;
+    }
+
+    if (!this.parent.room.host) {
+      throw new Error("CloseDoorsOfType send to room without a host");
+    }
+
+    this.sendRPCPacketTo([ this.parent.room.host as Connection ], new CloseDoorsOfTypePacket(systemId));
+  }
+
+  repairSystem(systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
+    if (this.parent.room.isHost) {
+      return;
+    }
+
+    this.sendRPCPacketTo(
+      [ this.parent.room.host as Connection ],
+      new RepairSystemPacket(systemId, playerControlNetId, amount.serialize(), this.level),
+    );
+  }
+
+  getData(old: BaseShipStatus<T, U>): DataPacket {
+    const changedSystemTypes: SystemType[] = this.systems.map((currentSystem, systemIndex) => {
+      const oldSystem = old.systems[systemIndex];
+
+      if (currentSystem.type != oldSystem.type) {
+        throw new Error(`Attempted comparison of two disperate system types: expected type ${SystemType[currentSystem.type]} but got ${SystemType[oldSystem.type]}`);
+      }
+
+      if (!currentSystem.equals(oldSystem)) {
+        return currentSystem.type;
+      }
+
+      return -1;
+    }).filter(systemType => systemType != -1);
+
+    const writer = new MessageWriter()
+      .writePackedUInt32(this.serializeSystemsToDirtyBits(changedSystemTypes))
+      .writeBytes(this.getSystems(old, changedSystemTypes, false));
+
+    return new DataPacket(
+      this.id,
+      writer,
+    );
+  }
+
+  setData(data: MessageReader | MessageWriter): void {
+    const reader = MessageReader.fromRawBytes(data.buffer);
+
+    this.setSystems(this.deserializeDirtyBitsToSystems(reader.readPackedUInt32()), reader.readRemainingBytes(), false);
+  }
+
+  getSpawn(): SpawnInnerNetObject {
+    return new SpawnInnerNetObject(
+      this.id,
+      this.getSystems(undefined, this.systemTypes, true),
+    );
+  }
+
+  setSpawn(data: MessageReader | MessageWriter): void {
+    this.setSystems(this.systemTypes, MessageReader.fromMessage(data), true);
+  }
+
+  private getSystemFromType(systemType: SystemType): BaseSystem<InternalSystemType> {
+    switch (systemType) {
+      case SystemType.Doors:
+        if (this.level == Level.Polus) {
+          return this.systems[InternalSystemType.Doors];
+        }
+
+        return this.systems[InternalSystemType.AutoDoors];
+
+      case SystemType.Communications:
+        if (this.level == Level.MiraHq) {
+          return this.systems[InternalSystemType.HqHud];
+        }
+
+        return this.systems[InternalSystemType.HudOverride];
+
+      case SystemType.Decontamination:
+        return this.systems[InternalSystemType.Decon];
+      case SystemType.Decontamination2:
+        return this.systems[InternalSystemType.Decon2];
+      case SystemType.Electrical:
+        return this.systems[InternalSystemType.Switch];
+      case SystemType.Laboratory:
+      case SystemType.Reactor:
+        return this.systems[InternalSystemType.Reactor];
+      case SystemType.Sabotage:
+        return this.systems[InternalSystemType.Sabotage];
+      case SystemType.Security:
+        return this.systems[InternalSystemType.SecurityCamera];
+      default:
+        throw new Error(`Tried to get unimplemented SystemType: ${systemType}`);
+    }
+  }
+
+  private initializeSystems(): void {
     for (let i = 0; i < this.systemTypes.length; i++) {
       const type = this.systemTypes[i];
-      
+
       switch (type) {
         case SystemType.Doors:
           if (this.level == Level.Polus) {
@@ -98,12 +197,12 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
           this.systems[InternalSystemType.SecurityCamera] = new SecurityCameraSystem();
           break;
         default:
-          throw new Error("Tried to get unimplemented system type: " + type);
+          throw new Error(`Tried to get unimplemented SystemType: ${type}`);
       }
     }
   }
 
-  private serializeSystemsToDirtyBits(otherSystems: SystemType[]) {
+  private serializeSystemsToDirtyBits(otherSystems: SystemType[]): number {
     let n = 0;
 
     for (let i = 0; i < this.systemTypes.length; i++) {
@@ -111,55 +210,23 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
         n |= 1 << this.systemTypes[i];
       }
     }
-    
+
     return n;
   }
 
   private deserializeDirtyBitsToSystems(dirtyBits: number): SystemType[] {
-    let systemTypes = [];
-    
+    const systemTypes = [];
+
     for (let i = 0; i < Object.keys(SystemType).length / 2; i++) {
       if ((dirtyBits & (1 << i)) != 0) {
-        systemTypes.push(i);
+        systemTypes.push(i as never);
       }
     }
 
     return systemTypes;
   }
 
-  getSystemFromType(systemType: SystemType) {
-    switch (systemType) {
-      case SystemType.Doors:
-        if (this.level == Level.Polus) {
-          return this.systems[InternalSystemType.Doors];
-        } else {
-          return this.systems[InternalSystemType.AutoDoors];
-        }
-      case SystemType.Communications:
-        if (this.level == Level.MiraHq) {
-          return this.systems[InternalSystemType.HqHud];
-        } else {
-          return this.systems[InternalSystemType.HudOverride];
-        }
-      case SystemType.Decontamination:
-        return this.systems[InternalSystemType.Decon];
-      case SystemType.Decontamination2:
-        return this.systems[InternalSystemType.Decon2];
-      case SystemType.Electrical:
-        return this.systems[InternalSystemType.Switch];
-      case SystemType.Laboratory:
-      case SystemType.Reactor:
-        return this.systems[InternalSystemType.Reactor];
-      case SystemType.Sabotage:
-        return this.systems[InternalSystemType.Sabotage];
-      case SystemType.Security:
-        return this.systems[InternalSystemType.SecurityCamera];
-      default:
-        throw new Error("Tried to get unimplemented system type: " + systemType);
-    }
-  }
-
-  private setSystems(systems: SystemType[], data: MessageReader, fromSpawn: boolean) {
+  private setSystems(systems: SystemType[], data: MessageReader, fromSpawn: boolean): void {
     for (let i = 0; i < systems.length; i++) {
       const system = this.getSystemFromType(systems[i]);
 
@@ -170,10 +237,10 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
   private getSystems(old: undefined, systems: SystemType[], fromSpawn: true): MessageWriter;
   private getSystems(old: BaseShipStatus<T, U>, systems: SystemType[], fromSpawn: false): MessageWriter;
   private getSystems(old: BaseShipStatus<T, U> | undefined, systems: SystemType[], fromSpawn: boolean): MessageWriter {
-    let writers: MessageWriter[] = new Array(systems.length);
+    const writers: MessageWriter[] = new Array(systems.length);
 
     for (let i = 0; i < systems.length; i++) {
-      let system = this.getSystemFromType(systems[i]);
+      const system = this.getSystemFromType(systems[i]);
 
       if (fromSpawn) {
         system.spawn();
@@ -183,64 +250,5 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
     }
 
     return MessageWriter.concat(...writers);
-  }
-
-  getData(old: BaseShipStatus<T, U>): DataPacket {
-    let changedSystemTypes: SystemType[] = this.systems.map((currentSystem, systemIndex) => {
-      let oldSystem = old.systems[systemIndex];
-
-      if (currentSystem.type != oldSystem.type) {
-        throw new Error("Attempted comparison of two desperate system types");
-      }
-
-      if (!currentSystem.equals(oldSystem)) {
-        return currentSystem.type;
-      } else {
-        return -1;
-      }
-    }).filter(systemType => systemType != -1);
-
-    let writer = new MessageWriter()
-      .writePackedUInt32(this.serializeSystemsToDirtyBits(changedSystemTypes))
-      .writeBytes(this.getSystems(old, changedSystemTypes, false));
-
-    return new DataPacket(
-      this.id,
-      writer,
-    );
-  }
-
-  setData(data: MessageReader | MessageWriter): void {
-    let reader = MessageReader.fromRawBytes(data.buffer);
-    
-    this.setSystems(this.deserializeDirtyBitsToSystems(reader.readPackedUInt32()), reader.readRemainingBytes(), false);
-  }
-
-  getSpawn(): SpawnInnerNetObject {
-    return new SpawnInnerNetObject(
-      this.id,
-      this.getSystems(undefined, this.systemTypes, true),
-    );
-  }
-
-  setSpawn(data: MessageReader | MessageWriter): void {
-    this.setSystems(this.systemTypes, MessageReader.fromMessage(data), true);
-  }
-
-  closeDoorsOfType(systemId: SystemType) {
-    if (this.parent.room.isHost)
-      return;
-
-    this.sendRPCPacketTo([<Connection>this.parent.room.host], new CloseDoorsOfTypePacket(systemId))
-  }
-
-  repairSystem(systemId: SystemType, playerControlNetId: number, amount: RepairAmount) {
-    if (this.parent.room.isHost)
-      return;
-
-    this.sendRPCPacketTo(
-      [ <Connection>this.parent.room.host ],
-      new RepairSystemPacket(systemId, playerControlNetId, amount.serialize(), this.level),
-    )
   }
 }

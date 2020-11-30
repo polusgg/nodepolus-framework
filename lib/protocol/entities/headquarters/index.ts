@@ -1,9 +1,9 @@
-import { SpawnPacket, SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
+import { SpawnInnerNetObject, SpawnPacket } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { InnerHeadquarters } from "./innerHeadquarters";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
-import { BaseEntity } from "../baseEntity";
 import { RoomImplementation } from "../types";
+import { BaseEntity } from "../baseEntity";
 
 export type HeadquartersInnerNetObjects = [ InnerHeadquarters ];
 
@@ -21,11 +21,11 @@ export class EntityHeadquarters extends BaseEntity {
   }
 
   static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityHeadquarters {
-    let headquarters = new EntityHeadquarters(room);
+    const headquarters = new EntityHeadquarters(room);
 
     headquarters.setSpawn(flags, owner, innerNetObjects);
-    
-    return headquarters
+
+    return headquarters;
   }
 
   getSpawn(): SpawnPacket {
@@ -39,7 +39,7 @@ export class EntityHeadquarters extends BaseEntity {
     );
   }
 
-  setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]) {
+  setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
       InnerHeadquarters.spawn(innerNetObjects[0], this),

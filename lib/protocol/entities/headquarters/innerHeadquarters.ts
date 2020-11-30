@@ -17,8 +17,8 @@ export class InnerHeadquarters extends BaseShipStatus<InnerHeadquarters, EntityH
     ]);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityHeadquarters) {
-    let headquarters = new InnerHeadquarters(object.innerNetObjectID, parent);
+  static spawn(object: SpawnInnerNetObject, parent: EntityHeadquarters): InnerHeadquarters {
+    const headquarters = new InnerHeadquarters(object.innerNetObjectID, parent);
 
     headquarters.setSpawn(object.data);
 

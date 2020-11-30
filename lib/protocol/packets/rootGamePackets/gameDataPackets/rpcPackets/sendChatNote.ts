@@ -1,10 +1,10 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { ChatNoteType } from "../../../../../types/chatNoteType";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SendChatNotePacket extends BaseRPCPacket {
-  constructor(public readonly playerId: number, public readonly noteType: ChatNoteType) {
+  constructor(readonly playerId: number, readonly noteType: ChatNoteType) {
     super(RPCPacketType.SendChatNote);
   }
 
@@ -13,6 +13,7 @@ export class SendChatNotePacket extends BaseRPCPacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.playerId).writeByte(this.type);
+    return new MessageWriter().writeByte(this.playerId)
+      .writeByte(this.type);
   }
 }

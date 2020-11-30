@@ -18,8 +18,8 @@ export class InnerShipStatus extends BaseShipStatus<InnerShipStatus, EntityShipS
     ]);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityShipStatus) {
-    let shipStatus = new InnerShipStatus(object.innerNetObjectID, parent);
+  static spawn(object: SpawnInnerNetObject, parent: EntityShipStatus): InnerShipStatus {
+    const shipStatus = new InnerShipStatus(object.innerNetObjectID, parent);
 
     shipStatus.setSpawn(object.data);
 

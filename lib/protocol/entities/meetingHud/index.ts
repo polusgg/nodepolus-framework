@@ -1,4 +1,4 @@
-import { SpawnPacket, SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
+import { SpawnInnerNetObject, SpawnPacket } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { GLOBAL_OWNER } from "../../../util/constants";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
@@ -6,7 +6,7 @@ import { InnerMeetingHud } from "./innerMeetingHud";
 import { RoomImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 
-export type MeetingHudInnerNetObjects = [ InnerMeetingHud ]
+export type MeetingHudInnerNetObjects = [ InnerMeetingHud ];
 
 export class EntityMeetingHud extends BaseEntity {
   public owner!: number;
@@ -22,17 +22,11 @@ export class EntityMeetingHud extends BaseEntity {
   }
 
   static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityMeetingHud {
-    let meetingHud = new EntityMeetingHud(room);
+    const meetingHud = new EntityMeetingHud(room);
 
     meetingHud.setSpawn(flags, owner, innerNetObjects);
 
     return meetingHud;
-  }
-
-  setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
-    this.innerNetObjects = [
-      InnerMeetingHud.spawn(innerNetObjects[0], this),
-    ];
   }
 
   getSpawn(): SpawnPacket {
@@ -42,5 +36,12 @@ export class EntityMeetingHud extends BaseEntity {
       SpawnFlag.None,
       [],
     );
+  }
+
+  setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
+    this.owner = owner;
+    this.innerNetObjects = [
+      InnerMeetingHud.spawn(innerNetObjects[0], this),
+    ];
   }
 }

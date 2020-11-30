@@ -1,4 +1,4 @@
-import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { POLUS_DOOR_COUNT } from "../../../../util/constants";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
@@ -11,7 +11,15 @@ export class DoorsSystem extends BaseSystem<DoorsSystem> {
     super(SystemType.Doors);
   }
 
-  getData(old: DoorsSystem): MessageWriter {
+  static spawn(data: MessageReader): DoorsSystem {
+    const doorsSystem = new DoorsSystem();
+
+    doorsSystem.setSpawn(data);
+
+    return doorsSystem;
+  }
+
+  getData(): MessageWriter {
     return this.getSpawn();
   }
 
@@ -20,9 +28,9 @@ export class DoorsSystem extends BaseSystem<DoorsSystem> {
   }
 
   getSpawn(): MessageWriter {
-    let writer = new MessageWriter().writeList(this.timers, (writer, item) => {
-      writer.writeByte(item[0]);
-      writer.writeFloat32(item[1]);
+    const writer = new MessageWriter().writeList(this.timers, (sub, item) => {
+      sub.writeByte(item[0]);
+      sub.writeFloat32(item[1]);
     });
 
     for (let i = 0; i < POLUS_DOOR_COUNT; i++) {
@@ -33,7 +41,7 @@ export class DoorsSystem extends BaseSystem<DoorsSystem> {
   }
 
   setSpawn(data: MessageReader): void {
-    this.timers = new Map(data.readList(reader => [ reader.readByte(), reader.readFloat32() ]));
+    this.timers = new Map(data.readList(reader => [reader.readByte(), reader.readFloat32()]));
 
     for (let i = 0; i < POLUS_DOOR_COUNT; i++) {
       this.doorStates[i] = data.readBoolean();
@@ -55,8 +63,8 @@ export class DoorsSystem extends BaseSystem<DoorsSystem> {
       }
     }
 
-    let timerArray = Array.from(this.timers.values());
-    let oldTimerArray = Array.from(old.timers.values());
+    const timerArray = Array.from(this.timers.values());
+    const oldTimerArray = Array.from(old.timers.values());
 
     for (let i = 0; i < timerArray.length; i++) {
       if (timerArray[i] != oldTimerArray[i]) {
@@ -65,13 +73,5 @@ export class DoorsSystem extends BaseSystem<DoorsSystem> {
     }
 
     return true;
-  }
-
-  static spawn(data: MessageReader): DoorsSystem {
-    let doorsSystem = new DoorsSystem();
-
-    doorsSystem.setSpawn(data);
-
-    return doorsSystem;
   }
 }

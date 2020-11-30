@@ -1,10 +1,10 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { PlayerSkin } from "../../../../../types/playerSkin";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SetSkinPacket extends BaseRPCPacket {
-  constructor(public readonly skin: PlayerSkin) {
+  constructor(readonly skin: PlayerSkin) {
     super(RPCPacketType.SetSkin);
   }
 

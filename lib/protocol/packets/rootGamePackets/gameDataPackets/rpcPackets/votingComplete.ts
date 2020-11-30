@@ -1,15 +1,15 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
+import { VoteState } from "../../../../entities/meetingHud/innerMeetingHud";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
-import { VoteState } from "../../../../entities/meetingHud/innerMeetingHud";
 
 export class VotingCompletePacket extends BaseRPCPacket {
   public readonly didVotePlayerOff: boolean;
 
   constructor(
-    public readonly states: VoteState[],
-    public readonly isTie: boolean,
-    public readonly exiledPlayerId?: number,
+    readonly states: VoteState[],
+    readonly isTie: boolean,
+    readonly exiledPlayerId?: number,
   ) {
     super(RPCPacketType.VotingComplete);
 

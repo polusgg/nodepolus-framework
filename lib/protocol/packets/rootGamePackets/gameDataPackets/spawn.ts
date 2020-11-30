@@ -1,4 +1,4 @@
-import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SpawnFlag } from "../../../../types/spawnFlag";
 import { BaseGameDataPacket } from "../../basePacket";
 import { GameDataPacketType } from "../../types";
@@ -21,9 +21,7 @@ export class SpawnPacket extends BaseGameDataPacket {
       reader.readPackedUInt32(),
       reader.readPackedInt32(),
       reader.readByte(),
-      reader.readList<SpawnInnerNetObject>(reader => {
-        return SpawnInnerNetObject.deserialize(reader);
-      }),
+      reader.readList<SpawnInnerNetObject>(sub => SpawnInnerNetObject.deserialize(sub)),
     );
   }
 
@@ -32,8 +30,6 @@ export class SpawnPacket extends BaseGameDataPacket {
       .writePackedUInt32(this.type)
       .writePackedInt32(this.owner)
       .writeByte(this.flags)
-      .writeList(this.innerNetObjects, (_, item) => {
-        return item.serialize()
-      })
+      .writeList(this.innerNetObjects, (_, item) => item.serialize());
   }
 }

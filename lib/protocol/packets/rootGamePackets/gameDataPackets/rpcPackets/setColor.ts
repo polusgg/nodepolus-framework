@@ -1,10 +1,10 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { PlayerColor } from "../../../../../types/playerColor";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SetColorPacket extends BaseRPCPacket {
-  constructor(public readonly color: PlayerColor) {
+  constructor(readonly color: PlayerColor) {
     super(RPCPacketType.SetColor);
   }
 

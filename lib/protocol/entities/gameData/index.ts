@@ -3,8 +3,8 @@ import { InnerVoteBanSystem } from "./innerVoteBanSystem";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
 import { InnerGameData } from "./innerGameData";
-import { BaseEntity } from "../baseEntity";
 import { RoomImplementation } from "../types";
+import { BaseEntity } from "../baseEntity";
 
 export type GameDataInnerNetObjects = [ InnerGameData, InnerVoteBanSystem ];
 
@@ -16,7 +16,7 @@ export class EntityGameData extends BaseEntity {
   get gameData(): InnerGameData {
     return this.innerNetObjects[0];
   }
-  
+
   get voteBanSystem(): InnerVoteBanSystem {
     return this.innerNetObjects[1];
   }
@@ -26,7 +26,7 @@ export class EntityGameData extends BaseEntity {
   }
 
   static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityGameData {
-    let gameData = new EntityGameData(room);
+    const gameData = new EntityGameData(room);
 
     gameData.setSpawn(flags, owner, innerNetObjects);
 
@@ -45,7 +45,7 @@ export class EntityGameData extends BaseEntity {
     );
   }
 
-  setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]) {
+  setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
       InnerGameData.spawn(innerNetObjects[0], this),

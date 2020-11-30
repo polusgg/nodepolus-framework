@@ -26,7 +26,7 @@ export class DisconnectReason {
   constructor(public type: DisconnectionType, public message: string = "") {}
 
   static deserialize(reader: MessageReader, asInt: boolean = false): DisconnectReason {
-    let type = reader[asInt ? "readUInt32" : "readByte"]();
+    const type = reader[asInt ? "readUInt32" : "readByte"]();
     let message = "";
 
     if (type == DisconnectionType.Custom && reader.hasBytesLeft()) {
@@ -34,14 +34,6 @@ export class DisconnectReason {
     }
 
     return new DisconnectReason(type, message);
-  }
-
-  serialize(writer: MessageWriter, asInt: boolean = false) {
-    writer[asInt ? "writeUInt32" : "writeByte"](this.type);
-
-    if (this.type == DisconnectionType.Custom && this.message.length > 0) {
-      writer.writeString(this.message);
-    }
   }
 
   static exitGame(): DisconnectReason {
@@ -118,5 +110,13 @@ export class DisconnectReason {
 
   static newConnection(): DisconnectReason {
     return new DisconnectReason(DisconnectionType.NewConnection);
+  }
+
+  serialize(writer: MessageWriter, asInt: boolean = false): void {
+    writer[asInt ? "writeUInt32" : "writeByte"](this.type);
+
+    if (this.type == DisconnectionType.Custom && this.message.length > 0) {
+      writer.writeString(this.message);
+    }
   }
 }

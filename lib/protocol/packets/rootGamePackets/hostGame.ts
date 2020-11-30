@@ -5,7 +5,7 @@ import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 
 export class HostGameRequestPacket extends BaseRootGamePacket {
-  constructor(public readonly options: GameOptionsData) {
+  constructor(readonly options: GameOptionsData) {
     super(RootGamePacketType.HostGame);
   }
 
@@ -14,7 +14,7 @@ export class HostGameRequestPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter();
+    const writer = new MessageWriter();
 
     this.options.serialize(writer);
 
@@ -23,7 +23,7 @@ export class HostGameRequestPacket extends BaseRootGamePacket {
 }
 
 export class HostGameResponsePacket extends BaseRootGamePacket {
-  constructor(public readonly roomCode: string) {
+  constructor(readonly roomCode: string) {
     super(RootGamePacketType.HostGame);
   }
 

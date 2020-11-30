@@ -6,9 +6,9 @@ import { RootGamePacketType } from "../types";
 
 export class EndGamePacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
-    public readonly reason: GameOverReason,
-    public readonly showAd: boolean,
+    readonly roomCode: string,
+    readonly reason: GameOverReason,
+    readonly showAd: boolean,
   ) {
     super(RootGamePacketType.EndGame);
   }

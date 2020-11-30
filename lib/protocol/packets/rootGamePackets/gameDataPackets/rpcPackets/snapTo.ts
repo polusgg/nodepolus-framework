@@ -1,21 +1,21 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
+import { Vector2 } from "../../../../../util/vector2";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
-import { Vector2 } from "../../../../../util/vector2";
 
 export class SnapToPacket extends BaseRPCPacket {
-  constructor(public readonly position: Vector2, public readonly lastSequenceId: number) {
+  constructor(readonly position: Vector2, readonly lastSequenceId: number) {
     super(RPCPacketType.SnapTo);
   }
 
   static deserialize(reader: MessageReader): SnapToPacket {
-    let position = Vector2.deserialize(reader);
+    const position = Vector2.deserialize(reader);
 
     return new SnapToPacket(position, reader.readUInt16());
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter();
+    const writer = new MessageWriter();
 
     this.position.serialize(writer);
 

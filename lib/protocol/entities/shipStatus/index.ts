@@ -1,9 +1,9 @@
-import { SpawnPacket, SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
+import { SpawnInnerNetObject, SpawnPacket } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
 import { InnerShipStatus } from "./innerShipStatus";
-import { BaseEntity } from "../baseEntity";
 import { RoomImplementation } from "../types";
+import { BaseEntity } from "../baseEntity";
 
 export type ShipStatusInnerNetObjects = [ InnerShipStatus ];
 
@@ -21,18 +21,11 @@ export class EntityShipStatus extends BaseEntity {
   }
 
   static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityShipStatus {
-    let shipStatus = new EntityShipStatus(room);
+    const shipStatus = new EntityShipStatus(room);
 
     shipStatus.setSpawn(flags, owner, innerNetObjects);
 
     return shipStatus;
-  }
-
-  setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]) {
-    this.owner = owner;
-    this.innerNetObjects = [
-      InnerShipStatus.spawn(innerNetObjects[0], this),
-    ];
   }
 
   getSpawn(): SpawnPacket {
@@ -44,5 +37,12 @@ export class EntityShipStatus extends BaseEntity {
         this.shipStatus.spawn(),
       ],
     );
+  }
+
+  setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
+    this.owner = owner;
+    this.innerNetObjects = [
+      InnerShipStatus.spawn(innerNetObjects[0], this),
+    ];
   }
 }

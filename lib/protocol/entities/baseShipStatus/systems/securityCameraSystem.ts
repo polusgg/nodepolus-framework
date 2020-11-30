@@ -1,15 +1,23 @@
-import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class SecurityCameraSystem extends BaseSystem<SecurityCameraSystem> {
-  playersViewingCams!: Set<number>;
+  public playersViewingCams!: Set<number>;
 
   constructor() {
     super(SystemType.Security);
   }
 
-  getData(old: SecurityCameraSystem): MessageWriter {
+  static spawn(data: MessageReader): SecurityCameraSystem {
+    const securityCameraSystem = new SecurityCameraSystem();
+
+    securityCameraSystem.setSpawn(data);
+
+    return securityCameraSystem;
+  }
+
+  getData(): MessageWriter {
     return this.getSpawn();
   }
 
@@ -32,8 +40,8 @@ export class SecurityCameraSystem extends BaseSystem<SecurityCameraSystem> {
       return false;
     }
 
-    let viewers = Array.from(this.playersViewingCams);
-    let oldViewers = Array.from(this.playersViewingCams);
+    const viewers = Array.from(this.playersViewingCams);
+    const oldViewers = Array.from(this.playersViewingCams);
 
     for (let i = 0; i < this.playersViewingCams.size; i++) {
       if (viewers[i] != oldViewers[i]) {
@@ -42,13 +50,5 @@ export class SecurityCameraSystem extends BaseSystem<SecurityCameraSystem> {
     }
 
     return true;
-  }
-
-  static spawn(data: MessageReader): SecurityCameraSystem {
-    let securityCameraSystem = new SecurityCameraSystem();
-    
-    securityCameraSystem.setSpawn(data);
-    
-    return securityCameraSystem;
   }
 }

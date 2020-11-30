@@ -6,7 +6,7 @@ import { RootGamePacketType } from "../types";
 import { Level } from "../../../types/level";
 
 export class JoinGameRequestPacket extends BaseRootGamePacket {
-  constructor(public readonly roomCode: string, public readonly ownedMaps: Level[]) {
+  constructor(readonly roomCode: string, readonly ownedMaps: Level[]) {
     super(RootGamePacketType.JoinGame);
   }
 
@@ -16,9 +16,7 @@ export class JoinGameRequestPacket extends BaseRootGamePacket {
       // TODO: Probably broken but just an example
       reader.readBitfield()
         .reverse()
-        .map((bit, index) => {
-          return bit ? 1 << index : 0;
-        })
+        .map((bit, index) => (bit ? 1 << index : 0))
         .filter(bit => bit),
     );
   }
@@ -32,9 +30,9 @@ export class JoinGameRequestPacket extends BaseRootGamePacket {
 
 export class JoinGameResponsePacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
-    public readonly joiningClientId: number,
-    public readonly hostClientId: number,
+    readonly roomCode: string,
+    readonly joiningClientId: number,
+    readonly hostClientId: number,
   ) {
     super(RootGamePacketType.JoinGame);
   }
@@ -52,7 +50,7 @@ export class JoinGameResponsePacket extends BaseRootGamePacket {
 }
 
 export class JoinGameErrorPacket extends BaseRootGamePacket {
-  constructor(public readonly disconnectReason: DisconnectReason) {
+  constructor(readonly disconnectReason: DisconnectReason) {
     super(RootGamePacketType.JoinGame);
   }
 
@@ -61,7 +59,7 @@ export class JoinGameErrorPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter();
+    const writer = new MessageWriter();
 
     this.disconnectReason.serialize(writer, true);
 

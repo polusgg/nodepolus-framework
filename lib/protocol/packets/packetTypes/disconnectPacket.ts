@@ -9,9 +9,9 @@ export class DisconnectPacket extends BasePacket {
   }
 
   static deserialize(reader: MessageReader): DisconnectPacket {
-    reader.readBoolean(); // Fucking Forte
+    reader.readBoolean();
 
-    let reason = reader.readMessage();
+    const reason = reader.readMessage();
 
     if (reason) {
       return new DisconnectPacket(DisconnectReason.deserialize(reason));
@@ -21,7 +21,7 @@ export class DisconnectPacket extends BasePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter().writeBoolean(true); // For real, though...
+    const writer = new MessageWriter().writeBoolean(true);
 
     if (this.reason) {
       this.reason.serialize(writer);

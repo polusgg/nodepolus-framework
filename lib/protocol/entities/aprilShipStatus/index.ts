@@ -4,8 +4,8 @@ import { InnerAprilShipStatus } from "./innerAprilShipStatus";
 import { ShipStatusInnerNetObjects } from "../shipStatus";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
-import { BaseEntity } from "../baseEntity";
 import { RoomImplementation } from "../types";
+import { BaseEntity } from "../baseEntity";
 
 export class EntityAprilShipStatus extends BaseEntity {
   public owner!: number;
@@ -21,7 +21,7 @@ export class EntityAprilShipStatus extends BaseEntity {
   }
 
   static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityAprilShipStatus {
-    let aprilShipStatus = new EntityAprilShipStatus(room);
+    const aprilShipStatus = new EntityAprilShipStatus(room);
 
     aprilShipStatus.setSpawn(flags, owner, innerNetObjects);
 
@@ -39,7 +39,7 @@ export class EntityAprilShipStatus extends BaseEntity {
     );
   }
 
-  setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]) {
+  setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
       InnerAprilShipStatus.spawn(innerNetObjects[0], this),

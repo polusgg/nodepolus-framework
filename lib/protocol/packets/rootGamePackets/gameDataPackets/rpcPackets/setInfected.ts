@@ -1,9 +1,9 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SetInfectedPacket extends BaseRPCPacket {
-  constructor(public readonly impostorPlayerIds: number[]) {
+  constructor(readonly impostorPlayerIds: number[]) {
     super(RPCPacketType.SetInfected);
   }
 

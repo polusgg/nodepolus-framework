@@ -1,9 +1,9 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class MurderPlayerPacket extends BaseRPCPacket {
-  constructor(public readonly victimPlayerControlNetId: number) {
+  constructor(readonly victimPlayerControlNetId: number) {
     super(RPCPacketType.SetHat);
   }
 

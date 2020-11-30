@@ -1,4 +1,4 @@
-import { PacketType, RootGamePacketType, GameDataPacketType, RPCPacketType } from "./types";
+import { GameDataPacketType, PacketType, RPCPacketType, RootGamePacketType } from "./types";
 import { MessageWriter } from "../../util/hazelMessage";
 
 export interface Bindable<T> {
@@ -6,7 +6,7 @@ export interface Bindable<T> {
 }
 
 export abstract class BasePacket implements Bindable<BasePacket> {
-  clientBound?: boolean;
+  public clientBound?: boolean;
 
   constructor(public type: PacketType) {}
 
@@ -20,7 +20,7 @@ export abstract class BasePacket implements Bindable<BasePacket> {
 }
 
 export abstract class BaseRootGamePacket implements Bindable<BaseRootGamePacket> {
-  clientBound?: boolean;
+  public clientBound?: boolean;
 
   constructor(public type: RootGamePacketType) {}
 
@@ -34,7 +34,7 @@ export abstract class BaseRootGamePacket implements Bindable<BaseRootGamePacket>
 }
 
 export abstract class BaseGameDataPacket implements Bindable<BaseGameDataPacket> {
-  clientBound?: boolean;
+  public clientBound?: boolean;
 
   constructor(public type: GameDataPacketType) {}
 
@@ -48,7 +48,7 @@ export abstract class BaseGameDataPacket implements Bindable<BaseGameDataPacket>
 }
 
 export abstract class BaseRPCPacket implements Bindable<BaseRPCPacket> {
-  clientBound?: boolean;
+  public clientBound?: boolean;
 
   constructor(public type: RPCPacketType) {}
 

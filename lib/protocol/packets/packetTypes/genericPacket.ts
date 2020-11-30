@@ -1,5 +1,5 @@
-import { JoinGameRequestPacket, JoinGameResponsePacket, JoinGameErrorPacket } from "../rootGamePackets/joinGame";
-import { GetGameListResponsePacket, GetGameListRequestPacket } from "../rootGamePackets/getGameList";
+import { JoinGameErrorPacket, JoinGameRequestPacket, JoinGameResponsePacket } from "../rootGamePackets/joinGame";
+import { GetGameListRequestPacket, GetGameListResponsePacket } from "../rootGamePackets/getGameList";
 import { HostGameRequestPacket, HostGameResponsePacket } from "../rootGamePackets/hostGame";
 import { LateRejectionPacket, RemovePlayerPacket } from "../rootGamePackets/removePlayer";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
@@ -35,24 +35,24 @@ export type RootGamePacketDataType =
   | RedirectPacket
   | ReselectServerPacket
   | GetGameListRequestPacket
-  | GetGameListResponsePacket
+  | GetGameListResponsePacket;
 
 export class RootGamePacket {
-  constructor(public readonly packets: RootGamePacketDataType[]) {}
+  constructor(readonly packets: RootGamePacketDataType[]) {}
 
   static deserialize(reader: MessageReader, clientBound: boolean, level?: Level): RootGamePacket {
-    let packets: RootGamePacketDataType[] = [];
+    const packets: RootGamePacketDataType[] = [];
 
     reader.readAllChildMessages(child => {
       switch (child.tag) {
-        case RootGamePacketType.HostGame: 
+        case RootGamePacketType.HostGame:
           if (clientBound) {
             packets.push(HostGameResponsePacket.deserialize(child));
           } else {
             packets.push(HostGameRequestPacket.deserialize(child));
           }
           break;
-        case RootGamePacketType.JoinGame: 
+        case RootGamePacketType.JoinGame:
           if (clientBound) {
             if (child.buffer.length <= 4) {
               packets.push(JoinGameErrorPacket.deserialize(child));
@@ -63,13 +63,13 @@ export class RootGamePacket {
             packets.push(JoinGameRequestPacket.deserialize(child));
           }
           break;
-        case RootGamePacketType.StartGame: 
+        case RootGamePacketType.StartGame:
           packets.push(StartGamePacket.deserialize(child));
           break;
-        case RootGamePacketType.RemoveGame: 
+        case RootGamePacketType.RemoveGame:
           packets.push(RemoveGamePacket.deserialize(child));
           break;
-        case RootGamePacketType.RemovePlayer: 
+        case RootGamePacketType.RemovePlayer:
           if (clientBound) {
             packets.push(LateRejectionPacket.deserialize(child));
           } else {
@@ -77,31 +77,31 @@ export class RootGamePacket {
           }
           break;
         case RootGamePacketType.GameData:
-        case RootGamePacketType.GameDataTo: 
+        case RootGamePacketType.GameDataTo:
           packets.push(GameDataPacket.deserialize(child, level));
           break;
-        case RootGamePacketType.JoinedGame: 
+        case RootGamePacketType.JoinedGame:
           packets.push(JoinedGamePacket.deserialize(child));
           break;
-        case RootGamePacketType.EndGame: 
+        case RootGamePacketType.EndGame:
           packets.push(EndGamePacket.deserialize(child));
           break;
-        case RootGamePacketType.AlterGameTag: 
+        case RootGamePacketType.AlterGameTag:
           packets.push(AlterGameTagPacket.deserialize(child));
           break;
-        case RootGamePacketType.KickPlayer: 
+        case RootGamePacketType.KickPlayer:
           packets.push(KickPlayerPacket.deserialize(child));
           break;
-        case RootGamePacketType.WaitForHost: 
+        case RootGamePacketType.WaitForHost:
           packets.push(WaitForHostPacket.deserialize(child));
           break;
-        case RootGamePacketType.Redirect: 
+        case RootGamePacketType.Redirect:
           packets.push(RedirectPacket.deserialize(child));
           break;
-        case RootGamePacketType.ReselectServer: 
+        case RootGamePacketType.ReselectServer:
           packets.push(ReselectServerPacket.deserialize(child));
           break;
-        case RootGamePacketType.GetGameList: 
+        case RootGamePacketType.GetGameList:
           if (clientBound) {
             packets.push(GetGameListResponsePacket.deserialize(child));
           } else {
@@ -109,7 +109,7 @@ export class RootGamePacket {
           }
           break;
         default:
-          throw new Error("Unhandled root packet type: " + child.tag);
+          throw new Error(`Unhandled root packet type: ${child.tag}`);
       }
     });
 
@@ -117,10 +117,11 @@ export class RootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter();
+    const writer = new MessageWriter();
 
     for (let i = 0; i < this.packets.length; i++) {
-      writer.startMessage(this.packets[i].type).writeBytes(this.packets[i].serialize()).endMessage();
+      writer.startMessage(this.packets[i].type).writeBytes(this.packets[i].serialize())
+        .endMessage();
     }
 
     return writer;

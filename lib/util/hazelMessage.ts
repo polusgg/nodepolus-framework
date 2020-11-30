@@ -1,16 +1,15 @@
 /**
  * Core buffer type for reading and writing messages
  */
-type BuildFrom = number | Buffer | string | number[] | MessageReader | MessageWriter;
+type BuildFrom = number | Buffer | string | number[] | HazelMessage;
 
-export class MessageWriter {
-  cursor: number = 0;
-  buffer: Buffer;
+export abstract class HazelMessage {
+  public buffer!: Buffer;
 
-  private messageStarts: number[] = [];
-
-  constructor(buildFrom: BuildFrom = 0, isHex?: boolean) {
-    if (typeof buildFrom != "number") {
+  constructor(buildFrom: BuildFrom = 0, isHex: boolean = true) {
+    if (buildFrom instanceof HazelMessage) {
+      this.buffer = buildFrom.buffer;
+    } else if (typeof buildFrom != "number") {
       if (typeof buildFrom === "string" && isHex) {
         this.buffer = Buffer.from(buildFrom, "hex");
       } else {
@@ -20,18 +19,15 @@ export class MessageWriter {
       this.buffer = Buffer.alloc(buildFrom);
     }
   }
+}
 
-  private resizeBuffer(addsize: number): void {
-    let newlen = this.cursor + addsize;
+export class MessageWriter extends HazelMessage {
+  public cursor = 0;
 
-    if (this.buffer.length < this.cursor + addsize) {
-      newlen = newlen - this.buffer.length + this.cursor;
-    }
+  private readonly messageStarts: number[] = [];
 
-    const newb = Buffer.alloc(newlen);
-
-    this.buffer.copy(newb);
-    this.buffer = newb;
+  static concat(...writers: MessageWriter[]): MessageWriter {
+    return new MessageWriter(Buffer.concat(writers.map(writer => writer.buffer)));
   }
 
   startMessage(flag: number): this {
@@ -43,7 +39,7 @@ export class MessageWriter {
   }
 
   endMessage(): this {
-    let start = this.messageStarts.pop();
+    const start = this.messageStarts.pop();
 
     if (start) {
       if (this.cursor - start > 65535) {
@@ -51,7 +47,7 @@ export class MessageWriter {
       }
 
       this.buffer[start - 3] = (this.cursor - start) % 256;
-      this.buffer[start - 2] = ((this.cursor - start) >> 8) % 256;
+      this.buffer[start - 2] = (this.cursor - start >> 8) % 256;
     } else {
       throw new Error("endMessage called when there are no active messages");
     }
@@ -67,7 +63,7 @@ export class MessageWriter {
     this.resizeBuffer(1);
 
     if (value > 127 || value < -128) {
-      throw new RangeError("Value " + value + " outside of UInt8 range [-128 - 127]");
+      throw new RangeError(`Value ${value} outside of UInt8 range [-128 - 127]`);
     }
 
     this.buffer.writeInt8(value, this.cursor++);
@@ -79,7 +75,7 @@ export class MessageWriter {
     this.resizeBuffer(1);
 
     if (value > 255 || value < 0) {
-      throw new RangeError("Value " + value + " outside of UInt8 range [0 - 255]");
+      throw new RangeError(`Value ${value} outside of UInt8 range [0 - 255]`);
     }
 
     this.buffer[this.cursor++] = value;
@@ -91,7 +87,7 @@ export class MessageWriter {
     this.resizeBuffer(2);
 
     if (value > 32767 || value < -32768) {
-      throw new RangeError("Value " + value + " outside of UInt16 range [-32768 - 32767]");
+      throw new RangeError(`Value ${value} outside of UInt16 range [-32768 - 32767]`);
     }
 
     this.buffer[isBigEndian ? "writeInt16BE" : "writeInt16LE"](value, this.cursor);
@@ -105,7 +101,7 @@ export class MessageWriter {
     this.resizeBuffer(2);
 
     if (value > 65535 || value < 0) {
-      throw new RangeError("Value " + value + " outside of UInt16 range [0 - 65535]");
+      throw new RangeError(`Value ${value} outside of UInt16 range [0 - 65535]`);
     }
 
     this.buffer[isBigEndian ? "writeUInt16BE" : "writeUInt16LE"](value, this.cursor);
@@ -119,7 +115,7 @@ export class MessageWriter {
     this.resizeBuffer(4);
 
     if (value > 2147483647 || value < -2147483648) {
-      throw new RangeError("Value " + value + " outside of UInt8 range [-2147483648 - 2147483647]");
+      throw new RangeError(`Value ${value} outside of UInt8 range [-2147483648 - 2147483647]`);
     }
 
     this.buffer[isBigEndian ? "writeInt32BE" : "writeInt32LE"](value, this.cursor);
@@ -133,7 +129,7 @@ export class MessageWriter {
     this.resizeBuffer(4);
 
     if (value > 4294967295 || value < 0) {
-      throw new RangeError("Value " + value + " outside of UInt8 range [0 - 4294967295]");
+      throw new RangeError(`Value ${value} outside of UInt8 range [0 - 4294967295]`);
     }
 
     this.buffer[isBigEndian ? "writeUInt32BE" : "writeUInt32LE"](value, this.cursor);
@@ -143,7 +139,7 @@ export class MessageWriter {
     return this;
   }
 
-  writeFloat32(value: number, isBigEndian = false): this {
+  writeFloat32(value: number, isBigEndian: boolean = false): this {
     this.resizeBuffer(4);
 
     this.buffer[isBigEndian ? "writeFloatBE" : "writeFloatLE"](value, this.cursor);
@@ -154,7 +150,7 @@ export class MessageWriter {
   }
 
   writeString(value: string): this {
-    let bytes = Buffer.from(value);
+    const bytes = Buffer.from(value);
 
     return this.writePackedUInt32(bytes.length).writeBytes(bytes);
   }
@@ -180,14 +176,15 @@ export class MessageWriter {
     return this;
   }
 
-  writeBytes(bytes: Buffer | Number[] | String | MessageWriter | MessageReader): this {
-    if (bytes instanceof MessageWriter || bytes instanceof MessageReader) {
+  writeBytes(bytes: Buffer | number[] | string | HazelMessage): this {
+    if (bytes instanceof HazelMessage) {
       bytes = bytes.buffer;
     }
 
     this.resizeBuffer(bytes.length);
 
     const buf = Buffer.from(bytes);
+
     buf.copy(this.buffer, this.cursor);
 
     this.cursor += buf.length;
@@ -197,7 +194,7 @@ export class MessageWriter {
 
   writeBitfield(arr: boolean[]): this {
     for (let chunkidx = 0; chunkidx < arr.length; chunkidx += 8) {
-      let tmparr = arr.slice(chunkidx, chunkidx + 8);
+      const tmparr = arr.slice(chunkidx, chunkidx + 8);
       let n = 0;
 
       for (let i = 0; i < tmparr.length; i++) {
@@ -217,7 +214,7 @@ export class MessageWriter {
     writer: (subWriter: MessageWriter, item: T, idx: number) => void,
     lengthIsPacked: boolean = true,
   ): this {
-    let arr = Array.from(items);
+    const arr = Array.from(items);
 
     if (lengthIsPacked) {
       this.writePackedUInt32(arr.length);
@@ -244,7 +241,7 @@ export class MessageWriter {
     defaultTag: number = 0,
   ): this {
     return this.writeList(items, (subWriter, item) => {
-      let child = subWriter.startMessage(defaultTag % 256);
+      const child = subWriter.startMessage(defaultTag % 256);
 
       writer(child, item);
 
@@ -260,25 +257,35 @@ export class MessageWriter {
     return this.buffer.length - this.cursor;
   }
 
-  static concat(...writers: MessageWriter[]): MessageWriter {
-    return new MessageWriter(Buffer.concat(writers.map(writer => writer.buffer)));
-  }
-
   get length(): number {
     return this.buffer.length;
   }
+
+  private resizeBuffer(addsize: number): void {
+    let newlen = this.cursor + addsize;
+
+    if (this.buffer.length < this.cursor + addsize) {
+      newlen = newlen - this.buffer.length + this.cursor;
+    }
+
+    const newb = Buffer.alloc(newlen);
+
+    this.buffer.copy(newb);
+    this.buffer = newb;
+  }
 }
 
-export class MessageReader {
-  buffer: Buffer = Buffer.alloc(0);
-  cursor: number = 0;
-  tag: number = 0xff;
-  length: number = 0;
+export class MessageReader extends HazelMessage {
+  public cursor = 0;
+  public tag = 0xff;
+  public length = 0;
+
+  constructor(source: BuildFrom = 0, isHex: boolean = true) {
+    super(source, isHex);
+  }
 
   static fromMessage(source: BuildFrom = 0, isHex: boolean = true): MessageReader {
-    let reader = new MessageReader();
-
-    reader.initialize(source, isHex);
+    const reader = new MessageReader(source, isHex);
 
     reader.length = reader.buffer.readUInt16LE();
     reader.tag = reader.buffer.readUInt8(2);
@@ -288,9 +295,7 @@ export class MessageReader {
   }
 
   static fromRawBytes(source: BuildFrom = 0, isHex: boolean = true): MessageReader {
-    let reader = new MessageReader();
-
-    reader.initialize(source, isHex);
+    const reader = new MessageReader(source, isHex);
 
     reader.length = reader.buffer.length;
     reader.tag = 0xff;
@@ -298,26 +303,12 @@ export class MessageReader {
     return reader;
   }
 
-  private initialize(buildFrom: BuildFrom, isHexString: boolean) {
-    if (buildFrom instanceof MessageReader) {
-      this.buffer = buildFrom.buffer;
-    } else if (typeof buildFrom != "number") {
-      if (typeof buildFrom === "string" && isHexString) {
-        this.buffer = Buffer.from(buildFrom, "hex");
-      } else {
-        this.buffer = Buffer.from(buildFrom);
-      }
-    } else {
-      this.buffer = Buffer.alloc(buildFrom);
-    }
-  }
-
   readMessage(): MessageReader | undefined {
     if (this.getReadableBytesLength() - 3 <= 0) {
       return;
     }
 
-    let len = this.buffer.readUInt16LE(this.cursor);
+    const len = this.buffer.readUInt16LE(this.cursor);
 
     return MessageReader.fromMessage(this.readBytes(len + 3));
   }
@@ -334,8 +325,8 @@ export class MessageReader {
     return this.buffer.readUInt8(this.cursor++);
   }
 
-  readInt16(isBigEndian = false): number {
-    let val = this.buffer[isBigEndian ? "readInt16LE" : "readInt16LE"](this.cursor);
+  readInt16(isBigEndian: boolean = false): number {
+    const val = this.buffer[isBigEndian ? "readInt16LE" : "readInt16LE"](this.cursor);
 
     this.cursor += 2;
 
@@ -343,31 +334,31 @@ export class MessageReader {
   }
 
   readUInt16(isBigEndian: boolean = false): number {
-    let val = this.buffer[isBigEndian ? "readUInt16LE" : "readUInt16LE"](this.cursor);
+    const val = this.buffer[isBigEndian ? "readUInt16LE" : "readUInt16LE"](this.cursor);
 
     this.cursor += 2;
 
     return val;
   }
 
-  readInt32(isBigEndian = false): number {
-    let val = this.buffer[isBigEndian ? "readInt32LE" : "readInt32LE"](this.cursor);
+  readInt32(isBigEndian: boolean = false): number {
+    const val = this.buffer[isBigEndian ? "readInt32LE" : "readInt32LE"](this.cursor);
 
     this.cursor += 4;
 
     return val;
   }
 
-  readUInt32(isBigEndian = false): number {
-    let val = this.buffer[isBigEndian ? "readUInt32LE" : "readUInt32LE"](this.cursor);
+  readUInt32(isBigEndian: boolean = false): number {
+    const val = this.buffer[isBigEndian ? "readUInt32LE" : "readUInt32LE"](this.cursor);
 
     this.cursor += 4;
 
     return val;
   }
 
-  readFloat32(isBigEndian = false): number {
-    let val = this.buffer[isBigEndian ? "readFloatBE" : "readFloatLE"](this.cursor);
+  readFloat32(isBigEndian: boolean = false): number {
+    const val = this.buffer[isBigEndian ? "readFloatBE" : "readFloatLE"](this.cursor);
 
     this.cursor += 4;
 
@@ -379,9 +370,9 @@ export class MessageReader {
   }
 
   readPackedInt32(): number {
-    let readMore: boolean = true;
-    let shift: number = 0;
-    let output: number = 0;
+    let readMore = true;
+    let shift = 0;
+    let output = 0;
 
     while (readMore) {
       if (!this.hasBytesLeft()) {
@@ -409,7 +400,7 @@ export class MessageReader {
   }
 
   readBytes(length: number): MessageReader {
-    let reader = MessageReader.fromRawBytes(this.buffer.slice(this.cursor, this.cursor + length));
+    const reader = MessageReader.fromRawBytes(this.buffer.slice(this.cursor, this.cursor + length));
 
     this.cursor += length;
 
@@ -417,21 +408,20 @@ export class MessageReader {
   }
 
   readBitfield(size: number = 8): boolean[] {
-    return [...this.readBytes(Math.ceil(size / 8)).buffer]
-      .map(v => {
-        return v
-          .toString(2)
-          .padStart(8, "0")
-          .split("")
-          .map(c => c === "1");
-      })
-      .flat()
+    return [ ...this.readBytes(Math.ceil(size / 8)).buffer ]
+      .map(v => v
+        .toString(2)
+        .padStart(8, "0"),
+      )
+      .join("")
+      .split("")
+      .map(c => c === "1")
       .slice(0, size);
   }
 
   readList<T>(reader: (subReader: MessageReader) => T, lengthIsPacked: boolean = true): T[] {
-    let length = lengthIsPacked ? this.readPackedUInt32() : this.readByte();
-    let results: T[] = [];
+    const length = lengthIsPacked ? this.readPackedUInt32() : this.readByte();
+    const results: T[] = [];
 
     for (let i = 0; i < length; i++) {
       results.push(reader(this));
@@ -442,7 +432,7 @@ export class MessageReader {
 
   readMessageList<T>(reader: (subReader: MessageReader) => T, lengthIsPacked: boolean = true): T[] {
     return this.readList((sub: MessageReader) => {
-      let child = sub.readMessage();
+      const child = sub.readMessage();
 
       if (!child) {
         throw new Error(
@@ -465,7 +455,7 @@ export class MessageReader {
   }
 
   getAllChildMessages(): MessageReader[] {
-    let messages: MessageReader[] = [];
+    const messages: MessageReader[] = [];
     let current: MessageReader | undefined;
 
     while ((current = this.readMessage())) {

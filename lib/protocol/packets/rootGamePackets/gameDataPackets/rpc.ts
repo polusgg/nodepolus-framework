@@ -1,4 +1,4 @@
-import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { CloseDoorsOfTypePacket } from "./rpcPackets/closeDoorsOfType";
 import { BaseGameDataPacket, BaseRPCPacket } from "../../basePacket";
 import { SetStartCounterPacket } from "./rpcPackets/setStartCounter";
@@ -40,8 +40,8 @@ export class RPCPacket extends BaseGameDataPacket {
   }
 
   static deserialize(reader: MessageReader, level?: Level): RPCPacket {
-    let senderNetId = reader.readPackedUInt32();
-    let type = reader.readByte();
+    const senderNetId = reader.readPackedUInt32();
+    const type = reader.readByte();
 
     switch (type) {
       case RPCPacketType.PlayAnimation:

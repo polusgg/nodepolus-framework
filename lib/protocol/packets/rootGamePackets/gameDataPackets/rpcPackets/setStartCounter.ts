@@ -1,11 +1,11 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SetStartCounterPacket extends BaseRPCPacket {
   public readonly isReset: boolean;
 
-  constructor(public readonly sequenceId: number, public readonly timeRemaining: number) {
+  constructor(readonly sequenceId: number, readonly timeRemaining: number) {
     super(RPCPacketType.SetStartCounter);
 
     this.isReset = this.timeRemaining == 0xff;
@@ -16,6 +16,7 @@ export class SetStartCounterPacket extends BaseRPCPacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writePackedUInt32(this.sequenceId).writeSByte(this.timeRemaining);
+    return new MessageWriter().writePackedUInt32(this.sequenceId)
+      .writeSByte(this.timeRemaining);
   }
 }

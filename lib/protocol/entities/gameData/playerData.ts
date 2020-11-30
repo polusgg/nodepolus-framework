@@ -12,7 +12,7 @@ export enum PlayerFlags {
 
 export class PlayerData {
   constructor(
-    public readonly id: number,
+    readonly id: number,
     public name: string,
     public color: PlayerColor,
     public hat: PlayerHat,
@@ -21,24 +21,25 @@ export class PlayerData {
     public isDisconnected: boolean,
     public isImpostor: boolean,
     public isDead: boolean,
-    public tasks: [number, boolean][], // TODO: TaskType or map-specific task type (e.g. PolusTask)
+    // TODO: TaskType or map-specific task type (e.g. PolusTask)
+    public tasks: [number, boolean][],
   ) {}
 
   static deserialize(reader: MessageReader): PlayerData {
-    let id = reader.readByte();
-    let name = reader.readString();
-    let color = reader.readPackedUInt32();
-    let hat = reader.readPackedUInt32();
-    let pet = reader.readPackedUInt32();
-    let skin = reader.readPackedUInt32();
-    let flags = reader.readByte();
-    let isDisconnected = (flags & (1 << PlayerFlags.IsDisconnected)) == PlayerFlags.IsDisconnected;
-    let isImpostor = (flags & (1 << PlayerFlags.IsImpostor)) == PlayerFlags.IsImpostor;
-    let isDead = (flags & (1 << PlayerFlags.IsDead)) == PlayerFlags.IsDead;
+    const id = reader.readByte();
+    const name = reader.readString();
+    const color = reader.readPackedUInt32();
+    const hat = reader.readPackedUInt32();
+    const pet = reader.readPackedUInt32();
+    const skin = reader.readPackedUInt32();
+    const flags = reader.readByte();
+    const isDisconnected = (flags & (1 << PlayerFlags.IsDisconnected)) == PlayerFlags.IsDisconnected;
+    const isImpostor = (flags & (1 << PlayerFlags.IsImpostor)) == PlayerFlags.IsImpostor;
+    const isDead = (flags & (1 << PlayerFlags.IsDead)) == PlayerFlags.IsDead;
 
     return new PlayerData(
       id, name, color, hat, pet, skin, isDisconnected, isImpostor, isDead,
-      reader.readList(tasks => [ tasks.readByte(), tasks.readBoolean() ]),
+      reader.readList(tasks => [tasks.readByte(), tasks.readBoolean()]),
     );
   }
 
@@ -52,8 +53,9 @@ export class PlayerData {
       .writeByte(
         (this.isDisconnected ? PlayerFlags.IsDisconnected : 0) |
         (this.isImpostor ? PlayerFlags.IsImpostor : 0) |
-        (this.isDead ? PlayerFlags.IsDead : 0)
-      ).writeList(this.tasks, (sub, task) => {
+        (this.isDead ? PlayerFlags.IsDead : 0),
+      )
+      .writeList(this.tasks, (sub, task) => {
         sub.writePackedUInt32(task[0]).writeBoolean(task[1]);
       });
   }

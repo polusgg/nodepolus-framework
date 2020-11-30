@@ -1,9 +1,9 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class EnterVentPacket extends BaseRPCPacket {
-  constructor(public readonly ventId: number) {
+  constructor(readonly ventId: number) {
     super(RPCPacketType.EnterVent);
   }
 

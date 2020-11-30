@@ -1,4 +1,4 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
@@ -7,7 +7,8 @@ export class ClearVotePacket extends BaseRPCPacket {
     super(RPCPacketType.ClearVote);
   }
 
-  static deserialize(reader: MessageReader): ClearVotePacket {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static deserialize(_reader: MessageReader): ClearVotePacket {
     return new ClearVotePacket();
   }
 

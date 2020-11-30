@@ -4,7 +4,7 @@ import { BaseRootGamePacket } from "../basePacket";
 import { RootGamePacketType } from "../types";
 
 export class RemoveGamePacket extends BaseRootGamePacket {
-  constructor(public readonly disconnectReason?: DisconnectReason) {
+  constructor(readonly disconnectReason?: DisconnectReason) {
     super(RootGamePacketType.RemoveGame);
   }
 
@@ -13,7 +13,7 @@ export class RemoveGamePacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter();
+    const writer = new MessageWriter();
 
     if (this.disconnectReason) {
       this.disconnectReason.serialize(writer);

@@ -1,10 +1,10 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { PlayerData } from "../../../../entities/gameData/playerData";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class UpdateGameDataPacket extends BaseRPCPacket {
-  constructor(public readonly players: PlayerData[]) {
+  constructor(readonly players: PlayerData[]) {
     super(RPCPacketType.UpdateGameData);
   }
 

@@ -252,13 +252,13 @@ test("writes bytes", t => {
 });
 
 test("reads a message", t => {
-  let buf = MessageReader.fromMessage("12003205000104736f6d6507000206737472696e67");
+  const buf = MessageReader.fromMessage("12003205000104736f6d6507000206737472696e67");
 
   t.is(buf.length, 0x0012);
   t.is(buf.tag, 0x32);
 
-  let one = buf.readMessage();
-  let two = buf.readMessage();
+  const one = buf.readMessage();
+  const two = buf.readMessage();
 
   t.truthy(one);
   t.is(one!.length, 0x05);
@@ -276,7 +276,7 @@ test("reads a message", t => {
 });
 
 test("writes a message", t => {
-  let buf = new MessageWriter();
+  const buf = new MessageWriter();
 
   buf.startMessage(0x32);
   buf.startMessage(0x01);
@@ -291,14 +291,14 @@ test("writes a message", t => {
 });
 
 test("reads a bitfield", t => {
-  let buf = MessageReader.fromRawBytes("6e");
+  const buf = MessageReader.fromRawBytes("6e");
 
   t.deepEqual(buf.readBitfield(), [false, true, true, false, true, true, true, false]);
   t.false(buf.hasBytesLeft());
 });
 
 test("writes a bitfield", t => {
-  let buf = new MessageWriter();
+  const buf = new MessageWriter();
 
   buf.writeBitfield([false, true, true, false, true, true, true, false]);
 
@@ -306,7 +306,7 @@ test("writes a bitfield", t => {
 });
 
 test("reads a long bitfield", t => {
-  let buf = MessageReader.fromRawBytes("a52e");
+  const buf = MessageReader.fromRawBytes("a52e");
 
   t.deepEqual(buf.readBitfield(16), [
     true,
@@ -330,7 +330,7 @@ test("reads a long bitfield", t => {
 });
 
 test("writes a long bitfield", t => {
-  let buf = new MessageWriter();
+  const buf = new MessageWriter();
 
   buf.writeBitfield([
     true,
@@ -355,8 +355,8 @@ test("writes a long bitfield", t => {
 });
 
 test("reads a list of objects", t => {
-  let buf = MessageReader.fromMessage("0d000103010000000200000003000000");
-  let results = buf.readList(sub => sub.readInt32());
+  const buf = MessageReader.fromMessage("0d000103010000000200000003000000");
+  const results = buf.readList(sub => sub.readInt32());
 
   t.is(results.length, 3);
   t.is(results[0], 1);
@@ -366,8 +366,8 @@ test("reads a list of objects", t => {
 });
 
 test("writes a list of objects", t => {
-  let buf = new MessageWriter();
-  let list = [1, 2, 3];
+  const buf = new MessageWriter();
+  const list = [1, 2, 3];
 
   buf.startMessage(1);
   buf.writeList(list, (writer, item) => writer.writeInt32(item));
@@ -377,8 +377,8 @@ test("writes a list of objects", t => {
 });
 
 test("reads a list of messages", t => {
-  let buf = MessageReader.fromMessage("1300010205000104736f6d6507000206737472696e67", true);
-  let results = buf.readMessageList(sub => sub.readString());
+  const buf = MessageReader.fromMessage("1300010205000104736f6d6507000206737472696e67", true);
+  const results = buf.readMessageList(sub => sub.readString());
 
   t.is(results.length, 2);
   t.is(results[0], "some");
@@ -387,14 +387,12 @@ test("reads a list of messages", t => {
 });
 
 test("reads a list of typed messages", t => {
-  let buf = MessageReader.fromMessage("1d0000020a0000054a656e6e79ed5f84000c0001074d696e7574657320050800", true);
-  let results = buf.readMessageList(
-    (sub): Example => {
-      return {
-        someString: sub.readString(),
-        someNumber: sub.readUInt32(),
-      };
-    },
+  const buf = MessageReader.fromMessage("1d0000020a0000054a656e6e79ed5f84000c0001074d696e7574657320050800", true);
+  const results = buf.readMessageList(
+    (sub): Example => ({
+      someString: sub.readString(),
+      someNumber: sub.readUInt32(),
+    }),
   );
 
   t.is(results.length, 2);
@@ -406,10 +404,12 @@ test("reads a list of typed messages", t => {
 });
 
 test("writes a list of messages with custom tags", t => {
-  let buf = new MessageWriter();
-  let items: Example[] = [
-    { someString: "Jenny", someNumber: 8675309 },
-    { someString: "Minutes", someNumber: 525600 },
+  const buf = new MessageWriter();
+  const items: Example[] = [
+    { someString: "Jenny",
+      someNumber: 8675309 },
+    { someString: "Minutes",
+      someNumber: 525600 },
   ];
 
   buf.startMessage(0);
@@ -425,10 +425,12 @@ test("writes a list of messages with custom tags", t => {
 });
 
 test("writes a list of messages with zeroed tags", t => {
-  let buf = new MessageWriter();
-  let items: Example[] = [
-    { someString: "Jenny", someNumber: 8675309 },
-    { someString: "Minutes", someNumber: 525600 },
+  const buf = new MessageWriter();
+  const items: Example[] = [
+    { someString: "Jenny",
+      someNumber: 8675309 },
+    { someString: "Minutes",
+      someNumber: 525600 },
   ];
 
   buf.startMessage(0);
@@ -442,8 +444,8 @@ test("writes a list of messages with zeroed tags", t => {
 });
 
 test("reads all child messages", t => {
-  let buf = MessageReader.fromMessage("2300010f00030a576f7273742079656172e40700000e000509426573742079656172b1070000");
-  let items: Example[] = [];
+  const buf = MessageReader.fromMessage("2300010f00030a576f7273742079656172e40700000e000509426573742079656172b1070000");
+  const items: Example[] = [];
 
   buf.readAllChildMessages(child => {
     items.push({
@@ -459,11 +461,11 @@ test("reads all child messages", t => {
 });
 
 test("reads remaining bytes", t => {
-  let buf = MessageReader.fromMessage("0d00010600010f68656c6c6f66e6f642");
+  const buf = MessageReader.fromMessage("0d00010600010f68656c6c6f66e6f642");
 
-  let child = buf.readMessage();
+  const child = buf.readMessage();
 
-  t.false(typeof child == undefined);
+  t.false(typeof child == "undefined");
   t.is(child!.readByte(), 15);
   t.is(child!.readRemainingBytes().buffer.toString(), "hello");
   t.false(child!.hasBytesLeft());

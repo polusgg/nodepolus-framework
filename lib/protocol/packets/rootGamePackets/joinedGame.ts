@@ -6,11 +6,11 @@ import { RootGamePacketType } from "../types";
 
 export class JoinedGamePacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
-    public readonly joinedClientId: number,
-    public readonly hostClientId: number,
-    public readonly otherClientIds: number[],
-    public readonly disconnectReason: DisconnectReason,
+    readonly roomCode: string,
+    readonly joinedClientId: number,
+    readonly hostClientId: number,
+    readonly otherClientIds: number[],
+    readonly disconnectReason: DisconnectReason,
   ) {
     super(RootGamePacketType.JoinedGame);
   }
@@ -26,13 +26,11 @@ export class JoinedGamePacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter()
+    const writer = new MessageWriter()
       .writeInt32(RoomCode.encode(this.roomCode))
       .writeUInt32(this.joinedClientId)
       .writeUInt32(this.hostClientId)
-      .writeList(this.otherClientIds, (sub, id) => {
-        return sub.writePackedUInt32(id);
-      });
+      .writeList(this.otherClientIds, (sub, id) => sub.writePackedUInt32(id));
 
     this.disconnectReason.serialize(writer);
 

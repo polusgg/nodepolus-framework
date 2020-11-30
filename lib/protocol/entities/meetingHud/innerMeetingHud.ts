@@ -1,14 +1,14 @@
+import { VotingCompletePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/votingComplete";
+import { ClearVotePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/clearVote";
+import { CastVotePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/castVote";
 import { ClosePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/close";
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
-import { MessageWriter, MessageReader } from "../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseGameObject } from "../baseEntity";
+import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { EntityMeetingHud } from ".";
-import { VotingCompletePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/votingComplete";
-import { CastVotePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/castVote";
-import { Connection } from "../../connection";
-import { ClearVotePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/clearVote";
 
 export enum VoteStateMask {
   DidReport = 0x20,
@@ -26,7 +26,7 @@ export class VoteState {
   ) {}
 
   static deserialize(reader: MessageReader): VoteState {
-    let state = reader.readByte();
+    const state = reader.readByte();
 
     return new VoteState(
       (state & VoteStateMask.DidReport) == VoteStateMask.DidReport,
@@ -36,24 +36,102 @@ export class VoteState {
     );
   }
 
-  serialize(writer: MessageWriter) {
+  serialize(writer: MessageWriter): void {
     writer.writeByte(
       (this.didReport ? VoteStateMask.DidReport : 0) |
       (this.didVote ? VoteStateMask.DidVote : 0) |
       (this.isDead ? VoteStateMask.IsDead : 0) |
-      (((this.votedFor || -1) + 1) & VoteStateMask.VotedFor)
+      ((this.votedFor ?? -1) + 1 & VoteStateMask.VotedFor),
     );
   }
 }
 
 export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
   public playerStates: VoteState[] = [];
-  public ended: boolean = false;
+  public ended = false;
   public isTie?: boolean;
   public exiledPlayer?: number;
 
   constructor(netId: number, parent: EntityMeetingHud) {
     super(InnerNetObjectType.MeetingHud, netId, parent);
+  }
+
+  static spawn(object: SpawnInnerNetObject, parent: EntityMeetingHud): InnerMeetingHud {
+    const meetingHud = new InnerMeetingHud(object.innerNetObjectID, parent);
+
+    meetingHud.setSpawn(object.data);
+
+    return meetingHud;
+  }
+
+  close(): void {
+    this.sendRPCPacket(new ClosePacket());
+  }
+
+  votingComplete(voteStates: VoteState[], isTie: boolean, exiledPlayerId?: number): void {
+    this.playerStates = voteStates;
+    this.ended = true;
+    this.isTie = isTie;
+    this.exiledPlayer = exiledPlayerId;
+
+    this.sendRPCPacket(new VotingCompletePacket(voteStates, isTie, exiledPlayerId));
+  }
+
+  castVote(votingPlayerId: number, suspectPlayerId: number): void {
+    this.playerStates[votingPlayerId].votedFor = suspectPlayerId;
+    this.playerStates[votingPlayerId].didVote = true;
+
+    this.sendRPCPacket(new CastVotePacket(votingPlayerId, suspectPlayerId));
+  }
+
+  clearVote(player: Connection[]): void {
+    this.sendRPCPacketTo(player, new ClearVotePacket());
+  }
+
+  getData(old: InnerMeetingHud): DataPacket {
+    const writer = new MessageWriter();
+    const dirtyBits = this.serializeStatesToDirtyBits(old.playerStates);
+
+    writer.writePackedUInt32(dirtyBits);
+
+    for (let i = 0; i < this.playerStates.length; i++) {
+      const state = this.playerStates[i];
+
+      if (state == old.playerStates[i]) {
+        continue;
+      }
+
+      state.serialize(writer);
+    }
+
+    return new DataPacket(this.id, writer);
+  }
+
+  setData(packet: MessageReader | MessageWriter): void {
+    const data = MessageReader.fromRawBytes(packet);
+    const dirtyStates = this.deserializeDirtyBitsToStates(data.readPackedUInt32());
+
+    for (let i = 0; i < dirtyStates.length; i++) {
+      this.playerStates[dirtyStates[i]] = VoteState.deserialize(data);
+    }
+  }
+
+  getSpawn(): SpawnInnerNetObject {
+    const writer = new MessageWriter();
+
+    for (let i = 0; i < this.playerStates.length; i++) {
+      this.playerStates[i].serialize(writer);
+    }
+
+    return new SpawnInnerNetObject(this.id, writer);
+  }
+
+  setSpawn(data: MessageReader | MessageWriter): void {
+    const reader = MessageReader.fromRawBytes(data.buffer);
+
+    for (let i = 0; i < data.length; i++) {
+      this.playerStates[i] = VoteState.deserialize(reader);
+    }
   }
 
   private serializeStatesToDirtyBits(states: VoteState[]): number {
@@ -64,13 +142,13 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
         n |= 1 << i;
       }
     }
-    
+
     return n;
   }
 
   private deserializeDirtyBitsToStates(dirtyBits: number): number[] {
-    let voteStates = [];
-    
+    const voteStates: number[] = [];
+
     for (let i = 0; i < this.playerStates.length; i++) {
       if ((dirtyBits & (1 << i)) != 0) {
         voteStates.push(i);
@@ -78,86 +156,5 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
     }
 
     return voteStates;
-  }
-  
-  getData(old: InnerMeetingHud): DataPacket {
-    let writer = new MessageWriter();
-    let dirtyBits = this.serializeStatesToDirtyBits(old.playerStates);
-    
-    writer.writePackedUInt32(dirtyBits);
-
-    for (let i = 0; i < this.playerStates.length; i++) {
-      let state = this.playerStates[i];
-
-      if (state == old.playerStates[i]) {
-        continue;
-      }
-
-      state.serialize(writer);
-    }
-    
-    return new DataPacket(this.id, writer);
-  }
-  
-  setData(packet: MessageReader | MessageWriter): void {
-    let data = MessageReader.fromRawBytes(packet);
-    let dirtyStates = this.deserializeDirtyBitsToStates(data.readPackedUInt32());
-    
-    for (let i = 0; i < dirtyStates.length; i++) {
-      this.playerStates[dirtyStates[i]] = VoteState.deserialize(data);
-    }
-  }
-  
-  getSpawn(): SpawnInnerNetObject {
-    let writer = new MessageWriter();
-    
-    for (let i = 0; i < this.playerStates.length; i++) {
-      this.playerStates[i].serialize(writer);
-    }
-
-    return new SpawnInnerNetObject(this.id, writer);
-  }
-  
-  setSpawn(data: MessageReader | MessageWriter): void {
-    let reader = MessageReader.fromRawBytes(data.buffer);
-
-    for (let i = 0; i < data.length; i++) {
-      this.playerStates[i] = VoteState.deserialize(reader);
-    }
-  }
-  
-  static spawn(object: SpawnInnerNetObject, parent: EntityMeetingHud) {
-    let meetingHud = new InnerMeetingHud(
-      object.innerNetObjectID,
-      parent,
-    );
-    
-    meetingHud.setSpawn(object.data);
-    
-    return meetingHud;
-  }
-
-  close() {
-    this.sendRPCPacket(new ClosePacket())
-  }
-
-  votingComplete(voteStates: VoteState[], isTie: boolean, exiledPlayerId?: number) {
-    this.playerStates = voteStates;
-    this.ended = true;
-    this.isTie = isTie;
-    this.exiledPlayer = exiledPlayerId;
-
-    this.sendRPCPacket(new VotingCompletePacket(voteStates, isTie, exiledPlayerId))
-  }
-
-  castVote(votingPlayerId: number, suspectPlayerId: number) {
-    this.playerStates[votingPlayerId].votedFor = suspectPlayerId;
-    this.playerStates[votingPlayerId].didVote = true;
-
-    this.sendRPCPacket(new CastVotePacket(votingPlayerId, suspectPlayerId))
-  }
-
-  clearVote(player: Connection[]) {
-    this.sendRPCPacketTo(player, new ClearVotePacket())
   }
 }

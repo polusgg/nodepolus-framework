@@ -1,15 +1,23 @@
-import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class HudOverrideSystem extends BaseSystem<HudOverrideSystem> {
-  sabotaged!: boolean;
+  public sabotaged!: boolean;
 
   constructor() {
     super(SystemType.Communications);
   }
 
-  getData(old: HudOverrideSystem): MessageWriter {
+  static spawn(data: MessageReader): HudOverrideSystem {
+    const hudOverrideSystem = new HudOverrideSystem();
+
+    hudOverrideSystem.setSpawn(data);
+
+    return hudOverrideSystem;
+  }
+
+  getData(): MessageWriter {
     return this.getSpawn();
   }
 
@@ -27,13 +35,5 @@ export class HudOverrideSystem extends BaseSystem<HudOverrideSystem> {
 
   equals(old: HudOverrideSystem): boolean {
     return this.sabotaged == old.sabotaged;
-  }
-
-  static spawn(data: MessageReader): HudOverrideSystem {
-    let hudOverrideSystem = new HudOverrideSystem();
-    
-    hudOverrideSystem.setSpawn(data);
-    
-    return hudOverrideSystem;
   }
 }

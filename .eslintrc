@@ -16,6 +16,7 @@
     "project": "tsconfig.json"
   },
   "parser": "@typescript-eslint/parser",
+  // "plugins": ["@typescript-eslint", "import"],
   "plugins": ["@typescript-eslint"],
   "rules": {
     // "prettier/prettier": "error",
@@ -23,7 +24,9 @@
       "allowEmptyCatch": true
     }],
     "no-extra-parens": "off",
-    "@typescript-eslint/no-extra-parens": ["error"],
+    // "@typescript-eslint/no-extra-parens": [2, "all", {
+    //   "nestedBinaryExpressions": false
+    // }],
     "no-template-curly-in-string": "error",
     "no-unreachable-loop": "error",
     "no-unsafe-negation": ["error", {
@@ -32,14 +35,14 @@
     "array-callback-return": "error",
     "block-scoped-var": "error",
     "curly": ["error", "multi-line", "consistent"],
-    "default-case": "error",
+    "default-case": "off",
     "default-case-last": "error",
     "default-param-last": "off",
     "@typescript-eslint/default-param-last": "error",
     "dot-location": ["error", "property"],
     "dot-notation": "off",
     "@typescript-eslint/dot-notation": ["error", {
-      "allowKeywords": false
+      "allowKeywords": true
     }],
     "grouped-accessor-pairs": ["error", "getBeforeSet"],
     "guard-for-in": "error",
@@ -79,7 +82,7 @@
     "@typescript-eslint/require-await": "error",
     "no-shadow": "off",
     "@typescript-eslint/no-shadow": ["error", {
-      "builtinGlobals": true,
+      "builtinGlobals": false,
       "hoist": "never"
     }],
     "no-shadow-restricted-names": "error",
@@ -98,7 +101,13 @@
       "allowSingleLine": true
     }],
     "comma-dangle": "off",
-    "@typescript-eslint/comma-dangle": ["error", "always-multiline"],
+    "@typescript-eslint/comma-dangle": ["error", {
+      "arrays": "only-multiline",
+      "objects": "only-multiline",
+      "imports": "only-multiline",
+      "exports": "never",
+      "functions": "never"
+    }],
     "comma-spacing": "off",
     "@typescript-eslint/comma-spacing": ["error", {
       "before": false,
@@ -130,7 +139,7 @@
     }],
     "linebreak-style": ["error", "unix"],
     "lines-around-comment": ["error", {
-      "beforeBlockComment": true,
+      "beforeBlockComment": false,
       "afterBlockComment": false,
       "beforeLineComment": false,
       "afterLineComment": false,
@@ -144,8 +153,10 @@
       "allowClassEnd": true,
       "applyDefaultIgnorePatterns": true
     }],
-    "lines-between-class-members": "error",
-    "@typescript-eslint/lines-between-class-members": ["error", "always"],
+    "lines-between-class-members": "off",
+    "@typescript-eslint/lines-between-class-members": ["error", "always", {
+      "exceptAfterSingleLine": true
+    }],
     "multiline-comment-style": ["error", "starred-block"],
     "multiline-ternary": ["error", "always-multiline"],
     "new-cap": ["error", {
@@ -164,6 +175,7 @@
       "max": 1,
       "maxEOF": 1
     }],
+    "@typescript-eslint/no-non-null-assertion": "off",
     "no-new-object": "error",
     "no-tabs": ["error", {
       "allowIndentationTabs": false
@@ -180,7 +192,7 @@
     "operator-assignment": ["error", "always"],
     "padded-blocks": ["error", "never"],
     "padding-line-between-statements": ["error",
-      { "blankLine": "always", "prev": "*", "next": "return" },
+      { "blankLine": "always", "prev": "*", "next": ["return", "try", "for", "do", "export", "function", "if", "switch", "while"] },
       { "blankLine": "always", "prev": ["const", "let", "var"], "next": "*" },
       { "blankLine": "always", "prev": "*", "next": ["const", "let", "var"] },
       { "blankLine": "any", "prev": ["const", "let", "var"], "next": ["const", "let", "var"] },
@@ -236,9 +248,9 @@
       "before": true,
       "after": true
     }],
-    "no-confusing-arrow": ["error", {
-      "allowParens": true
-    }],
+    // "no-confusing-arrow": ["error", {
+    //   "allowParens": true
+    // }],
     "no-duplicate-imports": "error",
     "@typescript-eslint/no-duplicate-imports": ["error", {
       "includeExports": true
@@ -252,12 +264,9 @@
     "prefer-spread": "error",
     "prefer-template": "error",
     "rest-spread-spacing": ["error", "never"],
-    "sort-imports": ["error", {
-      "ignoreCase": false,
-      "ignoreDeclarationSort": false,
-      "ignoreMemberSort": false,
-      "memberSyntaxSortOrder": ["multiple", "single", "none", "all"],
-      "allowSeparatedGroups": false
+    // "order": ["error"],
+    "@typescript-eslint/no-inferrable-types": ["error", {
+      "ignoreParameters": true
     }],
     "symbol-description": "error",
     "template-curly-spacing": "error",
@@ -371,11 +380,17 @@
       {
         "selector": "variableLike",
         "format": ["camelCase", "UPPER_CASE"],
-        "leadingUnderscore": "forbid",
+        "leadingUnderscore": "allow",
         "trailingUnderscore": "forbid"
       },
       {
         "selector": "typeLike",
+        "format": ["PascalCase"],
+        "leadingUnderscore": "forbid",
+        "trailingUnderscore": "forbid"
+      },
+      {
+        "selector": "enumMember",
         "format": ["PascalCase"],
         "leadingUnderscore": "forbid",
         "trailingUnderscore": "forbid"
@@ -402,7 +417,7 @@
     "@typescript-eslint/no-unnecessary-qualifier": "error",
     "@typescript-eslint/no-unnecessary-type-arguments": "error",
     "@typescript-eslint/no-unnecessary-type-constraint": "error",
-    "@typescript-eslint/prefer-literal-enum-member": "error",
+    // "@typescript-eslint/prefer-literal-enum-member": "error",
     "@typescript-eslint/prefer-nullish-coalescing": "error",
     "@typescript-eslint/prefer-optional-chain": "error",
     "@typescript-eslint/prefer-readonly": ["error", {
@@ -423,13 +438,13 @@
       }
     }],
     "@typescript-eslint/typedef": ["error", {
-      "memberVariableDeclaration": true,
       "parameter": true,
-      "propertyDeclaration": true,
-      "variableDeclaration": true,
-      "variableDeclarationIgnoreFunction": false
+      "propertyDeclaration": true
     }],
     "@typescript-eslint/unified-signatures": "error"
   },
-  "reportUnusedDisableDirectives": true
+  "reportUnusedDisableDirectives": true,
+  "globals": {
+    "NodeJS": "readonly"
+  }
 }

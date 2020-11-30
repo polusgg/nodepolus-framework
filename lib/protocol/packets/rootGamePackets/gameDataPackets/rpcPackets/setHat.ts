@@ -1,10 +1,10 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { PlayerHat } from "../../../../../types/playerHat";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SetHatPacket extends BaseRPCPacket {
-  constructor(public readonly hat: PlayerHat) {
+  constructor(readonly hat: PlayerHat) {
     super(RPCPacketType.SetHat);
   }
 

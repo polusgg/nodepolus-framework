@@ -56,49 +56,49 @@ export type GameOptionsDataInterface = GameOptionsDataV1 | GameOptionsDataV2 | G
 
 // TODO: Try and get rid of the TS error below
 export class GameOptionsData {
-  constructor(public readonly options: GameOptionsDataInterface) {}
+  constructor(readonly options: GameOptionsDataInterface) {}
 
   static deserialize(reader: MessageReader, isSearching: boolean = false): GameOptionsData {
-    let length = reader.readPackedUInt32();
+    const length = reader.readPackedUInt32();
 
     if (!(length == 41 || length == 42 || length == 44 || length == 46)) {
-      throw new Error("Invalid GameOptions length: " + length);
+      throw new Error(`Invalid GameOptions length: ${length}`);
     }
 
-    let version = reader.readByte();
+    const version = reader.readByte();
 
-    /*
-      we must write || 1 || 2 || 3 || 4 here because js Numbers
-      can be non-whole, so ver <= 4 && ver >= 1 would return 
-      true for 2.5. Since typescript doesn't know readByte
-      will always return a whole number, it fails to accept
-      ver <= 4 && ver >= 1
-    */
+    /**
+     * We must write  `1 || 2 || 3 || 4` here because a Number
+     * can be non-whole, so `ver <= 4 && ver >= 1` would return
+     * `true` for `2.5`. Since TypeScript doesn't know `readByte`
+     * will always return a whole number, it fails to accept
+     * `ver <= 4 && ver >= 1`
+     */
     if (!(version == 1 || version == 2 || version == 3 || version == 4)) {
-      throw new Error("Invalid GameOptions version: " + version);
+      throw new Error(`Invalid GameOptions version: ${version}`);
     }
 
-    let maxPlayers = reader.readByte();
-    let languages: Language[] = reader
+    const maxPlayers = reader.readByte();
+    const languages: Language[] = reader
       .readBitfield(32)
       .reverse()
       .map((bit, index) => bit ? 1 << index : 0)
       .filter(bit => bit);
-    let levels: Level[] = isSearching
+    const levels: Level[] = isSearching
       ? reader.readBitfield(32)
         .reverse()
         .map((bit, index) => bit ? 1 << index : 0)
         .filter(bit => bit)
-      : [reader.readByte()];
+      : [ reader.readByte() ];
 
-    /*
-      Typescript is complaining that opt is missing the properties
-      from GameOptionsDataV4 because they are not being defined
-      inside the object definiton. This is OK because they are being
-      defined in the if block below it.77
-    */
-    // @ts-ignore
-    let opt: GameOptionsDataInterface = {
+    /**
+     * Typescript is complaining that opt is missing the properties
+     * from GameOptionsDataV4 because they are not being defined
+     * inside the object definiton. This is okay because they are being
+     * defined in the if-statements below.
+     */
+    // @ts-expect-error see above
+    const opt: GameOptionsDataInterface = {
       length,
       version,
       maxPlayers,
@@ -136,7 +136,7 @@ export class GameOptionsData {
     return new GameOptionsData(opt);
   }
 
-  serialize(writer: MessageWriter, isSearching: boolean = false) {
+  serialize(writer: MessageWriter, isSearching: boolean = false): void {
     writer.writePackedUInt32(this.options.length);
     writer.writeByte(this.options.version);
     writer.writeByte(this.options.maxPlayers);

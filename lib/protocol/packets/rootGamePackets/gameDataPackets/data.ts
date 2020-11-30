@@ -1,4 +1,4 @@
-import { MessageWriter, MessageReader } from "../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { BaseGameDataPacket } from "../../basePacket";
 import { GameDataPacketType } from "../../types";
 

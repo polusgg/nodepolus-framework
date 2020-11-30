@@ -18,11 +18,11 @@ export class InnerAprilShipStatus extends BaseShipStatus<InnerAprilShipStatus, E
     ]);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityAprilShipStatus) {
-    let shipStatus = new InnerAprilShipStatus(object.innerNetObjectID, parent);
+  static spawn(object: SpawnInnerNetObject, parent: EntityAprilShipStatus): InnerAprilShipStatus {
+    const aprilShipStatus = new InnerAprilShipStatus(object.innerNetObjectID, parent);
 
-    shipStatus.setSpawn(object.data);
+    aprilShipStatus.setSpawn(object.data);
 
-    return shipStatus;
+    return aprilShipStatus;
   }
 }

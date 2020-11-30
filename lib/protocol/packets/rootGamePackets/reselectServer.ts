@@ -4,10 +4,10 @@ import { RootGamePacketType } from "../types";
 
 export class MasterServer {
   constructor(
-    public readonly name: string,
-    public readonly ipAddress: string,
-    public readonly port: number,
-    public readonly playerCount: number,
+    readonly name: string,
+    readonly ipAddress: string,
+    readonly port: number,
+    readonly playerCount: number,
   ) {}
 
   static deserialize(reader: MessageReader): MasterServer {
@@ -22,14 +22,14 @@ export class MasterServer {
   serialize(writer: MessageWriter): void {
     writer
       .writeString(this.name)
-      .writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet)))
+      .writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet, 10)))
       .writeUInt16(this.port)
       .writePackedUInt32(this.playerCount);
   }
 }
 
 export class ReselectServerPacket extends BaseRootGamePacket {
-  constructor(public readonly unknown: number, public readonly servers: MasterServer[]) {
+  constructor(readonly unknown: number, readonly servers: MasterServer[]) {
     super(RootGamePacketType.ReselectServer);
   }
 
@@ -41,8 +41,9 @@ export class ReselectServerPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.unknown).writeMessageList(this.servers, (subWriter, item) => {
-      item.serialize(subWriter);
-    });
+    return new MessageWriter().writeByte(this.unknown)
+      .writeMessageList(this.servers, (subWriter, item) => {
+        item.serialize(subWriter);
+      });
   }
 }

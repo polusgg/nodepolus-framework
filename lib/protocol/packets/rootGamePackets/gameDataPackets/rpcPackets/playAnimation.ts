@@ -1,9 +1,9 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class PlayAnimationPacket extends BaseRPCPacket {
-  constructor(public readonly taskId: number) {
+  constructor(readonly taskId: number) {
     super(RPCPacketType.PlayAnimation);
   }
 

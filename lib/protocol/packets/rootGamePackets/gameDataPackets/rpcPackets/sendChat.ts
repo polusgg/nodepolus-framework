@@ -1,9 +1,9 @@
-import { MessageWriter, MessageReader } from "../../../../../util/hazelMessage";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
 import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SendChatPacket extends BaseRPCPacket {
-  constructor(public readonly message: string) {
+  constructor(readonly message: string) {
     super(RPCPacketType.SendChat);
   }
 

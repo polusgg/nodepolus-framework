@@ -5,7 +5,8 @@ import { RootGamePacketType } from "../types";
 
 export class WaitForHostPacket extends BaseRootGamePacket {
   public clientBound: boolean | undefined;
-  constructor(public readonly roomCode: string, public readonly waitingClientId: number) {
+
+  constructor(readonly roomCode: string, readonly waitingClientId: number) {
     super(RootGamePacketType.WaitForHost);
   }
 
@@ -14,6 +15,7 @@ export class WaitForHostPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeInt32(RoomCode.encode(this.roomCode)).writeUInt32(this.waitingClientId);
+    return new MessageWriter().writeInt32(RoomCode.encode(this.roomCode))
+      .writeUInt32(this.waitingClientId);
   }
 }

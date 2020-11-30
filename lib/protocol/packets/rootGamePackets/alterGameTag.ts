@@ -5,8 +5,8 @@ import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 
 export class AlterGameTagPacket extends BaseRootGamePacket {
-  constructor(public readonly roomCode: string, public readonly tag: AlterGameTag, public readonly value: number) {
-    super(RootGamePacketType.AlterGame);
+  constructor(readonly roomCode: string, readonly tag: AlterGameTag, readonly value: number) {
+    super(RootGamePacketType.AlterGameTag);
   }
 
   static deserialize(reader: MessageReader): AlterGameTagPacket {
@@ -14,6 +14,8 @@ export class AlterGameTagPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeInt32(RoomCode.encode(this.roomCode)).writeByte(this.tag).writeByte(this.value);
+    return new MessageWriter().writeInt32(RoomCode.encode(this.roomCode))
+      .writeByte(this.tag)
+      .writeByte(this.value);
   }
 }

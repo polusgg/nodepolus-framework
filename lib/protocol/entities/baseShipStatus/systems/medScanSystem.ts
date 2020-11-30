@@ -3,13 +3,21 @@ import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class MedScanSystem extends BaseSystem<MedScanSystem> {
-  playersInQueue!: Set<number>;
+  public playersInQueue!: Set<number>;
 
   constructor() {
     super(SystemType.Medbay);
   }
 
-  getData(old: MedScanSystem): MessageWriter {
+  static spawn(data: MessageReader): MedScanSystem {
+    const medScanSystem = new MedScanSystem();
+
+    medScanSystem.setSpawn(data);
+
+    return medScanSystem;
+  }
+
+  getData(): MessageWriter {
     return this.getSpawn();
   }
 
@@ -32,8 +40,8 @@ export class MedScanSystem extends BaseSystem<MedScanSystem> {
       return false;
     }
 
-    let playersInQueueArray = new Array(this.playersInQueue);
-    let oldPlayersInQueueArray = new Array(old.playersInQueue);
+    const playersInQueueArray = new Array(this.playersInQueue);
+    const oldPlayersInQueueArray = new Array(old.playersInQueue);
 
     for (let i = 0; i < playersInQueueArray.length; i++) {
       if (playersInQueueArray[i] != oldPlayersInQueueArray[i]) {
@@ -42,14 +50,6 @@ export class MedScanSystem extends BaseSystem<MedScanSystem> {
     }
 
     return true;
-  }
-
-  static spawn(data: MessageReader): MedScanSystem {
-    let medScanSystem = new MedScanSystem();
-    
-    medScanSystem.setSpawn(data);
-    
-    return medScanSystem;
   }
 }
 

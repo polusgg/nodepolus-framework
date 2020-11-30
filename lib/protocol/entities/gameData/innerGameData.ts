@@ -1,37 +1,68 @@
+import { UpdateGameDataPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/updateGameData";
+import { SetTasksPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/setTasks";
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
-import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data"
-import { MessageWriter, MessageReader } from "../../../util/hazelMessage";
-import { PlayerData } from "./playerData";
+import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
+import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseGameObject } from "../baseEntity";
 import { InnerNetObjectType } from "../types";
+import { PlayerData } from "./playerData";
 import { EntityGameData } from ".";
-import { SetTasksPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/setTasks";
-import { UpdateGameDataPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/updateGameData";
 
 export class InnerGameData extends BaseGameObject<InnerGameData> {
   constructor(netId: number, public parent: EntityGameData, public players: PlayerData[]) {
     super(InnerNetObjectType.GameData, netId, parent);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityGameData) {
-    let gameData = new InnerGameData(object.innerNetObjectID, parent, []);
+  static spawn(object: SpawnInnerNetObject, parent: EntityGameData): InnerGameData {
+    const gameData = new InnerGameData(object.innerNetObjectID, parent, []);
 
     gameData.setSpawn(object.data);
 
     return gameData;
   }
 
+  setTasks(playerId: number, tasks: number[]): void {
+    for (let i = 0; i < this.players.length; i++) {
+      if (this.players[i].id == playerId) {
+        this.players[i].tasks = new Array(tasks.length);
+
+        for (let j = 0; j < tasks.length; j++) {
+          this.players[i].tasks[j] = [
+            tasks[j],
+            false,
+          ];
+        }
+        break;
+      }
+    }
+
+    this.sendRPCPacket(new SetTasksPacket(playerId, tasks));
+  }
+
+  updateGameData(playerData: PlayerData[]): void {
+    for (let i = 0; i < playerData.length; i++) {
+      for (let j = 0; j < this.players.length; j++) {
+        if (this.players[j].id == playerData[i].id) {
+          this.players[j] = playerData[i];
+          break;
+        }
+      }
+    }
+
+    this.sendRPCPacket(new UpdateGameDataPacket(playerData));
+  }
+
   // TODO: compare players and only send those that have updated
-  getData(old: InnerGameData): DataPacket {
+  getData(): DataPacket {
     return new DataPacket(
       this.id,
-      new MessageWriter().writeList(this.players, (sub, player) => player.serialize(sub), false)
+      new MessageWriter().writeList(this.players, (sub, player) => player.serialize(sub), false),
     );
   }
 
   setData(packet: MessageReader | MessageWriter): void {
     MessageReader.fromRawBytes(packet.buffer).readList(sub => {
-      let player = PlayerData.deserialize(sub);
+      const player = PlayerData.deserialize(sub);
 
       this.players[player.id] = player;
     }, false);
@@ -40,41 +71,13 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
   getSpawn(): SpawnInnerNetObject {
     return new DataPacket(
       this.id,
-      new MessageWriter().startMessage(0).writeList(this.players, (sub, player) => player.serialize(sub)).endMessage()
+      new MessageWriter().startMessage(0)
+        .writeList(this.players, (sub, player) => player.serialize(sub))
+        .endMessage(),
     );
   }
 
   setSpawn(data: MessageReader | MessageWriter): void {
     this.players = MessageReader.fromMessage(data.buffer).readList(sub => PlayerData.deserialize(sub));
-  }
-
-  setTasks(playerId: number, tasks: number[]) {
-    for (let i = 0; i < this.players.length; i++) {
-      if(this.players[i].id == playerId) {
-        this.players[i].tasks = new Array(tasks.length)
-        for (let j = 0; j < tasks.length; j++) {
-          this.players[i].tasks[j] = [
-            tasks[j],
-            false
-          ]
-        }
-        break;
-      }
-    }
-    
-    this.sendRPCPacket(new SetTasksPacket(playerId, tasks))
-  }
-
-  updateGameData(playerData: PlayerData[]) {
-    for (let i = 0; i < playerData.length; i++) {
-      for (let j = 0; j < this.players.length; j++) {
-        if(this.players[j].id == playerData[i].id) {
-          this.players[j] = playerData[i]
-          break;
-        }
-      }
-    }
-
-    this.sendRPCPacket(new UpdateGameDataPacket(playerData))
   }
 }

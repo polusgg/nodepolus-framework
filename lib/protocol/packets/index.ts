@@ -8,22 +8,23 @@ import { Level } from "../../types/level";
 import { PacketType } from "./types";
 
 type PacketDataType = AcknowledgementPacket
-                    | DisconnectPacket
-                    | HelloPacket
-                    | PingPacket
-                    | RootGamePacket;
+| DisconnectPacket
+| HelloPacket
+| PingPacket
+| RootGamePacket;
 
 export class Packet {
   public readonly type: number;
+
   public clientBound: boolean | undefined;
 
-  public get isReliable(): boolean {
+  get isReliable(): boolean {
     return Packet.isReliable(this.type);
   }
 
   constructor(
-    public readonly nonce: number | undefined,
-    public readonly data: PacketDataType,
+    readonly nonce: number | undefined,
+    readonly data: PacketDataType,
   ) {
     if (data instanceof AcknowledgementPacket) {
       this.type = PacketType.Acknowledgement;
@@ -36,7 +37,7 @@ export class Packet {
     } else if (data instanceof RootGamePacket) {
       this.type = this.nonce ? PacketType.Reliable : PacketType.Unreliable;
     } else {
-      throw new Error("Unsupported packet type: " + typeof data);
+      throw new Error(`Unsupported packet type: ${typeof data}`);
     }
   }
 
@@ -48,7 +49,7 @@ export class Packet {
   }
 
   static deserialize(reader: MessageReader, clientBound: boolean, level?: Level): Packet {
-    let type = reader.readByte();
+    const type = reader.readByte();
     let data: PacketDataType;
     let nonce: number | undefined;
 
@@ -74,14 +75,14 @@ export class Packet {
         data = AcknowledgementPacket.deserialize(reader);
         break;
       default:
-        throw new Error("Unhandled packet type: " + type);
+        throw new Error(`Unhandled packet type: ${type}`);
     }
 
     return new Packet(nonce, data).bound(clientBound);
   }
 
   serialize(): MessageWriter {
-    let writer = new MessageWriter().writeByte(this.type);
+    const writer = new MessageWriter().writeByte(this.type);
 
     if (this.isReliable) {
       if (!this.nonce) {
