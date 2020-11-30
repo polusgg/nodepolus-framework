@@ -8,7 +8,7 @@ export abstract class HazelMessage {
 
   constructor(buildFrom: BuildFrom = 0, isHex: boolean = true) {
     if (buildFrom instanceof HazelMessage) {
-      this.buffer = buildFrom.buffer;
+      this.buffer = Buffer.from(buildFrom.buffer);
     } else if (typeof buildFrom != "number") {
       if (typeof buildFrom === "string" && isHex) {
         this.buffer = Buffer.from(buildFrom, "hex");
@@ -424,7 +424,8 @@ export class MessageReader extends HazelMessage {
     const results: T[] = [];
 
     for (let i = 0; i < length; i++) {
-      results.push(reader(MessageReader.fromRawBytes(this.buffer)));
+      // results.push(reader(this));
+      results.push(reader(this));
     }
 
     return results;
@@ -444,8 +445,12 @@ export class MessageReader extends HazelMessage {
     }, lengthIsPacked);
   }
 
-  readAllChildMessages(reader: (child: MessageReader, idx: number) => void): void {
-    this.getAllChildMessages().forEach((child, idx) => reader(child, idx));
+  readAllChildMessages<T>(reader: (child: MessageReader, idx: number) => T): T[] {
+    const items: T[] = [];
+
+    this.getAllChildMessages().forEach((child, idx) => items.push(reader(child, idx)));
+
+    return items;
   }
 
   readRemainingBytes(): MessageReader {

@@ -10,8 +10,6 @@ test("it reads a vector2", t => {
   const buf = MessageReader.fromMessage("040001ff7fff7f");
   const vec = Vector2.deserialize(buf);
 
-  console.log(`x=${vec.x}, y = ${vec.y}`);
-
   t.true(isEqual(vec.x, 0, 0.001));
   t.true(isEqual(vec.y, 0, 0.001));
 });

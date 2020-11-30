@@ -58,7 +58,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == infectedPlayerId);
 
       if (gameDataPlayerIndex == -1) {
-        throw new Error(`Player #${this.id} does not have an instance in GameData`);
+        throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
       }
 
       gameData.gameData.players[gameDataPlayerIndex].isImpostor = true;
@@ -78,16 +78,16 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("GameData does not exist on the RoomImplementation");
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.id);
+    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
     if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.id} does not have an instance in GameData`);
+      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
     }
 
     const taskCount = gameData.gameData.players[gameDataPlayerIndex].tasks.length;
 
     if (taskCount < taskIdx) {
-      throw new Error(`Player #${this.id} has fewer tasks (${taskCount}) than the requested index ${taskIdx}`);
+      throw new Error(`Player #${this.playerId} has fewer tasks (${taskCount}) than the requested index ${taskIdx}`);
     }
 
     gameData.gameData.players[gameDataPlayerIndex].tasks[taskIdx][1] = true;
@@ -108,15 +108,15 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("GameData does not exist on the RoomImplementation");
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.id);
+    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
     if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.id} does not have an instance in GameData`);
+      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
     }
 
     gameData.gameData.players[gameDataPlayerIndex].isDead = true;
 
-    const thisPlayer = this.parent.room.players.find(player => player.id == this.id);
+    const thisPlayer = this.parent.room.players.find(player => player.id == this.playerId);
 
     if (!thisPlayer) {
       throw new Error("Exiled packet sent to a recipient that has no connection or player instance");
@@ -148,10 +148,11 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("GameData does not exist on the RoomImplementation");
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.id);
+    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
     if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.id} does not have an instance in GameData`);
+      console.log(gameData.gameData.players);
+      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
     }
 
     gameData.gameData.players[gameDataPlayerIndex].name = name;
@@ -178,10 +179,10 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("GameData does not exist on the RoomImplementation");
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.id);
+    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
     if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.id} does not have an instance in GameData`);
+      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
     }
 
     gameData.gameData.players[gameDataPlayerIndex].color = color;
@@ -196,10 +197,10 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("GameData does not exist on the RoomImplementation");
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.id);
+    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
     if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.id} does not have an instance in GameData`);
+      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
     }
 
     gameData.gameData.players[gameDataPlayerIndex].hat = hat;
@@ -214,10 +215,10 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("GameData does not exist on the RoomImplementation");
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.id);
+    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
     if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.id} does not have an instance in GameData`);
+      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
     }
 
     gameData.gameData.players[gameDataPlayerIndex].skin = skin;
@@ -276,10 +277,10 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("GameData does not exist on the RoomImplementation");
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.id);
+    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
     if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.id} does not have an instance in GameData`);
+      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
     }
 
     gameData.gameData.players[gameDataPlayerIndex].pet = pet;
@@ -292,7 +293,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   getData(): DataPacket {
-    const writer = new MessageWriter().writeByte(this.playerId);
+    const writer = new MessageWriter().writeByte(this.id);
 
     return new DataPacket(this.id, writer);
   }
@@ -300,7 +301,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   setData(packet: MessageReader | MessageWriter): void {
     const reader = MessageReader.fromRawBytes(packet.buffer);
 
-    this.playerId = reader.readByte();
+    this.id = reader.readByte();
   }
 
   getSpawn(): SpawnInnerNetObject {

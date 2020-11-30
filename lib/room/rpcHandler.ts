@@ -52,6 +52,8 @@ export class RPCHandler {
   constructor(readonly room: Room) {}
 
   handleBaseRPC(type: RPCPacketType, senderNetId: number, rawPacket: BaseRPCPacket, reciever: Connection | undefined): void {
+    console.log("Handle Base RPC", { type, senderNetId, rawPacket });
+
     const sender = this.room.findInnerNetObject(senderNetId);
 
     if (!sender) {

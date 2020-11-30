@@ -189,7 +189,9 @@
       "consistent": true
     }],
     "object-curly-spacing": ["error", "always"],
-    "object-property-newline": "error",
+    "object-property-newline": ["error", {
+      "allowAllPropertiesOnSameLine": true
+    }],
     "operator-assignment": ["error", "always"],
     "padded-blocks": ["error", "never"],
     "padding-line-between-statements": ["error",

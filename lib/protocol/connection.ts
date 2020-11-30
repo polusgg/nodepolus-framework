@@ -15,11 +15,11 @@ import { PlayerColor } from "../types/playerColor";
 import { SystemType } from "../types/systemType";
 import { InnerLevel } from "./entities/types";
 import { HostInstance } from "../host/types";
-import dgram from "dgram";
 import { Packet } from "./packets";
 import { Player } from "../player";
 import Emittery from "emittery";
 import { Room } from "../room";
+import dgram from "dgram";
 
 interface ConnectionEvents {
   packet: RootGamePacketDataType;

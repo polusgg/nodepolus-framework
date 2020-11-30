@@ -25,8 +25,8 @@ export class PlayerData {
     public tasks: [number, boolean][],
   ) {}
 
-  static deserialize(reader: MessageReader): PlayerData {
-    const id = reader.readByte();
+  static deserialize(reader: MessageReader, idIsTag: boolean = false): PlayerData {
+    const id = idIsTag ? reader.tag : reader.readByte();
     const name = reader.readString();
     const color = reader.readPackedUInt32();
     const hat = reader.readPackedUInt32();
@@ -36,6 +36,10 @@ export class PlayerData {
     const isDisconnected = (flags & (1 << PlayerFlags.IsDisconnected)) == PlayerFlags.IsDisconnected;
     const isImpostor = (flags & (1 << PlayerFlags.IsImpostor)) == PlayerFlags.IsImpostor;
     const isDead = (flags & (1 << PlayerFlags.IsDead)) == PlayerFlags.IsDead;
+
+    console.trace({
+      id, name, color, hat, pet, skin, flags, isDisconnected, isImpostor, isDead,
+    });
 
     return new PlayerData(
       id, name, color, hat, pet, skin, isDisconnected, isImpostor, isDead,

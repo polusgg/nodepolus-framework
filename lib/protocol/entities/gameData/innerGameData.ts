@@ -40,12 +40,26 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
   }
 
   updateGameData(playerData: PlayerData[]): void {
+    console.log("Recieved RPC UpdateGameData", playerData);
+
     for (let i = 0; i < playerData.length; i++) {
+      let hasPlayer = false;
+
       for (let j = 0; j < this.players.length; j++) {
         if (this.players[j].id == playerData[i].id) {
+          hasPlayer = true;
+          console.log("UpdatedOldPlayer", this.players[j]);
+          process.exit();
           this.players[j] = playerData[i];
           break;
         }
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (!hasPlayer) {
+        console.log("PushedNewPlayer");
+        process.exit();
+        this.players.push(playerData[i]);
       }
     }
 
@@ -78,6 +92,13 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
   }
 
   setSpawn(data: MessageReader | MessageWriter): void {
+    console.table({
+      type: "InnerGameDataSpawn",
+      data,
+    });
+
     this.players = MessageReader.fromMessage(data.buffer).readList(sub => PlayerData.deserialize(sub));
+
+    console.log("players", this.players);
   }
 }

@@ -43,6 +43,13 @@ export class RPCPacket extends BaseGameDataPacket {
     const senderNetId = reader.readPackedUInt32();
     const type = reader.readByte();
 
+    console.log("Deserializing RPC Packet");
+    console.table({
+      senderNetId,
+      type: RPCPacketType[type],
+      reader,
+    });
+
     switch (type) {
       case RPCPacketType.PlayAnimation:
         return new RPCPacket(senderNetId, PlayAnimationPacket.deserialize(reader));
@@ -112,6 +119,8 @@ export class RPCPacket extends BaseGameDataPacket {
   }
 
   serialize(): MessageWriter {
+    console.log("Serializing RPC Packet", { senderNetId: this.senderNetId, type: this.type, packet: this.packet })
+
     return new MessageWriter()
       .writePackedUInt32(this.senderNetId)
       .writeBytes(this.packet.serialize());

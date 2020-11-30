@@ -3,9 +3,8 @@
   "version": "3.0.0",
   "description": "NodePolus is a JavaScript library containing multiple implementations of the Among Us network protocol.",
   "main": "bin/polus.ts",
-  "type": "module",
   "scripts": {
-    "start": "npm-run-all --parallel watch:build watch:server --print-label",
+    "start": "ts-node bin/polus",
     "watch:build": "tsc --watch",
     "watch:server": "nodemon ./dist/bin/polus.js --watch ./dist",
     "lint": "prettier --check .",
@@ -43,12 +42,14 @@
     "udp-proxy": "^1.2.0"
   },
   "ava": {
+    "files": [
+      "test/**/*"
+    ],
     "extensions": [
       "ts"
     ],
     "require": [
-      "ts-node/register",
-      "tsconfig-paths/register"
+      "ts-node/register"
     ]
   }
 }

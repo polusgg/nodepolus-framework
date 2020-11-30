@@ -9,7 +9,7 @@ export class UpdateGameDataPacket extends BaseRPCPacket {
   }
 
   static deserialize(reader: MessageReader): UpdateGameDataPacket {
-    return new UpdateGameDataPacket(reader.readList(sub => PlayerData.deserialize(sub)));
+    return new UpdateGameDataPacket(reader.readAllChildMessages(sub => PlayerData.deserialize(sub, true)));
   }
 
   serialize(): MessageWriter {
