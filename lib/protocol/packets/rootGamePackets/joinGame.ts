@@ -11,6 +11,8 @@ export class JoinGameRequestPacket extends BaseRootGamePacket {
   }
 
   static deserialize(reader: MessageReader): JoinGameRequestPacket {
+    console.log(reader);
+
     return new JoinGameRequestPacket(
       RoomCode.decode(reader.readInt32()),
       // TODO: Probably broken but just an example

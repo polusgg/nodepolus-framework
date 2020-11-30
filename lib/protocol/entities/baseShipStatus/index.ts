@@ -215,11 +215,11 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
   }
 
   private deserializeDirtyBitsToSystems(dirtyBits: number): SystemType[] {
-    const systemTypes = [];
+    const systemTypes: SystemType[] = [];
 
     for (let i = 0; i < Object.keys(SystemType).length / 2; i++) {
       if ((dirtyBits & (1 << i)) != 0) {
-        systemTypes.push(i as never);
+        systemTypes.push(i);
       }
     }
 

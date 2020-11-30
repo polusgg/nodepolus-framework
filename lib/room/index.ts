@@ -6,7 +6,6 @@ import { DespawnPacket } from "../protocol/packets/rootGamePackets/gameDataPacke
 import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
 import { AlterGameTagPacket } from "../protocol/packets/rootGamePackets/alterGameTag";
 import { DataPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/data";
-import { JoinGameResponsePacket } from "../protocol/packets/rootGamePackets/joinGame";
 import { RPCPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/rpc";
 import { WaitForHostPacket } from "../protocol/packets/rootGamePackets/waitForHost";
 import { BaseRPCPacket, BaseRootGamePacket } from "../protocol/packets/basePacket";
@@ -46,6 +45,7 @@ import { CustomHost } from "../host";
 import { Player } from "../player";
 import Emittery from "emittery";
 import dgram from "dgram";
+import { JoinedGamePacket } from "../protocol/packets/rootGamePackets/joinedGame";
 
 export type RoomEventTypes = {
   connectionJoin: Connection;
@@ -103,13 +103,7 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
 
       throw new Error("Room is host without a custom host instance");
     } else {
-      const host = this.connections.find((c: Connection) => c.isHost);
-
-      if (host) {
-        return host;
-      }
-
-      throw new Error("Room has no connection assigned as host");
+      return this.connections.find((c: Connection) => c.isHost);
     }
   }
 
@@ -278,13 +272,18 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
   }
 
   handleJoin(connection: Connection): void {
-    if (!this.isHost && !this.host) connection.isHost = true;
+    this.connections.push(connection);
+
+    if (!this.isHost && !this.host) {
+      connection.isHost = true;
+    }
+
+    console.log(connection.isHost, this.host);
 
     this.sendRootGamePacket(
-      new JoinGameResponsePacket(this.code, connection.id, this.isHost ? 0 : this.host!.id),
+      new JoinedGamePacket(this.code, connection.id, this.isHost ? 0 : this.host!.id, this.connections.map(e => e.id).filter(id => id != connection.id)),
       [ connection ],
     );
-    this.connections.push(connection);
   }
 
   private handleGameDataPacket(packet: GameDataPacketDataType, sender: Connection, sendTo?: Connection[]): void {
@@ -297,6 +296,7 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
         break;
       case GameDataPacketType.RPC:
         //TODO: add multiple receivers support
+        console.log("RPC", packet);
         this.RPCHandler.handleBaseRPC(
           (packet as RPCPacket).packet.type,
           (packet as RPCPacket).senderNetId,
@@ -328,7 +328,7 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
       }
       case GameDataPacketType.Spawn:
         this.handleSpawn(
-          (packet as SpawnPacket).type,
+          (packet as SpawnPacket).spawnType,
           (packet as SpawnPacket).flags,
           (packet as SpawnPacket).owner,
           (packet as SpawnPacket).innerNetObjects,
@@ -336,6 +336,11 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
         );
         break;
       default:
+        /**
+         * We expect this to throw an error because we implement all known
+         * packets. This should get thrown if an unknown packet is sent.
+         */
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         throw new Error(`Unhandled game data packet type: ${packet.type}`);
     }
   }

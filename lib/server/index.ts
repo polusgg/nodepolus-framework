@@ -4,13 +4,12 @@ import { HostGameResponsePacket } from "../protocol/packets/rootGamePackets/host
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";
 import { DEFAULT_SERVER_PORT } from "../util/constants";
-import { MessageReader } from "../util/hazelMessage";
 import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
-import { Packet } from "../protocol/packets";
 import { Level } from "../types/level";
 import { Room } from "../room";
 import dgram from "dgram";
+import { JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
 
 enum DefaultHostState {
   Server,
@@ -35,6 +34,7 @@ export class Server {
   public connections: Map<string, Connection> = new Map();
   public connectionRoomMap: Map<string, Room> = new Map();
   public rooms: Room[] = [];
+  public roomMap: Map<string, Room> = new Map();
 
   // Starts at 1 to allow the Server host implementation's ID to be 0
   private connectionIdx = 1;
@@ -46,9 +46,8 @@ export class Server {
 
     this.UDPServer.on("message", (buf, remoteInfo) => {
       const sender = this.getConnection(remoteInfo);
-      const packet = Packet.deserialize(MessageReader.fromRawBytes(buf), false);
 
-      this.handlePacket(packet, sender);
+      sender.emit("message", buf);
     });
   }
 
@@ -65,7 +64,9 @@ export class Server {
 
     let con = this.connections.get(remoteInfo);
 
-    if (con) return con;
+    if (con) {
+      return con;
+    }
 
     con = this.initializeConnection(RemoteInfo.fromString(remoteInfo));
 
@@ -75,7 +76,7 @@ export class Server {
   }
 
   private initializeConnection(remoteInfo: dgram.RemoteInfo): Connection {
-    const newCon = new Connection(remoteInfo, dgram.createSocket(remoteInfo.family == "IPv4" ? "udp4" : "udp6"), PacketDestination.Client);
+    const newCon = new Connection(remoteInfo, this.UDPServer, PacketDestination.Client);
 
     newCon.id = this.connectionIdx++;
 
@@ -90,19 +91,20 @@ export class Server {
         const newRoom = new Room(this.config.defaultRoomAddress, this.config.defaultRoomPort, this.config.defaultHost == DefaultHostState.Server);
 
         this.rooms.push(newRoom);
+        this.roomMap.set(newRoom.code, newRoom);
 
         sender.send([ new HostGameResponsePacket(newRoom.code) ]);
         break;
       }
       case RootGamePacketType.JoinGame: {
-        const room = this.connectionRoomMap.get(RemoteInfo.toString(sender));
+        const room = this.roomMap.get((packet as JoinGameRequestPacket).roomCode);
 
         if (room) {
           this.connectionRoomMap.set(RemoteInfo.toString(sender), room);
 
           room.handleJoin(sender);
         } else {
-          throw new Error(`Client ${sender.id} sent a ${RootGamePacketType[packet.type]} packet while not in a room`);
+          throw new Error(`Client ${sender.id} sent a JoinGame with an invalid room`);
         }
         break;
       }
@@ -139,7 +141,7 @@ export class Server {
         if (room) {
           room.handlePacket(packet, sender);
         } else {
-          throw new Error(`Client [${sender.id}] sent a [${RootGamePacketType[packet.type]}] Packet while not mapped to the room, even though the server expects packets of this type to be handled on a room.`);
+          throw new Error(`Client [${sender.id}] sent a [${packet.type} - ${RootGamePacketType[packet.type]}] Packet while not mapped to the room, even though the server expects packets of this type to be handled on a room.`);
         }
       }
     }

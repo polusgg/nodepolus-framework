@@ -15,7 +15,7 @@ import { PlayerColor } from "../types/playerColor";
 import { SystemType } from "../types/systemType";
 import { InnerLevel } from "./entities/types";
 import { HostInstance } from "../host/types";
-import dgram, { Socket } from "dgram";
+import dgram from "dgram";
 import { Packet } from "./packets";
 import { Player } from "../player";
 import Emittery from "emittery";
@@ -24,6 +24,7 @@ import { Room } from "../room";
 interface ConnectionEvents {
   packet: RootGamePacketDataType;
   disconnected?: DisconnectReason;
+  message: Buffer;
 }
 
 export class Connection extends Emittery.Typed<ConnectionEvents> implements HostInstance, dgram.RemoteInfo {
@@ -55,19 +56,21 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     return Date.now() - this.lastPingRecievedTime;
   }
 
-  constructor(remoteInfo: dgram.RemoteInfo, public socket: Socket, public bound: PacketDestination) {
+  constructor(remoteInfo: dgram.RemoteInfo, public socket: dgram.Socket, public bound: PacketDestination) {
     super();
 
     this.address = remoteInfo.address;
     this.port = remoteInfo.port;
     this.family = remoteInfo.family;
 
-    socket.on("message", buf => {
-      const parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound != PacketDestination.Server, this.room?.options.options.levels[0]);
+    this.on("message", buf => {
+      const parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound == PacketDestination.Server, this.room?.options.options.levels[0]);
 
       if (parsed.isReliable) {
         this.acknowledgePacket(parsed.nonce!);
       }
+
+      console.log(parsed);
 
       switch (parsed.type) {
         case PacketType.Reliable:
@@ -134,7 +137,12 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
       nonce = this.nonceIndex++;
     }
 
-    const packetToSend: MessageWriter = new Packet(nonce, new RootGamePacket(this.packetBuffer)).serialize();
+    const packet = new Packet(nonce, new RootGamePacket(this.packetBuffer));
+
+    packet.bound(true);
+    console.log("Writing", packet);
+
+    const packetToSend: MessageWriter = packet.serialize();
 
     if (nonce) {
       this.unacknowledgedPackets.set(nonce, 0);
@@ -145,7 +153,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
             this.disconnect(DisconnectReason.custom(`Failed to acknowledge packet ${nonce} after 10 attempts.`));
             clearInterval(resendInterval);
           } else {
-            this.socket.send(packetToSend.buffer);
+            this.socket.send(packetToSend.buffer, this.port, this.address);
           }
         } else {
           clearInterval(resendInterval);
@@ -153,7 +161,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
       }, 1000);
     }
 
-    this.socket.send(packetToSend.buffer);
+    this.socket.send(packetToSend.buffer, this.port, this.address);
 
     this.packetBuffer = [];
   }
@@ -163,7 +171,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
     const packetToSend: MessageWriter = new Packet(undefined, new DisconnectPacket(reason)).serialize();
 
-    this.socket.send(packetToSend.buffer);
+    this.socket.send(packetToSend.buffer, this.port, this.address);
 
     this.disconnectTimeout = setTimeout(() => {
       this.cleanup(reason);
@@ -234,7 +242,11 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   }
 
   private acknowledgePacket(nonce: number): void {
-    this.socket.send(new Packet(nonce, new AcknowledgementPacket(new Array(8).fill(true))).serialize().buffer);
+    const a = new Packet(nonce, new AcknowledgementPacket(new Array(8).fill(true))).serialize().buffer;
+
+    console.log(a);
+
+    this.socket.send(a, this.port, this.address);
   }
 
   private handleAcknowledgement(nonce: number): void {
@@ -255,7 +267,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   private handleDisconnection(reason?: DisconnectReason): void {
     if (!this.requestedDisconnect) {
       // No need to serialize a DisconnectReason object since there is no data
-      this.socket.send([ PacketType.Disconnect ]);
+      this.socket.send([ PacketType.Disconnect ], this.port, this.address);
     }
 
     this.cleanup(reason);

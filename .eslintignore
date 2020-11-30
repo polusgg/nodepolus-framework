@@ -1,4 +1,2 @@
-node_modules
-dist
-tests
-tests/proxy.js
+node_modules/*
+dist/*

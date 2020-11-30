@@ -43,13 +43,13 @@ export class MessageWriter extends HazelMessage {
 
     if (start) {
       if (this.cursor - start > 65535) {
-        throw new Error("Message length longer than 65.535KiB! Will not fit into U16.");
+        throw new Error("Message length longer than UInt16 max of 65535");
       }
 
       this.buffer[start - 3] = (this.cursor - start) % 256;
       this.buffer[start - 2] = (this.cursor - start >> 8) % 256;
     } else {
-      throw new Error("endMessage called when there are no active messages");
+      throw new Error("No open nested messages to end");
     }
 
     return this;
@@ -297,6 +297,7 @@ export class MessageReader extends HazelMessage {
   static fromRawBytes(source: BuildFrom = 0, isHex: boolean = true): MessageReader {
     const reader = new MessageReader(source, isHex);
 
+    reader.cursor = 0;
     reader.length = reader.buffer.length;
     reader.tag = 0xff;
 
@@ -326,7 +327,7 @@ export class MessageReader extends HazelMessage {
   }
 
   readInt16(isBigEndian: boolean = false): number {
-    const val = this.buffer[isBigEndian ? "readInt16LE" : "readInt16LE"](this.cursor);
+    const val = this.buffer[isBigEndian ? "readInt16BE" : "readInt16LE"](this.cursor);
 
     this.cursor += 2;
 
@@ -334,7 +335,7 @@ export class MessageReader extends HazelMessage {
   }
 
   readUInt16(isBigEndian: boolean = false): number {
-    const val = this.buffer[isBigEndian ? "readUInt16LE" : "readUInt16LE"](this.cursor);
+    const val = this.buffer[isBigEndian ? "readUInt16BE" : "readUInt16LE"](this.cursor);
 
     this.cursor += 2;
 
@@ -342,7 +343,7 @@ export class MessageReader extends HazelMessage {
   }
 
   readInt32(isBigEndian: boolean = false): number {
-    const val = this.buffer[isBigEndian ? "readInt32LE" : "readInt32LE"](this.cursor);
+    const val = this.buffer[isBigEndian ? "readInt32BE" : "readInt32LE"](this.cursor);
 
     this.cursor += 4;
 
@@ -350,7 +351,7 @@ export class MessageReader extends HazelMessage {
   }
 
   readUInt32(isBigEndian: boolean = false): number {
-    const val = this.buffer[isBigEndian ? "readUInt32LE" : "readUInt32LE"](this.cursor);
+    const val = this.buffer[isBigEndian ? "readUInt32BE" : "readUInt32LE"](this.cursor);
 
     this.cursor += 4;
 
@@ -376,7 +377,7 @@ export class MessageReader extends HazelMessage {
 
     while (readMore) {
       if (!this.hasBytesLeft()) {
-        throw new Error("Read length is longer than message length");
+        throw new Error(`No bytes left to read`);
       }
 
       let next = this.readByte();
@@ -411,8 +412,7 @@ export class MessageReader extends HazelMessage {
     return [ ...this.readBytes(Math.ceil(size / 8)).buffer ]
       .map(v => v
         .toString(2)
-        .padStart(8, "0"),
-      )
+        .padStart(8, "0"))
       .join("")
       .split("")
       .map(c => c === "1")
@@ -424,7 +424,7 @@ export class MessageReader extends HazelMessage {
     const results: T[] = [];
 
     for (let i = 0; i < length; i++) {
-      results.push(reader(this));
+      results.push(reader(MessageReader.fromRawBytes(this.buffer)));
     }
 
     return results;
@@ -436,9 +436,7 @@ export class MessageReader extends HazelMessage {
 
       if (!child) {
         throw new Error(
-          `Could not read message from list: read length of ${sub.cursor + 3} is greater than buffer length of ${
-            sub.length
-          }`,
+          `Read length is longer than message length: ${sub.cursor + 3} > ${sub.length}`,
         );
       }
 
