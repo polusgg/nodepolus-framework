@@ -6,9 +6,9 @@ import { RootGamePacketType } from "../types";
 
 export class LateRejectionPacket extends BaseRootGamePacket {
   constructor(
-    readonly roomCode: string,
-    readonly removedClientId: number,
-    readonly disconnectReason: DisconnectReason,
+    public readonly roomCode: string,
+    public readonly removedClientId: number,
+    public readonly disconnectReason: DisconnectReason,
   ) {
     super(RootGamePacketType.RemovePlayer);
   }
@@ -33,12 +33,12 @@ export class LateRejectionPacket extends BaseRootGamePacket {
 
 export class RemovePlayerPacket extends BaseRootGamePacket {
   constructor(
-    readonly roomCode: string,
-    readonly removedClientId: number,
-    readonly hostClientId: number,
-    readonly disconnectReason?: DisconnectReason,
+    public readonly roomCode: string,
+    public readonly removedClientId: number,
+    public readonly hostClientId: number,
+    public readonly disconnectReason?: DisconnectReason,
   ) {
-    super(RootGamePacketType.JoinGame);
+    super(RootGamePacketType.RemovePlayer);
   }
 
   static deserialize(reader: MessageReader): RemovePlayerPacket {

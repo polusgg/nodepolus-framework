@@ -12,7 +12,7 @@ export enum PlayerFlags {
 
 export class PlayerData {
   constructor(
-    readonly id: number,
+    public readonly id: number,
     public name: string,
     public color: PlayerColor,
     public hat: PlayerHat,
@@ -25,21 +25,17 @@ export class PlayerData {
     public tasks: [number, boolean][],
   ) {}
 
-  static deserialize(reader: MessageReader, idIsTag: boolean = false): PlayerData {
-    const id = idIsTag ? reader.tag : reader.readByte();
+  static deserialize(reader: MessageReader, tag?: number): PlayerData {
+    const id = tag ?? reader.readByte();
     const name = reader.readString();
     const color = reader.readPackedUInt32();
     const hat = reader.readPackedUInt32();
     const pet = reader.readPackedUInt32();
     const skin = reader.readPackedUInt32();
     const flags = reader.readByte();
-    const isDisconnected = (flags & (1 << PlayerFlags.IsDisconnected)) == PlayerFlags.IsDisconnected;
-    const isImpostor = (flags & (1 << PlayerFlags.IsImpostor)) == PlayerFlags.IsImpostor;
-    const isDead = (flags & (1 << PlayerFlags.IsDead)) == PlayerFlags.IsDead;
-
-    console.trace({
-      id, name, color, hat, pet, skin, flags, isDisconnected, isImpostor, isDead,
-    });
+    const isDisconnected = (flags & PlayerFlags.IsDisconnected) == PlayerFlags.IsDisconnected;
+    const isImpostor = (flags & PlayerFlags.IsImpostor) == PlayerFlags.IsImpostor;
+    const isDead = (flags & PlayerFlags.IsDead) == PlayerFlags.IsDead;
 
     return new PlayerData(
       id, name, color, hat, pet, skin, isDisconnected, isImpostor, isDead,
@@ -47,9 +43,12 @@ export class PlayerData {
     );
   }
 
-  serialize(writer: MessageWriter): void {
-    writer.writeByte(this.id)
-      .writeString(this.name)
+  serialize(writer: MessageWriter, includeId: boolean = true): void {
+    if (includeId) {
+      writer.writeByte(this.id);
+    }
+
+    writer.writeString(this.name)
       .writePackedUInt32(this.color)
       .writePackedUInt32(this.hat)
       .writePackedUInt32(this.pet)

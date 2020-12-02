@@ -6,6 +6,7 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseGameObject } from "../baseEntity";
 import { InnerNetObjectType } from "../types";
 import { EntityPlayer } from ".";
+import { Connection } from "../../connection";
 
 export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
   constructor(netId: number, parent: EntityPlayer) {
@@ -20,12 +21,12 @@ export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
     return playerPhysics;
   }
 
-  enterVent(ventId: number): void {
-    this.sendRPCPacket(new EnterVentPacket(ventId));
+  enterVent(ventId: number, sendTo: Connection[]): void {
+    this.sendRPCPacketTo(sendTo, new EnterVentPacket(ventId));
   }
 
-  exitVent(ventId: number): void {
-    this.sendRPCPacket(new ExitVentPacket(ventId));
+  exitVent(ventId: number, sendTo: Connection[]): void {
+    this.sendRPCPacketTo(sendTo, new ExitVentPacket(ventId));
   }
 
   getData(): DataPacket {
@@ -36,7 +37,12 @@ export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
   setData(_packet: MessageReader | MessageWriter): void {}
 
   getSpawn(): SpawnInnerNetObject {
-    return new DataPacket(this.id, new MessageWriter());
+    return new DataPacket(
+      this.id,
+      new MessageWriter()
+        .startMessage(1)
+        .endMessage(),
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars

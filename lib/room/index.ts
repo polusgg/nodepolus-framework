@@ -1,21 +1,29 @@
+import { EntityLevel, InnerNetObject, InnerNetObjectType, RoomImplementation } from "../protocol/entities/types";
 import { SpawnInnerNetObject, SpawnPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/spawn";
 import { LateRejectionPacket, RemovePlayerPacket } from "../protocol/packets/rootGamePackets/removePlayer";
 import { GameDataPacket, GameDataPacketDataType } from "../protocol/packets/rootGamePackets/gameData";
+import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
 import { SceneChangePacket } from "../protocol/packets/rootGamePackets/gameDataPackets/sceneChange";
 import { DespawnPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/despawn";
 import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
 import { AlterGameTagPacket } from "../protocol/packets/rootGamePackets/alterGameTag";
 import { DataPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/data";
+import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSystem";
+import { JoinGameResponsePacket } from "../protocol/packets/rootGamePackets/joinGame";
+import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
+import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
 import { RPCPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/rpc";
 import { WaitForHostPacket } from "../protocol/packets/rootGamePackets/waitForHost";
 import { BaseRPCPacket, BaseRootGamePacket } from "../protocol/packets/basePacket";
 import { GameDataPacketType, RootGamePacketType } from "../protocol/packets/types";
+import { JoinedGamePacket } from "../protocol/packets/rootGamePackets/joinedGame";
 import { KickPlayerPacket } from "../protocol/packets/rootGamePackets/kickPlayer";
 import { RemoveGamePacket } from "../protocol/packets/rootGamePackets/removeGame";
 import { StartGamePacket } from "../protocol/packets/rootGamePackets/startGame";
-import { InnerNetObject, RoomImplementation } from "../protocol/entities/types";
+import { RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { EntityAprilShipStatus } from "../protocol/entities/aprilShipStatus";
 import { EndGamePacket } from "../protocol/packets/rootGamePackets/endGame";
+import { InnerGameData } from "../protocol/entities/gameData/innerGameData";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityHeadquarters } from "../protocol/entities/headquarters";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
@@ -26,69 +34,41 @@ import { EntityGameData } from "../protocol/entities/gameData";
 import { DisconnectReason } from "../types/disconnectReason";
 import { GameOptionsData } from "../types/gameOptionsData";
 import { EntityPlayer } from "../protocol/entities/player";
-import { Entity } from "../protocol/entities/baseEntity";
+import { DEFAULT_GAME_OPTIONS } from "../util/constants";
 import { GameOverReason } from "../types/gameOverReason";
-import { TaskBarUpdate } from "../types/taskBarUpdate";
-import { KillDistance } from "../types/killDistance";
 import { AlterGameTag } from "../types/alterGameTag";
 import { Connection } from "../protocol/connection";
+import { FakeHostId } from "../types/fakeHostId";
 import { notUndefined } from "../util/functions";
 import { RemoteInfo } from "../util/remoteInfo";
 import { SpawnFlag } from "../types/spawnFlag";
 import { SpawnType } from "../types/spawnType";
-import { Language } from "../types/language";
+import { GameState } from "../types/gameState";
 import { HostInstance } from "../host/types";
 import { RoomCode } from "../util/roomCode";
 import { RPCHandler } from "./rpcHandler";
-import { Level } from "../types/level";
+import cloneDeep from "lodash/clonedeep";
 import { CustomHost } from "../host";
 import { Player } from "../player";
-import Emittery from "emittery";
 import dgram from "dgram";
-import { JoinedGamePacket } from "../protocol/packets/rootGamePackets/joinedGame";
 
-export type RoomEventTypes = {
-  connectionJoin: Connection;
-};
+// TODO: Client disconnect handler to close the room when empty
+export class Room implements RoomImplementation, dgram.RemoteInfo {
+  public readonly createdAt: number = new Date().getTime();
 
-// TODO: Cody: Add a "toRoomListing" function for easy server list generation in lib/server.ts
-export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplementation, dgram.RemoteInfo {
-  public size = -1;
-  public family: "IPv4" | "IPv6";
   public connections: Connection[] = [];
+  public gameState = GameState.NotStarted;
   public customHostInstance?: CustomHost;
   public lobbyBehavior?: EntityLobbyBehaviour;
   public gameData?: EntityGameData;
-  public shipStatus?: EntityShipStatus | EntityAprilShipStatus | EntityHeadquarters | EntityPlanetMap;
+  public shipStatus?: EntityLevel;
   public meetingHud?: EntityMeetingHud;
-  public options: GameOptionsData = new GameOptionsData({
-    length: 46,
-    version: 4,
-    maxPlayers: 10,
-    languages: [ Language.Other ],
-    levels: [ Level.Polus ],
-    playerSpeedModifier: 1,
-    crewLightModifier: 1,
-    impostorLightModifier: 1.5,
-    killCooldown: 45,
-    commonTasks: 1,
-    longTasks: 1,
-    shortTasks: 2,
-    emergencies: 1,
-    impostorCount: 2,
-    killDistance: KillDistance.Medium,
-    discussionTime: 15,
-    votingTime: 120,
-    isDefault: true,
-    emergencyCooldown: 15,
-    confirmEjects: true,
-    visualTasks: true,
-    anonymousVoting: false,
-    taskBarUpdates: TaskBarUpdate.Always,
-  });
+  public options: GameOptionsData = DEFAULT_GAME_OPTIONS;
+  public gameTags: Map<AlterGameTag, number> = new Map([ [AlterGameTag.ChangePrivacy, 0] ]);
+  public family: "IPv4" | "IPv6";
+  public size = -1;
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  private readonly RPCHandler: RPCHandler = new RPCHandler(this);
+  private readonly rpcHandler: RPCHandler = new RPCHandler(this);
 
   get players(): Player[] {
     return this.connections.map(con => con.player).filter(notUndefined);
@@ -97,32 +77,44 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
   get host(): HostInstance | undefined {
     if (this.isHost) {
       if (this.customHostInstance) {
-        // @ts-expect-error TODO: implement
         return this.customHostInstance;
       }
 
-      throw new Error("Room is host without a custom host instance");
+      throw new Error("Room cannot be host without a custom host instance");
     } else {
-      return this.connections.find((c: Connection) => c.isHost);
+      return this.connections.find(con => con.isHost);
     }
   }
 
-  constructor(public address: string, public port: number, public isHost: boolean, readonly code: string = RoomCode.generate()) {
-    super();
+  get age(): number {
+    return (new Date().getTime() - this.createdAt) / 1000;
+  }
 
+  get roomListing(): RoomListing {
+    return new RoomListing(
+      this.address,
+      this.port,
+      this.code,
+      "TODO: Host Name",
+      this.players.length,
+      this.age,
+      this.options.options.levels[0],
+      this.options.options.impostorCount,
+      this.options.options.maxPlayers,
+    );
+  }
+
+  constructor(
+    public address: string,
+    public port: number,
+    public isHost: boolean,
+    public readonly code: string = RoomCode.generate(),
+  ) {
     this.family = RemoteInfo.fromString(`${address}:${port}`).family;
 
-    if (!this.isHost) {
-      this.once("connectionJoin").then((con: Connection) => {
-        con.isHost = true;
-      });
-    } else {
+    if (this.isHost) {
       this.customHostInstance = new CustomHost();
     }
-
-    this.on("connectionJoin", (con: Connection) => {
-      con.on("packet", packet => this.handlePacket(packet, con));
-    });
   }
 
   findInnerNetObject(netId: number): InnerNetObject | undefined {
@@ -142,15 +134,16 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
     for (let i = 0; i < this.players.length; i++) {
       const player = this.players[i];
 
-      switch (netId) {
-        case player.gameObject.playerControl.id:
-          return player.gameObject.playerControl;
-        case player.gameObject.playerPhysics.id:
-          return player.gameObject.playerPhysics;
-        case player.gameObject.customNetworkTransform.id:
-          return player.gameObject.customNetworkTransform;
+      for (let j = 0; j < player.gameObject.innerNetObjects.length; j++) {
+        const object = player.gameObject.innerNetObjects[j];
+
+        if (object.id == netId) {
+          return object;
+        }
       }
     }
+
+    throw new Error(`InnerNetObject with ID ${netId} not found.`);
   }
 
   findConnection(id: number): Connection | undefined {
@@ -191,7 +184,7 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
         const con = this.findConnection(id);
 
         if (!con) {
-          throw new Error(`KickPlayer sent for unknown connection: ${id}`);
+          throw new Error(`KickPlayer sent for unknown client: ${id}`);
         }
 
         con.sendKick(data.banned, data.disconnectReason);
@@ -208,7 +201,7 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
           const con = this.findConnection(id);
 
           if (!con) {
-            throw new Error(`SendLateRejection sent for unknown connection: ${id}`);
+            throw new Error(`SendLateRejection sent for unknown client: ${id}`);
           }
 
           con.sendLateRejection(data.disconnectReason);
@@ -228,14 +221,14 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
         const con = this.findConnection(id);
 
         if (!con) {
-          throw new Error(`WaitForHost sent for unknown connection: ${id}`);
+          throw new Error(`WaitForHost sent for unknown client: ${id}`);
         }
 
         con.sendWaitingForHost();
         break;
       }
       default:
-        throw new Error(`Unhandled root game packet type: ${packet.type}`);
+        throw new Error(`Attempted to handle an unimplemented root game packet type: ${packet.type} (${RootGamePacketType[packet.type]})`);
     }
   }
 
@@ -245,12 +238,16 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
     }
   }
 
-  sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, sendTo?: (Player | HostInstance)[]): void {
-    let sendToConnections: Connection[] = new Array(sendTo?.length);
+  sendUnreliableRootGamePacket(packet: BaseRootGamePacket, sendTo: Connection[] = this.connections): void {
+    for (let i = 0; i < sendTo.length; i++) {
+      sendTo[i].writeUnreliable(packet);
+    }
+  }
 
-    if (!sendTo) {
-      sendToConnections = this.connections.filter(c => c.id != from.id);
-    } else {
+  sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, sendTo?: (Player | HostInstance)[]): void {
+    const sendToConnections: Connection[] = new Array(sendTo?.length);
+
+    if (sendTo) {
       for (let i = 0; i < sendTo.length; i++) {
         if (sendTo[i] instanceof Connection) {
           sendToConnections.push(sendTo[i] as Connection);
@@ -260,7 +257,7 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
           if (con) {
             sendToConnections.push(con);
           } else {
-            throw new Error("Attempted to send packet to a player with no connection");
+            throw new Error("Attempted to send a packet to a player with no connection");
           }
         }
       }
@@ -268,25 +265,67 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
 
     this.sendRootGamePacket(new GameDataPacket([
       new RPCPacket(from.id, packet),
-    ]), sendTo as Connection[]);
+    ], this.code), sendTo as Connection[]);
+  }
+
+  handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
+    const disconnectingConnectionIndex = this.connections.indexOf(connection);
+
+    // Disconnection packets remove the player from the connections array
+    // however doing so also removes the only reference to that player's
+    // gameobject. Because of this, despawn packets sent to that player
+    // will fail to find that game object
+
+    this.connections.splice(disconnectingConnectionIndex, 1);
+
+    // TODO: Add limbo checks (Cody)
+
+    if (connection.isHost && this.connections[0]) {
+      this.connections[0].isHost = true;
+    }
+
+    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, this.host?.id ?? 0, reason));
   }
 
   handleJoin(connection: Connection): void {
-    this.connections.push(connection);
+    connection.room = this;
+
+    connection.on("packet", (packet: RootGamePacketDataType) => {
+      this.handlePacket(packet, connection);
+    });
 
     if (!this.isHost && !this.host) {
       connection.isHost = true;
     }
 
-    console.log(connection.isHost, this.host);
+    this.connections.push(connection);
 
-    this.sendRootGamePacket(
-      new JoinedGamePacket(this.code, connection.id, this.isHost ? 0 : this.host!.id, this.connections.map(e => e.id).filter(id => id != connection.id)),
-      [ connection ],
-    );
+    connection.send([
+      new JoinedGamePacket(
+        this.code,
+        connection.id,
+        this.isHost
+          ? FakeHostId.ServerAsHost
+          : this.host!.id,
+        this.connections
+          .map(con => con.id)
+          .filter(id => id != connection.id)),
+      new AlterGameTagPacket(
+        this.code,
+        AlterGameTag.ChangePrivacy,
+        this.gameTags.get(AlterGameTag.ChangePrivacy) ?? 0),
+    ]);
+
+    this.sendRootGamePacket(new JoinGameResponsePacket(
+      this.code,
+      connection.id,
+      this.host ? this.host.id : FakeHostId.FetchHostError,
+    ));
   }
 
   private handleGameDataPacket(packet: GameDataPacketDataType, sender: Connection, sendTo?: Connection[]): void {
+    sendTo = ((sendTo && sendTo.length > 0) ? sendTo : this.connections).filter(c => c.id != sender.id);
+
     switch (packet.type) {
       case GameDataPacketType.Data:
         this.handleData((packet as DataPacket).innerNetObjectID, (packet as DataPacket).data, sendTo);
@@ -295,32 +334,30 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
         this.handleDespawn((packet as DespawnPacket).innerNetObjectID, sendTo);
         break;
       case GameDataPacketType.RPC:
-        //TODO: add multiple receivers support
-        console.log("RPC", packet);
-        this.RPCHandler.handleBaseRPC(
+        // TODO: Add multiple receiver support
+        this.rpcHandler.handleBaseRPC(
           (packet as RPCPacket).packet.type,
           (packet as RPCPacket).senderNetId,
-          (packet as RPCPacket).packet, sendTo
-            ? sendTo[0]
-            : undefined,
+          (packet as RPCPacket).packet,
+          sendTo,
         );
         break;
       case GameDataPacketType.Ready:
         if (!this.host) {
-          throw new Error("Hostful Handle call sent without room host");
+          throw new Error("Ready packet received without a host");
         }
 
         this.host.handleReady(sender);
         break;
       case GameDataPacketType.SceneChange: {
+        if (!this.host) {
+          throw new Error("SceneChange packet received without a host");
+        }
+
         const connectionChangingScene = this.findConnection((packet as SceneChangePacket).clientId);
 
         if (!connectionChangingScene) {
-          throw new Error(`SceneChange packet sent for unknown connection: ${(packet as SceneChangePacket).clientId}`);
-        }
-
-        if (!this.host) {
-          throw new Error("Hostful Handle call sent without room host");
+          throw new Error(`SceneChange packet sent for unknown client: ${(packet as SceneChangePacket).clientId}`);
         }
 
         this.host.handleSceneChange(connectionChangingScene, (packet as SceneChangePacket).scene);
@@ -336,12 +373,7 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
         );
         break;
       default:
-        /**
-         * We expect this to throw an error because we implement all known
-         * packets. This should get thrown if an unknown packet is sent.
-         */
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        throw new Error(`Unhandled game data packet type: ${packet.type}`);
+        throw new Error(`Attempted to handle an unimplemented game data packet type: ${packet.type as number} (${GameDataPacketType[packet.type]})`);
     }
   }
 
@@ -349,10 +381,15 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
     const netObject = this.findInnerNetObject(netId);
 
     if (netObject) {
-      const oldNetObject = Object.assign({}, netObject);
+      const oldNetObject = cloneDeep(netObject) as InnerNetObject;
 
       netObject.data(data);
-      this.sendRootGamePacket(new GameDataPacket([ netObject.data(oldNetObject) ]), sendTo);
+
+      if (netObject.type == InnerNetObjectType.CustomNetworkTransform) {
+        this.sendUnreliableRootGamePacket(new GameDataPacket([ netObject.data(oldNetObject) ], this.code), sendTo ?? []);
+      } else {
+        this.sendRootGamePacket(new GameDataPacket([ netObject.data(oldNetObject) ], this.code), sendTo ?? []);
+      }
     } else {
       throw new Error(`Data packet sent with unknown InnerNetObject ID: ${netId}`);
     }
@@ -361,73 +398,73 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
   private handleSpawn(type: SpawnType, flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], sendTo?: Connection[]): void {
     switch (type) {
       case SpawnType.ShipStatus: {
-        if (this.shipStatus) {
-          throw new Error("Duplicate spawn packet sent for ShipStatus");
+        if (this.shipStatus && this.isHost) {
+          throw new Error("Received duplicate spawn packet for ShipStatus");
         }
 
         this.shipStatus = EntityShipStatus.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ]), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ], this.code), sendTo);
         break;
       }
       case SpawnType.AprilShipStatus: {
-        if (this.shipStatus) {
-          throw new Error("Duplicate spawn packet sent for AprilShipStatus");
+        if (this.shipStatus && this.isHost) {
+          throw new Error("Received duplicate spawn packet for AprilShipStatus");
         }
 
         this.shipStatus = EntityAprilShipStatus.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ]), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ], this.code), sendTo);
         break;
       }
       case SpawnType.Headquarters: {
-        if (this.shipStatus) {
-          throw new Error("Duplicate spawn packet sent for Headquarters");
+        if (this.shipStatus && this.isHost) {
+          throw new Error("Received duplicate spawn packet for Headquarters");
         }
 
         this.shipStatus = EntityHeadquarters.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ]), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ], this.code), sendTo);
         break;
       }
       case SpawnType.PlanetMap: {
-        if (this.shipStatus) {
-          throw new Error("Duplicate spawn packet sent for PlanetMap");
+        if (this.shipStatus && this.isHost) {
+          throw new Error("Received duplicate spawn packet for PlanetMap");
         }
 
         this.shipStatus = EntityPlanetMap.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ]), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ], this.code), sendTo);
         break;
       }
       case SpawnType.GameData: {
-        if (this.gameData) {
-          throw new Error("Duplicate spawn packet sent for GameData");
+        if (this.gameData && this.isHost) {
+          throw new Error("Received duplicate spawn packet for GameData");
         }
 
         this.gameData = EntityGameData.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.gameData.spawn() ]), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([ this.gameData.spawn() ], this.code), sendTo);
         break;
       }
       case SpawnType.LobbyBehaviour: {
-        if (this.lobbyBehavior) {
-          throw new Error("Duplicate spawn packet sent for LobbyBehaviour");
+        if (this.lobbyBehavior && this.isHost) {
+          throw new Error("Received duplicate spawn packet for LobbyBehaviour");
         }
 
         this.lobbyBehavior = EntityLobbyBehaviour.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.lobbyBehavior.spawn() ]), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([ this.lobbyBehavior.spawn() ], this.code), sendTo);
         break;
       }
       case SpawnType.MeetingHud: {
-        if (this.meetingHud) {
-          throw new Error("Duplicate spawn packet sent for MeetingHud");
+        if (this.meetingHud && this.isHost) {
+          throw new Error("Received duplicate spawn packet for MeetingHud");
         }
 
         this.meetingHud = EntityMeetingHud.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.meetingHud.spawn() ]), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([ this.meetingHud.spawn() ], this.code), sendTo);
         break;
       }
       case SpawnType.PlayerControl: {
@@ -439,9 +476,15 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
 
         connection.player = new Player(EntityPlayer.spawn(flags, owner, innerNetObjects, this));
 
-        this.sendRootGamePacket(new GameDataPacket([ connection.player.gameObject.spawn() ]), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([ connection.player.gameObject.spawn() ], this.code), sendTo);
         break;
       }
+    }
+  }
+
+  private deleteIfEmpty(prop: string): void {
+    if (this[prop].innerNetObjects.filter(e => e).length == 0) {
+      delete this[prop];
     }
   }
 
@@ -449,47 +492,90 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
     const innerNetObject = this.findInnerNetObject(netId);
 
     if (!innerNetObject) {
-      throw new Error(`Attempted to despawn an unknown InnerNetObject: ${netId}`);
+      throw new Error("Attempted to despawn an InnerNetObject that does not exist");
     }
 
-    let entity: Entity;
+    let connection: Connection | undefined;
 
-    switch (innerNetObject.parent.type) {
-      case SpawnType.AprilShipStatus:
-      case SpawnType.Headquarters:
-      case SpawnType.ShipStatus:
-      case SpawnType.PlanetMap:
-        entity = this.shipStatus!;
-        break;
-      case SpawnType.GameData:
-        entity = this.gameData!;
-        break;
-      case SpawnType.LobbyBehaviour:
-        entity = this.lobbyBehavior!;
-        break;
-      case SpawnType.MeetingHud:
-        entity = this.meetingHud!;
-        break;
-      case SpawnType.PlayerControl:
-        this.connections.forEach(connection => {
-          if (connection.player) {
-            switch (netId) {
-              case connection.player.gameObject.playerControl.id:
-                return connection.player.gameObject.playerControl;
-              case connection.player.gameObject.playerPhysics.id:
-                return connection.player.gameObject.playerPhysics;
-              case connection.player.gameObject.customNetworkTransform.id:
-                return connection.player.gameObject.customNetworkTransform;
-            }
-          }
-        });
+    if (
+      innerNetObject.type == InnerNetObjectType.PlayerControl ||
+      innerNetObject.type == InnerNetObjectType.PlayerPhysics ||
+      innerNetObject.type == InnerNetObjectType.CustomNetworkTransform
+    ) {
+      connection = this.findConnection(innerNetObject.parent.owner);
 
-        return;
+      if (!connection) {
+        throw new Error("Attempted to despawn a player that has no connection");
+      }
+
+      if (!connection.player) {
+        throw new Error("Attempted to despawn a player whose connection object is missing a player instance");
+      }
     }
 
-    delete entity.innerNetObjects[
-      entity.innerNetObjects.findIndex((ino: InnerNetObject) => ino.id == netId)
-    ];
+    switch (innerNetObject.type) {
+      case InnerNetObjectType.ShipStatus:
+      case InnerNetObjectType.AprilShipStatus:
+      case InnerNetObjectType.Headquarters:
+      case InnerNetObjectType.PlanetMap:
+        if (!this.shipStatus) {
+          throw new Error("Attempted to despawn ShipStatus that is not currently spawned");
+        }
+
+        delete this.shipStatus;
+        break;
+      case InnerNetObjectType.VoteBanSystem:
+        if (!this.gameData) {
+          throw new Error("Attempted to despawn VoteBanSystem that is not currently spawned");
+        }
+
+        this.gameData.innerNetObjects[1] = undefined as unknown as InnerVoteBanSystem;
+        this.deleteIfEmpty("gameData");
+        break;
+      case InnerNetObjectType.GameData:
+        if (!this.gameData) {
+          throw new Error("Attempted to despawn GameData that is not currently spawned");
+        }
+
+        this.gameData.innerNetObjects[0] = undefined as unknown as InnerGameData;
+        this.deleteIfEmpty("gameData");
+        break;
+      case InnerNetObjectType.LobbyBehaviour:
+        if (!this.lobbyBehavior) {
+          throw new Error("Attempted to despawn LobbyBehaviour that is not currently spawned");
+        }
+
+        delete this.lobbyBehavior;
+        break;
+      case InnerNetObjectType.MeetingHud:
+        if (!this.meetingHud) {
+          throw new Error("Attempted to despawn MeetingHud that is not currently spawned");
+        }
+
+        delete this.meetingHud;
+        break;
+      case InnerNetObjectType.PlayerControl:
+        connection!.player!.gameObject.innerNetObjects[0] = undefined as unknown as InnerPlayerControl;
+
+        if (connection!.player!.gameObject.innerNetObjects.filter(e => Boolean(e)).length == 0) {
+          delete connection!.player;
+        }
+        break;
+      case InnerNetObjectType.PlayerPhysics:
+        connection!.player!.gameObject.innerNetObjects[1] = undefined as unknown as InnerPlayerPhysics;
+
+        if (connection!.player!.gameObject.innerNetObjects.filter(e => Boolean(e)).length == 0) {
+          delete connection!.player;
+        }
+        break;
+      case InnerNetObjectType.CustomNetworkTransform:
+        connection!.player!.gameObject.innerNetObjects[2] = undefined as unknown as InnerCustomNetworkTransform;
+
+        if (connection!.player!.gameObject.innerNetObjects.filter(e => Boolean(e)).length == 0) {
+          delete connection!.player;
+        }
+        break;
+    }
 
     this.sendRootGamePacket(
       new GameDataPacket(
@@ -501,10 +587,22 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
   }
 
   private handleAlterGameTag(tag: AlterGameTag, value: number, sendTo?: Connection[]): void {
+    this.gameTags.set(tag, value);
+
     this.sendRootGamePacket(new AlterGameTagPacket(this.code, tag, value), sendTo);
   }
 
   private handleEndGame(reason: GameOverReason, showAd: boolean, sendTo?: Connection[]): void {
+    this.gameState = GameState.Ended;
+
+    /**
+     * TODO: Loop over all connections:
+     *          Set their limbo to PreSpawn
+     *          Remove them from the connections list
+     *          Send them the end game packet
+     *          Store their ID in the limboIds list
+     * TODO: Empty the connections list
+     */
     this.sendRootGamePacket(new EndGamePacket(this.code, reason, showAd), sendTo);
   }
 
@@ -513,6 +611,8 @@ export class Room extends Emittery.Typed<RoomEventTypes> implements RoomImplemen
   }
 
   private handleStartGame(sendTo?: Connection[]): void {
+    this.gameState = GameState.Started;
+
     this.sendRootGamePacket(new StartGamePacket(this.code), sendTo);
   }
 

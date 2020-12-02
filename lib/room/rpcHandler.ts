@@ -49,12 +49,11 @@ import { Vector2 } from "../util/vector2";
 import { Room } from ".";
 
 export class RPCHandler {
-  constructor(readonly room: Room) {}
+  constructor(public readonly room: Room) {}
 
-  handleBaseRPC(type: RPCPacketType, senderNetId: number, rawPacket: BaseRPCPacket, reciever: Connection | undefined): void {
-    console.log("Handle Base RPC", { type, senderNetId, rawPacket });
-
+  handleBaseRPC(type: RPCPacketType, senderNetId: number, rawPacket: BaseRPCPacket, sendTo: Connection[]): void {
     const sender = this.room.findInnerNetObject(senderNetId);
+    const typeString = InnerNetObjectType[type];
 
     if (!sender) {
       throw new Error(`RPC packet sent from unknown InnerNetObject: ${senderNetId}`);
@@ -65,271 +64,271 @@ export class RPCHandler {
         const packet: PlayAnimationPacket = rawPacket as PlayAnimationPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received PlayAnimation from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received PlayAnimation packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handlePlayAnimation(sender as InnerPlayerControl, packet.taskId);
+        this.handlePlayAnimation(sender as InnerPlayerControl, packet.taskId, sendTo);
         break;
       }
       case RPCPacketType.CompleteTask: {
         const packet: CompleteTaskPacket = rawPacket as CompleteTaskPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received CompleteTask from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received CompleteTask packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleCompleteTask(sender as InnerPlayerControl, packet.taskIndex);
+        this.handleCompleteTask(sender as InnerPlayerControl, packet.taskIndex, sendTo);
         break;
       }
       case RPCPacketType.SyncSettings: {
         const packet: SyncSettingsPacket = rawPacket as SyncSettingsPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received SyncSettings from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SyncSettings packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSyncSettings(sender as InnerPlayerControl, packet.options);
+        this.handleSyncSettings(sender as InnerPlayerControl, packet.options, sendTo);
         break;
       }
       case RPCPacketType.SetInfected: {
         const packet: SetInfectedPacket = rawPacket as SetInfectedPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received SetInfected from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SetInfected packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSetInfected(sender as InnerPlayerControl, packet.impostorPlayerIds);
+        this.handleSetInfected(sender as InnerPlayerControl, packet.impostorPlayerIds, sendTo);
         break;
       }
       case RPCPacketType.Exiled: {
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received Exiled from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received Exiled packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleExiled(sender as InnerPlayerControl);
+        this.handleExiled(sender as InnerPlayerControl, sendTo);
         break;
       }
       case RPCPacketType.CheckName: {
         const packet: CheckNamePacket = rawPacket as CheckNamePacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received CheckName from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received CheckName packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleCheckName(sender as InnerPlayerControl, packet.name);
+        this.handleCheckName(sender as InnerPlayerControl, packet.name, sendTo);
         break;
       }
       case RPCPacketType.SetName: {
         const packet: SetNamePacket = rawPacket as SetNamePacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received SetName from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SetName packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSetName(sender as InnerPlayerControl, packet.name);
+        this.handleSetName(sender as InnerPlayerControl, packet.name, sendTo);
         break;
       }
       case RPCPacketType.CheckColor: {
         const packet: CheckColorPacket = rawPacket as CheckColorPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received CheckColor from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received CheckColor packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleCheckColor(sender as InnerPlayerControl, packet.color);
+        this.handleCheckColor(sender as InnerPlayerControl, packet.color, sendTo);
         break;
       }
       case RPCPacketType.SetColor: {
         const packet: SetColorPacket = rawPacket as SetColorPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received SetColor from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SetColor packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSetColor(sender as InnerPlayerControl, packet.color);
+        this.handleSetColor(sender as InnerPlayerControl, packet.color, sendTo);
         break;
       }
       case RPCPacketType.SetHat: {
         const packet: SetHatPacket = rawPacket as SetHatPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received SetHat from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SetHat packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSetHat(sender as InnerPlayerControl, packet.hat);
+        this.handleSetHat(sender as InnerPlayerControl, packet.hat, sendTo);
         break;
       }
       case RPCPacketType.SetSkin: {
         const packet: SetSkinPacket = rawPacket as SetSkinPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received SetSkin from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SetSkin packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSetSkin(sender as InnerPlayerControl, packet.skin);
+        this.handleSetSkin(sender as InnerPlayerControl, packet.skin, sendTo);
         break;
       }
       case RPCPacketType.ReportDeadBody: {
         const packet: ReportDeadBodyPacket = rawPacket as ReportDeadBodyPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received ReportDeadBody from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received ReportDeadBody packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleReportDeadBody(sender as InnerPlayerControl, packet.victimPlayerId);
+        this.handleReportDeadBody(sender as InnerPlayerControl, packet.victimPlayerId, sendTo);
         break;
       }
       case RPCPacketType.MurderPlayer: {
         const packet: MurderPlayerPacket = rawPacket as MurderPlayerPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received MurderPlayer from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received MurderPlayer packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleMurderPlayer(sender as InnerPlayerControl, packet.victimPlayerControlNetId);
+        this.handleMurderPlayer(sender as InnerPlayerControl, packet.victimPlayerControlNetId, sendTo);
         break;
       }
       case RPCPacketType.SendChat: {
         const packet: SendChatPacket = rawPacket as SendChatPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl) {
-          throw new Error(`Received SendChat from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SendChat packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSendChat(sender as InnerPlayerControl, packet.message);
+        this.handleSendChat(sender as InnerPlayerControl, packet.message, sendTo);
         break;
       }
       case RPCPacketType.StartMeeting: {
         const packet: StartMeetingPacket = rawPacket as StartMeetingPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl) {
-          throw new Error(`Received StartMeeting from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received StartMeeting packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleStartMeeting(sender as InnerPlayerControl, packet.victimPlayerId);
+        this.handleStartMeeting(sender as InnerPlayerControl, packet.victimPlayerId, sendTo);
         break;
       }
       case RPCPacketType.SetScanner: {
         const packet: SetScannerPacket = rawPacket as SetScannerPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl) {
-          throw new Error(`Received SetScanner from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SetScanner packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSetScanner(sender as InnerPlayerControl, packet.isScanning, packet.sequenceId);
+        this.handleSetScanner(sender as InnerPlayerControl, packet.isScanning, packet.sequenceId, sendTo);
         break;
       }
       case RPCPacketType.SendChatNote: {
         const packet: SendChatNotePacket = rawPacket as SendChatNotePacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl) {
-          throw new Error(`Received SendChatNote from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SendChatNote packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSendChatNote(sender as InnerPlayerControl, packet.playerId, packet.noteType);
+        this.handleSendChatNote(sender as InnerPlayerControl, packet.playerId, packet.noteType, sendTo);
         break;
       }
       case RPCPacketType.SetPet: {
         const packet: SetPetPacket = rawPacket as SetPetPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl) {
-          throw new Error(`Received SetPet from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SetPet packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSetPet(sender as InnerPlayerControl, packet.pet);
+        this.handleSetPet(sender as InnerPlayerControl, packet.pet, sendTo);
         break;
       }
       case RPCPacketType.SetStartCounter: {
         const packet: SetStartCounterPacket = rawPacket as SetStartCounterPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl) {
-          throw new Error(`Received SetStartCounter from invalid InnerNetObject: expected PlayerControl but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SetStartCounter packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSetStartCounter(sender as InnerPlayerControl, packet.sequenceId, packet.timeRemaining);
+        this.handleSetStartCounter(sender as InnerPlayerControl, packet.sequenceId, packet.timeRemaining, sendTo);
         break;
       }
       case RPCPacketType.EnterVent: {
         const packet: EnterVentPacket = rawPacket as EnterVentPacket;
 
         if (sender.type != InnerNetObjectType.PlayerPhysics) {
-          throw new Error(`Received EnterVent from invalid InnerNetObject: expected PlayerPhysics but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received EnterVent packet from invalid InnerNetObject: expected PlayerPhysics but got ${type as number} (${typeString})`);
         }
 
-        this.handleEnterVent(sender as InnerPlayerPhysics, packet.ventId);
+        this.handleEnterVent(sender as InnerPlayerPhysics, packet.ventId, sendTo);
         break;
       }
       case RPCPacketType.ExitVent: {
         const packet: ExitVentPacket = rawPacket as ExitVentPacket;
 
         if (sender.type != InnerNetObjectType.PlayerPhysics) {
-          throw new Error(`Received ExitVent from invalid InnerNetObject: expected PlayerPhysics but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received ExitVent packet from invalid InnerNetObject: expected PlayerPhysics but got ${type as number} (${typeString})`);
         }
 
-        this.handleExitVent(sender as InnerPlayerPhysics, packet.ventId);
+        this.handleExitVent(sender as InnerPlayerPhysics, packet.ventId, sendTo);
         break;
       }
       case RPCPacketType.SnapTo: {
         const packet: SnapToPacket = rawPacket as SnapToPacket;
 
         if (sender.type != InnerNetObjectType.CustomNetworkTransform) {
-          throw new Error(`Received SnapTo from invalid InnerNetObject: expected CustomNetworkTransform but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SnapTo packet from invalid InnerNetObject: expected CustomNetworkTransform but got ${type as number} (${typeString})`);
         }
 
-        this.handleSnapTo(sender as InnerCustomNetworkTransform, packet.position, packet.lastSequenceId);
+        this.handleSnapTo(sender as InnerCustomNetworkTransform, packet.position, packet.lastSequenceId, sendTo);
         break;
       }
       case RPCPacketType.Close: {
         if (sender.type != InnerNetObjectType.MeetingHud) {
-          throw new Error(`Received Close from invalid InnerNetObject: expected MeetingHud but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received Close packet from invalid InnerNetObject: expected MeetingHud but got ${type as number} (${typeString})`);
         }
 
-        this.handleClose(sender as InnerMeetingHud);
+        this.handleClose(sender as InnerMeetingHud, sendTo);
         break;
       }
       case RPCPacketType.VotingComplete: {
         const packet: VotingCompletePacket = rawPacket as VotingCompletePacket;
 
         if (sender.type != InnerNetObjectType.MeetingHud) {
-          throw new Error(`Received VotingComplete from invalid InnerNetObject: expected MeetingHud but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received VotingComplete packet from invalid InnerNetObject: expected MeetingHud but got ${type as number} (${typeString})`);
         }
 
-        this.handleVotingComplete(sender as InnerMeetingHud, packet.states, packet.isTie, packet.exiledPlayerId);
+        this.handleVotingComplete(sender as InnerMeetingHud, packet.states, packet.didVotePlayerOff, packet.exiledPlayerId, packet.isTie, sendTo);
         break;
       }
       case RPCPacketType.CastVote: {
         const packet: CastVotePacket = rawPacket as CastVotePacket;
 
         if (sender.type != InnerNetObjectType.MeetingHud) {
-          throw new Error(`Received CastVote from invalid InnerNetObject: expected MeetingHud but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received CastVote packet from invalid InnerNetObject: expected MeetingHud but got ${type as number} (${typeString})`);
         }
 
-        this.handleCastVote(sender as InnerMeetingHud, packet.votingPlayerId, packet.suspectPlayerId);
+        this.handleCastVote(sender as InnerMeetingHud, packet.votingPlayerId, packet.suspectPlayerId, sendTo);
         break;
       }
       case RPCPacketType.ClearVote: {
         if (sender.type != InnerNetObjectType.MeetingHud) {
-          throw new Error(`Received ClearVote from invalid InnerNetObject: expected MeetingHud but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received ClearVote packet from invalid InnerNetObject: expected MeetingHud but got ${type as number} (${typeString})`);
         }
 
-        this.handleClearVote(sender as InnerMeetingHud, reciever);
+        this.handleClearVote(sender as InnerMeetingHud, sendTo);
         break;
       }
       case RPCPacketType.AddVote: {
         const packet: AddVotePacket = rawPacket as AddVotePacket;
 
         if (sender.type != InnerNetObjectType.VoteBanSystem) {
-          throw new Error(`Received AddVote from invalid InnerNetObject: expected VoteBanSystem but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received AddVote packet from invalid InnerNetObject: expected VoteBanSystem but got ${type as number} (${typeString})`);
         }
 
-        this.handleAddVote(sender as InnerVoteBanSystem, packet.votingClientId, packet.targetClientId);
+        this.handleAddVote(sender as InnerVoteBanSystem, packet.votingClientId, packet.targetClientId, sendTo);
         break;
       }
       case RPCPacketType.CloseDoorsOfType: {
         const packet: CloseDoorsOfTypePacket = rawPacket as CloseDoorsOfTypePacket;
 
         if (!(sender instanceof BaseShipStatus)) {
-          throw new Error(`Received CloseDoorsOfType from invalid InnerNetObject: expected BaseShipStatus but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received CloseDoorsOfType packet from invalid InnerNetObject: expected BaseShipStatus but got ${type as number} (${typeString})`);
         }
 
         this.handleCloseDoorsOfType(sender as InnerLevel, packet.system);
@@ -339,7 +338,7 @@ export class RPCHandler {
         const packet: RepairSystemPacket = rawPacket as RepairSystemPacket;
 
         if (!(sender instanceof BaseShipStatus)) {
-          throw new Error(`Received RepairSystem from invalid InnerNetObject: expected BaseShipStatus but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received RepairSystem packet from invalid InnerNetObject: expected BaseShipStatus but got ${type as number} (${typeString})`);
         }
 
         this.handleRepairSystem(sender as InnerLevel, packet.system, packet.playerControlNetId, packet.amount);
@@ -349,163 +348,158 @@ export class RPCHandler {
         const packet: SetTasksPacket = rawPacket as SetTasksPacket;
 
         if (sender.type != InnerNetObjectType.GameData) {
-          throw new Error(`Received SetTasks from invalid InnerNetObject: expected GameData but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received SetTasks packet from invalid InnerNetObject: expected GameData but got ${type as number} (${typeString})`);
         }
 
-        this.handleSetTasks(sender as InnerGameData, packet.playerId, packet.tasks);
+        this.handleSetTasks(sender as InnerGameData, packet.playerId, packet.tasks, sendTo);
         break;
       }
       case RPCPacketType.UpdateGameData: {
         const packet: UpdateGameDataPacket = rawPacket as UpdateGameDataPacket;
 
         if (sender.type != InnerNetObjectType.GameData) {
-          throw new Error(`Received UpdateGameData from invalid InnerNetObject: expected GameData but got ${InnerNetObjectType[sender.type]}`);
+          throw new Error(`Received UpdateGameData packet from invalid InnerNetObject: expected GameData but got ${type as number} (${typeString})`);
         }
 
-        this.handleUpdateGameData(sender as InnerGameData, packet.players);
+        this.handleUpdateGameData(sender as InnerGameData, packet.players, sendTo);
         break;
       }
       default:
-        throw new Error(`Unhandled RPC packet type: ${RPCPacketType[type]}`);
+        throw new Error(`Attempted to handle an unimplemented RPC packet type: ${type as number} (${RPCPacketType[type]})`);
     }
   }
 
-  handlePlayAnimation(sender: InnerPlayerControl, taskId: number): void {
-    sender.playAnimation(taskId);
+  handlePlayAnimation(sender: InnerPlayerControl, taskId: number, sendTo: Connection[]): void {
+    sender.playAnimation(taskId, sendTo);
   }
 
-  handleCompleteTask(sender: InnerPlayerControl, taskIndex: number): void {
-    sender.completeTask(taskIndex);
+  handleCompleteTask(sender: InnerPlayerControl, taskIndex: number, sendTo: Connection[]): void {
+    sender.completeTask(taskIndex, sendTo);
   }
 
-  handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData): void {
-    sender.syncSettings(options);
+  handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData, sendTo: Connection[]): void {
+    sender.syncSettings(options, sendTo);
   }
 
-  handleSetInfected(sender: InnerPlayerControl, impostorPlayerIds: number[]): void {
-    sender.setInfected(impostorPlayerIds);
+  handleSetInfected(sender: InnerPlayerControl, impostorPlayerIds: number[], sendTo: Connection[]): void {
+    sender.setInfected(impostorPlayerIds, sendTo);
   }
 
-  handleExiled(sender: InnerPlayerControl): void {
-    sender.exiled();
+  handleExiled(sender: InnerPlayerControl, sendTo: Connection[]): void {
+    sender.exiled(sendTo);
   }
 
-  handleCheckName(sender: InnerPlayerControl, name: string): void {
+  handleCheckName(sender: InnerPlayerControl, name: string, sendTo: Connection[]): void {
     if (!this.room.host) {
-      throw new Error("Hostful RPC Handle call sent without room host");
+      throw new Error("CheckName RPC handler called without a host");
     }
 
     this.room.host.handleCheckName(sender, name);
 
-    sender.checkName(name);
+    sender.checkName(name, sendTo);
   }
 
-  handleSetName(sender: InnerPlayerControl, name: string): void {
-    sender.setName(name);
+  handleSetName(sender: InnerPlayerControl, name: string, sendTo: Connection[]): void {
+    sender.setName(name, sendTo);
   }
 
-  handleCheckColor(sender: InnerPlayerControl, color: PlayerColor): void {
+  handleCheckColor(sender: InnerPlayerControl, color: PlayerColor, sendTo: Connection[]): void {
     if (!this.room.host) {
-      throw new Error("Hostful RPC Handle call sent without room host");
+      throw new Error("CheckColor RPC handler called without a host");
     }
 
     this.room.host.handleCheckColor(sender, color);
 
-    sender.checkColor(color);
+    sender.checkColor(color, sendTo);
   }
 
-  handleSetColor(sender: InnerPlayerControl, color: PlayerColor): void {
-    sender.setColor(color);
+  handleSetColor(sender: InnerPlayerControl, color: PlayerColor, sendTo: Connection[]): void {
+    sender.setColor(color, sendTo);
   }
 
-  handleSetHat(sender: InnerPlayerControl, hat: PlayerHat): void {
-    sender.setHat(hat);
+  handleSetHat(sender: InnerPlayerControl, hat: PlayerHat, sendTo: Connection[]): void {
+    sender.setHat(hat, sendTo);
   }
 
-  handleSetSkin(sender: InnerPlayerControl, skin: PlayerSkin): void {
-    sender.setSkin(skin);
+  handleSetSkin(sender: InnerPlayerControl, skin: PlayerSkin, sendTo: Connection[]): void {
+    sender.setSkin(skin, sendTo);
   }
 
-  handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void {
+  handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId: number | undefined, sendTo: Connection[]): void {
     if (!this.room.host) {
-      throw new Error("Hostful RPC Handle call sent without room host");
+      throw new Error("ReportDeadBody RPC handler called without a host");
     }
 
     this.room.host.handleReportDeadBody(sender, victimPlayerId);
 
-    sender.reportDeadBody(victimPlayerId);
+    sender.reportDeadBody(victimPlayerId, sendTo);
   }
 
-  handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number): void {
-    sender.murderPlayer(victimPlayerControlNetId);
+  handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number, sendTo: Connection[]): void {
+    sender.murderPlayer(victimPlayerControlNetId, sendTo);
   }
 
-  handleSendChat(sender: InnerPlayerControl, message: string): void {
-    sender.sendChat(message);
+  handleSendChat(sender: InnerPlayerControl, message: string, sendTo: Connection[]): void {
+    sender.sendChat(message, sendTo);
   }
 
-  handleStartMeeting(sender: InnerPlayerControl, victimPlayerId?: number): void {
-    sender.startMeeting(victimPlayerId);
+  handleStartMeeting(sender: InnerPlayerControl, victimPlayerId: number | undefined, sendTo: Connection[]): void {
+    sender.startMeeting(victimPlayerId, sendTo);
   }
 
-  /**
-   * TODO: Figure out what sequenceId does
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handleSetScanner(sender: InnerPlayerControl, isScanning: boolean, _sequenceId: number): void {
+  // TODO: Figure out what sequenceId does
+  handleSetScanner(sender: InnerPlayerControl, isScanning: boolean, _sequenceId: number, sendTo: Connection[]): void {
     // TODO: Why is sequenceId not being passed?
-    sender.setScanner(isScanning);
+    sender.setScanner(isScanning, sendTo);
   }
 
-  handleSendChatNote(sender: InnerPlayerControl, playerId: number, noteType: ChatNoteType): void {
-    sender.sendChatNote(playerId, noteType);
+  handleSendChatNote(sender: InnerPlayerControl, playerId: number, noteType: ChatNoteType, sendTo: Connection[]): void {
+    sender.sendChatNote(playerId, noteType, sendTo);
   }
 
-  handleSetPet(sender: InnerPlayerControl, pet: PlayerPet): void {
-    sender.setPet(pet);
+  handleSetPet(sender: InnerPlayerControl, pet: PlayerPet, sendTo: Connection[]): void {
+    sender.setPet(pet, sendTo);
   }
 
-  handleSetStartCounter(sender: InnerPlayerControl, sequenceId: number, timeRemaining: number): void {
-    sender.setStartCounter(sequenceId, timeRemaining);
+  handleSetStartCounter(sender: InnerPlayerControl, sequenceId: number, timeRemaining: number, sendTo: Connection[]): void {
+    sender.setStartCounter(sequenceId, timeRemaining, sendTo);
   }
 
-  handleEnterVent(sender: InnerPlayerPhysics, ventId: number): void {
-    sender.enterVent(ventId);
+  handleEnterVent(sender: InnerPlayerPhysics, ventId: number, sendTo: Connection[]): void {
+    sender.enterVent(ventId, sendTo);
   }
 
-  handleExitVent(sender: InnerPlayerPhysics, ventId: number): void {
-    sender.exitVent(ventId);
+  handleExitVent(sender: InnerPlayerPhysics, ventId: number, sendTo: Connection[]): void {
+    sender.exitVent(ventId, sendTo);
   }
 
-  handleSnapTo(sender: InnerCustomNetworkTransform, position: Vector2, lastSequenceId: number): void {
-    sender.snapTo(position, lastSequenceId);
+  handleSnapTo(sender: InnerCustomNetworkTransform, position: Vector2, lastSequenceId: number, sendTo: Connection[]): void {
+    sender.snapTo(position, lastSequenceId, sendTo);
   }
 
-  handleClose(sender: InnerMeetingHud): void {
-    sender.close();
+  handleClose(sender: InnerMeetingHud, sendTo: Connection[]): void {
+    sender.close(sendTo);
   }
 
-  handleVotingComplete(sender: InnerMeetingHud, voteStates: VoteState[], isTie: boolean, exiledPlayerId?: number): void {
-    sender.votingComplete(voteStates, isTie, exiledPlayerId);
+  handleVotingComplete(sender: InnerMeetingHud, voteStates: VoteState[], didVotePlayerOff: boolean, exiledPlayerId: number, isTie: boolean, sendTo: Connection[]): void {
+    sender.votingComplete(voteStates, didVotePlayerOff, exiledPlayerId, isTie, sendTo);
   }
 
-  handleCastVote(sender: InnerMeetingHud, votingPlayerId: number, suspectPlayerId: number): void {
-    sender.castVote(votingPlayerId, suspectPlayerId);
+  handleCastVote(sender: InnerMeetingHud, votingPlayerId: number, suspectPlayerId: number, sendTo: Connection[]): void {
+    sender.castVote(votingPlayerId, suspectPlayerId, sendTo);
   }
 
-  handleClearVote(sender: InnerMeetingHud, reciever?: Connection): void {
-    if (reciever) {
-      sender.clearVote([ reciever ]);
-    }
+  handleClearVote(sender: InnerMeetingHud, sendTo: Connection[]): void {
+    sender.clearVote(sendTo);
   }
 
-  handleAddVote(sender: InnerVoteBanSystem, votingClientId: number, targetClientId: number): void {
-    sender.addVote(votingClientId, targetClientId);
+  handleAddVote(sender: InnerVoteBanSystem, votingClientId: number, targetClientId: number, sendTo: Connection[]): void {
+    sender.addVote(votingClientId, targetClientId, sendTo);
   }
 
   handleCloseDoorsOfType(sender: InnerLevel, system: SystemType): void {
     if (!this.room.host) {
-      throw new Error("Hostful RPC Handle call sent without room host");
+      throw new Error("CloseDoorsOfType RPC handler called without a host");
     }
 
     this.room.host.handleCloseDoorsOfType(sender, system);
@@ -515,7 +509,7 @@ export class RPCHandler {
 
   handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
     if (!this.room.host) {
-      throw new Error("Hostful RPC Handle call sent without room host");
+      throw new Error("RepairSystem RPC handler called without a host");
     }
 
     this.room.host.handleRepairSystem(sender, systemId, playerControlNetId, amount);
@@ -523,11 +517,11 @@ export class RPCHandler {
     sender.repairSystem(systemId, playerControlNetId, amount);
   }
 
-  handleSetTasks(sender: InnerGameData, playerId: number, tasks: number[]): void {
-    sender.setTasks(playerId, tasks);
+  handleSetTasks(sender: InnerGameData, playerId: number, tasks: number[], sendTo: Connection[]): void {
+    sender.setTasks(playerId, tasks, sendTo);
   }
 
-  handleUpdateGameData(sender: InnerGameData, players: PlayerData[]): void {
-    sender.updateGameData(players);
+  handleUpdateGameData(sender: InnerGameData, players: PlayerData[], sendTo: Connection[]): void {
+    sender.updateGameData(players, sendTo);
   }
 }

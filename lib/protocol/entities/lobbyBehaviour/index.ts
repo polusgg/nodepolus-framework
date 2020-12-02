@@ -34,7 +34,9 @@ export class EntityLobbyBehaviour extends BaseEntity {
       SpawnType.LobbyBehaviour,
       GLOBAL_OWNER,
       SpawnFlag.None,
-      [],
+      [
+        this.lobbyBehaviour.spawn(),
+      ],
     );
   }
 

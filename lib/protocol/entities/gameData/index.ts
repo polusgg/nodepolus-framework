@@ -35,7 +35,7 @@ export class EntityGameData extends BaseEntity {
 
   getSpawn(): SpawnPacket {
     return new SpawnPacket(
-      SpawnType.PlayerControl,
+      SpawnType.GameData,
       this.owner,
       this.flags,
       [

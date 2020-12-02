@@ -6,6 +6,7 @@ import { Vector2 } from "../../../util/vector2";
 import { BaseGameObject } from "../baseEntity";
 import { InnerNetObjectType } from "../types";
 import { EntityPlayer } from ".";
+import { Connection } from "../../connection";
 
 export class InnerCustomNetworkTransform extends BaseGameObject<InnerCustomNetworkTransform> {
   constructor(public netId: number, public parent: EntityPlayer, public sequenceId: number, public position: Vector2, public velocity: Vector2) {
@@ -26,11 +27,11 @@ export class InnerCustomNetworkTransform extends BaseGameObject<InnerCustomNetwo
     return customNetworkTransform;
   }
 
-  snapTo(position: Vector2, lastSequenceId: number): void {
+  snapTo(position: Vector2, lastSequenceId: number, sendTo: Connection[]): void {
     this.position = position;
     this.velocity = new Vector2(0, 0);
 
-    this.sendRPCPacket(new SnapToPacket(position, lastSequenceId));
+    this.sendRPCPacketTo(sendTo, new SnapToPacket(position, lastSequenceId));
   }
 
   getData(): DataPacket {
@@ -51,10 +52,18 @@ export class InnerCustomNetworkTransform extends BaseGameObject<InnerCustomNetwo
   }
 
   getSpawn(): SpawnInnerNetObject {
-    return this.getData();
+    const writer = new MessageWriter()
+      .startMessage(1)
+      .writeUInt16(this.sequenceId)
+      .endMessage();
+
+    this.position.serialize(writer);
+    this.velocity.serialize(writer);
+
+    return new DataPacket(this.id, writer);
   }
 
   setSpawn(data: MessageReader | MessageWriter): void {
-    this.setData(data);
+    this.setData(MessageReader.fromMessage(data.buffer).readRemainingBytes());
   }
 }

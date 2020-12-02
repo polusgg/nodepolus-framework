@@ -35,8 +35,8 @@ export class SwitchSystem extends BaseSystem<SwitchSystem> {
   }
 
   setSpawn(data: MessageReader): void {
-    this.expectedSwitches = data.readBitfield(5);
-    this.actualSwitches = data.readBitfield(5);
+    this.expectedSwitches = data.readBitfield(8).slice(3);
+    this.actualSwitches = data.readBitfield(8).slice(3);
     this.visionModifier = data.readByte();
   }
 

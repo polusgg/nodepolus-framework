@@ -19,6 +19,7 @@ import { HostInstance } from "../../host/types";
 import { EntityPlanetMap } from "./planetMap";
 import { EntityGameData } from "./gameData";
 import { Player } from "../../player";
+import { GameState } from "../../types/gameState";
 
 export enum InnerNetObjectType {
   LobbyBehaviour,
@@ -50,14 +51,20 @@ export type InnerLevel = InnerShipStatus
 | InnerHeadquarters
 | InnerAprilShipStatus;
 
+export type EntityLevel = EntityShipStatus
+| EntityAprilShipStatus
+| EntityHeadquarters
+| EntityPlanetMap;
+
 export interface RoomImplementation {
   players: Player[];
   gameData?: EntityGameData;
-  shipStatus?: EntityShipStatus | EntityAprilShipStatus | EntityHeadquarters | EntityPlanetMap;
+  shipStatus?: EntityLevel;
   meetingHud?: EntityMeetingHud;
   options: GameOptionsData;
   host: HostInstance | undefined;
   isHost: boolean;
+  gameState: GameState;
 
   sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, sendTo?: (Player | HostInstance)[]): void;
 }

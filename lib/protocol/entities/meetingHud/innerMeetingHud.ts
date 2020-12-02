@@ -5,6 +5,7 @@ import { ClosePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPa
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { shallowEqual } from "../../../util/functions";
 import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
@@ -22,7 +23,7 @@ export class VoteState {
     public didReport: boolean,
     public didVote: boolean,
     public isDead: boolean,
-    public votedFor?: number,
+    public votedFor: number,
   ) {}
 
   static deserialize(reader: MessageReader): VoteState {
@@ -41,7 +42,7 @@ export class VoteState {
       (this.didReport ? VoteStateMask.DidReport : 0) |
       (this.didVote ? VoteStateMask.DidVote : 0) |
       (this.isDead ? VoteStateMask.IsDead : 0) |
-      ((this.votedFor ?? -1) + 1 & VoteStateMask.VotedFor),
+      ((this.votedFor + 1) & VoteStateMask.VotedFor),
     );
   }
 }
@@ -49,10 +50,10 @@ export class VoteState {
 export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
   public playerStates: VoteState[] = [];
   public ended = false;
-  public isTie?: boolean;
-  public exiledPlayer?: number;
+  public isTie = false;
+  public exiledPlayer = 0xff;
 
-  constructor(netId: number, parent: EntityMeetingHud) {
+  constructor(public netId: number, public parent: EntityMeetingHud) {
     super(InnerNetObjectType.MeetingHud, netId, parent);
   }
 
@@ -64,24 +65,29 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
     return meetingHud;
   }
 
-  close(): void {
-    this.sendRPCPacket(new ClosePacket());
+  close(sendTo: Connection[]): void {
+    this.sendRPCPacketTo(sendTo, new ClosePacket());
   }
 
-  votingComplete(voteStates: VoteState[], isTie: boolean, exiledPlayerId?: number): void {
-    this.playerStates = voteStates;
+  votingComplete(voteStates: VoteState[], didVotePlayerOff: boolean, exiledPlayerId: number, isTie: boolean, sendTo: Connection[]): void {
+    for (let i = 0; i < voteStates.length; i++) {
+      this.playerStates[i] = voteStates[i];
+    }
+
     this.ended = true;
     this.isTie = isTie;
-    this.exiledPlayer = exiledPlayerId;
+    this.exiledPlayer = didVotePlayerOff ? exiledPlayerId : 0xff;
 
-    this.sendRPCPacket(new VotingCompletePacket(voteStates, isTie, exiledPlayerId));
+    this.sendRPCPacketTo(sendTo, new VotingCompletePacket(this.playerStates, this.exiledPlayer, this.isTie));
   }
 
-  castVote(votingPlayerId: number, suspectPlayerId: number): void {
-    this.playerStates[votingPlayerId].votedFor = suspectPlayerId;
-    this.playerStates[votingPlayerId].didVote = true;
+  castVote(votingPlayerId: number, suspectPlayerId: number, sendTo: Connection[]): void {
+    if (this.parent.room.isHost) {
+      this.playerStates[votingPlayerId].votedFor = suspectPlayerId;
+      this.playerStates[votingPlayerId].didVote = true;
+    }
 
-    this.sendRPCPacket(new CastVotePacket(votingPlayerId, suspectPlayerId));
+    this.sendRPCPacketTo(sendTo, new CastVotePacket(votingPlayerId, suspectPlayerId));
   }
 
   clearVote(player: Connection[]): void {
@@ -97,7 +103,7 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
     for (let i = 0; i < this.playerStates.length; i++) {
       const state = this.playerStates[i];
 
-      if (state == old.playerStates[i]) {
+      if (shallowEqual(state, old.playerStates[i])) {
         continue;
       }
 
@@ -127,7 +133,7 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
   }
 
   setSpawn(data: MessageReader | MessageWriter): void {
-    const reader = MessageReader.fromRawBytes(data.buffer);
+    const reader = MessageReader.fromMessage(data.buffer);
 
     for (let i = 0; i < data.length; i++) {
       this.playerStates[i] = VoteState.deserialize(reader);
@@ -138,7 +144,8 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
     let n = 0;
 
     for (let i = 0; i < this.playerStates.length; i++) {
-      if (states[i] != this.playerStates[i]) {
+      if (!shallowEqual(states[i], this.playerStates[i])) {
+        console.log(states[i], this.playerStates[i], 1 << i);
         n |= 1 << i;
       }
     }

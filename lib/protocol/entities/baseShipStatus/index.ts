@@ -7,6 +7,7 @@ import { SecurityCameraSystem } from "./systems/securityCameraSystem";
 import { HudOverrideSystem } from "./systems/hudOverrideSystem";
 import { AutoDoorsSystem } from "./systems/autoDoorsSystem";
 import { LifeSuppSystem } from "./systems/lifeSuppSystem";
+import { DeconTwoSystem } from "./systems/deconTwoSystem";
 import { SabotageSystem } from "./systems/sabotageSystem";
 import { MedScanSystem } from "./systems/medScanSystem";
 import { ReactorSystem } from "./systems/reactorSystem";
@@ -21,15 +22,18 @@ import { BaseSystem } from "./systems/baseSystem";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { Level } from "../../../types/level";
+import { LaboratorySystem } from "./systems/laboratorySystem";
 
 export type System = AutoDoorsSystem
 | DeconSystem
+| DeconTwoSystem
 | DoorsSystem
 | HqHudSystem
 | HudOverrideSystem
 | LifeSuppSystem
 | MedScanSystem
 | ReactorSystem
+| LaboratorySystem
 | SabotageSystem
 | SecurityCameraSystem
 | SwitchSystem;
@@ -53,7 +57,7 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
         this.level = Level.Polus;
         break;
       default:
-        throw new Error(`Unsupported ShipStatus type: ${type}`);
+        throw new Error(`Unsupported ShipStatus type: ${type} (${InnerNetObjectType[type]})`);
     }
 
     this.initializeSystems();
@@ -65,7 +69,7 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
     }
 
     if (!this.parent.room.host) {
-      throw new Error("CloseDoorsOfType send to room without a host");
+      throw new Error("CloseDoorsOfType sent to room without a host");
     }
 
     this.sendRPCPacketTo([ this.parent.room.host as Connection ], new CloseDoorsOfTypePacket(systemId));
@@ -87,8 +91,10 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
       const oldSystem = old.systems[systemIndex];
 
       if (currentSystem.type != oldSystem.type) {
-        throw new Error(`Attempted comparison of two disperate system types: expected type ${SystemType[currentSystem.type]} but got ${SystemType[oldSystem.type]}`);
+        throw new Error(`Attempted comparison of two disperate SystemTypes: expected ${currentSystem.type} (${SystemType[currentSystem.type]}) but got ${oldSystem.type} (${SystemType[oldSystem.type]})`);
       }
+
+      console.log({ oldSystem, currentSystem });
 
       if (!currentSystem.equals(oldSystem)) {
         return currentSystem.type;
@@ -147,14 +153,19 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
       case SystemType.Electrical:
         return this.systems[InternalSystemType.Switch];
       case SystemType.Laboratory:
+        return this.systems[InternalSystemType.Laboratory];
       case SystemType.Reactor:
         return this.systems[InternalSystemType.Reactor];
       case SystemType.Sabotage:
         return this.systems[InternalSystemType.Sabotage];
       case SystemType.Security:
         return this.systems[InternalSystemType.SecurityCamera];
+      case SystemType.Medbay:
+        return this.systems[InternalSystemType.MedScan];
+      case SystemType.Oxygen:
+        return this.systems[InternalSystemType.Oxygen];
       default:
-        throw new Error(`Tried to get unimplemented SystemType: ${systemType}`);
+        throw new Error(`Tried to get unimplemented SystemType: ${systemType} (${SystemType[systemType]})`);
     }
   }
 
@@ -181,12 +192,14 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
           this.systems[InternalSystemType.Decon] = new DeconSystem();
           break;
         case SystemType.Decontamination2:
-          this.systems[InternalSystemType.Decon2] = new DeconSystem();
+          this.systems[InternalSystemType.Decon2] = new DeconTwoSystem();
           break;
         case SystemType.Electrical:
           this.systems[InternalSystemType.Switch] = new SwitchSystem();
           break;
         case SystemType.Laboratory:
+          this.systems[InternalSystemType.Laboratory] = new LaboratorySystem();
+          break;
         case SystemType.Reactor:
           this.systems[InternalSystemType.Reactor] = new ReactorSystem();
           break;
@@ -196,8 +209,14 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
         case SystemType.Security:
           this.systems[InternalSystemType.SecurityCamera] = new SecurityCameraSystem();
           break;
+        case SystemType.Medbay:
+          this.systems[InternalSystemType.MedScan] = new MedScanSystem();
+          break;
+        case SystemType.Oxygen:
+          this.systems[InternalSystemType.Oxygen] = new LifeSuppSystem();
+          break;
         default:
-          throw new Error(`Tried to get unimplemented SystemType: ${type}`);
+          throw new Error(`Tried to get unimplemented SystemType: ${type} (${SystemType[type]})`);
       }
     }
   }
@@ -206,7 +225,7 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
     let n = 0;
 
     for (let i = 0; i < this.systemTypes.length; i++) {
-      if (otherSystems.includes(this.systemTypes[i])) {
+      if (otherSystems.indexOf(this.systemTypes[i]) != -1) {
         n |= 1 << this.systemTypes[i];
       }
     }
@@ -231,6 +250,8 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
       const system = this.getSystemFromType(systems[i]);
 
       system[fromSpawn ? "spawn" : "data"](data);
+
+      // console.log("Deserialized", system, "current reader", data);
     }
   }
 
@@ -242,10 +263,12 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
     for (let i = 0; i < systems.length; i++) {
       const system = this.getSystemFromType(systems[i]);
 
+      // console.log("Current status at cursor", this);
+
       if (fromSpawn) {
-        system.spawn();
+        writers[i] = system.spawn();
       } else {
-        system.data(old!.getSystemFromType(systems[i]));
+        writers[i] = system.data(old!.getSystemFromType(systems[i]));
       }
     }
 

@@ -7,6 +7,7 @@ import { BaseGameObject } from "../baseEntity";
 import { InnerNetObjectType } from "../types";
 import { PlayerData } from "./playerData";
 import { EntityGameData } from ".";
+import { Connection } from "../../connection";
 
 export class InnerGameData extends BaseGameObject<InnerGameData> {
   constructor(netId: number, public parent: EntityGameData, public players: PlayerData[]) {
@@ -21,7 +22,7 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
     return gameData;
   }
 
-  setTasks(playerId: number, tasks: number[]): void {
+  setTasks(playerId: number, tasks: number[], sendTo: Connection[]): void {
     for (let i = 0; i < this.players.length; i++) {
       if (this.players[i].id == playerId) {
         this.players[i].tasks = new Array(tasks.length);
@@ -36,11 +37,11 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
       }
     }
 
-    this.sendRPCPacket(new SetTasksPacket(playerId, tasks));
+    this.sendRPCPacketTo(sendTo, new SetTasksPacket(playerId, tasks));
   }
 
-  updateGameData(playerData: PlayerData[]): void {
-    console.log("Recieved RPC UpdateGameData", playerData);
+  updateGameData(playerData: PlayerData[], sendTo: Connection[]): void {
+    console.log("Update", 1, playerData);
 
     for (let i = 0; i < playerData.length; i++) {
       let hasPlayer = false;
@@ -48,22 +49,19 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
       for (let j = 0; j < this.players.length; j++) {
         if (this.players[j].id == playerData[i].id) {
           hasPlayer = true;
-          console.log("UpdatedOldPlayer", this.players[j]);
-          process.exit();
           this.players[j] = playerData[i];
           break;
         }
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!hasPlayer) {
-        console.log("PushedNewPlayer");
-        process.exit();
         this.players.push(playerData[i]);
       }
     }
 
-    this.sendRPCPacket(new UpdateGameDataPacket(playerData));
+    console.log("Update", 2, playerData);
+
+    this.sendRPCPacketTo(sendTo, new UpdateGameDataPacket(playerData));
   }
 
   // TODO: compare players and only send those that have updated
@@ -85,20 +83,14 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
   getSpawn(): SpawnInnerNetObject {
     return new DataPacket(
       this.id,
-      new MessageWriter().startMessage(0)
+      new MessageWriter()
+        .startMessage(1)
         .writeList(this.players, (sub, player) => player.serialize(sub))
         .endMessage(),
     );
   }
 
   setSpawn(data: MessageReader | MessageWriter): void {
-    console.table({
-      type: "InnerGameDataSpawn",
-      data,
-    });
-
     this.players = MessageReader.fromMessage(data.buffer).readList(sub => PlayerData.deserialize(sub));
-
-    console.log("players", this.players);
   }
 }

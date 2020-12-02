@@ -2,7 +2,6 @@ import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SpawnFlag } from "../../../../types/spawnFlag";
 import { BaseGameDataPacket } from "../../basePacket";
 import { GameDataPacketType } from "../../types";
-import { SpawnType } from "../../../../types/spawnType";
 
 export class SpawnInnerNetObject extends BaseGameDataPacket {
   constructor(
@@ -21,7 +20,7 @@ export class SpawnInnerNetObject extends BaseGameDataPacket {
 
   serialize(): MessageWriter {
     return new MessageWriter().writePackedUInt32(this.innerNetObjectID)
-      .startMessage(0x01)
+      .startMessage(1)
       .writeBytes(this.data)
       .endMessage();
   }
@@ -38,28 +37,11 @@ export class SpawnPacket extends BaseGameDataPacket {
   }
 
   static deserialize(reader: MessageReader): SpawnPacket {
-    const type = reader.readPackedUInt32();
-    const owner = reader.readPackedInt32();
-    const flags = reader.readByte();
-
-    console.table({
-      type: SpawnType[type],
-      owner,
-    });
-
-    let i = 0;
-
-    const innerNetObjects = reader.readList<SpawnInnerNetObject>(sub => {
-      console.log("SUB", i++, sub);
-
-      return SpawnInnerNetObject.deserialize(sub);
-    });
-
     return new SpawnPacket(
-      type,
-      owner,
-      flags,
-      innerNetObjects,
+      reader.readPackedUInt32(),
+      reader.readPackedInt32(),
+      reader.readByte(),
+      reader.readList<SpawnInnerNetObject>(sub => SpawnInnerNetObject.deserialize(sub)),
     );
   }
 
@@ -69,7 +51,7 @@ export class SpawnPacket extends BaseGameDataPacket {
       .writePackedInt32(this.owner)
       .writeByte(this.flags)
       .writeList(this.innerNetObjects, (writer, item) => {
-        
+        writer.writeBytes(item.serialize());
       });
   }
 }

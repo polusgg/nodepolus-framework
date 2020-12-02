@@ -2,7 +2,6 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SceneChangePacket } from "./gameDataPackets/sceneChange";
 import { GameDataPacketType, RootGamePacketType } from "../types";
 import { DespawnPacket } from "./gameDataPackets/despawn";
-import { DEFAULT_ROOM } from "../../../util/constants";
 import { ReadyPacket } from "./gameDataPackets/ready";
 import { SpawnPacket } from "./gameDataPackets/spawn";
 import { DataPacket } from "./gameDataPackets/data";
@@ -15,9 +14,9 @@ export type GameDataPacketDataType = DespawnPacket | ReadyPacket | SceneChangePa
 
 export class GameDataPacket extends BaseRootGamePacket {
   constructor(
-    readonly packets: GameDataPacketDataType[],
-    readonly roomCode?: string,
-    readonly targetClientId?: number,
+    public readonly packets: GameDataPacketDataType[],
+    public readonly roomCode: string,
+    public readonly targetClientId?: number,
   ) {
     super(RootGamePacketType[targetClientId ? "GameDataTo" : "GameData"]);
 
@@ -54,7 +53,7 @@ export class GameDataPacket extends BaseRootGamePacket {
         case GameDataPacketType.Ready:
           return packets.push(ReadyPacket.deserialize(child));
         default:
-          throw new Error(`Unhandled GameData(To) packet type: ${child.tag}`);
+          throw new Error(`Attempted to deserialize an unimplemented game data packet type: ${child.tag} (${GameDataPacketType[child.tag]})`);
       }
     });
 
@@ -64,13 +63,9 @@ export class GameDataPacket extends BaseRootGamePacket {
   serialize(): MessageWriter {
     const writer = new MessageWriter();
 
-    if (this.roomCode) {
-      writer.writeUInt32(RoomCode.encode(this.roomCode));
-    } else {
-      writer.writeUInt32(DEFAULT_ROOM);
-    }
+    writer.writeInt32(RoomCode.encode(this.roomCode));
 
-    if (this.targetClientId) {
+    if (this.targetClientId || this.targetClientId === 0) {
       writer.writePackedUInt32(this.targetClientId);
     }
 

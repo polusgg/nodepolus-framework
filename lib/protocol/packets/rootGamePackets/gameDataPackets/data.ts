@@ -10,7 +10,7 @@ export class DataPacket extends BaseGameDataPacket {
   static deserialize(reader: MessageReader): DataPacket {
     return new DataPacket(
       reader.readPackedUInt32(),
-      reader.readMessage()!,
+      reader.readRemainingBytes(),
     );
   }
 

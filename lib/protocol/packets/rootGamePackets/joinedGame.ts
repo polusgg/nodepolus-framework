@@ -5,10 +5,10 @@ import { RootGamePacketType } from "../types";
 
 export class JoinedGamePacket extends BaseRootGamePacket {
   constructor(
-    readonly roomCode: string,
-    readonly joinedClientId: number,
-    readonly hostClientId: number,
-    readonly otherClientIds: number[],
+    public readonly roomCode: string,
+    public readonly joinedClientId: number,
+    public readonly hostClientId: number,
+    public readonly otherClientIds: number[],
   ) {
     super(RootGamePacketType.JoinedGame);
   }

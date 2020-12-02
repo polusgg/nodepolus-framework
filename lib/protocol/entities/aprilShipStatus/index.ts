@@ -39,7 +39,7 @@ export class EntityAprilShipStatus extends BaseEntity {
     );
   }
 
-  setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
+  setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
       InnerAprilShipStatus.spawn(innerNetObjects[0], this),

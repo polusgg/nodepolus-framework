@@ -51,8 +51,9 @@ export class EntityPlayer extends BaseEntity {
     );
   }
 
-  setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
+  setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
+    this.flags = flags;
     this.innerNetObjects = [
       InnerPlayerControl.spawn(innerNetObjects[0], this),
       InnerPlayerPhysics.spawn(innerNetObjects[1], this),

@@ -2,7 +2,7 @@ import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/systemType";
 
 export abstract class BaseSystem<T> {
-  constructor(readonly type: SystemType) {}
+  constructor(public readonly type: SystemType) {}
 
   abstract getData(old: this): MessageWriter;
 

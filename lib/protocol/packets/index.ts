@@ -75,7 +75,7 @@ export class Packet {
         data = AcknowledgementPacket.deserialize(reader);
         break;
       default:
-        throw new Error(`Unhandled packet type: ${type}`);
+        throw new Error(`Attempted to deserialize an unimplemented packet type: ${type} (${PacketType[type]})`);
     }
 
     return new Packet(nonce, data).bound(clientBound);

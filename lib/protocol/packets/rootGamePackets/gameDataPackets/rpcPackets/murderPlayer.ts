@@ -3,8 +3,8 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class MurderPlayerPacket extends BaseRPCPacket {
-  constructor(readonly victimPlayerControlNetId: number) {
-    super(RPCPacketType.SetHat);
+  constructor(public readonly victimPlayerControlNetId: number) {
+    super(RPCPacketType.MurderPlayer);
   }
 
   static deserialize(reader: MessageReader): MurderPlayerPacket {

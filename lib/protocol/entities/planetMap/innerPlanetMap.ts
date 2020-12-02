@@ -12,10 +12,10 @@ export class InnerPlanetMap extends BaseShipStatus<InnerPlanetMap, EntityPlanetM
       SystemType.Security,
       SystemType.Communications,
       SystemType.Doors,
-      SystemType.Sabotage,
       SystemType.Decontamination,
-      SystemType.Laboratory,
       SystemType.Decontamination2,
+      SystemType.Sabotage,
+      SystemType.Laboratory,
     ]);
   }
 

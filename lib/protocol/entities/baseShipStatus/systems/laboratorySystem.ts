@@ -2,20 +2,20 @@ import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
-export class ReactorSystem extends BaseSystem<ReactorSystem> {
+export class LaboratorySystem extends BaseSystem<LaboratorySystem> {
   public timer!: number;
   public userConsoles!: Map<number, number>;
 
   constructor() {
-    super(SystemType.Reactor);
+    super(SystemType.Laboratory);
   }
 
-  static spawn(data: MessageReader): ReactorSystem {
-    const reactorSystem = new ReactorSystem();
+  static spawn(data: MessageReader): LaboratorySystem {
+    const laboratorySystem = new LaboratorySystem();
 
-    reactorSystem.setSpawn(data);
+    laboratorySystem.setSpawn(data);
 
-    return reactorSystem;
+    return laboratorySystem;
   }
 
   getData(): MessageWriter {
@@ -41,7 +41,7 @@ export class ReactorSystem extends BaseSystem<ReactorSystem> {
     this.userConsoles = new Map(data.readList(reader => [reader.readByte(), reader.readByte()]));
   }
 
-  equals(old: ReactorSystem): boolean {
+  equals(old: LaboratorySystem): boolean {
     if (this.timer != old.timer) {
       return false;
     }

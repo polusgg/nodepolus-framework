@@ -1,18 +1,16 @@
+import { DisconnectionType, DisconnectReason } from "../../../types/disconnectReason";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { DisconnectReason } from "../../../types/disconnectReason";
 import { BaseRootGamePacket } from "../basePacket";
 import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 import { Level } from "../../../types/level";
 
 export class JoinGameRequestPacket extends BaseRootGamePacket {
-  constructor(readonly roomCode: string, readonly ownedMaps: Level[]) {
+  constructor(public readonly roomCode: string, public readonly ownedMaps: Level[]) {
     super(RootGamePacketType.JoinGame);
   }
 
   static deserialize(reader: MessageReader): JoinGameRequestPacket {
-    console.log(reader);
-
     return new JoinGameRequestPacket(
       RoomCode.decode(reader.readInt32()),
       // TODO: Probably broken but just an example
@@ -32,9 +30,9 @@ export class JoinGameRequestPacket extends BaseRootGamePacket {
 
 export class JoinGameResponsePacket extends BaseRootGamePacket {
   constructor(
-    readonly roomCode: string,
-    readonly joiningClientId: number,
-    readonly hostClientId: number,
+    public readonly roomCode: string,
+    public readonly joiningClientId: number,
+    public readonly hostClientId: number,
   ) {
     super(RootGamePacketType.JoinGame);
   }
@@ -52,12 +50,20 @@ export class JoinGameResponsePacket extends BaseRootGamePacket {
 }
 
 export class JoinGameErrorPacket extends BaseRootGamePacket {
-  constructor(readonly disconnectReason: DisconnectReason) {
+  public readonly disconnectReason: DisconnectReason;
+
+  constructor(disconnectReason: DisconnectReason | DisconnectionType) {
     super(RootGamePacketType.JoinGame);
+
+    if (disconnectReason instanceof DisconnectReason) {
+      this.disconnectReason = disconnectReason;
+    } else {
+      this.disconnectReason = new DisconnectReason(disconnectReason);
+    }
   }
 
   static deserialize(reader: MessageReader): JoinGameErrorPacket {
-    return new JoinGameErrorPacket(new DisconnectReason(reader.readInt32()));
+    return new JoinGameErrorPacket(reader.readInt32());
   }
 
   serialize(): MessageWriter {

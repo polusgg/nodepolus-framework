@@ -31,7 +31,7 @@ export class MessageWriter extends HazelMessage {
   }
 
   startMessage(flag: number): this {
-    this.writeUInt16(0).writeByte(flag);
+    this.writeUInt16(0).writeByte(flag % 256);
 
     this.messageStarts.push(this.cursor);
 
@@ -63,7 +63,7 @@ export class MessageWriter extends HazelMessage {
     this.resizeBuffer(1);
 
     if (value > 127 || value < -128) {
-      throw new RangeError(`Value ${value} outside of UInt8 range [-128 - 127]`);
+      throw new RangeError(`Value outside of Int8 range: 65535 <= ${value} <= 127`);
     }
 
     this.buffer.writeInt8(value, this.cursor++);
@@ -75,7 +75,7 @@ export class MessageWriter extends HazelMessage {
     this.resizeBuffer(1);
 
     if (value > 255 || value < 0) {
-      throw new RangeError(`Value ${value} outside of UInt8 range [0 - 255]`);
+      throw new RangeError(`Value outside of UInt8 range: 0 <= ${value} <= 255`);
     }
 
     this.buffer[this.cursor++] = value;
@@ -87,7 +87,7 @@ export class MessageWriter extends HazelMessage {
     this.resizeBuffer(2);
 
     if (value > 32767 || value < -32768) {
-      throw new RangeError(`Value ${value} outside of UInt16 range [-32768 - 32767]`);
+      throw new RangeError(`Value outside of Int16 range: -32768 <= ${value} <= 32767`);
     }
 
     this.buffer[isBigEndian ? "writeInt16BE" : "writeInt16LE"](value, this.cursor);
@@ -101,7 +101,7 @@ export class MessageWriter extends HazelMessage {
     this.resizeBuffer(2);
 
     if (value > 65535 || value < 0) {
-      throw new RangeError(`Value ${value} outside of UInt16 range [0 - 65535]`);
+      throw new RangeError(`Value outside of UInt16 range: 0 <= ${value} <= 65535`);
     }
 
     this.buffer[isBigEndian ? "writeUInt16BE" : "writeUInt16LE"](value, this.cursor);
@@ -115,7 +115,7 @@ export class MessageWriter extends HazelMessage {
     this.resizeBuffer(4);
 
     if (value > 2147483647 || value < -2147483648) {
-      throw new RangeError(`Value ${value} outside of UInt8 range [-2147483648 - 2147483647]`);
+      throw new RangeError(`Value outside of Int32 range: -2147483648 <= ${value} <= 2147483647`);
     }
 
     this.buffer[isBigEndian ? "writeInt32BE" : "writeInt32LE"](value, this.cursor);
@@ -129,7 +129,7 @@ export class MessageWriter extends HazelMessage {
     this.resizeBuffer(4);
 
     if (value > 4294967295 || value < 0) {
-      throw new RangeError(`Value ${value} outside of UInt8 range [0 - 4294967295]`);
+      throw new RangeError(`Value outside of UInt32 range: 0 <= ${value} <= 4294967295`);
     }
 
     this.buffer[isBigEndian ? "writeUInt32BE" : "writeUInt32LE"](value, this.cursor);

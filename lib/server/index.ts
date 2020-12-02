@@ -1,6 +1,7 @@
 import { GetGameListResponsePacket, RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
 import { HostGameResponsePacket } from "../protocol/packets/rootGamePackets/hostGame";
+import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";
 import { DEFAULT_SERVER_PORT } from "../util/constants";
@@ -9,7 +10,7 @@ import { RemoteInfo } from "../util/remoteInfo";
 import { Level } from "../types/level";
 import { Room } from "../room";
 import dgram from "dgram";
-import { JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
+import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 
 enum DefaultHostState {
   Server,
@@ -29,22 +30,21 @@ const DEFAULT_SERVER_CONFIG: ServerConfig = {
 };
 
 export class Server {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public UDPServer: dgram.Socket;
+  public serverSocket: dgram.Socket;
   public connections: Map<string, Connection> = new Map();
   public connectionRoomMap: Map<string, Room> = new Map();
   public rooms: Room[] = [];
   public roomMap: Map<string, Room> = new Map();
 
   // Starts at 1 to allow the Server host implementation's ID to be 0
-  private connectionIdx = 1;
+  private connectionIndex = 1;
 
   constructor(
     public config: ServerConfig = DEFAULT_SERVER_CONFIG,
   ) {
-    this.UDPServer = dgram.createSocket("udp4");
+    this.serverSocket = dgram.createSocket("udp4");
 
-    this.UDPServer.on("message", (buf, remoteInfo) => {
+    this.serverSocket.on("message", (buf, remoteInfo) => {
       const sender = this.getConnection(remoteInfo);
 
       sender.emit("message", buf);
@@ -53,7 +53,7 @@ export class Server {
 
   async listen(port: number = DEFAULT_SERVER_PORT): Promise<void> {
     return new Promise(resolve => {
-      this.UDPServer.bind(port, "0.0.0.0", resolve);
+      this.serverSocket.bind(port, "0.0.0.0", resolve);
     });
   }
 
@@ -62,27 +62,45 @@ export class Server {
       remoteInfo = RemoteInfo.toString(remoteInfo);
     }
 
-    let con = this.connections.get(remoteInfo);
+    let connection = this.connections.get(remoteInfo);
 
-    if (con) {
-      return con;
+    if (connection) {
+      return connection;
     }
 
-    con = this.initializeConnection(RemoteInfo.fromString(remoteInfo));
+    connection = this.initializeConnection(RemoteInfo.fromString(remoteInfo));
 
-    this.connections.set(remoteInfo, con);
+    this.connections.set(remoteInfo, connection);
 
-    return con;
+    return connection;
+  }
+
+  private handleDisconnection(connection: Connection, reason?: DisconnectReason): void {
+    if (connection.room) {
+      connection.room.handleDisconnect(connection, reason);
+      this.connectionRoomMap.delete(RemoteInfo.toString(connection));
+
+      if (connection.room.connections.length == 0) {
+        delete this.rooms[this.rooms.indexOf(connection.room)];
+        this.roomMap.delete(connection.room.code);
+      }
+    }
+
+    this.connections.delete(RemoteInfo.toString(connection));
   }
 
   private initializeConnection(remoteInfo: dgram.RemoteInfo): Connection {
-    const newCon = new Connection(remoteInfo, this.UDPServer, PacketDestination.Client);
+    const newConnection = new Connection(remoteInfo, this.serverSocket, PacketDestination.Client);
 
-    newCon.id = this.connectionIdx++;
+    newConnection.id = this.connectionIndex++;
 
-    newCon.on("packet", (evt: RootGamePacketDataType) => this.handlePacket(evt, newCon));
+    newConnection.on("packet", (evt: RootGamePacketDataType) => this.handlePacket(evt, newConnection));
 
-    return newCon;
+    newConnection.on("disconnected", (reason?: DisconnectReason) => {
+      this.handleDisconnection(newConnection, reason);
+    });
+
+    return newConnection;
   }
 
   private handlePacket(packet: BaseRootGamePacket, sender: Connection): void {
@@ -104,7 +122,9 @@ export class Server {
 
           room.handleJoin(sender);
         } else {
-          throw new Error(`Client ${sender.id} sent a JoinGame with an invalid room`);
+          sender.send([ new JoinGameErrorPacket(DisconnectionType.GameNotFound) ]);
+
+          // throw new Error(`Client ${sender.id} sent a JoinGame packet with an invalid room`);
         }
         break;
       }
@@ -117,19 +137,8 @@ export class Server {
 
           counts[room.options.options.levels[0]]++;
 
-          //TODO: Filter pog?
-          rooms[i] = new RoomListing(
-            room.address,
-            room.port,
-            room.code,
-            "TODO: Player Name",
-            room.players.length,
-            // TODO: Age
-            0,
-            room.options.options.levels[0],
-            room.options.options.impostorCount,
-            room.options.options.maxPlayers,
-          );
+          // TODO: Filter pog?
+          rooms[i] = room.roomListing;
         }
 
         sender.send([ new GetGameListResponsePacket(rooms, counts[Level.TheSkeld], counts[Level.MiraHq], counts[Level.Polus]) ]);
@@ -138,10 +147,8 @@ export class Server {
       default: {
         const room = this.connectionRoomMap.get(RemoteInfo.toString(sender));
 
-        if (room) {
-          room.handlePacket(packet, sender);
-        } else {
-          throw new Error(`Client [${sender.id}] sent a [${packet.type} - ${RootGamePacketType[packet.type]}] Packet while not mapped to the room, even though the server expects packets of this type to be handled on a room.`);
+        if (!room) {
+          throw new Error(`Client ${sender.id} sent root game packet type ${packet.type} (${RootGamePacketType[packet.type]}) while not in a room`);
         }
       }
     }

@@ -1,14 +1,18 @@
+import { GameDataPacketType, PacketDestination, PacketType, RootGamePacketType, RPCPacketType } from "./packets/types";
 import { RepairAmount } from "./packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { RootGamePacket, RootGamePacketDataType } from "./packets/packetTypes/genericPacket";
+import { SceneChangePacket } from "./packets/rootGamePackets/gameDataPackets/sceneChange";
 import { AcknowledgementPacket } from "./packets/packetTypes/acknowledgementPacket";
+import { ReadyPacket } from "./packets/rootGamePackets/gameDataPackets/ready";
 import { LateRejectionPacket } from "./packets/rootGamePackets/removePlayer";
 import { DisconnectPacket } from "./packets/packetTypes/disconnectPacket";
 import { InnerPlayerControl } from "./entities/player/innerPlayerControl";
+import { RPCPacket } from "./packets/rootGamePackets/gameDataPackets/rpc";
 import { WaitForHostPacket } from "./packets/rootGamePackets/waitForHost";
 import { KickPlayerPacket } from "./packets/rootGamePackets/kickPlayer";
+import { GameDataPacket } from "./packets/rootGamePackets/gameData";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { HelloPacket } from "./packets/packetTypes/helloPacket";
-import { PacketDestination, PacketType } from "./packets/types";
 import { DisconnectReason } from "../types/disconnectReason";
 import { ClientVersion } from "../util/clientVersion";
 import { PlayerColor } from "../types/playerColor";
@@ -20,6 +24,7 @@ import { Player } from "../player";
 import Emittery from "emittery";
 import { Room } from "../room";
 import dgram from "dgram";
+import { LimboState } from "../types/limboState";
 
 interface ConnectionEvents {
   packet: RootGamePacketDataType;
@@ -28,7 +33,6 @@ interface ConnectionEvents {
 }
 
 export class Connection extends Emittery.Typed<ConnectionEvents> implements HostInstance, dgram.RemoteInfo {
-  public initialized = false;
   public hazelVersion?: number;
   public clientVersion?: ClientVersion;
   public name?: string;
@@ -36,7 +40,9 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   public isHost = false;
   public id = -1;
   public room?: Room;
+  // TODO: Use PlayerData from the GameData InnerNetObject?
   public player?: Player;
+  public limboState = LimboState.PreSpawn;
   public address: string;
   public port: number;
   public family: "IPv4" | "IPv6";
@@ -46,14 +52,16 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   private readonly flushInterval: NodeJS.Timeout;
   private readonly timeoutInterval: NodeJS.Timeout;
 
+  private initialized = false;
   private packetBuffer: RootGamePacketDataType[] = [];
-  private nonceIndex = 0;
+  private unreliablePacketBuffer: RootGamePacketDataType[] = [];
+  private nonceIndex = 1;
   private disconnectTimeout: NodeJS.Timeout | undefined;
-  private lastPingRecievedTime: number = Date.now();
+  private lastPingReceivedTime: number = Date.now();
   private requestedDisconnect = false;
 
   get timeSinceLastPing(): number {
-    return Date.now() - this.lastPingRecievedTime;
+    return Date.now() - this.lastPingReceivedTime;
   }
 
   constructor(remoteInfo: dgram.RemoteInfo, public socket: dgram.Socket, public bound: PacketDestination) {
@@ -70,18 +78,16 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
         this.acknowledgePacket(parsed.nonce!);
       }
 
-      console.log(parsed);
-
       switch (parsed.type) {
         case PacketType.Reliable:
           // fallthrough
         case PacketType.Fragment:
-          /**
-           * Hazel currently treats Fragment packets as Unreliable
-           */
+          // Hazel currently treats Fragment packets as Unreliable
           // fallthrough
         case PacketType.Unreliable: {
           (parsed.data as RootGamePacket).packets.forEach(packet => {
+            this.log(packet, parsed, true);
+
             this.emit("packet", packet);
           });
           break;
@@ -93,19 +99,23 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
           this.handlePing();
           break;
         case PacketType.Disconnect:
-          this.handleDisconnection((parsed.data as DisconnectPacket).reason);
+          this.handleDisconnection((parsed.data as DisconnectPacket).disconnectReason);
           break;
         case PacketType.Acknowledgement:
           this.handleAcknowledgement(parsed.nonce!);
           break;
         default:
-          throw new Error(`Socket got unexpected packet type ${parsed.type}`);
+          throw new Error(`Socket received an unimplemented packet type: ${parsed.type} (${PacketType[parsed.type]})`);
       }
     });
 
     this.flushInterval = setInterval(() => {
       if (this.packetBuffer.length > 0) {
-        this.flush();
+        this.flush(true);
+      }
+
+      if (this.unreliablePacketBuffer.length > 0) {
+        this.flush(false);
       }
     }, 10);
 
@@ -116,31 +126,83 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     }, 1000);
   }
 
-  write(pkt: RootGamePacketDataType): void {
-    this.packetBuffer.push(pkt);
+  write(packet: RootGamePacketDataType): void {
+    this.packetBuffer.push(packet);
+
+    // const lastElem: RootGamePacketDataType = this.packetBuffer[this.packetBuffer.length - 1];
+
+    // if (
+    //   this.packetBuffer.length != 0 &&
+    //   lastElem.type == packet.type &&
+    //   (
+    //     packet.type == RootGamePacketType.GameData ||
+    //     packet.type == RootGamePacketType.GameDataTo
+    //   ) &&
+    //   (lastElem as GameDataPacket).roomCode == (packet as GameDataPacket).roomCode &&
+    //   (lastElem as GameDataPacket).targetClientId == (packet as GameDataPacket).targetClientId
+    // ) {
+    //   for (let i = 0; i < (packet as GameDataPacket).packets.length; i++) {
+    //     const gameDataSinglePacket = (packet as GameDataPacket).packets[i];
+
+    //     (this.packetBuffer[this.packetBuffer.length - 1] as GameDataPacket).packets.push(gameDataSinglePacket);
+    //   }
+    // } else {
+    //   this.packetBuffer.push(packet);
+    // }
   }
 
-  send(pkts: RootGamePacketDataType[], reliable: boolean = true): void {
+  writeUnreliable(packet: RootGamePacketDataType): void {
+    this.unreliablePacketBuffer.push(packet);
+  }
+
+  send(packets: RootGamePacketDataType[], reliable: boolean = true): void {
     const temp: RootGamePacketDataType[] = [ ...this.packetBuffer ];
 
-    this.packetBuffer = pkts;
+    if (reliable) {
+      this.packetBuffer = packets;
+    } else {
+      this.unreliablePacketBuffer = packets;
+    }
 
     this.flush(reliable);
 
-    this.packetBuffer = temp;
+    if (reliable) {
+      this.packetBuffer = temp;
+    } else {
+      this.unreliablePacketBuffer = temp;
+    }
   }
 
   flush(reliable: boolean = true): void {
+    if (this.unreliablePacketBuffer.length == 0 && this.packetBuffer.length == 0) {
+      return;
+    }
+
+    // console.log("Flushing with", this.packetBuffer.length, "packets");
+
     let nonce: number | undefined;
 
     if (reliable) {
       nonce = this.nonceIndex++;
     }
 
-    const packet = new Packet(nonce, new RootGamePacket(this.packetBuffer));
+    let packet;
+
+    if (reliable) {
+      packet = new Packet(nonce, new RootGamePacket(this.packetBuffer));
+
+      this.packetBuffer.forEach(subpacket => {
+        this.log(subpacket, packet, false);
+      });
+    } else {
+      packet = new Packet(nonce, new RootGamePacket(this.unreliablePacketBuffer));
+
+      this.unreliablePacketBuffer.forEach(subpacket => {
+        this.log(subpacket, packet, false);
+      });
+    }
 
     packet.bound(true);
-    console.log("Writing", packet);
 
     const packetToSend: MessageWriter = packet.serialize();
 
@@ -150,7 +212,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
       const resendInterval = setInterval(() => {
         if (this.unacknowledgedPackets.has(nonce!)) {
           if (this.unacknowledgedPackets.get(nonce!)! > 10) {
-            this.disconnect(DisconnectReason.custom(`Failed to acknowledge packet ${nonce} after 10 attempts.`));
+            this.disconnect(DisconnectReason.custom(`Failed to acknowledge packet ${nonce} after 10 attempts`));
             clearInterval(resendInterval);
           } else {
             this.socket.send(packetToSend.buffer, this.port, this.address);
@@ -163,7 +225,11 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
     this.socket.send(packetToSend.buffer, this.port, this.address);
 
-    this.packetBuffer = [];
+    if (reliable) {
+      this.packetBuffer = [];
+    } else {
+      this.unreliablePacketBuffer = [];
+    }
   }
 
   disconnect(reason?: DisconnectReason): void {
@@ -173,9 +239,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
     this.socket.send(packetToSend.buffer, this.port, this.address);
 
-    this.disconnectTimeout = setTimeout(() => {
-      this.cleanup(reason);
-    }, 6000);
+    this.disconnectTimeout = setTimeout(() => this.cleanup(reason), 6000);
   }
 
   sendKick(isBanned: boolean, reason?: DisconnectReason): void {
@@ -214,39 +278,47 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     ));
   }
 
-  // These are NOOPs because we expect the connection to implement these
+  handleSceneChange(sender: Connection, scene: string): void {
+    if (!this.room) {
+      throw new Error("Cannot send a SceneChange packet to a connection that is not in a room");
+    }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  handleReady(_sender: Connection): void {}
+    this.write(new GameDataPacket([
+      new SceneChangePacket(sender.id, scene),
+    ], this.room.code));
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  handleSceneChange(_sender: Connection, _scene: string): void {}
+  handleReady(sender: Connection): void {
+    if (!this.room) {
+      throw new Error("Cannon send a Ready packet to a connection that is not in a room");
+    }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+    this.write(new GameDataPacket([
+      new ReadyPacket(sender.id),
+    ], this.room.code));
+  }
+
+  // These are no-ops because we expect the connection to implement these
+
+  /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
   handleCheckName(_sender: InnerPlayerControl, _name: string): void {}
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
   handleCheckColor(_sender: InnerPlayerControl, _color: PlayerColor): void {}
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
   handleReportDeadBody(_sender: InnerPlayerControl, _victimPlayerId: number): void {}
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
   handleRepairSystem(_sender: InnerLevel, _systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
   handleCloseDoorsOfType(_sender: InnerLevel, _systemId: SystemType): void {}
+  /* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
 
   private handlePing(): void {
-    this.lastPingRecievedTime = Date.now();
+    this.lastPingReceivedTime = Date.now();
   }
 
   private acknowledgePacket(nonce: number): void {
-    const a = new Packet(nonce, new AcknowledgementPacket(new Array(8).fill(true))).serialize().buffer;
-
-    console.log(a);
-
-    this.socket.send(a, this.port, this.address);
+    this.socket.send(
+      // TODO: Include unacknowledged packets
+      new Packet(nonce, new AcknowledgementPacket(new Array(8).fill(true))).serialize().buffer,
+      this.port,
+      this.address,
+    );
   }
 
   private handleAcknowledgement(nonce: number): void {
@@ -267,7 +339,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   private handleDisconnection(reason?: DisconnectReason): void {
     if (!this.requestedDisconnect) {
       // No need to serialize a DisconnectReason object since there is no data
-      this.socket.send([ PacketType.Disconnect ], this.port, this.address);
+      this.socket.send(Buffer.from([ PacketType.Disconnect ]), this.port, this.address);
     }
 
     this.cleanup(reason);
@@ -282,5 +354,33 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     }
 
     this.emit("disconnected", reason);
+  }
+
+  private log(packet: RootGamePacketDataType, parsed: Packet, isToServer: boolean): void {
+    if (!parsed.isReliable) {
+      return;
+    }
+
+    if (isToServer) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      console.log(`[${this.id} @ ${this.address}:${this.port}] > [Server] : Sent ${RootGamePacketType[packet.type]} in a ${parsed.isReliable ? "Reliable" : "Unreliable"} packet${parsed.isReliable ? ` with nonce ${parsed.nonce}` : ""}`);
+    } else {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      console.log(`[Server] > [${this.id} @ ${this.address}:${this.port}] : Sent ${RootGamePacketType[packet.type]} in a ${parsed.isReliable ? "Reliable" : "Unreliable"} packet${parsed.isReliable ? ` with nonce ${parsed.nonce}` : ""}`);
+    }
+
+    if (packet.type == RootGamePacketType.GameData || packet.type == RootGamePacketType.GameDataTo) {
+      // console.log((packet as GameDataPacket).packets);
+      const prefix = " ".repeat(`[${this.id} @ ${this.address}:${this.port}] > [Server] : Sent `.length);
+
+      console.log(`${prefix}│`);
+      console.log(`${prefix}├─[Room Code]─> ${(packet as GameDataPacket).roomCode}`);
+      console.log(`${prefix}├─[Recipient]─> ${(packet as GameDataPacket).targetClientId ?? "ALL"}`);
+      console.log(`${prefix}└─[Packets]`);
+
+      (packet as GameDataPacket).packets.forEach((subpacket, idx, { length }) => {
+        console.log(`${prefix}  ${idx == length - 1 ? "└" : "├"}─[${idx}]─> ${GameDataPacketType[subpacket.type]}${subpacket.type == GameDataPacketType.RPC ? ` > ${RPCPacketType[(subpacket as RPCPacket).packet.type]}` : ""}`);
+      });
+    }
   }
 }

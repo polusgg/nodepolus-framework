@@ -5,7 +5,11 @@ import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 
 export class AlterGameTagPacket extends BaseRootGamePacket {
-  constructor(readonly roomCode: string, readonly tag: AlterGameTag, readonly value: number) {
+  constructor(
+    public readonly roomCode: string,
+    public readonly tag: AlterGameTag,
+    public readonly value: number,
+  ) {
     super(RootGamePacketType.AlterGameTag);
   }
 

@@ -38,7 +38,7 @@ export type RootGamePacketDataType =
   | GetGameListResponsePacket;
 
 export class RootGamePacket {
-  constructor(readonly packets: RootGamePacketDataType[]) {}
+  constructor(public readonly packets: RootGamePacketDataType[]) {}
 
   static deserialize(reader: MessageReader, clientBound: boolean, level?: Level): RootGamePacket {
     const packets: RootGamePacketDataType[] = [];
@@ -109,7 +109,7 @@ export class RootGamePacket {
           }
           break;
         default:
-          throw new Error(`Unhandled root packet type: ${child.tag}`);
+          throw new Error(`Attempted to deserialize an unimplemented root game packet type: ${child.tag} (${RootGamePacketType[child.tag]})`);
       }
     });
 

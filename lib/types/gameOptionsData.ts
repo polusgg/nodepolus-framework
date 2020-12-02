@@ -62,7 +62,7 @@ export class GameOptionsData {
     const length = reader.readPackedUInt32();
 
     if (!(length == 41 || length == 42 || length == 44 || length == 46)) {
-      throw new Error(`Invalid GameOptions length: ${length}`);
+      throw new Error(`Invalid GameOptionsData length: ${length}`);
     }
 
     const version = reader.readByte();
@@ -75,7 +75,7 @@ export class GameOptionsData {
      * `ver <= 4 && ver >= 1`
      */
     if (!(version == 1 || version == 2 || version == 3 || version == 4)) {
-      throw new Error(`Invalid GameOptions version: ${version}`);
+      throw new Error(`Invalid GameOptionsData version: ${version}`);
     }
 
     const maxPlayers = reader.readByte();
@@ -85,7 +85,7 @@ export class GameOptionsData {
       .map((bit, index) => bit ? 1 << index : 0)
       .filter(bit => bit);
     const levels: Level[] = isSearching
-      ? reader.readBitfield(32)
+      ? reader.readBitfield(8)
         .reverse()
         .map((bit, index) => bit ? 1 << index : 0)
         .filter(bit => bit)

@@ -117,7 +117,12 @@ export class GetGameListResponsePacket extends BaseRootGamePacket {
     }
 
     writer.startMessage(0);
-    this.rooms.forEach(room => room.serialize(writer));
+
+    for (let i = 0; i < this.rooms.length; i++) {
+      writer.startMessage(0x01);
+      this.rooms[i].serialize(writer);
+      writer.endMessage();
+    }
 
     return writer.endMessage();
   }

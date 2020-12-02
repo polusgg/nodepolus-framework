@@ -43,13 +43,6 @@ export class RPCPacket extends BaseGameDataPacket {
     const senderNetId = reader.readPackedUInt32();
     const type = reader.readByte();
 
-    console.log("Deserializing RPC Packet");
-    console.table({
-      senderNetId,
-      type: RPCPacketType[type],
-      reader,
-    });
-
     switch (type) {
       case RPCPacketType.PlayAnimation:
         return new RPCPacket(senderNetId, PlayAnimationPacket.deserialize(reader));
@@ -114,15 +107,14 @@ export class RPCPacket extends BaseGameDataPacket {
       case RPCPacketType.UpdateGameData:
         return new RPCPacket(senderNetId, UpdateGameDataPacket.deserialize(reader));
       default:
-        throw new Error(`Unhandled RPC packet type ${type} from InnerNetObject ${senderNetId}`);
+        throw new Error(`Attempted to deserialize an unimplemented RPC packet type ${type} (${RPCPacketType[type]}) from InnerNetObject ${senderNetId}`);
     }
   }
 
   serialize(): MessageWriter {
-    console.log("Serializing RPC Packet", { senderNetId: this.senderNetId, type: this.type, packet: this.packet })
-
     return new MessageWriter()
       .writePackedUInt32(this.senderNetId)
+      .writeByte(this.packet.type)
       .writeBytes(this.packet.serialize());
   }
 }

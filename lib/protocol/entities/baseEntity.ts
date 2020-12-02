@@ -62,11 +62,6 @@ export abstract class BaseGameObject<T> {
     return this.getSpawn();
   }
 
-  // TODO: Combine sendRPCPacket and sendRPCPacketTo with optional ending `to?` param
-  sendRPCPacket(packet: BaseRPCPacket): void {
-    this.parent.room.sendRPCPacket(this as unknown as InnerNetObject, packet);
-  }
-
   sendRPCPacketTo(to: (Player | HostInstance)[], packet: BaseRPCPacket): void {
     this.parent.room.sendRPCPacket(this as unknown as InnerNetObject, packet, to);
   }

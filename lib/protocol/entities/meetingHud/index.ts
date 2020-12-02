@@ -34,7 +34,9 @@ export class EntityMeetingHud extends BaseEntity {
       SpawnType.MeetingHud,
       GLOBAL_OWNER,
       SpawnFlag.None,
-      [],
+      [
+        this.meetingHud.spawn(),
+      ],
     );
   }
 

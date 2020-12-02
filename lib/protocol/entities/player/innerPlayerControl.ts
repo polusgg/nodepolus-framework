@@ -30,6 +30,7 @@ import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { EntityPlayer } from ".";
+import { Player } from "../../../player";
 
 export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   public scannerSequenceId = 1;
@@ -39,14 +40,14 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   static spawn(object: SpawnInnerNetObject, parent: EntityPlayer): InnerPlayerControl {
-    const playerControl = new InnerPlayerControl(object.innerNetObjectID, parent, true, 0);
+    const playerControl = new InnerPlayerControl(object.innerNetObjectID, parent, true, 256);
 
     playerControl.setSpawn(object.data);
 
     return playerControl;
   }
 
-  setInfected(infected: number[]): void {
+  setInfected(infected: number[], sendTo: Connection[]): void {
     const gameData = this.parent.room.gameData;
 
     if (!gameData) {
@@ -58,20 +59,20 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == infectedPlayerId);
 
       if (gameDataPlayerIndex == -1) {
-        throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
+        throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
       }
 
       gameData.gameData.players[gameDataPlayerIndex].isImpostor = true;
     }
 
-    this.sendRPCPacket(new SetInfectedPacket(infected));
+    this.sendRPCPacketTo(sendTo, new SetInfectedPacket(infected));
   }
 
-  playAnimation(taskId: number): void {
-    this.sendRPCPacket(new PlayAnimationPacket(taskId));
+  playAnimation(taskId: number, sendTo: Connection[]): void {
+    this.sendRPCPacketTo(sendTo, new PlayAnimationPacket(taskId));
   }
 
-  completeTask(taskIdx: number): void {
+  completeTask(taskIdx: number, sendTo: Connection[]): void {
     const gameData = this.parent.room.gameData;
 
     if (!gameData) {
@@ -81,27 +82,28 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
     if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
+      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
     const taskCount = gameData.gameData.players[gameDataPlayerIndex].tasks.length;
 
     if (taskCount < taskIdx) {
-      throw new Error(`Player #${this.playerId} has fewer tasks (${taskCount}) than the requested index ${taskIdx}`);
+      throw new Error(`Player ${this.playerId} has fewer tasks (${taskCount}) than the requested index (${taskIdx})`);
     }
 
     gameData.gameData.players[gameDataPlayerIndex].tasks[taskIdx][1] = true;
 
-    this.sendRPCPacket(new CompleteTaskPacket(taskIdx));
+    this.sendRPCPacketTo(sendTo, new CompleteTaskPacket(taskIdx));
   }
 
-  syncSettings(options: GameOptionsData): void {
+  syncSettings(options: GameOptionsData, sendTo: Connection[]): void {
     this.parent.room.options = options;
 
-    this.sendRPCPacket(new SyncSettingsPacket(options));
+    this.sendRPCPacketTo(sendTo, new SyncSettingsPacket(options));
   }
 
-  exiled(): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  exiled(_sendTo: Connection[]): void {
     const gameData = this.parent.room.gameData;
 
     if (!gameData) {
@@ -111,7 +113,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
     if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
+      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
     gameData.gameData.players[gameDataPlayerIndex].isDead = true;
@@ -125,23 +127,24 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
     this.sendRPCPacketTo([ thisPlayer ], new ExiledPacket());
   }
 
-  exile(player: InnerPlayerControl): void {
-    player.exiled();
+  exile(player: InnerPlayerControl, sendTo: Connection[]): void {
+    player.exiled(sendTo);
   }
 
-  checkName(name: string): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  checkName(name: string, _sendTo: Connection[]): void {
     if (this.parent.room.isHost) {
       return;
     }
 
     if (!this.parent.room.host) {
-      throw new Error("CheckName sent to room without a host");
+      throw new Error("CheckName sent to a room without a host");
     }
 
     this.sendRPCPacketTo([ this.parent.room.host as Connection ], new CheckNamePacket(name));
   }
 
-  setName(name: string): void {
+  setName(name: string, sendTo: Connection[]): void {
     const gameData = this.parent.room.gameData;
 
     if (!gameData) {
@@ -150,29 +153,31 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1) {
-      console.log(gameData.gameData.players);
-      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
+    if (gameDataPlayerIndex == -1 && this.parent.room.isHost) {
+      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
-    gameData.gameData.players[gameDataPlayerIndex].name = name;
+    if (gameDataPlayerIndex != -1) {
+      gameData.gameData.players[gameDataPlayerIndex].name = name;
+    }
 
-    this.sendRPCPacket(new SetNamePacket(name));
+    this.sendRPCPacketTo(sendTo, new SetNamePacket(name));
   }
 
-  checkColor(color: PlayerColor): void {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  checkColor(color: PlayerColor, _sendTo: Connection[]): void {
     if (this.parent.room.isHost) {
       return;
     }
 
     if (!this.parent.room.host) {
-      throw new Error("CheckColor sent to room without a host");
+      throw new Error("CheckColor sent to a room without a host");
     }
 
     this.sendRPCPacketTo([ this.parent.room.host ], new CheckColorPacket(color));
   }
 
-  setColor(color: PlayerColor): void {
+  setColor(color: PlayerColor, sendTo: Connection[]): void {
     const gameData = this.parent.room.gameData;
 
     if (!gameData) {
@@ -181,16 +186,18 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
+    if (gameDataPlayerIndex == -1 && this.parent.room.isHost) {
+      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
-    gameData.gameData.players[gameDataPlayerIndex].color = color;
+    if (gameDataPlayerIndex != -1) {
+      gameData.gameData.players[gameDataPlayerIndex].color = color;
+    }
 
-    this.sendRPCPacket(new SetColorPacket(color));
+    this.sendRPCPacketTo(sendTo, new SetColorPacket(color));
   }
 
-  setHat(hat: PlayerHat): void {
+  setHat(hat: PlayerHat, sendTo: Connection[]): void {
     const gameData = this.parent.room.gameData;
 
     if (!gameData) {
@@ -199,16 +206,18 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
+    if (gameDataPlayerIndex == -1 && this.parent.room.isHost) {
+      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
-    gameData.gameData.players[gameDataPlayerIndex].hat = hat;
+    if (gameDataPlayerIndex != -1) {
+      gameData.gameData.players[gameDataPlayerIndex].hat = hat;
+    }
 
-    this.sendRPCPacket(new SetHatPacket(hat));
+    this.sendRPCPacketTo(sendTo, new SetHatPacket(hat));
   }
 
-  setSkin(skin: PlayerSkin): void {
+  setSkin(skin: PlayerSkin, sendTo: Connection[]): void {
     const gameData = this.parent.room.gameData;
 
     if (!gameData) {
@@ -217,24 +226,26 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
+    if (gameDataPlayerIndex == -1 && this.parent.room.isHost) {
+      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
-    gameData.gameData.players[gameDataPlayerIndex].skin = skin;
+    if (gameDataPlayerIndex != -1) {
+      gameData.gameData.players[gameDataPlayerIndex].skin = skin;
+    }
 
-    this.sendRPCPacket(new SetSkinPacket(skin));
+    this.sendRPCPacketTo(sendTo, new SetSkinPacket(skin));
   }
 
-  reportDeadBody(victimPlayerId?: number): void {
-    this.sendRPCPacket(new ReportDeadBodyPacket(victimPlayerId));
+  reportDeadBody(victimPlayerId: number | undefined, sendTo: Connection[]): void {
+    this.sendRPCPacketTo(sendTo, new ReportDeadBodyPacket(victimPlayerId));
   }
 
-  murderPlayer(victimPlayerControlNetId: number): void {
-    const victimPlayerId: number | undefined = this.parent.room.players.find(player => player.gameObject.playerControl.id == victimPlayerControlNetId)?.id;
+  murderPlayer(victimPlayerControlNetId: number, sendTo: Connection[]): void {
+    const victimPlayer: Player | undefined = this.parent.room.players.find(player => player.gameObject.playerControl.id == victimPlayerControlNetId);
 
-    if (!victimPlayerId) {
-      throw new Error("AAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    if (!victimPlayer) {
+      throw new Error("Could not find victim Player");
     }
 
     const gameData = this.parent.room.gameData;
@@ -243,34 +254,36 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("GameData does not exist on the RoomImplementation");
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == victimPlayerId);
+    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == victimPlayer.id);
 
     if (gameDataPlayerIndex == -1) {
-      throw new Error(`player ${victimPlayerId} does not have an instance in GameData`);
+      throw new Error(`Player ${victimPlayer.id} does not have an instance in GameData`);
     }
 
     gameData.gameData.players[gameDataPlayerIndex].isDead = true;
 
-    this.sendRPCPacket(new MurderPlayerPacket(victimPlayerControlNetId));
+    console.log("Player", this.id, "Murdered", victimPlayer.id);
+
+    this.sendRPCPacketTo(sendTo, new MurderPlayerPacket(victimPlayer.gameObject.playerControl.id));
   }
 
-  sendChat(message: string): void {
-    this.sendRPCPacket(new SendChatPacket(message));
+  sendChat(message: string, sendTo: Connection[]): void {
+    this.sendRPCPacketTo(sendTo, new SendChatPacket(message));
   }
 
-  startMeeting(victimPlayerId?: number): void {
-    this.sendRPCPacket(new StartMeetingPacket(victimPlayerId));
+  startMeeting(victimPlayerId: number | undefined, sendTo: Connection[]): void {
+    this.sendRPCPacketTo(sendTo, new StartMeetingPacket(victimPlayerId));
   }
 
-  setScanner(isScanning: boolean): void {
-    this.sendRPCPacket(new SetScannerPacket(isScanning, this.scannerSequenceId++));
+  setScanner(isScanning: boolean, sendTo: Connection[]): void {
+    this.sendRPCPacketTo(sendTo, new SetScannerPacket(isScanning, this.scannerSequenceId++));
   }
 
-  sendChatNote(playerId: number, type: ChatNoteType): void {
-    this.sendRPCPacket(new SendChatNotePacket(playerId, type));
+  sendChatNote(playerId: number, noteType: ChatNoteType, sendTo: Connection[]): void {
+    this.sendRPCPacketTo(sendTo, new SendChatNotePacket(playerId, noteType));
   }
 
-  setPet(pet: PlayerPet): void {
+  setPet(pet: PlayerPet, sendTo: Connection[]): void {
     const gameData = this.parent.room.gameData;
 
     if (!gameData) {
@@ -279,23 +292,27 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player #${this.playerId} does not have an instance in GameData`);
+    if (gameDataPlayerIndex == -1 && this.parent.room.isHost) {
+      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
-    gameData.gameData.players[gameDataPlayerIndex].pet = pet;
+    if (gameDataPlayerIndex != -1) {
+      gameData.gameData.players[gameDataPlayerIndex].pet = pet;
+    }
 
-    this.sendRPCPacket(new SetPetPacket(pet));
+    this.sendRPCPacketTo(sendTo, new SetPetPacket(pet));
   }
 
-  setStartCounter(sequenceId: number, timeRemaining: number): void {
-    this.sendRPCPacket(new SetStartCounterPacket(sequenceId, timeRemaining));
+  setStartCounter(sequenceId: number, timeRemaining: number, sendTo: Connection[]): void {
+    this.sendRPCPacketTo(sendTo, new SetStartCounterPacket(sequenceId, timeRemaining));
   }
 
   getData(): DataPacket {
-    const writer = new MessageWriter().writeByte(this.id);
-
-    return new DataPacket(this.id, writer);
+    return new DataPacket(
+      this.id,
+      new MessageWriter()
+        .writeByte(this.id),
+    );
   }
 
   setData(packet: MessageReader | MessageWriter): void {
@@ -305,14 +322,18 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   getSpawn(): SpawnInnerNetObject {
-    const writer = new MessageWriter().writeBoolean(this.isNew)
-      .writeByte(this.playerId);
-
-    return new DataPacket(this.id, writer);
+    return new DataPacket(
+      this.id,
+      new MessageWriter()
+        .startMessage(1)
+        .writeBoolean(this.isNew)
+        .writeByte(this.playerId)
+        .endMessage(),
+    );
   }
 
   setSpawn(data: MessageReader | MessageWriter): void {
-    const reader = MessageReader.fromRawBytes(data.buffer);
+    const reader = MessageReader.fromMessage(data.buffer);
 
     this.isNew = reader.readBoolean();
     this.playerId = reader.readByte();

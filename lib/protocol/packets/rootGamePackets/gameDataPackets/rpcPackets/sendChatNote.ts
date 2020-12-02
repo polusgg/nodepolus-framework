@@ -4,7 +4,10 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SendChatNotePacket extends BaseRPCPacket {
-  constructor(readonly playerId: number, readonly noteType: ChatNoteType) {
+  constructor(
+    public readonly playerId: number,
+    public readonly noteType: ChatNoteType,
+  ) {
     super(RPCPacketType.SendChatNote);
   }
 
@@ -13,7 +16,8 @@ export class SendChatNotePacket extends BaseRPCPacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.playerId)
-      .writeByte(this.type);
+    return new MessageWriter()
+      .writeByte(this.playerId)
+      .writeByte(this.noteType);
   }
 }

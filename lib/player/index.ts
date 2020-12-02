@@ -4,6 +4,6 @@ export class Player {
   public readonly id: number;
 
   constructor(public gameObject: EntityPlayer) {
-    this.id = gameObject.playerControl.id;
+    this.id = gameObject.playerControl.playerId;
   }
 }

@@ -3,7 +3,7 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class PlayAnimationPacket extends BaseRPCPacket {
-  constructor(readonly taskId: number) {
+  constructor(public readonly taskId: number) {
     super(RPCPacketType.PlayAnimation);
   }
 

@@ -26,7 +26,12 @@ export class InnerLobbyBehaviour extends BaseGameObject<InnerLobbyBehaviour> {
   setData(_packet: MessageReader | MessageWriter): void {}
 
   getSpawn(): SpawnInnerNetObject {
-    return new DataPacket(this.id, new MessageWriter());
+    return new DataPacket(
+      this.id,
+      new MessageWriter()
+        .startMessage(1)
+        .endMessage(),
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars

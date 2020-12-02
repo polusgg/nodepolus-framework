@@ -9,6 +9,7 @@ export enum InternalSystemType {
   Sabotage,
   HqHud,
   Decon,
+  Laboratory,
   Doors,
   Decon2,
 }

@@ -15,7 +15,7 @@ export class SyncSettingsPacket extends BaseRPCPacket {
   serialize(): MessageWriter {
     const writer = new MessageWriter();
 
-    this.options.serialize(new MessageWriter());
+    this.options.serialize(writer);
 
     return writer;
   }

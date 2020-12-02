@@ -16,8 +16,8 @@ export enum ReactorAction {
 
 export class ReactorAmount implements RepairAmount {
   private constructor(
-    readonly consoleId: number,
-    readonly action: ReactorAction,
+    public readonly consoleId: number,
+    public readonly action: ReactorAction,
   ) {}
 
   static deserialize(amount: number): ReactorAmount {
@@ -33,13 +33,13 @@ export class ReactorAmount implements RepairAmount {
   }
 
   serialize(): number {
-    return this.action | (this.consoleId & 3);
+    return this.consoleId | this.action;
   }
 }
 
 export class ElectricalAmount implements RepairAmount {
   private constructor(
-    readonly switchIndex: number,
+    public readonly switchIndex: number,
   ) {}
 
   static deserialize(amount: number): ElectricalAmount {
@@ -58,24 +58,24 @@ export enum OxygenAction {
 
 export class OxygenAmount implements RepairAmount {
   private constructor(
-    readonly consoleId: number,
-    readonly action: ReactorAction,
+    public readonly consoleId: number,
+    public readonly action: OxygenAction,
   ) {}
 
   static deserialize(amount: number): OxygenAmount {
-    let action = ReactorAction.PlacedHand;
+    let action = OxygenAction.Completed;
 
-    if ((amount & ReactorAction.RemovedHand) == ReactorAction.RemovedHand) {
-      action = ReactorAction.RemovedHand;
-    } else if ((amount & ReactorAction.Repaired) == ReactorAction.Repaired) {
-      action = ReactorAction.Repaired;
+    if ((amount & OxygenAction.Completed) == OxygenAction.Completed) {
+      action = OxygenAction.Completed;
+    } else if ((amount & OxygenAction.Repaired) == OxygenAction.Repaired) {
+      action = OxygenAction.Repaired;
     }
 
     return new OxygenAmount(amount & 3, action);
   }
 
   serialize(): number {
-    return 0;
+    return this.consoleId | this.action;
   }
 }
 
@@ -86,8 +86,8 @@ export enum MedbayAction {
 
 export class MedbayAmount implements RepairAmount {
   private constructor(
-    readonly playerId: number,
-    readonly action: MedbayAction,
+    public readonly playerId: number,
+    public readonly action: MedbayAction,
   ) {}
 
   static deserialize(amount: number): MedbayAmount {
@@ -100,13 +100,13 @@ export class MedbayAmount implements RepairAmount {
   }
 
   serialize(): number {
-    return 0;
+    return this.playerId | this.action;
   }
 }
 
 export class SecurityAmount implements RepairAmount {
   private constructor(
-    readonly isViewingCameras: boolean,
+    public readonly isViewingCameras: boolean,
   ) {}
 
   static deserialize(amount: number): SecurityAmount {
@@ -114,27 +114,27 @@ export class SecurityAmount implements RepairAmount {
   }
 
   serialize(): number {
-    return 0;
+    return Number(this.isViewingCameras);
   }
 }
 
 export class NormalCommunicationsAmount implements RepairAmount {
   private constructor(
-    readonly isRepaired: boolean,
+    public readonly isRepaired: boolean,
   ) {}
 
   static deserialize(amount: number): NormalCommunicationsAmount {
-    return new NormalCommunicationsAmount((amount & 0x80) == 0x80);
+    return new NormalCommunicationsAmount(amount == 0);
   }
 
   serialize(): number {
-    return 0;
+    return Number(this.isRepaired);
   }
 }
 
 export class SabotageAmount implements RepairAmount {
   private constructor(
-    readonly system: SystemType,
+    public readonly system: SystemType,
   ) {}
 
   static deserialize(amount: number): SabotageAmount {
@@ -142,7 +142,7 @@ export class SabotageAmount implements RepairAmount {
   }
 
   serialize(): number {
-    return 0;
+    return this.system;
   }
 }
 
@@ -154,8 +154,8 @@ export enum MiraCommunicationsAction {
 
 export class MiraCommunicationsAmount implements RepairAmount {
   private constructor(
-    readonly consoleId: number,
-    readonly action: MiraCommunicationsAction,
+    public readonly consoleId: number,
+    public readonly action: MiraCommunicationsAction,
   ) {}
 
   static deserialize(amount: number): MiraCommunicationsAmount {
@@ -167,31 +167,37 @@ export class MiraCommunicationsAmount implements RepairAmount {
       action = MiraCommunicationsAction.EnteredCode;
     }
 
-    return new MiraCommunicationsAmount(amount & 3, action);
+    return new MiraCommunicationsAmount(amount & 0xf, action);
   }
 
   serialize(): number {
-    return 0;
+    return this.consoleId | this.action;
   }
 }
 
 export class DecontaminationAmount implements RepairAmount {
   private constructor(
-    readonly doorState: number,
+    public readonly isEntering: boolean,
+    public readonly isHeadingUp: boolean,
   ) {}
 
   static deserialize(amount: number): DecontaminationAmount {
-    return new DecontaminationAmount(amount);
+    return new DecontaminationAmount(
+      amount == 1 || amount == 2,
+      amount == 1 || amount == 3,
+    );
   }
 
   serialize(): number {
-    return this.doorState;
+    return this.isEntering
+      ? (this.isHeadingUp ? 1 : 2)
+      : (this.isHeadingUp ? 3 : 4);
   }
 }
 
 export class PolusDoorsAmount implements RepairAmount {
   private constructor(
-    readonly doorId: number,
+    public readonly doorId: number,
   ) {}
 
   static deserialize(amount: number): PolusDoorsAmount {
@@ -199,7 +205,7 @@ export class PolusDoorsAmount implements RepairAmount {
   }
 
   serialize(): number {
-    return 0;
+    return this.doorId | 0x40;
   }
 }
 
@@ -218,10 +224,10 @@ export class RepairSystemPacket extends BaseRPCPacket {
   public readonly amount: Amounts;
 
   constructor(
-    readonly system: SystemType,
-    readonly playerControlNetId: number,
-    readonly amountByte: number,
-    readonly level: Level,
+    public readonly system: SystemType,
+    public readonly playerControlNetId: number,
+    public readonly amountByte: number,
+    public readonly level: Level,
   ) {
     super(RPCPacketType.RepairSystem);
 
@@ -229,8 +235,8 @@ export class RepairSystemPacket extends BaseRPCPacket {
   }
 
   static deserialize(reader: MessageReader, level?: Level): RepairSystemPacket {
-    if (!level) {
-      throw new Error("Received RepairSystem without a level");
+    if (!level && level !== 0) {
+      throw new Error("Attempted to deserialize RepairSystem without a level");
     }
 
     return new RepairSystemPacket(
@@ -263,14 +269,14 @@ export class RepairSystemPacket extends BaseRPCPacket {
           return PolusDoorsAmount.deserialize(this.amountByte);
         }
 
-        throw new Error(`Received RepairSystem for SystemType.Doors on unexpected level: ${Level[this.level]}`);
+        throw new Error(`Received RepairSystem for Doors on a level other than Polus`);
       case SystemType.Sabotage:
         return SabotageAmount.deserialize(this.amountByte);
       case SystemType.Decontamination:
       case SystemType.Decontamination2:
         return DecontaminationAmount.deserialize(this.amountByte);
       default:
-        throw new Error(`Received unhandled RepairSystem for system ${this.system} on level ${this.level}`);
+        throw new Error(`Attempted to parse RepairSystem amount for unimplemented SystemType ${this.system} (${SystemType[this.system]}) on level ${this.level} (${Level[this.level]})`);
     }
   }
 
