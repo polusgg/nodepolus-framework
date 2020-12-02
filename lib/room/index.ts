@@ -9,7 +9,7 @@ import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericP
 import { AlterGameTagPacket } from "../protocol/packets/rootGamePackets/alterGameTag";
 import { DataPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/data";
 import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSystem";
-import { JoinGameResponsePacket } from "../protocol/packets/rootGamePackets/joinGame";
+import { JoinGameErrorPacket, JoinGameResponsePacket } from "../protocol/packets/rootGamePackets/joinGame";
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
 import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
 import { RPCPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/rpc";
@@ -31,7 +31,7 @@ import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { EntityShipStatus } from "../protocol/entities/shipStatus";
 import { EntityPlanetMap } from "../protocol/entities/planetMap";
 import { EntityGameData } from "../protocol/entities/gameData";
-import { DisconnectReason } from "../types/disconnectReason";
+import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { GameOptionsData } from "../types/gameOptionsData";
 import { EntityPlayer } from "../protocol/entities/player";
 import { DEFAULT_GAME_OPTIONS } from "../util/constants";
@@ -51,6 +51,7 @@ import cloneDeep from "lodash/clonedeep";
 import { CustomHost } from "../host";
 import { Player } from "../player";
 import dgram from "dgram";
+import { LimboState } from "../types/limboState";
 
 // TODO: Client disconnect handler to close the room when empty
 export class Room implements RoomImplementation, dgram.RemoteInfo {
@@ -69,6 +70,8 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   public size = -1;
 
   private readonly rpcHandler: RPCHandler = new RPCHandler(this);
+
+  private clientsInLimbo: number[] = [];
 
   get players(): Player[] {
     return this.connections.map(con => con.player).filter(notUndefined);
@@ -278,10 +281,12 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
     this.connections.splice(disconnectingConnectionIndex, 1);
 
-    // TODO: Add limbo checks (Cody)
-
     if (connection.isHost && this.connections[0]) {
       this.connections[0].isHost = true;
+
+      if (this.gameState == GameState.Ended && this.connections[0].limboState == LimboState.WaitingForHost) {
+        this.handleRejoin(this.connections[0]);
+      }
     }
 
     this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, this.host?.id ?? 0, reason));
@@ -294,19 +299,90 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       this.handlePacket(packet, connection);
     });
 
+    switch (this.gameState) {
+      case GameState.NotStarted:
+        this.handleNewJoin(connection);
+        break;
+      case GameState.Ended:
+        this.handleRejoin(connection);
+        break;
+      default:
+        connection.send([
+          new JoinGameErrorPacket(DisconnectionType.GameStarted),
+        ]);
+    }
+  }
+
+  private handleNewJoin(connection: Connection): void {
+    this.connections.push(connection);
+
     if (!this.isHost && !this.host) {
       connection.isHost = true;
     }
 
+    connection.limboState = connection.isHost ? LimboState.NotLimbo : LimboState.PreSpawn;
+
+    this.sendJoinedMessage(connection);
+    this.broadcastJoinMessage(connection);
+  }
+
+  private handleRejoin(connection: Connection): void {
+    if (connection.room?.code != this.code) {
+      connection.send([
+        new JoinGameErrorPacket(DisconnectionType.GameStarted),
+      ]);
+
+      return;
+    }
+
+    if (!this.isHost && !this.host) {
+      connection.isHost = true;
+    }
+
+    if (connection.isHost) {
+      this.gameState = GameState.NotStarted;
+
+      this.handleNewJoin(connection);
+      this.takeFromLimbo(this.connections.filter(con => con.id != connection.id));
+    } else {
+      this.sendToLimbo(connection);
+    }
+  }
+
+  private sendToLimbo(connection: Connection): void {
     this.connections.push(connection);
 
+    connection.limboState = LimboState.WaitingForHost;
+
+    connection.send([
+      new WaitForHostPacket(this.code, connection.id),
+    ]);
+
+    this.broadcastJoinMessage(connection);
+  }
+
+  private takeFromLimbo(connections: Connection[]): void {
+    connections.forEach(con => {
+      con.limboState = LimboState.NotLimbo;
+
+      this.sendJoinedMessage(con);
+    });
+  }
+
+  private broadcastJoinMessage(connection: Connection): void {
+    this.sendRootGamePacket(new JoinGameResponsePacket(
+      this.code,
+      connection.id,
+      this.host ? this.host.id : FakeHostId.FetchHostError,
+    ));
+  }
+
+  private sendJoinedMessage(connection: Connection): void {
     connection.send([
       new JoinedGamePacket(
         this.code,
         connection.id,
-        this.isHost
-          ? FakeHostId.ServerAsHost
-          : this.host!.id,
+        this.isHost ? FakeHostId.ServerAsHost : this.host!.id,
         this.connections
           .map(con => con.id)
           .filter(id => id != connection.id)),
@@ -315,12 +391,6 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         AlterGameTag.ChangePrivacy,
         this.gameTags.get(AlterGameTag.ChangePrivacy) ?? 0),
     ]);
-
-    this.sendRootGamePacket(new JoinGameResponsePacket(
-      this.code,
-      connection.id,
-      this.host ? this.host.id : FakeHostId.FetchHostError,
-    ));
   }
 
   private handleGameDataPacket(packet: GameDataPacketDataType, sender: Connection, sendTo?: Connection[]): void {
@@ -595,15 +665,17 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   private handleEndGame(reason: GameOverReason, showAd: boolean, sendTo?: Connection[]): void {
     this.gameState = GameState.Ended;
 
-    /**
-     * TODO: Loop over all connections:
-     *          Set their limbo to PreSpawn
-     *          Remove them from the connections list
-     *          Send them the end game packet
-     *          Store their ID in the limboIds list
-     * TODO: Empty the connections list
-     */
     this.sendRootGamePacket(new EndGamePacket(this.code, reason, showAd), sendTo);
+
+    for (let i = 0; i < this.connections.length; i++) {
+      const con = this.connections[i];
+
+      con.limboState = LimboState.PreSpawn;
+
+      this.clientsInLimbo.push(con.id);
+    }
+
+    // this.connections.splice(0);
   }
 
   private handleRemoveGame(reason?: DisconnectReason, sendTo?: Connection[]): void {

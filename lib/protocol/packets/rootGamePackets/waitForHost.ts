@@ -6,7 +6,10 @@ import { RootGamePacketType } from "../types";
 export class WaitForHostPacket extends BaseRootGamePacket {
   public clientBound: boolean | undefined;
 
-  constructor(readonly roomCode: string, readonly waitingClientId: number) {
+  constructor(
+    public readonly roomCode: string,
+    public readonly waitingClientId: number,
+  ) {
     super(RootGamePacketType.WaitForHost);
   }
 
