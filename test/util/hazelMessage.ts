@@ -171,43 +171,71 @@ test("writes a float32", t => {
 });
 
 test("reads a packed int32", t => {
-  const buf = MessageReader.fromMessage("090001dcfcffff0f45a08a20");
+  const buf = MessageReader.fromMessage("1a00010001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
 
-  t.is(buf.readPackedInt32(), -420);
-  t.is(buf.readPackedInt32(), 69);
-  t.is(buf.readPackedInt32(), 525600);
+  t.is(buf.readPackedInt32(), 0);
+  t.is(buf.readPackedInt32(), 1);
+  t.is(buf.readPackedInt32(), 2);
+  t.is(buf.readPackedInt32(), 127);
+  t.is(buf.readPackedInt32(), 128);
+  t.is(buf.readPackedInt32(), 255);
+  t.is(buf.readPackedInt32(), 2097151);
+  t.is(buf.readPackedInt32(), 2147483647);
+  t.is(buf.readPackedInt32(), -1);
+  t.is(buf.readPackedInt32(), -2147483648);
   t.false(buf.hasBytesLeft());
 });
 
 test("writes a packed int32", t => {
   const buf = new MessageWriter();
 
-  buf.writePackedInt32(-420);
-  buf.writePackedInt32(69);
-  buf.writePackedInt32(525600);
+  buf.writePackedInt32(0);
+  buf.writePackedInt32(1);
+  buf.writePackedInt32(2);
+  buf.writePackedInt32(127);
+  buf.writePackedInt32(128);
+  buf.writePackedInt32(255);
+  buf.writePackedInt32(2097151);
+  buf.writePackedInt32(2147483647);
+  buf.writePackedInt32(-1);
+  buf.writePackedInt32(-2147483648);
 
-  t.is(buf.buffer.toString("hex"), "dcfcffff0f45a08a20");
-  t.is(buf.length, 9);
+  t.is(buf.buffer.toString("hex"), "0001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
+  t.is(buf.length, 26);
 });
 
 test("reads a packed uint32", t => {
-  const buf = MessageReader.fromMessage("090001dcfcffff0f45a08a20");
+  const buf = MessageReader.fromMessage("1a00010001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
 
-  t.is(buf.readPackedUInt32(), 4294966876);
-  t.is(buf.readPackedUInt32(), 69);
-  t.is(buf.readPackedUInt32(), 525600);
+  t.is(buf.readPackedUInt32(), 0);
+  t.is(buf.readPackedUInt32(), 1);
+  t.is(buf.readPackedUInt32(), 2);
+  t.is(buf.readPackedUInt32(), 127);
+  t.is(buf.readPackedUInt32(), 128);
+  t.is(buf.readPackedUInt32(), 255);
+  t.is(buf.readPackedUInt32(), 2097151);
+  t.is(buf.readPackedUInt32(), 2147483647);
+  t.is(buf.readPackedUInt32(), 4294967295);
+  t.is(buf.readPackedUInt32(), 2147483648);
   t.false(buf.hasBytesLeft());
 });
 
 test("writes a packed uint32", t => {
   const buf = new MessageWriter();
 
-  buf.writePackedUInt32(4294966876);
-  buf.writePackedUInt32(69);
-  buf.writePackedUInt32(525600);
+  buf.writePackedUInt32(0);
+  buf.writePackedUInt32(1);
+  buf.writePackedUInt32(2);
+  buf.writePackedUInt32(127);
+  buf.writePackedUInt32(128);
+  buf.writePackedUInt32(255);
+  buf.writePackedUInt32(2097151);
+  buf.writePackedUInt32(2147483647);
+  buf.writePackedUInt32(4294967295);
+  buf.writePackedUInt32(2147483648);
 
-  t.is(buf.buffer.toString("hex"), "dcfcffff0f45a08a20");
-  t.is(buf.length, 9);
+  t.is(buf.buffer.toString("hex"), "0001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
+  t.is(buf.length, 26);
 });
 
 test("reads a string", t => {
