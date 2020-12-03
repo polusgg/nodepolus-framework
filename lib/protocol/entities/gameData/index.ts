@@ -21,7 +21,7 @@ export class EntityGameData extends BaseEntity {
     return this.innerNetObjects[1];
   }
 
-  private constructor(room: RoomImplementation) {
+  constructor(room: RoomImplementation) {
     super(SpawnType.GameData, room);
   }
 

@@ -115,7 +115,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     this.family = RemoteInfo.fromString(`${address}:${port}`).family;
 
     if (this.isHost) {
-      this.customHostInstance = new CustomHost();
+      this.customHostInstance = new CustomHost(this);
     }
   }
 
@@ -307,6 +307,10 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   handleJoin(connection: Connection): void {
+    if (!this.isHost && this.connections.length >= 10) {
+      connection.send([ new JoinGameErrorPacket(DisconnectionType.GameFull) ]);
+    }
+
     if (!connection.room) {
       connection.room = this;
 
@@ -385,12 +389,17 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     }
 
     /**
-     * If the host leaves the game while in the lobby, and the next connection
-     * in line is still at the end-game screen (in either PreSpawn or limbo
-     * WaitingForHost limbo) then we should just assign the next player that is
-     * already in the lobby to host
+     * Host priority:
+     *  1. First connection that is already in the lobby ("NotLimbo")
+     *     (if the host left while they and someone else were in the lobby)
+     *  2. First connection that clicked "Play Again" ("WaitingForHost")
+     *     (if the host left before anybody clicked "Play Again")
+     *  3. First connection in line
+     *     (if the host left and nobody clicked "Play Again" yet)
      */
-    const newHost = this.connections.find(con => con.limboState == LimboState.NotLimbo) ?? this.connections[0];
+    const newHost = this.connections.find(con => con.limboState == LimboState.NotLimbo)
+      ?? this.connections.find(con => con.limboState == LimboState.WaitingForHost)
+      ?? this.connections[0];
 
     newHost.isHost = true;
 
@@ -400,11 +409,16 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   private broadcastJoinMessage(connection: Connection): void {
-    this.sendRootGamePacket(new JoinGameResponsePacket(
-      this.code,
-      connection.id,
-      this.host ? this.host.id : FakeHostId.FetchHostError,
-    ));
+    this.sendRootGamePacket(
+      new JoinGameResponsePacket(
+        this.code,
+        connection.id,
+        this.host ? this.host.id : FakeHostId.FetchHostError,
+      ),
+      this.connections
+        .filter(con => con.id != connection.id)
+        .filter(con => con.limboState == LimboState.NotLimbo),
+    );
   }
 
   private sendJoinedMessage(connection: Connection): void {
@@ -431,7 +445,9 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         this.handleData((packet as DataPacket).innerNetObjectID, (packet as DataPacket).data, sendTo);
         break;
       case GameDataPacketType.Despawn:
-        this.handleDespawn((packet as DespawnPacket).innerNetObjectID, sendTo);
+        if (sender.isHost) {
+          this.handleDespawn((packet as DespawnPacket).innerNetObjectID, sendTo);
+        }
         break;
       case GameDataPacketType.RPC:
         // TODO: Add multiple receiver support
@@ -594,6 +610,8 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     const ignoreIds = this.ignoreDespawnNetIds.indexOf(netId);
 
     if (ignoreIds != -1) {
+      this.ignoreDespawnNetIds.splice(ignoreIds, 1);
+
       return;
     }
 

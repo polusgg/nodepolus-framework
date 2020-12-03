@@ -17,7 +17,7 @@ export class EntityLobbyBehaviour extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  private constructor(room: RoomImplementation) {
+  constructor(room: RoomImplementation) {
     super(SpawnType.LobbyBehaviour, room);
   }
 

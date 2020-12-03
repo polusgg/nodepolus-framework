@@ -26,7 +26,7 @@ export class EntityPlayer extends BaseEntity {
     return this.innerNetObjects[2];
   }
 
-  private constructor(room: RoomImplementation) {
+  constructor(room: RoomImplementation) {
     super(SpawnType.PlayerControl, room);
   }
 
