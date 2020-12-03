@@ -96,21 +96,23 @@ export class CustomHost implements HostInstance {
       new InnerCustomNetworkTransform(this.netIdIndex++, entity, 5, new Vector2(0, 0), new Vector2(0, 0)),
     ];
 
-    sender.player = new Player(entity);
+    const player = new Player(entity);
 
-    this.room.players.forEach(player => {
-      if (player.id == sender.player!.id) {
+    this.room.players.push(player);
+
+    this.room.players.forEach(testplayer => {
+      if (testplayer.id == player.id) {
         return;
       }
       sender.write(new GameDataPacket([ player.gameObject.spawn() ], this.room.code));
     });
 
-    this.room.sendRootGamePacket(new GameDataPacket([ sender.player.gameObject.spawn() ], this.room.code));
+    this.room.sendRootGamePacket(new GameDataPacket([ player.gameObject.spawn() ], this.room.code));
 
-    sender.player.gameObject.playerControl.syncSettings(this.room.options, this.room.connections);
+    player.gameObject.playerControl.syncSettings(this.room.options, this.room.connections);
 
     const playerData = new PlayerData(
-      sender.player.gameObject.playerControl.playerId,
+      player.gameObject.playerControl.playerId,
       "",
       PlayerColor.Red,
       0,
@@ -124,7 +126,7 @@ export class CustomHost implements HostInstance {
 
     this.room.gameData.gameData.updateGameData([ playerData ], this.room.connections);
 
-    sender.player.gameObject.playerControl.isNew = false;
+    player.gameObject.playerControl.isNew = false;
   }
 
   handleCheckName(sender: InnerPlayerControl, name: string): void {

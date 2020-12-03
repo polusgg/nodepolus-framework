@@ -20,7 +20,6 @@ import { SystemType } from "../types/systemType";
 import { InnerLevel } from "./entities/types";
 import { HostInstance } from "../host/types";
 import { Packet } from "./packets";
-import { Player } from "../player";
 import Emittery from "emittery";
 import { Room } from "../room";
 import dgram from "dgram";
@@ -40,8 +39,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   public isHost = false;
   public id = -1;
   public room?: Room;
-  // TODO: Use PlayerData from the GameData InnerNetObject?
-  public player?: Player;
   public limboState = LimboState.PreSpawn;
   public address: string;
   public port: number;

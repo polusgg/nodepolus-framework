@@ -30,9 +30,10 @@ const DEFAULT_SERVER_CONFIG: ServerConfig = {
 };
 
 export class Server {
-  public serverSocket: dgram.Socket;
-  public connections: Map<string, Connection> = new Map();
-  public connectionRoomMap: Map<string, Room> = new Map();
+  public readonly serverSocket: dgram.Socket;
+  public readonly connections: Map<string, Connection> = new Map();
+  public readonly connectionRoomMap: Map<string, Room> = new Map();
+  // TODO: Store rooms as just a Map of code to room?
   public rooms: Room[] = [];
   public roomMap: Map<string, Room> = new Map();
 
@@ -127,20 +128,20 @@ export class Server {
         break;
       }
       case RootGamePacketType.GetGameList: {
-        const rooms: RoomListing[] = [];
+        const results: RoomListing[] = [];
         const counts: [number, number, number] = [0, 0, 0];
 
         for (let i = 0; i < this.rooms.length; i++) {
-          // Remove from rooms array when deleted.
+          // TODO: Remove from rooms array when deleted.
           const room = this.rooms[i];
 
           counts[room.options.options.levels[0]]++;
 
           // TODO: Filter pog?
-          rooms[i] = room.roomListing;
+          results[i] = room.roomListing;
         }
 
-        sender.send([ new GetGameListResponsePacket(rooms, counts[Level.TheSkeld], counts[Level.MiraHq], counts[Level.Polus]) ]);
+        sender.send([ new GetGameListResponsePacket(results, counts[Level.TheSkeld], counts[Level.MiraHq], counts[Level.Polus]) ]);
         break;
       }
       default: {

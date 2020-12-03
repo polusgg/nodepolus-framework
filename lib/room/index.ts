@@ -53,11 +53,14 @@ import { Player } from "../player";
 import dgram from "dgram";
 import { LimboState } from "../types/limboState";
 
+// TODO: All players are being marked as new when joining a lobby
+
 // TODO: Client disconnect handler to close the room when empty
 export class Room implements RoomImplementation, dgram.RemoteInfo {
   public readonly createdAt: number = new Date().getTime();
 
   public connections: Connection[] = [];
+  public players: Player[] = [];
   public gameState = GameState.NotStarted;
   public customHostInstance?: CustomHost;
   public lobbyBehavior?: EntityLobbyBehaviour;
@@ -71,10 +74,6 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   private readonly rpcHandler: RPCHandler = new RPCHandler(this);
   private readonly ignoreDespawnNetIds: number[] = [];
-
-  get players(): Player[] {
-    return this.connections.map(con => con.player).filter(notUndefined);
-  }
 
   get host(): HostInstance | undefined {
     if (this.isHost) {
@@ -146,6 +145,14 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     }
 
     throw new Error(`InnerNetObject with ID ${netId} not found.`);
+  }
+
+  findPlayerByConnection(connection: Connection): Player | undefined {
+    return this.players.find(player => player.gameObject.owner == connection.id);
+  }
+
+  findPlayerIndexByConnection(connection: Connection): number {
+    return this.players.findIndex(player => player.gameObject.owner == connection.id);
   }
 
   findConnection(id: number): Connection | undefined {
@@ -266,7 +273,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         if (sendTo[i] instanceof Connection) {
           sendToConnections.push(sendTo[i] as Connection);
         } else {
-          const con = this.connections.find(c => c.player?.id == sendTo[i].id);
+          const con = this.connections.find(c => this.findPlayerByConnection(c)?.id == sendTo[i].id);
 
           if (con) {
             sendToConnections.push(con);
@@ -284,14 +291,6 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
-
-    if (connection.player) {
-      console.log("Disconnecting Connection had player.");
-      this.ignoreDespawnNetIds.push(connection.player.gameObject.playerControl.id);
-      this.ignoreDespawnNetIds.push(connection.player.gameObject.playerPhysics.id);
-      this.ignoreDespawnNetIds.push(connection.player.gameObject.customNetworkTransform.id);
-      console.log("current ignore list in handleDisconnect", this.ignoreDespawnNetIds);
-    }
 
     if (disconnectingConnectionIndex != -1) {
       this.connections.splice(disconnectingConnectionIndex, 1);
@@ -590,9 +589,9 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
           throw new Error("Spawn packet sent for a player on a connection that does not exist");
         }
 
-        connection.player = new Player(EntityPlayer.spawn(flags, owner, innerNetObjects, this));
+        this.players.push(new Player(EntityPlayer.spawn(flags, owner, innerNetObjects, this)));
 
-        this.sendRootGamePacket(new GameDataPacket([ connection.player.gameObject.spawn() ], this.code), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([ this.findPlayerByConnection(connection)!.gameObject.spawn() ], this.code), sendTo);
         break;
       }
     }
@@ -634,7 +633,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         throw new Error("Attempted to despawn a player that has no connection");
       }
 
-      if (!connection.player) {
+      if (!this.findPlayerByConnection(connection)) {
         throw new Error("Attempted to despawn a player whose connection object is missing a player instance");
       }
     }
@@ -681,24 +680,24 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         delete this.meetingHud;
         break;
       case InnerNetObjectType.PlayerControl:
-        connection!.player!.gameObject.innerNetObjects[0] = undefined as unknown as InnerPlayerControl;
+        this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects[0] = undefined as unknown as InnerPlayerControl;
 
-        if (connection!.player!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
-          delete connection!.player;
+        if (this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
+          this.players.splice(this.findPlayerIndexByConnection(connection!));
         }
         break;
       case InnerNetObjectType.PlayerPhysics:
-        connection!.player!.gameObject.innerNetObjects[1] = undefined as unknown as InnerPlayerPhysics;
+        this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects[1] = undefined as unknown as InnerPlayerPhysics;
 
-        if (connection!.player!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
-          delete connection!.player;
+        if (this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
+          this.players.splice(this.findPlayerIndexByConnection(connection!));
         }
         break;
       case InnerNetObjectType.CustomNetworkTransform:
-        connection!.player!.gameObject.innerNetObjects[2] = undefined as unknown as InnerCustomNetworkTransform;
+        this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects[2] = undefined as unknown as InnerCustomNetworkTransform;
 
-        if (connection!.player!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
-          delete connection!.player;
+        if (this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
+          this.players.splice(this.findPlayerIndexByConnection(connection!));
         }
         break;
     }
