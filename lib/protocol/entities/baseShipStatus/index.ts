@@ -145,14 +145,12 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
         }
 
         return this.systems[InternalSystemType.AutoDoors];
-
       case SystemType.Communications:
         if (this.level == Level.MiraHq) {
           return this.systems[InternalSystemType.HqHud];
         }
 
         return this.systems[InternalSystemType.HudOverride];
-
       case SystemType.Decontamination:
         return this.systems[InternalSystemType.Decon];
       case SystemType.Decontamination2:

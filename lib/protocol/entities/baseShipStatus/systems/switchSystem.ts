@@ -5,7 +5,7 @@ import { BaseSystem } from "./baseSystem";
 export class SwitchSystem extends BaseSystem<SwitchSystem> {
   public actualSwitches: boolean[] = Array(5).fill(0).map(() => !!Math.round(Math.random() * 1));
   public expectedSwitches: boolean[] = this.actualSwitches;
-  public visionModifier: number = 0xff;
+  public visionModifier = 0xff;
 
   constructor() {
     super(SystemType.Electrical);

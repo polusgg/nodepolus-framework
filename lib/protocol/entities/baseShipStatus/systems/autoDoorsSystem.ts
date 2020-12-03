@@ -31,11 +31,11 @@ export class AutoDoorsSystem extends BaseSystem<AutoDoorsSystem> {
       }
     }
 
-    return writer.writeByte(mask).writeBytes(dirtyDoors);
+    return writer.writePackedUInt32(mask).writeBytes(dirtyDoors);
   }
 
   setData(data: MessageReader): void {
-    const mask = data.readByte();
+    const mask = data.readPackedUInt32();
 
     for (let i = 0; i < this.doors.length; i++) {
       if ((mask & (1 << i)) != 0) {

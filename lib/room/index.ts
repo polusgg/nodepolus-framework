@@ -71,7 +71,6 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   private readonly rpcHandler: RPCHandler = new RPCHandler(this);
   private readonly ignoreDespawnNetIds: number[] = [];
-  // private clientsInLimbo: number[] = [];
 
   get players(): Player[] {
     return this.connections.map(con => con.player).filter(notUndefined);
@@ -159,12 +158,20 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         const data = packet as AlterGameTagPacket;
 
         this.handleAlterGameTag(data.tag, data.value);
+
+        this.gameTags.set(data.tag, data.value);
         break;
       }
       case RootGamePacketType.EndGame: {
         const data = packet as EndGamePacket;
 
         this.handleEndGame(data.reason, data.showAd);
+
+        this.gameState = GameState.Ended;
+
+        for (let i = 0; i < this.connections.length; i++) {
+          this.connections[i].limboState = LimboState.PreSpawn;
+        }
         break;
       }
       case RootGamePacketType.GameData:
@@ -217,6 +224,8 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       }
       case RootGamePacketType.StartGame: {
         this.handleStartGame();
+
+        this.gameState = GameState.Started;
         break;
       }
       case RootGamePacketType.WaitForHost: {
@@ -230,6 +239,8 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         con.sendWaitingForHost();
         break;
       }
+      case RootGamePacketType.JoinGame:
+        break;
       default:
         throw new Error(`Attempted to handle an unimplemented root game packet type: ${packet.type} (${RootGamePacketType[packet.type]})`);
     }
@@ -282,25 +293,27 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       console.log("current ignore list in handleDisconnect", this.ignoreDespawnNetIds);
     }
 
-    this.connections.splice(disconnectingConnectionIndex, 1);
-
-    if (connection.isHost && this.connections[0]) {
-      this.connections[0].isHost = true;
-
-      if (this.gameState == GameState.Ended && this.connections[0].limboState == LimboState.WaitingForHost) {
-        this.handleRejoin(this.connections[0]);
-      }
+    if (disconnectingConnectionIndex != -1) {
+      this.connections.splice(disconnectingConnectionIndex, 1);
     }
+
+    if (connection.isHost && this.connections.length > 0) {
+      this.migrateHost();
+    }
+
+    console.log("handleDisconnect host id", this.host?.id ?? 0);
 
     this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, this.host?.id ?? 0, reason));
   }
 
   handleJoin(connection: Connection): void {
-    connection.room = this;
+    if (!connection.room) {
+      connection.room = this;
 
-    connection.on("packet", (packet: RootGamePacketDataType) => {
-      this.handlePacket(packet, connection);
-    });
+      connection.on("packet", (packet: RootGamePacketDataType) => {
+        this.handlePacket(packet, connection);
+      });
+    }
 
     switch (this.gameState) {
       case GameState.NotStarted:
@@ -310,20 +323,20 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         this.handleRejoin(connection);
         break;
       default:
-        connection.send([
-          new JoinGameErrorPacket(DisconnectionType.GameStarted),
-        ]);
+        connection.send([ new JoinGameErrorPacket(DisconnectionType.GameStarted) ]);
     }
   }
 
   private handleNewJoin(connection: Connection): void {
-    this.connections.push(connection);
+    if (this.connections.indexOf(connection) == -1) {
+      this.connections.push(connection);
+    }
 
     if (!this.isHost && !this.host) {
       connection.isHost = true;
     }
 
-    connection.limboState = connection.isHost ? LimboState.NotLimbo : LimboState.PreSpawn;
+    connection.limboState = LimboState.NotLimbo;
 
     this.sendJoinedMessage(connection);
     this.broadcastJoinMessage(connection);
@@ -331,9 +344,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   private handleRejoin(connection: Connection): void {
     if (connection.room?.code != this.code) {
-      connection.send([
-        new JoinGameErrorPacket(DisconnectionType.GameStarted),
-      ]);
+      connection.send([ new JoinGameErrorPacket(DisconnectionType.GameStarted) ]);
 
       return;
     }
@@ -353,23 +364,39 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   private sendToLimbo(connection: Connection): void {
-    this.connections.push(connection);
-
     connection.limboState = LimboState.WaitingForHost;
 
-    connection.send([
-      new WaitForHostPacket(this.code, connection.id),
-    ]);
+    connection.send([ new WaitForHostPacket(this.code, connection.id) ]);
 
     this.broadcastJoinMessage(connection);
   }
 
   private takeFromLimbo(connections: Connection[]): void {
-    connections.forEach(con => {
-      con.limboState = LimboState.NotLimbo;
-
+    connections.filter(con => con.limboState == LimboState.WaitingForHost).forEach(con => {
       this.sendJoinedMessage(con);
+
+      con.limboState = LimboState.NotLimbo;
     });
+  }
+
+  private migrateHost(): void {
+    if (this.isHost || this.host) {
+      return;
+    }
+
+    /**
+     * If the host leaves the game while in the lobby, and the next connection
+     * in line is still at the end-game screen (in either PreSpawn or limbo
+     * WaitingForHost limbo) then we should just assign the next player that is
+     * already in the lobby to host
+     */
+    const newHost = this.connections.find(con => con.limboState == LimboState.NotLimbo) ?? this.connections[0];
+
+    newHost.isHost = true;
+
+    if (this.gameState == GameState.Ended && newHost.limboState == LimboState.WaitingForHost) {
+      this.handleRejoin(newHost);
+    }
   }
 
   private broadcastJoinMessage(connection: Connection): void {
@@ -668,25 +695,11 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   private handleAlterGameTag(tag: AlterGameTag, value: number, sendTo?: Connection[]): void {
-    this.gameTags.set(tag, value);
-
     this.sendRootGamePacket(new AlterGameTagPacket(this.code, tag, value), sendTo);
   }
 
   private handleEndGame(reason: GameOverReason, showAd: boolean, sendTo?: Connection[]): void {
-    this.gameState = GameState.Ended;
-
     this.sendRootGamePacket(new EndGamePacket(this.code, reason, showAd), sendTo);
-
-    for (let i = 0; i < this.connections.length; i++) {
-      const con = this.connections[i];
-
-      con.limboState = LimboState.PreSpawn;
-
-      // this.clientsInLimbo.push(con.id);
-    }
-
-    // this.connections.splice(0);
   }
 
   private handleRemoveGame(reason?: DisconnectReason, sendTo?: Connection[]): void {
@@ -694,8 +707,6 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   private handleStartGame(sendTo?: Connection[]): void {
-    this.gameState = GameState.Started;
-
     this.sendRootGamePacket(new StartGamePacket(this.code), sendTo);
   }
 

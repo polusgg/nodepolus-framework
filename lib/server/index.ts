@@ -1,8 +1,9 @@
+import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
 import { GetGameListResponsePacket, RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
 import { HostGameResponsePacket } from "../protocol/packets/rootGamePackets/hostGame";
-import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
+import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";
 import { DEFAULT_SERVER_PORT } from "../util/constants";
 import { Connection } from "../protocol/connection";
@@ -10,14 +11,13 @@ import { RemoteInfo } from "../util/remoteInfo";
 import { Level } from "../types/level";
 import { Room } from "../room";
 import dgram from "dgram";
-import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 
-enum DefaultHostState {
+export enum DefaultHostState {
   Server,
   Client,
 }
 
-interface ServerConfig {
+export interface ServerConfig {
   defaultHost: DefaultHostState;
   defaultRoomAddress: string;
   defaultRoomPort: number;
@@ -123,8 +123,6 @@ export class Server {
           room.handleJoin(sender);
         } else {
           sender.send([ new JoinGameErrorPacket(DisconnectionType.GameNotFound) ]);
-
-          // throw new Error(`Client ${sender.id} sent a JoinGame packet with an invalid room`);
         }
         break;
       }
