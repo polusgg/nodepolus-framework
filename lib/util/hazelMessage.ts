@@ -56,7 +56,7 @@ export class MessageWriter extends HazelMessage {
   }
 
   writeBoolean(value: boolean): this {
-    return this.writeByte(Number(value));
+    return this.writeByte(value ? 1 : 0);
   }
 
   writeSByte(value: number): this {
@@ -214,7 +214,7 @@ export class MessageWriter extends HazelMessage {
     writer: (subWriter: MessageWriter, item: T, idx: number) => void,
     lengthIsPacked: boolean = true,
   ): this {
-    const arr = Array.from(items);
+    const arr = [ ...items ];
 
     if (lengthIsPacked) {
       this.writePackedUInt32(arr.length);
@@ -315,7 +315,7 @@ export class MessageReader extends HazelMessage {
   }
 
   readBoolean(): boolean {
-    return Boolean(this.readByte());
+    return !!this.readByte();
   }
 
   readSByte(): number {

@@ -3,9 +3,9 @@ import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class SwitchSystem extends BaseSystem<SwitchSystem> {
-  public actualSwitches!: boolean[];
-  public expectedSwitches!: boolean[];
-  public visionModifier!: number;
+  public actualSwitches: boolean[] = Array(5).fill(0).map(() => !!Math.round(Math.random() * 1));
+  public expectedSwitches: boolean[] = this.actualSwitches;
+  public visionModifier: number = 0xff;
 
   constructor() {
     super(SystemType.Electrical);

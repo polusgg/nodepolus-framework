@@ -5,6 +5,7 @@ import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SecurityCameraSystem } from "./systems/securityCameraSystem";
 import { HudOverrideSystem } from "./systems/hudOverrideSystem";
+import { LaboratorySystem } from "./systems/laboratorySystem";
 import { AutoDoorsSystem } from "./systems/autoDoorsSystem";
 import { LifeSuppSystem } from "./systems/lifeSuppSystem";
 import { DeconTwoSystem } from "./systems/deconTwoSystem";
@@ -22,7 +23,6 @@ import { BaseSystem } from "./systems/baseSystem";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { Level } from "../../../types/level";
-import { LaboratorySystem } from "./systems/laboratorySystem";
 
 export type System = AutoDoorsSystem
 | DeconSystem
@@ -40,11 +40,14 @@ export type System = AutoDoorsSystem
 
 export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject<T> {
   public systems: BaseSystem<System>[] = [];
+  public spawnSystemTypes: SystemType[];
 
   private readonly level: Level;
 
-  protected constructor(public type: InnerNetObjectType, netId: number, parent: U, public systemTypes: SystemType[]) {
+  protected constructor(public type: InnerNetObjectType, netId: number, parent: U, public systemTypes: SystemType[], spawnSystemTypes?: SystemType[]) {
     super(type, netId, parent);
+
+    this.spawnSystemTypes = spawnSystemTypes ?? this.systemTypes;
 
     switch (type) {
       case InnerNetObjectType.ShipStatus:
@@ -96,7 +99,11 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
 
       console.log({ oldSystem, currentSystem });
 
-      if (!currentSystem.equals(oldSystem)) {
+      const isEqual = currentSystem.equals(oldSystem);
+
+      console.log(currentSystem.type, isEqual);
+
+      if (!isEqual) {
         return currentSystem.type;
       }
 
@@ -122,12 +129,12 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
   getSpawn(): SpawnInnerNetObject {
     return new SpawnInnerNetObject(
       this.id,
-      this.getSystems(undefined, this.systemTypes, true),
+      this.getSystems(undefined, this.spawnSystemTypes, true),
     );
   }
 
   setSpawn(data: MessageReader | MessageWriter): void {
-    this.setSystems(this.systemTypes, MessageReader.fromMessage(data), true);
+    this.setSystems(this.spawnSystemTypes, MessageReader.fromMessage(data), true);
   }
 
   private getSystemFromType(systemType: SystemType): BaseSystem<InternalSystemType> {

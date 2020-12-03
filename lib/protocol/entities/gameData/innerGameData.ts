@@ -4,10 +4,10 @@ import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPacke
 import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseGameObject } from "../baseEntity";
+import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { PlayerData } from "./playerData";
 import { EntityGameData } from ".";
-import { Connection } from "../../connection";
 
 export class InnerGameData extends BaseGameObject<InnerGameData> {
   constructor(netId: number, public parent: EntityGameData, public players: PlayerData[]) {

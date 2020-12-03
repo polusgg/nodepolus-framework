@@ -3,8 +3,8 @@ import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class HqHudSystem extends BaseSystem<HqHudSystem> {
-  public activeConsoles!: Map<number, number>;
-  public completedConsoles!: Set<number>;
+  public activeConsoles: Map<number, number> = new Map();
+  public completedConsoles: Set<number> = new Set([0, 1]);
 
   constructor() {
     super(SystemType.Communications);
@@ -53,8 +53,8 @@ export class HqHudSystem extends BaseSystem<HqHudSystem> {
       return false;
     }
 
-    const completedConsolesArray = Array.from(this.completedConsoles);
-    const oldCompletedConsolesArray = Array.from(old.completedConsoles);
+    const completedConsolesArray = [ ...this.completedConsoles ];
+    const oldCompletedConsolesArray = [ ...old.completedConsoles ];
 
     for (let i = 0; i < completedConsolesArray.length; i++) {
       if (oldCompletedConsolesArray[i] != completedConsolesArray[i]) {

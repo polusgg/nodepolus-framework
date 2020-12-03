@@ -165,7 +165,9 @@
       "capIsNew": true,
       "properties": true
     }],
-    "newline-per-chained-call": "error",
+    "newline-per-chained-call": ["error", {
+      "ignoreChainWithDepth": 3
+    }],
     "no-array-constructor": "off",
     "@typescript-eslint/no-array-constructor": "error",
     "no-inline-comments": "error",

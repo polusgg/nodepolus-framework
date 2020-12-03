@@ -4,7 +4,7 @@ import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class AutoDoorsSystem extends BaseSystem<AutoDoorsSystem> {
-  public doors!: boolean[];
+  public doors: boolean[] = Array(SKELD_DOOR_COUNT).fill(true);
 
   constructor() {
     super(SystemType.Doors);
@@ -18,22 +18,46 @@ export class AutoDoorsSystem extends BaseSystem<AutoDoorsSystem> {
     return autoDoorsSystem;
   }
 
-  getData(): MessageWriter {
-    return new MessageWriter().writeBitfield(this.doors);
+  getData(old: AutoDoorsSystem): MessageWriter {
+    const writer = new MessageWriter();
+    let mask = 0;
+    const dirtyDoors: number[] = [];
+
+    for (let i = 0; i < this.doors.length; i++) {
+      if (old.doors[i] != this.doors[i]) {
+        mask |= 1 << i;
+
+        dirtyDoors.push(this.doors[i] ? 1 : 0);
+      }
+    }
+
+    return writer.writeByte(mask).writeBytes(dirtyDoors);
   }
 
   setData(data: MessageReader): void {
-    this.doors = data.readBitfield(SKELD_DOOR_COUNT);
+    const mask = data.readByte();
+
+    for (let i = 0; i < this.doors.length; i++) {
+      if ((mask & (1 << i)) != 0) {
+        this.doors[i] = data.readBoolean();
+      }
+    }
   }
 
   getSpawn(): MessageWriter {
-    return new MessageWriter().writeList(this.doors, (writer, door) => {
-      writer.writeBoolean(door);
-    });
+    const writer = new MessageWriter();
+
+    for (let i = 0; i < this.doors.length; i++) {
+      writer.writeBoolean(this.doors[i]);
+    }
+
+    return writer;
   }
 
   setSpawn(data: MessageReader): void {
-    this.doors = data.readList(reader => reader.readBoolean());
+    for (let i = 0; i < this.doors.length; i++) {
+      this.doors[i] = data.readBoolean();
+    }
   }
 
   equals(old: AutoDoorsSystem): boolean {

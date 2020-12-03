@@ -3,7 +3,7 @@ import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class SecurityCameraSystem extends BaseSystem<SecurityCameraSystem> {
-  public playersViewingCams!: Set<number>;
+  public playersViewingCams: Set<number> = new Set();
 
   constructor() {
     super(SystemType.Security);
@@ -40,8 +40,8 @@ export class SecurityCameraSystem extends BaseSystem<SecurityCameraSystem> {
       return false;
     }
 
-    const viewers = Array.from(this.playersViewingCams);
-    const oldViewers = Array.from(this.playersViewingCams);
+    const viewers = [ ...this.playersViewingCams ];
+    const oldViewers = [ ...this.playersViewingCams ];
 
     for (let i = 0; i < this.playersViewingCams.size; i++) {
       if (viewers[i] != oldViewers[i]) {

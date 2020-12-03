@@ -4,8 +4,8 @@ import { DecontaminationDoorState } from "./deconSystem";
 import { BaseSystem } from "./baseSystem";
 
 export class DeconTwoSystem extends BaseSystem<DeconTwoSystem> {
-  public timer!: number;
-  public state!: DecontaminationDoorState;
+  public timer = 0;
+  public state: DecontaminationDoorState = DecontaminationDoorState.Idle;
 
   constructor() {
     super(SystemType.Decontamination2);

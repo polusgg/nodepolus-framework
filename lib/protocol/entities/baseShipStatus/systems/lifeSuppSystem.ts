@@ -3,8 +3,8 @@ import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class LifeSuppSystem extends BaseSystem<LifeSuppSystem> {
-  public timer!: number;
-  public completedConsoles!: Set<number>;
+  public timer = 10000;
+  public completedConsoles: Set<number> = new Set([0, 1]);
 
   constructor() {
     super(SystemType.Oxygen);
@@ -47,8 +47,8 @@ export class LifeSuppSystem extends BaseSystem<LifeSuppSystem> {
       return false;
     }
 
-    const completedConsolesArray = new Array(this.completedConsoles);
-    const oldCompletedConsolesArray = new Array(old.completedConsoles);
+    const completedConsolesArray = [ ...this.completedConsoles ];
+    const oldCompletedConsolesArray = [ ...old.completedConsoles ];
 
     for (let i = 0; i < completedConsolesArray.length; i++) {
       if (completedConsolesArray[i] != oldCompletedConsolesArray[i]) {

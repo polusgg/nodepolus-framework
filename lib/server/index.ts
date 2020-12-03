@@ -81,7 +81,7 @@ export class Server {
       this.connectionRoomMap.delete(RemoteInfo.toString(connection));
 
       if (connection.room.connections.length == 0) {
-        delete this.rooms[this.rooms.indexOf(connection.room)];
+        this.rooms.splice(this.rooms.indexOf(connection.room), 1);
         this.roomMap.delete(connection.room.code);
       }
     }
@@ -133,6 +133,7 @@ export class Server {
         const counts: [number, number, number] = [0, 0, 0];
 
         for (let i = 0; i < this.rooms.length; i++) {
+          // Remove from rooms array when deleted.
           const room = this.rooms[i];
 
           counts[room.options.options.levels[0]]++;

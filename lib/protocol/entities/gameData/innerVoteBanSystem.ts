@@ -23,11 +23,12 @@ export class InnerVoteBanSystem extends BaseGameObject<InnerVoteBanSystem> {
   }
 
   addVote(votingClientId: number, targetClientId: number, sendTo: Connection[]): void {
-    const votes = this.votes.get(targetClientId);
+    const votes = this.votes.get(targetClientId) ?? [];
 
-    if (!votes) {
-      throw new Error(`VoteBanSystem does not contain an entry for client ${targetClientId}`);
-    }
+    // if (!votes) {
+    //   // throw new Error(`VoteBanSystem does not contain an entry for client ${targetClientId}`);
+    //   this.votes.set(targetClientId, []);
+    // }
 
     for (let i = 0; i < 3; i++) {
       if (votes[i] == 0) {
@@ -35,6 +36,8 @@ export class InnerVoteBanSystem extends BaseGameObject<InnerVoteBanSystem> {
         break;
       }
     }
+
+    this.votes.set(targetClientId, votes);
 
     this.sendRPCPacketTo(sendTo, new AddVotePacket(votingClientId, targetClientId));
   }

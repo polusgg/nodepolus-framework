@@ -3,8 +3,8 @@ import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class LaboratorySystem extends BaseSystem<LaboratorySystem> {
-  public timer!: number;
-  public userConsoles!: Map<number, number>;
+  public timer = 10000;
+  public userConsoles: Map<number, number> = new Map();
 
   constructor() {
     super(SystemType.Laboratory);

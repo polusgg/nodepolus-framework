@@ -49,7 +49,7 @@ export const DEFAULT_GAME_OPTIONS = new GameOptionsData({
  */
 export const POLUS_DOOR_COUNT = 12;
 
-export const SKELD_DOOR_COUNT = 12;
+export const SKELD_DOOR_COUNT = 13;
 
 /**
  * RemoteInfo constants

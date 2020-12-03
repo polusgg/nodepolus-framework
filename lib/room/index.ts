@@ -70,8 +70,8 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   public size = -1;
 
   private readonly rpcHandler: RPCHandler = new RPCHandler(this);
-
-  private clientsInLimbo: number[] = [];
+  private readonly ignoreDespawnNetIds: number[] = [];
+  // private clientsInLimbo: number[] = [];
 
   get players(): Player[] {
     return this.connections.map(con => con.player).filter(notUndefined);
@@ -98,7 +98,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       this.address,
       this.port,
       this.code,
-      "TODO: Host Name",
+      this.isHost ? "TODO: Host Name" : (this.host as Connection).name!,
       this.players.length,
       this.age,
       this.options.options.levels[0],
@@ -140,7 +140,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       for (let j = 0; j < player.gameObject.innerNetObjects.length; j++) {
         const object = player.gameObject.innerNetObjects[j];
 
-        if (object.id == netId) {
+        if (notUndefined(object) && object.id == netId) {
           return object;
         }
       }
@@ -274,10 +274,13 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
 
-    // Disconnection packets remove the player from the connections array
-    // however doing so also removes the only reference to that player's
-    // gameobject. Because of this, despawn packets sent to that player
-    // will fail to find that game object
+    if (connection.player) {
+      console.log("Disconnecting Connection had player.");
+      this.ignoreDespawnNetIds.push(connection.player.gameObject.playerControl.id);
+      this.ignoreDespawnNetIds.push(connection.player.gameObject.playerPhysics.id);
+      this.ignoreDespawnNetIds.push(connection.player.gameObject.customNetworkTransform.id);
+      console.log("current ignore list in handleDisconnect", this.ignoreDespawnNetIds);
+    }
 
     this.connections.splice(disconnectingConnectionIndex, 1);
 
@@ -553,12 +556,20 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   private deleteIfEmpty(prop: string): void {
-    if (this[prop].innerNetObjects.filter(e => e).length == 0) {
+    if (this[prop].innerNetObjects.filter(notUndefined).length == 0) {
       delete this[prop];
     }
   }
 
   private handleDespawn(netId: number, sendTo?: Connection[]): void {
+    console.log("current ignore list in handleDespawn", this.ignoreDespawnNetIds);
+
+    const ignoreIds = this.ignoreDespawnNetIds.indexOf(netId);
+
+    if (ignoreIds != -1) {
+      return;
+    }
+
     const innerNetObject = this.findInnerNetObject(netId);
 
     if (!innerNetObject) {
@@ -627,21 +638,21 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       case InnerNetObjectType.PlayerControl:
         connection!.player!.gameObject.innerNetObjects[0] = undefined as unknown as InnerPlayerControl;
 
-        if (connection!.player!.gameObject.innerNetObjects.filter(e => Boolean(e)).length == 0) {
+        if (connection!.player!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
           delete connection!.player;
         }
         break;
       case InnerNetObjectType.PlayerPhysics:
         connection!.player!.gameObject.innerNetObjects[1] = undefined as unknown as InnerPlayerPhysics;
 
-        if (connection!.player!.gameObject.innerNetObjects.filter(e => Boolean(e)).length == 0) {
+        if (connection!.player!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
           delete connection!.player;
         }
         break;
       case InnerNetObjectType.CustomNetworkTransform:
         connection!.player!.gameObject.innerNetObjects[2] = undefined as unknown as InnerCustomNetworkTransform;
 
-        if (connection!.player!.gameObject.innerNetObjects.filter(e => Boolean(e)).length == 0) {
+        if (connection!.player!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
           delete connection!.player;
         }
         break;
@@ -672,7 +683,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
       con.limboState = LimboState.PreSpawn;
 
-      this.clientsInLimbo.push(con.id);
+      // this.clientsInLimbo.push(con.id);
     }
 
     // this.connections.splice(0);

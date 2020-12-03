@@ -3,7 +3,7 @@ import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class HudOverrideSystem extends BaseSystem<HudOverrideSystem> {
-  public sabotaged!: boolean;
+  public sabotaged = false;
 
   constructor() {
     super(SystemType.Communications);

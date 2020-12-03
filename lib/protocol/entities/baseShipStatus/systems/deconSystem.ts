@@ -11,8 +11,8 @@ export enum DecontaminationDoorState {
 }
 
 export class DeconSystem extends BaseSystem<DeconSystem> {
-  public timer!: number;
-  public state!: DecontaminationDoorState;
+  public timer = 0;
+  public state: DecontaminationDoorState = DecontaminationDoorState.Idle;
 
   constructor() {
     super(SystemType.Decontamination);

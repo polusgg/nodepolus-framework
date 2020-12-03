@@ -4,7 +4,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class CloseDoorsOfTypePacket extends BaseRPCPacket {
-  constructor(readonly system: SystemType) {
+  constructor(
+    public readonly system: SystemType,
+  ) {
     super(RPCPacketType.CloseDoorsOfType);
   }
 

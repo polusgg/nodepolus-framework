@@ -114,7 +114,7 @@ export class SecurityAmount implements RepairAmount {
   }
 
   serialize(): number {
-    return Number(this.isViewingCameras);
+    return this.isViewingCameras ? 1 : 0;
   }
 }
 
@@ -128,7 +128,7 @@ export class NormalCommunicationsAmount implements RepairAmount {
   }
 
   serialize(): number {
-    return Number(this.isRepaired);
+    return this.isRepaired ? 1 : 0;
   }
 }
 

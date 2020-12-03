@@ -14,6 +14,13 @@ export class InnerHeadquarters extends BaseShipStatus<InnerHeadquarters, EntityH
       SystemType.Communications,
       SystemType.Sabotage,
       SystemType.Decontamination,
+    ], [
+      SystemType.Reactor,
+      SystemType.Electrical,
+      SystemType.Oxygen,
+      SystemType.Medbay,
+      SystemType.Communications,
+      SystemType.Sabotage,
     ]);
   }
 

@@ -3,7 +3,7 @@ import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class MedScanSystem extends BaseSystem<MedScanSystem> {
-  public playersInQueue!: Set<number>;
+  public playersInQueue: Set<number> = new Set();
 
   constructor() {
     super(SystemType.Medbay);
@@ -40,8 +40,8 @@ export class MedScanSystem extends BaseSystem<MedScanSystem> {
       return false;
     }
 
-    const playersInQueueArray = new Array(this.playersInQueue);
-    const oldPlayersInQueueArray = new Array(old.playersInQueue);
+    const playersInQueueArray = [ ...this.playersInQueue ];
+    const oldPlayersInQueueArray = [ ...old.playersInQueue ];
 
     for (let i = 0; i < playersInQueueArray.length; i++) {
       if (playersInQueueArray[i] != oldPlayersInQueueArray[i]) {

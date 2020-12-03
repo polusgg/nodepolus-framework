@@ -70,8 +70,10 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
   }
 
   votingComplete(voteStates: VoteState[], didVotePlayerOff: boolean, exiledPlayerId: number, isTie: boolean, sendTo: Connection[]): void {
-    for (let i = 0; i < voteStates.length; i++) {
-      this.playerStates[i] = voteStates[i];
+    if (this.parent.room.isHost) {
+      for (let i = 0; i < voteStates.length; i++) {
+        this.playerStates[i] = voteStates[i];
+      }
     }
 
     this.ended = true;

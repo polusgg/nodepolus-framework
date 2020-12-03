@@ -3,7 +3,7 @@ import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class SabotageSystem extends BaseSystem<SabotageSystem> {
-  public cooldown!: number;
+  public cooldown = 0;
 
   constructor() {
     super(SystemType.Sabotage);
