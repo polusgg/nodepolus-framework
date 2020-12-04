@@ -61,9 +61,7 @@ export class GameDataPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    const writer = new MessageWriter();
-
-    writer.writeInt32(RoomCode.encode(this.roomCode));
+    const writer = new MessageWriter().writeInt32(RoomCode.encode(this.roomCode));
 
     if (this.targetClientId || this.targetClientId === 0) {
       writer.writePackedUInt32(this.targetClientId);
@@ -72,7 +70,8 @@ export class GameDataPacket extends BaseRootGamePacket {
     for (let i = 0; i < this.packets.length; i++) {
       const packet = this.packets[i];
 
-      writer.startMessage(packet.type).writeBytes(packet.serialize())
+      writer.startMessage(packet.type)
+        .writeBytes(packet.serialize())
         .endMessage();
     }
 

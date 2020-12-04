@@ -19,7 +19,8 @@ export class CastVotePacket extends BaseRPCPacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.votingPlayerId)
+    return new MessageWriter()
+      .writeByte(this.votingPlayerId)
       .writeSByte(this.suspectPlayerId);
   }
 }

@@ -27,7 +27,8 @@ export class LaboratorySystem extends BaseSystem<LaboratorySystem> {
   }
 
   getSpawn(): MessageWriter {
-    return new MessageWriter().writeFloat32(this.timer)
+    return new MessageWriter()
+      .writeFloat32(this.timer)
       .writeList(this.userConsoles, (writer, pair) => {
         writer.writeByte(pair[0]);
         writer.writeByte(pair[1]);

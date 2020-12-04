@@ -39,9 +39,7 @@ export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
   getSpawn(): SpawnInnerNetObject {
     return new DataPacket(
       this.id,
-      new MessageWriter()
-        .startMessage(1)
-        .endMessage(),
+      new MessageWriter().startMessage(1).endMessage(),
     );
   }
 

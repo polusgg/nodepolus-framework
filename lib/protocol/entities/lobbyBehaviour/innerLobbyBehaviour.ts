@@ -28,9 +28,7 @@ export class InnerLobbyBehaviour extends BaseGameObject<InnerLobbyBehaviour> {
   getSpawn(): SpawnInnerNetObject {
     return new DataPacket(
       this.id,
-      new MessageWriter()
-        .startMessage(1)
-        .endMessage(),
+      new MessageWriter().startMessage(1).endMessage(),
     );
   }
 

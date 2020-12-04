@@ -19,7 +19,8 @@ export class SpawnInnerNetObject extends BaseGameDataPacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writePackedUInt32(this.innerNetObjectID)
+    return new MessageWriter()
+      .writePackedUInt32(this.innerNetObjectID)
       .startMessage(1)
       .writeBytes(this.data)
       .endMessage();
@@ -50,8 +51,6 @@ export class SpawnPacket extends BaseGameDataPacket {
       .writePackedUInt32(this.spawnType)
       .writePackedInt32(this.owner)
       .writeByte(this.flags)
-      .writeList(this.innerNetObjects, (writer, item) => {
-        writer.writeBytes(item.serialize());
-      });
+      .writeList(this.innerNetObjects, (writer, item) => writer.writeBytes(item.serialize()));
   }
 }

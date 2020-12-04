@@ -18,6 +18,8 @@ export class AnnouncementDataPacket extends BaseAnnouncementPacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writePackedUInt32(this.uniqueId).writeString(this.text);
+    return new MessageWriter()
+      .writePackedUInt32(this.uniqueId)
+      .writeString(this.text);
   }
 }

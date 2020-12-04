@@ -15,7 +15,8 @@ export class SetScannerPacket extends BaseRPCPacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeBoolean(this.isScanning)
+    return new MessageWriter()
+      .writeBoolean(this.isScanning)
       .writeByte(this.sequenceId);
   }
 }

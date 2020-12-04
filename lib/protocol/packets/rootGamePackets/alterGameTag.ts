@@ -18,7 +18,8 @@ export class AlterGameTagPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeInt32(RoomCode.encode(this.roomCode))
+    return new MessageWriter()
+      .writeInt32(RoomCode.encode(this.roomCode))
       .writeByte(this.tag)
       .writeByte(this.value);
   }

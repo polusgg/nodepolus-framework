@@ -44,7 +44,8 @@ export class ReselectServerPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.unknown)
+    return new MessageWriter()
+      .writeByte(this.unknown)
       .writeMessageList(this.servers, (subWriter, item) => {
         item.serialize(subWriter);
       });

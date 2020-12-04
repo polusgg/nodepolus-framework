@@ -128,7 +128,8 @@ export class RootGamePacket {
     const writer = new MessageWriter();
 
     for (let i = 0; i < this.packets.length; i++) {
-      writer.startMessage(this.packets[i].type).writeBytes(this.packets[i].serialize())
+      writer.startMessage(this.packets[i].type)
+        .writeBytes(this.packets[i].serialize())
         .endMessage();
     }
 
@@ -163,7 +164,8 @@ export class RootAnnouncementPacket {
     const writer = new MessageWriter();
 
     for (let i = 0; i < this.packets.length; i++) {
-      writer.startMessage(this.packets[i].type).writeBytes(this.packets[i].serialize())
+      writer.startMessage(this.packets[i].type)
+        .writeBytes(this.packets[i].serialize())
         .endMessage();
     }
 

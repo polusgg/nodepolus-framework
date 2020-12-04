@@ -16,7 +16,8 @@ export class SetTasksPacket extends BaseRPCPacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.playerId)
+    return new MessageWriter()
+      .writeByte(this.playerId)
       .writeList(this.tasks, (sub, task) => sub.writeByte(task));
   }
 }

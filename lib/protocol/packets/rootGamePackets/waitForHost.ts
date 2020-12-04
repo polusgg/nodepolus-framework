@@ -18,7 +18,8 @@ export class WaitForHostPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeInt32(RoomCode.encode(this.roomCode))
+    return new MessageWriter()
+      .writeInt32(RoomCode.encode(this.roomCode))
       .writeUInt32(this.waitingClientId);
   }
 }

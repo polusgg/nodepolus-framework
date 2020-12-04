@@ -28,7 +28,8 @@ export class DeconTwoSystem extends BaseSystem<DeconTwoSystem> {
   }
 
   getSpawn(): MessageWriter {
-    return new MessageWriter().writeByte(this.timer)
+    return new MessageWriter()
+      .writeByte(this.timer)
       .writeByte(this.state);
   }
 

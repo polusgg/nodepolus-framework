@@ -312,8 +312,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   getData(): DataPacket {
     return new DataPacket(
       this.id,
-      new MessageWriter()
-        .writeByte(this.id),
+      new MessageWriter().writeByte(this.id),
     );
   }
 

@@ -123,7 +123,11 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
   setData(data: MessageReader | MessageWriter): void {
     const reader = MessageReader.fromRawBytes(data.buffer);
 
-    this.setSystems(this.deserializeDirtyBitsToSystems(reader.readPackedUInt32()), reader.readRemainingBytes(), false);
+    this.setSystems(
+      this.deserializeDirtyBitsToSystems(reader.readPackedUInt32()),
+      reader.readRemainingBytes(),
+      false,
+    );
   }
 
   getSpawn(): SpawnInnerNetObject {

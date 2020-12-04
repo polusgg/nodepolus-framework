@@ -35,7 +35,8 @@ export class DeconSystem extends BaseSystem<DeconSystem> {
   }
 
   getSpawn(): MessageWriter {
-    return new MessageWriter().writeByte(this.timer)
+    return new MessageWriter()
+      .writeByte(this.timer)
       .writeByte(this.state);
   }
 

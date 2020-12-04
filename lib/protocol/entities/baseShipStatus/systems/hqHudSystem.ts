@@ -30,10 +30,7 @@ export class HqHudSystem extends BaseSystem<HqHudSystem> {
     return new MessageWriter().writeList(this.activeConsoles, (writer, pair) => {
       writer.writeByte(pair[0]);
       writer.writeByte(pair[1]);
-    })
-      .writeList(this.completedConsoles, (writer, con) => {
-        writer.writeByte(con);
-      });
+    }).writeList(this.completedConsoles, (writer, con) => writer.writeByte(con));
   }
 
   setSpawn(data: MessageReader): void {

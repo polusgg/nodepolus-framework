@@ -22,7 +22,8 @@ export class LateRejectionPacket extends BaseRootGamePacket {
   }
 
   serialize(): MessageWriter {
-    const writer = new MessageWriter().writeInt32(RoomCode.encode(this.roomCode))
+    const writer = new MessageWriter()
+      .writeInt32(RoomCode.encode(this.roomCode))
       .writePackedUInt32(this.removedClientId);
 
     this.disconnectReason.serialize(writer);

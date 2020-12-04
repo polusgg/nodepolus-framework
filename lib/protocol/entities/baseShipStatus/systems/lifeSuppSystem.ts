@@ -27,10 +27,9 @@ export class LifeSuppSystem extends BaseSystem<LifeSuppSystem> {
   }
 
   getSpawn(): MessageWriter {
-    return new MessageWriter().writeFloat32(this.timer)
-      .writeList(this.completedConsoles, (writer, con) => {
-        writer.writePackedUInt32(con);
-      });
+    return new MessageWriter()
+      .writeFloat32(this.timer)
+      .writeList(this.completedConsoles, (writer, con) => writer.writePackedUInt32(con));
   }
 
   setSpawn(data: MessageReader): void {
