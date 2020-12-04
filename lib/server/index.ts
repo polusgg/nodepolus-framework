@@ -52,10 +52,10 @@ export class Server {
     });
   }
 
-  async listen(port: number = DEFAULT_SERVER_PORT): Promise<void> {
-    return new Promise(resolve => {
-      this.serverSocket.bind(port, "0.0.0.0", resolve);
-    });
+  listen(port: number = DEFAULT_SERVER_PORT, onStart: () => void = () => {}): void {
+    this.serverSocket.bind(port, "0.0.0.0");
+
+    onStart();
   }
 
   getConnection(remoteInfo: string | dgram.RemoteInfo): Connection {

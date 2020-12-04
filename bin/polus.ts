@@ -1,20 +1,22 @@
 Error.stackTraceLimit = 25;
 
 import { Server } from "../lib/server";
-import repl from "repl";
+// import repl from "repl";
 
 const server = new Server();
 
-server.listen(22023).then(() => {
+server.listen(22023, () => {
   console.log("Listening on port 22023");
 });
 
-repl.start("> ");
+// repl.start("> ");
 
 const exitHandler = (): void => {
   console.log("Shutting down");
 
   server.connections.forEach(c => c.disconnect());
+
+  process.exit();
 };
 
 ["exit", "SIGINT", "SIGTERM", "SIGUSR1", "SIGUSR2"].forEach((event: string) => {
