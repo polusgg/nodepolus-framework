@@ -22,6 +22,13 @@ import { Vector2 } from "../util/vector2";
 import { HostInstance } from "./types";
 import { Player } from "../player";
 import { Room } from "../room";
+import { Level } from "../types/level";
+import { EntityShipStatus } from "../protocol/entities/shipStatus";
+import { InnerShipStatus } from "../protocol/entities/shipStatus/innerShipStatus";
+import { EntityHeadquarters } from "../protocol/entities/headquarters";
+import { InnerHeadquarters } from "../protocol/entities/headquarters/innerHeadquarters";
+import { EntityPlanetMap } from "../protocol/entities/planetMap";
+import { InnerPlanetMap } from "../protocol/entities/planetMap/innerPlanetMap";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
@@ -49,7 +56,29 @@ export class CustomHost implements HostInstance {
     this.readyPlayerList.push(sender.id);
 
     if (this.readyPlayerList.length == this.room.connections.length) {
-      // start game
+      if (this.room.lobbyBehavior) {
+        this.room.despawn(this.room.lobbyBehavior.lobbyBehaviour);
+      }
+
+      switch (this.room.options.options.levels[0]) {
+        case Level.TheSkeld:
+          // TODO: API call for AprilShipStatus
+          this.room.shipStatus = new EntityShipStatus(this.room);
+          this.room.shipStatus.innerNetObjects[0] = new InnerShipStatus(this.netIdIndex++, this.room.shipStatus);
+          break;
+        case Level.MiraHq:
+          this.room.shipStatus = new EntityHeadquarters(this.room);
+          this.room.shipStatus.innerNetObjects[0] = new InnerHeadquarters(this.netIdIndex++, this.room.shipStatus);
+          break;
+        case Level.Polus:
+          this.room.shipStatus = new EntityPlanetMap(this.room);
+          this.room.shipStatus.innerNetObjects[0] = new InnerPlanetMap(this.netIdIndex++, this.room.shipStatus);
+          break;
+      }
+
+      this.room.connections.forEach(connection => {
+        connection.write(new GameDataPacket([ this.room.shipStatus!.spawn() ], this.room.code));
+      });
     }
   }
 
@@ -107,7 +136,11 @@ export class CustomHost implements HostInstance {
       sender.write(new GameDataPacket([ player.gameObject.spawn() ], this.room.code));
     });
 
+    console.log("A");
+
     this.room.sendRootGamePacket(new GameDataPacket([ player.gameObject.spawn() ], this.room.code));
+
+    console.log("B");
 
     player.gameObject.playerControl.syncSettings(this.room.options, this.room.connections);
 

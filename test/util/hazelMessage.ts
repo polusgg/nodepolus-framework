@@ -337,22 +337,8 @@ test("reads a long bitfield", t => {
   const buf = MessageReader.fromRawBytes("a52e");
 
   t.deepEqual(buf.readBitfield(16), [
-    true,
-    false,
-    true,
-    false,
-    false,
-    true,
-    false,
-    true,
-    false,
-    false,
-    true,
-    false,
-    true,
-    true,
-    true,
-    false,
+    true, false, true, false, false, true, false, true,
+    false, false, true, false, true, true, true, false,
   ]);
   t.false(buf.hasBytesLeft());
 });
@@ -361,22 +347,8 @@ test("writes a long bitfield", t => {
   const buf = new MessageWriter();
 
   buf.writeBitfield([
-    true,
-    false,
-    true,
-    false,
-    false,
-    true,
-    false,
-    true,
-    false,
-    false,
-    true,
-    false,
-    true,
-    true,
-    true,
-    false,
+    true, false, true, false, false, true, false, true,
+    false, false, true, false, true, true, true, false,
   ]);
 
   t.is(buf.buffer.toString("hex"), "a52e");

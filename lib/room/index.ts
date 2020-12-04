@@ -1,5 +1,6 @@
 import { EntityLevel, InnerNetObject, InnerNetObjectType, RoomImplementation } from "../protocol/entities/types";
 import { SpawnInnerNetObject, SpawnPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/spawn";
+import { JoinGameErrorPacket, JoinGameResponsePacket } from "../protocol/packets/rootGamePackets/joinGame";
 import { LateRejectionPacket, RemovePlayerPacket } from "../protocol/packets/rootGamePackets/removePlayer";
 import { GameDataPacket, GameDataPacketDataType } from "../protocol/packets/rootGamePackets/gameData";
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
@@ -9,7 +10,6 @@ import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericP
 import { AlterGameTagPacket } from "../protocol/packets/rootGamePackets/alterGameTag";
 import { DataPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/data";
 import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSystem";
-import { JoinGameErrorPacket, JoinGameResponsePacket } from "../protocol/packets/rootGamePackets/joinGame";
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
 import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
 import { RPCPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/rpc";
@@ -19,6 +19,7 @@ import { GameDataPacketType, RootGamePacketType } from "../protocol/packets/type
 import { JoinedGamePacket } from "../protocol/packets/rootGamePackets/joinedGame";
 import { KickPlayerPacket } from "../protocol/packets/rootGamePackets/kickPlayer";
 import { RemoveGamePacket } from "../protocol/packets/rootGamePackets/removeGame";
+import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { StartGamePacket } from "../protocol/packets/rootGamePackets/startGame";
 import { RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { EntityAprilShipStatus } from "../protocol/entities/aprilShipStatus";
@@ -31,7 +32,6 @@ import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { EntityShipStatus } from "../protocol/entities/shipStatus";
 import { EntityPlanetMap } from "../protocol/entities/planetMap";
 import { EntityGameData } from "../protocol/entities/gameData";
-import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { GameOptionsData } from "../types/gameOptionsData";
 import { EntityPlayer } from "../protocol/entities/player";
 import { DEFAULT_GAME_OPTIONS } from "../util/constants";
@@ -40,6 +40,7 @@ import { AlterGameTag } from "../types/alterGameTag";
 import { Connection } from "../protocol/connection";
 import { FakeHostId } from "../types/fakeHostId";
 import { notUndefined } from "../util/functions";
+import { LimboState } from "../types/limboState";
 import { RemoteInfo } from "../util/remoteInfo";
 import { SpawnFlag } from "../types/spawnFlag";
 import { SpawnType } from "../types/spawnType";
@@ -51,7 +52,6 @@ import cloneDeep from "lodash/clonedeep";
 import { CustomHost } from "../host";
 import { Player } from "../player";
 import dgram from "dgram";
-import { LimboState } from "../types/limboState";
 
 // TODO: All players are being marked as new when joining a lobby
 
@@ -105,6 +105,10 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     );
   }
 
+  get isPublic(): boolean {
+    return !!(this.gameTags.get(AlterGameTag.ChangePrivacy) ?? 0);
+  }
+
   constructor(
     public address: string,
     public port: number,
@@ -112,6 +116,8 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     public readonly code: string = RoomCode.generate(),
   ) {
     this.family = RemoteInfo.fromString(`${address}:${port}`).family;
+
+    console.log(this);
 
     if (this.isHost) {
       this.customHostInstance = new CustomHost(this);
@@ -328,6 +334,13 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       default:
         connection.send([ new JoinGameErrorPacket(DisconnectionType.GameStarted) ]);
     }
+  }
+
+  despawn(innerNetObject: InnerNetObject): void {
+    this.handleDespawn(innerNetObject.id);
+    this.sendRootGamePacket(new GameDataPacket([
+      new DespawnPacket(innerNetObject.id),
+    ], this.code));
   }
 
   private handleNewJoin(connection: Connection): void {

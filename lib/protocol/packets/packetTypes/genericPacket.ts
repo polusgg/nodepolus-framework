@@ -13,8 +13,11 @@ import { StartGamePacket } from "../rootGamePackets/startGame";
 import { GameDataPacket } from "../rootGamePackets/gameData";
 import { RedirectPacket } from "../rootGamePackets/redirect";
 import { EndGamePacket } from "../rootGamePackets/endGame";
-import { RootGamePacketType } from "../types";
+import { RootAnnouncementPacketType, RootGamePacketType } from "../types";
 import { Level } from "../../../types/level";
+import { AnnouncementDataPacket } from "../announcementPackets/announcementData";
+import { CacheDataPacket } from "../announcementPackets/cacheData";
+import { FreeWeekendPacket } from "../announcementPackets/freeWeekend";
 
 export type RootGamePacketDataType =
   | HostGameRequestPacket
@@ -36,6 +39,11 @@ export type RootGamePacketDataType =
   | ReselectServerPacket
   | GetGameListRequestPacket
   | GetGameListResponsePacket;
+
+export type RootAnnouncementPacketDataType =
+  | CacheDataPacket
+  | AnnouncementDataPacket
+  | FreeWeekendPacket;
 
 export class RootGamePacket {
   constructor(public readonly packets: RootGamePacketDataType[]) {}
@@ -114,6 +122,41 @@ export class RootGamePacket {
     });
 
     return new RootGamePacket(packets);
+  }
+
+  serialize(): MessageWriter {
+    const writer = new MessageWriter();
+
+    for (let i = 0; i < this.packets.length; i++) {
+      writer.startMessage(this.packets[i].type).writeBytes(this.packets[i].serialize())
+        .endMessage();
+    }
+
+    return writer;
+  }
+}
+
+export class RootAnnouncementPacket {
+  constructor(public readonly packets: RootAnnouncementPacketDataType[]) {}
+
+  static deserialize(reader: MessageReader): RootAnnouncementPacket {
+    const packets: RootAnnouncementPacketDataType[] = [];
+
+    reader.readAllChildMessages(child => {
+      switch (child.tag) {
+        case RootAnnouncementPacketType.CacheData:
+          packets.push(CacheDataPacket.deserialize(child));
+          break;
+        case RootAnnouncementPacketType.AnnouncementData:
+          packets.push(AnnouncementDataPacket.deserialize(child));
+          break;
+        case RootAnnouncementPacketType.FreeWeekend:
+          packets.push(FreeWeekendPacket.deserialize(child));
+          break;
+      }
+    });
+
+    return new RootAnnouncementPacket(packets);
   }
 
   serialize(): MessageWriter {

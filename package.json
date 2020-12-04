@@ -3,24 +3,27 @@
   "version": "3.0.0",
   "description": "NodePolus is a JavaScript library containing multiple implementations of the Among Us network protocol.",
   "main": "bin/polus.ts",
+  "engines": {
+    "node": ">=15.0.1"
+  },
   "scripts": {
     "start": "ts-node bin/polus",
     "watch:build": "tsc --watch",
     "watch:server": "nodemon ./dist/bin/polus.js --watch ./dist",
-    "lint": "prettier --check .",
-    "lint-and-fix": "npx prettier --write .",
+    "lint": "eslint . --ext .ts",
+    "lint-and-fix": "eslint . --ext .ts --fix",
     "test": "ava"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NodePolus/NodePolusRewrite.git"
+    "url": "git+https://github.com/NodePolus/NodePolus.git"
   },
   "author": "",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/NodePolus/NodePolusRewrite/issues"
+    "url": "https://github.com/NodePolus/NodePolus/issues"
   },
-  "homepage": "https://github.com/NodePolus/NodePolusRewrite#readme",
+  "homepage": "https://github.com/NodePolus/NodePolus",
   "dependencies": {
     "commonjs": "^0.0.1",
     "emittery": "^0.7.2",

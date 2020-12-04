@@ -3,9 +3,6 @@ Error.stackTraceLimit = 25;
 import { Server } from "../lib/server";
 import repl from "repl";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const globalAny: any = global;
-
 const server = new Server();
 
 server.listen(22023).then(() => {
@@ -14,15 +11,22 @@ server.listen(22023).then(() => {
 
 repl.start("> ");
 
-globalAny.exit = (): void => {
-  server.connections.forEach(c => c.disconnect());
+const exitHandler = (): void => {
+  console.log("Shutting down");
 
-  setTimeout(() => process.exit(), 1000);
+  server.connections.forEach(c => c.disconnect());
 };
 
-process.on("unhandledRejection", reason => {
-  console.log(reason);
+["exit", "SIGINT", "SIGTERM", "SIGUSR1", "SIGUSR2"].forEach((event: string) => {
+  process.on(event, exitHandler);
 });
-process.on("uncaughtException", reason => {
-  console.log(reason);
+
+process.on("unhandledRejection", reason => {
+  console.error("Unhandled promise rejection");
+  console.error(reason);
+});
+
+process.on("uncaughtException", (ex: Error) => {
+  console.error("Uncaught exception");
+  console.error(ex.stack);
 });

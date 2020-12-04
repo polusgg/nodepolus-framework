@@ -335,7 +335,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
   private handleDisconnection(reason?: DisconnectReason): void {
     if (!this.requestedDisconnect) {
-      // No need to serialize a DisconnectReason object since there is no data
       this.socket.send(Buffer.from([ PacketType.Disconnect ]), this.port, this.address);
     }
 

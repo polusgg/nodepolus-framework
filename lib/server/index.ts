@@ -24,7 +24,7 @@ export interface ServerConfig {
 }
 
 const DEFAULT_SERVER_CONFIG: ServerConfig = {
-  defaultHost: DefaultHostState.Client,
+  defaultHost: DefaultHostState.Server,
   defaultRoomAddress: "0.0.0.0",
   defaultRoomPort: DEFAULT_SERVER_PORT,
 };
@@ -132,13 +132,19 @@ export class Server {
         const counts: [number, number, number] = [0, 0, 0];
 
         for (let i = 0; i < this.rooms.length; i++) {
-          // TODO: Remove from rooms array when deleted.
           const room = this.rooms[i];
+
+          // TODO: Add config option to include private games
+          if (!room.isPublic) {
+            continue;
+          }
 
           counts[room.options.options.levels[0]]++;
 
-          // TODO: Filter pog?
-          results[i] = room.roomListing;
+          // TODO: Make results size configurable
+          if (results.length < 10) {
+            results[i] = room.roomListing;
+          }
         }
 
         sender.send([ new GetGameListResponsePacket(results, counts[Level.TheSkeld], counts[Level.MiraHq], counts[Level.Polus]) ]);

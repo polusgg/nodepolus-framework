@@ -1,6 +1,8 @@
 import { DisconnectReason } from "../types/disconnectReason";
 import { ClientInstance } from "./types";
 import dgram from "dgram";
+import { Packet } from "../protocol/packets";
+import { MessageReader } from "../util/hazelMessage";
 
 export interface ClientConfig {
   address: string;
@@ -8,13 +10,17 @@ export interface ClientConfig {
 }
 
 export class Client implements ClientInstance {
-  public id: number;
+  //client instance wasn't meant for an actual client :(((
+  // no, it is. also you are going to create a connection on this right?
+  public id = -1;
   public socket: dgram.Socket;
 
   constructor(public config: ClientConfig) {
     this.socket = dgram.createSocket("udp4");
     this.socket.on("message", buffer => {
+      const packet = Packet.deserialize(MessageReader.fromRawBytes(buffer), true);
 
+      this.handlePacket(packet);
     });
   }
 
@@ -36,7 +42,7 @@ export class Client implements ClientInstance {
     throw new Error("Method not implemented.");
   }
 
-  private handlePacket(): void{
-
+  private handlePacket(packet: Packet): void {
+    throw new Error("Method not implemented.");
   }
 }

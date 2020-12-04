@@ -16,7 +16,7 @@ export class EntityHeadquarters extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  private constructor(room: RoomImplementation) {
+  constructor(room: RoomImplementation) {
     super(SpawnType.Headquarters, room);
   }
 

@@ -13,13 +13,13 @@ import { EntityAprilShipStatus } from "./aprilShipStatus";
 import { InnerGameData } from "./gameData/innerGameData";
 import { BaseRPCPacket } from "../packets/basePacket";
 import { EntityHeadquarters } from "./headquarters";
+import { GameState } from "../../types/gameState";
 import { EntityMeetingHud } from "./meetingHud";
 import { EntityShipStatus } from "./shipStatus";
 import { HostInstance } from "../../host/types";
 import { EntityPlanetMap } from "./planetMap";
 import { EntityGameData } from "./gameData";
 import { Player } from "../../player";
-import { GameState } from "../../types/gameState";
 
 export enum InnerNetObjectType {
   LobbyBehaviour,

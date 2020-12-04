@@ -14,6 +14,12 @@ export enum PacketType {
   Ping = 0x0c,
 }
 
+export enum RootAnnouncementPacketType {
+  CacheData = 0x00,
+  AnnouncementData = 0x01,
+  FreeWeekend = 0x02,
+}
+
 export enum RootGamePacketType {
   HostGame = 0x00,
   JoinGame = 0x01,

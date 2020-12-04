@@ -1,4 +1,4 @@
-import { GameDataPacketType, PacketType, RPCPacketType, RootGamePacketType } from "./types";
+import { GameDataPacketType, PacketType, RPCPacketType, RootGamePacketType, RootAnnouncementPacketType } from "./types";
 import { MessageWriter } from "../../util/hazelMessage";
 
 export interface Bindable<T> {
@@ -59,4 +59,10 @@ export abstract class BaseRPCPacket implements Bindable<BaseRPCPacket> {
 
     return this;
   }
+}
+
+export abstract class BaseAnnouncementPacket {
+  constructor(public type: RootAnnouncementPacketType) {}
+
+  abstract serialize(): MessageWriter;
 }

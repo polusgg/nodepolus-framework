@@ -6,7 +6,7 @@ function isEqual(actual: number, expected: number, epsilon: number = 0.001): boo
   return Math.abs(actual - expected) < epsilon;
 }
 
-test("it reads a vector2", t => {
+test("reads a vector2", t => {
   const buf = MessageReader.fromMessage("040001ff7fff7f");
   const vec = Vector2.deserialize(buf);
 
@@ -14,7 +14,7 @@ test("it reads a vector2", t => {
   t.true(isEqual(vec.y, 0, 0.001));
 });
 
-test("it writes a vector2", t => {
+test("writes a vector2", t => {
   const buf = new MessageWriter().startMessage(1);
   const vec = new Vector2(0, 0);
 
