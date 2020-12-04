@@ -5,12 +5,13 @@ import { HostGameResponsePacket } from "../protocol/packets/rootGamePackets/host
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
 import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";
-import { DEFAULT_SERVER_PORT } from "../util/constants";
+import { DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
 import { Level } from "../types/level";
 import { Room } from "../room";
 import dgram from "dgram";
+import { RoomCode } from "../util/roomCode";
 
 export enum DefaultHostState {
   Server,
@@ -30,15 +31,25 @@ const DEFAULT_SERVER_CONFIG: ServerConfig = {
 };
 
 export class Server {
+  public readonly startedAt = Date.now();
   public readonly serverSocket: dgram.Socket;
   public readonly connections: Map<string, Connection> = new Map();
   public readonly connectionRoomMap: Map<string, Room> = new Map();
+
   // TODO: Store rooms as just a Map of code to room?
   public rooms: Room[] = [];
   public roomMap: Map<string, Room> = new Map();
 
   // Starts at 1 to allow the Server host implementation's ID to be 0
   private connectionIndex = 1;
+
+  private get nextConnectionId(): number {
+    if (++this.connectionIndex > MaxValue.UInt32) {
+      this.connectionIndex = 1;
+    }
+
+    return this.connectionIndex;
+  }
 
   constructor(
     public config: ServerConfig = DEFAULT_SERVER_CONFIG,
@@ -52,10 +63,12 @@ export class Server {
     });
   }
 
-  listen(port: number = DEFAULT_SERVER_PORT, onStart: () => void = () => {}): void {
+  listen(port: number = DEFAULT_SERVER_PORT, onStart?: () => void): void {
     this.serverSocket.bind(port, "0.0.0.0");
 
-    onStart();
+    if (onStart) {
+      onStart();
+    }
   }
 
   getConnection(remoteInfo: string | dgram.RemoteInfo): Connection {
@@ -93,7 +106,7 @@ export class Server {
   private initializeConnection(remoteInfo: dgram.RemoteInfo): Connection {
     const newConnection = new Connection(remoteInfo, this.serverSocket, PacketDestination.Client);
 
-    newConnection.id = this.connectionIndex++;
+    newConnection.id = this.nextConnectionId;
 
     newConnection.on("packet", (evt: RootGamePacketDataType) => this.handlePacket(evt, newConnection));
 
@@ -107,12 +120,23 @@ export class Server {
   private handlePacket(packet: BaseRootGamePacket, sender: Connection): void {
     switch (packet.type) {
       case RootGamePacketType.HostGame: {
-        const newRoom = new Room(this.config.defaultRoomAddress, this.config.defaultRoomPort, this.config.defaultHost == DefaultHostState.Server);
+        let roomCode = RoomCode.generate();
+
+        while (this.roomMap.has(roomCode)) {
+          roomCode = RoomCode.generate();
+        }
+
+        const newRoom = new Room(
+          this.config.defaultRoomAddress,
+          this.config.defaultRoomPort,
+          this.config.defaultHost == DefaultHostState.Server,
+          roomCode,
+        );
 
         this.rooms.push(newRoom);
         this.roomMap.set(newRoom.code, newRoom);
 
-        sender.send([ new HostGameResponsePacket(newRoom.code) ]);
+        sender.sendReliable([ new HostGameResponsePacket(newRoom.code) ]);
         break;
       }
       case RootGamePacketType.JoinGame: {
@@ -123,7 +147,7 @@ export class Server {
 
           room.handleJoin(sender);
         } else {
-          sender.send([ new JoinGameErrorPacket(DisconnectionType.GameNotFound) ]);
+          sender.sendReliable([ new JoinGameErrorPacket(DisconnectionType.GameNotFound) ]);
         }
         break;
       }
@@ -149,7 +173,7 @@ export class Server {
 
         results.sort((a, b) => b.playerCount - a.playerCount);
 
-        sender.send([ new GetGameListResponsePacket(results, counts[Level.TheSkeld], counts[Level.MiraHq], counts[Level.Polus]) ]);
+        sender.sendReliable([ new GetGameListResponsePacket(results, counts[Level.TheSkeld], counts[Level.MiraHq], counts[Level.Polus]) ]);
         break;
       }
       default: {

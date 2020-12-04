@@ -3,13 +3,19 @@
 import { RepairAmount } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
 import { InnerLobbyBehaviour } from "../protocol/entities/lobbyBehaviour/innerLobbyBehaviour";
+import { InnerHeadquarters } from "../protocol/entities/headquarters/innerHeadquarters";
 import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSystem";
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
 import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
+import { InnerShipStatus } from "../protocol/entities/shipStatus/innerShipStatus";
+import { InnerPlanetMap } from "../protocol/entities/planetMap/innerPlanetMap";
 import { GameDataPacket } from "../protocol/packets/rootGamePackets/gameData";
 import { InnerGameData } from "../protocol/entities/gameData/innerGameData";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
+import { EntityHeadquarters } from "../protocol/entities/headquarters";
 import { PlayerData } from "../protocol/entities/gameData/playerData";
+import { EntityShipStatus } from "../protocol/entities/shipStatus";
+import { EntityPlanetMap } from "../protocol/entities/planetMap";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { DisconnectReason } from "../types/disconnectReason";
 import { EntityPlayer } from "../protocol/entities/player";
@@ -19,24 +25,22 @@ import { PlayerColor } from "../types/playerColor";
 import { FakeHostId } from "../types/fakeHostId";
 import { SystemType } from "../types/systemType";
 import { Vector2 } from "../util/vector2";
+import { Level } from "../types/level";
 import { HostInstance } from "./types";
 import { Player } from "../player";
 import { Room } from "../room";
-import { Level } from "../types/level";
-import { EntityShipStatus } from "../protocol/entities/shipStatus";
-import { InnerShipStatus } from "../protocol/entities/shipStatus/innerShipStatus";
-import { EntityHeadquarters } from "../protocol/entities/headquarters";
-import { InnerHeadquarters } from "../protocol/entities/headquarters/innerHeadquarters";
-import { EntityPlanetMap } from "../protocol/entities/planetMap";
-import { InnerPlanetMap } from "../protocol/entities/planetMap/innerPlanetMap";
+import { StartGamePacket } from "../protocol/packets/rootGamePackets/startGame";
+import { GameState } from "../types/gameState";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
   public readonly readyPlayerList: number[] = [];
   public readonly playersInScene: Map<number, string> = new Map();
 
-  public netIdIndex = 1;
-  public playerIdIndex = 0;
+  private netIdIndex = 1;
+  private playerIdIndex = 0;
+  private counterSequenceId = 0;
+  private countdownInterval: NodeJS.Timeout | undefined;
 
   constructor(
     public room: Room,
@@ -44,13 +48,12 @@ export class CustomHost implements HostInstance {
     // TODO: Implement
   }
 
-  sendKick(banned: boolean, reason: DisconnectReason): void {
-    throw new Error("Method not implemented.");
-  }
-
-  sendLateRejection(disconnectReason: DisconnectReason): void {
-    throw new Error("Method not implemented.");
-  }
+  /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
+  sendKick(_banned: boolean, _reason: DisconnectReason): void {}
+  sendLateRejection(_disconnectReason: DisconnectReason): void {}
+  // Clients do not need to wait for the host if the server is the host.
+  sendWaitingForHost(): void {}
+  /* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
 
   handleReady(sender: Connection): void {
     this.readyPlayerList.push(sender.id);
@@ -64,25 +67,37 @@ export class CustomHost implements HostInstance {
         case Level.TheSkeld:
           // TODO: API call for AprilShipStatus
           this.room.shipStatus = new EntityShipStatus(this.room);
-          this.room.shipStatus.innerNetObjects[0] = new InnerShipStatus(this.netIdIndex++, this.room.shipStatus);
+          this.room.shipStatus.innerNetObjects = [
+            new InnerShipStatus(this.netIdIndex++, this.room.shipStatus),
+          ];
           break;
         case Level.MiraHq:
           this.room.shipStatus = new EntityHeadquarters(this.room);
-          this.room.shipStatus.innerNetObjects[0] = new InnerHeadquarters(this.netIdIndex++, this.room.shipStatus);
+          this.room.shipStatus.innerNetObjects = [
+            new InnerHeadquarters(this.netIdIndex++, this.room.shipStatus),
+          ];
           break;
         case Level.Polus:
           this.room.shipStatus = new EntityPlanetMap(this.room);
-          this.room.shipStatus.innerNetObjects[0] = new InnerPlanetMap(this.netIdIndex++, this.room.shipStatus);
+          this.room.shipStatus.innerNetObjects = [
+            new InnerPlanetMap(this.netIdIndex++, this.room.shipStatus),
+          ];
           break;
       }
 
       this.room.connections.forEach(connection => {
         connection.write(new GameDataPacket([ this.room.shipStatus!.spawn() ], this.room.code));
       });
+
+      this.room.gameState = GameState.Started;
     }
   }
 
-  handleSceneChange(sender: Connection, sceneName: string): void {
+  async handleSceneChange(sender: Connection, sceneName: string): Promise<void> {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+
     if (sceneName !== "OnlineGame") {
       return;
     }
@@ -106,6 +121,7 @@ export class CustomHost implements HostInstance {
 
     if (!this.room.gameData) {
       this.room.gameData = new EntityGameData(this.room);
+      this.room.gameData.owner = -2;
       this.room.gameData.innerNetObjects = [
         new InnerGameData(this.netIdIndex++, this.room.gameData, []),
         new InnerVoteBanSystem(this.netIdIndex++, this.room.gameData),
@@ -130,7 +146,7 @@ export class CustomHost implements HostInstance {
     console.log(this.room.players);
 
     this.room.players.forEach(testplayer => {
-      sender.write(new GameDataPacket([ player.gameObject.spawn() ], this.room.code));
+      sender.write(new GameDataPacket([ testplayer.gameObject.spawn() ], this.room.code));
     });
 
     this.room.players.push(player);
@@ -139,7 +155,7 @@ export class CustomHost implements HostInstance {
 
     console.log("A");
 
-    this.room.sendRootGamePacket(new GameDataPacket([ player.gameObject.spawn() ], this.room.code));
+    await this.room.sendRootGamePacket(new GameDataPacket([ player.gameObject.spawn() ], this.room.code));
 
     console.log("B");
 
@@ -161,6 +177,12 @@ export class CustomHost implements HostInstance {
     this.room.gameData.gameData.updateGameData([ playerData ], this.room.connections);
 
     player.gameObject.playerControl.isNew = false;
+
+    // await promise;
+
+    setTimeout(() => {
+      this.room.reapplyActingHosts();
+    }, 100);
   }
 
   handleCheckName(sender: InnerPlayerControl, name: string): void {
@@ -198,22 +220,57 @@ export class CustomHost implements HostInstance {
   }
 
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void {
+    // TODO: Spawn MeetingHud with player states
     throw new Error("Method not implemented.");
   }
 
   handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
+    // TODO: Update system and send ShipStatus data packet
     throw new Error("Method not implemented.");
   }
 
   handleCloseDoorsOfType(sender: InnerLevel, systemId: SystemType): void {
+    // TODO: Close the requested doors and send ShipStatus data packet
     throw new Error("Method not implemented.");
   }
 
-  // SendWaitingForHost is not needed on a HostImplementation
-  // as it would not be used.
+  handleSetStartCounter(sequenceId: number, timeRemaining: number): void {
+    console.trace("setStartCounter", { sequenceId, timeRemaining });
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  sendWaitingForHost(): void { }
+    if (sequenceId < this.counterSequenceId && this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+
+    if (timeRemaining == 5) {
+      this.room.removeActingHosts(true);
+      this.room.players[0].gameObject.playerControl.setStartCounter(sequenceId, -1, this.room.connections);
+      // TODO: Config option
+      this.startCountdown(5);
+    }
+  }
+
+  startCountdown(count: number): void {
+    let currentCount = count;
+
+    const countdownInterval = setInterval(() => {
+      const c = currentCount--;
+
+      this.room.players[0].gameObject.playerControl.setStartCounter(++this.counterSequenceId, c, this.room.connections);
+
+      if (c <= 0) {
+        clearInterval(countdownInterval);
+        this.startGame();
+      }
+    }, 1000);
+
+    this.countdownInterval = countdownInterval;
+  }
+
+  startGame(): void {
+    console.trace("Starting Game...");
+
+    this.room.sendRootGamePacket(new StartGamePacket(this.room.code));
+  }
 
   private isNameTaken(name: string): boolean {
     if (!this.room.gameData) {

@@ -304,6 +304,8 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   setStartCounter(sequenceId: number, timeRemaining: number, sendTo: Connection[]): void {
+    this.parent.room.host?.handleSetStartCounter(sequenceId, timeRemaining);
+
     this.sendRPCPacketTo(sendTo, new SetStartCounterPacket(sequenceId, timeRemaining));
   }
 

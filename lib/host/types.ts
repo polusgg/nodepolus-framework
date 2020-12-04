@@ -20,4 +20,6 @@ export interface HostInstance extends ClientInstance {
   handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void;
 
   handleCloseDoorsOfType(sender: InnerLevel, systemId: SystemType): void;
+
+  handleSetStartCounter(sequenceId: number, timeRemaining: number): void;
 }

@@ -26,7 +26,10 @@ export type Entity = EntityAprilShipStatus
 | EntityShipStatus;
 
 export abstract class BaseEntity {
-  constructor(readonly type: SpawnType, readonly room: RoomImplementation) {}
+  constructor(
+    public readonly type: SpawnType,
+    public readonly room: RoomImplementation,
+  ) {}
 
   abstract setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void;
 
@@ -38,7 +41,11 @@ export abstract class BaseEntity {
 }
 
 export abstract class BaseGameObject<T> {
-  constructor(readonly type: InnerNetObjectType, public id: number, public parent: Entity) {}
+  constructor(
+    public readonly type: InnerNetObjectType,
+    public id: number,
+    public parent: Entity,
+  ) {}
 
   abstract getData(old: BaseGameObject<T>): DataPacket;
 

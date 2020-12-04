@@ -16,6 +16,7 @@ import { HelloPacket } from "./packets/packetTypes/helloPacket";
 import { DisconnectReason } from "../types/disconnectReason";
 import { ClientVersion } from "../util/clientVersion";
 import { PlayerColor } from "../types/playerColor";
+import { LimboState } from "../types/limboState";
 import { SystemType } from "../types/systemType";
 import { InnerLevel } from "./entities/types";
 import { HostInstance } from "../host/types";
@@ -23,12 +24,16 @@ import { Packet } from "./packets";
 import Emittery from "emittery";
 import { Room } from "../room";
 import dgram from "dgram";
-import { LimboState } from "../types/limboState";
 
 interface ConnectionEvents {
   packet: RootGamePacketDataType;
   disconnected?: DisconnectReason;
   message: Buffer;
+}
+
+interface AwaitingPacket {
+  packet: RootGamePacketDataType;
+  resolve(value?: unknown): void;
 }
 
 export class Connection extends Emittery.Typed<ConnectionEvents> implements HostInstance, dgram.RemoteInfo {
@@ -37,6 +42,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   public name?: string;
   public timeoutLength = 6000;
   public isHost = false;
+  public isActingHost = false;
   public id = -1;
   public room?: Room;
   public limboState = LimboState.PreSpawn;
@@ -45,12 +51,13 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   public family: "IPv4" | "IPv6";
   public size = -1;
 
+  private readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
   private readonly unacknowledgedPackets: Map<number, number> = new Map();
   private readonly flushInterval: NodeJS.Timeout;
   private readonly timeoutInterval: NodeJS.Timeout;
 
   private initialized = false;
-  private packetBuffer: RootGamePacketDataType[] = [];
+  private packetBuffer: AwaitingPacket[] = [];
   private unreliablePacketBuffer: RootGamePacketDataType[] = [];
   private nonceIndex = 1;
   private disconnectTimeout: NodeJS.Timeout | undefined;
@@ -123,8 +130,10 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     }, 1000);
   }
 
-  write(packet: RootGamePacketDataType): void {
-    this.packetBuffer.push(packet);
+  async write(packet: RootGamePacketDataType): Promise<void> {
+    return new Promise(resolve => {
+      this.packetBuffer.push({ packet, resolve });
+    });
 
     // const lastElem: RootGamePacketDataType = this.packetBuffer[this.packetBuffer.length - 1];
 
@@ -152,22 +161,24 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     this.unreliablePacketBuffer.push(packet);
   }
 
-  send(packets: RootGamePacketDataType[], reliable: boolean = true): void {
-    const temp: RootGamePacketDataType[] = [ ...this.packetBuffer ];
+  async sendReliable(packets: RootGamePacketDataType[]): Promise<void> {
+    return new Promise(resolve => {
+      const temp: AwaitingPacket[] = [ ...this.packetBuffer ];
 
-    if (reliable) {
-      this.packetBuffer = packets;
-    } else {
-      this.unreliablePacketBuffer = packets;
-    }
-
-    this.flush(reliable);
-
-    if (reliable) {
+      this.packetBuffer = packets.map(packet => ({ packet, resolve }));
+      this.flush(true);
       this.packetBuffer = temp;
-    } else {
-      this.unreliablePacketBuffer = temp;
-    }
+    });
+  }
+
+  sendUnreliable(packets: RootGamePacketDataType[]): void {
+    const temp: RootGamePacketDataType[] = [ ...this.unreliablePacketBuffer ];
+
+    this.unreliablePacketBuffer = packets;
+
+    this.flush(false);
+
+    this.unreliablePacketBuffer = temp;
   }
 
   flush(reliable: boolean = true): void {
@@ -179,22 +190,38 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
     let nonce: number | undefined;
 
+    let packet: Packet;
+
+    let packetBuffer: RootGamePacketDataType[] = [];
+
     if (reliable) {
       nonce = this.nonceIndex++;
-    }
 
-    let packet;
+      const packetArr = new Array(this.packetBuffer.length);
+      const resolveFuncs = new Array(this.packetBuffer.length);
 
-    if (reliable) {
-      packet = new Packet(nonce, new RootGamePacket(this.packetBuffer));
+      for (let i = 0; i < this.packetBuffer.length; i++) {
+        const awaitingPacket = this.packetBuffer[i];
 
-      this.packetBuffer.forEach(subpacket => {
+        packetArr[i] = awaitingPacket.packet;
+        resolveFuncs[i] = awaitingPacket.resolve;
+      }
+
+      packetBuffer = packetArr;
+
+      packet = new Packet(nonce, new RootGamePacket(packetBuffer));
+
+      this.acknowledgementResolveMap.set(nonce!, resolveFuncs);
+
+      packetBuffer.forEach(subpacket => {
         this.log(subpacket, packet, false);
       });
     } else {
       packet = new Packet(nonce, new RootGamePacket(this.unreliablePacketBuffer));
 
-      this.unreliablePacketBuffer.forEach(subpacket => {
+      packetBuffer = this.unreliablePacketBuffer;
+
+      packetBuffer.forEach(subpacket => {
         this.log(subpacket, packet, false);
       });
     }
@@ -303,19 +330,47 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   handleReportDeadBody(_sender: InnerPlayerControl, _victimPlayerId: number): void {}
   handleRepairSystem(_sender: InnerLevel, _systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
   handleCloseDoorsOfType(_sender: InnerLevel, _systemId: SystemType): void {}
+  handleSetStartCounter(_sequenceId: number, _timeRemaining: number): void {}
   /* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
 
   private handlePing(): void {
     this.lastPingReceivedTime = Date.now();
   }
 
+  private getUnacknowledgedPacketArray(): boolean[] {
+    let index = this.nonceIndex;
+    const packets = Array(8).fill(true);
+
+    for (let i = 7; i >= 0; i--) {
+      if (index < 1) {
+        break;
+      }
+
+      if (this.unacknowledgedPackets.has(index)) {
+        packets[i] = true;
+      }
+
+      index--;
+    }
+
+    return packets;
+  }
+
   private acknowledgePacket(nonce: number): void {
     this.socket.send(
       // TODO: Include unacknowledged packets
-      new Packet(nonce, new AcknowledgementPacket(new Array(8).fill(true))).serialize().buffer,
+      new Packet(nonce, new AcknowledgementPacket(this.getUnacknowledgedPacketArray())).serialize().buffer,
       this.port,
       this.address,
     );
+
+    const resolveFunArr = this.acknowledgementResolveMap.get(nonce);
+
+    if (resolveFunArr) {
+      for (let i = 0; i < resolveFunArr.length; i++) {
+        resolveFunArr[i]();
+      }
+    }
   }
 
   private handleAcknowledgement(nonce: number): void {

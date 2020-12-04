@@ -9,3 +9,4 @@ export interface ClientInstance {
 
   sendWaitingForHost(): void;
 }
+

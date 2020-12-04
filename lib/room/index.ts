@@ -53,9 +53,6 @@ import { CustomHost } from "../host";
 import { Player } from "../player";
 import dgram from "dgram";
 
-// TODO: All players are being marked as new when joining a lobby
-
-// TODO: Client disconnect handler to close the room when empty
 export class Room implements RoomImplementation, dgram.RemoteInfo {
   public readonly createdAt: number = new Date().getTime();
 
@@ -87,8 +84,18 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     }
   }
 
+  get actingHosts(): Connection[] {
+    return this.connections.filter(con => con.isActingHost);
+  }
+
   get age(): number {
     return (new Date().getTime() - this.createdAt) / 1000;
+  }
+
+  get hostName(): string {
+    return this.isHost
+      ? this.actingHosts[0]?.name ?? this.connections[0].name!
+      : (this.host as Connection).name!;
   }
 
   get roomListing(): RoomListing {
@@ -96,7 +103,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       this.address,
       this.port,
       this.code,
-      this.isHost ? "TODO: Host Name" : (this.host as Connection).name!,
+      this.hostName,
       this.players.length,
       this.age,
       this.options.options.levels[0],
@@ -122,6 +129,46 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     if (this.isHost) {
       this.customHostInstance = new CustomHost(this);
     }
+  }
+
+  removeActingHosts(sendImmediately: boolean = true): void {
+    this.actingHosts.forEach(actingHost => {
+      this.sendRemoveHost(actingHost, sendImmediately);
+    });
+  }
+
+  reapplyActingHosts(sendImmediately: boolean = true): void {
+    this.actingHosts.forEach(actingHost => {
+      this.sendSetHost(actingHost, sendImmediately);
+    });
+  }
+
+  sendSetHost(connection: Connection, sendImmediately: boolean = true): void {
+    if (sendImmediately) {
+      connection.sendReliable([ new JoinGameResponsePacket(this.code, connection.id, connection.id) ]);
+    } else {
+      connection.write(new JoinGameResponsePacket(this.code, connection.id, connection.id));
+    }
+  }
+
+  sendRemoveHost(connection: Connection, sendImmediately: boolean = true): void {
+    if (sendImmediately) {
+      connection.sendReliable([ new JoinGameResponsePacket(this.code, connection.id, this.host?.id ?? FakeHostId.ServerAsHost) ]);
+    } else {
+      connection.write(new JoinGameResponsePacket(this.code, connection.id, this.host?.id ?? FakeHostId.ServerAsHost));
+    }
+  }
+
+  setActingHost(connection: Connection, sendImmediately: boolean = true): void {
+    connection.isActingHost = true;
+
+    this.sendSetHost(connection, sendImmediately);
+  }
+
+  removeActingHost(connection: Connection, sendImmediately: boolean = true): void {
+    connection.isActingHost = false;
+
+    this.sendRemoveHost(connection, sendImmediately);
   }
 
   findInnerNetObject(netId: number): InnerNetObject | undefined {
@@ -259,10 +306,14 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     }
   }
 
-  sendRootGamePacket(packet: BaseRootGamePacket, sendTo: Connection[] = this.connections): void {
+  async sendRootGamePacket(packet: BaseRootGamePacket, sendTo: Connection[] = this.connections): Promise<PromiseSettledResult<void>[]> {
+    const promiseArray = new Array(sendTo.length);
+
     for (let i = 0; i < sendTo.length; i++) {
       sendTo[i].write(packet);
     }
+
+    return Promise.allSettled(promiseArray);
   }
 
   sendUnreliableRootGamePacket(packet: BaseRootGamePacket, sendTo: Connection[] = this.connections): void {
@@ -313,8 +364,10 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   handleJoin(connection: Connection): void {
     if (!this.isHost && this.connections.length >= 10) {
-      connection.send([ new JoinGameErrorPacket(DisconnectionType.GameFull) ]);
+      connection.sendReliable([ new JoinGameErrorPacket(DisconnectionType.GameFull) ]);
     }
+
+    this.removeActingHosts();
 
     if (!connection.room) {
       connection.room = this;
@@ -332,7 +385,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         this.handleRejoin(connection);
         break;
       default:
-        connection.send([ new JoinGameErrorPacket(DisconnectionType.GameStarted) ]);
+        connection.sendReliable([ new JoinGameErrorPacket(DisconnectionType.GameStarted) ]);
     }
   }
 
@@ -350,6 +403,9 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
     if (!this.isHost && !this.host) {
       connection.isHost = true;
+    } else if (this.isHost) {
+      // TODO: This will make everyone an acting host
+      connection.isActingHost = true;
     }
 
     connection.limboState = LimboState.NotLimbo;
@@ -360,7 +416,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   private handleRejoin(connection: Connection): void {
     if (connection.room?.code != this.code) {
-      connection.send([ new JoinGameErrorPacket(DisconnectionType.GameStarted) ]);
+      connection.sendReliable([ new JoinGameErrorPacket(DisconnectionType.GameStarted) ]);
 
       return;
     }
@@ -382,7 +438,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   private sendToLimbo(connection: Connection): void {
     connection.limboState = LimboState.WaitingForHost;
 
-    connection.send([ new WaitForHostPacket(this.code, connection.id) ]);
+    connection.sendReliable([ new WaitForHostPacket(this.code, connection.id) ]);
 
     this.broadcastJoinMessage(connection);
   }
@@ -396,7 +452,16 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   private migrateHost(): void {
-    if (this.isHost || this.host) {
+    if (this.isHost) {
+      // TODO: Assign new acting host if there are none
+      return;
+    }
+
+    // Don't change code below this line, it's for client-as-host logic.
+    // Put server-as-host logic above and return early when done.
+
+    // If we already have a client that is host then we don't need to migrate.
+    if (this.host) {
       return;
     }
 
@@ -425,7 +490,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       new JoinGameResponsePacket(
         this.code,
         connection.id,
-        this.host ? this.host.id : FakeHostId.FetchHostError,
+        this.isHost ? FakeHostId.ServerAsHost : this.host!.id,
       ),
       this.connections
         .filter(con => con.id != connection.id)
@@ -434,7 +499,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   private sendJoinedMessage(connection: Connection): void {
-    connection.send([
+    connection.sendReliable([
       new JoinedGamePacket(
         this.code,
         connection.id,
@@ -462,7 +527,6 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         }
         break;
       case GameDataPacketType.RPC:
-        // TODO: Add multiple receiver support
         this.rpcHandler.handleBaseRPC(
           (packet as RPCPacket).packet.type,
           (packet as RPCPacket).senderNetId,

@@ -5,6 +5,27 @@ import { Level } from "../types/level";
 import { TaskBarUpdate } from "../types/taskBarUpdate";
 
 /**
+ * Primitive type constants
+ */
+export enum MaxValue {
+  Int8 = 127,
+  UInt8 = 255,
+  Int16 = 32767,
+  UInt16 = 65535,
+  Int32 = 2147483647,
+  UInt32 = 4294967295,
+}
+
+export enum MinValue {
+  Int8 = -128,
+  UInt8 = 0,
+  Int16 = -32768,
+  UInt16 = 0,
+  Int32 = -2147483648,
+  UInt32 = 0,
+}
+
+/**
  * Server constants
  */
 export const ANNOUNCEMENT_SERVER_PORT = 22024;
