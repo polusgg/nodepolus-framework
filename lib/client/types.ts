@@ -8,5 +8,7 @@ export interface ClientInstance {
   sendLateRejection(disconnectReason: DisconnectReason): void;
 
   sendWaitingForHost(): void;
+
+  // TODO: sendExile() ?
 }
 

@@ -395,7 +395,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   despawn(innerNetObject: InnerNetObject): void {
-    this.handleDespawn(innerNetObject.id);
+    // this.handleDespawn(innerNetObject.id);
     this.sendRootGamePacket(new GameDataPacket([
       new DespawnPacket(innerNetObject.id),
     ], this.code));

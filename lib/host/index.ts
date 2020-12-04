@@ -22,6 +22,7 @@ import { InnerLevel } from "../protocol/entities/types";
 import { Connection } from "../protocol/connection";
 import { PlayerColor } from "../types/playerColor";
 import { FakeHostId } from "../types/fakeHostId";
+import { GLOBAL_OWNER } from "../util/constants";
 import { SystemType } from "../types/systemType";
 import { GameState } from "../types/gameState";
 import { Vector2 } from "../util/vector2";
@@ -68,6 +69,14 @@ export class CustomHost implements HostInstance {
   handleReady(sender: Connection): void {
     this.readyPlayerList.push(sender.id);
 
+    /**
+     * TODO:
+     * Add disconnection logic to timeout players who take too long to be ready.
+     * This **SHOULD NOT** be allowed because literally anybody who can read
+     * could browse the source or check sus.wiki to figure this out and lock up
+     * an entire server if they really wanted to.
+     */
+
     if (this.readyPlayerList.length == this.room.connections.length) {
       if (this.room.lobbyBehavior) {
         this.room.despawn(this.room.lobbyBehavior.lobbyBehaviour);
@@ -77,18 +86,21 @@ export class CustomHost implements HostInstance {
         case Level.TheSkeld:
           // TODO: API call for AprilShipStatus
           this.room.shipStatus = new EntityShipStatus(this.room);
+          this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
             new InnerShipStatus(this.netIdIndex++, this.room.shipStatus),
           ];
           break;
         case Level.MiraHq:
           this.room.shipStatus = new EntityHeadquarters(this.room);
+          this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
             new InnerHeadquarters(this.netIdIndex++, this.room.shipStatus),
           ];
           break;
         case Level.Polus:
           this.room.shipStatus = new EntityPlanetMap(this.room);
+          this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
             new InnerPlanetMap(this.netIdIndex++, this.room.shipStatus),
           ];
@@ -96,6 +108,7 @@ export class CustomHost implements HostInstance {
       }
 
       this.room.connections.forEach(connection => {
+        // TODO: setInfected, setTasks, updateGameData
         connection.write(new GameDataPacket([ this.room.shipStatus!.spawn() ], this.room.code));
       });
 
@@ -124,6 +137,7 @@ export class CustomHost implements HostInstance {
 
     if (!this.room.lobbyBehavior) {
       this.room.lobbyBehavior = new EntityLobbyBehaviour(this.room);
+      this.room.lobbyBehavior.owner = GLOBAL_OWNER;
       this.room.lobbyBehavior.innerNetObjects = [
         new InnerLobbyBehaviour(this.netIdIndex++, this.room.lobbyBehavior),
       ];
@@ -133,7 +147,7 @@ export class CustomHost implements HostInstance {
 
     if (!this.room.gameData) {
       this.room.gameData = new EntityGameData(this.room);
-      this.room.gameData.owner = -2;
+      this.room.gameData.owner = GLOBAL_OWNER;
       this.room.gameData.innerNetObjects = [
         new InnerGameData(this.netIdIndex++, this.room.gameData, []),
         new InnerVoteBanSystem(this.netIdIndex++, this.room.gameData),
