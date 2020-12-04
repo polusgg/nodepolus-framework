@@ -23,8 +23,8 @@ export class Packet {
   }
 
   constructor(
-    readonly nonce: number | undefined,
-    readonly data: PacketDataType,
+    public readonly nonce: number | undefined,
+    public readonly data: PacketDataType,
   ) {
     if (data instanceof AcknowledgementPacket) {
       this.type = PacketType.Acknowledgement;

@@ -4,7 +4,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class CheckColorPacket extends BaseRPCPacket {
-  constructor(readonly color: PlayerColor) {
+  constructor(
+    public readonly color: PlayerColor,
+  ) {
     super(RPCPacketType.CheckColor);
   }
 

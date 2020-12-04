@@ -56,7 +56,9 @@ export type GameOptionsDataInterface = GameOptionsDataV1 | GameOptionsDataV2 | G
 
 // TODO: Try and get rid of the TS error below
 export class GameOptionsData {
-  constructor(readonly options: GameOptionsDataInterface) {}
+  constructor(
+    public readonly options: GameOptionsDataInterface,
+  ) {}
 
   static deserialize(reader: MessageReader, isSearching: boolean = false): GameOptionsData {
     const length = reader.readPackedUInt32();

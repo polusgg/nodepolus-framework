@@ -5,7 +5,9 @@ import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 
 export class HostGameRequestPacket extends BaseRootGamePacket {
-  constructor(readonly options: GameOptionsData) {
+  constructor(
+    public readonly options: GameOptionsData,
+  ) {
     super(RootGamePacketType.HostGame);
   }
 
@@ -23,7 +25,9 @@ export class HostGameRequestPacket extends BaseRootGamePacket {
 }
 
 export class HostGameResponsePacket extends BaseRootGamePacket {
-  constructor(readonly roomCode: string) {
+  constructor(
+    public readonly roomCode: string,
+  ) {
     super(RootGamePacketType.HostGame);
   }
 

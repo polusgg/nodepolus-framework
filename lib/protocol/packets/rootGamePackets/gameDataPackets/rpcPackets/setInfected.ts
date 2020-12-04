@@ -3,7 +3,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SetInfectedPacket extends BaseRPCPacket {
-  constructor(readonly impostorPlayerIds: number[]) {
+  constructor(
+    public readonly impostorPlayerIds: number[],
+  ) {
     super(RPCPacketType.SetInfected);
   }
 

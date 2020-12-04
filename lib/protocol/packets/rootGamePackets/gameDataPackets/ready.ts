@@ -3,7 +3,9 @@ import { BaseGameDataPacket } from "../../basePacket";
 import { GameDataPacketType } from "../../types";
 
 export class ReadyPacket extends BaseGameDataPacket {
-  constructor(public playerClientID: number) {
+  constructor(
+    public playerClientID: number,
+  ) {
     super(GameDataPacketType.Ready);
   }
 

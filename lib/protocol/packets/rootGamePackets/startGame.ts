@@ -4,7 +4,9 @@ import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 
 export class StartGamePacket extends BaseRootGamePacket {
-  constructor(readonly roomCode: string) {
+  constructor(
+    public readonly roomCode: string,
+  ) {
     super(RootGamePacketType.StartGame);
   }
 

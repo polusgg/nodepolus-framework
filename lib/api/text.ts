@@ -33,19 +33,19 @@ interface ResetElement {
 }
 
 function colorToString(color: [number, number, number, number]): string {
-  return color.map(c => c.toString(16).padStart(2, "0")).join("").toUpperCase();
+  return color.map(channel => channel.toString(16).padStart(2, "0")).join("").toUpperCase();
 }
 
-function stringToColor(string: string): [number, number, number, number] {
-  string = string.padStart(8, "0");
+function stringToColor(str: string): [number, number, number, number] {
+  str = str.padStart(8, "0");
 
-  const retarr: [number, number, number, number] = [-1, -1, -1, -1];
+  const color: [number, number, number, number] = [-1, -1, -1, -1];
 
-  for (let i = 0; i < string.length; i += 2) {
-    retarr[i / 2] = parseInt(string[i] + string[i + 1], 16);
+  for (let i = 0; i < str.length; i += 2) {
+    color[i / 2] = parseInt(str[i] + str[i + 1], 16);
   }
 
-  return retarr;
+  return color;
 }
 
 export class Text {
@@ -55,7 +55,7 @@ export class Text {
   private currentOpacity = 255;
 
   static from(source: string): Text {
-    const t = new Text();
+    const text = new Text();
 
     const reader: Reader = {
       state: ReaderState.ReadingText,
@@ -69,7 +69,7 @@ export class Text {
       if (reader.state == ReaderState.ReadingText) {
         if (char == "[") {
           reader.element = reader.element.slice(1);
-          t.addReader(reader);
+          text.addReader(reader);
           reader.state = ReaderState.ReadingElement;
           reader.element = "";
           reader.chunk = "";
@@ -90,9 +90,9 @@ export class Text {
 
     reader.element = reader.element.slice(1);
 
-    t.addReader(reader);
+    text.addReader(reader);
 
-    return t;
+    return text;
   }
 
   add(content: string): Text {
@@ -121,6 +121,7 @@ export class Text {
   reset(): Text {
     this.currentColor = [255, 255, 255];
     this.currentOpacity = 255;
+
     this.elements.push({ type: ElementType.Reset });
 
     return this;
@@ -191,7 +192,6 @@ export class Text {
 
       this.setColor(color[0], color[1], color[2]);
       this.setOpacity(color[3]);
-
       this.add(reader.chunk);
     }
   }

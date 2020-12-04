@@ -7,10 +7,10 @@ import { RootGamePacketType } from "../types";
 
 export class KickPlayerPacket extends BaseRootGamePacket {
   constructor(
-    readonly roomCode: string,
-    readonly kickedClientId: AlterGameTag,
-    readonly banned: boolean,
-    readonly disconnectReason?: DisconnectReason,
+    public readonly roomCode: string,
+    public readonly kickedClientId: AlterGameTag,
+    public readonly banned: boolean,
+    public readonly disconnectReason?: DisconnectReason,
   ) {
     super(RootGamePacketType.KickPlayer);
   }

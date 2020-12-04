@@ -1,9 +1,9 @@
 export class ClientVersion {
   constructor(
-    readonly year: number,
-    readonly month: number,
-    readonly day: number,
-    readonly revision: number,
+    public readonly year: number,
+    public readonly month: number,
+    public readonly day: number,
+    public readonly revision: number,
   ) {}
 
   static decode(version: number): ClientVersion {

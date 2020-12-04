@@ -3,7 +3,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class MurderPlayerPacket extends BaseRPCPacket {
-  constructor(public readonly victimPlayerControlNetId: number) {
+  constructor(
+    public readonly victimPlayerControlNetId: number,
+  ) {
     super(RPCPacketType.MurderPlayer);
   }
 

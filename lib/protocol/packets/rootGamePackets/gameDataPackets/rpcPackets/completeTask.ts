@@ -3,7 +3,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class CompleteTaskPacket extends BaseRPCPacket {
-  constructor(readonly taskIndex: number) {
+  constructor(
+    public readonly taskIndex: number,
+  ) {
     super(RPCPacketType.CompleteTask);
   }
 

@@ -5,7 +5,10 @@ import { RPCPacketType } from "../../../types";
 export class SetStartCounterPacket extends BaseRPCPacket {
   public readonly isReset: boolean;
 
-  constructor(readonly sequenceId: number, readonly timeRemaining: number) {
+  constructor(
+    public readonly sequenceId: number,
+    public readonly timeRemaining: number,
+  ) {
     super(RPCPacketType.SetStartCounter);
 
     this.isReset = this.timeRemaining == 0xff;

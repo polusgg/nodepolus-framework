@@ -3,7 +3,10 @@ import { BaseRootGamePacket } from "../basePacket";
 import { RootGamePacketType } from "../types";
 
 export class RedirectPacket extends BaseRootGamePacket {
-  constructor(readonly ipAddress: string, readonly port: number) {
+  constructor(
+    public readonly ipAddress: string,
+    public readonly port: number,
+  ) {
     super(RootGamePacketType.Redirect);
   }
 

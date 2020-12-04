@@ -4,7 +4,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SyncSettingsPacket extends BaseRPCPacket {
-  constructor(readonly options: GameOptionsData) {
+  constructor(
+    public readonly options: GameOptionsData,
+  ) {
     super(RPCPacketType.SyncSettings);
   }
 

@@ -1,8 +1,8 @@
 import { DisconnectReason } from "../types/disconnectReason";
+import { MessageReader } from "../util/hazelMessage";
+import { Packet } from "../protocol/packets";
 import { ClientInstance } from "./types";
 import dgram from "dgram";
-import { Packet } from "../protocol/packets";
-import { MessageReader } from "../util/hazelMessage";
 
 export interface ClientConfig {
   address: string;
@@ -10,8 +10,8 @@ export interface ClientConfig {
 }
 
 export class Client implements ClientInstance {
-  //client instance wasn't meant for an actual client :(((
-  // no, it is. also you are going to create a connection on this right?
+  // TODO: client instance wasn't meant for an actual client :(((
+  // TODO: no, it is. also you are going to create a connection on this right?
   public id = -1;
   public socket: dgram.Socket;
 

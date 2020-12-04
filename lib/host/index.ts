@@ -167,23 +167,13 @@ export class CustomHost implements HostInstance {
 
     const player = new Player(entity);
 
-    // console.log("ABC DEF");
-
-    // console.log(this.room.players);
-
     this.room.players.forEach(testplayer => {
       sender.write(new GameDataPacket([ testplayer.gameObject.spawn() ], this.room.code));
     });
 
     this.room.players.push(player);
 
-    // console.log(this.room);
-
-    // console.log("A");
-
     await this.room.sendRootGamePacket(new GameDataPacket([ player.gameObject.spawn() ], this.room.code));
-
-    // console.log("B");
 
     player.gameObject.playerControl.syncSettings(this.room.options, this.room.connections);
 
@@ -203,8 +193,6 @@ export class CustomHost implements HostInstance {
     this.room.gameData.gameData.updateGameData([ playerData ], this.room.connections);
 
     player.gameObject.playerControl.isNew = false;
-
-    // await promise;
 
     setTimeout(() => {
       this.room.reapplyActingHosts();

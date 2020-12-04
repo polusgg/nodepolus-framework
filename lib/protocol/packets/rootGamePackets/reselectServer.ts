@@ -4,10 +4,10 @@ import { RootGamePacketType } from "../types";
 
 export class MasterServer {
   constructor(
-    readonly name: string,
-    readonly ipAddress: string,
-    readonly port: number,
-    readonly playerCount: number,
+    public readonly name: string,
+    public readonly ipAddress: string,
+    public readonly port: number,
+    public readonly playerCount: number,
   ) {}
 
   static deserialize(reader: MessageReader): MasterServer {
@@ -29,7 +29,10 @@ export class MasterServer {
 }
 
 export class ReselectServerPacket extends BaseRootGamePacket {
-  constructor(readonly unknown: number, readonly servers: MasterServer[]) {
+  constructor(
+    public readonly unknown: number,
+    public readonly servers: MasterServer[],
+  ) {
     super(RootGamePacketType.ReselectServer);
   }
 

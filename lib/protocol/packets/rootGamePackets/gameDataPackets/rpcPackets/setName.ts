@@ -3,7 +3,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SetNamePacket extends BaseRPCPacket {
-  constructor(readonly name: string) {
+  constructor(
+    public readonly name: string,
+  ) {
     super(RPCPacketType.SetName);
   }
 

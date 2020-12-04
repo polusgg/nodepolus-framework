@@ -3,7 +3,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class StartMeetingPacket extends BaseRPCPacket {
-  constructor(readonly victimPlayerId?: number) {
+  constructor(
+    public readonly victimPlayerId?: number,
+  ) {
     super(RPCPacketType.StartMeeting);
   }
 

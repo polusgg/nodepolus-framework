@@ -35,7 +35,10 @@ import { ClosePacket } from "./rpcPackets/close";
 import { Level } from "../../../../types/level";
 
 export class RPCPacket extends BaseGameDataPacket {
-  constructor(public senderNetId: number, public packet: BaseRPCPacket) {
+  constructor(
+    public senderNetId: number,
+    public packet: BaseRPCPacket,
+  ) {
     super(GameDataPacketType.RPC);
   }
 

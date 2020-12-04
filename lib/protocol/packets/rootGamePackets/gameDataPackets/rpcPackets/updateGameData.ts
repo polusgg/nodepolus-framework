@@ -4,7 +4,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class UpdateGameDataPacket extends BaseRPCPacket {
-  constructor(public readonly players: PlayerData[]) {
+  constructor(
+    public readonly players: PlayerData[],
+  ) {
     super(RPCPacketType.UpdateGameData);
   }
 

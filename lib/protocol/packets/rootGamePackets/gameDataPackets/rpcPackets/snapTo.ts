@@ -4,7 +4,10 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SnapToPacket extends BaseRPCPacket {
-  constructor(readonly position: Vector2, readonly lastSequenceId: number) {
+  constructor(
+    public readonly position: Vector2,
+    public readonly lastSequenceId: number,
+  ) {
     super(RPCPacketType.SnapTo);
   }
 

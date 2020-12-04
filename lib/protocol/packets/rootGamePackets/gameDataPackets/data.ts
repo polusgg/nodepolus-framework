@@ -3,7 +3,10 @@ import { BaseGameDataPacket } from "../../basePacket";
 import { GameDataPacketType } from "../../types";
 
 export class DataPacket extends BaseGameDataPacket {
-  constructor(public innerNetObjectID: number, public data: MessageReader | MessageWriter) {
+  constructor(
+    public innerNetObjectID: number,
+    public data: MessageReader | MessageWriter,
+  ) {
     super(GameDataPacketType.Data);
   }
 

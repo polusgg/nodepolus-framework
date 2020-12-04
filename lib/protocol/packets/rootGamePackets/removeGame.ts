@@ -4,7 +4,9 @@ import { BaseRootGamePacket } from "../basePacket";
 import { RootGamePacketType } from "../types";
 
 export class RemoveGamePacket extends BaseRootGamePacket {
-  constructor(readonly disconnectReason?: DisconnectReason) {
+  constructor(
+    public readonly disconnectReason?: DisconnectReason,
+  ) {
     super(RootGamePacketType.RemoveGame);
   }
 

@@ -6,7 +6,10 @@ import { RootGamePacketType } from "../types";
 import { Level } from "../../../types/level";
 
 export class JoinGameRequestPacket extends BaseRootGamePacket {
-  constructor(public readonly roomCode: string, public readonly ownedMaps: Level[]) {
+  constructor(
+    public readonly roomCode: string,
+    public readonly ownedMaps: Level[],
+  ) {
     super(RootGamePacketType.JoinGame);
   }
 
@@ -52,7 +55,9 @@ export class JoinGameResponsePacket extends BaseRootGamePacket {
 export class JoinGameErrorPacket extends BaseRootGamePacket {
   public readonly disconnectReason: DisconnectReason;
 
-  constructor(disconnectReason: DisconnectReason | DisconnectionType) {
+  constructor(
+    disconnectReason: DisconnectReason | DisconnectionType,
+  ) {
     super(RootGamePacketType.JoinGame);
 
     if (disconnectReason instanceof DisconnectReason) {

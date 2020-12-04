@@ -4,7 +4,10 @@ import { RPCPacketType } from "../../../types";
 
 export class SetTasksPacket extends BaseRPCPacket {
   // TODO: Leave tasks as a number[] or add a type for map-specific tasks and use that instead (e.g. LevelTask[])?
-  constructor(readonly playerId: number, readonly tasks: number[]) {
+  constructor(
+    public readonly playerId: number,
+    public readonly tasks: number[],
+  ) {
     super(RPCPacketType.SetTasks);
   }
 

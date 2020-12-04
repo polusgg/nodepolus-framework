@@ -108,7 +108,6 @@ export class Server {
     newConnection.id = this.nextConnectionId;
 
     newConnection.on("packet", (evt: RootGamePacketDataType) => this.handlePacket(evt, newConnection));
-
     newConnection.on("disconnected", (reason?: DisconnectReason) => {
       this.handleDisconnection(newConnection, reason);
     });

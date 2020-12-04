@@ -4,7 +4,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SetSkinPacket extends BaseRPCPacket {
-  constructor(readonly skin: PlayerSkin) {
+  constructor(
+    public readonly skin: PlayerSkin,
+  ) {
     super(RPCPacketType.SetSkin);
   }
 

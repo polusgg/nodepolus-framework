@@ -3,7 +3,9 @@ import { BaseGameDataPacket } from "../../basePacket";
 import { GameDataPacketType } from "../../types";
 
 export class DespawnPacket extends BaseGameDataPacket {
-  constructor(public innerNetObjectID: number) {
+  constructor(
+    public innerNetObjectID: number,
+  ) {
     super(GameDataPacketType.Despawn);
   }
 

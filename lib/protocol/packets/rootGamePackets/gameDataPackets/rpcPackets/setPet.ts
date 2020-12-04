@@ -4,7 +4,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SetPetPacket extends BaseRPCPacket {
-  constructor(readonly pet: PlayerPet) {
+  constructor(
+    public readonly pet: PlayerPet,
+  ) {
     super(RPCPacketType.SetPet);
   }
 

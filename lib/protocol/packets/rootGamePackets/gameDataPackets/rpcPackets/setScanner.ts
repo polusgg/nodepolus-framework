@@ -3,7 +3,10 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SetScannerPacket extends BaseRPCPacket {
-  constructor(readonly isScanning: boolean, readonly sequenceId: number) {
+  constructor(
+    public readonly isScanning: boolean,
+    public readonly sequenceId: number,
+  ) {
     super(RPCPacketType.SetScanner);
   }
 

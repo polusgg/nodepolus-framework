@@ -1,7 +1,10 @@
 import { MessageReader, MessageWriter } from "./hazelMessage";
 
 export class Vector2 {
-  constructor(readonly x: number, readonly y: number) {}
+  constructor(
+    public readonly x: number,
+    public readonly y: number,
+  ) {}
 
   static deserialize(reader: MessageReader): Vector2 {
     return new Vector2(

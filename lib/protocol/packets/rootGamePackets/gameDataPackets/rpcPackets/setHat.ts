@@ -4,7 +4,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SetHatPacket extends BaseRPCPacket {
-  constructor(readonly hat: PlayerHat) {
+  constructor(
+    public readonly hat: PlayerHat,
+  ) {
     super(RPCPacketType.SetHat);
   }
 

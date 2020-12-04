@@ -3,7 +3,10 @@ import { BaseGameDataPacket } from "../../basePacket";
 import { GameDataPacketType } from "../../types";
 
 export class SceneChangePacket extends BaseGameDataPacket {
-  constructor(public clientId: number, public scene: string) {
+  constructor(
+    public clientId: number,
+    public scene: string,
+  ) {
     super(GameDataPacketType.SceneChange);
   }
 

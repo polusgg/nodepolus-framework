@@ -3,7 +3,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class EnterVentPacket extends BaseRPCPacket {
-  constructor(readonly ventId: number) {
+  constructor(
+    public readonly ventId: number,
+  ) {
     super(RPCPacketType.EnterVent);
   }
 

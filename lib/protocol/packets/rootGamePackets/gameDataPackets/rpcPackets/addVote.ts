@@ -3,7 +3,10 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class AddVotePacket extends BaseRPCPacket {
-  constructor(readonly votingClientId: number, readonly targetClientId: number) {
+  constructor(
+    public readonly votingClientId: number,
+    public readonly targetClientId: number,
+  ) {
     super(RPCPacketType.AddVote);
   }
 

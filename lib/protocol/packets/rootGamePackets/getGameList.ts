@@ -7,15 +7,15 @@ import { Level } from "../../../types/level";
 
 export class RoomListing {
   constructor(
-    readonly ipAddress: string,
-    readonly port: number,
-    readonly roomCode: string,
-    readonly hostName: string,
-    readonly playerCount: number,
-    readonly age: number,
-    readonly level: Level,
-    readonly impostorCount: number,
-    readonly maxPlayers: number,
+    public readonly ipAddress: string,
+    public readonly port: number,
+    public readonly roomCode: string,
+    public readonly hostName: string,
+    public readonly playerCount: number,
+    public readonly age: number,
+    public readonly level: Level,
+    public readonly impostorCount: number,
+    public readonly maxPlayers: number,
   ) {}
 
   static deserialize(reader: MessageReader): RoomListing {
@@ -47,8 +47,8 @@ export class RoomListing {
 
 export class GetGameListRequestPacket extends BaseRootGamePacket {
   constructor(
-    readonly includePrivate: boolean,
-    readonly options: GameOptionsData,
+    public readonly includePrivate: boolean,
+    public readonly options: GameOptionsData,
   ) {
     super(RootGamePacketType.GetGameList);
   }
@@ -71,10 +71,10 @@ export class GetGameListRequestPacket extends BaseRootGamePacket {
 
 export class GetGameListResponsePacket extends BaseRootGamePacket {
   constructor(
-    readonly rooms: RoomListing[],
-    readonly skeldCount?: number,
-    readonly miraCount?: number,
-    readonly polusCount?: number,
+    public readonly rooms: RoomListing[],
+    public readonly skeldCount?: number,
+    public readonly miraCount?: number,
+    public readonly polusCount?: number,
   ) {
     super(RootGamePacketType.GetGameList);
   }

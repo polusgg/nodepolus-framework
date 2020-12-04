@@ -3,7 +3,9 @@ import { BaseRPCPacket } from "../../../basePacket";
 import { RPCPacketType } from "../../../types";
 
 export class SendChatPacket extends BaseRPCPacket {
-  constructor(readonly message: string) {
+  constructor(
+    public readonly message: string,
+  ) {
     super(RPCPacketType.SendChat);
   }
 
