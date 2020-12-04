@@ -69,9 +69,6 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   public family: "IPv4" | "IPv6";
   public size = -1;
 
-  private readonly rpcHandler: RPCHandler = new RPCHandler(this);
-  private readonly ignoreDespawnNetIds: number[] = [];
-
   get host(): HostInstance | undefined {
     if (this.isHost) {
       if (this.customHostInstance) {
@@ -115,6 +112,9 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   get isPublic(): boolean {
     return !!(this.gameTags.get(AlterGameTag.ChangePrivacy) ?? 0);
   }
+
+  private readonly rpcHandler: RPCHandler = new RPCHandler(this);
+  private readonly ignoreDespawnNetIds: number[] = [];
 
   constructor(
     public address: string,
@@ -348,9 +348,14 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
+    const disconnectingPlayerIndex = this.findPlayerIndexByConnection(connection);
 
     if (disconnectingConnectionIndex != -1) {
       this.connections.splice(disconnectingConnectionIndex, 1);
+    }
+
+    if (disconnectingPlayerIndex) {
+      this.players.splice(disconnectingPlayerIndex, 1);
     }
 
     if (connection.isHost && this.connections.length > 0) {

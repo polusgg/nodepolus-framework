@@ -8,10 +8,10 @@ import { BaseRootGamePacket } from "../protocol/packets/basePacket";
 import { DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
+import { RoomCode } from "../util/roomCode";
 import { Level } from "../types/level";
 import { Room } from "../room";
 import dgram from "dgram";
-import { RoomCode } from "../util/roomCode";
 
 export enum DefaultHostState {
   Server,
@@ -36,7 +36,6 @@ export class Server {
   public readonly connections: Map<string, Connection> = new Map();
   public readonly connectionRoomMap: Map<string, Room> = new Map();
 
-  // TODO: Store rooms as just a Map of code to room?
   public rooms: Room[] = [];
   public roomMap: Map<string, Room> = new Map();
 

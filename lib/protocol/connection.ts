@@ -189,9 +189,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     // console.log("Flushing with", this.packetBuffer.length, "packets");
 
     let nonce: number | undefined;
-
     let packet: Packet;
-
     let packetBuffer: RootGamePacketDataType[] = [];
 
     if (reliable) {
@@ -208,7 +206,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
       }
 
       packetBuffer = packetArr;
-
       packet = new Packet(nonce, new RootGamePacket(packetBuffer));
 
       this.acknowledgementResolveMap.set(nonce!, resolveFuncs);
@@ -218,7 +215,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
       });
     } else {
       packet = new Packet(nonce, new RootGamePacket(this.unreliablePacketBuffer));
-
       packetBuffer = this.unreliablePacketBuffer;
 
       packetBuffer.forEach(subpacket => {
