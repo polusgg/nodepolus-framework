@@ -88,10 +88,8 @@ export class CustomHost implements HostInstance {
     }
 
     if (this.playersInScene.get(sender.id)) {
-      throw new Error("Sender already has changed scene");
+      throw new Error("Sender has already changed scene");
     }
-
-    console.trace("Incrementing this.playerIdIndex from", this.playerIdIndex, "to", this.playerIdIndex + 1);
 
     const newPlayerId = this.playerIdIndex++;
 
@@ -127,14 +125,17 @@ export class CustomHost implements HostInstance {
 
     const player = new Player(entity);
 
-    this.room.players.push(player);
+    console.log("ABC DEF");
+
+    console.log(this.room.players);
 
     this.room.players.forEach(testplayer => {
-      if (testplayer.id == player.id) {
-        return;
-      }
       sender.write(new GameDataPacket([ player.gameObject.spawn() ], this.room.code));
     });
+
+    this.room.players.push(player);
+
+    console.log(this.room);
 
     console.log("A");
 
@@ -182,8 +183,8 @@ export class CustomHost implements HostInstance {
     let setColor: PlayerColor = color;
 
     if (this.room.players.length <= 12) {
-      while (takenColors.indexOf(color) != -1) {
-        for (let i = 0; i < Object.keys(PlayerColor).length / 2; i++) {
+      while (takenColors.indexOf(setColor) != -1) {
+        for (let i = 0; i < 12; i++) {
           if (takenColors.indexOf(i) == -1) {
             setColor = i;
           }

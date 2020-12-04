@@ -141,11 +141,13 @@ export class Server {
 
           counts[room.options.options.levels[0]]++;
 
-          // TODO: Make results size configurable
-          if (results.length < 10) {
+          // TODO: Add config option for max player count and max results
+          if (room.roomListing.playerCount < 10 && results.length < 10) {
             results[i] = room.roomListing;
           }
         }
+
+        results.sort((a, b) => b.playerCount - a.playerCount);
 
         sender.send([ new GetGameListResponsePacket(results, counts[Level.TheSkeld], counts[Level.MiraHq], counts[Level.Polus]) ]);
         break;
