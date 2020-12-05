@@ -22,7 +22,6 @@ import { BaseSystem } from "./systems/baseSystem";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { Level } from "../../../types/level";
-import { CustomHost } from "../../../host";
 import {
   NormalCommunicationsAmount,
   MiraCommunicationsAmount,
@@ -105,31 +104,40 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
         throw new Error(`RepairSystem sent to room without a host`);
       }
 
-      if (!(this.parent.room.host instanceof CustomHost)) {
-        throw new Error(`Unexpected host type on room: expected CustomHost but found ${typeof this.parent.room.host}`);
-      }
-
+      /**
+       * The following ts-ignore annotations are needed because TS is not smart
+       * enough to know that a room acting as the host *must* have an instance
+       * of CustomHost. Importing CustomHost in this file would cause a
+       * circular reference and would fail to compile.
+       */
       switch (system.type) {
         case SystemType.Electrical:
+          // @ts-ignore
           this.parent.room.host.systemsHandler.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
           break;
         case SystemType.Medbay:
+          // @ts-ignore
           this.parent.room.host.systemsHandler.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
           break;
         case SystemType.Oxygen:
+          // @ts-ignore
           this.parent.room.host.systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
           break;
         case SystemType.Reactor:
+          // @ts-ignore
           this.parent.room.host.systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
           break;
         case SystemType.Laboratory:
+          // @ts-ignore
           this.parent.room.host.systemsHandler.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
           break;
         case SystemType.Security:
+          // @ts-ignore
           this.parent.room.host.systemsHandler.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
           break;
         case SystemType.Doors:
           if (this.parent.room.options.options.levels[0] == Level.Polus) {
+            // @ts-ignore
             this.parent.room.host.systemsHandler.repairDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
           } else {
             // TODO: Skeld doors
@@ -137,19 +145,24 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
           break;
         case SystemType.Communications:
           if (this.parent.room.options.options.levels[0] == Level.MiraHq) {
+            // @ts-ignore
             this.parent.room.host.systemsHandler.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
           } else {
+            // @ts-ignore
             this.parent.room.host.systemsHandler.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
           }
           break;
         case SystemType.Decontamination:
+          // @ts-ignore
           this.parent.room.host.systemsHandler.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
           break;
         case SystemType.Decontamination2:
+          // @ts-ignore
           this.parent.room.host.systemsHandler.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
           break;
         case SystemType.Sabotage:
           // TODO: Change to sabotageSystemHandler
+          // @ts-ignore
           this.parent.room.host.systemsHandler.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
           break;
         default:
