@@ -65,7 +65,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   public shipStatus?: EntityLevel;
   public meetingHud?: EntityMeetingHud;
   public options: GameOptionsData = DEFAULT_GAME_OPTIONS;
-  public gameTags: Map<AlterGameTag, number> = new Map([ [AlterGameTag.ChangePrivacy, 0] ]);
+  public gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
   public family: "IPv4" | "IPv6";
   public size = -1;
 
@@ -145,7 +145,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   sendSetHost(connection: Connection, sendImmediately: boolean = true): void {
     if (sendImmediately) {
-      connection.sendReliable([ new JoinGameResponsePacket(this.code, connection.id, connection.id) ]);
+      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, connection.id)]);
     } else {
       connection.write(new JoinGameResponsePacket(this.code, connection.id, connection.id));
     }
@@ -153,7 +153,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   sendRemoveHost(connection: Connection, sendImmediately: boolean = true): void {
     if (sendImmediately) {
-      connection.sendReliable([ new JoinGameResponsePacket(this.code, connection.id, this.host?.id ?? FakeHostId.ServerAsHost) ]);
+      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.host?.id ?? FakeHostId.ServerAsHost)]);
     } else {
       connection.write(new JoinGameResponsePacket(this.code, connection.id, this.host?.id ?? FakeHostId.ServerAsHost));
     }
@@ -204,6 +204,10 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     return this.players.find(player => player.gameObject.owner == connection.id);
   }
 
+  findConnectionByPlayer(player: Player): Connection | undefined {
+    return this.findConnection(player.gameObject.owner);
+  }
+
   findPlayerIndexByConnection(connection: Connection): number {
     return this.players.findIndex(player => player.gameObject.owner == connection.id);
   }
@@ -244,7 +248,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         }
 
         for (let i = 0; i < gameData.packets.length; i++) {
-          this.handleGameDataPacket(gameData.packets[i], sender, target ? [ target ] : undefined);
+          this.handleGameDataPacket(gameData.packets[i], sender, target ? [target] : undefined);
         }
         break;
       }
@@ -341,9 +345,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       }
     }
 
-    this.sendRootGamePacket(new GameDataPacket([
-      new RPCPacket(from.id, packet),
-    ], this.code), sendTo as Connection[]);
+    this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.id, packet)], this.code), sendTo as Connection[]);
   }
 
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
@@ -369,7 +371,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   handleJoin(connection: Connection): void {
     if (!this.isHost && this.connections.length >= 10) {
-      connection.sendReliable([ new JoinGameErrorPacket(DisconnectionType.GameFull) ]);
+      connection.sendReliable([new JoinGameErrorPacket(DisconnectionType.GameFull)]);
     }
 
     this.removeActingHosts();
@@ -390,15 +392,15 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         this.handleRejoin(connection);
         break;
       default:
-        connection.sendReliable([ new JoinGameErrorPacket(DisconnectionType.GameStarted) ]);
+        connection.sendReliable([new JoinGameErrorPacket(DisconnectionType.GameStarted)]);
     }
   }
 
   despawn(innerNetObject: InnerNetObject): void {
+    // TODO: Commented out because the lobby was being despawned twice with
+    //       the server as the host
     // this.handleDespawn(innerNetObject.id);
-    this.sendRootGamePacket(new GameDataPacket([
-      new DespawnPacket(innerNetObject.id),
-    ], this.code));
+    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.id)], this.code));
   }
 
   private handleNewJoin(connection: Connection): void {
@@ -421,7 +423,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   private handleRejoin(connection: Connection): void {
     if (connection.room?.code != this.code) {
-      connection.sendReliable([ new JoinGameErrorPacket(DisconnectionType.GameStarted) ]);
+      connection.sendReliable([new JoinGameErrorPacket(DisconnectionType.GameStarted)]);
 
       return;
     }
@@ -443,7 +445,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   private sendToLimbo(connection: Connection): void {
     connection.limboState = LimboState.WaitingForHost;
 
-    connection.sendReliable([ new WaitForHostPacket(this.code, connection.id) ]);
+    connection.sendReliable([new WaitForHostPacket(this.code, connection.id)]);
 
     this.broadcastJoinMessage(connection);
   }
@@ -583,9 +585,9 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       netObject.data(data);
 
       if (netObject.type == InnerNetObjectType.CustomNetworkTransform) {
-        this.sendUnreliableRootGamePacket(new GameDataPacket([ netObject.data(oldNetObject) ], this.code), sendTo ?? []);
+        this.sendUnreliableRootGamePacket(new GameDataPacket([netObject.data(oldNetObject)], this.code), sendTo ?? []);
       } else {
-        this.sendRootGamePacket(new GameDataPacket([ netObject.data(oldNetObject) ], this.code), sendTo ?? []);
+        this.sendRootGamePacket(new GameDataPacket([netObject.data(oldNetObject)], this.code), sendTo ?? []);
       }
     } else {
       throw new Error(`Data packet sent with unknown InnerNetObject ID: ${netId}`);
@@ -601,7 +603,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
         this.shipStatus = EntityShipStatus.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ], this.code), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
       }
       case SpawnType.AprilShipStatus: {
@@ -611,7 +613,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
         this.shipStatus = EntityAprilShipStatus.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ], this.code), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
       }
       case SpawnType.Headquarters: {
@@ -621,7 +623,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
         this.shipStatus = EntityHeadquarters.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ], this.code), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
       }
       case SpawnType.PlanetMap: {
@@ -631,7 +633,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
         this.shipStatus = EntityPlanetMap.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.shipStatus.spawn() ], this.code), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
       }
       case SpawnType.GameData: {
@@ -641,7 +643,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
         this.gameData = EntityGameData.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.gameData.spawn() ], this.code), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([this.gameData.spawn()], this.code), sendTo);
         break;
       }
       case SpawnType.LobbyBehaviour: {
@@ -651,7 +653,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
         this.lobbyBehavior = EntityLobbyBehaviour.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.lobbyBehavior.spawn() ], this.code), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([this.lobbyBehavior.spawn()], this.code), sendTo);
         break;
       }
       case SpawnType.MeetingHud: {
@@ -661,7 +663,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
         this.meetingHud = EntityMeetingHud.spawn(flags, owner, innerNetObjects, this);
 
-        this.sendRootGamePacket(new GameDataPacket([ this.meetingHud.spawn() ], this.code), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([this.meetingHud.spawn()], this.code), sendTo);
         break;
       }
       case SpawnType.PlayerControl: {
@@ -673,7 +675,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
         this.players.push(new Player(EntityPlayer.spawn(flags, owner, innerNetObjects, this)));
 
-        this.sendRootGamePacket(new GameDataPacket([ this.findPlayerByConnection(connection)!.gameObject.spawn() ], this.code), sendTo);
+        this.sendRootGamePacket(new GameDataPacket([this.findPlayerByConnection(connection)!.gameObject.spawn()], this.code), sendTo);
         break;
       }
     }
@@ -786,7 +788,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
     this.sendRootGamePacket(
       new GameDataPacket(
-        [ new DespawnPacket(innerNetObject.id) ],
+        [new DespawnPacket(innerNetObject.id)],
         this.code,
       ),
       sendTo,

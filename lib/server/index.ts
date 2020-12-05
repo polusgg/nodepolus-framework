@@ -134,7 +134,7 @@ export class Server {
         this.rooms.push(newRoom);
         this.roomMap.set(newRoom.code, newRoom);
 
-        sender.sendReliable([ new HostGameResponsePacket(newRoom.code) ]);
+        sender.sendReliable([new HostGameResponsePacket(newRoom.code)]);
         break;
       }
       case RootGamePacketType.JoinGame: {
@@ -145,7 +145,7 @@ export class Server {
 
           room.handleJoin(sender);
         } else {
-          sender.sendReliable([ new JoinGameErrorPacket(DisconnectionType.GameNotFound) ]);
+          sender.sendReliable([new JoinGameErrorPacket(DisconnectionType.GameNotFound)]);
         }
         break;
       }
@@ -171,7 +171,7 @@ export class Server {
 
         results.sort((a, b) => b.playerCount - a.playerCount);
 
-        sender.sendReliable([ new GetGameListResponsePacket(results, counts[Level.TheSkeld], counts[Level.MiraHq], counts[Level.Polus]) ]);
+        sender.sendReliable([new GetGameListResponsePacket(results, counts[Level.TheSkeld], counts[Level.MiraHq], counts[Level.Polus])]);
         break;
       }
       default: {

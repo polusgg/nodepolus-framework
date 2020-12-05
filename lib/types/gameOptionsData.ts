@@ -91,7 +91,7 @@ export class GameOptionsData {
         .reverse()
         .map((bit, index) => bit ? 1 << index : 0)
         .filter(bit => bit)
-      : [ reader.readByte() ];
+      : [reader.readByte()];
 
     /**
      * Typescript is complaining that opt is missing the properties
@@ -121,6 +121,7 @@ export class GameOptionsData {
       isDefault: reader.readBoolean(),
     };
 
+    // TODO: Cody: refactor to single type/object with defaults for lower versions
     if (opt.version == 2 || opt.version == 3 || opt.version == 4) {
       opt.emergencyCooldown = reader.readByte();
     }
@@ -158,18 +159,18 @@ export class GameOptionsData {
     writer.writeInt32(this.options.votingTime);
     writer.writeBoolean(this.options.isDefault);
 
-    if (this.options.version == 2 || this.options.version == 3 || this.options.version == 4) {
-      writer.writeByte(this.options.emergencyCooldown);
+    if (this.options.version > 1) {
+      writer.writeByte((this.options as GameOptionsDataV2).emergencyCooldown);
     }
 
-    if (this.options.version == 3 || this.options.version == 4) {
-      writer.writeBoolean(this.options.confirmEjects);
-      writer.writeBoolean(this.options.visualTasks);
+    if (this.options.version > 2) {
+      writer.writeBoolean((this.options as GameOptionsDataV3).confirmEjects);
+      writer.writeBoolean((this.options as GameOptionsDataV3).visualTasks);
     }
 
-    if (this.options.version == 4) {
-      writer.writeBoolean(this.options.anonymousVoting);
-      writer.writeByte(this.options.taskBarUpdates);
+    if (this.options.version > 3) {
+      writer.writeBoolean((this.options as GameOptionsDataV4).anonymousVoting);
+      writer.writeByte((this.options as GameOptionsDataV4).taskBarUpdates);
     }
   }
 }

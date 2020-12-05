@@ -9,7 +9,11 @@ export class HelloPacket extends BasePacket {
   }
 
   static deserialize(reader: MessageReader): HelloPacket {
-    return new HelloPacket(reader.readByte(), ClientVersion.decode(reader.readUInt32()), reader.readString());
+    return new HelloPacket(
+      reader.readByte(),
+      ClientVersion.decode(reader.readUInt32()),
+      reader.readString(),
+    );
   }
 
   serialize(): MessageWriter {

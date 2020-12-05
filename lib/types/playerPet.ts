@@ -10,4 +10,5 @@ export enum PlayerPet {
   EllieRose = 8,
   Squig = 9,
   Bedcrab = 10,
+  Glitch = 11,
 }

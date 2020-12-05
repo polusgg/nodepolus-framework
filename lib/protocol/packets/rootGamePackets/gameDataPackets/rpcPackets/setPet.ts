@@ -11,10 +11,10 @@ export class SetPetPacket extends BaseRPCPacket {
   }
 
   static deserialize(reader: MessageReader): SetPetPacket {
-    return new SetPetPacket(reader.readByte());
+    return new SetPetPacket(reader.readPackedUInt32());
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.pet);
+    return new MessageWriter().writePackedUInt32(this.pet);
   }
 }

@@ -163,7 +163,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
   async sendReliable(packets: RootGamePacketDataType[]): Promise<void> {
     return new Promise(resolve => {
-      const temp: AwaitingPacket[] = [ ...this.packetBuffer ];
+      const temp: AwaitingPacket[] = [...this.packetBuffer];
 
       this.packetBuffer = packets.map(packet => ({ packet, resolve }));
       this.flush(true);
@@ -172,7 +172,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   }
 
   sendUnreliable(packets: RootGamePacketDataType[]): void {
-    const temp: RootGamePacketDataType[] = [ ...this.unreliablePacketBuffer ];
+    const temp: RootGamePacketDataType[] = [...this.unreliablePacketBuffer];
 
     this.unreliablePacketBuffer = packets;
 
@@ -327,6 +327,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   handleRepairSystem(_sender: InnerLevel, _systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
   handleCloseDoorsOfType(_sender: InnerLevel, _systemId: SystemType): void {}
   handleSetStartCounter(_sequenceId: number, _timeRemaining: number): void {}
+  setInfected(_impostorCount: number): void {}
+  setTasks(): void {}
   /* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
 
   private handlePing(): void {
@@ -354,7 +356,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
   private acknowledgePacket(nonce: number): void {
     this.socket.send(
-      // TODO: Include unacknowledged packets
       new Packet(nonce, new AcknowledgementPacket(this.getUnacknowledgedPacketArray())).serialize().buffer,
       this.port,
       this.address,
@@ -375,7 +376,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
   private handleHello(helloPacket: HelloPacket): void {
     if (this.initialized) {
-      throw new Error("Connection already recieved a Hello packet");
+      throw new Error("Connection already received a Hello packet");
     }
 
     this.initialized = true;
@@ -386,7 +387,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
   private handleDisconnection(reason?: DisconnectReason): void {
     if (!this.requestedDisconnect) {
-      this.socket.send(Buffer.from([ PacketType.Disconnect ]), this.port, this.address);
+      this.socket.send(Buffer.from([PacketType.Disconnect]), this.port, this.address);
     }
 
     this.cleanup(reason);

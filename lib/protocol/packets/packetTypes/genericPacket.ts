@@ -2,9 +2,13 @@ import { JoinGameErrorPacket, JoinGameRequestPacket, JoinGameResponsePacket } fr
 import { GetGameListRequestPacket, GetGameListResponsePacket } from "../rootGamePackets/getGameList";
 import { HostGameRequestPacket, HostGameResponsePacket } from "../rootGamePackets/hostGame";
 import { LateRejectionPacket, RemovePlayerPacket } from "../rootGamePackets/removePlayer";
+import { AnnouncementDataPacket } from "../announcementPackets/announcementData";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { RootAnnouncementPacketType, RootGamePacketType } from "../types";
 import { ReselectServerPacket } from "../rootGamePackets/reselectServer";
+import { FreeWeekendPacket } from "../announcementPackets/freeWeekend";
 import { AlterGameTagPacket } from "../rootGamePackets/alterGameTag";
+import { CacheDataPacket } from "../announcementPackets/cacheData";
 import { WaitForHostPacket } from "../rootGamePackets/waitForHost";
 import { JoinedGamePacket } from "../rootGamePackets/joinedGame";
 import { KickPlayerPacket } from "../rootGamePackets/kickPlayer";
@@ -13,11 +17,7 @@ import { StartGamePacket } from "../rootGamePackets/startGame";
 import { GameDataPacket } from "../rootGamePackets/gameData";
 import { RedirectPacket } from "../rootGamePackets/redirect";
 import { EndGamePacket } from "../rootGamePackets/endGame";
-import { RootAnnouncementPacketType, RootGamePacketType } from "../types";
 import { Level } from "../../../types/level";
-import { AnnouncementDataPacket } from "../announcementPackets/announcementData";
-import { CacheDataPacket } from "../announcementPackets/cacheData";
-import { FreeWeekendPacket } from "../announcementPackets/freeWeekend";
 
 export type RootGamePacketDataType =
   | HostGameRequestPacket

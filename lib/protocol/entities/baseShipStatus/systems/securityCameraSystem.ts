@@ -40,8 +40,8 @@ export class SecurityCameraSystem extends BaseSystem<SecurityCameraSystem> {
       return false;
     }
 
-    const viewers = [ ...this.playersViewingCams ];
-    const oldViewers = [ ...old.playersViewingCams ];
+    const viewers = [...this.playersViewingCams];
+    const oldViewers = [...old.playersViewingCams];
 
     for (let i = 0; i < this.playersViewingCams.size; i++) {
       if (viewers[i] != oldViewers[i]) {

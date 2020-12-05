@@ -3,6 +3,16 @@ import { SKELD_DOOR_COUNT } from "../../../../util/constants";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
+export const SYSTEM_DOORS: Map<SystemType, number[]> = new Map([
+  [SystemType.Electrical, [9]],
+  [SystemType.LowerEngine, [4, 11]],
+  [SystemType.UpperEngine, [2, 5]],
+  [SystemType.Security, [6]],
+  [SystemType.Medbay, [10]],
+  [SystemType.Storage, [1, 7, 12]],
+  [SystemType.Cafeteria, [0, 3, 8]],
+]);
+
 export class AutoDoorsSystem extends BaseSystem<AutoDoorsSystem> {
   public doors: boolean[] = Array(SKELD_DOOR_COUNT).fill(true);
 

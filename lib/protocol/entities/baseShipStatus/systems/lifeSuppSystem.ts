@@ -46,8 +46,8 @@ export class LifeSuppSystem extends BaseSystem<LifeSuppSystem> {
       return false;
     }
 
-    const completedConsolesArray = [ ...this.completedConsoles ];
-    const oldCompletedConsolesArray = [ ...old.completedConsoles ];
+    const completedConsolesArray = [...this.completedConsoles];
+    const oldCompletedConsolesArray = [...old.completedConsoles];
 
     for (let i = 0; i < completedConsolesArray.length; i++) {
       if (completedConsolesArray[i] != oldCompletedConsolesArray[i]) {

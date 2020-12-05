@@ -1,4 +1,4 @@
-export enum Tasks {
+export enum TaskType {
   SubmitScan = 0,
   PrimeShields = 1,
   FuelEngines = 2,

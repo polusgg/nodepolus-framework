@@ -11,10 +11,10 @@ export class SetSkinPacket extends BaseRPCPacket {
   }
 
   static deserialize(reader: MessageReader): SetSkinPacket {
-    return new SetSkinPacket(reader.readByte());
+    return new SetSkinPacket(reader.readPackedUInt32());
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.skin);
+    return new MessageWriter().writePackedUInt32(this.skin);
   }
 }

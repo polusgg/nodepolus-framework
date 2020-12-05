@@ -224,7 +224,7 @@ export class MessageWriter extends HazelMessage {
     writer: (subWriter: MessageWriter, item: T, idx: number) => void,
     lengthIsPacked: boolean = true,
   ): this {
-    const arr = [ ...items ];
+    const arr = [...items];
 
     if (lengthIsPacked) {
       this.writePackedUInt32(arr.length);
@@ -419,7 +419,7 @@ export class MessageReader extends HazelMessage {
   }
 
   readBitfield(size: number = 8): boolean[] {
-    return [ ...this.readBytes(Math.ceil(size / 8)).buffer ]
+    return [...this.readBytes(Math.ceil(size / 8)).buffer]
       .map(v => v
         .toString(2)
         .padStart(8, "0"))

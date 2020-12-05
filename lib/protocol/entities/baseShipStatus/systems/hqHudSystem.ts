@@ -50,8 +50,8 @@ export class HqHudSystem extends BaseSystem<HqHudSystem> {
       return false;
     }
 
-    const completedConsolesArray = [ ...this.completedConsoles ];
-    const oldCompletedConsolesArray = [ ...old.completedConsoles ];
+    const completedConsolesArray = [...this.completedConsoles];
+    const oldCompletedConsolesArray = [...old.completedConsoles];
 
     for (let i = 0; i < completedConsolesArray.length; i++) {
       if (oldCompletedConsolesArray[i] != completedConsolesArray[i]) {
@@ -63,7 +63,7 @@ export class HqHudSystem extends BaseSystem<HqHudSystem> {
       return false;
     }
 
-    let testVal;
+    let testVal: number | undefined;
 
     for (const [key, val] of this.activeConsoles) {
       testVal = old.activeConsoles.get(key);

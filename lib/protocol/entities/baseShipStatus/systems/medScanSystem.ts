@@ -40,8 +40,8 @@ export class MedScanSystem extends BaseSystem<MedScanSystem> {
       return false;
     }
 
-    const playersInQueueArray = [ ...this.playersInQueue ];
-    const oldPlayersInQueueArray = [ ...old.playersInQueue ];
+    const playersInQueueArray = [...this.playersInQueue];
+    const oldPlayersInQueueArray = [...old.playersInQueue];
 
     for (let i = 0; i < playersInQueueArray.length; i++) {
       if (playersInQueueArray[i] != oldPlayersInQueueArray[i]) {

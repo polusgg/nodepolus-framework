@@ -1,4 +1,3 @@
-import { RepairAmount, RepairSystemPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { CloseDoorsOfTypePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/closeDoorsOfType";
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
@@ -23,6 +22,21 @@ import { BaseSystem } from "./systems/baseSystem";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { Level } from "../../../types/level";
+import { CustomHost } from "../../../host";
+import {
+  NormalCommunicationsAmount,
+  MiraCommunicationsAmount,
+  DecontaminationAmount,
+  RepairSystemPacket,
+  ElectricalAmount,
+  PolusDoorsAmount,
+  SabotageAmount,
+  SecurityAmount,
+  ReactorAmount,
+  MedbayAmount,
+  OxygenAmount,
+  RepairAmount,
+} from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 
 export type System = AutoDoorsSystem
 | DeconSystem
@@ -75,18 +89,78 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
       throw new Error("CloseDoorsOfType sent to room without a host");
     }
 
-    this.sendRPCPacketTo([ this.parent.room.host as Connection ], new CloseDoorsOfTypePacket(systemId));
+    this.sendRPCPacketTo([this.parent.room.host as Connection], new CloseDoorsOfTypePacket(systemId));
   }
 
   repairSystem(systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
     if (this.parent.room.isHost) {
-      return;
-    }
+      const system = this.getSystemFromType(systemId);
+      const player = this.parent.room.players.find(testplayer => testplayer.gameObject.playerControl.id == playerControlNetId);
 
-    this.sendRPCPacketTo(
-      [ this.parent.room.host as Connection ],
-      new RepairSystemPacket(systemId, playerControlNetId, amount.serialize(), this.level),
-    );
+      if (!player) {
+        throw new Error(`RepairSystem called from a non-existant or non-playerControl netId: ${playerControlNetId}`);
+      }
+
+      if (!this.parent.room.host) {
+        throw new Error(`RepairSystem sent to room without a host`);
+      }
+
+      if (!(this.parent.room.host instanceof CustomHost)) {
+        throw new Error(`Unexpected host type on room: expected CustomHost but found ${typeof this.parent.room.host}`);
+      }
+
+      switch (system.type) {
+        case SystemType.Electrical:
+          this.parent.room.host.systemsHandler.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
+          break;
+        case SystemType.Medbay:
+          this.parent.room.host.systemsHandler.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
+          break;
+        case SystemType.Oxygen:
+          this.parent.room.host.systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
+          break;
+        case SystemType.Reactor:
+          this.parent.room.host.systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
+          break;
+        case SystemType.Laboratory:
+          this.parent.room.host.systemsHandler.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
+          break;
+        case SystemType.Security:
+          this.parent.room.host.systemsHandler.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
+          break;
+        case SystemType.Doors:
+          if (this.parent.room.options.options.levels[0] == Level.Polus) {
+            this.parent.room.host.systemsHandler.repairDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
+          } else {
+            // TODO: Skeld doors
+          }
+          break;
+        case SystemType.Communications:
+          if (this.parent.room.options.options.levels[0] == Level.MiraHq) {
+            this.parent.room.host.systemsHandler.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
+          } else {
+            this.parent.room.host.systemsHandler.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
+          }
+          break;
+        case SystemType.Decontamination:
+          this.parent.room.host.systemsHandler.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
+          break;
+        case SystemType.Decontamination2:
+          this.parent.room.host.systemsHandler.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
+          break;
+        case SystemType.Sabotage:
+          // TODO: Change to sabotageSystemHandler
+          this.parent.room.host.systemsHandler.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
+          break;
+        default:
+          throw new Error(`Received RepairSystem packet for an unimplemented SystemType: ${system.type} (${SystemType[system.type]})`);
+      }
+    } else {
+      this.sendRPCPacketTo(
+        [this.parent.room.host as Connection],
+        new RepairSystemPacket(systemId, playerControlNetId, amount.serialize(), this.level),
+      );
+    }
   }
 
   getData(old: BaseShipStatus<T, U>): DataPacket {
@@ -141,7 +215,7 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
     this.setSystems(this.spawnSystemTypes, MessageReader.fromMessage(data), true);
   }
 
-  private getSystemFromType(systemType: SystemType): BaseSystem<InternalSystemType> {
+  getSystemFromType(systemType: SystemType): BaseSystem<InternalSystemType> {
     switch (systemType) {
       case SystemType.Doors:
         if (this.level == Level.Polus) {

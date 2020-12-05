@@ -4,9 +4,9 @@ import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPacke
 import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseGameObject } from "../baseEntity";
+import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { EntityPlayer } from ".";
-import { Connection } from "../../connection";
 
 export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
   constructor(netId: number, parent: EntityPlayer) {

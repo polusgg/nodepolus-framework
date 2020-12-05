@@ -11,10 +11,10 @@ export class SetHatPacket extends BaseRPCPacket {
   }
 
   static deserialize(reader: MessageReader): SetHatPacket {
-    return new SetHatPacket(reader.readByte());
+    return new SetHatPacket(reader.readPackedUInt32());
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.hat);
+    return new MessageWriter().writePackedUInt32(this.hat);
   }
 }

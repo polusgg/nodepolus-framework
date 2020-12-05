@@ -22,4 +22,8 @@ export interface HostInstance extends ClientInstance {
   handleCloseDoorsOfType(sender: InnerLevel, systemId: SystemType): void;
 
   handleSetStartCounter(sequenceId: number, timeRemaining: number): void;
+
+  setInfected(infectedCount: number): void;
+
+  setTasks(): void;
 }

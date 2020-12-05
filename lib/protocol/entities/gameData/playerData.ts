@@ -58,6 +58,6 @@ export class PlayerData {
         (this.isImpostor ? PlayerFlags.IsImpostor : 0) |
         (this.isDead ? PlayerFlags.IsDead : 0),
       )
-      .writeList(this.tasks, (sub, task) => sub.writePackedUInt32(task[0]).writeBoolean(task[1]));
+      .writeList(this.tasks, (sub, task, i) => sub.writePackedUInt32(i).writeBoolean(task[1]));
   }
 }

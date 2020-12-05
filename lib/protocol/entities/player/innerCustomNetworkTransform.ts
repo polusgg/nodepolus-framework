@@ -4,9 +4,9 @@ import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { Vector2 } from "../../../util/vector2";
 import { BaseGameObject } from "../baseEntity";
+import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { EntityPlayer } from ".";
-import { Connection } from "../../connection";
 
 export class InnerCustomNetworkTransform extends BaseGameObject<InnerCustomNetworkTransform> {
   constructor(public netId: number, public parent: EntityPlayer, public sequenceId: number, public position: Vector2, public velocity: Vector2) {

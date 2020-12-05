@@ -29,8 +29,8 @@ import { PlayerPet } from "../../../types/playerPet";
 import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
-import { EntityPlayer } from ".";
 import { Player } from "../../../player";
+import { EntityPlayer } from ".";
 
 export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   public scannerSequenceId = 1;
@@ -124,7 +124,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("Exiled packet sent to a recipient that has no connection or player instance");
     }
 
-    this.sendRPCPacketTo([ thisPlayer ], new ExiledPacket());
+    this.sendRPCPacketTo([thisPlayer], new ExiledPacket());
   }
 
   exile(player: InnerPlayerControl, sendTo: Connection[]): void {
@@ -141,7 +141,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("CheckName sent to a room without a host");
     }
 
-    this.sendRPCPacketTo([ this.parent.room.host as Connection ], new CheckNamePacket(name));
+    this.sendRPCPacketTo([this.parent.room.host as Connection], new CheckNamePacket(name));
   }
 
   setName(name: string, sendTo: Connection[]): void {
@@ -174,7 +174,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("CheckColor sent to a room without a host");
     }
 
-    this.sendRPCPacketTo([ this.parent.room.host ], new CheckColorPacket(color));
+    this.sendRPCPacketTo([this.parent.room.host], new CheckColorPacket(color));
   }
 
   setColor(color: PlayerColor, sendTo: Connection[]): void {

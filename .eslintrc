@@ -93,9 +93,7 @@
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "error",
     "array-bracket-newline": ["error", "consistent"],
-    "array-bracket-spacing": ["error", "never", {
-      "singleValue": true
-    }],
+    "array-bracket-spacing": ["error", "never"],
     "block-spacing": "error",
     "brace-style": "off",
     "@typescript-eslint/brace-style": ["error", "1tbs", {

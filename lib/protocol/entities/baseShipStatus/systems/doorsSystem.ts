@@ -63,8 +63,8 @@ export class DoorsSystem extends BaseSystem<DoorsSystem> {
       }
     }
 
-    const timerArray = [ ...this.timers.values() ];
-    const oldTimerArray = [ ...old.timers.values() ];
+    const timerArray = [...this.timers.values()];
+    const oldTimerArray = [...old.timers.values()];
 
     for (let i = 0; i < timerArray.length; i++) {
       if (timerArray[i] != oldTimerArray[i]) {

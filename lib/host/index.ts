@@ -3,38 +3,51 @@ import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCu
 import { InnerLobbyBehaviour } from "../protocol/entities/lobbyBehaviour/innerLobbyBehaviour";
 import { InnerHeadquarters } from "../protocol/entities/headquarters/innerHeadquarters";
 import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSystem";
+import { TaskLength, LevelTask, THE_SKELD, MIRA_HQ, POLUS } from "../types/levelTask";
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
 import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
 import { InnerShipStatus } from "../protocol/entities/shipStatus/innerShipStatus";
-import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { StartGamePacket } from "../protocol/packets/rootGamePackets/startGame";
 import { InnerPlanetMap } from "../protocol/entities/planetMap/innerPlanetMap";
+import { SabotageSystemHandler } from "./systemHandlers/sabotageSystemHandler";
 import { GameDataPacket } from "../protocol/packets/rootGamePackets/gameData";
+import { EndGamePacket } from "../protocol/packets/rootGamePackets/endGame";
 import { InnerGameData } from "../protocol/entities/gameData/innerGameData";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityHeadquarters } from "../protocol/entities/headquarters";
 import { PlayerData } from "../protocol/entities/gameData/playerData";
 import { EntityShipStatus } from "../protocol/entities/shipStatus";
+import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
 import { EntityPlanetMap } from "../protocol/entities/planetMap";
 import { EntityGameData } from "../protocol/entities/gameData";
+import { DisconnectReason } from "../types/disconnectReason";
 import { EntityPlayer } from "../protocol/entities/player";
+import { GameOverReason } from "../types/gameOverReason";
 import { InnerLevel } from "../protocol/entities/types";
 import { Connection } from "../protocol/connection";
 import { PlayerColor } from "../types/playerColor";
+import { SystemsHandler } from "./systemHandlers";
 import { FakeHostId } from "../types/fakeHostId";
 import { GLOBAL_OWNER } from "../util/constants";
 import { SystemType } from "../types/systemType";
 import { GameState } from "../types/gameState";
+import { TaskType } from "../types/taskType";
 import { Vector2 } from "../util/vector2";
 import { Level } from "../types/level";
 import { HostInstance } from "./types";
 import { Player } from "../player";
 import { Room } from "../room";
+import { DeconHandler } from "./systemHandlers/deconHandler";
+import { InternalSystemType } from "../protocol/entities/baseShipStatus/systems/type";
+import { DeconSystem } from "../protocol/entities/baseShipStatus/systems/deconSystem";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
   public readonly readyPlayerList: number[] = [];
   public readonly playersInScene: Map<number, string> = new Map();
+  public readonly systemsHandler: SystemsHandler;
+  public readonly sabotageHandler: SabotageSystemHandler;
+  public readonly deconHandlers: DeconHandler[];
 
   private netIdIndex = 1;
   private counterSequenceId = 0;
@@ -56,7 +69,29 @@ export class CustomHost implements HostInstance {
   constructor(
     public room: Room,
   ) {
-    // TODO: Implement
+    this.systemsHandler = new SystemsHandler(this);
+    this.sabotageHandler = new SabotageSystemHandler(this);
+
+    if (!this.room.shipStatus) {
+      throw new Error("Ship status nessacery to instantiate a CustomHost");
+    }
+
+    switch (this.room.options.options.levels[0]) {
+      case Level.TheSkeld:
+        this.deconHandlers = [];
+        break;
+      case Level.MiraHq:
+        this.deconHandlers = [
+          new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
+        ];
+        break;
+      case Level.Polus:
+        this.deconHandlers = [
+          new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
+          new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon2] as DeconSystem),
+        ];
+        break;
+    }
   }
 
   /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
@@ -107,10 +142,17 @@ export class CustomHost implements HostInstance {
           break;
       }
 
-      this.room.connections.forEach(connection => {
-        // TODO: setInfected, setTasks, updateGameData
-        connection.write(new GameDataPacket([ this.room.shipStatus!.spawn() ], this.room.code));
-      });
+      if (!this.room.gameData) {
+        throw new Error("Attempted to start game w/o gamedata");
+      }
+
+      this.room.sendRootGamePacket(new GameDataPacket([this.room.shipStatus!.spawn()], this.room.code));
+
+      this.setInfected(this.room.options.options.impostorCount);
+
+      this.setTasks();
+
+      this.room.gameData.gameData.updateGameData(this.room.gameData.gameData.players, this.room.connections);
 
       this.room.gameState = GameState.Started;
     }
@@ -130,7 +172,7 @@ export class CustomHost implements HostInstance {
     const newPlayerId = this.nextPlayerId;
 
     if (newPlayerId == -1) {
-      sender.sendLateRejection(new DisconnectReason(DisconnectionType.GameFull));
+      sender.sendLateRejection(DisconnectReason.gameFull());
     }
 
     this.playersInScene.set(sender.id, sceneName);
@@ -143,7 +185,7 @@ export class CustomHost implements HostInstance {
       ];
     }
 
-    sender.write(new GameDataPacket([ this.room.lobbyBehavior.spawn() ], this.room.code));
+    sender.write(new GameDataPacket([this.room.lobbyBehavior.spawn()], this.room.code));
 
     if (!this.room.gameData) {
       this.room.gameData = new EntityGameData(this.room);
@@ -154,7 +196,7 @@ export class CustomHost implements HostInstance {
       ];
     }
 
-    sender.write(new GameDataPacket([ this.room.gameData.spawn() ], this.room.code));
+    sender.write(new GameDataPacket([this.room.gameData.spawn()], this.room.code));
 
     const entity = new EntityPlayer(this.room);
 
@@ -168,12 +210,12 @@ export class CustomHost implements HostInstance {
     const player = new Player(entity);
 
     this.room.players.forEach(testplayer => {
-      sender.write(new GameDataPacket([ testplayer.gameObject.spawn() ], this.room.code));
+      sender.write(new GameDataPacket([testplayer.gameObject.spawn()], this.room.code));
     });
 
     this.room.players.push(player);
 
-    await this.room.sendRootGamePacket(new GameDataPacket([ player.gameObject.spawn() ], this.room.code));
+    await this.room.sendRootGamePacket(new GameDataPacket([player.gameObject.spawn()], this.room.code));
 
     player.gameObject.playerControl.syncSettings(this.room.options, this.room.connections);
 
@@ -190,7 +232,7 @@ export class CustomHost implements HostInstance {
       [],
     );
 
-    this.room.gameData.gameData.updateGameData([ playerData ], this.room.connections);
+    this.room.gameData.gameData.updateGameData([playerData], this.room.connections);
 
     player.gameObject.playerControl.isNew = false;
 
@@ -239,10 +281,12 @@ export class CustomHost implements HostInstance {
     throw new Error("Method not implemented.");
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
-    // TODO: Update system and send ShipStatus data packet
-    throw new Error("Method not implemented.");
+    if (!this.room.shipStatus) {
+      throw new Error("Attempted to handle Repair System without a shipstatus");
+    }
+
+    this.room.shipStatus.innerNetObjects[0].repairSystem(systemId, playerControlNetId, amount);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -252,6 +296,7 @@ export class CustomHost implements HostInstance {
   }
 
   handleSetStartCounter(sequenceId: number, timeRemaining: number): void {
+    // This breaks the logic of stopping the counter when someone joins or leaves
     if (timeRemaining == -1) {
       return;
     }
@@ -296,6 +341,165 @@ export class CustomHost implements HostInstance {
 
   startGame(): void {
     this.room.sendRootGamePacket(new StartGamePacket(this.room.code));
+  }
+
+  setInfected(infectedCount: number): void {
+    const shuffledPlayers = shuffleArrayClone(this.room.players);
+    const impostors = new Array(infectedCount);
+
+    for (let i = 0; i < infectedCount; i++) {
+      impostors[i] = shuffledPlayers[i].id;
+    }
+
+    this.room.players[0].gameObject.playerControl.setInfected(impostors, this.room.connections);
+  }
+
+  setTasks(): void {
+    const options = this.room.options.options;
+    const level = options.levels[0];
+    const numCommon = options.commonTasks;
+    const numLong = options.longTasks;
+    // Minimum of 1 short task
+    const numShort = numCommon + numLong + options.shortTasks > 0 ? options.shortTasks : 1;
+
+    console.log(`Setting tasks: ${numCommon} common, ${numLong} long, ${numShort} short`);
+
+    let allTasks: LevelTask[];
+
+    switch (level) {
+      case Level.TheSkeld:
+        allTasks = THE_SKELD;
+        break;
+      case Level.MiraHq:
+        allTasks = MIRA_HQ;
+        break;
+      case Level.Polus:
+        allTasks = POLUS;
+        break;
+      default:
+        throw new Error(`Attempted to set tasks for an unimplemented level: ${level as Level} (${Level[level]})`);
+    }
+
+    const allCommon = shuffleArrayClone(allTasks.filter(task => task.length == TaskLength.Common));
+    const allShort = shuffleArrayClone(allTasks.filter(task => task.length == TaskLength.Short));
+    const allLong = shuffleArrayClone(allTasks.filter(task => task.length == TaskLength.Long));
+
+    // Used to store the currently assigned tasks to try to prevent
+    // players from having the exact same tasks
+    const used: Set<TaskType> = new Set();
+    // The array of tasks for the player
+    const tasks: LevelTask[] = [];
+
+    // Add common tasks
+    this.addTasksFromList({ val: 0 }, numCommon, tasks, used, allCommon);
+
+    for (let i = 0; i < numCommon; i++) {
+      if (allCommon.length == 0) {
+        // Not enough common tasks
+        break;
+      }
+
+      const idx = Math.floor(Math.random() * allCommon.length);
+
+      // tasks.push(allCommon[idx]);
+      tasks.push(allCommon[idx]);
+      allCommon.splice(idx, 1);
+    }
+
+    // Indices used to act as a read head for short and long tasks
+    // to try to prevent players from having the exact same tasks
+    const shortIdx = { val: 0 };
+    const longIdx = { val: 0 };
+
+    for (let pid = 0; pid < this.room.players.length; pid++) {
+      // Clear the used task array
+      // used.splice(0, used.length);
+      used.clear();
+
+      // Remove every non-common task (effectively reusing the same array)
+      tasks.splice(numCommon, tasks.length - numCommon);
+
+      // Add long tasks
+      this.addTasksFromList(longIdx, numLong, tasks, used, allLong);
+
+      // Add short tasks
+      this.addTasksFromList(shortIdx, numShort, tasks, used, allShort);
+
+      const player = this.room.players.find(pl => pl.id == pid);
+
+      if (player) {
+        console.log(`Player ${pid} has tasks:`, tasks.map(task => task.id));
+        console.log(`${tasks.filter(task => task.length == TaskLength.Common).length} common`);
+        console.log(`${tasks.filter(task => task.length == TaskLength.Long).length} long`);
+        console.log(`${tasks.filter(task => task.length == TaskLength.Short).length} short`);
+
+        if (!this.room.gameData) {
+          throw new Error("Attempted to set tasks without a GameData object");
+        }
+
+        this.room.gameData.gameData.setTasks(player.id, tasks.map(task => task.id), this.room.connections);
+      }
+    }
+  }
+
+  endGame(reason: GameOverReason): void {
+    this.room.sendRootGamePacket(new EndGamePacket(this.room.code, reason, false));
+  }
+
+  // Don't blame me, blame Forte
+  private addTasksFromList(
+    start: { val: number },
+    count: number,
+    tasks: LevelTask[],
+    usedTaskTypes: Set<TaskType>,
+    unusedTasks: LevelTask[],
+  ): void {
+    // A separate counter to stop the loop should it run forever since `i`
+    // could be get decremented below
+    let sanityCheck = 0;
+
+    for (let i = 0; i < count; i++) {
+      if (sanityCheck++ >= 1000) {
+        // Stop after 1000 tries
+        break;
+      }
+
+      // If we are trying to get another task that
+      // exceeds the number of available tasks
+      if (start.val >= unusedTasks.length) {
+        // Start back at the beginning...
+        start.val = 0;
+
+        // ...and reshuffle the available tasks
+        shuffleArray(unusedTasks);
+
+        // If the player already has every single task...
+        // if (unusedTasks.every(task => usedTaskTypes.indexOf(task.type) != -1)) {
+        if (unusedTasks.every(task => usedTaskTypes.has(task.type))) {
+          // ...then clear the used task array so they can have duplicates
+          // usedTaskTypes.splice(0, usedTaskTypes.length);
+          usedTaskTypes.clear();
+        }
+      }
+
+      // Get the task
+      const task: LevelTask | undefined = start.val >= unusedTasks.length ? undefined : unusedTasks[start.val++];
+
+      if (!task) {
+        continue;
+      }
+
+      // If it is already assigned...
+      // if (usedTaskTypes.indexOf(task.type) != -1) {
+      if (usedTaskTypes.has(task.type)) {
+        // ...then go back one
+        i--;
+      } else {
+        // ...otherwise add it to the player's tasks
+        usedTaskTypes.add(task.type);
+        tasks.push(task);
+      }
+    }
   }
 
   private isNameTaken(name: string): boolean {
