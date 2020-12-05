@@ -17,6 +17,7 @@ export class Client implements ClientInstance {
 
   constructor(public config: ClientConfig) {
     this.socket = dgram.createSocket("udp4");
+
     this.socket.on("message", buffer => {
       const packet = Packet.deserialize(MessageReader.fromRawBytes(buffer), true);
 

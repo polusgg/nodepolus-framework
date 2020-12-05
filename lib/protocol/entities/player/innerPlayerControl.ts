@@ -262,7 +262,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     gameData.gameData.players[gameDataPlayerIndex].isDead = true;
 
-    console.log("Player", this.id, "Murdered", victimPlayer.id);
+    // console.log("Player", this.id, "Murdered", victimPlayer.id);
 
     this.sendRPCPacketTo(sendTo, new MurderPlayerPacket(victimPlayer.gameObject.playerControl.id));
   }

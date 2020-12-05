@@ -1,9 +1,23 @@
-import { RepairAmount } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
+import { RepairAmount, ElectricalAmount, MedbayAmount, OxygenAmount, ReactorAmount, SecurityAmount, PolusDoorsAmount, MiraCommunicationsAmount, NormalCommunicationsAmount, DecontaminationAmount, SabotageAmount } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
+import { SecurityCameraSystem } from "../protocol/entities/baseShipStatus/systems/securityCameraSystem";
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
+import { HudOverrideSystem } from "../protocol/entities/baseShipStatus/systems/hudOverrideSystem";
+import { LaboratorySystem } from "../protocol/entities/baseShipStatus/systems/laboratorySystem";
+import { AutoDoorsSystem } from "../protocol/entities/baseShipStatus/systems/autoDoorsSystem";
 import { InnerLobbyBehaviour } from "../protocol/entities/lobbyBehaviour/innerLobbyBehaviour";
+import { DeconTwoSystem } from "../protocol/entities/baseShipStatus/systems/deconTwoSystem";
+import { LifeSuppSystem } from "../protocol/entities/baseShipStatus/systems/lifeSuppSystem";
+import { SabotageSystem } from "../protocol/entities/baseShipStatus/systems/sabotageSystem";
+import { MedScanSystem } from "../protocol/entities/baseShipStatus/systems/medScanSystem";
+import { ReactorSystem } from "../protocol/entities/baseShipStatus/systems/reactorSystem";
 import { InnerHeadquarters } from "../protocol/entities/headquarters/innerHeadquarters";
+import { SwitchSystem } from "../protocol/entities/baseShipStatus/systems/switchSystem";
+import { DeconSystem } from "../protocol/entities/baseShipStatus/systems/deconSystem";
+import { DoorsSystem } from "../protocol/entities/baseShipStatus/systems/doorsSystem";
+import { HqHudSystem } from "../protocol/entities/baseShipStatus/systems/hqHudSystem";
 import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSystem";
 import { TaskLength, LevelTask, THE_SKELD, MIRA_HQ, POLUS } from "../types/levelTask";
+import { InternalSystemType } from "../protocol/entities/baseShipStatus/systems/type";
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
 import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
 import { InnerShipStatus } from "../protocol/entities/shipStatus/innerShipStatus";
@@ -20,6 +34,7 @@ import { EntityShipStatus } from "../protocol/entities/shipStatus";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
 import { EntityPlanetMap } from "../protocol/entities/planetMap";
 import { EntityGameData } from "../protocol/entities/gameData";
+import { DeconHandler } from "./systemHandlers/deconHandler";
 import { DisconnectReason } from "../types/disconnectReason";
 import { EntityPlayer } from "../protocol/entities/player";
 import { GameOverReason } from "../types/gameOverReason";
@@ -37,9 +52,6 @@ import { Level } from "../types/level";
 import { HostInstance } from "./types";
 import { Player } from "../player";
 import { Room } from "../room";
-import { DeconHandler } from "./systemHandlers/deconHandler";
-import { InternalSystemType } from "../protocol/entities/baseShipStatus/systems/type";
-import { DeconSystem } from "../protocol/entities/baseShipStatus/systems/deconSystem";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
@@ -47,7 +59,7 @@ export class CustomHost implements HostInstance {
   public readonly playersInScene: Map<number, string> = new Map();
   public readonly systemsHandler: SystemsHandler;
   public readonly sabotageHandler: SabotageSystemHandler;
-  public readonly deconHandlers: DeconHandler[];
+  public deconHandlers: DeconHandler[] = [];
 
   private netIdIndex = 1;
   private counterSequenceId = 0;
@@ -71,27 +83,6 @@ export class CustomHost implements HostInstance {
   ) {
     this.systemsHandler = new SystemsHandler(this);
     this.sabotageHandler = new SabotageSystemHandler(this);
-
-    if (!this.room.shipStatus) {
-      throw new Error("Ship status nessacery to instantiate a CustomHost");
-    }
-
-    switch (this.room.options.options.levels[0]) {
-      case Level.TheSkeld:
-        this.deconHandlers = [];
-        break;
-      case Level.MiraHq:
-        this.deconHandlers = [
-          new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
-        ];
-        break;
-      case Level.Polus:
-        this.deconHandlers = [
-          new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
-          new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon2] as DeconSystem),
-        ];
-        break;
-    }
   }
 
   /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
@@ -142,6 +133,23 @@ export class CustomHost implements HostInstance {
           break;
       }
 
+      switch (this.room.options.options.levels[0]) {
+        case Level.TheSkeld:
+          this.deconHandlers = [];
+          break;
+        case Level.MiraHq:
+          this.deconHandlers = [
+            new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
+          ];
+          break;
+        case Level.Polus:
+          this.deconHandlers = [
+            new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
+            new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon2] as DeconSystem),
+          ];
+          break;
+      }
+
       if (!this.room.gameData) {
         throw new Error("Attempted to start game w/o gamedata");
       }
@@ -150,7 +158,12 @@ export class CustomHost implements HostInstance {
 
       this.setInfected(this.room.options.options.impostorCount);
 
-      this.setTasks();
+      // TODO: Uncomment when all tasks are added to LevelTask
+      // this.setTasks();
+
+      for (let i = 0; i < this.room.players.length; i++) {
+        this.room.gameData.gameData.setTasks(this.room.players[i].id, [25, 4, 2], this.room.connections);
+      }
 
       this.room.gameData.gameData.updateGameData(this.room.gameData.gameData.players, this.room.connections);
 
@@ -286,7 +299,62 @@ export class CustomHost implements HostInstance {
       throw new Error("Attempted to handle Repair System without a shipstatus");
     }
 
-    this.room.shipStatus.innerNetObjects[0].repairSystem(systemId, playerControlNetId, amount);
+    if (!this.room.isHost || !(this.room.host instanceof CustomHost)) {
+      throw new Error(`CustomHost received RepairSystem but server is not host`);
+    }
+
+    const system = this.room.shipStatus.innerNetObjects[0].getSystemFromType(systemId);
+    const player = this.room.players.find(testplayer => testplayer.gameObject.playerControl.id == playerControlNetId);
+
+    if (!player) {
+      throw new Error(`Received RepairSystem from an InnerNetObject other than a player: ${playerControlNetId}`);
+    }
+
+    switch (system.type) {
+      case SystemType.Electrical:
+        this.room.host.systemsHandler.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
+        break;
+      case SystemType.Medbay:
+        this.room.host.systemsHandler.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
+        break;
+      case SystemType.Oxygen:
+        this.room.host.systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
+        break;
+      case SystemType.Reactor:
+        this.room.host.systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
+        break;
+      case SystemType.Laboratory:
+        this.room.host.systemsHandler.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
+        break;
+      case SystemType.Security:
+        this.room.host.systemsHandler.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
+        break;
+      case SystemType.Doors:
+        if (this.room.options.options.levels[0] == Level.TheSkeld) {
+          this.room.host.systemsHandler.repairSkeldDoors(player, system as AutoDoorsSystem, amount);
+        } else if (this.room.options.options.levels[0] == Level.Polus) {
+          this.room.host.systemsHandler.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
+        }
+        break;
+      case SystemType.Communications:
+        if (this.room.options.options.levels[0] == Level.MiraHq) {
+          this.room.host.systemsHandler.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
+        } else {
+          this.room.host.systemsHandler.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
+        }
+        break;
+      case SystemType.Decontamination:
+        this.room.host.systemsHandler.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
+        break;
+      case SystemType.Decontamination2:
+        this.room.host.systemsHandler.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
+        break;
+      case SystemType.Sabotage:
+        this.room.host.systemsHandler.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
+        break;
+      default:
+        throw new Error(`Received RepairSystem packet for an unimplemented SystemType: ${system.type} (${SystemType[system.type]})`);
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -296,7 +364,7 @@ export class CustomHost implements HostInstance {
   }
 
   handleSetStartCounter(sequenceId: number, timeRemaining: number): void {
-    // This breaks the logic of stopping the counter when someone joins or leaves
+    // TODO: This breaks the logic of stopping the counter when someone joins or leaves
     if (timeRemaining == -1) {
       return;
     }
@@ -362,7 +430,7 @@ export class CustomHost implements HostInstance {
     // Minimum of 1 short task
     const numShort = numCommon + numLong + options.shortTasks > 0 ? options.shortTasks : 1;
 
-    console.log(`Setting tasks: ${numCommon} common, ${numLong} long, ${numShort} short`);
+    // console.log(`Setting tasks: ${numCommon} common, ${numLong} long, ${numShort} short`);
 
     let allTasks: LevelTask[];
 
@@ -428,10 +496,10 @@ export class CustomHost implements HostInstance {
       const player = this.room.players.find(pl => pl.id == pid);
 
       if (player) {
-        console.log(`Player ${pid} has tasks:`, tasks.map(task => task.id));
-        console.log(`${tasks.filter(task => task.length == TaskLength.Common).length} common`);
-        console.log(`${tasks.filter(task => task.length == TaskLength.Long).length} long`);
-        console.log(`${tasks.filter(task => task.length == TaskLength.Short).length} short`);
+        // console.log(`Player ${pid} has tasks:`, tasks.map(task => task.id));
+        // console.log(`${tasks.filter(task => task.length == TaskLength.Common).length} common`);
+        // console.log(`${tasks.filter(task => task.length == TaskLength.Long).length} long`);
+        // console.log(`${tasks.filter(task => task.length == TaskLength.Short).length} short`);
 
         if (!this.room.gameData) {
           throw new Error("Attempted to set tasks without a GameData object");

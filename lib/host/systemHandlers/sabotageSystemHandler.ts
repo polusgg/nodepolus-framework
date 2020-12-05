@@ -7,9 +7,11 @@ import { HqHudSystem } from "../../protocol/entities/baseShipStatus/systems/hqHu
 import { GameOverReason } from "../../types/gameOverReason";
 import { Level } from "../../types/level";
 import { CustomHost } from "..";
+import { randomInRange } from "../../util/functions";
+import { shuffleArrayClone } from "../../util/shuffle";
 
 export class SabotageSystemHandler {
-  private timer: NodeJS.Timeout | undefined;
+  public timer: NodeJS.Timeout | undefined;
 
   constructor(
     public host: CustomHost,
@@ -56,8 +58,40 @@ export class SabotageSystemHandler {
     //        make certain it isn't setting
     //        actualSwitches to expectedSwitches
 
-    system.actualSwitches = [false, false, false, false, false];
-    system.expectedSwitches = [true, true, true, true, true];
+    // const flippable = randomInRange(2, 5);
+    // const flipped = [];
+
+    // for (let i = 0; i < flippable; i++) {
+    //   const random = randomInRange();
+    //   if (flipped.indexOf(i))
+    //   system.actualSwitches[chosen[i]] = !system.actualSwitches[chosen[i]];
+    // }
+
+    // system.expectedSwitches = Array(5).fill(false).map(() => Math.random() < 0.5);
+    // system.actualSwitches = shuffleArrayClone(system.expectedSwitches);
+
+    // system.expectedSwitches = Array(5).fill(false).map(() => Math.random() < 0.5);
+    // system.actualSwitches = system.expectedSwitches.concat([]);
+
+    const brokenSwitches = randomInRange(2, 4);
+    const swapIdxs = [0, 1, 2, 3, 4];
+
+    for (let i = 0; i < brokenSwitches; i++) {
+      const idxToSwap = randomInRange(0, swapIdxs.length - 1);
+      const val = swapIdxs[idxToSwap];
+
+      swapIdxs.splice(idxToSwap, 1);
+
+      system.actualSwitches[val] = !system.expectedSwitches[val];
+    }
+
+    // system.actualSwitches = [false, false, false, false, false];
+    // system.expectedSwitches = [true, true, true, true, true];
+
+    // TODO: Actually count down like every other system (like -85 every second)
+    setTimeout(() => {
+      system.visionModifier = 0;
+    }, 3000);
   }
 
   sabotageOxygen(system: LifeSuppSystem): void {

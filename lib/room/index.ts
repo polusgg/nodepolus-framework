@@ -364,7 +364,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       this.migrateHost();
     }
 
-    console.log("handleDisconnect host id", this.host?.id ?? 0);
+    // console.log("handleDisconnect host id", this.host?.id ?? 0);
 
     this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, this.host?.id ?? 0, reason));
   }
@@ -688,7 +688,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   private handleDespawn(netId: number, sendTo?: Connection[]): void {
-    console.log("current ignore list in handleDespawn", this.ignoreDespawnNetIds);
+    // console.log("current ignore list in handleDespawn", this.ignoreDespawnNetIds);
 
     const ignoreIds = this.ignoreDespawnNetIds.indexOf(netId);
 

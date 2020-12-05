@@ -11,9 +11,9 @@ export class DeconHandler {
   ) {}
 
   update(): void {
-    this.system.timer--;
+    console.log("Update Called", this.system);
 
-    if (this.system.timer == 0) {
+    if (--this.system.timer == 0) {
       this.system.timer = 3;
 
       if (this.system.state & DecontaminationDoorState.Enter) {
@@ -54,5 +54,9 @@ export class DeconHandler {
       this.update();
       this.host.systemsHandler.sendDataUpdate();
     }, 1000);
+
+    this.host.systemsHandler.setOldShipStatus();
+    this.update();
+    this.host.systemsHandler.sendDataUpdate();
   }
 }

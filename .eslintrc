@@ -427,7 +427,8 @@
     "@typescript-eslint/prefer-readonly": ["error", {
       "onlyInlineLambdas": false
     }],
-    "@typescript-eslint/prefer-ts-expect-error": "error",
+    // "@typescript-eslint/prefer-ts-expect-error": "error",
+    "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/promise-function-async": "error",
     "@typescript-eslint/require-array-sort-compare": "error",
     "@typescript-eslint/switch-exhaustiveness-check": "error",

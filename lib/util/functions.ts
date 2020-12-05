@@ -25,3 +25,10 @@ export function shallowEqual<T>(object1: T, object2: T): boolean {
 
   return true;
 }
+
+/**
+ * Choose a random number in an inclusive range
+ */
+export function randomInRange(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}

@@ -1,5 +1,5 @@
 /**
- * Shuffled the given array using the Fisher-Yates algorithm
+ * Shuffles the given array using the Fisher-Yates algorithm
  * Via https://basarat.gitbook.io/algorithms/shuffling
  */
 const shuffleArray = <T>(array: T[]): void => {

@@ -1,7 +1,7 @@
+import { HostGameResponsePacket, HostGameRequestPacket } from "../protocol/packets/rootGamePackets/hostGame";
 import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
 import { GetGameListResponsePacket, RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
-import { HostGameResponsePacket } from "../protocol/packets/rootGamePackets/hostGame";
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
 import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";
@@ -130,6 +130,8 @@ export class Server {
           this.config.defaultHost == DefaultHostState.Server,
           roomCode,
         );
+
+        newRoom.options = (packet as HostGameRequestPacket).options;
 
         this.rooms.push(newRoom);
         this.roomMap.set(newRoom.code, newRoom);

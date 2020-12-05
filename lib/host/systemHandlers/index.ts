@@ -31,10 +31,13 @@ import {
   OxygenAction,
   MiraCommunicationsAction,
   ReactorAction,
+  RepairAmount,
 } from "../../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
+import { AutoDoorsSystem } from "../../protocol/entities/baseShipStatus/systems/autoDoorsSystem";
 
 export class SystemsHandler {
   private oldShipStatus: EntityLevel = this.host.room.shipStatus!;
+  private sabotageCountdownInterval: NodeJS.Timeout | undefined;
 
   private get shipStatus(): EntityLevel {
     return this.host.room.shipStatus!;
@@ -57,10 +60,18 @@ export class SystemsHandler {
       state |= DecontaminationDoorState.HeadingUp;
     }
 
-    system.state = state;
+    this.host.deconHandlers[system instanceof DeconSystem ? 0 : 1].start(state);
   }
 
-  repairDoors<T extends DoorsSystem>(repairer: Player, system: T, amount: PolusDoorsAmount): void {
+  repairSkeldDoors<T extends AutoDoorsSystem>(repairer: Player, system: T, amount: RepairAmount): void {
+    this.setOldShipStatus();
+
+    // TODO: Door timers
+
+    this.sendDataUpdate();
+  }
+
+  repairPolusDoors<T extends DoorsSystem>(repairer: Player, system: T, amount: PolusDoorsAmount): void {
     this.setOldShipStatus();
 
     // TODO: Door timers
@@ -99,12 +110,22 @@ export class SystemsHandler {
 
     switch (amount.action) {
       case OxygenAction.Completed:
-        system.completedConsoles.add(repairer.id);
+        system.completedConsoles.add(amount.consoleId);
+
+        if (system.completedConsoles.size == 2) {
+          system.timer = 10000;
+
+          if (this.host.sabotageHandler.timer) {
+            clearInterval(this.host.sabotageHandler.timer);
+          }
+        }
         break;
       case OxygenAction.Repaired:
-        system.completedConsoles.clear();
-
         system.timer = 10000;
+
+        if (this.host.sabotageHandler.timer) {
+          clearInterval(this.host.sabotageHandler.timer);
+        }
         break;
     }
 
@@ -129,14 +150,24 @@ export class SystemsHandler {
     switch (amount.action) {
       case ReactorAction.PlacedHand:
         system.userConsoles.set(repairer.id, amount.consoleId);
+
+        if (system.userConsoles.size == 2) {
+          system.timer = 10000;
+
+          if (this.host.sabotageHandler.timer) {
+            clearInterval(this.host.sabotageHandler.timer);
+          }
+        }
         break;
       case ReactorAction.RemovedHand:
         system.userConsoles.delete(repairer.id);
         break;
       case ReactorAction.Repaired:
-        system.userConsoles.clear();
-
         system.timer = 10000;
+
+        if (this.host.sabotageHandler.timer) {
+          clearInterval(this.host.sabotageHandler.timer);
+        }
         break;
     }
 
@@ -148,6 +179,19 @@ export class SystemsHandler {
 
     const ship = this.shipStatus.innerNetObjects[0];
     const type = amount.system;
+
+    (ship.getSystemFromType(SystemType.Sabotage) as SabotageSystem).cooldown = 30;
+
+    this.sabotageCountdownInterval = setInterval(() => {
+      (ship.getSystemFromType(SystemType.Sabotage) as SabotageSystem).cooldown--;
+
+      if (
+        (ship.getSystemFromType(SystemType.Sabotage) as SabotageSystem).cooldown == 0 &&
+        this.sabotageCountdownInterval
+      ) {
+        clearInterval(this.sabotageCountdownInterval);
+      }
+    }, 1000);
 
     switch (type) {
       case SystemType.Reactor:
@@ -185,7 +229,21 @@ export class SystemsHandler {
   repairSwitch<T extends SwitchSystem>(repairer: Player, system: T, amount: ElectricalAmount): void {
     this.setOldShipStatus();
 
-    system.actualSwitches[amount.switchIndex] = !system.actualSwitches[amount.switchIndex];
+    const index = 4 - amount.switchIndex;
+
+    system.actualSwitches[index] = !system.actualSwitches[index];
+
+    if (system.actualSwitches.every((s, i) => s == system.expectedSwitches[i])) {
+      // TODO: Count back up (like +85 every second)
+      setTimeout(() => {
+        // Don't fix the lights if they somehow get immediately sabotaged again
+        if (system.actualSwitches.every((s, i) => s == system.expectedSwitches[i])) {
+          this.setOldShipStatus();
+          system.visionModifier = 0xff;
+          this.sendDataUpdate();
+        }
+      }, 3000);
+    }
 
     this.sendDataUpdate();
   }
