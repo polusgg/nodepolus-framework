@@ -52,6 +52,7 @@ import { Level } from "../types/level";
 import { HostInstance } from "./types";
 import { Player } from "../player";
 import { Room } from "../room";
+import { DoorSystem } from "./doorHandlers/doorSystem";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
@@ -60,6 +61,7 @@ export class CustomHost implements HostInstance {
   public readonly systemsHandler: SystemsHandler;
   public readonly sabotageHandler: SabotageSystemHandler;
   public deconHandlers: DeconHandler[] = [];
+  public doorSystem: DoorSystem | undefined;
 
   private netIdIndex = 1;
   private counterSequenceId = 0;
@@ -147,6 +149,7 @@ export class CustomHost implements HostInstance {
             new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
             new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon2] as DeconSystem),
           ];
+          this.doorSystem = new DoorSystem(this, this.room.shipStatus);
           break;
       }
 
@@ -312,55 +315,58 @@ export class CustomHost implements HostInstance {
 
     switch (system.type) {
       case SystemType.Electrical:
-        this.room.host.systemsHandler.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
+        this.systemsHandler.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
         break;
       case SystemType.Medbay:
-        this.room.host.systemsHandler.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
+        this.systemsHandler.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
         break;
       case SystemType.Oxygen:
-        this.room.host.systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
+        this.systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
         break;
       case SystemType.Reactor:
-        this.room.host.systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
+        this.systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
         break;
       case SystemType.Laboratory:
-        this.room.host.systemsHandler.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
+        this.systemsHandler.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
         break;
       case SystemType.Security:
-        this.room.host.systemsHandler.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
+        this.systemsHandler.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
         break;
       case SystemType.Doors:
         if (this.room.options.options.levels[0] == Level.TheSkeld) {
-          this.room.host.systemsHandler.repairSkeldDoors(player, system as AutoDoorsSystem, amount);
+          this.systemsHandler.repairSkeldDoors(player, system as AutoDoorsSystem, amount);
         } else if (this.room.options.options.levels[0] == Level.Polus) {
-          this.room.host.systemsHandler.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
+          this.systemsHandler.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
         }
         break;
       case SystemType.Communications:
         if (this.room.options.options.levels[0] == Level.MiraHq) {
-          this.room.host.systemsHandler.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
+          this.systemsHandler.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
         } else {
-          this.room.host.systemsHandler.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
+          this.systemsHandler.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
         }
         break;
       case SystemType.Decontamination:
-        this.room.host.systemsHandler.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
+        this.systemsHandler.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
         break;
       case SystemType.Decontamination2:
-        this.room.host.systemsHandler.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
+        this.systemsHandler.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
         break;
       case SystemType.Sabotage:
-        this.room.host.systemsHandler.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
+        this.systemsHandler.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
         break;
       default:
         throw new Error(`Received RepairSystem packet for an unimplemented SystemType: ${system.type} (${SystemType[system.type]})`);
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleCloseDoorsOfType(sender: InnerLevel, systemId: SystemType): void {
-    // TODO: Close the requested doors and send ShipStatus data packet
-    throw new Error("Method not implemented.");
+    if (!this.doorSystem) {
+      throw new Error("handleCloseDoorsOfType called without a door system. Likely due to the packet being sent either before map initiation (lobby) or on MiraHQ, which does not have doors.");
+    }
+
+    this.doorSystem.closeDoor(this.doorSystem.getDoorsForSystem(systemId));
+    this.doorSystem.setSystemTimeout(systemId, 30);
   }
 
   handleSetStartCounter(sequenceId: number, timeRemaining: number): void {

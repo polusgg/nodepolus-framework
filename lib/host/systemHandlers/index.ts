@@ -74,7 +74,7 @@ export class SystemsHandler {
   repairPolusDoors<T extends DoorsSystem>(repairer: Player, system: T, amount: PolusDoorsAmount): void {
     this.setOldShipStatus();
 
-    // TODO: Door timers
+    system.doorStates[amount.doorId] = true;
 
     this.sendDataUpdate();
   }

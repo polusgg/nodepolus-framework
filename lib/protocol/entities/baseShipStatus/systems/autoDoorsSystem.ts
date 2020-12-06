@@ -3,7 +3,7 @@ import { SKELD_DOOR_COUNT } from "../../../../util/constants";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
-export const SYSTEM_DOORS: Map<SystemType, number[]> = new Map([
+export const SYSTEM_DOORS_AUTO: Map<SystemType, number[]> = new Map([
   [SystemType.Electrical, [9]],
   [SystemType.LowerEngine, [4, 11]],
   [SystemType.UpperEngine, [2, 5]],

@@ -3,9 +3,19 @@ import { POLUS_DOOR_COUNT } from "../../../../util/constants";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
+export const SYSTEM_DOORS: Map<SystemType, number[]> = new Map([
+  [SystemType.Electrical, [0, 1, 2]],
+  [SystemType.Oxygen, [3, 4]],
+  [SystemType.Weapons, [5]],
+  [SystemType.Communications, [6]],
+  [SystemType.Office, [7, 8]],
+  [SystemType.Laboratory, [9, 10]],
+  [SystemType.Storage, [11]],
+]);
+
 export class DoorsSystem extends BaseSystem<DoorsSystem> {
   public timers: Map<SystemType, number> = new Map<SystemType, number>();
-  public doorStates: boolean[] = Array(POLUS_DOOR_COUNT).fill(false);
+  public doorStates: boolean[] = Array(POLUS_DOOR_COUNT).fill(true);
 
   constructor() {
     super(SystemType.Doors);
