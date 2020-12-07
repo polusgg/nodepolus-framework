@@ -1,44 +1,48 @@
-import { InnerLevel } from "../../protocol/entities/types";
-import { CustomHost } from "..";
-import { GameDataPacket } from "../../protocol/packets/rootGamePackets/gameData";
-import { SystemType } from "../../types/systemType";
 import { AutoDoorsSystem, SYSTEM_DOORS_AUTO } from "../../protocol/entities/baseShipStatus/systems/autoDoorsSystem";
+import { GameDataPacket } from "../../protocol/packets/rootGamePackets/gameData";
+import { InnerLevel } from "../../protocol/entities/types";
+import { SystemType } from "../../types/systemType";
+import { CustomHost } from "..";
 
-export class AutoDoorSystem {
-  private oldShipStatus: InnerLevel;
+export class AutoDoorsHandler {
   private readonly systemTimers: NodeJS.Timeout[] = [];
 
-  constructor(public host: CustomHost, public shipStatus: InnerLevel) {
+  private oldShipStatus: InnerLevel;
+
+  constructor(
+    public host: CustomHost,
+    public shipStatus: InnerLevel,
+  ) {
     this.oldShipStatus = shipStatus.clone();
   }
 
-  closeDoor(doorId: number | number[], state: boolean = false): void {
+  closeDoor(doorIds: number | number[], state: boolean = false): void {
     this.setOldShipStatus();
 
-    const internalDoorsSystem = this.shipStatus.getSystemFromType(SystemType.Doors) as AutoDoorsSystem;
+    const autoDoorsSystem = this.shipStatus.getSystemFromType(SystemType.Doors) as AutoDoorsSystem;
 
-    if (doorId instanceof Array) {
-      for (let i = 0; i < doorId.length; i++) {
-        const singleId = doorId[i];
+    if (doorIds instanceof Array) {
+      for (let i = 0; i < doorIds.length; i++) {
+        const id = doorIds[i];
 
-        internalDoorsSystem.doors[singleId] = state;
+        autoDoorsSystem.doors[id] = state;
       }
     } else {
-      internalDoorsSystem.doors[doorId] = state;
+      autoDoorsSystem.doors[doorIds] = state;
     }
 
     this.sendDataUpdate();
   }
 
-  openDoor(doorId: number | number[]): void {
-    this.closeDoor(doorId, true);
+  openDoor(doorIds: number | number[]): void {
+    this.closeDoor(doorIds, true);
   }
 
   getDoorsForSystem(systemId: SystemType): number[] {
     const doors = SYSTEM_DOORS_AUTO.get(systemId);
 
     if (!doors) {
-      throw new Error(`getDoorsForSystem called with a systemId (${systemId}, ${SystemType[systemId]}) that does not have door mappings.`);
+      throw new Error(`SystemType ${systemId} (${SystemType[systemId]}) does not have any doors`);
     }
 
     return doors;

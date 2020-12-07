@@ -1,10 +1,10 @@
-import { RepairAmount, ElectricalAmount, MedbayAmount, OxygenAmount, ReactorAmount, SecurityAmount, PolusDoorsAmount, MiraCommunicationsAmount, NormalCommunicationsAmount, DecontaminationAmount, SabotageAmount } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { SecurityCameraSystem } from "../protocol/entities/baseShipStatus/systems/securityCameraSystem";
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
 import { HudOverrideSystem } from "../protocol/entities/baseShipStatus/systems/hudOverrideSystem";
 import { LaboratorySystem } from "../protocol/entities/baseShipStatus/systems/laboratorySystem";
 import { AutoDoorsSystem } from "../protocol/entities/baseShipStatus/systems/autoDoorsSystem";
 import { InnerLobbyBehaviour } from "../protocol/entities/lobbyBehaviour/innerLobbyBehaviour";
+import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud/innerMeetingHud";
 import { DeconTwoSystem } from "../protocol/entities/baseShipStatus/systems/deconTwoSystem";
 import { LifeSuppSystem } from "../protocol/entities/baseShipStatus/systems/lifeSuppSystem";
 import { SabotageSystem } from "../protocol/entities/baseShipStatus/systems/sabotageSystem";
@@ -30,12 +30,15 @@ import { InnerGameData } from "../protocol/entities/gameData/innerGameData";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityHeadquarters } from "../protocol/entities/headquarters";
 import { PlayerData } from "../protocol/entities/gameData/playerData";
+import { AutoDoorsHandler } from "./systemHandlers/autoDoorsHandler";
+import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { EntityShipStatus } from "../protocol/entities/shipStatus";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
 import { EntityPlanetMap } from "../protocol/entities/planetMap";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { DeconHandler } from "./systemHandlers/deconHandler";
 import { DisconnectReason } from "../types/disconnectReason";
+import { DoorsHandler } from "./systemHandlers/doorsHandler";
 import { EntityPlayer } from "../protocol/entities/player";
 import { GameOverReason } from "../types/gameOverReason";
 import { InnerLevel } from "../protocol/entities/types";
@@ -52,19 +55,29 @@ import { Level } from "../types/level";
 import { HostInstance } from "./types";
 import { Player } from "../player";
 import { Room } from "../room";
-import { DoorSystem } from "./doorHandlers/doorSystem";
-import { AutoDoorSystem } from "./doorHandlers/autoDoorSystem";
-import { EntityMeetingHud } from "../protocol/entities/meetingHud";
-import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud/innerMeetingHud";
+import {
+  NormalCommunicationsAmount,
+  MiraCommunicationsAmount,
+  DecontaminationAmount,
+  ElectricalAmount,
+  PolusDoorsAmount,
+  SabotageAmount,
+  SecurityAmount,
+  ReactorAmount,
+  MedbayAmount,
+  OxygenAmount,
+  RepairAmount,
+} from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
   public readonly readyPlayerList: number[] = [];
   public readonly playersInScene: Map<number, string> = new Map();
+
   public systemsHandler?: SystemsHandler;
   public sabotageHandler?: SabotageSystemHandler;
   public deconHandlers: DeconHandler[] = [];
-  public doorSystem: DoorSystem | AutoDoorSystem | undefined;
+  public doorHandler: DoorsHandler | AutoDoorsHandler | undefined;
 
   private netIdIndex = 1;
   private counterSequenceId = 0;
@@ -85,8 +98,7 @@ export class CustomHost implements HostInstance {
 
   constructor(
     public room: Room,
-  ) {
-  }
+  ) {}
 
   /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
   sendKick(_banned: boolean, _reason: DisconnectReason): void {}
@@ -136,13 +148,13 @@ export class CustomHost implements HostInstance {
           break;
       }
 
-      this.systemsHandler! = new SystemsHandler(this);
+      this.systemsHandler = new SystemsHandler(this);
       this.sabotageHandler = new SabotageSystemHandler(this);
 
       switch (this.room.options.options.levels[0]) {
         case Level.TheSkeld:
           this.deconHandlers = [];
-          this.doorSystem = new AutoDoorSystem(this, this.room.shipStatus.innerNetObjects[0]);
+          this.doorHandler = new AutoDoorsHandler(this, this.room.shipStatus.innerNetObjects[0]);
           break;
         case Level.MiraHq:
           this.deconHandlers = [
@@ -152,9 +164,9 @@ export class CustomHost implements HostInstance {
         case Level.Polus:
           this.deconHandlers = [
             new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
-            new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon2] as DeconSystem),
+            new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon2] as DeconTwoSystem),
           ];
-          this.doorSystem = new DoorSystem(this, this.room.shipStatus.innerNetObjects[0]);
+          this.doorHandler = new DoorsHandler(this, this.room.shipStatus.innerNetObjects[0]);
           break;
       }
 
@@ -333,7 +345,6 @@ export class CustomHost implements HostInstance {
       }
 
       const oldData = this.room.meetingHud.meetingHud.clone();
-
       const votes: Map<number, number[]> = new Map();
 
       this.room.gameData.gameData.players.forEach(player => {
@@ -342,13 +353,12 @@ export class CustomHost implements HostInstance {
         if (!votes.has(state.votedFor)) {
           votes.set(state.votedFor, []);
         }
+
         votes.set(state.votedFor, votes.get(state.votedFor)!.concat([player.id]));
       });
 
       const a = [...votes.values()].map(playersVotedFor => playersVotedFor.length);
-
       const largestVoteCount = Math.max(...a);
-
       const allLargestVotes = [...votes.entries()].filter(entry => entry[1].length == largestVoteCount);
 
       if (allLargestVotes.length == 1) {
@@ -437,12 +447,12 @@ export class CustomHost implements HostInstance {
   }
 
   handleCloseDoorsOfType(sender: InnerLevel, systemId: SystemType): void {
-    if (!this.doorSystem) {
-      throw new Error("handleCloseDoorsOfType called without a door system. Likely due to the packet being sent either before map initiation (lobby) or on MiraHQ, which does not have doors.");
+    if (!this.doorHandler) {
+      throw new Error("Received CloseDoorsOfType without a door system");
     }
 
-    this.doorSystem.closeDoor(this.doorSystem.getDoorsForSystem(systemId));
-    this.doorSystem.setSystemTimeout(systemId, 30);
+    this.doorHandler.closeDoor(this.doorHandler.getDoorsForSystem(systemId));
+    this.doorHandler.setSystemTimeout(systemId, 30);
   }
 
   handleSetStartCounter(sequenceId: number, timeRemaining: number): void {
@@ -512,8 +522,6 @@ export class CustomHost implements HostInstance {
     // Minimum of 1 short task
     const numShort = numCommon + numLong + options.shortTasks > 0 ? options.shortTasks : 1;
 
-    // console.log(`Setting tasks: ${numCommon} common, ${numLong} long, ${numShort} short`);
-
     let allTasks: LevelTask[];
 
     switch (level) {
@@ -551,7 +559,6 @@ export class CustomHost implements HostInstance {
 
       const idx = Math.floor(Math.random() * allCommon.length);
 
-      // tasks.push(allCommon[idx]);
       tasks.push(allCommon[idx]);
       allCommon.splice(idx, 1);
     }
@@ -563,7 +570,6 @@ export class CustomHost implements HostInstance {
 
     for (let pid = 0; pid < this.room.players.length; pid++) {
       // Clear the used task array
-      // used.splice(0, used.length);
       used.clear();
 
       // Remove every non-common task (effectively reusing the same array)
@@ -578,11 +584,6 @@ export class CustomHost implements HostInstance {
       const player = this.room.players.find(pl => pl.id == pid);
 
       if (player) {
-        // console.log(`Player ${pid} has tasks:`, tasks.map(task => task.id));
-        // console.log(`${tasks.filter(task => task.length == TaskLength.Common).length} common`);
-        // console.log(`${tasks.filter(task => task.length == TaskLength.Long).length} long`);
-        // console.log(`${tasks.filter(task => task.length == TaskLength.Short).length} short`);
-
         if (!this.room.gameData) {
           throw new Error("Attempted to set tasks without a GameData object");
         }
@@ -596,7 +597,6 @@ export class CustomHost implements HostInstance {
     this.room.sendRootGamePacket(new EndGamePacket(this.room.code, reason, false));
   }
 
-  // Don't blame me, blame Forte
   private addTasksFromList(
     start: { val: number },
     count: number,
@@ -627,7 +627,6 @@ export class CustomHost implements HostInstance {
         // if (unusedTasks.every(task => usedTaskTypes.indexOf(task.type) != -1)) {
         if (unusedTasks.every(task => usedTaskTypes.has(task.type))) {
           // ...then clear the used task array so they can have duplicates
-          // usedTaskTypes.splice(0, usedTaskTypes.length);
           usedTaskTypes.clear();
         }
       }
@@ -640,7 +639,6 @@ export class CustomHost implements HostInstance {
       }
 
       // If it is already assigned...
-      // if (usedTaskTypes.indexOf(task.type) != -1) {
       if (usedTaskTypes.has(task.type)) {
         // ...then go back one
         i--;

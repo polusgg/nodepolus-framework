@@ -88,7 +88,7 @@ export class DoorsSystem extends BaseSystem<DoorsSystem> {
   clone(): DoorsSystem {
     const clone = new DoorsSystem();
 
-    clone.doorStates = new Array(...this.doorStates);
+    clone.doorStates = [...this.doorStates];
     clone.timers = new Map(this.timers);
 
     return clone;

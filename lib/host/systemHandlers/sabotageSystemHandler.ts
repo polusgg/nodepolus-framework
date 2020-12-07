@@ -5,9 +5,9 @@ import { ReactorSystem } from "../../protocol/entities/baseShipStatus/systems/re
 import { SwitchSystem } from "../../protocol/entities/baseShipStatus/systems/switchSystem";
 import { HqHudSystem } from "../../protocol/entities/baseShipStatus/systems/hqHudSystem";
 import { GameOverReason } from "../../types/gameOverReason";
+import { randomInRange } from "../../util/functions";
 import { Level } from "../../types/level";
 import { CustomHost } from "..";
-import { randomInRange } from "../../util/functions";
 
 export class SabotageSystemHandler {
   public timer: NodeJS.Timeout | undefined;
@@ -76,15 +76,17 @@ export class SabotageSystemHandler {
   sabotageOxygen(system: LifeSuppSystem): void {
     system.completedConsoles.clear();
 
-    switch (this.host.room.options.options.levels[0]) {
+    const level = this.host.room.options.options.levels[0];
+
+    switch (level) {
       case Level.TheSkeld:
         system.timer = 30;
         break;
       case Level.MiraHq:
         system.timer = 45;
         break;
-      case Level.Polus:
-        throw new Error("Sabotage Oxygen sent when on Polus. This should be impossible");
+      default:
+        throw new Error(`Attempted to sabotage oxygen on an unsupported map: ${level} (${Level[level]})`);
     }
 
     this.timer = setInterval(() => {

@@ -1,30 +1,31 @@
-import { InnerLevel } from "../../protocol/entities/types";
-import { CustomHost } from "..";
-import { GameDataPacket } from "../../protocol/packets/rootGamePackets/gameData";
-import { SystemType } from "../../types/systemType";
 import { DoorsSystem, SYSTEM_DOORS } from "../../protocol/entities/baseShipStatus/systems/doorsSystem";
+import { GameDataPacket } from "../../protocol/packets/rootGamePackets/gameData";
+import { InnerLevel } from "../../protocol/entities/types";
+import { SystemType } from "../../types/systemType";
+import { CustomHost } from "..";
 
-export class DoorSystem {
-  private oldShipStatus: InnerLevel;
+export class DoorsHandler {
   private readonly systemTimers: NodeJS.Timeout[] = [];
+
+  private oldShipStatus: InnerLevel;
 
   constructor(public host: CustomHost, public shipStatus: InnerLevel) {
     this.oldShipStatus = shipStatus.clone();
   }
 
-  closeDoor(doorId: number | number[]): void {
+  closeDoor(doorIds: number | number[]): void {
     this.setOldShipStatus();
 
-    const internalDoorsSystem = this.shipStatus.getSystemFromType(SystemType.Doors) as DoorsSystem;
+    const doorsSystem = this.shipStatus.getSystemFromType(SystemType.Doors) as DoorsSystem;
 
-    if (doorId instanceof Array) {
-      for (let i = 0; i < doorId.length; i++) {
-        const singleId = doorId[i];
+    if (doorIds instanceof Array) {
+      for (let i = 0; i < doorIds.length; i++) {
+        const id = doorIds[i];
 
-        internalDoorsSystem.doorStates[singleId] = false;
+        doorsSystem.doorStates[id] = false;
       }
     } else {
-      internalDoorsSystem.doorStates[doorId] = false;
+      doorsSystem.doorStates[doorIds] = false;
     }
 
     this.sendDataUpdate();
@@ -34,7 +35,7 @@ export class DoorSystem {
     const doors = SYSTEM_DOORS.get(systemId);
 
     if (!doors) {
-      throw new Error(`getDoorsForSystem called with a systemId (${systemId}, ${SystemType[systemId]}) that does not have door mappings.`);
+      throw new Error(`SystemType ${systemId} (${SystemType[systemId]}) does not have any doors`);
     }
 
     return doors;
@@ -43,15 +44,15 @@ export class DoorSystem {
   setSystemTimeout(systemId: SystemType, time: number): void {
     this.setOldShipStatus();
 
-    const internalDoorsSystem = this.shipStatus.getSystemFromType(SystemType.Doors) as DoorsSystem;
+    const doorsSystem = this.shipStatus.getSystemFromType(SystemType.Doors) as DoorsSystem;
 
-    internalDoorsSystem.timers.set(systemId, time);
+    doorsSystem.timers.set(systemId, time);
 
     this.systemTimers[systemId] = setInterval(() => {
-      let currentTime = internalDoorsSystem.timers.get(systemId);
+      let currentTime = doorsSystem.timers.get(systemId);
 
       if (currentTime && currentTime != 0) {
-        internalDoorsSystem.timers.set(systemId, --currentTime);
+        doorsSystem.timers.set(systemId, --currentTime);
       } else {
         clearInterval(this.systemTimers[systemId]);
       }

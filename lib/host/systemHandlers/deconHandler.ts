@@ -11,8 +11,6 @@ export class DeconHandler {
   ) {}
 
   update(): void {
-    console.log("Update Called", this.system);
-
     if (--this.system.timer < 0) {
       this.system.timer = 0;
     }

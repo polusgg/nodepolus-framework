@@ -95,8 +95,6 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
   }
 
   clone(): InnerGameData {
-    const clone = new InnerGameData(this.id, this.parent, this.players);
-
-    return clone;
+    return new InnerGameData(this.id, this.parent, this.players);
   }
 }

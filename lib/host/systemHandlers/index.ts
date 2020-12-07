@@ -2,6 +2,7 @@ import { DeconSystem, DecontaminationDoorState } from "../../protocol/entities/b
 import { SecurityCameraSystem } from "../../protocol/entities/baseShipStatus/systems/securityCameraSystem";
 import { HudOverrideSystem } from "../../protocol/entities/baseShipStatus/systems/hudOverrideSystem";
 import { LaboratorySystem } from "../../protocol/entities/baseShipStatus/systems/laboratorySystem";
+import { AutoDoorsSystem } from "../../protocol/entities/baseShipStatus/systems/autoDoorsSystem";
 import { DeconTwoSystem } from "../../protocol/entities/baseShipStatus/systems/deconTwoSystem";
 import { LifeSuppSystem } from "../../protocol/entities/baseShipStatus/systems/lifeSuppSystem";
 import { SabotageSystem } from "../../protocol/entities/baseShipStatus/systems/sabotageSystem";
@@ -32,7 +33,6 @@ import {
   ReactorAction,
   RepairAmount,
 } from "../../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
-import { AutoDoorsSystem } from "../../protocol/entities/baseShipStatus/systems/autoDoorsSystem";
 
 export class SystemsHandler {
   private oldShipStatus: InnerLevel = this.host.room.shipStatus!.innerNetObjects[0];
@@ -46,7 +46,7 @@ export class SystemsHandler {
     public readonly host: CustomHost,
   ) {}
 
-  repairDecon<T extends DeconSystem | DeconTwoSystem>(repairer: Player, system: T, amount: DecontaminationAmount): void {
+  repairDecon<T extends DeconSystem | DeconTwoSystem>(_repairer: Player, system: T, amount: DecontaminationAmount): void {
     let state = 0;
 
     if (amount.isEntering) {
@@ -70,7 +70,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairPolusDoors<T extends DoorsSystem>(repairer: Player, system: T, amount: PolusDoorsAmount): void {
+  repairPolusDoors<T extends DoorsSystem>(_repairer: Player, system: T, amount: PolusDoorsAmount): void {
     this.setOldShipStatus();
 
     system.doorStates[amount.doorId] = true;
@@ -96,7 +96,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairHudOverride<T extends HudOverrideSystem>(repairer: Player, system: T, amount: NormalCommunicationsAmount): void {
+  repairHudOverride<T extends HudOverrideSystem>(_repairer: Player, system: T, amount: NormalCommunicationsAmount): void {
     this.setOldShipStatus();
 
     system.sabotaged = !amount.isRepaired;
@@ -104,7 +104,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairOxygen<T extends LifeSuppSystem>(repairer: Player, system: T, amount: OxygenAmount): void {
+  repairOxygen<T extends LifeSuppSystem>(_repairer: Player, system: T, amount: OxygenAmount): void {
     this.setOldShipStatus();
 
     switch (amount.action) {
@@ -131,7 +131,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairMedbay<T extends MedScanSystem>(repairer: Player, system: T, amount: MedbayAmount): void {
+  repairMedbay<T extends MedScanSystem>(_repairer: Player, system: T, amount: MedbayAmount): void {
     this.setOldShipStatus();
 
     if (amount.action == MedbayAction.EnteredQueue) {
@@ -173,7 +173,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairSabotage<T extends SabotageSystem>(repairer: Player, system: T, amount: SabotageAmount): void {
+  repairSabotage<T extends SabotageSystem>(_repairer: Player, _system: T, amount: SabotageAmount): void {
     this.setOldShipStatus();
 
     const ship = this.shipStatus;
@@ -207,7 +207,7 @@ export class SystemsHandler {
         this.host.sabotageHandler!.sabotageElectrical(ship.getSystemFromType(type) as SwitchSystem);
         break;
       default:
-        throw new Error(`Received RepairSystem of type Sabotage for an unimplemented SystemType: ${type} (${SystemType[type]})`);
+        throw new Error(`Attempted to sabotage an unsupported SystemType: ${type} (${SystemType[type]})`);
     }
 
     this.sendDataUpdate();
@@ -225,7 +225,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairSwitch<T extends SwitchSystem>(repairer: Player, system: T, amount: ElectricalAmount): void {
+  repairSwitch<T extends SwitchSystem>(_repairer: Player, system: T, amount: ElectricalAmount): void {
     this.setOldShipStatus();
 
     const index = 4 - amount.switchIndex;
@@ -238,7 +238,9 @@ export class SystemsHandler {
         // Don't fix the lights if they somehow get immediately sabotaged again
         if (system.actualSwitches.every((s, i) => s == system.expectedSwitches[i])) {
           this.setOldShipStatus();
+
           system.visionModifier = 0xff;
+
           this.sendDataUpdate();
         }
       }, 3000);
