@@ -66,8 +66,6 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
     this.initializeSystems();
   }
 
-  abstract clone(): T;
-
   closeDoorsOfType(systemId: SystemType): void {
     if (this.parent.room.isHost) {
       return;
