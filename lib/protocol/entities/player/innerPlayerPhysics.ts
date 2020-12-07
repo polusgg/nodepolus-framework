@@ -9,7 +9,7 @@ import { InnerNetObjectType } from "../types";
 import { EntityPlayer } from ".";
 
 export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
-  constructor(netId: number, parent: EntityPlayer) {
+  constructor(netId: number, public parent: EntityPlayer) {
     super(InnerNetObjectType.PlayerPhysics, netId, parent);
   }
 
@@ -45,4 +45,8 @@ export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
   setSpawn(_data: MessageReader | MessageWriter): void {}
+
+  clone(): InnerPlayerPhysics {
+    return new InnerPlayerPhysics(this.id, this.parent);
+  }
 }

@@ -66,6 +66,8 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
     this.initializeSystems();
   }
 
+  abstract clone(): T;
+
   closeDoorsOfType(systemId: SystemType): void {
     if (this.parent.room.isHost) {
       return;
@@ -139,7 +141,7 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
     this.setSystems(this.spawnSystemTypes, MessageReader.fromMessage(data), true);
   }
 
-  getSystemFromType(systemType: SystemType): BaseSystem<InternalSystemType> {
+  getSystemFromType(systemType: SystemType): BaseSystem<System> {
     switch (systemType) {
       case SystemType.Doors:
         if (this.level == Level.Polus) {

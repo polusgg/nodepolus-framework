@@ -10,7 +10,7 @@ import { AddVotePacket } from "../../packets/rootGamePackets/gameDataPackets/rpc
 export class InnerVoteBanSystem extends BaseGameObject<InnerVoteBanSystem> {
   public votes: Map<number, number[]> = new Map<number, number[]>();
 
-  constructor(netId: number, parent: EntityGameData) {
+  constructor(netId: number, public parent: EntityGameData) {
     super(InnerNetObjectType.VoteBanSystem, netId, parent);
   }
 
@@ -83,5 +83,13 @@ export class InnerVoteBanSystem extends BaseGameObject<InnerVoteBanSystem> {
 
   setSpawn(data: MessageReader | MessageWriter): void {
     this.setData(MessageReader.fromMessage(data.buffer).readRemainingBytes());
+  }
+
+  clone(): InnerVoteBanSystem {
+    const clone = new InnerVoteBanSystem(this.id, this.parent);
+
+    clone.votes = new Map(this.votes);
+
+    return clone;
   }
 }

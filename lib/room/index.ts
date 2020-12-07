@@ -48,7 +48,6 @@ import { GameState } from "../types/gameState";
 import { HostInstance } from "../host/types";
 import { RoomCode } from "../util/roomCode";
 import { RPCHandler } from "./rpcHandler";
-import cloneDeep from "lodash/clonedeep";
 import { CustomHost } from "../host";
 import { Player } from "../player";
 import dgram from "dgram";
@@ -180,6 +179,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       case this.gameData?.voteBanSystem.id:
         return this.gameData!.voteBanSystem;
       case this.shipStatus?.innerNetObjects[0].id:
+        //@ts-ignore Talk to Cody about this?
         return this.shipStatus!.innerNetObjects[0];
       case this.meetingHud?.meetingHud.id:
         return this.meetingHud!.meetingHud;
@@ -580,13 +580,15 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     const netObject = this.findInnerNetObject(netId);
 
     if (netObject) {
-      const oldNetObject = cloneDeep(netObject) as InnerNetObject;
+      const oldNetObject = netObject.clone();
 
       netObject.data(data);
 
       if (netObject.type == InnerNetObjectType.CustomNetworkTransform) {
+      //@ts-ignore Talk to Cody about this?
         this.sendUnreliableRootGamePacket(new GameDataPacket([netObject.data(oldNetObject)], this.code), sendTo ?? []);
       } else {
+      //@ts-ignore Talk to Cody about this?
         this.sendRootGamePacket(new GameDataPacket([netObject.data(oldNetObject)], this.code), sendTo ?? []);
       }
     } else {

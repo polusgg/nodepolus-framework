@@ -36,4 +36,12 @@ export class HudOverrideSystem extends BaseSystem<HudOverrideSystem> {
   equals(old: HudOverrideSystem): boolean {
     return this.sabotaged == old.sabotaged;
   }
+
+  clone(): HudOverrideSystem {
+    const clone = new HudOverrideSystem();
+
+    clone.sabotaged = this.sabotaged;
+
+    return clone;
+  }
 }

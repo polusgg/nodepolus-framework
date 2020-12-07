@@ -93,4 +93,10 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
   setSpawn(data: MessageReader | MessageWriter): void {
     this.players = MessageReader.fromMessage(data.buffer).readList(sub => PlayerData.deserialize(sub));
   }
+
+  clone(): InnerGameData {
+    const clone = new InnerGameData(this.id, this.parent, this.players);
+
+    return clone;
+  }
 }

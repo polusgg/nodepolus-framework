@@ -79,4 +79,13 @@ export class HqHudSystem extends BaseSystem<HqHudSystem> {
 
     return true;
   }
+
+  clone(): HqHudSystem {
+    const clone = new HqHudSystem();
+
+    clone.activeConsoles = new Map(this.activeConsoles);
+    clone.completedConsoles = new Set(this.completedConsoles);
+
+    return clone;
+  }
 }

@@ -57,4 +57,13 @@ export class LifeSuppSystem extends BaseSystem<LifeSuppSystem> {
 
     return true;
   }
+
+  clone(): LifeSuppSystem {
+    const clone = new LifeSuppSystem();
+
+    clone.timer = this.timer;
+    clone.completedConsoles = new Set(this.completedConsoles);
+
+    return clone;
+  }
 }

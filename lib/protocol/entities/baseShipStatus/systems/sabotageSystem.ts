@@ -40,4 +40,12 @@ export class SabotageSystem extends BaseSystem<SabotageSystem> {
 
     return true;
   }
+
+  clone(): SabotageSystem {
+    const clone = new SabotageSystem();
+
+    clone.cooldown = this.cooldown;
+
+    return clone;
+  }
 }

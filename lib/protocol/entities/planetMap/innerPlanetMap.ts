@@ -5,7 +5,7 @@ import { InnerNetObjectType } from "../types";
 import { EntityPlanetMap } from ".";
 
 export class InnerPlanetMap extends BaseShipStatus<InnerPlanetMap, EntityPlanetMap> {
-  constructor(netId: number, parent: EntityPlanetMap) {
+  constructor(netId: number, public parent: EntityPlanetMap) {
     super(InnerNetObjectType.PlanetMap, netId, parent, [
       SystemType.Electrical,
       SystemType.Medbay,
@@ -25,5 +25,13 @@ export class InnerPlanetMap extends BaseShipStatus<InnerPlanetMap, EntityPlanetM
     planetMap.setSpawn(object.data);
 
     return planetMap;
+  }
+
+  clone(): InnerPlanetMap {
+    const clone = new InnerPlanetMap(this.id, this.parent);
+
+    clone.systems = this.systems.map(system => system.clone());
+
+    return clone;
   }
 }

@@ -66,4 +66,8 @@ export class InnerCustomNetworkTransform extends BaseGameObject<InnerCustomNetwo
   setSpawn(data: MessageReader | MessageWriter): void {
     this.setData(MessageReader.fromMessage(data.buffer).readRemainingBytes());
   }
+
+  clone(): InnerCustomNetworkTransform {
+    return new InnerCustomNetworkTransform(this.id, this.parent, this.sequenceId, this.position, this.velocity);
+  }
 }

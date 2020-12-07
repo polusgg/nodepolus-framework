@@ -6,7 +6,7 @@ import { InnerNetObjectType } from "../types";
 import { EntityLobbyBehaviour } from ".";
 
 export class InnerLobbyBehaviour extends BaseGameObject<InnerLobbyBehaviour> {
-  constructor(netId: number, parent: EntityLobbyBehaviour) {
+  constructor(netId: number, public parent: EntityLobbyBehaviour) {
     super(InnerNetObjectType.LobbyBehaviour, netId, parent);
   }
 
@@ -34,4 +34,8 @@ export class InnerLobbyBehaviour extends BaseGameObject<InnerLobbyBehaviour> {
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
   setSpawn(_data: MessageReader | MessageWriter): void {}
+
+  clone(): InnerLobbyBehaviour {
+    return new InnerLobbyBehaviour(this.id, this.parent);
+  }
 }

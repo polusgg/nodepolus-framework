@@ -14,6 +14,8 @@ export abstract class BaseSystem<T> {
 
   abstract equals(old: BaseSystem<T>): boolean;
 
+  abstract clone(): T;
+
   data(packet: MessageReader): undefined;
   data(old: this): MessageWriter;
   data(arg0: MessageReader | this): MessageWriter | undefined {

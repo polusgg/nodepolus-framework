@@ -53,15 +53,18 @@ import { HostInstance } from "./types";
 import { Player } from "../player";
 import { Room } from "../room";
 import { DoorSystem } from "./doorHandlers/doorSystem";
+import { AutoDoorSystem } from "./doorHandlers/autoDoorSystem";
+import { EntityMeetingHud } from "../protocol/entities/meetingHud";
+import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud/innerMeetingHud";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
   public readonly readyPlayerList: number[] = [];
   public readonly playersInScene: Map<number, string> = new Map();
-  public readonly systemsHandler: SystemsHandler;
-  public readonly sabotageHandler: SabotageSystemHandler;
+  public systemsHandler?: SystemsHandler;
+  public sabotageHandler?: SabotageSystemHandler;
   public deconHandlers: DeconHandler[] = [];
-  public doorSystem: DoorSystem | undefined;
+  public doorSystem: DoorSystem | AutoDoorSystem | undefined;
 
   private netIdIndex = 1;
   private counterSequenceId = 0;
@@ -83,8 +86,6 @@ export class CustomHost implements HostInstance {
   constructor(
     public room: Room,
   ) {
-    this.systemsHandler = new SystemsHandler(this);
-    this.sabotageHandler = new SabotageSystemHandler(this);
   }
 
   /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
@@ -135,9 +136,13 @@ export class CustomHost implements HostInstance {
           break;
       }
 
+      this.systemsHandler! = new SystemsHandler(this);
+      this.sabotageHandler = new SabotageSystemHandler(this);
+
       switch (this.room.options.options.levels[0]) {
         case Level.TheSkeld:
           this.deconHandlers = [];
+          this.doorSystem = new AutoDoorSystem(this, this.room.shipStatus.innerNetObjects[0]);
           break;
         case Level.MiraHq:
           this.deconHandlers = [
@@ -149,7 +154,7 @@ export class CustomHost implements HostInstance {
             new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
             new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon2] as DeconSystem),
           ];
-          this.doorSystem = new DoorSystem(this, this.room.shipStatus);
+          this.doorSystem = new DoorSystem(this, this.room.shipStatus.innerNetObjects[0]);
           break;
       }
 
@@ -291,10 +296,81 @@ export class CustomHost implements HostInstance {
     sender.setColor(setColor, this.room.connections);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void {
-    // TODO: Spawn MeetingHud with player states
-    throw new Error("Method not implemented.");
+    if (!this.room.gameData) {
+      throw new Error("Attempted to handleReportDeadBody without GameData");
+    }
+
+    sender.startMeeting(victimPlayerId, this.room.connections);
+
+    this.room.meetingHud = new EntityMeetingHud(this.room);
+    this.room.meetingHud.innerNetObjects = [
+      new InnerMeetingHud(this.netIdIndex++, this.room.meetingHud),
+    ];
+
+    this.room.meetingHud.innerNetObjects[0].playerStates = Array(this.room.gameData.gameData.players.length);
+
+    this.room.gameData.gameData.players.forEach(player => {
+      this.room.meetingHud!.innerNetObjects[0].playerStates[player.id] = new VoteState(
+        player!.id == sender.playerId,
+        false,
+        player.isDead || player.isDisconnected,
+        -1,
+      );
+    });
+
+    this.room.sendRootGamePacket(new GameDataPacket([
+      this.room.meetingHud.spawn(),
+    ], this.room.code));
+
+    setTimeout(() => {
+      if (!this.room.meetingHud) {
+        throw new Error("Attempted to end a non-existant meeting.");
+      }
+
+      if (!this.room.gameData) {
+        throw new Error("Attempted to end a meeting without GameData");
+      }
+
+      const oldData = this.room.meetingHud.meetingHud.clone();
+
+      const votes: Map<number, number[]> = new Map();
+
+      this.room.gameData.gameData.players.forEach(player => {
+        const state = this.room.meetingHud!.meetingHud.playerStates[player.id];
+
+        if (!votes.has(state.votedFor)) {
+          votes.set(state.votedFor, []);
+        }
+        votes.set(state.votedFor, votes.get(state.votedFor)!.concat([player.id]));
+      });
+
+      const a = [...votes.values()].map(playersVotedFor => playersVotedFor.length);
+
+      const largestVoteCount = Math.max(...a);
+
+      const allLargestVotes = [...votes.entries()].filter(entry => entry[1].length == largestVoteCount);
+
+      if (allLargestVotes.length == 1) {
+        // not a tie, allLargestVotes[0] got voted out
+        this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, true, allLargestVotes[0][0], false, this.room.connections);
+      } else {
+        // is a tie
+        this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, false, 0, true, this.room.connections);
+      }
+
+      this.room.sendRootGamePacket(new GameDataPacket([
+        this.room.meetingHud.meetingHud.data(oldData),
+      ], this.room.code));
+
+      setTimeout(() => {
+        if (!this.room.meetingHud) {
+          throw new Error("Attempted to close a non-existant meeting.");
+        }
+
+        this.room.meetingHud.meetingHud.close(this.room.connections);
+      }, 5000);
+    }, (this.room.options.options.votingTime + this.room.options.options.discussionTime) * 1000);
   }
 
   handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
@@ -315,45 +391,45 @@ export class CustomHost implements HostInstance {
 
     switch (system.type) {
       case SystemType.Electrical:
-        this.systemsHandler.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
+        this.systemsHandler!.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
         break;
       case SystemType.Medbay:
-        this.systemsHandler.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
+        this.systemsHandler!.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
         break;
       case SystemType.Oxygen:
-        this.systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
+        this.systemsHandler!.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
         break;
       case SystemType.Reactor:
-        this.systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
+        this.systemsHandler!.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
         break;
       case SystemType.Laboratory:
-        this.systemsHandler.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
+        this.systemsHandler!.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
         break;
       case SystemType.Security:
-        this.systemsHandler.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
+        this.systemsHandler!.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
         break;
       case SystemType.Doors:
         if (this.room.options.options.levels[0] == Level.TheSkeld) {
-          this.systemsHandler.repairSkeldDoors(player, system as AutoDoorsSystem, amount);
+          this.systemsHandler!.repairSkeldDoors(player, system as AutoDoorsSystem, amount);
         } else if (this.room.options.options.levels[0] == Level.Polus) {
-          this.systemsHandler.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
+          this.systemsHandler!.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
         }
         break;
       case SystemType.Communications:
         if (this.room.options.options.levels[0] == Level.MiraHq) {
-          this.systemsHandler.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
+          this.systemsHandler!.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
         } else {
-          this.systemsHandler.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
+          this.systemsHandler!.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
         }
         break;
       case SystemType.Decontamination:
-        this.systemsHandler.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
+        this.systemsHandler!.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
         break;
       case SystemType.Decontamination2:
-        this.systemsHandler.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
+        this.systemsHandler!.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
         break;
       case SystemType.Sabotage:
-        this.systemsHandler.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
+        this.systemsHandler!.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
         break;
       default:
         throw new Error(`Received RepairSystem packet for an unimplemented SystemType: ${system.type} (${SystemType[system.type]})`);

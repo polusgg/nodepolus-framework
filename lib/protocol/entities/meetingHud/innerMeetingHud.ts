@@ -45,6 +45,10 @@ export class VoteState {
       ((this.votedFor + 1) & VoteStateMask.VotedFor),
     );
   }
+
+  clone(): VoteState {
+    return new VoteState(this.didReport, this.didVote, this.isDead, this.votedFor);
+  }
 }
 
 export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
@@ -140,6 +144,14 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
     for (let i = 0; i < data.length; i++) {
       this.playerStates[i] = VoteState.deserialize(reader);
     }
+  }
+
+  clone(): InnerMeetingHud {
+    const clone = new InnerMeetingHud(this.id, this.parent);
+
+    clone.playerStates = this.playerStates.map(e => e.clone());
+
+    return clone;
   }
 
   private serializeStatesToDirtyBits(states: VoteState[]): number {

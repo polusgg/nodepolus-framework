@@ -67,4 +67,13 @@ export class ReactorSystem extends BaseSystem<ReactorSystem> {
 
     return true;
   }
+
+  clone(): ReactorSystem {
+    const clone = new ReactorSystem();
+
+    clone.timer = this.timer;
+    clone.userConsoles = new Map(this.userConsoles);
+
+    return clone;
+  }
 }

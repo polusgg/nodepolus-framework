@@ -5,7 +5,7 @@ import { InnerNetObjectType } from "../types";
 import { EntityHeadquarters } from ".";
 
 export class InnerHeadquarters extends BaseShipStatus<InnerHeadquarters, EntityHeadquarters> {
-  constructor(netId: number, parent: EntityHeadquarters) {
+  constructor(netId: number, public parent: EntityHeadquarters) {
     super(InnerNetObjectType.Headquarters, netId, parent, [
       SystemType.Reactor,
       SystemType.Electrical,
@@ -30,5 +30,13 @@ export class InnerHeadquarters extends BaseShipStatus<InnerHeadquarters, EntityH
     headquarters.setSpawn(object.data);
 
     return headquarters;
+  }
+
+  clone(): InnerHeadquarters {
+    const clone = new InnerHeadquarters(this.id, this.parent);
+
+    clone.systems = this.systems.map(system => system.clone());
+
+    return clone;
   }
 }

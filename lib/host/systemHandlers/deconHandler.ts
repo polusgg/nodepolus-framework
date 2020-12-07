@@ -54,13 +54,13 @@ export class DeconHandler {
     this.system.timer = 3;
 
     this.timer = setInterval(() => {
-      this.host.systemsHandler.setOldShipStatus();
+      this.host.systemsHandler!.setOldShipStatus();
       this.update();
-      this.host.systemsHandler.sendDataUpdate();
+      this.host.systemsHandler!.sendDataUpdate();
     }, 1000);
 
-    this.host.systemsHandler.setOldShipStatus();
+    this.host.systemsHandler!.setOldShipStatus();
     this.update();
-    this.host.systemsHandler.sendDataUpdate();
+    this.host.systemsHandler!.sendDataUpdate();
   }
 }

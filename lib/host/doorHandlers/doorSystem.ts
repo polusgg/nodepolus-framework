@@ -1,22 +1,21 @@
-import { EntityLevel } from "../../protocol/entities/types";
-import cloneDeep from "lodash.clonedeep";
+import { InnerLevel } from "../../protocol/entities/types";
 import { CustomHost } from "..";
 import { GameDataPacket } from "../../protocol/packets/rootGamePackets/gameData";
 import { SystemType } from "../../types/systemType";
 import { DoorsSystem, SYSTEM_DOORS } from "../../protocol/entities/baseShipStatus/systems/doorsSystem";
 
 export class DoorSystem {
-  private oldShipStatus: EntityLevel;
+  private oldShipStatus: InnerLevel;
   private readonly systemTimers: NodeJS.Timeout[] = [];
 
-  constructor(public host: CustomHost, public shipStatus: EntityLevel) {
-    this.oldShipStatus = cloneDeep(shipStatus);
+  constructor(public host: CustomHost, public shipStatus: InnerLevel) {
+    this.oldShipStatus = shipStatus.clone();
   }
 
   closeDoor(doorId: number | number[]): void {
     this.setOldShipStatus();
 
-    const internalDoorsSystem = this.shipStatus.innerNetObjects[0].getSystemFromType(SystemType.Doors) as DoorsSystem;
+    const internalDoorsSystem = this.shipStatus.getSystemFromType(SystemType.Doors) as DoorsSystem;
 
     if (doorId instanceof Array) {
       for (let i = 0; i < doorId.length; i++) {
@@ -41,8 +40,10 @@ export class DoorSystem {
     return doors;
   }
 
-  setSystemTimeout(systemId: SystemType, time: number) {
-    const internalDoorsSystem = this.shipStatus.innerNetObjects[0].getSystemFromType(SystemType.Doors) as DoorsSystem;
+  setSystemTimeout(systemId: SystemType, time: number): void {
+    this.setOldShipStatus();
+
+    const internalDoorsSystem = this.shipStatus.getSystemFromType(SystemType.Doors) as DoorsSystem;
 
     internalDoorsSystem.timers.set(systemId, time);
 
@@ -55,15 +56,18 @@ export class DoorSystem {
         clearInterval(this.systemTimers[systemId]);
       }
     }, 1000);
+
+    this.sendDataUpdate();
   }
 
   setOldShipStatus(): void {
-    this.oldShipStatus = cloneDeep(this.shipStatus);
+    this.oldShipStatus = this.shipStatus.clone();
   }
 
   sendDataUpdate(): void {
     this.host.room.sendRootGamePacket(new GameDataPacket([
-      this.shipStatus.innerNetObjects[0].data(this.oldShipStatus.innerNetObjects[0]),
+      //@ts-ignore Talk to Cody about this?
+      this.shipStatus.data(this.oldShipStatus),
     ], this.host.room.code));
   }
 }

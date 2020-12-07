@@ -51,4 +51,12 @@ export class SecurityCameraSystem extends BaseSystem<SecurityCameraSystem> {
 
     return true;
   }
+
+  clone(): SecurityCameraSystem {
+    const clone = new SecurityCameraSystem();
+
+    clone.playersViewingCams = new Set(this.playersViewingCams);
+
+    return clone;
+  }
 }

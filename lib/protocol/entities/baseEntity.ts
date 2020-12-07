@@ -45,7 +45,9 @@ export abstract class BaseGameObject<T> {
     public readonly type: InnerNetObjectType,
     public id: number,
     public parent: Entity,
-  ) {}
+  ) { }
+
+  abstract clone(): T;
 
   abstract getData(old: BaseGameObject<T>): DataPacket;
 

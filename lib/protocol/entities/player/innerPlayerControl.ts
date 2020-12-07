@@ -35,7 +35,7 @@ import { EntityPlayer } from ".";
 export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   public scannerSequenceId = 1;
 
-  constructor(netId: number, parent: EntityPlayer, public isNew: boolean, public playerId: number) {
+  constructor(netId: number, public parent: EntityPlayer, public isNew: boolean, public playerId: number) {
     super(InnerNetObjectType.PlayerControl, netId, parent);
   }
 
@@ -338,5 +338,9 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     this.isNew = reader.readBoolean();
     this.playerId = reader.readByte();
+  }
+
+  clone(): InnerPlayerControl {
+    return new InnerPlayerControl(this.id, this.parent, this.isNew, this.playerId);
   }
 }

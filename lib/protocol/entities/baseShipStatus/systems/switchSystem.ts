@@ -59,4 +59,14 @@ export class SwitchSystem extends BaseSystem<SwitchSystem> {
 
     return true;
   }
+
+  clone(): SwitchSystem {
+    const clone = new SwitchSystem();
+
+    clone.actualSwitches = new Array(...this.actualSwitches);
+    clone.expectedSwitches = new Array(...this.expectedSwitches);
+    clone.visionModifier = this.visionModifier;
+
+    return clone;
+  }
 }

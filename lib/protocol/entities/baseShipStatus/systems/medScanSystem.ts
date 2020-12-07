@@ -51,5 +51,13 @@ export class MedScanSystem extends BaseSystem<MedScanSystem> {
 
     return true;
   }
+
+  clone(): MedScanSystem {
+    const clone = new MedScanSystem();
+
+    clone.playersInQueue = new Set(this.playersInQueue);
+
+    return clone;
+  }
 }
 

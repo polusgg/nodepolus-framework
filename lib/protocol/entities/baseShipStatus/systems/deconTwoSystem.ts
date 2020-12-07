@@ -49,4 +49,13 @@ export class DeconTwoSystem extends BaseSystem<DeconTwoSystem> {
 
     return true;
   }
+
+  clone(): DeconTwoSystem {
+    const clone = new DeconTwoSystem();
+
+    clone.state = this.state;
+    clone.timer = this.timer;
+
+    return clone;
+  }
 }

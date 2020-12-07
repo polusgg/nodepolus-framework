@@ -67,4 +67,13 @@ export class LaboratorySystem extends BaseSystem<LaboratorySystem> {
 
     return true;
   }
+
+  clone(): LaboratorySystem {
+    const clone = new LaboratorySystem();
+
+    clone.timer = this.timer;
+    clone.userConsoles = new Map(this.userConsoles);
+
+    return clone;
+  }
 }

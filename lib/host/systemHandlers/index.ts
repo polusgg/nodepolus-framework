@@ -11,9 +11,8 @@ import { SwitchSystem } from "../../protocol/entities/baseShipStatus/systems/swi
 import { DoorsSystem } from "../../protocol/entities/baseShipStatus/systems/doorsSystem";
 import { HqHudSystem } from "../../protocol/entities/baseShipStatus/systems/hqHudSystem";
 import { GameDataPacket } from "../../protocol/packets/rootGamePackets/gameData";
-import { EntityLevel } from "../../protocol/entities/types";
+import { InnerLevel } from "../../protocol/entities/types";
 import { SystemType } from "../../types/systemType";
-import cloneDeep from "lodash/clonedeep";
 import { Player } from "../../player";
 import { CustomHost } from "..";
 import {
@@ -36,11 +35,11 @@ import {
 import { AutoDoorsSystem } from "../../protocol/entities/baseShipStatus/systems/autoDoorsSystem";
 
 export class SystemsHandler {
-  private oldShipStatus: EntityLevel = this.host.room.shipStatus!;
+  private oldShipStatus: InnerLevel = this.host.room.shipStatus!.innerNetObjects[0];
   private sabotageCountdownInterval: NodeJS.Timeout | undefined;
 
-  private get shipStatus(): EntityLevel {
-    return this.host.room.shipStatus!;
+  private get shipStatus(): InnerLevel {
+    return this.host.room.shipStatus!.innerNetObjects[0];
   }
 
   constructor(
@@ -115,16 +114,16 @@ export class SystemsHandler {
         if (system.completedConsoles.size == 2) {
           system.timer = 10000;
 
-          if (this.host.sabotageHandler.timer) {
-            clearInterval(this.host.sabotageHandler.timer);
+          if (this.host.sabotageHandler!.timer) {
+            clearInterval(this.host.sabotageHandler!.timer);
           }
         }
         break;
       case OxygenAction.Repaired:
         system.timer = 10000;
 
-        if (this.host.sabotageHandler.timer) {
-          clearInterval(this.host.sabotageHandler.timer);
+        if (this.host.sabotageHandler!.timer) {
+          clearInterval(this.host.sabotageHandler!.timer);
         }
         break;
     }
@@ -154,8 +153,8 @@ export class SystemsHandler {
         if (system.userConsoles.size == 2) {
           system.timer = 10000;
 
-          if (this.host.sabotageHandler.timer) {
-            clearInterval(this.host.sabotageHandler.timer);
+          if (this.host.sabotageHandler!.timer) {
+            clearInterval(this.host.sabotageHandler!.timer);
           }
         }
         break;
@@ -165,8 +164,8 @@ export class SystemsHandler {
       case ReactorAction.Repaired:
         system.timer = 10000;
 
-        if (this.host.sabotageHandler.timer) {
-          clearInterval(this.host.sabotageHandler.timer);
+        if (this.host.sabotageHandler!.timer) {
+          clearInterval(this.host.sabotageHandler!.timer);
         }
         break;
     }
@@ -177,7 +176,7 @@ export class SystemsHandler {
   repairSabotage<T extends SabotageSystem>(repairer: Player, system: T, amount: SabotageAmount): void {
     this.setOldShipStatus();
 
-    const ship = this.shipStatus.innerNetObjects[0];
+    const ship = this.shipStatus;
     const type = amount.system;
 
     (ship.getSystemFromType(SystemType.Sabotage) as SabotageSystem).cooldown = 30;
@@ -196,16 +195,16 @@ export class SystemsHandler {
     switch (type) {
       case SystemType.Reactor:
       case SystemType.Laboratory:
-        this.host.sabotageHandler.sabotageReactor(ship.getSystemFromType(type) as ReactorSystem | LaboratorySystem);
+        this.host.sabotageHandler!.sabotageReactor(ship.getSystemFromType(type) as ReactorSystem | LaboratorySystem);
         break;
       case SystemType.Oxygen:
-        this.host.sabotageHandler.sabotageOxygen(ship.getSystemFromType(type) as LifeSuppSystem);
+        this.host.sabotageHandler!.sabotageOxygen(ship.getSystemFromType(type) as LifeSuppSystem);
         break;
       case SystemType.Communications:
-        this.host.sabotageHandler.sabotageCommunications(ship.getSystemFromType(type) as HudOverrideSystem | HqHudSystem);
+        this.host.sabotageHandler!.sabotageCommunications(ship.getSystemFromType(type) as HudOverrideSystem | HqHudSystem);
         break;
       case SystemType.Electrical:
-        this.host.sabotageHandler.sabotageElectrical(ship.getSystemFromType(type) as SwitchSystem);
+        this.host.sabotageHandler!.sabotageElectrical(ship.getSystemFromType(type) as SwitchSystem);
         break;
       default:
         throw new Error(`Received RepairSystem of type Sabotage for an unimplemented SystemType: ${type} (${SystemType[type]})`);
@@ -249,12 +248,13 @@ export class SystemsHandler {
   }
 
   setOldShipStatus(): void {
-    this.oldShipStatus = cloneDeep(this.shipStatus);
+    this.oldShipStatus = this.shipStatus.clone();
   }
 
   sendDataUpdate(): void {
     this.host.room.sendRootGamePacket(new GameDataPacket([
-      this.shipStatus.innerNetObjects[0].data(this.oldShipStatus.innerNetObjects[0]),
+      //@ts-ignore Talk to Cody about this?
+      this.shipStatus.data(this.oldShipStatus),
     ], this.host.room.code));
   }
 }

@@ -83,4 +83,12 @@ export class AutoDoorsSystem extends BaseSystem<AutoDoorsSystem> {
 
     return true;
   }
+
+  clone(): AutoDoorsSystem {
+    const clone = new AutoDoorsSystem();
+
+    clone.doors = new Array(...this.doors);
+
+    return clone;
+  }
 }
