@@ -2,7 +2,6 @@ import { SecurityCameraSystem } from "../protocol/entities/baseShipStatus/system
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
 import { HudOverrideSystem } from "../protocol/entities/baseShipStatus/systems/hudOverrideSystem";
 import { LaboratorySystem } from "../protocol/entities/baseShipStatus/systems/laboratorySystem";
-import { AutoDoorsSystem } from "../protocol/entities/baseShipStatus/systems/autoDoorsSystem";
 import { InnerLobbyBehaviour } from "../protocol/entities/lobbyBehaviour/innerLobbyBehaviour";
 import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud/innerMeetingHud";
 import { DeconTwoSystem } from "../protocol/entities/baseShipStatus/systems/deconTwoSystem";
@@ -394,6 +393,7 @@ export class CustomHost implements HostInstance {
 
     const system = this.room.shipStatus.innerNetObjects[0].getSystemFromType(systemId);
     const player = this.room.players.find(testplayer => testplayer.gameObject.playerControl.id == playerControlNetId);
+    const level = this.room.options.options.levels[0];
 
     if (!player) {
       throw new Error(`Received RepairSystem from an InnerNetObject other than a player: ${playerControlNetId}`);
@@ -419,14 +419,14 @@ export class CustomHost implements HostInstance {
         this.systemsHandler!.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
         break;
       case SystemType.Doors:
-        if (this.room.options.options.levels[0] == Level.TheSkeld) {
-          this.systemsHandler!.repairSkeldDoors(player, system as AutoDoorsSystem, amount);
-        } else if (this.room.options.options.levels[0] == Level.Polus) {
+        if (level == Level.Polus) {
           this.systemsHandler!.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
+        } else {
+          throw new Error(`Received RepairSystem for Doors on an unimplemented level: ${level as Level} (${Level[level]})`);
         }
         break;
       case SystemType.Communications:
-        if (this.room.options.options.levels[0] == Level.MiraHq) {
+        if (level == Level.MiraHq) {
           this.systemsHandler!.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
         } else {
           this.systemsHandler!.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
@@ -594,6 +594,8 @@ export class CustomHost implements HostInstance {
   }
 
   endGame(reason: GameOverReason): void {
+    this.room.gameState = GameState.Ended;
+
     this.room.sendRootGamePacket(new EndGamePacket(this.room.code, reason, false));
   }
 

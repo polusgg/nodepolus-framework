@@ -2,7 +2,6 @@ import { DeconSystem, DecontaminationDoorState } from "../../protocol/entities/b
 import { SecurityCameraSystem } from "../../protocol/entities/baseShipStatus/systems/securityCameraSystem";
 import { HudOverrideSystem } from "../../protocol/entities/baseShipStatus/systems/hudOverrideSystem";
 import { LaboratorySystem } from "../../protocol/entities/baseShipStatus/systems/laboratorySystem";
-import { AutoDoorsSystem } from "../../protocol/entities/baseShipStatus/systems/autoDoorsSystem";
 import { DeconTwoSystem } from "../../protocol/entities/baseShipStatus/systems/deconTwoSystem";
 import { LifeSuppSystem } from "../../protocol/entities/baseShipStatus/systems/lifeSuppSystem";
 import { SabotageSystem } from "../../protocol/entities/baseShipStatus/systems/sabotageSystem";
@@ -31,7 +30,6 @@ import {
   OxygenAction,
   MiraCommunicationsAction,
   ReactorAction,
-  RepairAmount,
 } from "../../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 
 export class SystemsHandler {
@@ -60,14 +58,6 @@ export class SystemsHandler {
     }
 
     this.host.deconHandlers[system instanceof DeconSystem ? 0 : 1].start(state);
-  }
-
-  repairSkeldDoors<T extends AutoDoorsSystem>(repairer: Player, system: T, amount: RepairAmount): void {
-    this.setOldShipStatus();
-
-    // TODO: Door timers
-
-    this.sendDataUpdate();
   }
 
   repairPolusDoors<T extends DoorsSystem>(_repairer: Player, system: T, amount: PolusDoorsAmount): void {

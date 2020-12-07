@@ -432,7 +432,13 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       connection.isHost = true;
     }
 
-    if (connection.isHost) {
+    if (this.isHost) {
+      if (this.gameState == GameState.Ended) {
+        this.gameState = GameState.NotStarted;
+      }
+
+      this.handleNewJoin(connection);
+    } else if (connection.isHost) {
       this.gameState = GameState.NotStarted;
 
       this.handleNewJoin(connection);
@@ -459,13 +465,13 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   private migrateHost(): void {
+    // If the server is the host
     if (this.isHost) {
       // TODO: Assign new acting host if there are none
       return;
     }
 
-    // Don't change code below this line, it's for client-as-host logic.
-    // Put server-as-host logic above and return early when done.
+    // Don't change code below this point as it is for client-as-host logic.
 
     // If we already have a client that is host then we don't need to migrate.
     if (this.host) {

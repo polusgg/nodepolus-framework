@@ -1,0 +1,58 @@
+{
+  "name": "nodepolus",
+  "version": "3.0.0",
+  "description": "NodePolus is a JavaScript library containing multiple implementations of the Among Us network protocol.",
+  "main": "bin/polus.ts",
+  "engines": {
+    "node": ">=15.0.1"
+  },
+  "scripts": {
+    "start": "ts-node bin/polus",
+    "lint": "eslint . --ext .ts",
+    "lint-and-fix": "eslint . --ext .ts --fix",
+    "test": "ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NodePolus/NodePolus.git"
+  },
+  "author": "",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/NodePolus/NodePolus/issues"
+  },
+  "homepage": "https://github.com/NodePolus/NodePolus",
+  "dependencies": {
+    "commonjs": "^0.0.1",
+    "emittery": "^0.7.2",
+    "public-ip": "^4.0.2",
+    "ts-node": "^9.1.0"
+  },
+  "devDependencies": {
+    "@types/lodash.clonedeep": "^4.5.6",
+    "@types/node": "^14.14.10",
+    "@typescript-eslint/eslint-plugin": "^4.8.2",
+    "@typescript-eslint/parser": "^4.8.2",
+    "ava": "^3.13.0",
+    "eslint": "^7.14.0",
+    "eslint-config-recommended": "^4.1.0",
+    "eslint-plugin-import": "^2.22.1",
+    "lodash.clonedeep": "^4.5.0",
+    "nodemon": "^2.0.6",
+    "npm-run-all": "^4.1.5",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^4.1.2",
+    "udp-proxy": "^1.2.0"
+  },
+  "ava": {
+    "files": [
+      "test/**/*"
+    ],
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
+  }
+}

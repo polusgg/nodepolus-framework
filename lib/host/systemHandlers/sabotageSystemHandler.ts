@@ -5,7 +5,6 @@ import { ReactorSystem } from "../../protocol/entities/baseShipStatus/systems/re
 import { SwitchSystem } from "../../protocol/entities/baseShipStatus/systems/switchSystem";
 import { HqHudSystem } from "../../protocol/entities/baseShipStatus/systems/hqHudSystem";
 import { GameOverReason } from "../../types/gameOverReason";
-import { randomInRange } from "../../util/functions";
 import { Level } from "../../types/level";
 import { CustomHost } from "..";
 
@@ -52,19 +51,13 @@ export class SabotageSystemHandler {
   }
 
   sabotageElectrical(system: SwitchSystem): void {
-    system.actualSwitches = [false, false, false, false, false];
-    system.expectedSwitches = [false, false, false, false, false];
+    system.expectedSwitches = Array(5).fill(false).map(() => Math.random() < 0.5);
+    system.actualSwitches = [...system.expectedSwitches];
 
-    const brokenSwitches = randomInRange(2, 4);
-    const swapIdxs = [0, 1, 2, 3, 4];
+    for (let i = 0; i < system.expectedSwitches.length; i++) {
+      const pos = Math.floor(Math.random() * (system.expectedSwitches.length - i)) * i;
 
-    for (let i = 0; i < brokenSwitches; i++) {
-      const idxToSwap = randomInRange(0, swapIdxs.length - 1);
-      const val = swapIdxs[idxToSwap];
-
-      swapIdxs.splice(idxToSwap, 1);
-
-      system.actualSwitches[val] = !system.expectedSwitches[val];
+      system.actualSwitches[pos] = !system.expectedSwitches[pos];
     }
 
     // TODO: Actually count down like every other system (like -85 every second)
