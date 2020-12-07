@@ -170,7 +170,7 @@ export class CustomHost implements HostInstance {
       }
 
       if (!this.room.gameData) {
-        throw new Error("Attempted to start game w/o gamedata");
+        throw new Error("Attempted to start game without GameData");
       }
 
       this.room.sendRootGamePacket(new GameDataPacket([this.room.shipStatus!.spawn()], this.room.code));

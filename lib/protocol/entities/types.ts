@@ -40,6 +40,7 @@ export type InnerNetObject = InnerMeetingHud
 | InnerCustomNetworkTransform
 | InnerPlanetMap
 | InnerHeadquarters
+| InnerAprilShipStatus
 | InnerPlayerControl
 | InnerPlayerPhysics
 | InnerShipStatus
