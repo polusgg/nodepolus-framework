@@ -335,7 +335,7 @@ export class CustomHost implements HostInstance {
 
     this.meetingHudTimeout = setTimeout(this.endMeeting, (this.room.options.options.votingTime + this.room.options.options.discussionTime) * 1000);
   }
-  
+
   endMeeting(): void {
     if (!this.room.meetingHud) {
       throw new Error("Attempted to end a meeting without a MeetingHud instance");
@@ -366,7 +366,7 @@ export class CustomHost implements HostInstance {
     if (allLargestVotes.length == 1) {
       this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, true, allLargestVotes[0][0], false, this.room.connections);
     } else {
-      this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, false, 0, true, this.room.connections);
+      this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, false, 255, true, this.room.connections);
     }
 
     this.room.sendRootGamePacket(new GameDataPacket([
