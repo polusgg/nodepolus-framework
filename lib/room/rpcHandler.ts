@@ -303,7 +303,7 @@ export class RPCHandler {
           throw new Error(`Received CastVote packet from invalid InnerNetObject: expected MeetingHud but got ${type as number} (${typeString})`);
         }
 
-        this.handleCastVote(sender as InnerMeetingHud, packet.votingPlayerId, packet.suspectPlayerId, sendTo);
+        this.handleCastVote(sender as InnerMeetingHud, packet.votingPlayerId, packet.suspectPlayerId);
         break;
       }
       case RPCPacketType.ClearVote: {
@@ -485,8 +485,8 @@ export class RPCHandler {
     sender.votingComplete(voteStates, didVotePlayerOff, exiledPlayerId, isTie, sendTo);
   }
 
-  handleCastVote(sender: InnerMeetingHud, votingPlayerId: number, suspectPlayerId: number, sendTo: Connection[]): void {
-    sender.castVote(votingPlayerId, suspectPlayerId, sendTo);
+  handleCastVote(sender: InnerMeetingHud, votingPlayerId: number, suspectPlayerId: number): void {
+    sender.castVote(votingPlayerId, suspectPlayerId);
   }
 
   handleClearVote(sender: InnerMeetingHud, sendTo: Connection[]): void {

@@ -81,6 +81,7 @@ export class CustomHost implements HostInstance {
   private netIdIndex = 1;
   private counterSequenceId = 0;
   private countdownInterval: NodeJS.Timeout | undefined;
+  private meetingHudTimeout: NodeJS.Timeout | undefined;
 
   private get nextPlayerId(): number {
     const taken = this.room.players.map(player => player.id);
@@ -332,51 +333,73 @@ export class CustomHost implements HostInstance {
       this.room.meetingHud.spawn(),
     ], this.room.code));
 
+    this.meetingHudTimeout = setTimeout(this.endMeeting, (this.room.options.options.votingTime + this.room.options.options.discussionTime) * 1000);
+  }
+  
+  endMeeting(): void {
+    if (!this.room.meetingHud) {
+      throw new Error("Attempted to end a meeting without a MeetingHud instance");
+    }
+
+    if (!this.room.gameData) {
+      throw new Error("Attempted to end a meeting without a GameData instance");
+    }
+
+    const oldData = this.room.meetingHud.meetingHud.clone();
+    const votes: Map<number, number[]> = new Map();
+
+    for (let i = 0; i < this.room.gameData.gameData.players.length; i++) {
+      const player = this.room.gameData.gameData.players[i];
+      const state = this.room.meetingHud!.meetingHud.playerStates[player.id];
+
+      if (!votes.has(state.votedFor)) {
+        votes.set(state.votedFor, []);
+      }
+
+      votes.get(state.votedFor)!.push(player.id);
+    }
+
+    const voteCounts = [...votes.values()].map(playersVotedFor => playersVotedFor.length);
+    const largestVoteCount = Math.max(...voteCounts);
+    const allLargestVotes = [...votes.entries()].filter(entry => entry[1].length == largestVoteCount);
+
+    if (allLargestVotes.length == 1) {
+      this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, true, allLargestVotes[0][0], false, this.room.connections);
+    } else {
+      this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, false, 0, true, this.room.connections);
+    }
+
+    this.room.sendRootGamePacket(new GameDataPacket([
+      this.room.meetingHud.meetingHud.data(oldData),
+    ], this.room.code));
+
     setTimeout(() => {
       if (!this.room.meetingHud) {
         throw new Error("Attempted to end a meeting without a MeetingHud instance");
       }
 
-      if (!this.room.gameData) {
-        throw new Error("Attempted to end a meeting without a GameData instance");
-      }
+      this.room.meetingHud.meetingHud.close(this.room.connections);
+    }, 5000);
+  }
 
-      const oldData = this.room.meetingHud.meetingHud.clone();
-      const votes: Map<number, number[]> = new Map();
+  handleCastVote(votingPlayerId: number, suspectPlayerId: number): void {
+    if (!this.room.meetingHud) {
+      throw new Error("CastVote called while meetingHud object does not exist on the room.");
+    }
 
-      for (let i = 0; i < this.room.gameData.gameData.players.length; i++) {
-        const player = this.room.gameData.gameData.players[i];
-        const state = this.room.meetingHud!.meetingHud.playerStates[player.id];
+    const oldMeetingHud = this.room.meetingHud.meetingHud.clone();
 
-        if (!votes.has(state.votedFor)) {
-          votes.set(state.votedFor, []);
-        }
+    this.room.meetingHud.meetingHud.playerStates[votingPlayerId].votedFor = suspectPlayerId;
+    this.room.meetingHud.meetingHud.playerStates[votingPlayerId].didVote = true;
 
-        votes.get(state.votedFor)!.push(player.id);
-      }
+    this.room.sendRootGamePacket(new GameDataPacket([
+      this.room.meetingHud.meetingHud.data(oldMeetingHud),
+    ], this.room.code));
 
-      const voteCounts = [...votes.values()].map(playersVotedFor => playersVotedFor.length);
-      const largestVoteCount = Math.max(...voteCounts);
-      const allLargestVotes = [...votes.entries()].filter(entry => entry[1].length == largestVoteCount);
-
-      if (allLargestVotes.length == 1) {
-        this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, true, allLargestVotes[0][0], false, this.room.connections);
-      } else {
-        this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, false, 0, true, this.room.connections);
-      }
-
-      this.room.sendRootGamePacket(new GameDataPacket([
-        this.room.meetingHud.meetingHud.data(oldData),
-      ], this.room.code));
-
-      setTimeout(() => {
-        if (!this.room.meetingHud) {
-          throw new Error("Attempted to end a meeting without a MeetingHud instance");
-        }
-
-        this.room.meetingHud.meetingHud.close(this.room.connections);
-      }, 5000);
-    }, (this.room.options.options.votingTime + this.room.options.options.discussionTime) * 1000);
+    if (this.meetingHudTimeout && this.room.meetingHud.meetingHud.playerStates.every(p => p.didVote || p.isDead)) {
+      this.endMeeting();
+      clearInterval(this.meetingHudTimeout);
+    }
   }
 
   handleRepairSystem(_sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {

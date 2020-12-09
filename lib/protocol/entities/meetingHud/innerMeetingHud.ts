@@ -10,6 +10,7 @@ import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { EntityMeetingHud } from ".";
+import { CustomHost } from "../../../host";
 
 export enum VoteStateMask {
   DidReport = 0x20,
@@ -87,13 +88,12 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
     this.sendRPCPacketTo(sendTo, new VotingCompletePacket(this.playerStates, this.exiledPlayer, this.isTie));
   }
 
-  castVote(votingPlayerId: number, suspectPlayerId: number, sendTo: Connection[]): void {
+  castVote(votingPlayerId: number, suspectPlayerId: number): void {
     if (this.parent.room.isHost) {
-      this.playerStates[votingPlayerId].votedFor = suspectPlayerId;
-      this.playerStates[votingPlayerId].didVote = true;
+      (this.parent.room.host as CustomHost).handleCastVote(votingPlayerId, suspectPlayerId);
+    } else {
+      this.sendRPCPacketTo([this.parent.room.host as Connection], new CastVotePacket(votingPlayerId, suspectPlayerId));
     }
-
-    this.sendRPCPacketTo(sendTo, new CastVotePacket(votingPlayerId, suspectPlayerId));
   }
 
   clearVote(player: Connection[]): void {
