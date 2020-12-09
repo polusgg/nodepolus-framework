@@ -170,7 +170,7 @@ export class CustomHost implements HostInstance {
       }
 
       if (!this.room.gameData) {
-        throw new Error("Attempted to start game without GameData");
+        throw new Error("Attempted to start game without a GameData instance");
       }
 
       this.room.sendRootGamePacket(new GameDataPacket([this.room.shipStatus!.spawn()], this.room.code));
@@ -287,7 +287,6 @@ export class CustomHost implements HostInstance {
 
   handleCheckColor(sender: InnerPlayerControl, color: PlayerColor): void {
     const takenColors = this.getTakenColors();
-
     let setColor: PlayerColor = color;
 
     if (this.room.players.length <= 12) {
@@ -307,7 +306,7 @@ export class CustomHost implements HostInstance {
 
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void {
     if (!this.room.gameData) {
-      throw new Error("Received HandleReportDeadBody without GameData");
+      throw new Error("Received HandleReportDeadBody without a GameData instance");
     }
 
     sender.startMeeting(victimPlayerId, this.room.connections);
@@ -316,7 +315,6 @@ export class CustomHost implements HostInstance {
     this.room.meetingHud.innerNetObjects = [
       new InnerMeetingHud(this.netIdIndex++, this.room.meetingHud),
     ];
-
     this.room.meetingHud.innerNetObjects[0].playerStates = Array(this.room.gameData.gameData.players.length);
 
     this.room.gameData.gameData.players.forEach(player => {
@@ -338,7 +336,7 @@ export class CustomHost implements HostInstance {
       }
 
       if (!this.room.gameData) {
-        throw new Error("Attempted to end a meeting without GameData");
+        throw new Error("Attempted to end a meeting without a GameData instance");
       }
 
       const oldData = this.room.meetingHud.meetingHud.clone();
@@ -351,18 +349,16 @@ export class CustomHost implements HostInstance {
           votes.set(state.votedFor, []);
         }
 
-        votes.set(state.votedFor, votes.get(state.votedFor)!.concat([player.id]));
+        votes.get(state.votedFor)!.push(player.id);
       });
 
-      const a = [...votes.values()].map(playersVotedFor => playersVotedFor.length);
-      const largestVoteCount = Math.max(...a);
+      const voteCounts = [...votes.values()].map(playersVotedFor => playersVotedFor.length);
+      const largestVoteCount = Math.max(...voteCounts);
       const allLargestVotes = [...votes.entries()].filter(entry => entry[1].length == largestVoteCount);
 
       if (allLargestVotes.length == 1) {
-        // not a tie, allLargestVotes[0] got voted out
         this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, true, allLargestVotes[0][0], false, this.room.connections);
       } else {
-        // is a tie
         this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, false, 0, true, this.room.connections);
       }
 
@@ -380,7 +376,7 @@ export class CustomHost implements HostInstance {
     }, (this.room.options.options.votingTime + this.room.options.options.discussionTime) * 1000);
   }
 
-  handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
+  handleRepairSystem(_sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
     if (!this.room.shipStatus) {
       throw new Error("Received RepairSystem without a ShipStatus instance");
     }
@@ -583,7 +579,7 @@ export class CustomHost implements HostInstance {
 
       if (player) {
         if (!this.room.gameData) {
-          throw new Error("Attempted to set tasks without a GameData object");
+          throw new Error("Attempted to set tasks without a GameData instance");
         }
 
         this.room.gameData.gameData.setTasks(player.id, tasks.map(task => task.id), this.room.connections);
