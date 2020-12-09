@@ -276,13 +276,10 @@ export class CustomHost implements HostInstance {
 
   handleCheckName(sender: InnerPlayerControl, name: string): void {
     let checkName: string = name;
-    let nameTaken: boolean = this.isNameTaken(checkName);
     let index = 1;
 
-    while (nameTaken) {
+    while (this.isNameTaken(checkName)) {
       checkName = `${name} ${index++}`;
-
-      nameTaken = this.isNameTaken(checkName);
     }
 
     sender.setName(checkName, this.room.connections);
