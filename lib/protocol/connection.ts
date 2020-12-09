@@ -89,11 +89,12 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
           // Hazel currently treats Fragment packets as Unreliable
           // fallthrough
         case PacketType.Unreliable: {
-          (parsed.data as RootGamePacket).packets.forEach(packet => {
-            this.log(packet, parsed, true);
+          const packets = (parsed.data as RootGamePacket).packets;
 
-            this.emit("packet", packet);
-          });
+          for (let i = 0; i < packets.length; i++) {
+            this.log(packets[i], parsed, true);
+            this.emit("packet", packets[i]);
+          }
           break;
         }
         case PacketType.Hello:
@@ -210,16 +211,16 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
       this.acknowledgementResolveMap.set(nonce!, resolveFuncs);
 
-      packetBuffer.forEach(subpacket => {
-        this.log(subpacket, packet, false);
-      });
+      for (let i = 0; i < packetBuffer.length; i++) {
+        this.log(packetBuffer[i], packet, false);
+      }
     } else {
       packet = new Packet(nonce, new RootGamePacket(this.unreliablePacketBuffer));
       packetBuffer = this.unreliablePacketBuffer;
 
-      packetBuffer.forEach(subpacket => {
-        this.log(subpacket, packet, false);
-      });
+      for (let i = 0; i < packetBuffer.length; i++) {
+        this.log(packetBuffer[i], packet, false);
+      }
     }
 
     packet.bound(true);

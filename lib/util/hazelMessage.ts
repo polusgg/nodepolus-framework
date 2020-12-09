@@ -456,9 +456,12 @@ export class MessageReader extends HazelMessage {
   }
 
   readAllChildMessages<T>(reader: (child: MessageReader, idx: number) => T): T[] {
-    const items: T[] = [];
+    const children = this.getAllChildMessages();
+    const items: T[] = Array(children.length);
 
-    this.getAllChildMessages().forEach((child, idx) => items.push(reader(child, idx)));
+    for (let i = 0; i < children.length; i++) {
+      items.push(reader(children[i], i));
+    }
 
     return items;
   }

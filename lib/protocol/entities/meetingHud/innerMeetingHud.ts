@@ -149,7 +149,7 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
   clone(): InnerMeetingHud {
     const clone = new InnerMeetingHud(this.id, this.parent);
 
-    clone.playerStates = this.playerStates.map(e => e.clone());
+    clone.playerStates = this.playerStates.map(state => state.clone());
 
     return clone;
   }

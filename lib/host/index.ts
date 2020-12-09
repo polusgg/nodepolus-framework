@@ -242,9 +242,9 @@ export class CustomHost implements HostInstance {
 
     const player = new Player(entity);
 
-    this.room.players.forEach(testplayer => {
-      sender.write(new GameDataPacket([testplayer.gameObject.spawn()], this.room.code));
-    });
+    for (let i = 0; i < this.room.players.length; i++) {
+      sender.write(new GameDataPacket([this.room.players[i].gameObject.spawn()], this.room.code));
+    }
 
     this.room.players.push(player);
 
@@ -317,14 +317,16 @@ export class CustomHost implements HostInstance {
     ];
     this.room.meetingHud.innerNetObjects[0].playerStates = Array(this.room.gameData.gameData.players.length);
 
-    this.room.gameData.gameData.players.forEach(player => {
+    for (let i = 0; i < this.room.gameData.gameData.players.length; i++) {
+      const player = this.room.gameData.gameData.players[i];
+
       this.room.meetingHud!.innerNetObjects[0].playerStates[player.id] = new VoteState(
         player!.id == sender.playerId,
         false,
         player.isDead || player.isDisconnected,
         -1,
       );
-    });
+    }
 
     this.room.sendRootGamePacket(new GameDataPacket([
       this.room.meetingHud.spawn(),
@@ -342,7 +344,8 @@ export class CustomHost implements HostInstance {
       const oldData = this.room.meetingHud.meetingHud.clone();
       const votes: Map<number, number[]> = new Map();
 
-      this.room.gameData.gameData.players.forEach(player => {
+      for (let i = 0; i < this.room.gameData.gameData.players.length; i++) {
+        const player = this.room.gameData.gameData.players[i];
         const state = this.room.meetingHud!.meetingHud.playerStates[player.id];
 
         if (!votes.has(state.votedFor)) {
@@ -350,7 +353,7 @@ export class CustomHost implements HostInstance {
         }
 
         votes.get(state.votedFor)!.push(player.id);
-      });
+      }
 
       const voteCounts = [...votes.values()].map(playersVotedFor => playersVotedFor.length);
       const largestVoteCount = Math.max(...voteCounts);
@@ -386,7 +389,7 @@ export class CustomHost implements HostInstance {
     }
 
     const system = this.room.shipStatus.innerNetObjects[0].getSystemFromType(systemId);
-    const player = this.room.players.find(testplayer => testplayer.gameObject.playerControl.id == playerControlNetId);
+    const player = this.room.players.find(thePlayer => thePlayer.gameObject.playerControl.id == playerControlNetId);
     const level = this.room.options.options.levels[0];
 
     if (!player) {
@@ -532,9 +535,25 @@ export class CustomHost implements HostInstance {
         throw new Error(`Attempted to set tasks for an unimplemented level: ${level as Level} (${Level[level]})`);
     }
 
-    const allCommon = shuffleArrayClone(allTasks.filter(task => task.length == TaskLength.Common));
-    const allShort = shuffleArrayClone(allTasks.filter(task => task.length == TaskLength.Short));
-    const allLong = shuffleArrayClone(allTasks.filter(task => task.length == TaskLength.Long));
+    const allCommon: LevelTask[] = [];
+    const allShort: LevelTask[] = [];
+    const allLong: LevelTask[] = [];
+
+    for (let i = 0; i < allTasks.length; i++) {
+      const task = allTasks[i];
+
+      switch (task.length) {
+        case TaskLength.Common:
+          allCommon.push(task);
+          break;
+        case TaskLength.Short:
+          allShort.push(task);
+          break;
+        case TaskLength.Long:
+          allLong.push(task);
+          break;
+      }
+    }
 
     // Used to store the currently assigned tasks to try to prevent
     // players from having the exact same tasks

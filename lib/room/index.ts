@@ -131,15 +131,15 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   removeActingHosts(sendImmediately: boolean = true): void {
-    this.actingHosts.forEach(actingHost => {
-      this.sendRemoveHost(actingHost, sendImmediately);
-    });
+    for (let i = 0; i < this.actingHosts.length; i++) {
+      this.sendRemoveHost(this.actingHosts[i], sendImmediately);
+    }
   }
 
   reapplyActingHosts(sendImmediately: boolean = true): void {
-    this.actingHosts.forEach(actingHost => {
-      this.sendSetHost(actingHost, sendImmediately);
-    });
+    for (let i = 0; i < this.actingHosts.length; i++) {
+      this.sendSetHost(this.actingHosts[i], sendImmediately);
+    }
   }
 
   sendSetHost(connection: Connection, sendImmediately: boolean = true): void {
