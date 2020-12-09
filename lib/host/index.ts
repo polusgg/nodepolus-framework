@@ -177,9 +177,10 @@ export class CustomHost implements HostInstance {
 
       this.setInfected(this.room.options.options.impostorCount);
 
-      // TODO: Uncomment when all tasks are added to LevelTask
+      // TODO: Uncomment when removing the for loop below
       // this.setTasks();
 
+      // TODO: Remove -- debug task list for medbay scan on all 3 maps
       for (let i = 0; i < this.room.players.length; i++) {
         this.room.gameData.gameData.setTasks(this.room.players[i].id, [25, 4, 2], this.room.connections);
       }
@@ -309,7 +310,7 @@ export class CustomHost implements HostInstance {
 
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void {
     if (!this.room.gameData) {
-      throw new Error("Attempted to handleReportDeadBody without GameData");
+      throw new Error("Received HandleReportDeadBody without GameData");
     }
 
     sender.startMeeting(victimPlayerId, this.room.connections);
@@ -336,7 +337,7 @@ export class CustomHost implements HostInstance {
 
     setTimeout(() => {
       if (!this.room.meetingHud) {
-        throw new Error("Attempted to end a non-existant meeting.");
+        throw new Error("Attempted to end a meeting without a MeetingHud instance");
       }
 
       if (!this.room.gameData) {
@@ -374,7 +375,7 @@ export class CustomHost implements HostInstance {
 
       setTimeout(() => {
         if (!this.room.meetingHud) {
-          throw new Error("Attempted to close a non-existant meeting.");
+          throw new Error("Attempted to end a meeting without a MeetingHud instance");
         }
 
         this.room.meetingHud.meetingHud.close(this.room.connections);
@@ -384,7 +385,7 @@ export class CustomHost implements HostInstance {
 
   handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
     if (!this.room.shipStatus) {
-      throw new Error("Attempted to handle Repair System without a shipstatus");
+      throw new Error("Received RepairSystem without a ShipStatus instance");
     }
 
     if (!this.room.isHost || !(this.room.host instanceof CustomHost)) {
@@ -396,7 +397,7 @@ export class CustomHost implements HostInstance {
     const level = this.room.options.options.levels[0];
 
     if (!player) {
-      throw new Error(`Received RepairSystem from an InnerNetObject other than a player: ${playerControlNetId}`);
+      throw new Error(`Received RepairSystem from a non-player InnerNetObject: ${playerControlNetId}`);
     }
 
     switch (system.type) {
@@ -448,7 +449,7 @@ export class CustomHost implements HostInstance {
 
   handleCloseDoorsOfType(sender: InnerLevel, systemId: SystemType): void {
     if (!this.doorHandler) {
-      throw new Error("Received CloseDoorsOfType without a door system");
+      throw new Error("Received CloseDoorsOfType without a door handler");
     }
 
     this.doorHandler.closeDoor(this.doorHandler.getDoorsForSystem(systemId));
@@ -654,7 +655,7 @@ export class CustomHost implements HostInstance {
 
   private isNameTaken(name: string): boolean {
     if (!this.room.gameData) {
-      throw new Error("isNameTaken called for room without a GameData instance");
+      throw new Error("isNameTaken called without a GameData instance");
     }
 
     return !!this.room.gameData.gameData.players.find(player => player.name == name);
@@ -662,7 +663,7 @@ export class CustomHost implements HostInstance {
 
   private getTakenColors(): PlayerColor[] {
     if (!this.room.gameData) {
-      throw new Error("getTakenColors called for room without a GameData instance");
+      throw new Error("getTakenColors called without a GameData instance");
     }
 
     return this.room.gameData.gameData.players.map(player => player.color);

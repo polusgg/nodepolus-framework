@@ -197,7 +197,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       }
     }
 
-    throw new Error(`InnerNetObject with ID ${netId} not found.`);
+    throw new Error(`InnerNetObject #${netId} not found`);
   }
 
   findPlayerByConnection(connection: Connection): Player | undefined {
