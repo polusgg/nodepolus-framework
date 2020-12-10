@@ -1,6 +1,6 @@
+import { PacketDestination } from "../protocol/packets/types";
 import { DisconnectReason } from "../types/disconnectReason";
-import { MessageReader } from "../util/hazelMessage";
-import { Packet } from "../protocol/packets";
+import { Connection } from "../protocol/connection";
 import { ClientInstance } from "./types";
 import dgram from "dgram";
 
@@ -14,14 +14,19 @@ export class Client implements ClientInstance {
   // TODO: no, it is. also you are going to create a connection on this right?
   public id = -1;
   public socket: dgram.Socket;
+  public connection: Connection;
 
   constructor(public config: ClientConfig) {
     this.socket = dgram.createSocket("udp4");
+    this.connection = new Connection({
+      address: config.address,
+      port: config.port,
+      family: "IPv4",
+      size: 0,
+    }, this.socket, PacketDestination.Server);
 
     this.socket.on("message", buffer => {
-      const packet = Packet.deserialize(MessageReader.fromRawBytes(buffer), true);
-
-      this.handlePacket(packet);
+      this.connection.emit("message", buffer);
     });
   }
 
@@ -40,10 +45,6 @@ export class Client implements ClientInstance {
   }
 
   sendWaitingForHost(): void {
-    throw new Error("Method not implemented.");
-  }
-
-  private handlePacket(packet: Packet): void {
     throw new Error("Method not implemented.");
   }
 }

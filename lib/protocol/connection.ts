@@ -369,6 +369,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
         resolveFunArr[i]();
       }
     }
+
+    this.acknowledgementResolveMap.delete(nonce);
   }
 
   private handleAcknowledgement(nonce: number): void {

@@ -132,13 +132,17 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   removeActingHosts(sendImmediately: boolean = true): void {
     for (let i = 0; i < this.actingHosts.length; i++) {
-      this.sendRemoveHost(this.actingHosts[i], sendImmediately);
+      if (this.actingHosts[i].limboState == LimboState.NotLimbo) {
+        this.sendRemoveHost(this.actingHosts[i], sendImmediately);
+      }
     }
   }
 
   reapplyActingHosts(sendImmediately: boolean = true): void {
     for (let i = 0; i < this.actingHosts.length; i++) {
-      this.sendSetHost(this.actingHosts[i], sendImmediately);
+      if (this.actingHosts[i].limboState == LimboState.NotLimbo) {
+        this.sendSetHost(this.actingHosts[i], sendImmediately);
+      }
     }
   }
 
@@ -311,10 +315,10 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   async sendRootGamePacket(packet: BaseRootGamePacket, sendTo: Connection[] = this.connections): Promise<PromiseSettledResult<void>[]> {
-    const promiseArray = new Array(sendTo.length);
+    const promiseArray: Promise<void>[] = [];
 
     for (let i = 0; i < sendTo.length; i++) {
-      sendTo[i].write(packet);
+      promiseArray.push(sendTo[i].write(packet));
     }
 
     return Promise.allSettled(promiseArray);
@@ -483,7 +487,7 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
      *  1. First connection that is already in the lobby ("NotLimbo")
      *     (if the host left while they and someone else were in the lobby)
      *  2. First connection that clicked "Play Again" ("WaitingForHost")
-     *     (if the host left before anybody clicked "Play Again")
+     *     (if the host left after one or more clients clicked "Play Again")
      *  3. First connection in line
      *     (if the host left and nobody clicked "Play Again" yet)
      */
@@ -518,8 +522,8 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         connection.id,
         this.isHost ? FakeHostId.ServerAsHost : this.host!.id,
         this.connections
-          .map(con => con.id)
-          .filter(id => id != connection.id)),
+          .filter(con => con.id != connection.id && con.limboState == LimboState.NotLimbo)
+          .map(con => con.id)),
       new AlterGameTagPacket(
         this.code,
         AlterGameTag.ChangePrivacy,
@@ -555,6 +559,10 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
         this.host.handleReady(sender);
         break;
       case GameDataPacketType.SceneChange: {
+        if ((packet as SceneChangePacket).scene != "OnlineGame") {
+          return;
+        }
+
         if (!this.host) {
           throw new Error("SceneChange packet received without a host");
         }

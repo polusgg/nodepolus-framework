@@ -67,11 +67,12 @@ import {
   OxygenAmount,
   RepairAmount,
 } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
+import { LimboState } from "../types/limboState";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
-  public readonly readyPlayerList: number[] = [];
-  public readonly playersInScene: Map<number, string> = new Map();
+  public readyPlayerList: number[] = [];
+  public playersInScene: Map<number, string> = new Map();
 
   public systemsHandler?: SystemsHandler;
   public sabotageHandler?: SabotageSystemHandler;
@@ -307,7 +308,7 @@ export class CustomHost implements HostInstance {
 
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void {
     if (!this.room.gameData) {
-      throw new Error("Received HandleReportDeadBody without a GameData instance");
+      throw new Error("Received ReportDeadBody without a GameData instance");
     }
 
     sender.startMeeting(victimPlayerId, this.room.connections);
@@ -384,7 +385,7 @@ export class CustomHost implements HostInstance {
 
   handleCastVote(votingPlayerId: number, suspectPlayerId: number): void {
     if (!this.room.meetingHud) {
-      throw new Error("CastVote called while meetingHud object does not exist on the room.");
+      throw new Error("Received CastVote without a MeetingHud instance");
     }
 
     const oldMeetingHud = this.room.meetingHud.meetingHud.clone();
@@ -466,7 +467,7 @@ export class CustomHost implements HostInstance {
     }
   }
 
-  handleCloseDoorsOfType(sender: InnerLevel, systemId: SystemType): void {
+  handleCloseDoorsOfType(_sender: InnerLevel, systemId: SystemType): void {
     if (!this.doorHandler) {
       throw new Error("Received CloseDoorsOfType without a door handler");
     }
@@ -504,19 +505,23 @@ export class CustomHost implements HostInstance {
 
   startCountdown(count: number): void {
     let currentCount = count;
+    const countdownFunction = (): void => {
+      const time = currentCount--;
 
-    const countdownInterval = setInterval(() => {
-      const c = currentCount--;
+      this.room.players[0].gameObject.playerControl.setStartCounter(this.counterSequenceId += 5, time, this.room.connections);
 
-      this.room.players[0].gameObject.playerControl.setStartCounter(this.counterSequenceId += 5, c, this.room.connections);
+      if (time <= 0) {
+        if (this.countdownInterval) {
+          clearInterval(this.countdownInterval);
+        }
 
-      if (c <= 0) {
-        clearInterval(countdownInterval);
         this.startGame();
       }
-    }, 1000);
+    };
 
-    this.countdownInterval = countdownInterval;
+    countdownFunction();
+
+    this.countdownInterval = setInterval(countdownFunction, 1000);
   }
 
   startGame(): void {
@@ -630,7 +635,23 @@ export class CustomHost implements HostInstance {
   }
 
   endGame(reason: GameOverReason): void {
-    this.room.gameState = GameState.Ended;
+    this.room.gameState = GameState.NotStarted;
+    this.deconHandlers = [];
+    this.readyPlayerList = [];
+    this.room.players = [];
+
+    this.playersInScene.clear();
+
+    for (let i = 0; i < this.room.connections.length; i++) {
+      this.room.connections[i].limboState = LimboState.PreSpawn;
+    }
+
+    delete this.room.lobbyBehavior;
+    delete this.room.shipStatus;
+    delete this.room.gameData;
+    delete this.doorHandler;
+    delete this.sabotageHandler;
+    delete this.systemsHandler;
 
     this.room.sendRootGamePacket(new EndGamePacket(this.room.code, reason, false));
   }
