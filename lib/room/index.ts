@@ -51,8 +51,14 @@ import { RPCHandler } from "./rpcHandler";
 import { CustomHost } from "../host";
 import { Player } from "../player";
 import dgram from "dgram";
+import Emittery from "emittery";
 
-export class Room implements RoomImplementation, dgram.RemoteInfo {
+export type RoomEvents = {
+  connection: Connection;
+  player: Player;
+};
+
+export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementation, dgram.RemoteInfo {
   public readonly createdAt: number = new Date().getTime();
 
   public connections: Connection[] = [];
@@ -114,20 +120,33 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
   private readonly rpcHandler: RPCHandler = new RPCHandler(this);
   private readonly ignoreDespawnNetIds: number[] = [];
+  private readonly spawningPlayers: Set<Connection> = new Set();
 
   constructor(
     public address: string,
     public port: number,
     public isHost: boolean,
-    public readonly code: string = RoomCode.generate(),
+    public code: string = RoomCode.generate(),
   ) {
-    this.family = RemoteInfo.fromString(`${address}:${port}`).family;
+    super();
 
-    console.log(this);
+    this.family = RemoteInfo.fromString(`${address}:${port}`).family;
 
     if (this.isHost) {
       this.customHostInstance = new CustomHost(this);
     }
+  }
+
+  finishedSpawningPlayer(con: Connection): void {
+    this.spawningPlayers.delete(con);
+  }
+
+  startedSpawningPlayer(con: Connection): void {
+    this.spawningPlayers.add(con);
+  }
+
+  isSpawningPlayers(): boolean {
+    return this.spawningPlayers.size > 0;
   }
 
   removeActingHosts(sendImmediately: boolean = true): void {
@@ -233,9 +252,9 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       case RootGamePacketType.EndGame: {
         const data = packet as EndGamePacket;
 
-        this.handleEndGame(data.reason, data.showAd);
-
         this.gameState = GameState.Ended;
+
+        this.handleEndGame(data.reason, data.showAd);
 
         for (let i = 0; i < this.connections.length; i++) {
           this.connections[i].limboState = LimboState.PreSpawn;
@@ -265,7 +284,9 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
           throw new Error(`KickPlayer sent for unknown client: ${id}`);
         }
 
-        con.sendKick(data.banned, data.disconnectReason);
+        if (sender.isHost) {
+          con.sendKick(data.banned, data.disconnectReason);
+        }
         break;
       }
       case RootGamePacketType.RemoveGame: {
@@ -336,12 +357,12 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
     if (sendTo) {
       for (let i = 0; i < sendTo.length; i++) {
         if (sendTo[i] instanceof Connection) {
-          sendToConnections.push(sendTo[i] as Connection);
+          sendToConnections[i] = sendTo[i] as Connection
         } else {
           const con = this.connections.find(c => this.findPlayerByConnection(c)?.id == sendTo[i].id);
 
           if (con) {
-            sendToConnections.push(con);
+            sendToConnections[i] = con;
           } else {
             throw new Error("Attempted to send a packet to a player with no connection");
           }
@@ -349,10 +370,14 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
       }
     }
 
-    this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.id, packet)], this.code), sendTo as Connection[]);
+    this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.id, packet)], this.code), sendToConnections);
   }
 
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
+    if (this.host instanceof CustomHost) {
+      this.host.handleDisconnect(connection);
+    }
+
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
     const disconnectingPlayerIndex = this.findPlayerIndexByConnection(connection);
 
@@ -401,9 +426,10 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
   }
 
   despawn(innerNetObject: InnerNetObject): void {
-    // TODO: Commented out because the lobby was being despawned twice with
-    //       the server as the host
-    // this.handleDespawn(innerNetObject.id);
+    if (!this.isHost) {
+      this.handleDespawn(innerNetObject.id);
+    }
+
     this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.id)], this.code));
   }
 
@@ -421,8 +447,12 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
 
     connection.limboState = LimboState.NotLimbo;
 
+    this.startedSpawningPlayer(connection);
+
     this.sendJoinedMessage(connection);
     this.broadcastJoinMessage(connection);
+
+    this.emit("connection", connection);
   }
 
   private handleRejoin(connection: Connection): void {
@@ -689,7 +719,9 @@ export class Room implements RoomImplementation, dgram.RemoteInfo {
           throw new Error("Spawn packet sent for a player on a connection that does not exist");
         }
 
-        this.players.push(new Player(EntityPlayer.spawn(flags, owner, innerNetObjects, this)));
+        const newPlayer = new Player(EntityPlayer.spawn(flags, owner, innerNetObjects, this));
+
+        this.players.push(newPlayer);
 
         this.sendRootGamePacket(new GameDataPacket([this.findPlayerByConnection(connection)!.gameObject.spawn()], this.code), sendTo);
         break;

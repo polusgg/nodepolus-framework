@@ -25,6 +25,16 @@ export class PlayerData {
     public tasks: [number, boolean][],
   ) {}
 
+  get isDoneWithTasks(): boolean {
+    for (let i = 0; i < this.tasks.length; i++) {
+      if (!this.tasks[i][1]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   static deserialize(reader: MessageReader, tag?: number): PlayerData {
     const id = tag ?? reader.readByte();
     const name = reader.readString();
@@ -41,6 +51,10 @@ export class PlayerData {
       id, name, color, hat, pet, skin, isDisconnected, isImpostor, isDead,
       reader.readList(tasks => [tasks.readByte(), tasks.readBoolean()]),
     );
+  }
+
+  completeTask(index: number, isComplete: boolean = true): void {
+    this.tasks[index][1] = isComplete;
   }
 
   serialize(writer: MessageWriter, includeId: boolean = true): void {

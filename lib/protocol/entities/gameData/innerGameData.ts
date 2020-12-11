@@ -41,7 +41,7 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
   }
 
   updateGameData(playerData: PlayerData[], sendTo: Connection[]): void {
-    // console.log("Update", 1, playerData);
+    // console.trace("Update", 1, playerData);
 
     for (let i = 0; i < playerData.length; i++) {
       let hasPlayer = false;
@@ -50,6 +50,7 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
         if (this.players[j].id == playerData[i].id) {
           hasPlayer = true;
           this.players[j] = playerData[i];
+
           break;
         }
       }

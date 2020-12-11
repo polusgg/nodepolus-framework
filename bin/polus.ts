@@ -1,31 +1,58 @@
+console.log("Loading NP...");
+
 Error.stackTraceLimit = 25;
 
-import { Server } from "../lib/server";
+import fs from "fs";
+import path from "path";
+import { Server } from "../lib/api/server";
 
-const server = new Server();
+declare const server: Server;
 
-server.listen(22023, () => {
-  console.log("Listening on port 22023");
-});
+declare interface IPluginMetadata {
+  version: [number, number, number];
+}
 
-const exitHandler = (): void => {
-  console.log("Shutting down");
+declare interface IPlugin {
+  filename: string;
+  pluginMetadata: IPluginMetadata;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  module: any;
+}
 
-  server.connections.forEach(c => c.disconnect());
+declare interface IConfig {
+  port: number;
+  disabledCredits: boolean | undefined;
+}
 
-  process.exit();
-};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const globalAny: any = global;
+const serverConfig: IConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "./config.json"), "utf-8"));
 
-["exit", "SIGINT", "SIGTERM", "SIGUSR1", "SIGUSR2"].forEach((event: string) => {
-  process.on(event, exitHandler);
-});
+globalAny.server = new Server();
 
-process.on("unhandledRejection", reason => {
-  console.error("Unhandled promise rejection");
-  console.error(reason);
-});
+const pluginDirectories = fs.readdirSync(path.join(__dirname, "./plugins/"));
+const plugins: IPlugin[] = [];
 
-process.on("uncaughtException", (ex: Error) => {
-  console.error("Uncaught exception");
-  console.error(ex.stack);
+for (let i = 0; i < pluginDirectories.length; i++) {
+  const directory = path.join(__dirname, "./plugins/", pluginDirectories[i]);
+  const dirSplitByPeriod = directory.split(".");
+  const fileType = dirSplitByPeriod[dirSplitByPeriod.length - 1];
+
+  if (fileType.toLowerCase() !== "npplugin") {
+    throw new Error(`A non-plugin file is in the plugin directory: ${pluginDirectories[i]}`);
+  }
+
+  plugins.push({
+    filename: pluginDirectories[i],
+    pluginMetadata: JSON.parse(fs.readFileSync(path.join(__dirname, "./plugins/", pluginDirectories[i], "plugin.json"), "utf-8")),
+    module: import(path.join(__dirname, "./plugins/", pluginDirectories[i], "/index")),
+  });
+}
+
+if (!serverConfig.disabledCredits) {
+  import("./devCredits");
+}
+
+server.listen(serverConfig.port).then(() => {
+  console.log(`Server listening on UDP port ${serverConfig.port}`);
 });

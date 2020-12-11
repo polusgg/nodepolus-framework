@@ -98,7 +98,7 @@ export class Text {
   add(content: string): Text {
     this.elements.push({
       type: ElementType.Text,
-      content,
+      content: content.split("[").join("[["),
       color: this.currentColor,
       opacity: this.currentOpacity,
     });
@@ -159,7 +159,7 @@ export class Text {
           accumulator += "[]";
         }
 
-        const stringColor = colorToString([...element.color, element.opacity]);
+        const stringColor = colorToString([...element.color, element.opacity] as [number, number, number, number]);
 
         if (stringColor != lastStringColor) {
           accumulator += `[${stringColor}]${element.content}`;

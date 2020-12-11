@@ -116,6 +116,8 @@ export class RPCHandler {
         }
 
         this.handleCheckName(sender as InnerPlayerControl, packet.name, sendTo);
+
+        this.room.emit("player", this.room.findPlayerByConnection(this.room.findConnection(sender.parent.owner)!)!);
         break;
       }
       case RPCPacketType.SetName: {
@@ -374,6 +376,12 @@ export class RPCHandler {
   }
 
   handleCompleteTask(sender: InnerPlayerControl, taskIndex: number, sendTo: Connection[]): void {
+    if (!this.room.host) {
+      throw new Error("CompleteTask RPC handler called without a host");
+    }
+
+    this.room.host.handleCompleteTask(sender, taskIndex);
+
     sender.completeTask(taskIndex, sendTo);
   }
 
@@ -436,7 +444,13 @@ export class RPCHandler {
   }
 
   handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number, sendTo: Connection[]): void {
+    if (!this.room.host) {
+      throw new Error("MurderPlayer RPC handler called without a host");
+    }
+
     sender.murderPlayer(victimPlayerControlNetId, sendTo);
+
+    this.room.host.handleMurderPlayer(sender, victimPlayerControlNetId);
   }
 
   handleSendChat(sender: InnerPlayerControl, message: string, sendTo: Connection[]): void {
@@ -523,5 +537,7 @@ export class RPCHandler {
 
   handleUpdateGameData(sender: InnerGameData, players: PlayerData[], sendTo: Connection[]): void {
     sender.updateGameData(players, sendTo);
+
+
   }
 }

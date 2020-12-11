@@ -445,19 +445,21 @@ test("writes a list of messages with zeroed tags", t => {
 
 test("reads all child messages", t => {
   const buf = MessageReader.fromMessage("2300010f00030a576f7273742079656172e40700000e000509426573742079656172b1070000");
-  const items: Example[] = [];
+  const results: Example[] = [];
 
   buf.readAllChildMessages(child => {
-    items.push({
+    results.push({
       someString: child.readString(),
       someNumber: child.readUInt32(),
     });
   });
 
-  t.is(items[0].someString, "Worst year");
-  t.is(items[0].someNumber, 2020);
-  t.is(items[1].someString, "Best year");
-  t.is(items[1].someNumber, 1969);
+  t.is(results.length, 2);
+  t.is(results[0].someString, "Worst year");
+  t.is(results[0].someNumber, 2020);
+  t.is(results[1].someString, "Best year");
+  t.is(results[1].someNumber, 1969);
+  t.false(buf.hasBytesLeft());
 });
 
 test("reads remaining bytes", t => {

@@ -12,6 +12,7 @@ import { RoomCode } from "../util/roomCode";
 import { Level } from "../types/level";
 import { Room } from "../room";
 import dgram from "dgram";
+import Emittery from "emittery";
 
 export enum DefaultHostState {
   Server,
@@ -30,7 +31,11 @@ const DEFAULT_SERVER_CONFIG: ServerConfig = {
   defaultRoomPort: DEFAULT_SERVER_PORT,
 };
 
-export class Server {
+export type ServerEvents = {
+  roomCreated: Room;
+};
+
+export class Server extends Emittery.Typed<ServerEvents> {
   public readonly startedAt = Date.now();
   public readonly serverSocket: dgram.Socket;
   public readonly connections: Map<string, Connection> = new Map();
@@ -42,17 +47,11 @@ export class Server {
   // Starts at 1 to allow the Server host implementation's ID to be 0
   private connectionIndex = 1;
 
-  private get nextConnectionId(): number {
-    if (++this.connectionIndex > MaxValue.UInt32) {
-      this.connectionIndex = 1;
-    }
-
-    return this.connectionIndex;
-  }
-
   constructor(
     public config: ServerConfig = DEFAULT_SERVER_CONFIG,
   ) {
+    super();
+
     this.serverSocket = dgram.createSocket("udp4");
 
     this.serverSocket.on("message", (buf, remoteInfo) => {
@@ -62,12 +61,16 @@ export class Server {
     });
   }
 
-  listen(port: number = DEFAULT_SERVER_PORT, onStart?: () => void): void {
-    this.serverSocket.bind(port, "0.0.0.0");
-
-    if (onStart) {
-      onStart();
+  get nextConnectionId(): number {
+    if (++this.connectionIndex > MaxValue.UInt32) {
+      this.connectionIndex = 1;
     }
+
+    return this.connectionIndex;
+  }
+
+  listen(port: number = DEFAULT_SERVER_PORT, onStart?: () => void): void {
+    this.serverSocket.bind(port, "0.0.0.0", onStart);
   }
 
   getConnection(remoteInfo: string | dgram.RemoteInfo): Connection {
@@ -132,6 +135,8 @@ export class Server {
         );
 
         newRoom.options = (packet as HostGameRequestPacket).options;
+
+        this.emit("roomCreated", newRoom);
 
         this.rooms.push(newRoom);
         this.roomMap.set(newRoom.code, newRoom);

@@ -14,7 +14,7 @@ export type LevelTask = {
   type: TaskType;
 };
 
-export const THE_SKELD: LevelTask[] = [
+export const TASKS_THE_SKELD: LevelTask[] = [
   { id: 0, name: "Admin: Swipe Card", isVisual: false, length: TaskLength.Common, type: TaskType.SwipeCard },
   { id: 1, name: "Electrical: Fix Wiring", isVisual: false, length: TaskLength.Common, type: TaskType.FixWiring },
   { id: 2, name: "Weapons: Clear Asteroids", isVisual: true, length: TaskLength.Long, type: TaskType.ClearAsteroids },
@@ -46,7 +46,7 @@ export const THE_SKELD: LevelTask[] = [
   { id: 28, name: "Electrical: Divert Power to Security", isVisual: false, length: TaskLength.Short, type: TaskType.DivertPower },
 ];
 
-export const MIRA_HQ: LevelTask[] = [
+export const TASKS_MIRA_HQ: LevelTask[] = [
   { id: 0, name: "Hallway: Fix Wiring", isVisual: false, length: TaskLength.Common, type: TaskType.FixWiring },
   { id: 1, name: "Admin: Enter ID Code", isVisual: false, length: TaskLength.Common, type: TaskType.EnterIdCode },
   { id: 2, name: "Medbay: Submit Scan", isVisual: true, length: TaskLength.Long, type: TaskType.SubmitScan },
@@ -75,7 +75,7 @@ export const MIRA_HQ: LevelTask[] = [
   { id: 25, name: "Reactor: Unlock Manifolds", isVisual: false, length: TaskLength.Short, type: TaskType.UnlockManifolds },
 ];
 
-export const POLUS: LevelTask[] = [
+export const TASKS_POLUS: LevelTask[] = [
   { id: 0, name: "Office: Swipe Card", isVisual: false, length: TaskLength.Common, type: TaskType.SwipeCard },
   { id: 1, name: "Dropship: Insert Keys", isVisual: false, length: TaskLength.Common, type: TaskType.InsertKeys },
   { id: 2, name: "Office: Scan Boarding Pass", isVisual: false, length: TaskLength.Common, type: TaskType.ScanBoardingPass },

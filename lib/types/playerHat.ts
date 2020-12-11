@@ -93,4 +93,5 @@ export enum PlayerHat {
   NinjaMask = 91,
   RamHorns = 92,
   MiniCrewmateSnowman = 93,
+  GeoffKeighley = 94,
 }

@@ -72,7 +72,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
     this.sendRPCPacketTo(sendTo, new PlayAnimationPacket(taskId));
   }
 
-  completeTask(taskIdx: number, sendTo: Connection[]): void {
+  completeTask(taskIndex: number, sendTo: Connection[]): void {
     const gameData = this.parent.room.gameData;
 
     if (!gameData) {
@@ -87,13 +87,13 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     const taskCount = gameData.gameData.players[gameDataPlayerIndex].tasks.length;
 
-    if (taskCount < taskIdx) {
-      throw new Error(`Player ${this.playerId} has fewer tasks (${taskCount}) than the requested index (${taskIdx})`);
+    if (taskCount < taskIndex) {
+      throw new Error(`Player ${this.playerId} has fewer tasks (${taskCount}) than the requested index (${taskIndex})`);
     }
 
-    gameData.gameData.players[gameDataPlayerIndex].tasks[taskIdx][1] = true;
+    gameData.gameData.players[gameDataPlayerIndex].tasks[taskIndex][1] = true;
 
-    this.sendRPCPacketTo(sendTo, new CompleteTaskPacket(taskIdx));
+    this.sendRPCPacketTo(sendTo, new CompleteTaskPacket(taskIndex));
   }
 
   syncSettings(options: GameOptionsData, sendTo: Connection[]): void {

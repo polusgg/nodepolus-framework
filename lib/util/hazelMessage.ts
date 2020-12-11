@@ -203,8 +203,8 @@ export class MessageWriter extends HazelMessage {
   }
 
   writeBitfield(arr: boolean[]): this {
-    for (let chunkidx = 0; chunkidx < arr.length; chunkidx += 8) {
-      const tmparr = arr.slice(chunkidx, chunkidx + 8);
+    for (let chunkIndex = 0; chunkIndex < arr.length; chunkIndex += 8) {
+      const tmparr = arr.slice(chunkIndex, chunkIndex + 8);
       let n = 0;
 
       for (let i = 0; i < tmparr.length; i++) {
@@ -221,7 +221,7 @@ export class MessageWriter extends HazelMessage {
 
   writeList<T>(
     items: Iterable<T>,
-    writer: (subWriter: MessageWriter, item: T, idx: number) => void,
+    writer: (subWriter: MessageWriter, item: T, index: number) => void,
     lengthIsPacked: boolean = true,
   ): this {
     const arr = [...items];
@@ -455,12 +455,12 @@ export class MessageReader extends HazelMessage {
     }, lengthIsPacked);
   }
 
-  readAllChildMessages<T>(reader: (child: MessageReader, idx: number) => T): T[] {
+  readAllChildMessages<T>(reader: (child: MessageReader, index: number) => T): T[] {
     const children = this.getAllChildMessages();
     const items: T[] = Array(children.length);
 
     for (let i = 0; i < children.length; i++) {
-      items.push(reader(children[i], i));
+      items[i] = reader(children[i], i);
     }
 
     return items;

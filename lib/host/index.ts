@@ -1,3 +1,4 @@
+import { TaskLength, LevelTask, TASKS_THE_SKELD, TASKS_MIRA_HQ, TASKS_POLUS } from "../types/levelTask";
 import { SecurityCameraSystem } from "../protocol/entities/baseShipStatus/systems/securityCameraSystem";
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
 import { HudOverrideSystem } from "../protocol/entities/baseShipStatus/systems/hudOverrideSystem";
@@ -15,7 +16,6 @@ import { DeconSystem } from "../protocol/entities/baseShipStatus/systems/deconSy
 import { DoorsSystem } from "../protocol/entities/baseShipStatus/systems/doorsSystem";
 import { HqHudSystem } from "../protocol/entities/baseShipStatus/systems/hqHudSystem";
 import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSystem";
-import { TaskLength, LevelTask, THE_SKELD, MIRA_HQ, POLUS } from "../types/levelTask";
 import { InternalSystemType } from "../protocol/entities/baseShipStatus/systems/type";
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
 import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
@@ -73,13 +73,13 @@ export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
   public readyPlayerList: number[] = [];
   public playersInScene: Map<number, string> = new Map();
+  public netIdIndex = 1;
 
   public systemsHandler?: SystemsHandler;
   public sabotageHandler?: SabotageSystemHandler;
   public deconHandlers: DeconHandler[] = [];
   public doorHandler: DoorsHandler | AutoDoorsHandler | undefined;
 
-  private netIdIndex = 1;
   private counterSequenceId = 0;
   private countdownInterval: NodeJS.Timeout | undefined;
   private meetingHudTimeout: NodeJS.Timeout | undefined;
@@ -271,8 +271,12 @@ export class CustomHost implements HostInstance {
 
     player.gameObject.playerControl.isNew = false;
 
+    this.room.finishedSpawningPlayer(sender);
+
     setTimeout(() => {
-      this.room.reapplyActingHosts();
+      if (!this.room.isSpawningPlayers()) {
+        this.room.reapplyActingHosts();
+      }
     }, 100);
   }
 
@@ -304,6 +308,33 @@ export class CustomHost implements HostInstance {
     }
 
     sender.setColor(setColor, this.room.connections);
+  }
+
+  handleCompleteTask(sender: InnerPlayerControl, taskIndex: number): void {
+    if (!this.room.gameData) {
+      throw new Error("Received CompleteTask without a GameData instance");
+    }
+
+    const playerIndex = this.room.gameData.gameData.players.findIndex(playerData => playerData.id == sender.playerId);
+
+    if (playerIndex == -1) {
+      throw new Error("Received CompleteTask from a connection without an InnerPlayerControl instance");
+    }
+
+    this.room.gameData.gameData.players[playerIndex].completeTask(taskIndex);
+
+    const crewmates = this.room.gameData.gameData.players.filter(playerData => !playerData.isImpostor);
+
+    if (crewmates.every(crewmate => crewmate.isDoneWithTasks)) {
+      this.endGame(GameOverReason.CrewmatesByTask);
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): void {
+    if (this.shouldEndGame()) {
+      this.endGame(GameOverReason.ImpostorsByKill);
+    }
   }
 
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void {
@@ -370,6 +401,14 @@ export class CustomHost implements HostInstance {
       this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, false, 255, true, this.room.connections);
     }
 
+    const exiledPlayer = this.room.gameData.gameData.players.find(playerData => playerData.id == allLargestVotes[0][0]);
+
+    if (!exiledPlayer) {
+      throw new Error("Exiled player has no data stored in GameData instance");
+    }
+
+    exiledPlayer.isDead = true;
+
     this.room.sendRootGamePacket(new GameDataPacket([
       this.room.meetingHud.meetingHud.data(oldData),
     ], this.room.code));
@@ -380,6 +419,23 @@ export class CustomHost implements HostInstance {
       }
 
       this.room.meetingHud.meetingHud.close(this.room.connections);
+
+      setTimeout(() => {
+        if (this.shouldEndGame()) {
+          if (!this.room.gameData) {
+            throw new Error("Attempted to end a meeting without a GameData instance");
+          }
+
+          if (exiledPlayer.isImpostor) {
+            this.endGame(GameOverReason.CrewmatesByVote);
+          } else {
+            this.endGame(GameOverReason.ImpostorsByVote);
+          }
+        }
+      // the 8.500s was recorded from in-game. It may be slightly
+      // inaccurate, as the timing is not hard-coded but rather
+      // dependant on FPS & Animations
+      }, 8500);
     }, 5000);
   }
 
@@ -493,6 +549,41 @@ export class CustomHost implements HostInstance {
     }
   }
 
+  handleDisconnect(connection: Connection): void {
+    if (this.room.gameState == GameState.NotStarted) {
+      this.stopCountdown();
+
+      return;
+    }
+
+    if (!this.room.gameData) {
+      if (this.room.gameState == GameState.Started) {
+        throw new Error("Received Disconnect without a GameData instance");
+      }
+
+      return;
+    }
+
+    const player = this.room.findPlayerByConnection(connection);
+
+    if (!player) {
+      throw new Error("Received Disconnect for a connection without a Player instance");
+    }
+
+    const playerIndex = this.room.gameData.gameData.players.findIndex(playerData => playerData.id == player.id);
+    const playerData = this.room.gameData.gameData.players[playerIndex];
+
+    playerData.isDisconnected = true;
+
+    if (this.shouldEndGame()) {
+      if (playerData.isImpostor) {
+        this.endGame(GameOverReason.ImpostorDisconnect);
+      } else {
+        this.endGame(GameOverReason.CrewmateDisconnect);
+      }
+    }
+  }
+
   stopCountdown(): void {
     if (this.room.players.length > 0) {
       this.room.players[0].gameObject.playerControl.setStartCounter(this.counterSequenceId += 5, -1, this.room.connections);
@@ -551,13 +642,13 @@ export class CustomHost implements HostInstance {
 
     switch (level) {
       case Level.TheSkeld:
-        allTasks = THE_SKELD;
+        allTasks = TASKS_THE_SKELD;
         break;
       case Level.MiraHq:
-        allTasks = MIRA_HQ;
+        allTasks = TASKS_MIRA_HQ;
         break;
       case Level.Polus:
-        allTasks = POLUS;
+        allTasks = TASKS_POLUS;
         break;
       default:
         throw new Error(`Attempted to set tasks for an unimplemented level: ${level as Level} (${Level[level]})`);
@@ -598,16 +689,16 @@ export class CustomHost implements HostInstance {
         break;
       }
 
-      const idx = Math.floor(Math.random() * allCommon.length);
+      const index = Math.floor(Math.random() * allCommon.length);
 
-      tasks.push(allCommon[idx]);
-      allCommon.splice(idx, 1);
+      tasks.push(allCommon[index]);
+      allCommon.splice(index, 1);
     }
 
     // Indices used to act as a read head for short and long tasks
     // to try to prevent players from having the exact same tasks
-    const shortIdx = { val: 0 };
-    const longIdx = { val: 0 };
+    const shortIndex = { val: 0 };
+    const longIndex = { val: 0 };
 
     for (let pid = 0; pid < this.room.players.length; pid++) {
       // Clear the used task array
@@ -617,10 +708,10 @@ export class CustomHost implements HostInstance {
       tasks.splice(numCommon, tasks.length - numCommon);
 
       // Add long tasks
-      this.addTasksFromList(longIdx, numLong, tasks, used, allLong);
+      this.addTasksFromList(longIndex, numLong, tasks, used, allLong);
 
       // Add short tasks
-      this.addTasksFromList(shortIdx, numShort, tasks, used, allShort);
+      this.addTasksFromList(shortIndex, numShort, tasks, used, allShort);
 
       const player = this.room.players.find(pl => pl.id == pid);
 
@@ -707,6 +798,31 @@ export class CustomHost implements HostInstance {
         tasks.push(task);
       }
     }
+  }
+
+  private shouldEndGame(): boolean {
+    if (!this.room.gameData) {
+      throw new Error("shouldEndGame called without a GameData instance");
+    }
+
+    const aliveImpostors: PlayerData[] = [];
+    const aliveCrewmates: PlayerData[] = [];
+
+    for (let i = 0; i < this.room.gameData.gameData.players.length; i++) {
+      const playerData = this.room.gameData.gameData.players[i];
+
+      if (playerData.isDead || playerData.isDisconnected) {
+        continue;
+      }
+
+      if (playerData.isImpostor) {
+        aliveImpostors.push(playerData);
+      } else {
+        aliveCrewmates.push(playerData);
+      }
+    }
+
+    return (aliveImpostors.length >= aliveCrewmates.length) || aliveImpostors.length == 0;
   }
 
   private isNameTaken(name: string): boolean {

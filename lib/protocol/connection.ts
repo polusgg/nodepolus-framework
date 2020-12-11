@@ -1,4 +1,4 @@
-import { GameDataPacketType, PacketDestination, PacketType, RootGamePacketType, RPCPacketType } from "./packets/types";
+import { PacketDestination, PacketType } from "./packets/types";
 import { RepairAmount } from "./packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { RootGamePacket, RootGamePacketDataType } from "./packets/packetTypes/genericPacket";
 import { SceneChangePacket } from "./packets/rootGamePackets/gameDataPackets/sceneChange";
@@ -7,7 +7,6 @@ import { ReadyPacket } from "./packets/rootGamePackets/gameDataPackets/ready";
 import { LateRejectionPacket } from "./packets/rootGamePackets/removePlayer";
 import { DisconnectPacket } from "./packets/packetTypes/disconnectPacket";
 import { InnerPlayerControl } from "./entities/player/innerPlayerControl";
-import { RPCPacket } from "./packets/rootGamePackets/gameDataPackets/rpc";
 import { WaitForHostPacket } from "./packets/rootGamePackets/waitForHost";
 import { KickPlayerPacket } from "./packets/rootGamePackets/kickPlayer";
 import { GameDataPacket } from "./packets/rootGamePackets/gameData";
@@ -54,7 +53,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   private readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
   private readonly unacknowledgedPackets: Map<number, number> = new Map();
   private readonly flushInterval: NodeJS.Timeout;
-  private readonly timeoutInterval: NodeJS.Timeout;
+  // private readonly timeoutInterval: NodeJS.Timeout;
 
   private initialized = false;
   private packetBuffer: AwaitingPacket[] = [];
@@ -124,11 +123,12 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
       }
     }, 10);
 
-    this.timeoutInterval = setInterval(() => {
-      if (this.timeSinceLastPing > this.timeoutLength) {
-        this.disconnect(DisconnectReason.custom("Connection timed out"));
-      }
-    }, 1000);
+    // TODO: This breaks. No clue why.
+    // this.timeoutInterval = setInterval(() => {
+    //   if (this.timeSinceLastPing > this.timeoutLength) {
+    //     this.disconnect(DisconnectReason.custom("Connection timed out"));
+    //   }
+    // }, 1000);
   }
 
   async write(packet: RootGamePacketDataType): Promise<void> {
@@ -328,6 +328,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   handleRepairSystem(_sender: InnerLevel, _systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
   handleCloseDoorsOfType(_sender: InnerLevel, _systemId: SystemType): void {}
   handleSetStartCounter(_sequenceId: number, _timeRemaining: number): void {}
+  handleCompleteTask(_sender: InnerPlayerControl, _taskIndex: number): void {}
+  handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): void {}
   setInfected(_impostorCount: number): void {}
   setTasks(): void {}
   /* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
@@ -398,7 +400,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
   private cleanup(reason?: DisconnectReason): void {
     clearInterval(this.flushInterval);
-    clearInterval(this.timeoutInterval);
+    // clearInterval(this.timeoutInterval);
 
     if (this.disconnectTimeout) {
       clearTimeout(this.disconnectTimeout);
@@ -407,31 +409,32 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     this.emit("disconnected", reason);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private log(packet: RootGamePacketDataType, parsed: Packet, isToServer: boolean): void {
-    if (!parsed.isReliable) {
-      return;
-    }
+    // if (!parsed.isReliable) {
+    //   return;
+    // }
 
-    if (isToServer) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      console.log(`[${this.id} @ ${this.address}:${this.port}] > [Server] : Sent ${RootGamePacketType[packet.type]} in a ${parsed.isReliable ? "Reliable" : "Unreliable"} packet${parsed.isReliable ? ` with nonce ${parsed.nonce}` : ""}`);
-    } else {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      console.log(`[Server] > [${this.id} @ ${this.address}:${this.port}] : Sent ${RootGamePacketType[packet.type]} in a ${parsed.isReliable ? "Reliable" : "Unreliable"} packet${parsed.isReliable ? ` with nonce ${parsed.nonce}` : ""}`);
-    }
+    // if (isToServer) {
+    //   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    //   console.log(`[${this.id} @ ${this.address}:${this.port}] > [Server] : Sent ${RootGamePacketType[packet.type]} in a ${parsed.isReliable ? "Reliable" : "Unreliable"} packet${parsed.isReliable ? ` with nonce ${parsed.nonce}` : ""}`);
+    // } else {
+    //   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    //   console.log(`[Server] > [${this.id} @ ${this.address}:${this.port}] : Sent ${RootGamePacketType[packet.type]} in a ${parsed.isReliable ? "Reliable" : "Unreliable"} packet${parsed.isReliable ? ` with nonce ${parsed.nonce}` : ""}`);
+    // }
 
-    if (packet.type == RootGamePacketType.GameData || packet.type == RootGamePacketType.GameDataTo) {
-      // console.log((packet as GameDataPacket).packets);
-      const prefix = " ".repeat(`[${this.id} @ ${this.address}:${this.port}] > [Server] : Sent `.length);
+    // if (packet.type == RootGamePacketType.GameData || packet.type == RootGamePacketType.GameDataTo) {
+    //   // console.log((packet as GameDataPacket).packets);
+    //   const prefix = " ".repeat(`[${this.id} @ ${this.address}:${this.port}] > [Server] : Sent `.length);
 
-      console.log(`${prefix}│`);
-      console.log(`${prefix}├─[Room Code]─> ${(packet as GameDataPacket).roomCode}`);
-      console.log(`${prefix}├─[Recipient]─> ${(packet as GameDataPacket).targetClientId ?? "ALL"}`);
-      console.log(`${prefix}└─[Packets]`);
+    //   console.log(`${prefix}│`);
+    //   console.log(`${prefix}├─[Room Code]─> ${(packet as GameDataPacket).roomCode}`);
+    //   console.log(`${prefix}├─[Recipient]─> ${(packet as GameDataPacket).targetClientId ?? "ALL"}`);
+    //   console.log(`${prefix}└─[Packets]`);
 
-      (packet as GameDataPacket).packets.forEach((subpacket, idx, { length }) => {
-        console.log(`${prefix}  ${idx == length - 1 ? "└" : "├"}─[${idx}]─> ${GameDataPacketType[subpacket.type]}${subpacket.type == GameDataPacketType.RPC ? ` > ${RPCPacketType[(subpacket as RPCPacket).packet.type]}` : ""}`);
-      });
-    }
+    //   (packet as GameDataPacket).packets.forEach((subpacket, index, { length }) => {
+    //     console.log(`${prefix}  ${index == length - 1 ? "└" : "├"}─[${index}]─> ${GameDataPacketType[subpacket.type]}${subpacket.type == GameDataPacketType.RPC ? ` > ${RPCPacketType[(subpacket as RPCPacket).packet.type]}` : ""}`);
+    //   });
+    // }
   }
 }

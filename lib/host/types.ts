@@ -23,6 +23,10 @@ export interface HostInstance extends ClientInstance {
 
   handleSetStartCounter(sequenceId: number, timeRemaining: number): void;
 
+  handleCompleteTask(sender: InnerPlayerControl, taskIndex: number): void;
+
+  handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number): void;
+
   setInfected(infectedCount: number): void;
 
   setTasks(): void;

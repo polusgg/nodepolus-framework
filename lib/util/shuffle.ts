@@ -8,9 +8,9 @@ const shuffleArray = <T>(array: T[]): void => {
   }
 
   for (let i = 0; i < array.length; i++) {
-    const randomIdx = Math.floor(Math.random() * (array.length - i)) + i;
+    const randomIndex = Math.floor(Math.random() * (array.length - i)) + i;
 
-    [array[i], array[randomIdx]] = [array[randomIdx], array[i]];
+    [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
   }
 };
 
