@@ -69,7 +69,9 @@ export class Text {
       if (reader.state == ReaderState.ReadingText) {
         if (char == "[") {
           reader.element = reader.element.slice(1);
+
           text.addReader(reader);
+
           reader.state = ReaderState.ReadingElement;
           reader.element = "";
           reader.chunk = "";
@@ -84,6 +86,7 @@ export class Text {
         } else {
           reader.element += char;
         }
+
         continue;
       }
     }
@@ -184,6 +187,7 @@ export class Text {
       if (this.elements.length != 0) {
         this.reset();
       }
+
       this.add(reader.chunk);
     } else if (reader.element[0] === "h") {
       this.link(reader.chunk, reader.element);
