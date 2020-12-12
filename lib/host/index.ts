@@ -71,6 +71,7 @@ import {
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
+
   public readyPlayerList: number[] = [];
   public playersInScene: Map<number, string> = new Map();
 
