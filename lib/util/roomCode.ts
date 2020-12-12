@@ -28,7 +28,7 @@ export class RoomCode {
       return RoomCode.encodeV2(code);
     }
 
-    throw new TypeError(`Invalid room code length, expected 4 or 6 characters: ${code}`);
+    throw new TypeError(`Invalid room code, expected 4 or 6 characters: ${code}`);
   }
 
   static encodeV1(code: string): number {

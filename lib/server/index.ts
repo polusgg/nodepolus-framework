@@ -10,9 +10,9 @@ import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
 import { RoomCode } from "../util/roomCode";
 import { Level } from "../types/level";
+import Emittery from "emittery";
 import { Room } from "../room";
 import dgram from "dgram";
-import Emittery from "emittery";
 
 export enum DefaultHostState {
   Server,
@@ -47,6 +47,14 @@ export class Server extends Emittery.Typed<ServerEvents> {
   // Starts at 1 to allow the Server host implementation's ID to be 0
   private connectionIndex = 1;
 
+  get nextConnectionId(): number {
+    if (++this.connectionIndex > MaxValue.UInt32) {
+      this.connectionIndex = 1;
+    }
+
+    return this.connectionIndex;
+  }
+
   constructor(
     public config: ServerConfig = DEFAULT_SERVER_CONFIG,
   ) {
@@ -59,14 +67,6 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
       sender.emit("message", buf);
     });
-  }
-
-  get nextConnectionId(): number {
-    if (++this.connectionIndex > MaxValue.UInt32) {
-      this.connectionIndex = 1;
-    }
-
-    return this.connectionIndex;
   }
 
   listen(port: number = DEFAULT_SERVER_PORT, onStart?: () => void): void {

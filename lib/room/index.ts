@@ -50,8 +50,8 @@ import { RoomCode } from "../util/roomCode";
 import { RPCHandler } from "./rpcHandler";
 import { CustomHost } from "../host";
 import { Player } from "../player";
-import dgram from "dgram";
 import Emittery from "emittery";
+import dgram from "dgram";
 
 export type RoomEvents = {
   connection: Connection;
@@ -73,6 +73,10 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
   public gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
   public family: "IPv4" | "IPv6";
   public size = -1;
+
+  private readonly rpcHandler: RPCHandler = new RPCHandler(this);
+  private readonly ignoreDespawnNetIds: number[] = [];
+  private readonly spawningPlayers: Set<Connection> = new Set();
 
   get host(): HostInstance | undefined {
     if (this.isHost) {
@@ -118,9 +122,9 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
     return !!(this.gameTags.get(AlterGameTag.ChangePrivacy) ?? 0);
   }
 
-  private readonly rpcHandler: RPCHandler = new RPCHandler(this);
-  private readonly ignoreDespawnNetIds: number[] = [];
-  private readonly spawningPlayers: Set<Connection> = new Set();
+  get isSpawningPlayers(): boolean {
+    return this.spawningPlayers.size > 0;
+  }
 
   constructor(
     public address: string,
@@ -137,16 +141,12 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
     }
   }
 
-  finishedSpawningPlayer(con: Connection): void {
-    this.spawningPlayers.delete(con);
+  finishedSpawningPlayer(connection: Connection): void {
+    this.spawningPlayers.delete(connection);
   }
 
-  startedSpawningPlayer(con: Connection): void {
-    this.spawningPlayers.add(con);
-  }
-
-  isSpawningPlayers(): boolean {
-    return this.spawningPlayers.size > 0;
+  startedSpawningPlayer(connection: Connection): void {
+    this.spawningPlayers.add(connection);
   }
 
   removeActingHosts(sendImmediately: boolean = true): void {
@@ -352,17 +352,17 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
   }
 
   sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, sendTo?: (Player | HostInstance)[]): void {
-    const sendToConnections: Connection[] = new Array(sendTo?.length);
+    const sendToConnections: Connection[] = new Array(sendTo?.length ?? 0);
 
     if (sendTo) {
       for (let i = 0; i < sendTo.length; i++) {
         if (sendTo[i] instanceof Connection) {
-          sendToConnections[i] = sendTo[i] as Connection
+          sendToConnections[i] = sendTo[i] as Connection;
         } else {
-          const con = this.connections.find(c => this.findPlayerByConnection(c)?.id == sendTo[i].id);
+          const connection = this.connections.find(con => this.findPlayerByConnection(con)?.id == sendTo[i].id);
 
-          if (con) {
-            sendToConnections[i] = con;
+          if (connection) {
+            sendToConnections[i] = connection;
           } else {
             throw new Error("Attempted to send a packet to a player with no connection");
           }
@@ -448,7 +448,6 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
     connection.limboState = LimboState.NotLimbo;
 
     this.startedSpawningPlayer(connection);
-
     this.sendJoinedMessage(connection);
     this.broadcastJoinMessage(connection);
 
@@ -719,9 +718,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
           throw new Error("Spawn packet sent for a player on a connection that does not exist");
         }
 
-        const newPlayer = new Player(EntityPlayer.spawn(flags, owner, innerNetObjects, this));
-
-        this.players.push(newPlayer);
+        this.players.push(new Player(EntityPlayer.spawn(flags, owner, innerNetObjects, this)));
 
         this.sendRootGamePacket(new GameDataPacket([this.findPlayerByConnection(connection)!.gameObject.spawn()], this.code), sendTo);
         break;

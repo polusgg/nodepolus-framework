@@ -1,3 +1,4 @@
 {
-  
+  "name": "Test Plugin",
+  "version": [1, 0, 0]
 }

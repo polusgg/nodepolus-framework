@@ -1,52 +1,47 @@
-console.log("Loading NP...");
+import { NodePolusConfig } from "../lib/api/serverConfig";
+import { NodePolusPlugin } from "../lib/api/plugin";
+import { Server } from "../lib/api/server";
+import path from "path";
+import fs from "fs";
 
 Error.stackTraceLimit = 25;
 
-import fs from "fs";
-import path from "path";
-import { Server } from "../lib/api/server";
-
 declare const server: Server;
 
-declare interface IPluginMetadata {
-  version: [number, number, number];
-}
-
-declare interface IPlugin {
-  filename: string;
-  pluginMetadata: IPluginMetadata;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  module: any;
-}
-
-declare interface IConfig {
-  port: number;
-  disabledCredits: boolean | undefined;
-}
+console.log("Starting NodePolus");
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const globalAny: any = global;
-const serverConfig: IConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "./config.json"), "utf-8"));
+(global as any).server = new Server();
 
-globalAny.server = new Server();
+console.log("Loading config.json");
 
-const pluginDirectories = fs.readdirSync(path.join(__dirname, "./plugins/"));
-const plugins: IPlugin[] = [];
+const serverConfig: NodePolusConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json"), "utf-8"));
+
+console.log("Loading plugins");
+
+const pathToPlugins = path.join(__dirname, "./plugins/");
+const pluginDirectories = fs.readdirSync(pathToPlugins);
+const plugins: NodePolusPlugin[] = [];
 
 for (let i = 0; i < pluginDirectories.length; i++) {
-  const directory = path.join(__dirname, "./plugins/", pluginDirectories[i]);
-  const dirSplitByPeriod = directory.split(".");
-  const fileType = dirSplitByPeriod[dirSplitByPeriod.length - 1];
+  const pathToPlugin = path.join(pathToPlugins, pluginDirectories[i]);
 
-  if (fileType.toLowerCase() !== "npplugin") {
-    throw new Error(`A non-plugin file is in the plugin directory: ${pluginDirectories[i]}`);
+  if (path.extname(pathToPlugin) !== ".npplugin") {
+    console.warn(`Skipping folder "${pluginDirectories[i]}" as it does not end with ".npplugin"`);
+
+    continue;
   }
 
-  plugins.push({
-    filename: pluginDirectories[i],
-    pluginMetadata: JSON.parse(fs.readFileSync(path.join(__dirname, "./plugins/", pluginDirectories[i], "plugin.json"), "utf-8")),
-    module: import(path.join(__dirname, "./plugins/", pluginDirectories[i], "/index")),
-  });
+  console.log(`Loading ${path.basename(pathToPlugin)}`);
+
+  const plugin: NodePolusPlugin = {
+    folder: pluginDirectories[i],
+    metadata: JSON.parse(fs.readFileSync(path.join(pathToPlugin, "plugin.json"), "utf-8")),
+    entrypoint: import(path.join(pathToPlugin, "index")),
+  };
+
+  plugins.push(plugin);
+  console.log(`Loaded plugin: ${plugin.metadata.name} v${plugin.metadata.version.join(".")}`);
 }
 
 if (!serverConfig.disabledCredits) {
@@ -54,5 +49,5 @@ if (!serverConfig.disabledCredits) {
 }
 
 server.listen(serverConfig.port).then(() => {
-  console.log(`Server listening on UDP port ${serverConfig.port}`);
+  console.log(`Server listening on port ${serverConfig.port}`);
 });

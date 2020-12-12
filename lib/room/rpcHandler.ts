@@ -537,7 +537,5 @@ export class RPCHandler {
 
   handleUpdateGameData(sender: InnerGameData, players: PlayerData[], sendTo: Connection[]): void {
     sender.updateGameData(players, sendTo);
-
-
   }
 }

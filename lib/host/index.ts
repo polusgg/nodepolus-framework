@@ -44,8 +44,9 @@ import { InnerLevel } from "../protocol/entities/types";
 import { Connection } from "../protocol/connection";
 import { PlayerColor } from "../types/playerColor";
 import { SystemsHandler } from "./systemHandlers";
-import { FakeHostId } from "../types/fakeHostId";
 import { GLOBAL_OWNER } from "../util/constants";
+import { FakeHostId } from "../types/fakeHostId";
+import { LimboState } from "../types/limboState";
 import { SystemType } from "../types/systemType";
 import { GameState } from "../types/gameState";
 import { TaskType } from "../types/taskType";
@@ -67,22 +68,25 @@ import {
   OxygenAmount,
   RepairAmount,
 } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
-import { LimboState } from "../types/limboState";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
   public readyPlayerList: number[] = [];
   public playersInScene: Map<number, string> = new Map();
-  public netIdIndex = 1;
 
   public systemsHandler?: SystemsHandler;
   public sabotageHandler?: SabotageSystemHandler;
   public deconHandlers: DeconHandler[] = [];
   public doorHandler: DoorsHandler | AutoDoorsHandler | undefined;
 
+  private netIdIndex = 1;
   private counterSequenceId = 0;
   private countdownInterval: NodeJS.Timeout | undefined;
   private meetingHudTimeout: NodeJS.Timeout | undefined;
+
+  get nextNetId(): number {
+    return this.netIdIndex++;
+  }
 
   private get nextPlayerId(): number {
     const taken = this.room.players.map(player => player.id);
@@ -104,7 +108,6 @@ export class CustomHost implements HostInstance {
   /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
   sendKick(_banned: boolean, _reason: DisconnectReason): void {}
   sendLateRejection(_disconnectReason: DisconnectReason): void {}
-  // Clients do not need to wait for the host if the server is the host.
   sendWaitingForHost(): void {}
   /* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
 
@@ -130,21 +133,21 @@ export class CustomHost implements HostInstance {
           this.room.shipStatus = new EntityShipStatus(this.room);
           this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
-            new InnerShipStatus(this.netIdIndex++, this.room.shipStatus),
+            new InnerShipStatus(this.nextNetId, this.room.shipStatus),
           ];
           break;
         case Level.MiraHq:
           this.room.shipStatus = new EntityHeadquarters(this.room);
           this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
-            new InnerHeadquarters(this.netIdIndex++, this.room.shipStatus),
+            new InnerHeadquarters(this.nextNetId, this.room.shipStatus),
           ];
           break;
         case Level.Polus:
           this.room.shipStatus = new EntityPlanetMap(this.room);
           this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
-            new InnerPlanetMap(this.netIdIndex++, this.room.shipStatus),
+            new InnerPlanetMap(this.nextNetId, this.room.shipStatus),
           ];
           break;
       }
@@ -216,7 +219,7 @@ export class CustomHost implements HostInstance {
       this.room.lobbyBehavior = new EntityLobbyBehaviour(this.room);
       this.room.lobbyBehavior.owner = GLOBAL_OWNER;
       this.room.lobbyBehavior.innerNetObjects = [
-        new InnerLobbyBehaviour(this.netIdIndex++, this.room.lobbyBehavior),
+        new InnerLobbyBehaviour(this.nextNetId, this.room.lobbyBehavior),
       ];
     }
 
@@ -226,8 +229,8 @@ export class CustomHost implements HostInstance {
       this.room.gameData = new EntityGameData(this.room);
       this.room.gameData.owner = GLOBAL_OWNER;
       this.room.gameData.innerNetObjects = [
-        new InnerGameData(this.netIdIndex++, this.room.gameData, []),
-        new InnerVoteBanSystem(this.netIdIndex++, this.room.gameData),
+        new InnerGameData(this.nextNetId, this.room.gameData, []),
+        new InnerVoteBanSystem(this.nextNetId, this.room.gameData),
       ];
     }
 
@@ -237,9 +240,9 @@ export class CustomHost implements HostInstance {
 
     entity.owner = sender.id;
     entity.innerNetObjects = [
-      new InnerPlayerControl(this.netIdIndex++, entity, true, newPlayerId),
-      new InnerPlayerPhysics(this.netIdIndex++, entity),
-      new InnerCustomNetworkTransform(this.netIdIndex++, entity, 5, new Vector2(0, 0), new Vector2(0, 0)),
+      new InnerPlayerControl(this.nextNetId, entity, true, newPlayerId),
+      new InnerPlayerPhysics(this.nextNetId, entity),
+      new InnerCustomNetworkTransform(this.nextNetId, entity, 5, new Vector2(0, 0), new Vector2(0, 0)),
     ];
 
     const player = new Player(entity);
@@ -274,7 +277,7 @@ export class CustomHost implements HostInstance {
     this.room.finishedSpawningPlayer(sender);
 
     setTimeout(() => {
-      if (!this.room.isSpawningPlayers()) {
+      if (!this.room.isSpawningPlayers) {
         this.room.reapplyActingHosts();
       }
     }, 100);
@@ -346,7 +349,7 @@ export class CustomHost implements HostInstance {
 
     this.room.meetingHud = new EntityMeetingHud(this.room);
     this.room.meetingHud.innerNetObjects = [
-      new InnerMeetingHud(this.netIdIndex++, this.room.meetingHud),
+      new InnerMeetingHud(this.nextNetId, this.room.meetingHud),
     ];
     this.room.meetingHud.innerNetObjects[0].playerStates = Array(this.room.gameData.gameData.players.length);
 
@@ -432,9 +435,8 @@ export class CustomHost implements HostInstance {
             this.endGame(GameOverReason.ImpostorsByVote);
           }
         }
-      // the 8.500s was recorded from in-game. It may be slightly
-      // inaccurate, as the timing is not hard-coded but rather
-      // dependant on FPS & Animations
+      // This timing of 8.5 seconds is based on in-game observations and may be
+      // slightly inaccurate due to network latency and fluctuating framerates
       }, 8500);
     }, 5000);
   }

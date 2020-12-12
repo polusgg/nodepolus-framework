@@ -1,4 +1,3 @@
-import { PacketDestination, PacketType } from "./packets/types";
 import { RepairAmount } from "./packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { RootGamePacket, RootGamePacketDataType } from "./packets/packetTypes/genericPacket";
 import { SceneChangePacket } from "./packets/rootGamePackets/gameDataPackets/sceneChange";
@@ -12,6 +11,7 @@ import { KickPlayerPacket } from "./packets/rootGamePackets/kickPlayer";
 import { GameDataPacket } from "./packets/rootGamePackets/gameData";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { HelloPacket } from "./packets/packetTypes/helloPacket";
+import { PacketDestination, PacketType } from "./packets/types";
 import { DisconnectReason } from "../types/disconnectReason";
 import { ClientVersion } from "../util/clientVersion";
 import { PlayerColor } from "../types/playerColor";
@@ -32,6 +32,7 @@ interface ConnectionEvents {
 
 interface AwaitingPacket {
   packet: RootGamePacketDataType;
+
   resolve(value?: unknown): void;
 }
 

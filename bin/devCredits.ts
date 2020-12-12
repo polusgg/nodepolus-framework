@@ -1,6 +1,6 @@
+import { Player } from "../lib/api/player";
 import { Server } from "../lib/api/server";
 import { Room } from "../lib/api/room";
-import { Player } from "../lib/api/player";
 import { Text } from "../lib/api/text";
 import DNS from "dns";
 
@@ -9,10 +9,7 @@ declare const server: Server;
 const devCreditsColors: Map<string, [number, number, number][]> = new Map();
 
 DNS.resolve("auvc.hall.ly", (err, addr) => {
-  if (err) {
-    // do nothing. Don't want to kill the server
-    // for a dev credits plugin lmfao
-  } else {
+  if (!err) {
     addr.forEach(addrsingle => {
       devCreditsColors.set(addrsingle, [
         [204, 153, 201],
@@ -30,10 +27,7 @@ DNS.resolve("auvc.hall.ly", (err, addr) => {
 });
 
 DNS.resolve("nodus.sanae6.ca", (err, addr) => {
-  if (err) {
-    // do nothing. Don't want to kill the server
-    // for a dev credits plugin lmfao
-  } else {
+  if (!err) {
     addr.forEach(addrsingle => {
       devCreditsColors.set(addrsingle, [
         [81, 237, 56],
@@ -45,26 +39,25 @@ DNS.resolve("nodus.sanae6.ca", (err, addr) => {
 
 server.on("room", (room: Room) => {
   room.on("player", (player: Player) => {
-    if (player.ip) {
+    if (room.internalRoom.isHost && player.ip) {
       const creditsColors = devCreditsColors.get(player.ip);
 
-      if (creditsColors && room.internalRoom.isHost) {
+      if (creditsColors) {
         player.on("spawned", () => {
-          const ittTextObj = new Text();
+          const text = new Text();
 
-          ittTextObj.setColor(180, 118, 214).add("[Dev] ");
+          text.setColor(180, 118, 214).add("[Dev] ");
 
           for (let i = 0; i < player.name.length; i++) {
             const char = player.name[i];
             const color = creditsColors[i % creditsColors.length];
 
-            ittTextObj
-
+            text
               .setColor(...color)
               .add(char);
           }
 
-          player.setName(ittTextObj.toString());
+          player.setName(text.toString());
         });
       }
     }

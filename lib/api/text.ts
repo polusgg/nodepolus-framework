@@ -1,34 +1,34 @@
-enum ElementType {
+export enum ElementType {
   Text,
   Link,
   Reset,
 }
 
-enum ReaderState {
+export enum ReaderState {
   ReadingText,
   ReadingElement,
 }
 
-interface Reader {
+export interface Reader {
   state: ReaderState;
   chunk: string;
   element: string;
 }
 
-interface TextElement {
+export interface TextElement {
   type: ElementType.Text;
   content: string;
   color: [number, number, number];
   opacity: number;
 }
 
-interface LinkElement {
+export interface LinkElement {
   type: ElementType.Link;
   content: string;
   link: string;
 }
 
-interface ResetElement {
+export interface ResetElement {
   type: ElementType.Reset;
 }
 

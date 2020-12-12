@@ -1,3 +1,3 @@
 export class Task {
-  public complete = false;
+  public isComplete = false;
 }

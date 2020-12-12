@@ -41,8 +41,6 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
   }
 
   updateGameData(playerData: PlayerData[], sendTo: Connection[]): void {
-    // console.trace("Update", 1, playerData);
-
     for (let i = 0; i < playerData.length; i++) {
       let hasPlayer = false;
 
@@ -59,8 +57,6 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
         this.players.push(playerData[i]);
       }
     }
-
-    // console.log("Update", 2, playerData);
 
     this.sendRPCPacketTo(sendTo, new UpdateGameDataPacket(playerData));
   }
