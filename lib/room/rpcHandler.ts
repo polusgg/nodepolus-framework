@@ -493,6 +493,8 @@ export class RPCHandler {
 
   handleClose(sender: InnerMeetingHud, sendTo: Connection[]): void {
     sender.close(sendTo);
+
+    delete this.room.meetingHud;
   }
 
   handleVotingComplete(sender: InnerMeetingHud, voteStates: VoteState[], didVotePlayerOff: boolean, exiledPlayerId: number, isTie: boolean, sendTo: Connection[]): void {

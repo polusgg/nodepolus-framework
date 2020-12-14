@@ -1,8 +1,10 @@
-export interface PluginAuthor {
+export interface IPluginAuthor {
   name: string;
   email?: string;
   website?: string;
 }
+
+export type PluginAuthor = IPluginAuthor | string;
 
 export interface PluginMetadata {
   name: string;

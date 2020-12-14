@@ -7,6 +7,8 @@ import { Room as InternalRoom } from "../room";
 import { DefaultHostState } from "../server";
 import { Server } from "./server";
 import Emittery from "emittery";
+import { PlayerColor } from "../types/playerColor";
+import { Game } from "./game";
 
 declare const server: Server;
 
@@ -124,6 +126,7 @@ export class Room extends Emittery.Typed<RoomEvents> {
   public readonly internalRoom: InternalRoom;
   public readonly codeObject: CodeObject;
   public readonly players: Player[] = [];
+  public game?: Game;
 
   get state(): GameState {
     return this.internalRoom.gameState;
@@ -181,5 +184,21 @@ export class Room extends Emittery.Typed<RoomEvents> {
 
       spawnedPlayer.emit("spawned");
     });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  sendChat(name: string, color: PlayerColor, content: string, _onLeft: boolean): void {
+    if (this.players.length != 0) {
+      const oldName = this.players[0].name;
+      const oldColor = this.players[0].color;
+
+      this.players[0].setName(name);
+      this.players[0].setColor(color);
+
+      this.players[0].sendChat(content);
+
+      this.players[0].setName(oldName);
+      this.players[0].setColor(oldColor);
+    }
   }
 }

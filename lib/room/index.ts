@@ -56,13 +56,18 @@ import dgram from "dgram";
 export type RoomEvents = {
   connection: Connection;
   player: Player;
+  murder: {
+    murderer: Player;
+    murdered: Player;
+  };
 };
 
 export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementation, dgram.RemoteInfo {
-  public readonly createdAt: number = new Date().getTime();
+  public readonly createdAt: number = Date.now();
 
   public connections: Connection[] = [];
   public players: Player[] = [];
+  public ignoredNetIds: number[] = [];
   public gameState = GameState.NotStarted;
   public customHostInstance?: CustomHost;
   public lobbyBehavior?: EntityLobbyBehaviour;
@@ -75,7 +80,6 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
   public size = -1;
 
   private readonly rpcHandler: RPCHandler = new RPCHandler(this);
-  private readonly ignoreDespawnNetIds: number[] = [];
   private readonly spawningPlayers: Set<Connection> = new Set();
 
   get host(): HostInstance | undefined {
@@ -263,6 +267,10 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
       }
       case RootGamePacketType.GameData:
       case RootGamePacketType.GameDataTo: {
+        if (sender.limboState == LimboState.PreSpawn) {
+          return;
+        }
+
         const gameData = packet as GameDataPacket;
         let target: Connection | undefined;
 
@@ -565,20 +573,24 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
 
     switch (packet.type) {
       case GameDataPacketType.Data:
-        this.handleData((packet as DataPacket).innerNetObjectID, (packet as DataPacket).data, sendTo);
+        if (!this.ignoredNetIds.includes((packet as DataPacket).innerNetObjectID)) {
+          this.handleData((packet as DataPacket).innerNetObjectID, (packet as DataPacket).data, sendTo);
+        }
         break;
       case GameDataPacketType.Despawn:
-        if (sender.isHost) {
+        if (sender.isHost && !this.ignoredNetIds.includes((packet as DespawnPacket).innerNetObjectID)) {
           this.handleDespawn((packet as DespawnPacket).innerNetObjectID, sendTo);
         }
         break;
       case GameDataPacketType.RPC:
-        this.rpcHandler.handleBaseRPC(
-          (packet as RPCPacket).packet.type,
-          (packet as RPCPacket).senderNetId,
-          (packet as RPCPacket).packet,
-          sendTo,
-        );
+        if (!this.ignoredNetIds.includes((packet as RPCPacket).senderNetId)) {
+          this.rpcHandler.handleBaseRPC(
+            (packet as RPCPacket).packet.type,
+            (packet as RPCPacket).senderNetId,
+            (packet as RPCPacket).packet,
+            sendTo,
+          );
+        }
         break;
       case GameDataPacketType.Ready:
         if (!this.host) {
@@ -733,13 +745,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
   }
 
   private handleDespawn(netId: number, sendTo?: Connection[]): void {
-    // console.log("current ignore list in handleDespawn", this.ignoreDespawnNetIds);
-
-    const ignoreIds = this.ignoreDespawnNetIds.indexOf(netId);
-
-    if (ignoreIds != -1) {
-      this.ignoreDespawnNetIds.splice(ignoreIds, 1);
-
+    if (this.isHost) {
       return;
     }
 

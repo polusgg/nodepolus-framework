@@ -54,13 +54,12 @@ export class InnerCustomNetworkTransform extends BaseGameObject<InnerCustomNetwo
   getSpawn(): SpawnInnerNetObject {
     const writer = new MessageWriter()
       .startMessage(1)
-      .writeUInt16(this.sequenceId)
-      .endMessage();
+      .writeUInt16(this.sequenceId);
 
     this.position.serialize(writer);
     this.velocity.serialize(writer);
 
-    return new DataPacket(this.id, writer);
+    return new DataPacket(this.id, writer.endMessage());
   }
 
   setSpawn(data: MessageReader | MessageWriter): void {

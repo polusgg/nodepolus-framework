@@ -341,6 +341,12 @@ export class CustomHost implements HostInstance {
     }
   }
 
+  handleImpostorDeath(): void {
+    if (this.shouldEndGame()) {
+      this.endGame(GameOverReason.CrewmatesByVote);
+    }
+  }
+
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void {
     if (!this.room.gameData) {
       throw new Error("Received ReportDeadBody without a GameData instance");
@@ -399,7 +405,7 @@ export class CustomHost implements HostInstance {
     const largestVoteCount = Math.max(...voteCounts);
     const allLargestVotes = [...votes.entries()].filter(entry => entry[1].length == largestVoteCount);
 
-    if (allLargestVotes.length == 1) {
+    if (allLargestVotes.length == 1 && allLargestVotes[0][0] != -1) {
       this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, true, allLargestVotes[0][0], false, this.room.connections);
     } else {
       this.room.meetingHud.meetingHud.votingComplete(this.room.meetingHud.meetingHud.playerStates, false, 255, true, this.room.connections);
@@ -407,11 +413,13 @@ export class CustomHost implements HostInstance {
 
     const exiledPlayer = this.room.gameData.gameData.players.find(playerData => playerData.id == allLargestVotes[0][0]);
 
-    if (!exiledPlayer) {
-      throw new Error("Exiled player has no data stored in GameData instance");
-    }
+    if (allLargestVotes[0][0] != -1 && allLargestVotes.length == 1) {
+      if (!exiledPlayer) {
+        throw new Error("Exiled player has no data stored in GameData instance");
+      }
 
-    exiledPlayer.isDead = true;
+      exiledPlayer.isDead = true;
+    }
 
     this.room.sendRootGamePacket(new GameDataPacket([
       this.room.meetingHud.meetingHud.data(oldData),
@@ -424,13 +432,15 @@ export class CustomHost implements HostInstance {
 
       this.room.meetingHud.meetingHud.close(this.room.connections);
 
+      delete this.room.meetingHud;
+
       setTimeout(() => {
         if (this.shouldEndGame()) {
           if (!this.room.gameData) {
             throw new Error("Attempted to end a meeting without a GameData instance");
           }
 
-          if (exiledPlayer.isImpostor) {
+          if (exiledPlayer!.isImpostor) {
             this.endGame(GameOverReason.CrewmatesByVote);
           } else {
             this.endGame(GameOverReason.ImpostorsByVote);
@@ -570,7 +580,7 @@ export class CustomHost implements HostInstance {
     const player = this.room.findPlayerByConnection(connection);
 
     if (!player) {
-      throw new Error("Received Disconnect for a connection without a Player instance");
+      return;
     }
 
     const playerIndex = this.room.gameData.gameData.players.findIndex(playerData => playerData.id == player.id);

@@ -26,7 +26,7 @@ const plugins: NodePolusPlugin[] = [];
 for (let i = 0; i < pluginDirectories.length; i++) {
   const pathToPlugin = path.join(pathToPlugins, pluginDirectories[i]);
 
-  if (path.extname(pathToPlugin) !== ".npplugin") {
+  if (path.extname(pathToPlugin).toLowerCase() !== ".npplugin") {
     console.warn(`Skipping folder "${pluginDirectories[i]}" as it does not end with ".npplugin"`);
 
     continue;
@@ -42,10 +42,6 @@ for (let i = 0; i < pluginDirectories.length; i++) {
 
   plugins.push(plugin);
   console.log(`Loaded plugin: ${plugin.metadata.name} v${plugin.metadata.version.join(".")}`);
-}
-
-if (!serverConfig.disabledCredits) {
-  import("./devCredits");
 }
 
 server.listen(serverConfig.port).then(() => {
