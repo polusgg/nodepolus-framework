@@ -57,8 +57,8 @@ export type RoomEvents = {
   connection: Connection;
   player: Player;
   murder: {
-    murderer: Player;
-    murdered: Player;
+    killer: Player;
+    victim: Player;
   };
 };
 

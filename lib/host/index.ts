@@ -106,11 +106,11 @@ export class CustomHost implements HostInstance {
     public room: Room,
   ) {}
 
-  /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
+  /* eslint-disable @typescript-eslint/no-empty-function */
   sendKick(_banned: boolean, _reason: DisconnectReason): void {}
   sendLateRejection(_disconnectReason: DisconnectReason): void {}
   sendWaitingForHost(): void {}
-  /* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
+  /* eslint-enable @typescript-eslint/no-empty-function */
 
   handleReady(sender: Connection): void {
     this.readyPlayerList.push(sender.id);
@@ -334,7 +334,6 @@ export class CustomHost implements HostInstance {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): void {
     if (this.shouldEndGame()) {
       this.endGame(GameOverReason.ImpostorsByKill);

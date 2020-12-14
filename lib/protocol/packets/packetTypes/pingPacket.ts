@@ -7,7 +7,6 @@ export class PingPacket extends BasePacket {
     super(PacketType.Ping);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static deserialize(_reader: MessageReader): PingPacket {
     return new PingPacket();
   }

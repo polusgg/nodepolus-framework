@@ -7,7 +7,6 @@ export class ClearVotePacket extends BaseRPCPacket {
     super(RPCPacketType.ClearVote);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static deserialize(_reader: MessageReader): ClearVotePacket {
     return new ClearVotePacket();
   }

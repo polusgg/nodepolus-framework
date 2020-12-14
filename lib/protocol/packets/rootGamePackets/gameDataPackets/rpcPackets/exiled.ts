@@ -7,7 +7,6 @@ export class ExiledPacket extends BaseRPCPacket {
     super(RPCPacketType.Exiled);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static deserialize(_reader: MessageReader): ExiledPacket {
     return new ExiledPacket();
   }

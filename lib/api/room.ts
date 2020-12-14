@@ -1,13 +1,13 @@
 import { HostGameResponsePacket } from "../protocol/packets/rootGamePackets/hostGame";
 import { Player as InternalPlayer } from "../player";
 import { Connection } from "../protocol/connection";
+import { PlayerColor } from "../types/playerColor";
 import { GameState } from "../types/gameState";
 import { Player, PlayerState } from "./player";
 import { Room as InternalRoom } from "../room";
 import { DefaultHostState } from "../server";
 import { Server } from "./server";
 import Emittery from "emittery";
-import { PlayerColor } from "../types/playerColor";
 import { Game } from "./game";
 
 declare const server: Server;
@@ -126,6 +126,7 @@ export class Room extends Emittery.Typed<RoomEvents> {
   public readonly internalRoom: InternalRoom;
   public readonly codeObject: CodeObject;
   public readonly players: Player[] = [];
+
   public game?: Game;
 
   get state(): GameState {
@@ -186,19 +187,16 @@ export class Room extends Emittery.Typed<RoomEvents> {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  sendChat(name: string, color: PlayerColor, content: string, _onLeft: boolean): void {
+  sendChat(name: string, color: PlayerColor, message: string, _onLeft: boolean): void {
     if (this.players.length != 0) {
-      const oldName = this.players[0].name;
-      const oldColor = this.players[0].color;
+      const { name: oldName, color: oldColor } = this.players[0];
 
-      this.players[0].setName(name);
-      this.players[0].setColor(color);
-
-      this.players[0].sendChat(content);
-
-      this.players[0].setName(oldName);
-      this.players[0].setColor(oldColor);
+      this.players[0]
+        .setName(name)
+        .setColor(color)
+        .sendChat(message)
+        .setName(oldName)
+        .setColor(oldColor);
     }
   }
 }

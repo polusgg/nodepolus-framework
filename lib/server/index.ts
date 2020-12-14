@@ -44,8 +44,8 @@ export class Server extends Emittery.Typed<ServerEvents> {
   public rooms: Room[] = [];
   public roomMap: Map<string, Room> = new Map();
 
-  // Starts at 2 to allow the Server host implementation's ID to be 0, and leave an always unused 1
-  private connectionIndex = 2;
+  // Starts at 1 to allow the Server host implementation's ID to be 0
+  private connectionIndex = 1;
 
   get nextConnectionId(): number {
     if (++this.connectionIndex > MaxValue.UInt32) {

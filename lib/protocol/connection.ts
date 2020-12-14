@@ -322,7 +322,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
   // These are no-ops because we expect the connection to implement these
 
-  /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
+  /* eslint-disable @typescript-eslint/no-empty-function */
   handleCheckName(_sender: InnerPlayerControl, _name: string): void {}
   handleCheckColor(_sender: InnerPlayerControl, _color: PlayerColor): void {}
   handleReportDeadBody(_sender: InnerPlayerControl, _victimPlayerId: number): void {}
@@ -333,7 +333,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): void {}
   setInfected(_impostorCount: number): void {}
   setTasks(): void {}
-  /* eslint-enable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function */
+  /* eslint-enable @typescript-eslint/no-empty-function */
 
   private handlePing(): void {
     this.lastPingReceivedTime = Date.now();

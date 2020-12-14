@@ -102,7 +102,6 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
     this.sendRPCPacketTo(sendTo, new SyncSettingsPacket(options));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   exiled(_sendTo: Connection[]): void {
     const gameData = this.parent.room.gameData;
 
@@ -131,7 +130,6 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
     player.exiled(sendTo);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   checkName(name: string, _sendTo: Connection[]): void {
     if (this.parent.room.isHost) {
       return;
@@ -164,7 +162,6 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
     this.sendRPCPacketTo(sendTo, new SetNamePacket(name));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   checkColor(color: PlayerColor, _sendTo: Connection[]): void {
     if (this.parent.room.isHost) {
       return;

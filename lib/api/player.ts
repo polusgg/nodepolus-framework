@@ -1,8 +1,12 @@
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
+import { DespawnPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/despawn";
+import { JoinGameResponsePacket } from "../protocol/packets/rootGamePackets/joinGame";
+import { RemovePlayerPacket } from "../protocol/packets/rootGamePackets/removePlayer";
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
 import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
 import { GameDataPacket } from "../protocol/packets/rootGamePackets/gameData";
 import { PlayerData } from "../protocol/entities/gameData/playerData";
+import { DisconnectReason } from "../types/disconnectReason";
 import { EntityPlayer } from "../protocol/entities/player";
 import { Player as InternalPlayer } from "../player";
 import { PlayerColor } from "../types/playerColor";
@@ -15,11 +19,6 @@ import { Server } from "./server";
 import Emittery from "emittery";
 import { Room } from "./room";
 import { Task } from "./task";
-// import { SpawnFlag } from "../types/spawnFlag";
-import { RemovePlayerPacket } from "../protocol/packets/rootGamePackets/removePlayer";
-import { DisconnectReason } from "../types/disconnectReason";
-import { JoinGameResponsePacket } from "../protocol/packets/rootGamePackets/joinGame";
-import { DespawnPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/despawn";
 
 declare const server: Server;
 
@@ -29,11 +28,11 @@ export enum PlayerState {
   InGame,
 }
 
-export type PlainPlayerEvents = "spawned";
-
 export type PlayerEvents = {
   todo: never;
 };
+
+export type PlainPlayerEvents = "spawned";
 
 export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   public playerId?: number;
@@ -126,32 +125,32 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     super();
   }
 
-  setName(newName: string): this {
-    this.internalPlayer.gameObject.playerControl.setName(newName, this.room.internalRoom.connections);
+  setName(name: string): this {
+    this.internalPlayer.gameObject.playerControl.setName(name, this.room.internalRoom.connections);
 
     return this;
   }
 
-  setColor(newColor: PlayerColor): this {
-    this.internalPlayer.gameObject.playerControl.setColor(newColor, this.room.internalRoom.connections);
+  setColor(color: PlayerColor): this {
+    this.internalPlayer.gameObject.playerControl.setColor(color, this.room.internalRoom.connections);
 
     return this;
   }
 
-  setHat(newHat: PlayerHat): this {
-    this.internalPlayer.gameObject.playerControl.setHat(newHat, this.room.internalRoom.connections);
+  setHat(hat: PlayerHat): this {
+    this.internalPlayer.gameObject.playerControl.setHat(hat, this.room.internalRoom.connections);
 
     return this;
   }
 
-  setPet(newPet: PlayerPet): this {
-    this.internalPlayer.gameObject.playerControl.setPet(newPet, this.room.internalRoom.connections);
+  setPet(pet: PlayerPet): this {
+    this.internalPlayer.gameObject.playerControl.setPet(pet, this.room.internalRoom.connections);
 
     return this;
   }
 
-  setSkin(newSkin: PlayerSkin): this {
-    this.internalPlayer.gameObject.playerControl.setSkin(newSkin, this.room.internalRoom.connections);
+  setSkin(skin: PlayerSkin): this {
+    this.internalPlayer.gameObject.playerControl.setSkin(skin, this.room.internalRoom.connections);
 
     return this;
   }
@@ -193,7 +192,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   revive(): this {
     if (this.room.internalRoom.host instanceof CustomHost) {
       if (!this.room.internalRoom.gameData) {
-        throw new Error("Cannot revive player without a gameData instance");
+        throw new Error("Attempted to revive player without a GameData instance");
       }
 
       const entity = new EntityPlayer(this.room.internalRoom);
@@ -202,12 +201,16 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
       entity.innerNetObjects = [
         new InnerPlayerControl(this.room.internalRoom.host.nextNetId, entity, false, this.playerId!),
         new InnerPlayerPhysics(this.room.internalRoom.host.nextNetId, entity),
-        new InnerCustomNetworkTransform(this.room.internalRoom.host.nextNetId, entity, 0, this.internalPlayer.gameObject.customNetworkTransform.position, this.internalPlayer.gameObject.customNetworkTransform.velocity),
+        new InnerCustomNetworkTransform(
+          this.room.internalRoom.host.nextNetId,
+          entity,
+          0,
+          this.internalPlayer.gameObject.customNetworkTransform.position,
+          this.internalPlayer.gameObject.customNetworkTransform.velocity,
+        ),
       ];
 
-      const transform = this.internalPlayer.gameObject.customNetworkTransform;
-
-      transform.position = new Vector2(-39, -39);
+      this.internalPlayer.gameObject.customNetworkTransform.position = new Vector2(-39, -39);
 
       const thisConnection = this.room.internalRoom.findConnectionByPlayer(this.internalPlayer);
 
@@ -215,7 +218,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
         throw new Error("Tried to respawn a player without a connection");
       }
 
-      const oldName = `${this.name}`;
+      const oldName = this.name;
 
       this.room.internalRoom.ignoredNetIds = this.room.internalRoom.ignoredNetIds.concat([
         this.internalPlayer.gameObject.playerControl.id,
@@ -232,6 +235,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
         thisConnection.write(new RemovePlayerPacket(this.room.code, this.clientId, this.room.internalRoom.host.id, DisconnectReason.serverRequest()));
         thisConnection.write(new JoinGameResponsePacket(this.room.code, this.clientId, this.room.internalRoom.host.id));
       }
+
       this.setName(oldName);
 
       for (let i = 0; i < this.room.internalRoom.connections.length; i++) {
@@ -245,9 +249,12 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
           ], this.room.code));
         }
       }
+
       this.gameDataEntry.isDead = false;
-      this.room.internalRoom.gameData.gameData.updateGameData([this.gameDataEntry], this.room.internalRoom.connections);
       this.internalPlayer.gameObject = entity;
+
+      this.room.internalRoom.gameData.gameData.updateGameData([this.gameDataEntry], this.room.internalRoom.connections);
+
       this.room.internalRoom.sendRootGamePacket(new GameDataPacket([
         entity.spawn(),
       ], this.room.code));
@@ -258,8 +265,10 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     return this;
   }
 
-  sendChat(content: string): void {
-    this.internalPlayer.gameObject.playerControl.sendChat(content, this.room.internalRoom.connections);
+  sendChat(message: string): this {
+    this.internalPlayer.gameObject.playerControl.sendChat(message, this.room.internalRoom.connections);
+
+    return this;
   }
 
   internalSetTasks(tasks: Task[]): void {

@@ -7,7 +7,6 @@ export class ClosePacket extends BaseRPCPacket {
     super(RPCPacketType.Close);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static deserialize(_reader: MessageReader): ClosePacket {
     return new ClosePacket();
   }

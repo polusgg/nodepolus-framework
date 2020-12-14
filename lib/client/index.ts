@@ -36,12 +36,10 @@ export class Client implements ClientInstance {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   sendKick(_banned: boolean, _reason: DisconnectReason): void {
     throw new Error("Method not implemented.");
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   sendLateRejection(_disconnectReason: DisconnectReason): void {
     throw new Error("Method not implemented.");
   }
