@@ -52,6 +52,7 @@ import { CustomHost } from "../host";
 import { Player } from "../player";
 import Emittery from "emittery";
 import dgram from "dgram";
+import { Vector2 } from "../util/vector2";
 
 export type RoomEvents = {
   connection: Connection;
@@ -60,6 +61,13 @@ export type RoomEvents = {
     killer: Player;
     victim: Player;
   };
+  playerMoved: {
+    cid: number;
+    sequenceId: number;
+    position: Vector2;
+    velocity: Vector2;
+  };
+  setInfected: number[];
 };
 
 export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementation, dgram.RemoteInfo {
@@ -640,7 +648,14 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
       netObject.data(data);
 
       if (netObject.type == InnerNetObjectType.CustomNetworkTransform) {
-      //@ts-ignore Talk to Cody about this?
+        this.emit("playerMoved", {
+          cid: netObject.parent.owner,
+          sequenceId: (netObject as InnerCustomNetworkTransform).sequenceId,
+          position: (netObject as InnerCustomNetworkTransform).position,
+          velocity: (netObject as InnerCustomNetworkTransform).velocity,
+        });
+
+        //@ts-ignore Talk to Cody about this?
         this.sendUnreliableRootGamePacket(new GameDataPacket([netObject.data(oldNetObject)], this.code), sendTo ?? []);
       } else {
       //@ts-ignore Talk to Cody about this?

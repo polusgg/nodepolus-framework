@@ -19,6 +19,7 @@ import { Server } from "./server";
 import Emittery from "emittery";
 import { Room } from "./room";
 import { Task } from "./task";
+import { Text } from "./text";
 
 declare const server: Server;
 
@@ -30,15 +31,21 @@ export enum PlayerState {
 
 export type PlayerEvents = {
   murdered: Player;
+  moved: {
+    position: Vector2;
+    velocity: Vector2;
+  };
 };
 
-export type PlainPlayerEvents = "spawned";
+export type PlainPlayerEvents = "spawned" | "assignedImpostor";
 
 export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   public playerId?: number;
   public state: PlayerState = PlayerState.PreSpawn;
 
   private internalTasks: Task[] = [];
+  private lastPosition: Vector2 = new Vector2(0, 0);
+  private lastVelocity: Vector2 = new Vector2(0, 0);
 
   get internalPlayer(): InternalPlayer {
     if (this.state == PlayerState.Spawned || this.state == PlayerState.InGame) {
@@ -60,8 +67,19 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     throw new Error("Attempted to get a player before they were spawned");
   }
 
-  get name(): string {
-    return this.gameDataEntry.name;
+  get name(): Text {
+    // TODO:     This is a bad, like *really* bad implementation.
+    //       it instantiates a new text object every time, which
+    //       is slow. Plus any changes made to the text object won't
+    //       reflect on the actual player which (i) think
+    //       should occur.
+    //
+    //           A better implementation would be to have a
+    //       non-getter property on the Player for name, that gets
+    //       updated when the internal player's name gets updated.
+    //       Eg, an event.
+
+    return Text.from(this.gameDataEntry.name);
   }
 
   get color(): PlayerColor {
@@ -123,10 +141,28 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     public readonly port?: number,
   ) {
     super();
+    room.internalRoom.on("playerMoved", ({ cid, position, velocity }) => {
+      if (cid == this.clientId) {
+        if (this.lastPosition.x != position.x || this.lastPosition.y != position.y || this.lastVelocity.x != velocity.x || this.lastVelocity.y != velocity.y) {
+          this.emit("moved", { position, velocity });
+          this.lastPosition = position;
+          this.lastVelocity = velocity;
+        }
+      }
+    });
+    room.internalRoom.on("setInfected", infected => {
+      for (let i = 0; i < infected.length; i++) {
+        const infectedpid = infected[i];
+
+        if (infectedpid === this.playerId) {
+          this.emit("assignedImpostor");
+        }
+      }
+    });
   }
 
-  setName(name: string): this {
-    this.internalPlayer.gameObject.playerControl.setName(name, this.room.internalRoom.connections);
+  setName(name: Text | string): this {
+    this.internalPlayer.gameObject.playerControl.setName(name.toString(), this.room.internalRoom.connections);
 
     return this;
   }
