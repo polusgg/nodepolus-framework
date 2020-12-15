@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/NodePolus/NodePolus",
   "dependencies": {
+    "ansi-styles": "^4.3.0",
     "commonjs": "^0.0.1",
     "emittery": "^0.7.2",
     "public-ip": "^4.0.2",

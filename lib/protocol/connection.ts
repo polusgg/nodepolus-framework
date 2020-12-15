@@ -195,7 +195,9 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     let packetBuffer: RootGamePacketDataType[] = [];
 
     if (reliable) {
-      nonce = this.nonceIndex++;
+      nonce = this.nonceIndex++ % 65536;
+
+      // console.log(this.nonceIndex);
 
       const packetArr = new Array(this.packetBuffer.length);
       const resolveFuncs = new Array(this.packetBuffer.length);

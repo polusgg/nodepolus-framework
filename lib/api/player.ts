@@ -29,7 +29,7 @@ export enum PlayerState {
 }
 
 export type PlayerEvents = {
-  todo: never;
+  murdered: Player;
 };
 
 export type PlainPlayerEvents = "spawned";

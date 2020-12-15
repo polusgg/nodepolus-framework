@@ -6,12 +6,8 @@ declare const server: Server;
 
 server.on("room", (room: Room) => {
   room.on("player", (player: Player) => {
-    setTimeout(() => {
-      player.kill();
-
-      setTimeout(() => {
-        player.revive();
-      }, 2000);
-    }, 2000);
+    player.on("murdered", (_murderer: Player) => {
+      
+    });
   });
 });

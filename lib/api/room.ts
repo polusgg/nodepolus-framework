@@ -9,6 +9,7 @@ import { DefaultHostState } from "../server";
 import { Server } from "./server";
 import Emittery from "emittery";
 import { Game } from "./game";
+import { Settings } from "./roomSettings";
 
 declare const server: Server;
 
@@ -126,6 +127,7 @@ export class Room extends Emittery.Typed<RoomEvents> {
   public readonly internalRoom: InternalRoom;
   public readonly codeObject: CodeObject;
   public readonly players: Player[] = [];
+  public readonly settings: Settings = new Settings(this);
 
   public game?: Game;
 

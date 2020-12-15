@@ -256,7 +256,7 @@ export class CustomHost implements HostInstance {
 
     await this.room.sendRootGamePacket(new GameDataPacket([player.gameObject.spawn()], this.room.code));
 
-    player.gameObject.playerControl.syncSettings(this.room.options, this.room.connections);
+    player.gameObject.playerControl.syncSettings(this.room.options, [sender]);
 
     const playerData = new PlayerData(
       player.gameObject.playerControl.playerId,
