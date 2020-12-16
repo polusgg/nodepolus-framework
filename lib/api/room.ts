@@ -6,10 +6,10 @@ import { GameState } from "../types/gameState";
 import { Player, PlayerState } from "./player";
 import { Room as InternalRoom } from "../room";
 import { DefaultHostState } from "../server";
+import { Settings } from "./roomSettings";
 import { Server } from "./server";
 import Emittery from "emittery";
 import { Game } from "./game";
-import { Settings } from "./roomSettings";
 
 declare const server: Server;
 

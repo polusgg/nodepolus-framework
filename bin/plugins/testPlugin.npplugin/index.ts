@@ -13,6 +13,7 @@ server.on("room", (room: Room) => {
 
     player.on("spawned", () => {
       logger.log(player, " Spawned");
+
       room.settings.fromPOV(player).setCrewVision(player.playerId!);
     });
 

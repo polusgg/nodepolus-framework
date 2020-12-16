@@ -1,7 +1,7 @@
 import { Text, ElementType } from "../api/text";
-import style from "ansi-styles";
-import { Player } from "../api/player";
 import { Vector2 } from "../util/vector2";
+import { Player } from "../api/player";
+import style from "ansi-styles";
 
 export class Logger {
   constructor(public readonly name: string) {}
@@ -45,7 +45,6 @@ export class Logger {
           break;
         case "function":
           throw new Error("Cannot log Functions yet.");
-          break;
         case "object":
           switch (true) {
             case element instanceof Text:
@@ -73,10 +72,10 @@ export class Logger {
           this.endColor();
           break;
         case "symbol":
-          throw new Error("Cannot log Symbols yet.");
-          break;
+          throw new Error("Symbol logging not yet implemented");
       }
     }
+
     this.print("\n");
   }
 
@@ -142,8 +141,7 @@ export class Logger {
     text.elements.forEach(element => {
       switch (element.type) {
         case ElementType.Text:
-          //TODO: Fetch background color, and use it
-          //      for simulated opacity
+          // TODO: Fetch background color, and use it for simulated opacity
           this.startColor(...element.color);
           this.print(element.content);
           this.endColor();
@@ -185,8 +183,7 @@ export class Logger {
   }
 
   private print(text: string): void {
-    //TODO: don't print if log level is not current log level,
-    //      passed in with --LogLevel= CLI option
+    // TODO: Don't print if log level is not the current log level, passed in with --LogLevel= CLI option
     process.stdout.write(text);
   }
 }

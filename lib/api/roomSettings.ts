@@ -1,17 +1,17 @@
-import { Room } from "./room";
 import { GameOptionsDataV4, GameOptionsData } from "../types/gameOptionsData";
+import { TaskBarUpdate } from "../types/taskBarUpdate";
+import { KillDistance } from "../types/killDistance";
+import { Connection } from "../protocol/connection";
 import { Language } from "../types/language";
 import { Level } from "../types/level";
-import { KillDistance } from "../types/killDistance";
-import { TaskBarUpdate } from "../types/taskBarUpdate";
-import { Connection } from "../protocol/connection";
 import { Player } from "./player";
+import { Room } from "./room";
 
 export class Settings {
-  private isFromPov = false;
-  private fromPovConnection: Connection | undefined;
   private readonly povCache: Map<number, Settings> = new Map();
 
+  private isFromPov = false;
+  private fromPovConnection: Connection | undefined;
   private povModifiedMaxPlayers: number | undefined;
   private povModifiedLanguages: Language[] | undefined;
   private povModifiedLevel: Level | undefined;
@@ -202,7 +202,9 @@ export class Settings {
     return this.povModifiedTaskBarUpdates;
   }
 
-  constructor(public room: Room) {}
+  constructor(
+    public room: Room,
+  ) {}
 
   setMaxPlayers(param: number): void {
     if (this.isFromPov) {
@@ -210,6 +212,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.maxPlayers = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -219,6 +222,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.languages = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -228,6 +232,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.levels = [param];
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -237,6 +242,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.playerSpeedModifier = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -246,6 +252,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.crewLightModifier = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -255,6 +262,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.impostorLightModifier = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -264,6 +272,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.killCooldown = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -273,6 +282,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.commonTasks = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -282,6 +292,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.longTasks = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -291,6 +302,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.shortTasks = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -300,6 +312,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.emergencies = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -309,6 +322,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.impostorCount = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -318,6 +332,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.killDistance = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -327,6 +342,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.discussionTime = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -336,6 +352,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.votingTime = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -345,6 +362,7 @@ export class Settings {
     } else {
       this.room.internalRoom.options.options.isDefault = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -354,6 +372,7 @@ export class Settings {
     } else {
       (this.room.internalRoom.options.options as GameOptionsDataV4).emergencyCooldown = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -372,6 +391,7 @@ export class Settings {
     } else {
       (this.room.internalRoom.options.options as GameOptionsDataV4).visualTasks = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -381,6 +401,7 @@ export class Settings {
     } else {
       (this.room.internalRoom.options.options as GameOptionsDataV4).anonymousVoting = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -390,6 +411,7 @@ export class Settings {
     } else {
       (this.room.internalRoom.options.options as GameOptionsDataV4).taskBarUpdates = param;
     }
+
     this.syncSettingsOnRoom();
   }
 
@@ -447,6 +469,7 @@ export class Settings {
           sendToConnections = [this.fromPovConnection];
         } else {
           sendToConnections = [];
+
           console.warn("Settings.SyncSettingsOnRoom called fromPOV on a POV without a connection");
         }
       } else {

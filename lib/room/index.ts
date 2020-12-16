@@ -48,11 +48,11 @@ import { GameState } from "../types/gameState";
 import { HostInstance } from "../host/types";
 import { RoomCode } from "../util/roomCode";
 import { RPCHandler } from "./rpcHandler";
+import { Vector2 } from "../util/vector2";
 import { CustomHost } from "../host";
 import { Player } from "../player";
 import Emittery from "emittery";
 import dgram from "dgram";
-import { Vector2 } from "../util/vector2";
 
 export type RoomEvents = {
   connection: Connection;

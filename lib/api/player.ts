@@ -68,17 +68,16 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   }
 
   get name(): Text {
-    // TODO:     This is a bad, like *really* bad implementation.
-    //       it instantiates a new text object every time, which
-    //       is slow. Plus any changes made to the text object won't
-    //       reflect on the actual player which (i) think
-    //       should occur.
-    //
-    //           A better implementation would be to have a
-    //       non-getter property on the Player for name, that gets
-    //       updated when the internal player's name gets updated.
-    //       Eg, an event.
-
+    /**
+     * TODO: This is a really bad implementation.
+     * It instantiates a new text object every time, which is slow. Plus any
+     * changes made to the text object won't reflect on the actual player which
+     * should occur.
+     *
+     * A better implementation would be to have a non-getter property on the
+     * Player for name, that gets updated when the internal player's name gets
+     * updated (e.g. in an event)
+     */
     return Text.from(this.gameDataEntry.name);
   }
 
@@ -141,15 +140,22 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     public readonly port?: number,
   ) {
     super();
+
     room.internalRoom.on("playerMoved", ({ cid, position, velocity }) => {
       if (cid == this.clientId) {
-        if (this.lastPosition.x != position.x || this.lastPosition.y != position.y || this.lastVelocity.x != velocity.x || this.lastVelocity.y != velocity.y) {
+        if (this.lastPosition.x != position.x ||
+            this.lastPosition.y != position.y ||
+            this.lastVelocity.x != velocity.x ||
+            this.lastVelocity.y != velocity.y
+        ) {
           this.emit("moved", { position, velocity });
+
           this.lastPosition = position;
           this.lastVelocity = velocity;
         }
       }
     });
+
     room.internalRoom.on("setInfected", infected => {
       for (let i = 0; i < infected.length; i++) {
         const infectedpid = infected[i];
