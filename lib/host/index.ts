@@ -738,6 +738,7 @@ export class CustomHost implements HostInstance {
   }
 
   endGame(reason: GameOverReason): void {
+    return;
     this.room.gameState = GameState.NotStarted;
     this.deconHandlers = [];
     this.readyPlayerList = [];

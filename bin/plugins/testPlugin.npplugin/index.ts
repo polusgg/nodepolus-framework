@@ -9,10 +9,11 @@ const logger = new Logger("Debug");
 
 server.on("room", (room: Room) => {
   room.on("player", (player: Player) => {
-    logger.log(player, " Connecting");
+    logger.log(player, " Connected");
 
     player.on("spawned", () => {
       logger.log(player, " Spawned");
+      room.settings.fromPOV(player).setCrewVision(player.playerId!);
     });
 
     player.on("moved", ({ position, velocity }) => {
