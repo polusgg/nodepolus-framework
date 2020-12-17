@@ -8,8 +8,8 @@ export enum FlyingPlatformSides {
 }
 
 export class FlyingPlatformSystem extends BaseSystem<FlyingPlatformSystem> {
-  public innerPlayerControlNetId?: number;
   public sequenceId = 0;
+  public innerPlayerControlNetId?: number;
   public side: FlyingPlatformSides = FlyingPlatformSides.LEFT;
 
   constructor() {
@@ -17,11 +17,11 @@ export class FlyingPlatformSystem extends BaseSystem<FlyingPlatformSystem> {
   }
 
   static spawn(data: MessageReader): FlyingPlatformSystem {
-    const deconSystem = new FlyingPlatformSystem();
+    const flyingPlatformSystem = new FlyingPlatformSystem();
 
-    deconSystem.setSpawn(data);
+    flyingPlatformSystem.setSpawn(data);
 
-    return deconSystem;
+    return flyingPlatformSystem;
   }
 
   getData(): MessageWriter {
@@ -34,9 +34,6 @@ export class FlyingPlatformSystem extends BaseSystem<FlyingPlatformSystem> {
 
   getSpawn(): MessageWriter {
     return new MessageWriter()
-      // %256 has been tested, and as far
-      // as anyone can tell is identical
-      // to how the game handles it
       .writeByte(this.sequenceId % 256)
       .writeInt32(this.innerPlayerControlNetId ?? -1)
       .writeByte(this.side);
@@ -45,10 +42,10 @@ export class FlyingPlatformSystem extends BaseSystem<FlyingPlatformSystem> {
   setSpawn(data: MessageReader): void {
     this.sequenceId = data.readByte();
 
-    const IPCNID = data.readInt32();
+    const innerPlayerControlNetId = data.readInt32();
 
-    if (IPCNID > -1) {
-      this.innerPlayerControlNetId = IPCNID;
+    if (innerPlayerControlNetId > -1) {
+      this.innerPlayerControlNetId = innerPlayerControlNetId;
     }
 
     this.side = data.readByte();

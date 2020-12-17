@@ -1,18 +1,18 @@
 import { SpawnInnerNetObject, SpawnPacket } from "../../packets/rootGamePackets/gameDataPackets/spawn";
-import { InnerAirshipShipStatus } from "./innerArshipShipStatus";
+import { InnerAirship } from "./innerArshipShipStatus";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
 import { RoomImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 
-export type AirshipShipStatusInnerNetObjects = [ InnerAirshipShipStatus ];
+export type AirshipInnerNetObjects = [ InnerAirship ];
 
-export class EntityAirshipShipStatus extends BaseEntity {
+export class EntityAirship extends BaseEntity {
   public owner!: number;
   public flags: SpawnFlag = SpawnFlag.None;
-  public innerNetObjects!: AirshipShipStatusInnerNetObjects;
+  public innerNetObjects!: AirshipInnerNetObjects;
 
-  get aprilShipStatus(): InnerAirshipShipStatus {
+  get aprilShipStatus(): InnerAirship {
     return this.innerNetObjects[0];
   }
 
@@ -20,8 +20,8 @@ export class EntityAirshipShipStatus extends BaseEntity {
     super(SpawnType.AprilShipStatus, room);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityAirshipShipStatus {
-    const aprilShipStatus = new EntityAirshipShipStatus(room);
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityAirship {
+    const aprilShipStatus = new EntityAirship(room);
 
     aprilShipStatus.setSpawn(flags, owner, innerNetObjects);
 
@@ -42,7 +42,7 @@ export class EntityAirshipShipStatus extends BaseEntity {
   setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
-      InnerAirshipShipStatus.spawn(innerNetObjects[0], this),
+      InnerAirship.spawn(innerNetObjects[0], this),
     ];
   }
 }

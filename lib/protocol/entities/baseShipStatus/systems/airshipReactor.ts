@@ -27,17 +27,15 @@ export class AirshipReactorSystem extends BaseSystem<AirshipReactorSystem> {
   }
 
   getSpawn(): MessageWriter {
-    return new MessageWriter().writeList(this.activeConsoles, (writer, pair) => {
-      writer.writeByte(pair[0]);
-      writer.writeByte(pair[1]);
-    }).writeList(this.completedConsoles, (writer, con) => writer.writeByte(con));
+    return new MessageWriter()
+      .writeList(this.activeConsoles, (writer, pair) => {
+        writer.writeByte(pair[0]);
+        writer.writeByte(pair[1]);
+      }).writeList(this.completedConsoles, (writer, con) => writer.writeByte(con));
   }
 
   setSpawn(data: MessageReader): void {
-    this.activeConsoles = new Map(data.readList(reader => [
-      reader.readByte(),
-      reader.readByte(),
-    ]));
+    this.activeConsoles = new Map(data.readList(reader => [reader.readByte(), reader.readByte()]));
     this.completedConsoles = new Set(data.readList(reader => reader.readByte()));
   }
 

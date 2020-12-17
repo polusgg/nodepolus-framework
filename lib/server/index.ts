@@ -162,19 +162,19 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         for (let i = 0; i < this.rooms.length; i++) {
           const room = this.rooms[i];
+          const level: number = room.options.options.levels[0];
 
           // TODO: Add config option to include private games
           if (!room.isPublic) {
             continue;
           }
 
-          if (room.options.options.levels[0] == Level.AprilSkeld) {
+          if (level == Level.AprilSkeld) {
             counts[0]++;
-          } else if (room.options.options.levels[0] < Level.AprilSkeld) {
-            //@ts-expect-error
-            counts[room.options.options.levels[0]]++;
+          } else if (level < Level.AprilSkeld) {
+            counts[level]++;
           } else {
-            counts[room.options.options.levels[0] - 1]++;
+            counts[level - 1]++;
           }
 
           // TODO: Add config option for max player count and max results

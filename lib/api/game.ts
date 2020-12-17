@@ -1,13 +1,13 @@
+import { GameDataPacket } from "../protocol/packets/rootGamePackets/gameData";
+import { InnerLevel } from "../protocol/entities/types";
 import Emittery from "emittery";
 import { Room } from "./room";
-import { InnerLevel } from "../protocol/entities/types";
-import { GameDataPacket } from "../protocol/packets/rootGamePackets/gameData";
 
 export type GameEvents = {
   ended: never;
 };
 
-export class BaseGameRoom extends Emittery.Typed<GameEvents> {
+export abstract class BaseGameRoom extends Emittery.Typed<GameEvents> {
   private shipStatusBackup?: InnerLevel;
 
   constructor(public game: Game) {
@@ -16,7 +16,7 @@ export class BaseGameRoom extends Emittery.Typed<GameEvents> {
 
   private backupShipStatus(): void {
     if (!this.game.room.internalRoom.shipStatus) {
-      throw new Error("TODO fill this in");
+      throw new Error("Attempted to make a copy of ShipStatus without an instance on the room");
     }
 
     this.shipStatusBackup = this.game.room.internalRoom.shipStatus.innerNetObjects[0].clone();
@@ -24,11 +24,11 @@ export class BaseGameRoom extends Emittery.Typed<GameEvents> {
 
   private updateShipStatus(): void {
     if (!this.game.room.internalRoom.shipStatus) {
-      throw new Error("fill this in");
+      throw new Error("Attempted to update ShipStatus without an instance on the room");
     }
 
     if (!this.shipStatusBackup) {
-      throw new Error("fill this in");
+      this.backupShipStatus();
     }
 
     //@ts-ignore Talk to cody about this.
@@ -40,7 +40,7 @@ export class BaseGameRoom extends Emittery.Typed<GameEvents> {
 
 export class ElectricalGameRoom extends BaseGameRoom {
   private sabotage() {
-    
+
   }
 }
 

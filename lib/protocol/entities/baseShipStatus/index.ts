@@ -3,7 +3,9 @@ import { CloseDoorsOfTypePacket } from "../../packets/rootGamePackets/gameDataPa
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { FlyingPlatformSystem } from "./systems/flyingPlatformSystem";
 import { SecurityCameraSystem } from "./systems/securityCameraSystem";
+import { AirshipReactorSystem } from "./systems/airshipReactor";
 import { HudOverrideSystem } from "./systems/hudOverrideSystem";
 import { LaboratorySystem } from "./systems/laboratorySystem";
 import { AutoDoorsSystem } from "./systems/autoDoorsSystem";
@@ -23,8 +25,6 @@ import { BaseSystem } from "./systems/baseSystem";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { Level } from "../../../types/level";
-import { AirshipReactorSystem } from "./systems/airshipReactor";
-import { FlyingPlatformSystem } from "./systems/flyingPlatformSystem";
 
 export type System = AutoDoorsSystem
 | DeconSystem
@@ -63,7 +63,7 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
       case InnerNetObjectType.PlanetMap:
         this.level = Level.Polus;
         break;
-      case InnerNetObjectType.AirshipShipStatus:
+      case InnerNetObjectType.Airship:
         this.level = Level.Airship;
         break;
       default:
@@ -189,7 +189,7 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
 
       switch (type) {
         case SystemType.Doors:
-          if (this.level != Level.TheSkeld) {
+          if (this.level == Level.TheSkeld) {
             this.systems[InternalSystemType.AutoDoors] = new AutoDoorsSystem();
           } else {
             this.systems[InternalSystemType.Doors] = new DoorsSystem();

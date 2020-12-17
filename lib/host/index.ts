@@ -2,10 +2,12 @@ import { TaskLength, LevelTask, TASKS_THE_SKELD, TASKS_MIRA_HQ, TASKS_POLUS } fr
 import { SecurityCameraSystem } from "../protocol/entities/baseShipStatus/systems/securityCameraSystem";
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
 import { HudOverrideSystem } from "../protocol/entities/baseShipStatus/systems/hudOverrideSystem";
+import { InnerAprilShipStatus } from "../protocol/entities/aprilShipStatus/innerAprilShipStatus";
 import { LaboratorySystem } from "../protocol/entities/baseShipStatus/systems/laboratorySystem";
 import { InnerLobbyBehaviour } from "../protocol/entities/lobbyBehaviour/innerLobbyBehaviour";
 import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud/innerMeetingHud";
 import { DeconTwoSystem } from "../protocol/entities/baseShipStatus/systems/deconTwoSystem";
+import { InnerAirship } from "../protocol/entities/airshipShipStatus/innerArshipShipStatus";
 import { LifeSuppSystem } from "../protocol/entities/baseShipStatus/systems/lifeSuppSystem";
 import { SabotageSystem } from "../protocol/entities/baseShipStatus/systems/sabotageSystem";
 import { MedScanSystem } from "../protocol/entities/baseShipStatus/systems/medScanSystem";
@@ -24,9 +26,11 @@ import { StartGamePacket } from "../protocol/packets/rootGamePackets/startGame";
 import { InnerPlanetMap } from "../protocol/entities/planetMap/innerPlanetMap";
 import { SabotageSystemHandler } from "./systemHandlers/sabotageSystemHandler";
 import { GameDataPacket } from "../protocol/packets/rootGamePackets/gameData";
+import { EntityAprilShipStatus } from "../protocol/entities/aprilShipStatus";
 import { EndGamePacket } from "../protocol/packets/rootGamePackets/endGame";
 import { InnerGameData } from "../protocol/entities/gameData/innerGameData";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
+import { EntityAirship } from "../protocol/entities/airshipShipStatus";
 import { EntityHeadquarters } from "../protocol/entities/headquarters";
 import { PlayerData } from "../protocol/entities/gameData/playerData";
 import { AutoDoorsHandler } from "./systemHandlers/autoDoorsHandler";
@@ -68,10 +72,6 @@ import {
   OxygenAmount,
   RepairAmount,
 } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
-import { InnerAirshipShipStatus } from "../protocol/entities/airshipShipStatus/innerArshipShipStatus";
-import { EntityAirshipShipStatus } from "../protocol/entities/airshipShipStatus";
-import { EntityAprilShipStatus } from "../protocol/entities/aprilShipStatus";
-import { InnerAprilShipStatus } from "../protocol/entities/aprilShipStatus/innerAprilShipStatus";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
@@ -162,10 +162,10 @@ export class CustomHost implements HostInstance {
           ];
           break;
         case Level.Airship:
-          this.room.shipStatus = new EntityAirshipShipStatus(this.room);
+          this.room.shipStatus = new EntityAirship(this.room);
           this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
-            new InnerAirshipShipStatus(this.nextNetId, this.room.shipStatus),
+            new InnerAirship(this.nextNetId, this.room.shipStatus),
           ];
           break;
       }
