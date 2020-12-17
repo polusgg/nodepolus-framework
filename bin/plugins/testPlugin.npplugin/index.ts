@@ -2,6 +2,7 @@ import { Player } from "../../../lib/api/player";
 import { Server } from "../../../lib/api/server";
 import { Room } from "../../../lib/api/room";
 import { Logger } from "../../../lib/logger";
+import { Level } from "../../../lib/types/level";
 
 declare const server: Server;
 
@@ -14,7 +15,7 @@ server.on("room", (room: Room) => {
     player.on("spawned", () => {
       logger.log(player, " Spawned");
 
-      room.settings.fromPOV(player).setCrewVision(player.playerId!);
+      room.settings.setLevel(Level.Airship);
     });
 
     player.on("moved", ({ position, velocity }) => {

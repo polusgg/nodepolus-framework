@@ -476,8 +476,6 @@ export class Settings {
         sendToConnections = this.room.internalRoom.connections;
       }
 
-      console.log("sending syncsettings to :", sendToConnections.map(c => c.id));
-
       this.room.internalRoom.players[0].gameObject.playerControl.syncSettings(customOptions, sendToConnections);
     } else {
       console.log("Warning, Settings#syncSettingsOnRoom() called without a player on the internalRoom");

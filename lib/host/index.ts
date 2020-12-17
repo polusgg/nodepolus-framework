@@ -68,6 +68,10 @@ import {
   OxygenAmount,
   RepairAmount,
 } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
+import { InnerAirshipShipStatus } from "../protocol/entities/airshipShipStatus/innerArshipShipStatus";
+import { EntityAirshipShipStatus } from "../protocol/entities/airshipShipStatus";
+import { EntityAprilShipStatus } from "../protocol/entities/aprilShipStatus";
+import { InnerAprilShipStatus } from "../protocol/entities/aprilShipStatus/innerAprilShipStatus";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeHostId.ServerAsHost;
@@ -130,11 +134,17 @@ export class CustomHost implements HostInstance {
 
       switch (this.room.options.options.levels[0]) {
         case Level.TheSkeld:
-          // TODO: API call for AprilShipStatus
           this.room.shipStatus = new EntityShipStatus(this.room);
           this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
             new InnerShipStatus(this.nextNetId, this.room.shipStatus),
+          ];
+          break;
+        case Level.AprilSkeld:
+          this.room.shipStatus = new EntityAprilShipStatus(this.room);
+          this.room.shipStatus.owner = GLOBAL_OWNER;
+          this.room.shipStatus.innerNetObjects = [
+            new InnerAprilShipStatus(this.nextNetId, this.room.shipStatus),
           ];
           break;
         case Level.MiraHq:
@@ -151,6 +161,13 @@ export class CustomHost implements HostInstance {
             new InnerPlanetMap(this.nextNetId, this.room.shipStatus),
           ];
           break;
+        case Level.Airship:
+          this.room.shipStatus = new EntityAirshipShipStatus(this.room);
+          this.room.shipStatus.owner = GLOBAL_OWNER;
+          this.room.shipStatus.innerNetObjects = [
+            new InnerAirshipShipStatus(this.nextNetId, this.room.shipStatus),
+          ];
+          break;
       }
 
       this.systemsHandler = new SystemsHandler(this);
@@ -158,6 +175,10 @@ export class CustomHost implements HostInstance {
 
       switch (this.room.options.options.levels[0]) {
         case Level.TheSkeld:
+          this.deconHandlers = [];
+          this.doorHandler = new AutoDoorsHandler(this, this.room.shipStatus.innerNetObjects[0]);
+          break;
+        case Level.AprilSkeld:
           this.deconHandlers = [];
           this.doorHandler = new AutoDoorsHandler(this, this.room.shipStatus.innerNetObjects[0]);
           break;
@@ -171,6 +192,10 @@ export class CustomHost implements HostInstance {
             new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
             new DeconHandler(this, this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon2] as DeconTwoSystem),
           ];
+          this.doorHandler = new DoorsHandler(this, this.room.shipStatus.innerNetObjects[0]);
+          break;
+        case Level.Airship:
+          this.deconHandlers = [];
           this.doorHandler = new DoorsHandler(this, this.room.shipStatus.innerNetObjects[0]);
           break;
       }

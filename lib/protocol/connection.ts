@@ -230,7 +230,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
     const packetToSend: MessageWriter = packet.serialize();
 
-    if (nonce) {
+    if (nonce !== undefined) {
       this.unacknowledgedPackets.set(nonce, 0);
 
       const resendInterval = setInterval(() => {

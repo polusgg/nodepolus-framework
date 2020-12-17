@@ -12,4 +12,6 @@ export enum InternalSystemType {
   Laboratory,
   Doors,
   Decon2,
+  AirshipReactor,
+  FlyingPlatform,
 }

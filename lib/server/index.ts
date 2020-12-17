@@ -158,7 +158,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
       }
       case RootGamePacketType.GetGameList: {
         const results: RoomListing[] = [];
-        const counts: [number, number, number] = [0, 0, 0];
+        const counts: [number, number, number, number] = [0, 0, 0, 0];
 
         for (let i = 0; i < this.rooms.length; i++) {
           const room = this.rooms[i];
@@ -168,7 +168,14 @@ export class Server extends Emittery.Typed<ServerEvents> {
             continue;
           }
 
-          counts[room.options.options.levels[0]]++;
+          if (room.options.options.levels[0] == Level.AprilSkeld) {
+            counts[0]++;
+          } else if (room.options.options.levels[0] < Level.AprilSkeld) {
+            //@ts-expect-error
+            counts[room.options.options.levels[0]]++;
+          } else {
+            counts[room.options.options.levels[0] - 1]++;
+          }
 
           // TODO: Add config option for max player count and max results
           if (room.roomListing.playerCount < 10 && results.length < 10) {

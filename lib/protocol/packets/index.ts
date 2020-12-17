@@ -85,7 +85,7 @@ export class Packet {
     const writer = new MessageWriter().writeByte(this.type);
 
     if (this.isReliable) {
-      if (!this.nonce) {
+      if (this.nonce === undefined) {
         throw new Error("Missing nonce in reliable packet");
       }
 

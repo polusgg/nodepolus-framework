@@ -23,6 +23,8 @@ import { BaseSystem } from "./systems/baseSystem";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
 import { Level } from "../../../types/level";
+import { AirshipReactorSystem } from "./systems/airshipReactor";
+import { FlyingPlatformSystem } from "./systems/flyingPlatformSystem";
 
 export type System = AutoDoorsSystem
 | DeconSystem
@@ -36,7 +38,9 @@ export type System = AutoDoorsSystem
 | LaboratorySystem
 | SabotageSystem
 | SecurityCameraSystem
-| SwitchSystem;
+| SwitchSystem
+| AirshipReactorSystem
+| FlyingPlatformSystem;
 
 export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject<T> {
   public systems: BaseSystem<System>[] = [];
@@ -58,6 +62,9 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
         break;
       case InnerNetObjectType.PlanetMap:
         this.level = Level.Polus;
+        break;
+      case InnerNetObjectType.AirshipShipStatus:
+        this.level = Level.Airship;
         break;
       default:
         throw new Error(`Unsupported ShipStatus type: ${type} (${InnerNetObjectType[type]})`);
@@ -182,10 +189,10 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
 
       switch (type) {
         case SystemType.Doors:
-          if (this.level == Level.Polus) {
-            this.systems[InternalSystemType.Doors] = new DoorsSystem();
-          } else {
+          if (this.level != Level.TheSkeld) {
             this.systems[InternalSystemType.AutoDoors] = new AutoDoorsSystem();
+          } else {
+            this.systems[InternalSystemType.Doors] = new DoorsSystem();
           }
           break;
         case SystemType.Communications:
@@ -208,7 +215,11 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
           this.systems[InternalSystemType.Laboratory] = new LaboratorySystem();
           break;
         case SystemType.Reactor:
-          this.systems[InternalSystemType.Reactor] = new ReactorSystem();
+          if (this.level == Level.Airship) {
+            this.systems[InternalSystemType.AirshipReactor] = new AirshipReactorSystem();
+          } else {
+            this.systems[InternalSystemType.Reactor] = new ReactorSystem();
+          }
           break;
         case SystemType.Sabotage:
           this.systems[InternalSystemType.Sabotage] = new SabotageSystem();
@@ -221,6 +232,9 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
           break;
         case SystemType.Oxygen:
           this.systems[InternalSystemType.Oxygen] = new LifeSuppSystem();
+          break;
+        case SystemType.Weapons:
+          this.systems[InternalSystemType.FlyingPlatform] = new FlyingPlatformSystem();
           break;
         default:
           throw new Error(`Tried to get unimplemented SystemType: ${type} (${SystemType[type]})`);

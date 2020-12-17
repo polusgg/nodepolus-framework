@@ -20,6 +20,8 @@ import { HostInstance } from "../../host/types";
 import { EntityPlanetMap } from "./planetMap";
 import { EntityGameData } from "./gameData";
 import { Player } from "../../player";
+import { InnerAirshipShipStatus } from "./airshipShipStatus/innerArshipShipStatus";
+import { EntityAirshipShipStatus } from "./airshipShipStatus";
 
 export enum InnerNetObjectType {
   LobbyBehaviour,
@@ -33,6 +35,7 @@ export enum InnerNetObjectType {
   Headquarters,
   AprilShipStatus,
   MeetingHud,
+  AirshipShipStatus,
 }
 
 export type InnerNetObject = InnerMeetingHud
@@ -45,17 +48,20 @@ export type InnerNetObject = InnerMeetingHud
 | InnerPlayerPhysics
 | InnerShipStatus
 | InnerVoteBanSystem
-| InnerLobbyBehaviour;
+| InnerLobbyBehaviour
+| InnerAirshipShipStatus;
 
 export type InnerLevel = InnerShipStatus
 | InnerPlanetMap
 | InnerHeadquarters
-| InnerAprilShipStatus;
+| InnerAprilShipStatus
+| InnerAirshipShipStatus;
 
 export type EntityLevel = EntityShipStatus
 | EntityAprilShipStatus
 | EntityHeadquarters
-| EntityPlanetMap;
+| EntityPlanetMap
+| EntityAirshipShipStatus;
 
 export interface RoomImplementation {
   players: Player[];
