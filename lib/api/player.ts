@@ -36,10 +36,9 @@ export type PlayerEvents = {
     position: Vector2;
     velocity: Vector2;
   };
-  despawned;
 };
 
-export type PlainPlayerEvents = "spawned" | "assignedImpostor";
+export type PlainPlayerEvents = "spawned" | "despawned" | "assignedImpostor";
 
 export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   public playerId?: number;
@@ -143,9 +142,12 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   ) {
     super();
 
-    room.internalRoom.on("playerMoved", ({ cid, position, velocity }) => {
-      if (this.state == PlayerState.PreSpawn) {}
-      if (cid == this.clientId) {
+    room.internalRoom.on("playerMoved", ({ clientId: id, position, velocity }) => {
+      if (this.state == PlayerState.PreSpawn) {
+        // TODO
+      }
+
+      if (id == this.clientId) {
         if (this.lastPosition.x != position.x ||
             this.lastPosition.y != position.y ||
             this.lastVelocity.x != velocity.x ||
@@ -161,17 +163,17 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
 
     room.internalRoom.on("setInfected", infected => {
       for (let i = 0; i < infected.length; i++) {
-        const infectedpid = infected[i];
+        const id = infected[i];
 
-        if (infectedpid === this.playerId) {
+        if (id === this.playerId) {
           this.emit("assignedImpostor");
         }
       }
     });
 
-    room.internalRoom.on("despawn", ino => {
-      if (ino.parent.owner == this.clientId) {
-        this.state == PlayerState.PreSpawn;
+    room.internalRoom.on("despawn", innerNetObject => {
+      if (innerNetObject.parent.owner == this.clientId) {
+        this.state = PlayerState.PreSpawn;
       }
     });
   }

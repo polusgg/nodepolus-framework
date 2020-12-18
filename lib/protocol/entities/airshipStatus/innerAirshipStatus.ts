@@ -6,7 +6,7 @@ import { EntityAirshipStatus } from ".";
 
 export class InnerAirshipStatus extends BaseShipStatus<InnerAirshipStatus, EntityAirshipStatus> {
   constructor(netId: number, public parent: EntityAirshipStatus) {
-    super(InnerNetObjectType.AprilShipStatus, netId, parent, [
+    super(InnerNetObjectType.SkeldAprilShipStatus, netId, parent, [
       SystemType.Reactor,
       SystemType.Electrical,
       SystemType.Security,

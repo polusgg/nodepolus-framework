@@ -1,36 +1,20 @@
+import { DEFAULT_HOST_STATE, DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { HostGameResponsePacket, HostGameRequestPacket } from "../protocol/packets/rootGamePackets/hostGame";
 import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
 import { GetGameListResponsePacket, RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
 import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
+import { DefaultHostState, ServerConfig } from "../api/serverConfig";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";
-import { DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { Connection } from "../protocol/connection";
+import { FakeHostId } from "../types/fakeHostId";
 import { RemoteInfo } from "../util/remoteInfo";
 import { RoomCode } from "../util/roomCode";
 import { Level } from "../types/level";
 import Emittery from "emittery";
 import { Room } from "../room";
 import dgram from "dgram";
-import { FakeHostId } from "../types/fakeHostId";
-
-export enum DefaultHostState {
-  Server,
-  Client,
-}
-
-export interface ServerConfig {
-  defaultHost: DefaultHostState;
-  defaultRoomAddress: string;
-  defaultRoomPort: number;
-}
-
-const DEFAULT_SERVER_CONFIG: ServerConfig = {
-  defaultHost: DefaultHostState.Server,
-  defaultRoomAddress: "0.0.0.0",
-  defaultRoomPort: DEFAULT_SERVER_PORT,
-};
 
 export type ServerEvents = {
   roomCreated: Room;
@@ -56,8 +40,28 @@ export class Server extends Emittery.Typed<ServerEvents> {
     return this.connectionIndex;
   }
 
+  get address(): string {
+    return this.config.serverAddress ?? DEFAULT_SERVER_ADDRESS;
+  }
+
+  get port(): number {
+    return this.config.serverPort ?? DEFAULT_SERVER_PORT;
+  }
+
+  get defaultHost(): DefaultHostState {
+    return this.config.defaultHost ?? DEFAULT_HOST_STATE;
+  }
+
+  get defaultRoomAddress(): string {
+    return this.config.defaultRoomAddress ?? this.address;
+  }
+
+  get defaultRoomPort(): number {
+    return this.config.defaultRoomPort ?? this.port;
+  }
+
   constructor(
-    public config: ServerConfig = DEFAULT_SERVER_CONFIG,
+    public config: ServerConfig = {},
   ) {
     super();
 
@@ -70,8 +74,8 @@ export class Server extends Emittery.Typed<ServerEvents> {
     });
   }
 
-  listen(port: number = DEFAULT_SERVER_PORT, onStart?: () => void): void {
-    this.serverSocket.bind(port, "0.0.0.0", onStart);
+  listen(onStart?: () => void): void {
+    this.serverSocket.bind(this.port, this.address, onStart);
   }
 
   getConnection(remoteInfo: string | dgram.RemoteInfo): Connection {
@@ -129,9 +133,9 @@ export class Server extends Emittery.Typed<ServerEvents> {
         }
 
         const newRoom = new Room(
-          this.config.defaultRoomAddress,
-          this.config.defaultRoomPort,
-          this.config.defaultHost == DefaultHostState.Server,
+          this.defaultRoomAddress,
+          this.defaultRoomPort,
+          this.defaultHost == DefaultHostState.Server,
           roomCode,
         );
 

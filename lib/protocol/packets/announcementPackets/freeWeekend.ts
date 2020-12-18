@@ -1,5 +1,5 @@
-import { FreeWeekendState } from "../../../types/freeWeekendState";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { FreeWeekendState } from "../../../types/freeWeekendState";
 import { BaseAnnouncementPacket } from "../basePacket";
 import { RootAnnouncementPacketType } from "../types";
 

@@ -18,6 +18,7 @@ export class SabotageSystemHandler {
   sabotageReactor(system: ReactorSystem | LaboratorySystem): void {
     switch (this.host.room.options.options.levels[0]) {
       case Level.TheSkeld:
+      case Level.AprilSkeld:
         system.timer = 30;
         break;
       case Level.MiraHq:
@@ -25,6 +26,9 @@ export class SabotageSystemHandler {
         break;
       case Level.Polus:
         system.timer = 60;
+        break;
+      case Level.Airship:
+        system.timer = 100;
         break;
     }
 
@@ -84,8 +88,6 @@ export class SabotageSystemHandler {
 
     this.timer = setInterval(() => {
       system.timer--;
-
-      console.log(system.timer);
 
       if (system.timer <= 0) {
         this.host.endGame(GameOverReason.ImpostorsBySabotage);

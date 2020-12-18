@@ -1,26 +1,28 @@
+import { InnerSkeldAprilShipStatus } from "./skeldAprilShipStatus/innerSkeldAprilShipStatus";
 import { InnerCustomNetworkTransform } from "./player/innerCustomNetworkTransform";
-import { InnerAprilShipStatus } from "./aprilShipStatus/innerAprilShipStatus";
+import { InnerPolusShipStatus } from "./polusShipStatus/innerPolusShipStatus";
+import { InnerSkeldShipStatus } from "./skeldShipStatus/innerSkeldShipStatus";
 import { InnerLobbyBehaviour } from "./lobbyBehaviour/innerLobbyBehaviour";
+import { InnerMiraShipStatus } from "./miraShipStatus/innerMiraShipStatus";
 import { InnerAirshipStatus } from "./airshipStatus/innerAirshipStatus";
-import { InnerHeadquarters } from "./headquarters/innerHeadquarters";
+import { EntitySkeldAprilShipStatus } from "./skeldAprilShipStatus";
 import { InnerVoteBanSystem } from "./gameData/innerVoteBanSystem";
 import { InnerPlayerControl } from "./player/innerPlayerControl";
 import { InnerPlayerPhysics } from "./player/innerPlayerPhysics";
 import { InnerMeetingHud } from "./meetingHud/innerMeetingHud";
-import { InnerShipStatus } from "./shipStatus/innerShipStatus";
 import { GameOptionsData } from "../../types/gameOptionsData";
-import { InnerPlanetMap } from "./planetMap/innerPlanetMap";
-import { EntityAprilShipStatus } from "./aprilShipStatus";
+import { EntityPolusShipStatus } from "./polusShipStatus";
+import { EntitySkeldShipStatus } from "./skeldShipStatus";
 import { InnerGameData } from "./gameData/innerGameData";
+import { EntityLobbyBehaviour } from "./lobbyBehaviour";
+import { EntityMiraShipStatus } from "./miraShipStatus";
 import { EntityAirshipStatus } from "./airshipStatus";
 import { BaseRPCPacket } from "../packets/basePacket";
-import { EntityHeadquarters } from "./headquarters";
 import { GameState } from "../../types/gameState";
 import { EntityMeetingHud } from "./meetingHud";
-import { EntityShipStatus } from "./shipStatus";
 import { HostInstance } from "../../host/types";
-import { EntityPlanetMap } from "./planetMap";
 import { EntityGameData } from "./gameData";
+import { EntityPlayer } from "./player";
 import { Player } from "../../player";
 
 export enum InnerNetObjectType {
@@ -30,38 +32,40 @@ export enum InnerNetObjectType {
   PlayerControl,
   PlayerPhysics,
   CustomNetworkTransform,
-  ShipStatus,
-  PlanetMap,
-  Headquarters,
-  AprilShipStatus,
   MeetingHud,
-  Airship,
+  SkeldShipStatus,
+  SkeldAprilShipStatus,
+  MiraShipStatus,
+  PolusShipStatus,
+  AirshipStatus,
 }
 
-export type InnerNetObject = InnerMeetingHud
+export type InnerLevel = InnerSkeldShipStatus
+| InnerSkeldAprilShipStatus
+| InnerMiraShipStatus
+| InnerPolusShipStatus
+| InnerAirshipStatus;
+
+export type EntityLevel = EntitySkeldShipStatus
+| EntitySkeldAprilShipStatus
+| EntityMiraShipStatus
+| EntityPolusShipStatus
+| EntityAirshipStatus;
+
+export type InnerNetObject = InnerLobbyBehaviour
 | InnerGameData
-| InnerCustomNetworkTransform
-| InnerPlanetMap
-| InnerHeadquarters
-| InnerAprilShipStatus
+| InnerVoteBanSystem
 | InnerPlayerControl
 | InnerPlayerPhysics
-| InnerShipStatus
-| InnerVoteBanSystem
-| InnerLobbyBehaviour
-| InnerAirshipStatus;
+| InnerCustomNetworkTransform
+| InnerMeetingHud
+| InnerLevel;
 
-export type InnerLevel = InnerShipStatus
-| InnerPlanetMap
-| InnerHeadquarters
-| InnerAprilShipStatus
-| InnerAirshipStatus;
-
-export type EntityLevel = EntityShipStatus
-| EntityAprilShipStatus
-| EntityHeadquarters
-| EntityPlanetMap
-| EntityAirshipStatus;
+export type Entity = EntityLobbyBehaviour
+| EntityGameData
+| EntityPlayer
+| EntityMeetingHud
+| EntityLevel;
 
 export interface RoomImplementation {
   players: Player[];

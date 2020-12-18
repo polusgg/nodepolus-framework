@@ -1,5 +1,6 @@
-import { Server as InternalServer, ServerConfig } from "../server";
+import { Server as InternalServer } from "../server";
 import { Room as InternalRoom } from "../room";
+import { ServerConfig } from "./serverConfig";
 import Emittery from "emittery";
 import { Room } from "./room";
 
@@ -26,9 +27,9 @@ export class Server extends Emittery.Typed<ServerEvents> {
     });
   }
 
-  async listen(port: number): Promise<void> {
+  async listen(): Promise<void> {
     return new Promise(resolve => {
-      this.internalServer.listen(port, resolve);
+      this.internalServer.listen(resolve);
     });
   }
 }

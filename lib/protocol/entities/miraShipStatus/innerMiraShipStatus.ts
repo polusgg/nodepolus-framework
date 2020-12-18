@@ -2,11 +2,11 @@ import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPacke
 import { SystemType } from "../../../types/systemType";
 import { BaseShipStatus } from "../baseShipStatus";
 import { InnerNetObjectType } from "../types";
-import { EntityHeadquarters } from ".";
+import { EntityMiraShipStatus } from ".";
 
-export class InnerHeadquarters extends BaseShipStatus<InnerHeadquarters, EntityHeadquarters> {
-  constructor(netId: number, public parent: EntityHeadquarters) {
-    super(InnerNetObjectType.Headquarters, netId, parent, [
+export class InnerMiraShipStatus extends BaseShipStatus<InnerMiraShipStatus, EntityMiraShipStatus> {
+  constructor(netId: number, public parent: EntityMiraShipStatus) {
+    super(InnerNetObjectType.MiraShipStatus, netId, parent, [
       SystemType.Reactor,
       SystemType.Electrical,
       SystemType.Oxygen,
@@ -24,16 +24,16 @@ export class InnerHeadquarters extends BaseShipStatus<InnerHeadquarters, EntityH
     ]);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityHeadquarters): InnerHeadquarters {
-    const headquarters = new InnerHeadquarters(object.innerNetObjectID, parent);
+  static spawn(object: SpawnInnerNetObject, parent: EntityMiraShipStatus): InnerMiraShipStatus {
+    const headquarters = new InnerMiraShipStatus(object.innerNetObjectID, parent);
 
     headquarters.setSpawn(object.data);
 
     return headquarters;
   }
 
-  clone(): InnerHeadquarters {
-    const clone = new InnerHeadquarters(this.id, this.parent);
+  clone(): InnerMiraShipStatus {
+    const clone = new InnerMiraShipStatus(this.id, this.parent);
 
     clone.systems = this.systems.map(system => system.clone());
 

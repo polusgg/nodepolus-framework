@@ -1,11 +1,14 @@
+import { InnerSkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus/innerSkeldAprilShipStatus";
 import { TaskLength, LevelTask, TASKS_THE_SKELD, TASKS_MIRA_HQ, TASKS_POLUS } from "../types/levelTask";
 import { MovingPlatformSystem } from "../protocol/entities/baseShipStatus/systems/movingPlatformSystem";
 import { SecurityCameraSystem } from "../protocol/entities/baseShipStatus/systems/securityCameraSystem";
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
 import { HudOverrideSystem } from "../protocol/entities/baseShipStatus/systems/hudOverrideSystem";
-import { InnerAprilShipStatus } from "../protocol/entities/aprilShipStatus/innerAprilShipStatus";
+import { InnerPolusShipStatus } from "../protocol/entities/polusShipStatus/innerPolusShipStatus";
+import { InnerSkeldShipStatus } from "../protocol/entities/skeldShipStatus/innerSkeldShipStatus";
 import { LaboratorySystem } from "../protocol/entities/baseShipStatus/systems/laboratorySystem";
 import { InnerLobbyBehaviour } from "../protocol/entities/lobbyBehaviour/innerLobbyBehaviour";
+import { InnerMiraShipStatus } from "../protocol/entities/miraShipStatus/innerMiraShipStatus";
 import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud/innerMeetingHud";
 import { DeconTwoSystem } from "../protocol/entities/baseShipStatus/systems/deconTwoSystem";
 import { LifeSuppSystem } from "../protocol/entities/baseShipStatus/systems/lifeSuppSystem";
@@ -13,8 +16,8 @@ import { SabotageSystem } from "../protocol/entities/baseShipStatus/systems/sabo
 import { InnerAirshipStatus } from "../protocol/entities/airshipStatus/innerAirshipStatus";
 import { MedScanSystem } from "../protocol/entities/baseShipStatus/systems/medScanSystem";
 import { ReactorSystem } from "../protocol/entities/baseShipStatus/systems/reactorSystem";
-import { InnerHeadquarters } from "../protocol/entities/headquarters/innerHeadquarters";
 import { SwitchSystem } from "../protocol/entities/baseShipStatus/systems/switchSystem";
+import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
 import { DeconSystem } from "../protocol/entities/baseShipStatus/systems/deconSystem";
 import { DoorsSystem } from "../protocol/entities/baseShipStatus/systems/doorsSystem";
 import { HqHudSystem } from "../protocol/entities/baseShipStatus/systems/hqHudSystem";
@@ -22,23 +25,20 @@ import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSy
 import { InternalSystemType } from "../protocol/entities/baseShipStatus/systems/type";
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
 import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
-import { InnerShipStatus } from "../protocol/entities/shipStatus/innerShipStatus";
 import { StartGamePacket } from "../protocol/packets/rootGamePackets/startGame";
-import { InnerPlanetMap } from "../protocol/entities/planetMap/innerPlanetMap";
 import { SabotageSystemHandler } from "./systemHandlers/sabotageSystemHandler";
 import { GameDataPacket } from "../protocol/packets/rootGamePackets/gameData";
-import { EntityAprilShipStatus } from "../protocol/entities/aprilShipStatus";
+import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
+import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
 import { EndGamePacket } from "../protocol/packets/rootGamePackets/endGame";
 import { InnerGameData } from "../protocol/entities/gameData/innerGameData";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
+import { EntityMiraShipStatus } from "../protocol/entities/miraShipStatus";
 import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
-import { EntityHeadquarters } from "../protocol/entities/headquarters";
 import { PlayerData } from "../protocol/entities/gameData/playerData";
 import { AutoDoorsHandler } from "./systemHandlers/autoDoorsHandler";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
-import { EntityShipStatus } from "../protocol/entities/shipStatus";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
-import { EntityPlanetMap } from "../protocol/entities/planetMap";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { DeconHandler } from "./systemHandlers/deconHandler";
 import { DisconnectReason } from "../types/disconnectReason";
@@ -79,7 +79,6 @@ export class CustomHost implements HostInstance {
 
   public readyPlayerList: number[] = [];
   public playersInScene: Map<number, string> = new Map();
-
   public systemsHandler?: SystemsHandler;
   public sabotageHandler?: SabotageSystemHandler;
   public deconHandlers: DeconHandler[] = [];
@@ -135,31 +134,31 @@ export class CustomHost implements HostInstance {
 
       switch (this.room.options.options.levels[0]) {
         case Level.TheSkeld:
-          this.room.shipStatus = new EntityShipStatus(this.room);
+          this.room.shipStatus = new EntitySkeldShipStatus(this.room);
           this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
-            new InnerShipStatus(this.nextNetId, this.room.shipStatus),
+            new InnerSkeldShipStatus(this.nextNetId, this.room.shipStatus),
           ];
           break;
         case Level.AprilSkeld:
-          this.room.shipStatus = new EntityAprilShipStatus(this.room);
+          this.room.shipStatus = new EntitySkeldAprilShipStatus(this.room);
           this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
-            new InnerAprilShipStatus(this.nextNetId, this.room.shipStatus),
+            new InnerSkeldAprilShipStatus(this.nextNetId, this.room.shipStatus),
           ];
           break;
         case Level.MiraHq:
-          this.room.shipStatus = new EntityHeadquarters(this.room);
+          this.room.shipStatus = new EntityMiraShipStatus(this.room);
           this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
-            new InnerHeadquarters(this.nextNetId, this.room.shipStatus),
+            new InnerMiraShipStatus(this.nextNetId, this.room.shipStatus),
           ];
           break;
         case Level.Polus:
-          this.room.shipStatus = new EntityPlanetMap(this.room);
+          this.room.shipStatus = new EntityPolusShipStatus(this.room);
           this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
-            new InnerPlanetMap(this.nextNetId, this.room.shipStatus),
+            new InnerPolusShipStatus(this.nextNetId, this.room.shipStatus),
           ];
           break;
         case Level.Airship:
@@ -296,7 +295,7 @@ export class CustomHost implements HostInstance {
     const owner = this.room.findConnection(sender.parent.owner);
 
     if (!owner) {
-      throw new Error("IPC doesn't have an owner when trying to checkName");
+      throw new Error("Received CheckName from an InnerPlayerControl without an owner");
     }
 
     this.confirmPlayerData(owner, new Player(sender.parent));
@@ -321,7 +320,7 @@ export class CustomHost implements HostInstance {
     const owner = this.room.findConnection(sender.parent.owner);
 
     if (!owner) {
-      throw new Error("IPC doesn't have an owner when trying to checkName");
+      throw new Error("Received CheckColor from an InnerPlayerControl without an owner");
     }
 
     this.confirmPlayerData(owner, new Player(sender.parent));
@@ -604,7 +603,7 @@ export class CustomHost implements HostInstance {
     const player = this.room.findPlayerByConnection(connection);
 
     if (!player) {
-      console.log("WARN: Recieved disconnect from connection without player");
+      console.warn("Received disconnect from connection without a player");
 
       return;
     }
@@ -909,14 +908,12 @@ export class CustomHost implements HostInstance {
     return this.room.gameData.gameData.players.map(player => player.color);
   }
 
-  private confirmPlayerData(connection: Connection, player: Player): void {
+  private confirmPlayerData(_connection: Connection, player: Player): void {
     if (!this.room.gameData) {
       throw new Error("confirmPlayerData called without a GameData instance");
     }
 
     if (this.room.gameData.gameData.players.map(p => p.id).indexOf(player.gameObject.playerControl.playerId) == -1) {
-      console.log(connection.name, "spawning");
-
       const playerData = new PlayerData(
         player.gameObject.playerControl.playerId,
         "",

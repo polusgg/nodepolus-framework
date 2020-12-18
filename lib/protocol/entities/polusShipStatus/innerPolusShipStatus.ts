@@ -2,11 +2,11 @@ import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPacke
 import { SystemType } from "../../../types/systemType";
 import { BaseShipStatus } from "../baseShipStatus";
 import { InnerNetObjectType } from "../types";
-import { EntityPlanetMap } from ".";
+import { EntityPolusShipStatus } from ".";
 
-export class InnerPlanetMap extends BaseShipStatus<InnerPlanetMap, EntityPlanetMap> {
-  constructor(netId: number, public parent: EntityPlanetMap) {
-    super(InnerNetObjectType.PlanetMap, netId, parent, [
+export class InnerPolusShipStatus extends BaseShipStatus<InnerPolusShipStatus, EntityPolusShipStatus> {
+  constructor(netId: number, public parent: EntityPolusShipStatus) {
+    super(InnerNetObjectType.PolusShipStatus, netId, parent, [
       SystemType.Electrical,
       SystemType.Medbay,
       SystemType.Security,
@@ -19,16 +19,16 @@ export class InnerPlanetMap extends BaseShipStatus<InnerPlanetMap, EntityPlanetM
     ]);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityPlanetMap): InnerPlanetMap {
-    const planetMap = new InnerPlanetMap(object.innerNetObjectID, parent);
+  static spawn(object: SpawnInnerNetObject, parent: EntityPolusShipStatus): InnerPolusShipStatus {
+    const planetMap = new InnerPolusShipStatus(object.innerNetObjectID, parent);
 
     planetMap.setSpawn(object.data);
 
     return planetMap;
   }
 
-  clone(): InnerPlanetMap {
-    const clone = new InnerPlanetMap(this.id, this.parent);
+  clone(): InnerPolusShipStatus {
+    const clone = new InnerPolusShipStatus(this.id, this.parent);
 
     clone.systems = this.systems.map(system => system.clone());
 

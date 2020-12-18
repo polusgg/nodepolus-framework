@@ -1,29 +1,12 @@
 import { SpawnInnerNetObject, SpawnPacket } from "../packets/rootGamePackets/gameDataPackets/spawn";
-import { InnerNetObject, InnerNetObjectType, RoomImplementation } from "./types";
+import { Entity, InnerNetObject, InnerNetObjectType, RoomImplementation } from "./types";
 import { DataPacket } from "../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
-import { EntityAprilShipStatus } from "./aprilShipStatus";
-import { EntityLobbyBehaviour } from "./lobbyBehaviour";
 import { BaseRPCPacket } from "../packets/basePacket";
-import { EntityHeadquarters } from "./headquarters";
 import { SpawnFlag } from "../../types/spawnFlag";
 import { SpawnType } from "../../types/spawnType";
-import { EntityMeetingHud } from "./meetingHud";
-import { EntityShipStatus } from "./shipStatus";
 import { HostInstance } from "../../host/types";
-import { EntityPlanetMap } from "./planetMap";
-import { EntityGameData } from "./gameData";
-import { EntityPlayer } from "./player";
 import { Player } from "../../player";
-
-export type Entity = EntityAprilShipStatus
-| EntityGameData
-| EntityHeadquarters
-| EntityLobbyBehaviour
-| EntityMeetingHud
-| EntityPlanetMap
-| EntityPlayer
-| EntityShipStatus;
 
 export abstract class BaseEntity {
   constructor(

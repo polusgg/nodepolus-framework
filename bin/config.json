@@ -1,3 +1,7 @@
 {
-  "port": 22023
+  "serverAddress": "0.0.0.0",
+  "serverPort": 22023,
+  "defaultHost": 1,
+  "defaultRoomAddress": "0.0.0.0",
+  "defaultRoomPort": 22023
 }

@@ -1,18 +1,18 @@
 import { SpawnInnerNetObject, SpawnPacket } from "../../packets/rootGamePackets/gameDataPackets/spawn";
-import { InnerHeadquarters } from "./innerHeadquarters";
+import { InnerMiraShipStatus } from "./innerMiraShipStatus";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
 import { RoomImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 
-export type HeadquartersInnerNetObjects = [ InnerHeadquarters ];
+export type MiraShipStatusInnerNetObjects = [ InnerMiraShipStatus ];
 
-export class EntityHeadquarters extends BaseEntity {
+export class EntityMiraShipStatus extends BaseEntity {
   public owner!: number;
   public flags: SpawnFlag = SpawnFlag.None;
-  public innerNetObjects!: HeadquartersInnerNetObjects;
+  public innerNetObjects!: MiraShipStatusInnerNetObjects;
 
-  get headquarters(): InnerHeadquarters {
+  get headquarters(): InnerMiraShipStatus {
     return this.innerNetObjects[0];
   }
 
@@ -20,8 +20,8 @@ export class EntityHeadquarters extends BaseEntity {
     super(SpawnType.Headquarters, room);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityHeadquarters {
-    const headquarters = new EntityHeadquarters(room);
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityMiraShipStatus {
+    const headquarters = new EntityMiraShipStatus(room);
 
     headquarters.setSpawn(flags, owner, innerNetObjects);
 
@@ -42,7 +42,7 @@ export class EntityHeadquarters extends BaseEntity {
   setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
-      InnerHeadquarters.spawn(innerNetObjects[0], this),
+      InnerMiraShipStatus.spawn(innerNetObjects[0], this),
     ];
   }
 }

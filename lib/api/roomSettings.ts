@@ -415,17 +415,17 @@ export class Settings {
     this.syncSettingsOnRoom();
   }
 
-  fromPOV(player: Player): Settings {
+  fromPov(player: Player): Settings {
     const connection = this.room.internalRoom.findConnection(player.internalPlayer.gameObject.owner);
 
     if (connection && this.povCache.has(connection.id)) {
       return this.povCache.get(connection.id)!;
     }
 
-    return Settings.fromPOV(this, connection);
+    return Settings.fromPov(this, connection);
   }
 
-  private static fromPOV(baseSettings: Settings, connection?: Connection): Settings {
+  private static fromPov(baseSettings: Settings, connection?: Connection): Settings {
     const povSettings = new Settings(baseSettings.room);
 
     povSettings.isFromPov = true;
@@ -470,7 +470,7 @@ export class Settings {
         } else {
           sendToConnections = [];
 
-          console.warn("Settings.SyncSettingsOnRoom called fromPOV on a POV without a connection");
+          console.warn("Attempted to sync room settings on a POV without a connection");
         }
       } else {
         sendToConnections = this.room.internalRoom.connections;
@@ -478,7 +478,7 @@ export class Settings {
 
       this.room.internalRoom.players[0].gameObject.playerControl.syncSettings(customOptions, sendToConnections);
     } else {
-      console.log("Warning, Settings#syncSettingsOnRoom() called without a player on the internalRoom");
+      console.warn("Attempted to sync room settings without a player");
     }
   }
 }

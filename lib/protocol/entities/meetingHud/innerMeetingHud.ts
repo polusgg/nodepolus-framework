@@ -9,8 +9,8 @@ import { shallowEqual } from "../../../util/functions";
 import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
-import { EntityMeetingHud } from ".";
 import { CustomHost } from "../../../host";
+import { EntityMeetingHud } from ".";
 
 export enum VoteStateMask {
   DidReport = 0x20,

@@ -1,8 +1,9 @@
 import { GameOptionsData } from "../types/gameOptionsData";
+import { DefaultHostState } from "../api/serverConfig";
+import { TaskBarUpdate } from "../types/taskBarUpdate";
 import { KillDistance } from "../types/killDistance";
 import { Language } from "../types/language";
 import { Level } from "../types/level";
-import { TaskBarUpdate } from "../types/taskBarUpdate";
 
 /**
  * Primitive type constants
@@ -30,7 +31,11 @@ export enum MinValue {
  */
 export const ANNOUNCEMENT_SERVER_PORT = 22024;
 
+export const DEFAULT_SERVER_ADDRESS = "0.0.0.0";
+
 export const DEFAULT_SERVER_PORT = 22023;
+
+export const DEFAULT_HOST_STATE = DefaultHostState.Server;
 
 /**
  * Room constants

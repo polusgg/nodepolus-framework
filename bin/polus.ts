@@ -1,4 +1,4 @@
-import { NodePolusConfig } from "../lib/api/serverConfig";
+import { ServerConfig } from "../lib/api/serverConfig";
 import { NodePolusPlugin } from "../lib/api/plugin";
 import { Server } from "../lib/api/server";
 import path from "path";
@@ -6,16 +6,15 @@ import fs from "fs";
 
 Error.stackTraceLimit = 25;
 
-declare const server: Server;
-
 console.log("Starting NodePolus");
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(global as any).server = new Server();
-
 console.log("Loading config.json");
 
-const serverConfig: NodePolusConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json"), "utf-8"));
+const serverConfig: ServerConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json"), "utf-8"));
+
+declare const server: Server;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).server = new Server(serverConfig);
 
 console.log("Loading plugins");
 
@@ -44,8 +43,8 @@ for (let i = 0; i < pluginDirectories.length; i++) {
   console.log(`Loaded plugin: ${plugin.metadata.name} v${plugin.metadata.version.join(".")}`);
 }
 
-server.listen(serverConfig.port).then(() => {
-  console.log(`Server listening on port ${serverConfig.port}`);
+server.listen().then(() => {
+  console.log(`Server listening on ${server.internalServer.address}:${server.internalServer.port}`);
 });
 
 process.on("uncaughtException", err => {

@@ -1,18 +1,18 @@
 import { SpawnInnerNetObject, SpawnPacket } from "../../packets/rootGamePackets/gameDataPackets/spawn";
+import { InnerPolusShipStatus } from "./innerPolusShipStatus";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
-import { InnerPlanetMap } from "./innerPlanetMap";
 import { RoomImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 
-export type PlanetMapInnerNetObjects = [ InnerPlanetMap ];
+export type PolusShipStatusInnerNetObjects = [ InnerPolusShipStatus ];
 
-export class EntityPlanetMap extends BaseEntity {
+export class EntityPolusShipStatus extends BaseEntity {
   public owner!: number;
   public flags: SpawnFlag = SpawnFlag.None;
-  public innerNetObjects!: PlanetMapInnerNetObjects;
+  public innerNetObjects!: PolusShipStatusInnerNetObjects;
 
-  get planetMap(): InnerPlanetMap {
+  get planetMap(): InnerPolusShipStatus {
     return this.innerNetObjects[0];
   }
 
@@ -20,8 +20,8 @@ export class EntityPlanetMap extends BaseEntity {
     super(SpawnType.PlanetMap, room);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityPlanetMap {
-    const planetMap = new EntityPlanetMap(room);
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityPolusShipStatus {
+    const planetMap = new EntityPolusShipStatus(room);
 
     planetMap.setSpawn(flags, owner, innerNetObjects);
 
@@ -42,7 +42,7 @@ export class EntityPlanetMap extends BaseEntity {
   setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
-      InnerPlanetMap.spawn(innerNetObjects[0], this),
+      InnerPolusShipStatus.spawn(innerNetObjects[0], this),
     ];
   }
 }

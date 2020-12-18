@@ -5,12 +5,12 @@ import { SpawnType } from "../../../types/spawnType";
 import { RoomImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 
-export type AirshipInnerNetObjects = [ InnerAirshipStatus ];
+export type AirshipStatusInnerNetObjects = [ InnerAirshipStatus ];
 
 export class EntityAirshipStatus extends BaseEntity {
   public owner!: number;
   public flags: SpawnFlag = SpawnFlag.None;
-  public innerNetObjects!: AirshipInnerNetObjects;
+  public innerNetObjects!: AirshipStatusInnerNetObjects;
 
   get aprilShipStatus(): InnerAirshipStatus {
     return this.innerNetObjects[0];

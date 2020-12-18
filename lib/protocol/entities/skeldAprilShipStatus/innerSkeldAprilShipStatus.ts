@@ -1,12 +1,12 @@
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { SystemType } from "../../../types/systemType";
 import { BaseShipStatus } from "../baseShipStatus";
+import { EntitySkeldAprilShipStatus } from ".";
 import { InnerNetObjectType } from "../types";
-import { EntityAprilShipStatus } from ".";
 
-export class InnerAprilShipStatus extends BaseShipStatus<InnerAprilShipStatus, EntityAprilShipStatus> {
-  constructor(netId: number, public parent: EntityAprilShipStatus) {
-    super(InnerNetObjectType.AprilShipStatus, netId, parent, [
+export class InnerSkeldAprilShipStatus extends BaseShipStatus<InnerSkeldAprilShipStatus, EntitySkeldAprilShipStatus> {
+  constructor(netId: number, public parent: EntitySkeldAprilShipStatus) {
+    super(InnerNetObjectType.SkeldAprilShipStatus, netId, parent, [
       SystemType.Reactor,
       SystemType.Electrical,
       SystemType.Oxygen,
@@ -18,16 +18,16 @@ export class InnerAprilShipStatus extends BaseShipStatus<InnerAprilShipStatus, E
     ]);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityAprilShipStatus): InnerAprilShipStatus {
-    const aprilShipStatus = new InnerAprilShipStatus(object.innerNetObjectID, parent);
+  static spawn(object: SpawnInnerNetObject, parent: EntitySkeldAprilShipStatus): InnerSkeldAprilShipStatus {
+    const aprilShipStatus = new InnerSkeldAprilShipStatus(object.innerNetObjectID, parent);
 
     aprilShipStatus.setSpawn(object.data);
 
     return aprilShipStatus;
   }
 
-  clone(): InnerAprilShipStatus {
-    const clone = new InnerAprilShipStatus(this.id, this.parent);
+  clone(): InnerSkeldAprilShipStatus {
+    const clone = new InnerSkeldAprilShipStatus(this.id, this.parent);
 
     clone.systems = this.systems.map(system => system.clone());
 

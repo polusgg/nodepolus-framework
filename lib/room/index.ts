@@ -7,6 +7,7 @@ import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCu
 import { SceneChangePacket } from "../protocol/packets/rootGamePackets/gameDataPackets/sceneChange";
 import { DespawnPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/despawn";
 import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
+import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
 import { AlterGameTagPacket } from "../protocol/packets/rootGamePackets/alterGameTag";
 import { DataPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/data";
 import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSystem";
@@ -22,15 +23,15 @@ import { RemoveGamePacket } from "../protocol/packets/rootGamePackets/removeGame
 import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { StartGamePacket } from "../protocol/packets/rootGamePackets/startGame";
 import { RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
-import { EntityAprilShipStatus } from "../protocol/entities/aprilShipStatus";
+import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
+import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
 import { EndGamePacket } from "../protocol/packets/rootGamePackets/endGame";
 import { InnerGameData } from "../protocol/entities/gameData/innerGameData";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
-import { EntityHeadquarters } from "../protocol/entities/headquarters";
+import { EntityMiraShipStatus } from "../protocol/entities/miraShipStatus";
+import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
-import { EntityShipStatus } from "../protocol/entities/shipStatus";
-import { EntityPlanetMap } from "../protocol/entities/planetMap";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { GameOptionsData } from "../types/gameOptionsData";
 import { EntityPlayer } from "../protocol/entities/player";
@@ -62,7 +63,7 @@ export type RoomEvents = {
     victim: Player;
   };
   playerMoved: {
-    cid: number;
+    clientId: number;
     sequenceId: number;
     position: Vector2;
     velocity: Vector2;
@@ -84,6 +85,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
   public shipStatus?: EntityLevel;
   public meetingHud?: EntityMeetingHud;
   public options: GameOptionsData = DEFAULT_GAME_OPTIONS;
+  // TODO: Change back to 0
   public gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 1]]);
   public family: "IPv4" | "IPv6";
   public size = -1;
@@ -652,7 +654,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
 
       if (netObject.type == InnerNetObjectType.CustomNetworkTransform) {
         this.emit("playerMoved", {
-          cid: netObject.parent.owner,
+          clientId: netObject.parent.owner,
           sequenceId: (netObject as InnerCustomNetworkTransform).sequenceId,
           position: (netObject as InnerCustomNetworkTransform).position,
           velocity: (netObject as InnerCustomNetworkTransform).velocity,
@@ -676,7 +678,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
           throw new Error("Received duplicate spawn packet for ShipStatus");
         }
 
-        this.shipStatus = EntityShipStatus.spawn(flags, owner, innerNetObjects, this);
+        this.shipStatus = EntitySkeldShipStatus.spawn(flags, owner, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
@@ -686,7 +688,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
           throw new Error("Received duplicate spawn packet for AprilShipStatus");
         }
 
-        this.shipStatus = EntityAprilShipStatus.spawn(flags, owner, innerNetObjects, this);
+        this.shipStatus = EntitySkeldAprilShipStatus.spawn(flags, owner, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
@@ -696,7 +698,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
           throw new Error("Received duplicate spawn packet for Headquarters");
         }
 
-        this.shipStatus = EntityHeadquarters.spawn(flags, owner, innerNetObjects, this);
+        this.shipStatus = EntityMiraShipStatus.spawn(flags, owner, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
@@ -706,7 +708,17 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
           throw new Error("Received duplicate spawn packet for PlanetMap");
         }
 
-        this.shipStatus = EntityPlanetMap.spawn(flags, owner, innerNetObjects, this);
+        this.shipStatus = EntityPolusShipStatus.spawn(flags, owner, innerNetObjects, this);
+
+        this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
+        break;
+      }
+      case SpawnType.Airship: {
+        if (this.shipStatus && this.isHost) {
+          throw new Error("Received duplicate spawn packet for AirShip");
+        }
+
+        this.shipStatus = EntityAirshipStatus.spawn(flags, owner, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
@@ -792,10 +804,11 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
     }
 
     switch (innerNetObject.type) {
-      case InnerNetObjectType.ShipStatus:
-      case InnerNetObjectType.AprilShipStatus:
-      case InnerNetObjectType.Headquarters:
-      case InnerNetObjectType.PlanetMap:
+      case InnerNetObjectType.SkeldShipStatus:
+      case InnerNetObjectType.SkeldAprilShipStatus:
+      case InnerNetObjectType.MiraShipStatus:
+      case InnerNetObjectType.PolusShipStatus:
+      case InnerNetObjectType.AirshipStatus:
         if (!this.shipStatus) {
           throw new Error("Attempted to despawn ShipStatus that is not currently spawned");
         }

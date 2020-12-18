@@ -14,16 +14,16 @@ import { DeconTwoSystem } from "./systems/deconTwoSystem";
 import { SabotageSystem } from "./systems/sabotageSystem";
 import { MedScanSystem } from "./systems/medScanSystem";
 import { ReactorSystem } from "./systems/reactorSystem";
-import { BaseGameObject, Entity } from "../baseEntity";
 import { SystemType } from "../../../types/systemType";
 import { SwitchSystem } from "./systems/switchSystem";
+import { Entity, InnerNetObjectType } from "../types";
 import { DeconSystem } from "./systems/deconSystem";
 import { DoorsSystem } from "./systems/doorsSystem";
 import { HqHudSystem } from "./systems/hqHudSystem";
 import { InternalSystemType } from "./systems/type";
 import { BaseSystem } from "./systems/baseSystem";
+import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";
-import { InnerNetObjectType } from "../types";
 import { Level } from "../../../types/level";
 
 export type System = AutoDoorsSystem
@@ -54,19 +54,19 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
     this.spawnSystemTypes = spawnSystemTypes ?? this.systemTypes;
 
     switch (type) {
-      case InnerNetObjectType.ShipStatus:
+      case InnerNetObjectType.SkeldShipStatus:
         this.level = Level.TheSkeld;
         break;
-      case InnerNetObjectType.Headquarters:
+      case InnerNetObjectType.MiraShipStatus:
         this.level = Level.MiraHq;
         break;
-      case InnerNetObjectType.PlanetMap:
+      case InnerNetObjectType.PolusShipStatus:
         this.level = Level.Polus;
         break;
-      case InnerNetObjectType.Airship:
+      case InnerNetObjectType.AirshipStatus:
         this.level = Level.Airship;
         break;
-      case InnerNetObjectType.AprilShipStatus:
+      case InnerNetObjectType.SkeldAprilShipStatus:
         this.level = Level.AprilSkeld;
         break;
       default:
