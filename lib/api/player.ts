@@ -27,6 +27,7 @@ export enum PlayerState {
   PreSpawn,
   Spawned,
   InGame,
+  Destroyed,
 }
 
 export type PlayerEvents = {
@@ -35,6 +36,7 @@ export type PlayerEvents = {
     position: Vector2;
     velocity: Vector2;
   };
+  despawned;
 };
 
 export type PlainPlayerEvents = "spawned" | "assignedImpostor";
@@ -142,6 +144,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     super();
 
     room.internalRoom.on("playerMoved", ({ cid, position, velocity }) => {
+      if (this.state == PlayerState.PreSpawn) {}
       if (cid == this.clientId) {
         if (this.lastPosition.x != position.x ||
             this.lastPosition.y != position.y ||
@@ -163,6 +166,12 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
         if (infectedpid === this.playerId) {
           this.emit("assignedImpostor");
         }
+      }
+    });
+
+    room.internalRoom.on("despawn", ino => {
+      if (ino.parent.owner == this.clientId) {
+        this.state == PlayerState.PreSpawn;
       }
     });
   }

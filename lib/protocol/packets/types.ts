@@ -80,4 +80,6 @@ export enum RPCPacketType {
   RepairSystem = 0x1c,
   SetTasks = 0x1d,
   UpdateGameData = 0x1e,
+  ClimbLadder = 0x1f,
+  UsePlatform = 0x20,
 }

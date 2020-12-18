@@ -3,7 +3,7 @@ import { CloseDoorsOfTypePacket } from "../../packets/rootGamePackets/gameDataPa
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { FlyingPlatformSystem } from "./systems/flyingPlatformSystem";
+import { MovingPlatformSystem } from "./systems/movingPlatformSystem";
 import { SecurityCameraSystem } from "./systems/securityCameraSystem";
 import { AirshipReactorSystem } from "./systems/airshipReactor";
 import { HudOverrideSystem } from "./systems/hudOverrideSystem";
@@ -40,7 +40,7 @@ export type System = AutoDoorsSystem
 | SecurityCameraSystem
 | SwitchSystem
 | AirshipReactorSystem
-| FlyingPlatformSystem;
+| MovingPlatformSystem;
 
 export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject<T> {
   public systems: BaseSystem<System>[] = [];
@@ -65,6 +65,9 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
         break;
       case InnerNetObjectType.Airship:
         this.level = Level.Airship;
+        break;
+      case InnerNetObjectType.AprilShipStatus:
+        this.level = Level.AprilSkeld;
         break;
       default:
         throw new Error(`Unsupported ShipStatus type: ${type} (${InnerNetObjectType[type]})`);
@@ -147,13 +150,15 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
   }
 
   getSystemFromType(systemType: SystemType): BaseSystem<System> {
+    console.log("returning system from systemType", systemType);
+
     switch (systemType) {
       case SystemType.Doors:
-        if (this.level == Level.Polus) {
-          return this.systems[InternalSystemType.Doors];
+        if (this.level == Level.TheSkeld) {
+          return this.systems[InternalSystemType.AutoDoors];
         }
 
-        return this.systems[InternalSystemType.AutoDoors];
+        return this.systems[InternalSystemType.Doors];
       case SystemType.Communications:
         if (this.level == Level.MiraHq) {
           return this.systems[InternalSystemType.HqHud];
@@ -169,6 +174,10 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
       case SystemType.Laboratory:
         return this.systems[InternalSystemType.Laboratory];
       case SystemType.Reactor:
+        if (this.level == Level.Airship) {
+          return this.systems[InternalSystemType.AirshipReactor];
+        }
+
         return this.systems[InternalSystemType.Reactor];
       case SystemType.Sabotage:
         return this.systems[InternalSystemType.Sabotage];
@@ -178,6 +187,8 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
         return this.systems[InternalSystemType.MedScan];
       case SystemType.Oxygen:
         return this.systems[InternalSystemType.Oxygen];
+      case SystemType.Weapons:
+        return this.systems[InternalSystemType.MovingPlatform];
       default:
         throw new Error(`Tried to get unimplemented SystemType: ${systemType} (${SystemType[systemType]})`);
     }
@@ -234,7 +245,7 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
           this.systems[InternalSystemType.Oxygen] = new LifeSuppSystem();
           break;
         case SystemType.Weapons:
-          this.systems[InternalSystemType.FlyingPlatform] = new FlyingPlatformSystem();
+          this.systems[InternalSystemType.MovingPlatform] = new MovingPlatformSystem();
           break;
         default:
           throw new Error(`Tried to get unimplemented SystemType: ${type} (${SystemType[type]})`);

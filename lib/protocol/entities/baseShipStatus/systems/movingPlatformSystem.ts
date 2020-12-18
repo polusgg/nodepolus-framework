@@ -2,26 +2,26 @@ import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
-export enum FlyingPlatformSides {
-  LEFT = 0x00,
-  RIGHT = 0x01,
+export enum MovingPlatformSides {
+  Left = 0x00,
+  Right = 0x01,
 }
 
-export class FlyingPlatformSystem extends BaseSystem<FlyingPlatformSystem> {
+export class MovingPlatformSystem extends BaseSystem<MovingPlatformSystem> {
   public sequenceId = 0;
   public innerPlayerControlNetId?: number;
-  public side: FlyingPlatformSides = FlyingPlatformSides.LEFT;
+  public side: MovingPlatformSides = MovingPlatformSides.Left;
 
   constructor() {
     super(SystemType.Weapons);
   }
 
-  static spawn(data: MessageReader): FlyingPlatformSystem {
-    const flyingPlatformSystem = new FlyingPlatformSystem();
+  static spawn(data: MessageReader): MovingPlatformSystem {
+    const movingPlatformSystem = new MovingPlatformSystem();
 
-    flyingPlatformSystem.setSpawn(data);
+    movingPlatformSystem.setSpawn(data);
 
-    return flyingPlatformSystem;
+    return movingPlatformSystem;
   }
 
   getData(): MessageWriter {
@@ -51,7 +51,7 @@ export class FlyingPlatformSystem extends BaseSystem<FlyingPlatformSystem> {
     this.side = data.readByte();
   }
 
-  equals(old: FlyingPlatformSystem): boolean {
+  equals(old: MovingPlatformSystem): boolean {
     if (this.sequenceId != old.sequenceId) {
       return false;
     }
@@ -67,8 +67,8 @@ export class FlyingPlatformSystem extends BaseSystem<FlyingPlatformSystem> {
     return true;
   }
 
-  clone(): FlyingPlatformSystem {
-    const clone = new FlyingPlatformSystem();
+  clone(): MovingPlatformSystem {
+    const clone = new MovingPlatformSystem();
 
     clone.sequenceId = this.sequenceId;
     clone.innerPlayerControlNetId = this.innerPlayerControlNetId;

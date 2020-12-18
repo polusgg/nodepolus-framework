@@ -1,4 +1,5 @@
 import { TaskLength, LevelTask, TASKS_THE_SKELD, TASKS_MIRA_HQ, TASKS_POLUS } from "../types/levelTask";
+import { MovingPlatformSystem } from "../protocol/entities/baseShipStatus/systems/movingPlatformSystem";
 import { SecurityCameraSystem } from "../protocol/entities/baseShipStatus/systems/securityCameraSystem";
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
 import { HudOverrideSystem } from "../protocol/entities/baseShipStatus/systems/hudOverrideSystem";
@@ -7,9 +8,9 @@ import { LaboratorySystem } from "../protocol/entities/baseShipStatus/systems/la
 import { InnerLobbyBehaviour } from "../protocol/entities/lobbyBehaviour/innerLobbyBehaviour";
 import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud/innerMeetingHud";
 import { DeconTwoSystem } from "../protocol/entities/baseShipStatus/systems/deconTwoSystem";
-import { InnerAirship } from "../protocol/entities/airshipShipStatus/innerArshipShipStatus";
 import { LifeSuppSystem } from "../protocol/entities/baseShipStatus/systems/lifeSuppSystem";
 import { SabotageSystem } from "../protocol/entities/baseShipStatus/systems/sabotageSystem";
+import { InnerAirshipStatus } from "../protocol/entities/airshipStatus/innerAirshipStatus";
 import { MedScanSystem } from "../protocol/entities/baseShipStatus/systems/medScanSystem";
 import { ReactorSystem } from "../protocol/entities/baseShipStatus/systems/reactorSystem";
 import { InnerHeadquarters } from "../protocol/entities/headquarters/innerHeadquarters";
@@ -30,7 +31,7 @@ import { EntityAprilShipStatus } from "../protocol/entities/aprilShipStatus";
 import { EndGamePacket } from "../protocol/packets/rootGamePackets/endGame";
 import { InnerGameData } from "../protocol/entities/gameData/innerGameData";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
-import { EntityAirship } from "../protocol/entities/airshipShipStatus";
+import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
 import { EntityHeadquarters } from "../protocol/entities/headquarters";
 import { PlayerData } from "../protocol/entities/gameData/playerData";
 import { AutoDoorsHandler } from "./systemHandlers/autoDoorsHandler";
@@ -162,10 +163,10 @@ export class CustomHost implements HostInstance {
           ];
           break;
         case Level.Airship:
-          this.room.shipStatus = new EntityAirship(this.room);
+          this.room.shipStatus = new EntityAirshipStatus(this.room);
           this.room.shipStatus.owner = GLOBAL_OWNER;
           this.room.shipStatus.innerNetObjects = [
-            new InnerAirship(this.nextNetId, this.room.shipStatus),
+            new InnerAirshipStatus(this.nextNetId, this.room.shipStatus),
           ];
           break;
       }
@@ -283,46 +284,47 @@ export class CustomHost implements HostInstance {
 
     player.gameObject.playerControl.syncSettings(this.room.options, [sender]);
 
-    const playerData = new PlayerData(
-      player.gameObject.playerControl.playerId,
-      "",
-      PlayerColor.Red,
-      0,
-      0,
-      0,
-      false,
-      false,
-      false,
-      [],
-    );
-
-    this.room.gameData.gameData.updateGameData([playerData], this.room.connections);
+    this.confirmPlayerData(sender, player);
 
     player.gameObject.playerControl.isNew = false;
-
-    this.room.finishedSpawningPlayer(sender);
-
-    setTimeout(() => {
-      if (!this.room.isSpawningPlayers) {
-        this.room.reapplyActingHosts();
-      }
-    }, 100);
   }
 
   handleCheckName(sender: InnerPlayerControl, name: string): void {
     let checkName: string = name;
     let index = 1;
 
+    const owner = this.room.findConnection(sender.parent.owner);
+
+    if (!owner) {
+      throw new Error("IPC doesn't have an owner when trying to checkName");
+    }
+
+    this.confirmPlayerData(owner, new Player(sender.parent));
+
     while (this.isNameTaken(checkName)) {
       checkName = `${name} ${index++}`;
     }
 
     sender.setName(checkName, this.room.connections);
+
+    this.room.finishedSpawningPlayer(owner);
+
+    if (!this.room.isSpawningPlayers) {
+      this.room.reapplyActingHosts();
+    }
   }
 
   handleCheckColor(sender: InnerPlayerControl, color: PlayerColor): void {
     const takenColors = this.getTakenColors();
     let setColor: PlayerColor = color;
+
+    const owner = this.room.findConnection(sender.parent.owner);
+
+    if (!owner) {
+      throw new Error("IPC doesn't have an owner when trying to checkName");
+    }
+
+    this.confirmPlayerData(owner, new Player(sender.parent));
 
     if (this.room.players.length <= 12) {
       while (takenColors.indexOf(setColor) != -1) {
@@ -589,12 +591,10 @@ export class CustomHost implements HostInstance {
   handleDisconnect(connection: Connection): void {
     if (this.room.gameState == GameState.NotStarted) {
       this.stopCountdown();
-
-      return;
     }
 
     if (!this.room.gameData) {
-      if (this.room.gameState == GameState.Started) {
+      if (this.room.gameState == GameState.NotStarted || this.room.gameState == GameState.Started) {
         throw new Error("Received Disconnect without a GameData instance");
       }
 
@@ -604,13 +604,21 @@ export class CustomHost implements HostInstance {
     const player = this.room.findPlayerByConnection(connection);
 
     if (!player) {
+      console.log("WARN: Recieved disconnect from connection without player");
+
       return;
     }
 
     const playerIndex = this.room.gameData.gameData.players.findIndex(playerData => playerData.id == player.id);
     const playerData = this.room.gameData.gameData.players[playerIndex];
 
-    playerData.isDisconnected = true;
+    if (this.room.gameState == GameState.Started) {
+      playerData.isDisconnected = true;
+    } else {
+      this.room.gameData.gameData.players.splice(playerIndex, 1);
+    }
+
+    this.room.gameData.gameData.updateGameData(this.room.gameData.gameData.players, this.room.connections);
 
     if (this.shouldEndGame()) {
       if (playerData.isImpostor) {
@@ -619,6 +627,25 @@ export class CustomHost implements HostInstance {
         this.endGame(GameOverReason.CrewmateDisconnect);
       }
     }
+  }
+
+  handleUsePlatform(sender: InnerPlayerControl): void {
+    if (!this.room.shipStatus) {
+      throw new Error("Cannot find shipStatus on room.");
+    }
+
+    const oldData = this.room.shipStatus.innerNetObjects[0].clone();
+    const movingPlatform = this.room.shipStatus.innerNetObjects[0].systems[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
+
+    movingPlatform.innerPlayerControlNetId = sender.parent.playerControl.id;
+    movingPlatform.side = (movingPlatform.side + 1) % 2;
+
+    movingPlatform.sequenceId++;
+
+    //@ts-ignore TODO: Talk to cody about this?
+    const data = this.room.shipStatus.innerNetObjects[0].getData(oldData);
+
+    this.room.sendRootGamePacket(new GameDataPacket([data], this.room.code));
   }
 
   stopCountdown(): void {
@@ -763,7 +790,6 @@ export class CustomHost implements HostInstance {
   }
 
   endGame(reason: GameOverReason): void {
-    return;
     this.room.gameState = GameState.NotStarted;
     this.deconHandlers = [];
     this.readyPlayerList = [];
@@ -843,6 +869,10 @@ export class CustomHost implements HostInstance {
       throw new Error("shouldEndGame called without a GameData instance");
     }
 
+    if (this.room.gameState == GameState.NotStarted) {
+      return false;
+    }
+
     const aliveImpostors: PlayerData[] = [];
     const aliveCrewmates: PlayerData[] = [];
 
@@ -877,5 +907,30 @@ export class CustomHost implements HostInstance {
     }
 
     return this.room.gameData.gameData.players.map(player => player.color);
+  }
+
+  private confirmPlayerData(connection: Connection, player: Player): void {
+    if (!this.room.gameData) {
+      throw new Error("confirmPlayerData called without a GameData instance");
+    }
+
+    if (this.room.gameData.gameData.players.map(p => p.id).indexOf(player.gameObject.playerControl.playerId) == -1) {
+      console.log(connection.name, "spawning");
+
+      const playerData = new PlayerData(
+        player.gameObject.playerControl.playerId,
+        "",
+        PlayerColor.Red,
+        0,
+        0,
+        0,
+        false,
+        false,
+        false,
+        [],
+      );
+
+      this.room.gameData.gameData.updateGameData([playerData], this.room.connections);
+    }
   }
 }

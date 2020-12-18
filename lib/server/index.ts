@@ -13,6 +13,7 @@ import { Level } from "../types/level";
 import Emittery from "emittery";
 import { Room } from "../room";
 import dgram from "dgram";
+import { FakeHostId } from "../types/fakeHostId";
 
 export enum DefaultHostState {
   Server,
@@ -45,7 +46,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
   public roomMap: Map<string, Room> = new Map();
 
   // Starts at 1 to allow the Server host implementation's ID to be 0
-  private connectionIndex = 1;
+  private connectionIndex = Object.keys(FakeHostId).length / 2;
 
   get nextConnectionId(): number {
     if (++this.connectionIndex > MaxValue.UInt32) {

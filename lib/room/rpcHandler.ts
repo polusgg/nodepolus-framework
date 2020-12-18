@@ -1,3 +1,4 @@
+import { ClimbLadderPacket, LadderSize, LadderDirection } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/climbLadder";
 import { RepairAmount, RepairSystemPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { CloseDoorsOfTypePacket } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/closeDoorsOfType";
 import { SetStartCounterPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/setStartCounter";
@@ -366,6 +367,26 @@ export class RPCHandler {
         this.handleUpdateGameData(sender as InnerGameData, packet.players, sendTo);
         break;
       }
+      case RPCPacketType.ClimbLadder: {
+        const packet: ClimbLadderPacket = rawPacket as ClimbLadderPacket;
+
+        if (sender.type != InnerNetObjectType.PlayerPhysics) {
+          throw new Error(`Received ClimbLadder packet from invalid InnerNetObject: expected PlayerPhysics but got ${type as number} (${typeString})`);
+        }
+
+        this.handleClimbLadder(sender as InnerPlayerPhysics, packet.ladderSize, packet.ladderDirection);
+        break;
+      }
+      case RPCPacketType.UsePlatform: {
+        if (sender.type != InnerNetObjectType.PlayerControl) {
+          throw new Error(`Received UsePlatform packet from invalid InnerNetObject: expected PlayerPhysics but got ${type as number} (${typeString})`);
+        }
+
+        this.room.host?.handleUsePlatform(sender as InnerPlayerControl);
+
+        this.handleUsePlatform(sender as InnerPlayerControl);
+        break;
+      }
       default:
         throw new Error(`Attempted to handle an unimplemented RPC packet type: ${type as number} (${RPCPacketType[type]})`);
     }
@@ -531,6 +552,18 @@ export class RPCHandler {
     this.room.host.handleRepairSystem(sender, systemId, playerControlNetId, amount);
 
     sender.repairSystem(systemId, playerControlNetId, amount);
+  }
+
+  handleClimbLadder(sender: InnerPlayerPhysics, ladderSize: LadderSize, ladderDirection: LadderDirection): void {
+    sender.climbLadder(ladderSize, ladderDirection, this.room.connections);
+  }
+
+  handleUsePlatform(sender: InnerPlayerControl): void {
+    if (!this.room.host) {
+      throw new Error("UsePlatform RPC handler called without a host");
+    }
+
+    this.room.host.handleUsePlatform(sender);
   }
 
   handleSetTasks(sender: InnerGameData, playerId: number, tasks: number[], sendTo: Connection[]): void {

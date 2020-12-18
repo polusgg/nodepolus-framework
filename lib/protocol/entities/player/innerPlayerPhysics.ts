@@ -1,3 +1,4 @@
+import { ClimbLadderPacket, LadderSize, LadderDirection } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/climbLadder";
 import { EnterVentPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/enterVent";
 import { ExitVentPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/exitVent";
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
@@ -27,6 +28,10 @@ export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
 
   exitVent(ventId: number, sendTo: Connection[]): void {
     this.sendRPCPacketTo(sendTo, new ExitVentPacket(ventId));
+  }
+
+  climbLadder(ladderSize: LadderSize, ladderDirection: LadderDirection, sendTo: Connection[]): void {
+    this.sendRPCPacketTo(sendTo, new ClimbLadderPacket(ladderSize, ladderDirection));
   }
 
   getData(): DataPacket {

@@ -149,6 +149,8 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
       throw new Error("GameData does not exist on the RoomImplementation");
     }
 
+    console.log(gameData.gameData.players);
+
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
     if (gameDataPlayerIndex == -1 && this.parent.room.isHost) {

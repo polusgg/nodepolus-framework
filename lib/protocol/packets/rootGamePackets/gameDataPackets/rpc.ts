@@ -13,7 +13,9 @@ import { RepairSystemPacket } from "./rpcPackets/repairSystem";
 import { SendChatNotePacket } from "./rpcPackets/sendChatNote";
 import { StartMeetingPacket } from "./rpcPackets/startMeeting";
 import { SyncSettingsPacket } from "./rpcPackets/syncSettings";
+import { ClimbLadderPacket } from "./rpcPackets/climbLadder";
 import { SetInfectedPacket } from "./rpcPackets/setInfected";
+import { UsePlatformPacket } from "./rpcPackets/usePlatform";
 import { CheckColorPacket } from "./rpcPackets/checkColor";
 import { SetScannerPacket } from "./rpcPackets/setScanner";
 import { CheckNamePacket } from "./rpcPackets/checkName";
@@ -109,6 +111,10 @@ export class RPCPacket extends BaseGameDataPacket {
         return new RPCPacket(senderNetId, SetTasksPacket.deserialize(reader));
       case RPCPacketType.UpdateGameData:
         return new RPCPacket(senderNetId, UpdateGameDataPacket.deserialize(reader));
+      case RPCPacketType.ClimbLadder:
+        return new RPCPacket(senderNetId, ClimbLadderPacket.deserialize(reader));
+      case RPCPacketType.UsePlatform:
+        return new RPCPacket(senderNetId, UsePlatformPacket.deserialize(reader));
       default:
         throw new Error(`Attempted to deserialize an unimplemented RPC packet type ${type} (${RPCPacketType[type]}) from InnerNetObject ${senderNetId}`);
     }

@@ -122,7 +122,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
       if (this.unreliablePacketBuffer.length > 0) {
         this.flush(false);
       }
-    }, 10);
+    }, 50);
 
     // TODO: This breaks. No clue why.
     // this.timeoutInterval = setInterval(() => {
@@ -333,6 +333,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   handleSetStartCounter(_sequenceId: number, _timeRemaining: number): void {}
   handleCompleteTask(_sender: InnerPlayerControl, _taskIndex: number): void {}
   handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): void {}
+  handleUsePlatform(_sender: InnerPlayerControl): void {}
   setInfected(_impostorCount: number): void {}
   setTasks(): void {}
   /* eslint-enable @typescript-eslint/no-empty-function */

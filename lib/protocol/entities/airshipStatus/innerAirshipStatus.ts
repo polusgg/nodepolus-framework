@@ -2,10 +2,10 @@ import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPacke
 import { SystemType } from "../../../types/systemType";
 import { BaseShipStatus } from "../baseShipStatus";
 import { InnerNetObjectType } from "../types";
-import { EntityAirship } from ".";
+import { EntityAirshipStatus } from ".";
 
-export class InnerAirship extends BaseShipStatus<InnerAirship, EntityAirship> {
-  constructor(netId: number, public parent: EntityAirship) {
+export class InnerAirshipStatus extends BaseShipStatus<InnerAirshipStatus, EntityAirshipStatus> {
+  constructor(netId: number, public parent: EntityAirshipStatus) {
     super(InnerNetObjectType.AprilShipStatus, netId, parent, [
       SystemType.Reactor,
       SystemType.Electrical,
@@ -17,16 +17,16 @@ export class InnerAirship extends BaseShipStatus<InnerAirship, EntityAirship> {
     ]);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityAirship): InnerAirship {
-    const airship = new InnerAirship(object.innerNetObjectID, parent);
+  static spawn(object: SpawnInnerNetObject, parent: EntityAirshipStatus): InnerAirshipStatus {
+    const airship = new InnerAirshipStatus(object.innerNetObjectID, parent);
 
     airship.setSpawn(object.data);
 
     return airship;
   }
 
-  clone(): InnerAirship {
-    const clone = new InnerAirship(this.id, this.parent);
+  clone(): InnerAirshipStatus {
+    const clone = new InnerAirshipStatus(this.id, this.parent);
 
     clone.systems = this.systems.map(system => system.clone());
 

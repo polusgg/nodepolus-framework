@@ -54,6 +54,7 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
       }
 
       if (!hasPlayer) {
+        console.trace("New Player Pog", playerData[i]);
         this.players.push(playerData[i]);
       }
     }

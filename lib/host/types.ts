@@ -27,6 +27,8 @@ export interface HostInstance extends ClientInstance {
 
   handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number): void;
 
+  handleUsePlatform(sender: InnerPlayerControl): void;
+
   setInfected(infectedCount: number): void;
 
   setTasks(): void;

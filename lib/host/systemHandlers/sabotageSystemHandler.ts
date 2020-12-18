@@ -31,7 +31,7 @@ export class SabotageSystemHandler {
     this.timer = setInterval(() => {
       system.timer--;
 
-      if (system.timer == 0) {
+      if (system.timer <= 0) {
         this.host.endGame(GameOverReason.ImpostorsBySabotage);
 
         if (this.timer) {
@@ -85,7 +85,9 @@ export class SabotageSystemHandler {
     this.timer = setInterval(() => {
       system.timer--;
 
-      if (system.timer == 0) {
+      console.log(system.timer);
+
+      if (system.timer <= 0) {
         this.host.endGame(GameOverReason.ImpostorsBySabotage);
 
         if (this.timer) {

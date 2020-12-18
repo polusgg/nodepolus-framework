@@ -68,6 +68,7 @@ export type RoomEvents = {
     velocity: Vector2;
   };
   setInfected: number[];
+  despawn: InnerNetObject;
 };
 
 export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementation, dgram.RemoteInfo {
@@ -83,7 +84,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
   public shipStatus?: EntityLevel;
   public meetingHud?: EntityMeetingHud;
   public options: GameOptionsData = DEFAULT_GAME_OPTIONS;
-  public gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
+  public gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 1]]);
   public family: "IPv4" | "IPv6";
   public size = -1;
 
@@ -445,6 +446,8 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
     if (!this.isHost) {
       this.handleDespawn(innerNetObject.id);
     }
+
+    this.emit("despawn", innerNetObject);
 
     this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.id)], this.code));
   }

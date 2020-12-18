@@ -143,3 +143,61 @@ timer    value
 
 
 
+
+
+// Gap Room (REACTOR_SYSTEM)
+  00 // NO ACTIVE
+  02 // 2 REPAIRED
+    00 // CONSOLE0
+    01 // CONSOLE1
+// Electrical (SWITCH_SYSTEM)
+  16 16 ff
+// Security (USERLIST_SYSTEM)
+  00
+// Communications (BASICCOMMUNICATIONS_SYSTEM)
+  00 (isSabotaged bool)
+// Doors (DOORS_SYSTEM)
+  00
+    01 01 01 01 01 01 01 01 01 01 01 01 01 01 00 01 01
+00000000
+// 
+00
+ffffffff
+00
+
+
+808008 802007bd
+
+// 808008  =>  131072  =>  [17]
+
+       0,       30
+802007bd, 3433ef41
+
+888008 (131080)
+  00003433ef41 [SABO_GAP_RM]
+08
+  01000100 [OPEN_GAP_RM_R]
+08
+  0000 [CL_GAP_RM_R]
+
+808004 // doors
+808008 // sabotage
+888008 // medbay, sabotage, records
+  00003433ef41
+
+  00 // No active consoles
+  00 // No complete consoles
+
+  3433ef41 // Sabotage cooldown
+  00003433ef41
+
+  00 // No active consoles
+  00 // No complete consoles
+
+  3433ef41 // Sabotage cooldown
+
+8020 // weapons, gaproom
+  02 // 
+  07000000
+  00
+08 // 

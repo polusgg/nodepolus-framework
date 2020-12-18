@@ -39,8 +39,8 @@ export abstract class BaseGameRoom extends Emittery.Typed<GameEvents> {
 }
 
 export class ElectricalGameRoom extends BaseGameRoom {
-  private sabotage() {
-
+  private sabotage(): void {
+    
   }
 }
 

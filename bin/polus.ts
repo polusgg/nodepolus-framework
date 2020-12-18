@@ -47,3 +47,7 @@ for (let i = 0; i < pluginDirectories.length; i++) {
 server.listen(serverConfig.port).then(() => {
   console.log(`Server listening on port ${serverConfig.port}`);
 });
+
+process.on("uncaughtException", err => {
+  console.log(err);
+});
