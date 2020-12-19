@@ -1,6 +1,5 @@
 import { VotingCompletePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/votingComplete";
 import { ClearVotePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/clearVote";
-import { CastVotePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/castVote";
 import { ClosePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/close";
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
@@ -9,7 +8,6 @@ import { shallowEqual } from "../../../util/functions";
 import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";
-import { CustomHost } from "../../../host";
 import { EntityMeetingHud } from ".";
 
 export enum VoteStateMask {
@@ -75,10 +73,8 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
   }
 
   votingComplete(voteStates: VoteState[], didVotePlayerOff: boolean, exiledPlayerId: number, isTie: boolean, sendTo: Connection[]): void {
-    if (this.parent.lobby.isHost) {
-      for (let i = 0; i < voteStates.length; i++) {
-        this.playerStates[i] = voteStates[i];
-      }
+    for (let i = 0; i < voteStates.length; i++) {
+      this.playerStates[i] = voteStates[i];
     }
 
     this.ended = true;
@@ -89,11 +85,7 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
   }
 
   castVote(votingPlayerId: number, suspectPlayerId: number): void {
-    if (this.parent.lobby.isHost) {
-      (this.parent.lobby.host as CustomHost).handleCastVote(votingPlayerId, suspectPlayerId);
-    } else {
-      this.sendRPCPacketTo([this.parent.lobby.host as Connection], new CastVotePacket(votingPlayerId, suspectPlayerId));
-    }
+    this.parent.lobby.customHostInstance.handleCastVote(votingPlayerId, suspectPlayerId);
   }
 
   clearVote(player: Connection[]): void {

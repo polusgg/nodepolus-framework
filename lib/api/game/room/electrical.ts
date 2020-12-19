@@ -1,9 +1,7 @@
-import { SabotageAmount, ElectricalAmount } from "../../../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
+import { ElectricalAmount } from "../../../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { SwitchSystem } from "../../../protocol/entities/baseShipStatus/systems/switchSystem";
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
-import { Connection } from "../../../protocol/connection";
 import { SystemType } from "../../../types/systemType";
-import { CustomHost } from "../../../host";
 import { BaseDoorGameRoom } from "./base";
 import { Player } from "../../../player";
 import { Game } from "..";
@@ -103,64 +101,37 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
   // TODO: Understand Airship's Electrical Doors, and add a serializer/deserializer
 
   sabotage(): void {
-    if (this.game.lobby.internalLobby.host instanceof CustomHost) {
-      this.internalBackupShipStatus();
+    this.internalBackupShipStatus();
 
-      if (!this.game.lobby.internalLobby.host.sabotageHandler) {
-        throw new Error("Host has no SabotageHandler instance");
-      }
-
-      this.game.lobby.internalLobby.host.sabotageHandler.sabotageElectrical(this.internalSystem);
-
-      this.internalUpdateShipStatus();
-    } else if (this.game.lobby.internalLobby.host instanceof Connection) {
-      this.internalShipStatus.repairSystem(
-        SystemType.Sabotage,
-        this.game.lobby.players[0].internalPlayer.gameObject.playerControl.id,
-        new SabotageAmount(SystemType.Electrical),
-      );
-    } else {
-      throw new Error("Attempted to sabotage electrical with an unsupported host instance");
+    if (!this.game.lobby.internalLobby.customHostInstance.sabotageHandler) {
+      throw new Error("Host has no SabotageHandler instance");
     }
+
+    this.game.lobby.internalLobby.customHostInstance.sabotageHandler.sabotageElectrical(this.internalSystem);
+
+    this.internalUpdateShipStatus();
   }
 
   repair(): void {
-    if (this.game.lobby.internalLobby.host instanceof CustomHost) {
-      this.internalBackupShipStatus();
+    this.internalBackupShipStatus();
 
-      if (!this.game.lobby.internalLobby.host.systemsHandler) {
-        throw new Error("Host has no SystemsHandler instance");
-      }
-
-      for (let i = 0; i < this.internalSystem.actualSwitches.length; i++) {
-        const actualSwitch = this.internalSystem.actualSwitches[i];
-        const expectedSwitch = this.internalSystem.actualSwitches[i];
-
-        if (actualSwitch != expectedSwitch) {
-          this.game.lobby.internalLobby.host.systemsHandler.repairSwitch(
-            undefined as unknown as Player,
-            this.internalSystem,
-            new ElectricalAmount(i),
-          );
-        }
-      }
-
-      this.internalUpdateShipStatus();
-    } else if (this.game.lobby.internalLobby.host instanceof Connection) {
-      for (let i = 0; i < this.internalSystem.actualSwitches.length; i++) {
-        const actualSwitch = this.internalSystem.actualSwitches[i];
-        const expectedSwitch = this.internalSystem.actualSwitches[i];
-
-        if (actualSwitch != expectedSwitch) {
-          this.internalShipStatus.repairSystem(
-            SystemType.Electrical,
-            this.game.lobby.players[0].internalPlayer.gameObject.playerControl.id,
-            new ElectricalAmount(i),
-          );
-        }
-      }
-    } else {
-      //TODO: Throw error about unknown host?
+    if (!this.game.lobby.internalLobby.customHostInstance.systemsHandler) {
+      throw new Error("Host has no SystemsHandler instance");
     }
+
+    for (let i = 0; i < this.internalSystem.actualSwitches.length; i++) {
+      const actualSwitch = this.internalSystem.actualSwitches[i];
+      const expectedSwitch = this.internalSystem.actualSwitches[i];
+
+      if (actualSwitch != expectedSwitch) {
+        this.game.lobby.internalLobby.customHostInstance.systemsHandler.repairSwitch(
+          undefined as unknown as Player,
+          this.internalSystem,
+          new ElectricalAmount(i),
+        );
+      }
+    }
+
+    this.internalUpdateShipStatus();
   }
 }

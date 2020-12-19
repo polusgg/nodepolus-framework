@@ -73,8 +73,7 @@ export interface LobbyImplementation {
   shipStatus?: EntityLevel;
   meetingHud?: EntityMeetingHud;
   options: GameOptionsData;
-  host: HostInstance | undefined;
-  isHost: boolean;
+  customHostInstance: HostInstance;
   gameState: GameState;
 
   sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, sendTo?: (Player | HostInstance)[]): void;

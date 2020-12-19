@@ -11,7 +11,6 @@ import { EndGamePacket } from "../../protocol/packets/rootGamePackets/endGame";
 import { PlayerData } from "../../protocol/entities/gameData/playerData";
 import { EntityPlayer } from "../../protocol/entities/player";
 import { GameOverReason } from "../../types/gameOverReason";
-import { DefaultHostState } from "../server/serverConfig";
 import { FakeClientId } from "../../types/fakeClientId";
 import { Player as InternalPlayer } from "../../player";
 import { Connection } from "../../protocol/connection";
@@ -25,7 +24,6 @@ import { LobbySettings } from "./lobbySettings";
 import { Player, PlayerState } from "../player";
 import { Vector2 } from "../../util/vector2";
 import { Level } from "../../types/level";
-import { CustomHost } from "../../host";
 import { TextComponent } from "../text";
 import { Server } from "../server";
 import Emittery from "emittery";
@@ -181,7 +179,6 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
       this.internalLobby = new InternalLobby(
         server.internalServer.defaultLobbyAddress,
         server.internalServer.defaultLobbyPort,
-        server.internalServer.defaultHost == DefaultHostState.Server,
       );
     }
 
@@ -230,52 +227,21 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
       throw new Error("Attempted to change current level from no level");
     }
 
-    if (this.internalLobby.host instanceof CustomHost) {
-      this.internalLobby.sendRootGamePacket(new EndGamePacket(this.code, GameOverReason.ImpostorsBySabotage, true));
+    this.internalLobby.sendRootGamePacket(new EndGamePacket(this.code, GameOverReason.ImpostorsBySabotage, true));
 
-      this.internalLobby.connections.forEach(con => {
-        con.write(new JoinedGamePacket(this.code, con.id, this.internalLobby.host!.id, this.internalLobby.connections.map(c => c.id).filter(id => id != con.id)));
-      });
+    this.internalLobby.connections.forEach(con => {
+      con.write(new JoinedGamePacket(this.code, con.id, this.internalLobby.customHostInstance!.id, this.internalLobby.connections.map(c => c.id).filter(id => id != con.id)));
+    });
 
-      this.internalLobby.host.readyPlayerList = [];
-      this.internalLobby.options.options.levels = [level];
+    this.internalLobby.customHostInstance.readyPlayerList = [];
+    this.internalLobby.options.options.levels = [level];
 
-      this.internalLobby.sendRootGamePacket(new StartGamePacket(this.code));
-    }
+    this.internalLobby.sendRootGamePacket(new StartGamePacket(this.code));
   }
 
   clearMessage(): void {
-    if (this.internalLobby.host instanceof CustomHost) {
-      this.internalLobby.sendRootGamePacket(new EndGamePacket(this.code, 0, false));
-
-      setTimeout(() => {
-        this.internalLobby.connections.forEach(connection => {
-          const player = this.internalLobby.findPlayerByConnection(connection);
-
-          if (player) {
-            connection.write(new JoinedGamePacket(
-              this.code,
-              connection.id,
-              this.internalLobby.host!.id,
-              this.internalLobby.connections.map(e => e.id).filter(id => id != connection.id)),
-            );
-            connection.write(new GameDataPacket(this.internalLobby.players.map(p => p.gameObject.spawn()), this.code));
-
-            if (this.internalLobby.lobbyBehavior) {
-              connection.write(new GameDataPacket([this.internalLobby.lobbyBehavior.spawn()], this.code));
-            }
-
-            if (this.internalLobby.gameData) {
-              connection.write(new GameDataPacket([this.internalLobby.gameData.spawn()], this.code));
-            }
-
-            if (this.internalLobby.shipStatus) {
-              connection.write(new GameDataPacket([this.internalLobby.shipStatus.spawn()], this.code));
-            }
-          }
-        });
-      }, 100);
-    }
+    //TODO: this *is* possible....
+    //      somehow...
   }
 
   sendMessage(message: TextComponent | string): void {
@@ -283,40 +249,36 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
       throw new Error("sendMessage called without a GameData instance");
     }
 
-    if (this.internalLobby.host instanceof CustomHost) {
-      const playerId = 127;
-      const entity = new EntityPlayer(this.internalLobby);
-      const playerData = new PlayerData(
-        playerId,
-        `[FFFFFFFF]${message.toString()}[FFFFFF00]`,
-        PlayerColor.Red,
-        PlayerHat.None,
-        PlayerPet.None,
-        PlayerSkin.None,
-        false,
-        false,
-        false,
-        [],
-      );
+    const playerId = 127;
+    const entity = new EntityPlayer(this.internalLobby);
+    const playerData = new PlayerData(
+      playerId,
+      `[FFFFFFFF]${message.toString()}[FFFFFF00]`,
+      PlayerColor.Red,
+      PlayerHat.None,
+      PlayerPet.None,
+      PlayerSkin.None,
+      false,
+      false,
+      false,
+      [],
+    );
 
-      entity.owner = FakeClientId.Message;
-      entity.innerNetObjects = [
-        new InnerPlayerControl(this.internalLobby.host.nextNetId, entity, false, playerId),
-        new InnerPlayerPhysics(this.internalLobby.host.nextNetId, entity),
-        new InnerCustomNetworkTransform(this.internalLobby.host.nextNetId, entity, 5, new Vector2(39, 39), new Vector2(0, 0)),
-      ];
+    entity.owner = FakeClientId.Message;
+    entity.innerNetObjects = [
+      new InnerPlayerControl(this.internalLobby.customHostInstance.nextNetId, entity, false, playerId),
+      new InnerPlayerPhysics(this.internalLobby.customHostInstance.nextNetId, entity),
+      new InnerCustomNetworkTransform(this.internalLobby.customHostInstance.nextNetId, entity, 5, new Vector2(39, 39), new Vector2(0, 0)),
+    ];
 
-      this.internalLobby.sendRootGamePacket(new JoinGameResponsePacket(this.internalLobby.code, FakeClientId.Message, this.internalLobby.host.id));
-      this.internalLobby.sendRootGamePacket(new GameDataPacket([entity.spawn()], this.internalLobby.code));
+    this.internalLobby.sendRootGamePacket(new JoinGameResponsePacket(this.internalLobby.code, FakeClientId.Message, this.internalLobby.customHostInstance.id));
+    this.internalLobby.sendRootGamePacket(new GameDataPacket([entity.spawn()], this.internalLobby.code));
 
-      setTimeout(() => {
-        if (this.internalLobby.gameData == undefined) {
-          throw new Error("Attempted to send a lobby message without a GameData instance");
-        }
+    this.internalLobby.connections.forEach(con => {
+      con.flush();
+    });
 
-        this.internalLobby.gameData.gameData.updateGameData([playerData], this.internalLobby.connections);
-        this.internalLobby.sendRootGamePacket(new RemovePlayerPacket(this.code, FakeClientId.Message, this.internalLobby.host!.id));
-      }, 51);
-    }
+    this.internalLobby.gameData.gameData.updateGameData([playerData], this.internalLobby.connections);
+    this.internalLobby.sendRootGamePacket(new RemovePlayerPacket(this.code, FakeClientId.Message, this.internalLobby.customHostInstance!.id));
   }
 }

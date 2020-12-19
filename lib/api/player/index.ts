@@ -18,7 +18,6 @@ import { PlayerHat } from "../../types/playerHat";
 import { PlayerPet } from "../../types/playerPet";
 import { DeathReason } from "../types/enums";
 import { Vector2 } from "../../util/vector2";
-import { CustomHost } from "../../host";
 import { TextComponent } from "../text";
 import { Task } from "../game/task";
 import { Server } from "../server";
@@ -272,12 +271,10 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
       this.gameDataEntry,
     ], this.lobby.internalLobby.connections);
 
-    if (this.lobby.internalLobby.isHost) {
-      if (this.isImpostor) {
-        (this.lobby.internalLobby.host as CustomHost).handleImpostorDeath();
-      } else {
-        (this.lobby.internalLobby.host as CustomHost).handleMurderPlayer(this.internalPlayer.gameObject.playerControl, 0);
-      }
+    if (this.isImpostor) {
+      this.lobby.internalLobby.customHostInstance.handleImpostorDeath();
+    } else {
+      this.lobby.internalLobby.customHostInstance.handleMurderPlayer(this.internalPlayer.gameObject.playerControl, 0);
     }
 
     // TODO: Finish once events are written
@@ -290,86 +287,79 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     const playerControl = this.internalPlayer.gameObject.playerControl;
 
     playerControl.murderPlayer(player.internalPlayer.gameObject.playerControl.id, this.lobby.internalLobby.connections);
-
-    if (this.lobby.internalLobby.host instanceof CustomHost) {
-      this.lobby.internalLobby.host.handleMurderPlayer(playerControl, 0);
-    }
+    this.lobby.internalLobby.customHostInstance.handleMurderPlayer(playerControl, 0);
 
     return this;
   }
 
   revive(): this {
-    if (this.lobby.internalLobby.host instanceof CustomHost) {
-      if (!this.lobby.internalLobby.gameData) {
-        throw new Error("Attempted to revive player without a GameData instance");
-      }
-
-      const entity = new EntityPlayer(this.lobby.internalLobby);
-
-      entity.owner = this.clientId;
-      entity.innerNetObjects = [
-        new InnerPlayerControl(this.lobby.internalLobby.host.nextNetId, entity, false, this.playerId!),
-        new InnerPlayerPhysics(this.lobby.internalLobby.host.nextNetId, entity),
-        new InnerCustomNetworkTransform(
-          this.lobby.internalLobby.host.nextNetId,
-          entity,
-          0,
-          this.internalPlayer.gameObject.customNetworkTransform.position,
-          this.internalPlayer.gameObject.customNetworkTransform.velocity,
-        ),
-      ];
-
-      this.internalPlayer.gameObject.customNetworkTransform.position = new Vector2(-39, -39);
-
-      const thisConnection = this.lobby.internalLobby.findConnectionByPlayer(this.internalPlayer);
-
-      if (!thisConnection) {
-        throw new Error("Tried to respawn a player without a connection");
-      }
-
-      const oldName = this.name;
-
-      this.lobby.internalLobby.ignoredNetIds = this.lobby.internalLobby.ignoredNetIds.concat([
-        this.internalPlayer.gameObject.playerControl.id,
-        this.internalPlayer.gameObject.playerPhysics.id,
-        this.internalPlayer.gameObject.customNetworkTransform.id,
-      ]);
-
-      this.setName("");
-
-      if (thisConnection.isActingHost) {
-        thisConnection.write(new RemovePlayerPacket(this.lobby.code, this.clientId, this.clientId, DisconnectReason.serverRequest()));
-        thisConnection.write(new JoinGameResponsePacket(this.lobby.code, this.clientId, this.clientId));
-      } else {
-        thisConnection.write(new RemovePlayerPacket(this.lobby.code, this.clientId, this.lobby.internalLobby.host.id, DisconnectReason.serverRequest()));
-        thisConnection.write(new JoinGameResponsePacket(this.lobby.code, this.clientId, this.lobby.internalLobby.host.id));
-      }
-
-      this.setName(oldName);
-
-      for (let i = 0; i < this.lobby.internalLobby.connections.length; i++) {
-        const connection = this.lobby.internalLobby.connections[i];
-
-        if (connection.id != this.clientId) {
-          connection.write(new GameDataPacket([
-            new DespawnPacket(this.internalPlayer.gameObject.playerControl.id),
-            new DespawnPacket(this.internalPlayer.gameObject.playerPhysics.id),
-            new DespawnPacket(this.internalPlayer.gameObject.customNetworkTransform.id),
-          ], this.lobby.code));
-        }
-      }
-
-      this.gameDataEntry.isDead = false;
-      this.internalPlayer.gameObject = entity;
-
-      this.lobby.internalLobby.gameData.gameData.updateGameData([this.gameDataEntry], this.lobby.internalLobby.connections);
-
-      this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
-        entity.spawn(),
-      ], this.lobby.code));
-    } else {
-      throw new Error("Attempted to revive player without a custom host instance");
+    if (!this.lobby.internalLobby.gameData) {
+      throw new Error("Attempted to revive player without a GameData instance");
     }
+
+    const entity = new EntityPlayer(this.lobby.internalLobby);
+
+    entity.owner = this.clientId;
+    entity.innerNetObjects = [
+      new InnerPlayerControl(this.lobby.internalLobby.customHostInstance.nextNetId, entity, false, this.playerId!),
+      new InnerPlayerPhysics(this.lobby.internalLobby.customHostInstance.nextNetId, entity),
+      new InnerCustomNetworkTransform(
+        this.lobby.internalLobby.customHostInstance.nextNetId,
+        entity,
+        0,
+        this.internalPlayer.gameObject.customNetworkTransform.position,
+        this.internalPlayer.gameObject.customNetworkTransform.velocity,
+      ),
+    ];
+
+    this.internalPlayer.gameObject.customNetworkTransform.position = new Vector2(-39, -39);
+
+    const thisConnection = this.lobby.internalLobby.findConnectionByPlayer(this.internalPlayer);
+
+    if (!thisConnection) {
+      throw new Error("Tried to respawn a player without a connection");
+    }
+
+    const oldName = this.name;
+
+    this.lobby.internalLobby.ignoredNetIds = this.lobby.internalLobby.ignoredNetIds.concat([
+      this.internalPlayer.gameObject.playerControl.id,
+      this.internalPlayer.gameObject.playerPhysics.id,
+      this.internalPlayer.gameObject.customNetworkTransform.id,
+    ]);
+
+    this.setName("");
+
+    if (thisConnection.isActingHost) {
+      thisConnection.write(new RemovePlayerPacket(this.lobby.code, this.clientId, this.clientId, DisconnectReason.serverRequest()));
+      thisConnection.write(new JoinGameResponsePacket(this.lobby.code, this.clientId, this.clientId));
+    } else {
+      thisConnection.write(new RemovePlayerPacket(this.lobby.code, this.clientId, this.lobby.internalLobby.customHostInstance.id, DisconnectReason.serverRequest()));
+      thisConnection.write(new JoinGameResponsePacket(this.lobby.code, this.clientId, this.lobby.internalLobby.customHostInstance.id));
+    }
+
+    this.setName(oldName);
+
+    for (let i = 0; i < this.lobby.internalLobby.connections.length; i++) {
+      const connection = this.lobby.internalLobby.connections[i];
+
+      if (connection.id != this.clientId) {
+        connection.write(new GameDataPacket([
+          new DespawnPacket(this.internalPlayer.gameObject.playerControl.id),
+          new DespawnPacket(this.internalPlayer.gameObject.playerPhysics.id),
+          new DespawnPacket(this.internalPlayer.gameObject.customNetworkTransform.id),
+        ], this.lobby.code));
+      }
+    }
+
+    this.gameDataEntry.isDead = false;
+    this.internalPlayer.gameObject = entity;
+
+    this.lobby.internalLobby.gameData.gameData.updateGameData([this.gameDataEntry], this.lobby.internalLobby.connections);
+
+    this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
+      entity.spawn(),
+    ], this.lobby.code));
 
     return this;
   }
@@ -386,29 +376,27 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
 
   // TODO: Delete?
   sendNote(message: TextComponent | string): this {
-    if (this.lobby.internalLobby.host instanceof CustomHost) {
-      const oldName = this.name.toString();
+    const oldName = this.name.toString();
 
-      const tempFakeMHud = new EntityMeetingHud(this.lobby.internalLobby);
+    const tempFakeMHud = new EntityMeetingHud(this.lobby.internalLobby);
 
-      tempFakeMHud.owner = GLOBAL_OWNER;
+    tempFakeMHud.owner = GLOBAL_OWNER;
 
-      tempFakeMHud.innerNetObjects = [
-        new InnerMeetingHud(this.lobby.internalLobby.host.nextNetId, tempFakeMHud),
-      ];
+    tempFakeMHud.innerNetObjects = [
+      new InnerMeetingHud(this.lobby.internalLobby.customHostInstance.nextNetId, tempFakeMHud),
+    ];
 
-      this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
-        tempFakeMHud.spawn(),
-      ], this.lobby.code));
+    this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
+      tempFakeMHud.spawn(),
+    ], this.lobby.code));
 
-      this.setName(`[FFFFFFFF]${message.toString()}[FFFFFF00]`);
-      this.internalPlayer.gameObject.playerControl.sendChatNote(this.playerId!, 0, this.lobby.internalLobby.connections);
-      this.setName(oldName);
+    this.setName(`[FFFFFFFF]${message.toString()}[FFFFFF00]`);
+    this.internalPlayer.gameObject.playerControl.sendChatNote(this.playerId!, 0, this.lobby.internalLobby.connections);
+    this.setName(oldName);
 
-      this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
-        new DespawnPacket(tempFakeMHud.innerNetObjects[0].id),
-      ], this.lobby.code));
-    }
+    this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
+      new DespawnPacket(tempFakeMHud.innerNetObjects[0].id),
+    ], this.lobby.code));
 
     return this;
   }

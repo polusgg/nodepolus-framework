@@ -25,7 +25,7 @@ export class ProxyLobby implements LobbyImplementation {
   public shipStatus?: EntityLevel;
   public meetingHud?: EntityMeetingHud;
   public options: GameOptionsData = DEFAULT_GAME_OPTIONS;
-  public host: HostInstance | undefined;
+  public customHostInstance: HostInstance;
   public gameState: GameState = GameState.NotStarted;
 
   constructor(

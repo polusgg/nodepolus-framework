@@ -7,9 +7,7 @@ import { SendChatNotePacket } from "../../packets/rootGamePackets/gameDataPacket
 import { StartMeetingPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/startMeeting";
 import { SyncSettingsPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/syncSettings";
 import { SetInfectedPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/setInfected";
-import { CheckColorPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/checkColor";
 import { SetScannerPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/setScanner";
-import { CheckNamePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/checkName";
 import { SendChatPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/sendChat";
 import { SetColorPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/setColor";
 import { SetNamePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/setName";
@@ -130,17 +128,8 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
     player.exiled(sendTo);
   }
 
-  checkName(name: string, _sendTo: Connection[]): void {
-    if (this.parent.lobby.isHost) {
-      return;
-    }
-
-    if (!this.parent.lobby.host) {
-      throw new Error("CheckName sent to a lobby without a host");
-    }
-
-    this.sendRPCPacketTo([this.parent.lobby.host as Connection], new CheckNamePacket(name));
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  checkName(_name: string, _sendTo: Connection[]): void {}
 
   setName(name: string, sendTo: Connection[]): void {
     const gameData = this.parent.lobby.gameData;
@@ -151,7 +140,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1 && this.parent.lobby.isHost) {
+    if (gameDataPlayerIndex == -1) {
       throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
@@ -162,17 +151,8 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
     this.sendRPCPacketTo(sendTo, new SetNamePacket(name));
   }
 
-  checkColor(color: PlayerColor, _sendTo: Connection[]): void {
-    if (this.parent.lobby.isHost) {
-      return;
-    }
-
-    if (!this.parent.lobby.host) {
-      throw new Error("CheckColor sent to a lobby without a host");
-    }
-
-    this.sendRPCPacketTo([this.parent.lobby.host], new CheckColorPacket(color));
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  checkColor(_color: PlayerColor, _sendTo: Connection[]): void {}
 
   setColor(color: PlayerColor, sendTo: Connection[]): void {
     const gameData = this.parent.lobby.gameData;
@@ -183,7 +163,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1 && this.parent.lobby.isHost) {
+    if (gameDataPlayerIndex == -1) {
       throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
@@ -203,7 +183,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1 && this.parent.lobby.isHost) {
+    if (gameDataPlayerIndex == -1) {
       throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
@@ -223,7 +203,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1 && this.parent.lobby.isHost) {
+    if (gameDataPlayerIndex == -1) {
       throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
@@ -272,8 +252,14 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
     this.sendRPCPacketTo(sendTo, new StartMeetingPacket(victimPlayerId));
   }
 
-  setScanner(isScanning: boolean, sendTo: Connection[]): void {
-    this.sendRPCPacketTo(sendTo, new SetScannerPacket(isScanning, this.scannerSequenceId++));
+  setScanner(isScanning: boolean, sequenceId: number, sendTo: Connection[]): void {
+    this.scannerSequenceId++;
+
+    if (sequenceId < this.scannerSequenceId) {
+      return;
+    }
+
+    this.sendRPCPacketTo(sendTo, new SetScannerPacket(isScanning, this.scannerSequenceId));
   }
 
   sendChatNote(playerId: number, noteType: ChatNoteType, sendTo: Connection[]): void {
@@ -289,7 +275,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1 && this.parent.lobby.isHost) {
+    if (gameDataPlayerIndex == -1) {
       throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
@@ -301,7 +287,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   setStartCounter(sequenceId: number, timeRemaining: number, sendTo: Connection[]): void {
-    this.parent.lobby.host?.handleSetStartCounter(sequenceId, timeRemaining);
+    this.parent.lobby.customHostInstance.handleSetStartCounter(sequenceId, timeRemaining);
 
     this.sendRPCPacketTo(sendTo, new SetStartCounterPacket(sequenceId, timeRemaining));
   }

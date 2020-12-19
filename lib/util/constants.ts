@@ -1,4 +1,3 @@
-import { DefaultHostState } from "../api/server/serverConfig";
 import { GameOptionsData } from "../types/gameOptionsData";
 import { TaskBarUpdate } from "../types/taskBarUpdate";
 import { KillDistance } from "../types/killDistance";
@@ -34,8 +33,6 @@ export const DEFAULT_SERVER_ADDRESS = "0.0.0.0";
 export const DEFAULT_SERVER_PORT = 22023;
 
 export const ANNOUNCEMENT_SERVER_PORT = 22024;
-
-export const DEFAULT_HOST_STATE = DefaultHostState.Server;
 
 /**
  * Lobby constants
