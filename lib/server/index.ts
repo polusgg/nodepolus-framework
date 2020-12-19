@@ -1,4 +1,4 @@
-import { GameListCounts, GetGameListResponsePacket, RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
+import { GameListCounts, GetGameListResponsePacket, LobbyListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { DEFAULT_HOST_STATE, DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { HostGameResponsePacket, HostGameRequestPacket } from "../protocol/packets/rootGamePackets/hostGame";
 import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
@@ -169,7 +169,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
         break;
       }
       case RootGamePacketType.GetGameList: {
-        const results: RoomListing[] = [];
+        const results: LobbyListing[] = [];
         const counts = new GameListCounts();
 
         for (let i = 0; i < this.rooms.length; i++) {
@@ -184,8 +184,8 @@ export class Server extends Emittery.Typed<ServerEvents> {
           counts.increment(level);
 
           // TODO: Add config option for max player count and max results
-          if (room.roomListing.playerCount < 10 && results.length < 10) {
-            results[i] = room.roomListing;
+          if (room.lobbyListing.playerCount < 10 && results.length < 10) {
+            results[i] = room.lobbyListing;
           }
         }
 

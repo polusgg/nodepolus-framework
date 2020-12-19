@@ -22,7 +22,7 @@ import { KickPlayerPacket } from "../protocol/packets/rootGamePackets/kickPlayer
 import { RemoveGamePacket } from "../protocol/packets/rootGamePackets/removeGame";
 import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { StartGamePacket } from "../protocol/packets/rootGamePackets/startGame";
-import { RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
+import { LobbyListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
 import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
 import { EndGamePacket } from "../protocol/packets/rootGamePackets/endGame";
@@ -158,8 +158,8 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
       : (this.host as Connection).name!;
   }
 
-  get roomListing(): RoomListing {
-    return new RoomListing(
+  get lobbyListing(): LobbyListing {
+    return new LobbyListing(
       this.address,
       this.port,
       this.code,

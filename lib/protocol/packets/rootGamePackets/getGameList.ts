@@ -5,7 +5,7 @@ import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 import { Level } from "../../../types/level";
 
-export class RoomListing {
+export class LobbyListing {
   constructor(
     public readonly ipAddress: string,
     public readonly port: number,
@@ -18,8 +18,8 @@ export class RoomListing {
     public readonly maxPlayers: number,
   ) {}
 
-  static deserialize(reader: MessageReader): RoomListing {
-    return new RoomListing(
+  static deserialize(reader: MessageReader): LobbyListing {
+    return new LobbyListing(
       reader.readBytes(4).buffer.join("."),
       reader.readUInt16(),
       RoomCode.decode(reader.readInt32()),
@@ -106,7 +106,7 @@ export class GetGameListRequestPacket extends BaseRootGamePacket {
 
 export class GetGameListResponsePacket extends BaseRootGamePacket {
   constructor(
-    public readonly rooms: RoomListing[],
+    public readonly rooms: LobbyListing[],
     public readonly counts?: GameListCounts,
   ) {
     super(RootGamePacketType.GetGameList);
@@ -114,7 +114,7 @@ export class GetGameListResponsePacket extends BaseRootGamePacket {
 
   static deserialize(reader: MessageReader): GetGameListResponsePacket {
     let counts: GameListCounts | undefined;
-    const rooms: RoomListing[] = [];
+    const rooms: LobbyListing[] = [];
 
     reader.readAllChildMessages(child => {
       if (child.tag == 1) {
@@ -126,7 +126,7 @@ export class GetGameListResponsePacket extends BaseRootGamePacket {
         );
       } else if (child.tag == 0) {
         child.readAllChildMessages(roomMessage => {
-          rooms.push(RoomListing.deserialize(roomMessage));
+          rooms.push(LobbyListing.deserialize(roomMessage));
         });
       }
     });
