@@ -1,5 +1,5 @@
 import { SpawnInnerNetObject, SpawnPacket } from "../packets/rootGamePackets/gameDataPackets/spawn";
-import { Entity, InnerNetObject, InnerNetObjectType, RoomImplementation } from "./types";
+import { Entity, InnerNetObject, InnerNetObjectType, LobbyImplementation } from "./types";
 import { DataPacket } from "../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
 import { BaseRPCPacket } from "../packets/basePacket";
@@ -11,7 +11,7 @@ import { Player } from "../../player";
 export abstract class BaseEntity {
   constructor(
     public readonly type: SpawnType,
-    public readonly room: RoomImplementation,
+    public readonly room: LobbyImplementation,
   ) {}
 
   abstract setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void;

@@ -2,7 +2,7 @@ import { SpawnInnerNetObject, SpawnPacket } from "../../packets/rootGamePackets/
 import { InnerSkeldAprilShipStatus } from "./innerSkeldAprilShipStatus";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
-import { RoomImplementation } from "../types";
+import { LobbyImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 
 export type SkeldAprilShipStatusInnerNetObjects = [ InnerSkeldAprilShipStatus ];
@@ -16,11 +16,11 @@ export class EntitySkeldAprilShipStatus extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(room: RoomImplementation) {
+  constructor(room: LobbyImplementation) {
     super(SpawnType.AprilShipStatus, room);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntitySkeldAprilShipStatus {
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntitySkeldAprilShipStatus {
     const aprilShipStatus = new EntitySkeldAprilShipStatus(room);
 
     aprilShipStatus.setSpawn(flags, owner, innerNetObjects);

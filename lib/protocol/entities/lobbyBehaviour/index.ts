@@ -3,7 +3,7 @@ import { InnerLobbyBehaviour } from "./innerLobbyBehaviour";
 import { GLOBAL_OWNER } from "../../../util/constants";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
-import { RoomImplementation } from "../types";
+import { LobbyImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 
 export type LobbyBehaviourInnerNetObjects = [ InnerLobbyBehaviour ];
@@ -17,11 +17,11 @@ export class EntityLobbyBehaviour extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(room: RoomImplementation) {
+  constructor(room: LobbyImplementation) {
     super(SpawnType.LobbyBehaviour, room);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityLobbyBehaviour {
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntityLobbyBehaviour {
     const lobbyBehaviour = new EntityLobbyBehaviour(room);
 
     lobbyBehaviour.setSpawn(flags, owner, innerNetObjects);

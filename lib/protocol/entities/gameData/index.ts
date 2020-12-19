@@ -3,7 +3,7 @@ import { InnerVoteBanSystem } from "./innerVoteBanSystem";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
 import { InnerGameData } from "./innerGameData";
-import { RoomImplementation } from "../types";
+import { LobbyImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 
 export type GameDataInnerNetObjects = [ InnerGameData, InnerVoteBanSystem ];
@@ -21,11 +21,11 @@ export class EntityGameData extends BaseEntity {
     return this.innerNetObjects[1];
   }
 
-  constructor(room: RoomImplementation) {
+  constructor(room: LobbyImplementation) {
     super(SpawnType.GameData, room);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityGameData {
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntityGameData {
     const gameData = new EntityGameData(room);
 
     gameData.setSpawn(flags, owner, innerNetObjects);

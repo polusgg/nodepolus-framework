@@ -1,4 +1,4 @@
-import { EntityLevel, InnerNetObject, InnerNetObjectType, RoomImplementation } from "../protocol/entities/types";
+import { EntityLevel, InnerNetObject, InnerNetObjectType, LobbyImplementation } from "../protocol/entities/types";
 import { SpawnInnerNetObject, SpawnPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/spawn";
 import { JoinGameErrorPacket, JoinGameResponsePacket } from "../protocol/packets/rootGamePackets/joinGame";
 import { LateRejectionPacket, RemovePlayerPacket } from "../protocol/packets/rootGamePackets/removePlayer";
@@ -111,7 +111,7 @@ export type RoomEvents = {
   despawn: InnerNetObject;
 };
 
-export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementation, dgram.RemoteInfo {
+export class Room extends Emittery.Typed<RoomEvents> implements LobbyImplementation, dgram.RemoteInfo {
   public readonly createdAt: number = Date.now();
 
   public connections: Connection[] = [];

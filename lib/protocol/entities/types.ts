@@ -67,7 +67,7 @@ export type Entity = EntityLobbyBehaviour
 | EntityMeetingHud
 | EntityLevel;
 
-export interface RoomImplementation {
+export interface LobbyImplementation {
   players: Player[];
   gameData?: EntityGameData;
   shipStatus?: EntityLevel;

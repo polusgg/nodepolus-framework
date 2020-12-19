@@ -2,7 +2,7 @@ import { SpawnInnerNetObject, SpawnPacket } from "../../packets/rootGamePackets/
 import { InnerAirshipStatus } from "./innerAirshipStatus";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
-import { RoomImplementation } from "../types";
+import { LobbyImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 
 export type AirshipStatusInnerNetObjects = [ InnerAirshipStatus ];
@@ -16,11 +16,11 @@ export class EntityAirshipStatus extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(room: RoomImplementation) {
+  constructor(room: LobbyImplementation) {
     super(SpawnType.Airship, room);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityAirshipStatus {
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntityAirshipStatus {
     const airshipStatus = new EntityAirshipStatus(room);
 
     airshipStatus.setSpawn(flags, owner, innerNetObjects);

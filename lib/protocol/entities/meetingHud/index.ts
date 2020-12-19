@@ -3,7 +3,7 @@ import { GLOBAL_OWNER } from "../../../util/constants";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";
 import { InnerMeetingHud } from "./innerMeetingHud";
-import { RoomImplementation } from "../types";
+import { LobbyImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 
 export type MeetingHudInnerNetObjects = [ InnerMeetingHud ];
@@ -17,11 +17,11 @@ export class EntityMeetingHud extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(room: RoomImplementation) {
+  constructor(room: LobbyImplementation) {
     super(SpawnType.MeetingHud, room);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: RoomImplementation): EntityMeetingHud {
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntityMeetingHud {
     const meetingHud = new EntityMeetingHud(room);
 
     meetingHud.setSpawn(flags, owner, innerNetObjects);

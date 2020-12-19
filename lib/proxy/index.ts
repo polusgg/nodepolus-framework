@@ -1,4 +1,4 @@
-import { RoomImplementation, EntityLevel, InnerNetObject } from "../protocol/entities/types";
+import { LobbyImplementation, EntityLevel, InnerNetObject } from "../protocol/entities/types";
 import { RPCPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/rpc";
 import { BaseRootGamePacket, BaseRPCPacket } from "../protocol/packets/basePacket";
 import { GameDataPacket } from "../protocol/packets/rootGamePackets/gameData";
@@ -19,7 +19,7 @@ export interface ProxyConfig {
   server: dgram.RemoteInfo;
 }
 
-export class ProxyRoom implements RoomImplementation {
+export class ProxyRoom implements LobbyImplementation {
   public players: Player[] = [];
   public gameData?: EntityGameData;
   public shipStatus?: EntityLevel;
