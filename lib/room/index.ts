@@ -38,14 +38,18 @@ import { EntityPlayer } from "../protocol/entities/player";
 import { DEFAULT_GAME_OPTIONS } from "../util/constants";
 import { GameOverReason } from "../types/gameOverReason";
 import { AlterGameTag } from "../types/alterGameTag";
+import { FakeClientId } from "../types/fakeClientId";
 import { Connection } from "../protocol/connection";
-import { FakeHostId } from "../types/fakeHostId";
+import { PlayerColor } from "../types/playerColor";
 import { notUndefined } from "../util/functions";
 import { LimboState } from "../types/limboState";
+import { PlayerSkin } from "../types/playerSkin";
 import { RemoteInfo } from "../util/remoteInfo";
+import { GameState } from "../types/gameState";
+import { PlayerHat } from "../types/playerHat";
+import { PlayerPet } from "../types/playerPet";
 import { SpawnFlag } from "../types/spawnFlag";
 import { SpawnType } from "../types/spawnType";
-import { GameState } from "../types/gameState";
 import { HostInstance } from "../host/types";
 import { RoomCode } from "../util/roomCode";
 import { RPCHandler } from "./rpcHandler";
@@ -62,11 +66,46 @@ export type RoomEvents = {
     killer: Player;
     victim: Player;
   };
-  playerMoved: {
+  chat: {
+    clientId: number;
+    message: string;
+  };
+  movement: {
     clientId: number;
     sequenceId: number;
     position: Vector2;
     velocity: Vector2;
+  };
+  nameChanged: {
+    clientId: number;
+    newName: string;
+  };
+  colorChanged: {
+    clientId: number;
+    newColor: PlayerColor;
+  };
+  petChanged: {
+    clientId: number;
+    newPet: PlayerPet;
+  };
+  hatChanged: {
+    clientId: number;
+    newHat: PlayerHat;
+  };
+  skinChanged: {
+    clientId: number;
+    newSkin: PlayerSkin;
+  };
+  removed: {
+    clientId: number;
+  };
+  enteredVent: {
+    clientId: number;
+    ventId: number;
+  };
+  leftVent: {
+    clientId: number;
+    ventId: number;
   };
   setInfected: number[];
   despawn: InnerNetObject;
@@ -190,9 +229,9 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
 
   sendRemoveHost(connection: Connection, sendImmediately: boolean = true): void {
     if (sendImmediately) {
-      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.host?.id ?? FakeHostId.ServerAsHost)]);
+      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.host?.id ?? FakeClientId.ServerAsHost)]);
     } else {
-      connection.write(new JoinGameResponsePacket(this.code, connection.id, this.host?.id ?? FakeHostId.ServerAsHost));
+      connection.write(new JoinGameResponsePacket(this.code, connection.id, this.host?.id ?? FakeClientId.ServerAsHost));
     }
   }
 
@@ -240,6 +279,10 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
 
   findPlayerByConnection(connection: Connection): Player | undefined {
     return this.players.find(player => player.gameObject.owner == connection.id);
+  }
+
+  findPlayerByInnerNetObject(netObject: InnerPlayerControl | InnerPlayerPhysics | InnerCustomNetworkTransform): Player | undefined {
+    return this.players.find(player => player.gameObject == netObject.parent);
   }
 
   findConnectionByPlayer(player: Player): Connection | undefined {
@@ -557,7 +600,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
       new JoinGameResponsePacket(
         this.code,
         connection.id,
-        this.isHost ? FakeHostId.ServerAsHost : this.host!.id,
+        this.isHost ? FakeClientId.ServerAsHost : this.host!.id,
       ),
       this.connections
         .filter(con => con.id != connection.id)
@@ -570,7 +613,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
       new JoinedGamePacket(
         this.code,
         connection.id,
-        this.isHost ? FakeHostId.ServerAsHost : this.host!.id,
+        this.isHost ? FakeClientId.ServerAsHost : this.host!.id,
         this.connections
           .filter(con => con.id != connection.id && con.limboState == LimboState.NotLimbo)
           .map(con => con.id)),
@@ -653,7 +696,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
       netObject.data(data);
 
       if (netObject.type == InnerNetObjectType.CustomNetworkTransform) {
-        this.emit("playerMoved", {
+        this.emit("movement", {
           clientId: netObject.parent.owner,
           sequenceId: (netObject as InnerCustomNetworkTransform).sequenceId,
           position: (netObject as InnerCustomNetworkTransform).position,
@@ -821,6 +864,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
         }
 
         this.gameData.innerNetObjects[1] = undefined as unknown as InnerVoteBanSystem;
+
         this.deleteIfEmpty("gameData");
         break;
       case InnerNetObjectType.GameData:
@@ -829,6 +873,7 @@ export class Room extends Emittery.Typed<RoomEvents> implements RoomImplementati
         }
 
         this.gameData.innerNetObjects[0] = undefined as unknown as InnerGameData;
+
         this.deleteIfEmpty("gameData");
         break;
       case InnerNetObjectType.LobbyBehaviour:

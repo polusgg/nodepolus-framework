@@ -409,9 +409,6 @@
       "allowStaticOnly": true,
       "allowWithDecorator": false
     }],
-    "@typescript-eslint/no-implicit-any-catch": ["error", {
-      "allowExplicitAny": false
-    }],
     "@typescript-eslint/no-invalid-void-type": "error",
     "@typescript-eslint/no-require-imports": "error",
     "@typescript-eslint/no-unnecessary-boolean-literal-compare": "error",

@@ -237,6 +237,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
         if (this.unacknowledgedPackets.has(nonce!)) {
           if (this.unacknowledgedPackets.get(nonce!)! > 10) {
             this.disconnect(DisconnectReason.custom(`Failed to acknowledge packet ${nonce} after 10 attempts`));
+
             clearInterval(resendInterval);
           } else {
             this.socket.send(packetToSend.buffer, this.port, this.address);

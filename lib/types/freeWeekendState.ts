@@ -1,5 +1,5 @@
 export enum FreeWeekendState {
   NotFree = 0x00,
-  FreeMIRA = 0x01,
-  FreeUnknown = 0x02,
+  FreeMira = 0x01,
+  FreePolus = 0x02,
 }

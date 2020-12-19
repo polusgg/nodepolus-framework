@@ -1,11 +1,11 @@
-import { GameOptionsDataV4, GameOptionsData } from "../types/gameOptionsData";
-import { TaskBarUpdate } from "../types/taskBarUpdate";
-import { KillDistance } from "../types/killDistance";
-import { Connection } from "../protocol/connection";
-import { Language } from "../types/language";
-import { Level } from "../types/level";
-import { Player } from "./player";
-import { Room } from "./room";
+import { GameOptionsDataV4, GameOptionsData } from "../../types/gameOptionsData";
+import { TaskBarUpdate } from "../../types/taskBarUpdate";
+import { KillDistance } from "../../types/killDistance";
+import { Connection } from "../../protocol/connection";
+import { Language } from "../../types/language";
+import { Level } from "../../types/level";
+import { Player } from "../player";
+import { Room } from ".";
 
 export class Settings {
   private readonly povCache: Map<number, Settings> = new Map();

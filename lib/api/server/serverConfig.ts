@@ -1,4 +1,3 @@
-// TODO: Merge with server config in server/index.ts
 export enum DefaultHostState {
   Server,
   Client,

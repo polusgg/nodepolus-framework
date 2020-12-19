@@ -1,5 +1,5 @@
 import { GameOptionsData } from "../types/gameOptionsData";
-import { DefaultHostState } from "../api/serverConfig";
+import { DefaultHostState } from "../api/server/serverConfig";
 import { TaskBarUpdate } from "../types/taskBarUpdate";
 import { KillDistance } from "../types/killDistance";
 import { Language } from "../types/language";

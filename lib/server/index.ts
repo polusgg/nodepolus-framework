@@ -5,19 +5,20 @@ import { GetGameListResponsePacket, RoomListing } from "../protocol/packets/root
 import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
 import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
-import { DefaultHostState, ServerConfig } from "../api/serverConfig";
+import { DefaultHostState, ServerConfig } from "../api/server/serverConfig";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";
+import { FakeClientId } from "../types/fakeClientId";
 import { Connection } from "../protocol/connection";
-import { FakeHostId } from "../types/fakeHostId";
 import { RemoteInfo } from "../util/remoteInfo";
 import { RoomCode } from "../util/roomCode";
 import { Level } from "../types/level";
 import Emittery from "emittery";
 import { Room } from "../room";
 import dgram from "dgram";
+import { RoomCreatedEvent } from "../api/events/server/roomCreated";
 
 export type ServerEvents = {
-  roomCreated: Room;
+  roomCreated: RoomCreatedEvent;
 };
 
 export class Server extends Emittery.Typed<ServerEvents> {
@@ -30,7 +31,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
   public roomMap: Map<string, Room> = new Map();
 
   // Starts at 1 to allow the Server host implementation's ID to be 0
-  private connectionIndex = Object.keys(FakeHostId).length / 2;
+  private connectionIndex = Object.keys(FakeClientId).length / 2;
 
   get nextConnectionId(): number {
     if (++this.connectionIndex > MaxValue.UInt32) {
@@ -141,12 +142,16 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         newRoom.options = (packet as HostGameRequestPacket).options;
 
-        this.emit("roomCreated", newRoom);
+        const event = new RoomCreatedEvent(newRoom);
 
-        this.rooms.push(newRoom);
-        this.roomMap.set(newRoom.code, newRoom);
+        this.emit("roomCreated", event);
 
-        sender.sendReliable([new HostGameResponsePacket(newRoom.code)]);
+        if (!event.isCancelled) {
+          this.rooms.push(newRoom);
+          this.roomMap.set(newRoom.code, newRoom);
+
+          sender.sendReliable([new HostGameResponsePacket(newRoom.code)]);
+        }
         break;
       }
       case RootGamePacketType.JoinGame: {

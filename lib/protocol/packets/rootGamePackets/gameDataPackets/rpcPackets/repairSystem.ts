@@ -15,7 +15,7 @@ export enum ReactorAction {
 }
 
 export class ReactorAmount implements RepairAmount {
-  private constructor(
+  constructor(
     public readonly consoleId: number,
     public readonly action: ReactorAction,
   ) {}
@@ -38,7 +38,7 @@ export class ReactorAmount implements RepairAmount {
 }
 
 export class ElectricalAmount implements RepairAmount {
-  private constructor(
+  constructor(
     public readonly switchIndex: number,
   ) {}
 
@@ -57,7 +57,7 @@ export enum OxygenAction {
 }
 
 export class OxygenAmount implements RepairAmount {
-  private constructor(
+  constructor(
     public readonly consoleId: number,
     public readonly action: OxygenAction,
   ) {}
@@ -85,7 +85,7 @@ export enum MedbayAction {
 }
 
 export class MedbayAmount implements RepairAmount {
-  private constructor(
+  constructor(
     public readonly playerId: number,
     public readonly action: MedbayAction,
   ) {}
@@ -105,7 +105,7 @@ export class MedbayAmount implements RepairAmount {
 }
 
 export class SecurityAmount implements RepairAmount {
-  private constructor(
+  constructor(
     public readonly isViewingCameras: boolean,
   ) {}
 
@@ -119,7 +119,7 @@ export class SecurityAmount implements RepairAmount {
 }
 
 export class NormalCommunicationsAmount implements RepairAmount {
-  private constructor(
+  constructor(
     public readonly isRepaired: boolean,
   ) {}
 
@@ -133,7 +133,7 @@ export class NormalCommunicationsAmount implements RepairAmount {
 }
 
 export class SabotageAmount implements RepairAmount {
-  private constructor(
+  constructor(
     public readonly system: SystemType,
   ) {}
 
@@ -153,7 +153,7 @@ export enum MiraCommunicationsAction {
 }
 
 export class MiraCommunicationsAmount implements RepairAmount {
-  private constructor(
+  constructor(
     public readonly consoleId: number,
     public readonly action: MiraCommunicationsAction,
   ) {}
@@ -176,7 +176,7 @@ export class MiraCommunicationsAmount implements RepairAmount {
 }
 
 export class DecontaminationAmount implements RepairAmount {
-  private constructor(
+  constructor(
     public readonly isEntering: boolean,
     public readonly isHeadingUp: boolean,
   ) {}
@@ -196,7 +196,7 @@ export class DecontaminationAmount implements RepairAmount {
 }
 
 export class PolusDoorsAmount implements RepairAmount {
-  private constructor(
+  constructor(
     public readonly doorId: number,
   ) {}
 

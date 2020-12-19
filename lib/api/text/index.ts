@@ -48,14 +48,14 @@ function stringToColor(str: string): [number, number, number, number] {
   return color;
 }
 
-export class Text {
+export class TextComponent {
   public readonly elements: (TextElement | LinkElement | ResetElement)[] = [];
 
   private currentColor: [number, number, number] = [255, 255, 255];
   private currentOpacity = 255;
 
-  static from(source: string): Text {
-    const text = new Text();
+  static from(source: string): TextComponent {
+    const text = new TextComponent();
 
     const reader: Reader = {
       state: ReaderState.ReadingText,
@@ -98,7 +98,7 @@ export class Text {
     return text;
   }
 
-  add(content: string): Text {
+  add(content: string): TextComponent {
     this.elements.push({
       type: ElementType.Text,
       content: content.split("[").join("[["),
@@ -109,19 +109,19 @@ export class Text {
     return this;
   }
 
-  setColor(red: number, green: number, blue: number): Text {
+  setColor(red: number, green: number, blue: number): TextComponent {
     this.currentColor = [red, green, blue];
 
     return this;
   }
 
-  setOpacity(opacity: number): Text {
+  setOpacity(opacity: number): TextComponent {
     this.currentOpacity = opacity;
 
     return this;
   }
 
-  reset(): Text {
+  reset(): TextComponent {
     this.currentColor = [255, 255, 255];
     this.currentOpacity = 255;
 
@@ -130,7 +130,7 @@ export class Text {
     return this;
   }
 
-  link(content: string, link: URL | string): Text {
+  link(content: string, link: URL | string): TextComponent {
     if (link instanceof URL) {
       this.elements.push({ type: ElementType.Link, content, link: link.toString() });
     } else {

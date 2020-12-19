@@ -45,6 +45,15 @@ export class RoomListing {
   }
 }
 
+export class GameListCounts {
+  constructor(
+    public skeld: number,
+    public skeldApril: number,
+    public mira: number,
+    public polus: number,
+  ) {}
+}
+
 export class GetGameListRequestPacket extends BaseRootGamePacket {
   constructor(
     public readonly includePrivate: boolean,

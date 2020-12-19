@@ -37,11 +37,13 @@ import { InnerLevel, InnerNetObjectType } from "../protocol/entities/types";
 import { PlayerData } from "../protocol/entities/gameData/playerData";
 import { BaseShipStatus } from "../protocol/entities/baseShipStatus";
 import { BaseRPCPacket } from "../protocol/packets/basePacket";
+// import { ChatEvent } from "../api/events/player/chatEvent";
 import { GameOptionsData } from "../types/gameOptionsData";
 import { RPCPacketType } from "../protocol/packets/types";
 import { ChatNoteType } from "../types/chatNoteType";
 import { Connection } from "../protocol/connection";
 import { PlayerColor } from "../types/playerColor";
+// import { TextComponent } from "../api/text/index";
 import { PlayerSkin } from "../types/playerSkin";
 import { SystemType } from "../types/systemType";
 import { PlayerHat } from "../types/playerHat";
@@ -429,6 +431,11 @@ export class RPCHandler {
   }
 
   handleSetName(sender: InnerPlayerControl, name: string, sendTo: Connection[]): void {
+    this.room.emit("nameChanged", {
+      clientId: sender.parent.owner,
+      newName: name,
+    });
+
     sender.setName(name, sendTo);
   }
 
@@ -443,14 +450,29 @@ export class RPCHandler {
   }
 
   handleSetColor(sender: InnerPlayerControl, color: PlayerColor, sendTo: Connection[]): void {
+    this.room.emit("colorChanged", {
+      clientId: sender.parent.owner,
+      newColor: color,
+    });
+
     sender.setColor(color, sendTo);
   }
 
   handleSetHat(sender: InnerPlayerControl, hat: PlayerHat, sendTo: Connection[]): void {
+    this.room.emit("hatChanged", {
+      clientId: sender.parent.owner,
+      newHat: hat,
+    });
+
     sender.setHat(hat, sendTo);
   }
 
   handleSetSkin(sender: InnerPlayerControl, skin: PlayerSkin, sendTo: Connection[]): void {
+    this.room.emit("skinChanged", {
+      clientId: sender.parent.owner,
+      newSkin: skin,
+    });
+
     sender.setSkin(skin, sendTo);
   }
 
@@ -475,14 +497,19 @@ export class RPCHandler {
   }
 
   handleSendChat(sender: InnerPlayerControl, message: string, sendTo: Connection[]): void {
+    // const event = new ChatEvent(this.room.findPlayerByInnerNetObject(sender)!, TextComponent.from(message));
+
+    // this.room.emit("chat", event);
+
+    // if (!event.isCancelled) {
     sender.sendChat(message, sendTo);
+    // }
   }
 
   handleStartMeeting(sender: InnerPlayerControl, victimPlayerId: number | undefined, sendTo: Connection[]): void {
     sender.startMeeting(victimPlayerId, sendTo);
   }
 
-  // TODO: Figure out what sequenceId does
   handleSetScanner(sender: InnerPlayerControl, isScanning: boolean, _sequenceId: number, sendTo: Connection[]): void {
     // TODO: Why is sequenceId not being passed?
     sender.setScanner(isScanning, sendTo);
@@ -493,6 +520,11 @@ export class RPCHandler {
   }
 
   handleSetPet(sender: InnerPlayerControl, pet: PlayerPet, sendTo: Connection[]): void {
+    this.room.emit("petChanged", {
+      clientId: sender.parent.owner,
+      newPet: pet,
+    });
+
     sender.setPet(pet, sendTo);
   }
 

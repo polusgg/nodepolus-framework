@@ -1,35 +1,35 @@
-import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
-import { HostGameResponsePacket } from "../protocol/packets/rootGamePackets/hostGame";
-import { JoinGameResponsePacket } from "../protocol/packets/rootGamePackets/joinGame";
-import { RemovePlayerPacket } from "../protocol/packets/rootGamePackets/removePlayer";
-import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
-import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
-import { JoinedGamePacket } from "../protocol/packets/rootGamePackets/joinedGame";
-import { StartGamePacket } from "../protocol/packets/rootGamePackets/startGame";
-import { GameDataPacket } from "../protocol/packets/rootGamePackets/gameData";
-import { EndGamePacket } from "../protocol/packets/rootGamePackets/endGame";
-import { PlayerData } from "../protocol/entities/gameData/playerData";
-import { EntityPlayer } from "../protocol/entities/player";
-import { GameOverReason } from "../types/gameOverReason";
-import { Player as InternalPlayer } from "../player";
-import { Connection } from "../protocol/connection";
-import { PlayerColor } from "../types/playerColor";
-import { FakeHostId } from "../types/fakeHostId";
-import { PlayerSkin } from "../types/playerSkin";
-import { GameState } from "../types/gameState";
-import { Player, PlayerState } from "./player";
-import { PlayerHat } from "../types/playerHat";
-import { PlayerPet } from "../types/playerPet";
-import { Room as InternalRoom } from "../room";
-import { DefaultHostState } from "../server";
+import { InnerCustomNetworkTransform } from "../../protocol/entities/player/innerCustomNetworkTransform";
+import { HostGameResponsePacket } from "../../protocol/packets/rootGamePackets/hostGame";
+import { JoinGameResponsePacket } from "../../protocol/packets/rootGamePackets/joinGame";
+import { RemovePlayerPacket } from "../../protocol/packets/rootGamePackets/removePlayer";
+import { InnerPlayerControl } from "../../protocol/entities/player/innerPlayerControl";
+import { InnerPlayerPhysics } from "../../protocol/entities/player/innerPlayerPhysics";
+import { JoinedGamePacket } from "../../protocol/packets/rootGamePackets/joinedGame";
+import { StartGamePacket } from "../../protocol/packets/rootGamePackets/startGame";
+import { GameDataPacket } from "../../protocol/packets/rootGamePackets/gameData";
+import { EndGamePacket } from "../../protocol/packets/rootGamePackets/endGame";
+import { PlayerData } from "../../protocol/entities/gameData/playerData";
+import { EntityPlayer } from "../../protocol/entities/player";
+import { GameOverReason } from "../../types/gameOverReason";
+import { DefaultHostState } from "../server/serverConfig";
+import { FakeClientId } from "../../types/fakeClientId";
+import { Player as InternalPlayer } from "../../player";
+import { Connection } from "../../protocol/connection";
+import { PlayerColor } from "../../types/playerColor";
+import { PlayerSkin } from "../../types/playerSkin";
+import { GameState } from "../../types/gameState";
+import { Player, PlayerState } from "../player";
+import { PlayerHat } from "../../types/playerHat";
+import { PlayerPet } from "../../types/playerPet";
+import { Room as InternalRoom } from "../../room";
+import { Vector2 } from "../../util/vector2";
+import { Level } from "../../types/level";
 import { Settings } from "./roomSettings";
-import { Vector2 } from "../util/vector2";
-import { Level } from "../types/level";
-import { CustomHost } from "../host";
-import { Server } from "./server";
+import { CustomHost } from "../../host";
+import { TextComponent } from "../text";
+import { Server } from "../server";
 import Emittery from "emittery";
-import { Game } from "./game";
-import { Text } from "./text";
+import { Game } from "../game";
 
 declare const server: Server;
 
@@ -179,9 +179,9 @@ export class Room extends Emittery.Typed<RoomEvents> {
       this.internalRoom = room;
     } else {
       this.internalRoom = new InternalRoom(
-        server.internalServer.config.defaultRoomAddress,
-        server.internalServer.config.defaultRoomPort,
-        server.internalServer.config.defaultHost == DefaultHostState.Server,
+        server.internalServer.defaultRoomAddress,
+        server.internalServer.defaultRoomPort,
+        server.internalServer.defaultHost == DefaultHostState.Server,
       );
     }
 
@@ -209,7 +209,7 @@ export class Room extends Emittery.Typed<RoomEvents> {
     });
   }
 
-  sendChat(name: string, color: PlayerColor, message: string | Text, _onLeft: boolean): void {
+  sendChat(name: string, color: PlayerColor, message: string | TextComponent, _onLeft: boolean): void {
     if (this.players.length != 0) {
       const { name: oldName, color: oldColor } = this.players[0];
 
@@ -244,7 +244,36 @@ export class Room extends Emittery.Typed<RoomEvents> {
     }
   }
 
-  sendMessage(message: Text | string): void {
+  clearMessage(): void {
+    if (this.internalRoom.host instanceof CustomHost) {
+      this.internalRoom.sendRootGamePacket(new EndGamePacket(this.code, 0, false));
+
+      setTimeout(() => {
+        this.internalRoom.connections.forEach(con => {
+          const player = this.internalRoom.findPlayerByConnection(con);
+
+          if (player) {
+            con.write(new JoinedGamePacket(this.code, con.id, this.internalRoom.host!.id, this.internalRoom.connections.map(e => e.id).filter(id => id != con.id)));
+            con.write(new GameDataPacket(this.internalRoom.players.map(p => p.gameObject.spawn()), this.code));
+
+            if (this.internalRoom.lobbyBehavior) {
+              con.write(new GameDataPacket([this.internalRoom.lobbyBehavior.spawn()], this.code));
+            }
+
+            if (this.internalRoom.gameData) {
+              con.write(new GameDataPacket([this.internalRoom.gameData.spawn()], this.code));
+            }
+
+            if (this.internalRoom.shipStatus) {
+              con.write(new GameDataPacket([this.internalRoom.shipStatus.spawn()], this.code));
+            }
+          }
+        });
+      }, 100);
+    }
+  }
+
+  sendMessage(message: TextComponent | string): void {
     if (this.internalRoom.gameData == undefined) {
       throw new Error("sendMessage called without gameData");
     }
@@ -265,14 +294,14 @@ export class Room extends Emittery.Typed<RoomEvents> {
         [],
       );
 
-      entity.owner = FakeHostId.Message;
+      entity.owner = FakeClientId.Message;
       entity.innerNetObjects = [
         new InnerPlayerControl(this.internalRoom.host.nextNetId, entity, false, playerId),
         new InnerPlayerPhysics(this.internalRoom.host.nextNetId, entity),
         new InnerCustomNetworkTransform(this.internalRoom.host.nextNetId, entity, 5, new Vector2(39, 39), new Vector2(0, 0)),
       ];
 
-      this.internalRoom.sendRootGamePacket(new JoinGameResponsePacket(this.internalRoom.code, FakeHostId.Message, this.internalRoom.host.id));
+      this.internalRoom.sendRootGamePacket(new JoinGameResponsePacket(this.internalRoom.code, FakeClientId.Message, this.internalRoom.host.id));
       this.internalRoom.sendRootGamePacket(new GameDataPacket([entity.spawn()], this.internalRoom.code));
 
       setTimeout(() => {
@@ -281,7 +310,7 @@ export class Room extends Emittery.Typed<RoomEvents> {
         }
 
         this.internalRoom.gameData.gameData.updateGameData([playerData], this.internalRoom.connections);
-        this.internalRoom.sendRootGamePacket(new RemovePlayerPacket(this.code, FakeHostId.Message, this.internalRoom.host!.id));
+        this.internalRoom.sendRootGamePacket(new RemovePlayerPacket(this.code, FakeClientId.Message, this.internalRoom.host!.id));
       }, 51);
     }
   }

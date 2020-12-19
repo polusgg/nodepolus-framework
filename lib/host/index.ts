@@ -46,11 +46,11 @@ import { DoorsHandler } from "./systemHandlers/doorsHandler";
 import { EntityPlayer } from "../protocol/entities/player";
 import { GameOverReason } from "../types/gameOverReason";
 import { InnerLevel } from "../protocol/entities/types";
+import { FakeClientId } from "../types/fakeClientId";
 import { Connection } from "../protocol/connection";
 import { PlayerColor } from "../types/playerColor";
 import { SystemsHandler } from "./systemHandlers";
 import { GLOBAL_OWNER } from "../util/constants";
-import { FakeHostId } from "../types/fakeHostId";
 import { LimboState } from "../types/limboState";
 import { SystemType } from "../types/systemType";
 import { GameState } from "../types/gameState";
@@ -75,7 +75,7 @@ import {
 } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 
 export class CustomHost implements HostInstance {
-  public readonly id: number = FakeHostId.ServerAsHost;
+  public readonly id: number = FakeClientId.ServerAsHost;
 
   public readyPlayerList: number[] = [];
   public playersInScene: Map<number, string> = new Map();
@@ -817,8 +817,7 @@ export class CustomHost implements HostInstance {
     usedTaskTypes: Set<TaskType>,
     unusedTasks: LevelTask[],
   ): void {
-    // A separate counter to stop the loop should it run forever since `i`
-    // could be get decremented below
+    // A separate counter to prevent the following loop from running forever
     let sanityCheck = 0;
 
     for (let i = 0; i < count; i++) {
@@ -908,12 +907,12 @@ export class CustomHost implements HostInstance {
     return this.room.gameData.gameData.players.map(player => player.color);
   }
 
-  private confirmPlayerData(_connection: Connection, player: Player): void {
+  private confirmPlayerData(connection: Connection, player: Player): void {
     if (!this.room.gameData) {
       throw new Error("confirmPlayerData called without a GameData instance");
     }
 
-    if (this.room.gameData.gameData.players.map(p => p.id).indexOf(player.gameObject.playerControl.playerId) == -1) {
+    if (!this.room.gameData.gameData.players.some(p => p.id == player.gameObject.playerControl.playerId)) {
       const playerData = new PlayerData(
         player.gameObject.playerControl.playerId,
         "",

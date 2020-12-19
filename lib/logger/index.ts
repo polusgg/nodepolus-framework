@@ -1,4 +1,4 @@
-import { Text, ElementType } from "../api/text";
+import { TextComponent, ElementType } from "../api/text";
 import { Vector2 } from "../util/vector2";
 import { Player } from "../api/player";
 import style from "ansi-styles";
@@ -47,7 +47,7 @@ export class Logger {
           throw new Error("Cannot log Functions yet.");
         case "object":
           switch (true) {
-            case element instanceof Text:
+            case element instanceof TextComponent:
               this.printRich(element);
               break;
             case element instanceof Player:
@@ -137,7 +137,7 @@ export class Logger {
     this.endColor();
   }
 
-  private printRich(text: Text): void {
+  private printRich(text: TextComponent): void {
     text.elements.forEach(element => {
       switch (element.type) {
         case ElementType.Text:

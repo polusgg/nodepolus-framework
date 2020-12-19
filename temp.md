@@ -15,11 +15,11 @@ lib/
       simpleDoors.ts
       polusDoors.ts
 
-    game/
+    game/N
       index.ts
       scan.ts
       cams.ts
-      decon.ts
+      decon.tsO
       meeting.ts
 
   annoucementServer/
@@ -201,3 +201,29 @@ ffffffff
   07000000
   00
 08 // 
+
+
+MovingPlatformBehaviour
+  byte: useId (sequence ID)
+  uint32: target (PlayerControl)
+  boolean: isLeft
+
+ClimbLadder RPC
+  byte: id (ladder ID)
+  // How does the ladder ID tell which ladder to use?
+  // There are two ladders with the same ID (electrical, gap room)
+
+HeliSabotageSystem
+  HashSet<Tuple<byte, byte>>: activeConsoles
+  HastSet<byte>: completedConsoles
+
+Switch, 7 [7]
+Medscan, 10 [10]
+Doors, 16 [16]
+MovingPlatformBehaviour, 44 [12]
+HeliSabotageSystem, 3 [3]
+SecurityCameras, 11 [11]
+Sabotage, 17 [17]
+
+Order:
+

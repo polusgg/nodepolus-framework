@@ -1,4 +1,4 @@
-import { ServerConfig } from "../lib/api/serverConfig";
+import { ServerConfig } from "../lib/api/server/serverConfig";
 import { NodePolusPlugin } from "../lib/api/plugin";
 import { Server } from "../lib/api/server";
 import path from "path";
@@ -48,5 +48,9 @@ server.listen().then(() => {
 });
 
 process.on("uncaughtException", err => {
+  console.log(err);
+});
+
+process.on("unhandledRejection", err => {
   console.log(err);
 });
