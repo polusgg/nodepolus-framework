@@ -45,7 +45,7 @@ export class LobbyListing {
   }
 }
 
-export class GameListCounts {
+export class LobbyCounts {
   constructor(
     public skeld: number = 0,
     public mira: number = 0,
@@ -107,18 +107,18 @@ export class GetGameListRequestPacket extends BaseRootGamePacket {
 export class GetGameListResponsePacket extends BaseRootGamePacket {
   constructor(
     public readonly lobbies: LobbyListing[],
-    public readonly counts?: GameListCounts,
+    public readonly counts?: LobbyCounts,
   ) {
     super(RootGamePacketType.GetGameList);
   }
 
   static deserialize(reader: MessageReader): GetGameListResponsePacket {
-    let counts: GameListCounts | undefined;
+    let counts: LobbyCounts | undefined;
     const lobbies: LobbyListing[] = [];
 
     reader.readAllChildMessages(child => {
       if (child.tag == 1) {
-        counts = new GameListCounts(
+        counts = new LobbyCounts(
           reader.readUInt32(),
           reader.readUInt32(),
           reader.readUInt32(),

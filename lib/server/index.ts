@@ -1,4 +1,4 @@
-import { GameListCounts, GetGameListResponsePacket, LobbyListing } from "../protocol/packets/rootGamePackets/getGameList";
+import { LobbyCounts, GetGameListResponsePacket, LobbyListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { DEFAULT_HOST_STATE, DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { HostGameResponsePacket, HostGameRequestPacket } from "../protocol/packets/rootGamePackets/hostGame";
 import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
@@ -169,7 +169,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
       }
       case RootGamePacketType.GetGameList: {
         const results: LobbyListing[] = [];
-        const counts = new GameListCounts();
+        const counts = new LobbyCounts();
 
         for (let i = 0; i < this.lobbies.length; i++) {
           const lobby = this.lobbies[i];
