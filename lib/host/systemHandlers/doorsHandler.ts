@@ -66,9 +66,9 @@ export class DoorsHandler {
   }
 
   sendDataUpdate(): void {
-    this.host.room.sendRootGamePacket(new GameDataPacket([
+    this.host.lobby.sendRootGamePacket(new GameDataPacket([
       //@ts-ignore Talk to Cody about this?
       this.shipStatus.data(this.oldShipStatus),
-    ], this.host.room.code));
+    ], this.host.lobby.code));
   }
 }

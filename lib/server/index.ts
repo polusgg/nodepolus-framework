@@ -6,28 +6,28 @@ import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericP
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
 import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { DefaultHostState, ServerConfig } from "../api/server/serverConfig";
+import { LobbyCreatedEvent } from "../api/events/server/lobbyCreated";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";
-import { RoomCreatedEvent } from "../api/events/server/roomCreated";
 import { FakeClientId } from "../types/fakeClientId";
 import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
-import { RoomCode } from "../util/roomCode";
+import { LobbyCode } from "../util/lobbyCode";
 import { Lobby } from "../lobby";
 import Emittery from "emittery";
 import dgram from "dgram";
 
 export type ServerEvents = {
-  roomCreated: RoomCreatedEvent;
+  lobbyCreated: LobbyCreatedEvent;
 };
 
 export class Server extends Emittery.Typed<ServerEvents> {
   public readonly startedAt = Date.now();
   public readonly serverSocket: dgram.Socket;
   public readonly connections: Map<string, Connection> = new Map();
-  public readonly connectionRoomMap: Map<string, Lobby> = new Map();
+  public readonly connectionLobbyMap: Map<string, Lobby> = new Map();
 
-  public rooms: Lobby[] = [];
-  public roomMap: Map<string, Lobby> = new Map();
+  public lobbies: Lobby[] = [];
+  public lobbyMap: Map<string, Lobby> = new Map();
 
   // Starts at 1 to allow the Server host implementation's ID to be 0
   private connectionIndex = Object.keys(FakeClientId).length / 2;
@@ -52,12 +52,12 @@ export class Server extends Emittery.Typed<ServerEvents> {
     return this.config.defaultHost ?? DEFAULT_HOST_STATE;
   }
 
-  get defaultRoomAddress(): string {
-    return this.config.defaultRoomAddress ?? this.address;
+  get defaultLobbyAddress(): string {
+    return this.config.defaultLobbyAddress ?? this.address;
   }
 
-  get defaultRoomPort(): number {
-    return this.config.defaultRoomPort ?? this.port;
+  get defaultLobbyPort(): number {
+    return this.config.defaultLobbyPort ?? this.port;
   }
 
   constructor(
@@ -97,13 +97,13 @@ export class Server extends Emittery.Typed<ServerEvents> {
   }
 
   private handleDisconnection(connection: Connection, reason?: DisconnectReason): void {
-    if (connection.room) {
-      connection.room.handleDisconnect(connection, reason);
-      this.connectionRoomMap.delete(RemoteInfo.toString(connection));
+    if (connection.lobby) {
+      connection.lobby.handleDisconnect(connection, reason);
+      this.connectionLobbyMap.delete(RemoteInfo.toString(connection));
 
-      if (connection.room.connections.length == 0) {
-        this.rooms.splice(this.rooms.indexOf(connection.room), 1);
-        this.roomMap.delete(connection.room.code);
+      if (connection.lobby.connections.length == 0) {
+        this.lobbies.splice(this.lobbies.indexOf(connection.lobby), 1);
+        this.lobbyMap.delete(connection.lobby.code);
       }
     }
 
@@ -126,42 +126,42 @@ export class Server extends Emittery.Typed<ServerEvents> {
   private handlePacket(packet: BaseRootGamePacket, sender: Connection): void {
     switch (packet.type) {
       case RootGamePacketType.HostGame: {
-        let roomCode = RoomCode.generate();
+        let lobbyCode = LobbyCode.generate();
 
-        while (this.roomMap.has(roomCode)) {
-          roomCode = RoomCode.generate();
+        while (this.lobbyMap.has(lobbyCode)) {
+          lobbyCode = LobbyCode.generate();
         }
 
-        const newRoom = new Lobby(
-          this.defaultRoomAddress,
-          this.defaultRoomPort,
+        const newLobby = new Lobby(
+          this.defaultLobbyAddress,
+          this.defaultLobbyPort,
           this.defaultHost == DefaultHostState.Server,
-          roomCode,
+          lobbyCode,
         );
 
-        newRoom.options = (packet as HostGameRequestPacket).options;
+        newLobby.options = (packet as HostGameRequestPacket).options;
 
-        const event = new RoomCreatedEvent(newRoom);
+        const event = new LobbyCreatedEvent(newLobby);
 
-        this.emit("roomCreated", event);
+        this.emit("lobbyCreated", event);
 
         if (!event.isCancelled) {
-          this.rooms.push(newRoom);
-          this.roomMap.set(newRoom.code, newRoom);
+          this.lobbies.push(newLobby);
+          this.lobbyMap.set(newLobby.code, newLobby);
 
-          sender.sendReliable([new HostGameResponsePacket(newRoom.code)]);
+          sender.sendReliable([new HostGameResponsePacket(newLobby.code)]);
         } else {
           sender.disconnect(DisconnectReason.custom("The server refused to create your game"));
         }
         break;
       }
       case RootGamePacketType.JoinGame: {
-        const room = this.roomMap.get((packet as JoinGameRequestPacket).roomCode);
+        const lobby = this.lobbyMap.get((packet as JoinGameRequestPacket).lobbyCode);
 
-        if (room) {
-          this.connectionRoomMap.set(RemoteInfo.toString(sender), room);
+        if (lobby) {
+          this.connectionLobbyMap.set(RemoteInfo.toString(sender), lobby);
 
-          room.handleJoin(sender);
+          lobby.handleJoin(sender);
         } else {
           sender.sendReliable([new JoinGameErrorPacket(DisconnectionType.GameNotFound)]);
         }
@@ -171,20 +171,20 @@ export class Server extends Emittery.Typed<ServerEvents> {
         const results: LobbyListing[] = [];
         const counts = new GameListCounts();
 
-        for (let i = 0; i < this.rooms.length; i++) {
-          const room = this.rooms[i];
-          const level: number = room.options.options.levels[0];
+        for (let i = 0; i < this.lobbies.length; i++) {
+          const lobby = this.lobbies[i];
+          const level: number = lobby.options.options.levels[0];
 
           // TODO: Add config option to include private games
-          if (!room.isPublic) {
+          if (!lobby.isPublic) {
             continue;
           }
 
           counts.increment(level);
 
           // TODO: Add config option for max player count and max results
-          if (room.lobbyListing.playerCount < 10 && results.length < 10) {
-            results[i] = room.lobbyListing;
+          if (lobby.lobbyListing.playerCount < 10 && results.length < 10) {
+            results[i] = lobby.lobbyListing;
           }
         }
 
@@ -194,10 +194,10 @@ export class Server extends Emittery.Typed<ServerEvents> {
         break;
       }
       default: {
-        const room = this.connectionRoomMap.get(RemoteInfo.toString(sender));
+        const lobby = this.connectionLobbyMap.get(RemoteInfo.toString(sender));
 
-        if (!room) {
-          throw new Error(`Client ${sender.id} sent root game packet type ${packet.type} (${RootGamePacketType[packet.type]}) while not in a room`);
+        if (!lobby) {
+          throw new Error(`Client ${sender.id} sent root game packet type ${packet.type} (${RootGamePacketType[packet.type]}) while not in a lobby`);
         }
       }
     }

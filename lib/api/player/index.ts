@@ -69,15 +69,15 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
         throw new Error("Player has no ID");
       }
 
-      for (let i = 0; i < this.room.internalRoom.players.length; i++) {
-        const player = this.room.internalRoom.players[i];
+      for (let i = 0; i < this.lobby.internalLobby.players.length; i++) {
+        const player = this.lobby.internalLobby.players[i];
 
         if (player.id == this.playerId) {
           return player;
         }
       }
 
-      throw new Error("Player was not found in the room's players array");
+      throw new Error("Player was not found in the lobby's players array");
     }
 
     throw new Error("Attempted to get a player before they were spawned");
@@ -146,33 +146,33 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
         throw new Error("Player has no ID");
       }
 
-      if (!this.room.internalRoom.gameData) {
-        throw new Error("Room has no GameData instance");
+      if (!this.lobby.internalLobby.gameData) {
+        throw new Error("Lobby has no GameData instance");
       }
 
-      for (let i = 0; i < this.room.internalRoom.gameData.gameData.players.length; i++) {
-        const player = this.room.internalRoom.gameData!.gameData.players[i];
+      for (let i = 0; i < this.lobby.internalLobby.gameData.gameData.players.length; i++) {
+        const player = this.lobby.internalLobby.gameData!.gameData.players[i];
 
         if (player.id == this.playerId) {
           return player;
         }
       }
 
-      throw new Error("Player was not found in the room's GameData instance");
+      throw new Error("Player was not found in the lobby's GameData instance");
     }
 
     throw new Error("Attempted to get a player's data before they were spawned");
   }
 
   constructor(
-    public room: Lobby,
+    public lobby: Lobby,
     public readonly clientId: number = server.internalServer.nextConnectionId,
     public readonly ip?: string,
     public readonly port?: number,
   ) {
     super();
 
-    room.internalRoom.on("movement", ({ clientId: id, position, velocity }) => {
+    lobby.internalLobby.on("movement", ({ clientId: id, position, velocity }) => {
       if (this.state == PlayerState.PreSpawn) {
         // TODO
       }
@@ -191,14 +191,14 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
       }
     });
 
-    room.internalRoom.on("chat", ({ clientId: id, message }) => {
+    lobby.internalLobby.on("chat", ({ clientId: id, message }) => {
       if (id == this.clientId) {
         // TODO: See name getter
         this.emit("chat", TextComponent.from(message));
       }
     });
 
-    room.internalRoom.on("setInfected", infected => {
+    lobby.internalLobby.on("setInfected", infected => {
       for (let i = 0; i < infected.length; i++) {
         const id = infected[i];
 
@@ -208,13 +208,13 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
       }
     });
 
-    room.internalRoom.on("despawn", innerNetObject => {
+    lobby.internalLobby.on("despawn", innerNetObject => {
       if (innerNetObject.parent.owner == this.clientId) {
         this.state = PlayerState.PreSpawn;
       }
     });
 
-    // room.internalRoom.on("nameChanged", ({ clientId: id, newName }) => {
+    // lobby.internalLobby.on("nameChanged", ({ clientId: id, newName }) => {
     //   if (id == this.clientId) {
     //     this.emit("")
     //   }
@@ -224,7 +224,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   setName(name: TextComponent | string): this {
     this.emit("nameChanged", this.name);
 
-    this.internalPlayer.gameObject.playerControl.setName(name.toString(), this.room.internalRoom.connections);
+    this.internalPlayer.gameObject.playerControl.setName(name.toString(), this.lobby.internalLobby.connections);
 
     return this;
   }
@@ -232,7 +232,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   setColor(color: PlayerColor): this {
     this.emit("colorChanged", this.color);
 
-    this.internalPlayer.gameObject.playerControl.setColor(color, this.room.internalRoom.connections);
+    this.internalPlayer.gameObject.playerControl.setColor(color, this.lobby.internalLobby.connections);
 
     return this;
   }
@@ -240,7 +240,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   setHat(hat: PlayerHat): this {
     this.emit("hatChanged", this.hat);
 
-    this.internalPlayer.gameObject.playerControl.setHat(hat, this.room.internalRoom.connections);
+    this.internalPlayer.gameObject.playerControl.setHat(hat, this.lobby.internalLobby.connections);
 
     return this;
   }
@@ -248,7 +248,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   setPet(pet: PlayerPet): this {
     this.emit("petChanged", this.pet);
 
-    this.internalPlayer.gameObject.playerControl.setPet(pet, this.room.internalRoom.connections);
+    this.internalPlayer.gameObject.playerControl.setPet(pet, this.lobby.internalLobby.connections);
 
     return this;
   }
@@ -256,27 +256,27 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   setSkin(skin: PlayerSkin): this {
     this.emit("skinChanged", this.skin);
 
-    this.internalPlayer.gameObject.playerControl.setSkin(skin, this.room.internalRoom.connections);
+    this.internalPlayer.gameObject.playerControl.setSkin(skin, this.lobby.internalLobby.connections);
 
     return this;
   }
 
   kill(): this {
-    if (!this.room.internalRoom.gameData) {
+    if (!this.lobby.internalLobby.gameData) {
       throw new Error("Attempted to kill player without a GameData instance");
     }
 
     this.internalPlayer.gameObject.playerControl.exiled([]);
 
-    this.room.internalRoom.gameData.gameData.updateGameData([
+    this.lobby.internalLobby.gameData.gameData.updateGameData([
       this.gameDataEntry,
-    ], this.room.internalRoom.connections);
+    ], this.lobby.internalLobby.connections);
 
-    if (this.room.internalRoom.isHost) {
+    if (this.lobby.internalLobby.isHost) {
       if (this.isImpostor) {
-        (this.room.internalRoom.host as CustomHost).handleImpostorDeath();
+        (this.lobby.internalLobby.host as CustomHost).handleImpostorDeath();
       } else {
-        (this.room.internalRoom.host as CustomHost).handleMurderPlayer(this.internalPlayer.gameObject.playerControl, 0);
+        (this.lobby.internalLobby.host as CustomHost).handleMurderPlayer(this.internalPlayer.gameObject.playerControl, 0);
       }
     }
 
@@ -289,29 +289,29 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   murder(player: Player): this {
     const playerControl = this.internalPlayer.gameObject.playerControl;
 
-    playerControl.murderPlayer(player.internalPlayer.gameObject.playerControl.id, this.room.internalRoom.connections);
+    playerControl.murderPlayer(player.internalPlayer.gameObject.playerControl.id, this.lobby.internalLobby.connections);
 
-    if (this.room.internalRoom.host instanceof CustomHost) {
-      this.room.internalRoom.host.handleMurderPlayer(playerControl, 0);
+    if (this.lobby.internalLobby.host instanceof CustomHost) {
+      this.lobby.internalLobby.host.handleMurderPlayer(playerControl, 0);
     }
 
     return this;
   }
 
   revive(): this {
-    if (this.room.internalRoom.host instanceof CustomHost) {
-      if (!this.room.internalRoom.gameData) {
+    if (this.lobby.internalLobby.host instanceof CustomHost) {
+      if (!this.lobby.internalLobby.gameData) {
         throw new Error("Attempted to revive player without a GameData instance");
       }
 
-      const entity = new EntityPlayer(this.room.internalRoom);
+      const entity = new EntityPlayer(this.lobby.internalLobby);
 
       entity.owner = this.clientId;
       entity.innerNetObjects = [
-        new InnerPlayerControl(this.room.internalRoom.host.nextNetId, entity, false, this.playerId!),
-        new InnerPlayerPhysics(this.room.internalRoom.host.nextNetId, entity),
+        new InnerPlayerControl(this.lobby.internalLobby.host.nextNetId, entity, false, this.playerId!),
+        new InnerPlayerPhysics(this.lobby.internalLobby.host.nextNetId, entity),
         new InnerCustomNetworkTransform(
-          this.room.internalRoom.host.nextNetId,
+          this.lobby.internalLobby.host.nextNetId,
           entity,
           0,
           this.internalPlayer.gameObject.customNetworkTransform.position,
@@ -321,7 +321,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
 
       this.internalPlayer.gameObject.customNetworkTransform.position = new Vector2(-39, -39);
 
-      const thisConnection = this.room.internalRoom.findConnectionByPlayer(this.internalPlayer);
+      const thisConnection = this.lobby.internalLobby.findConnectionByPlayer(this.internalPlayer);
 
       if (!thisConnection) {
         throw new Error("Tried to respawn a player without a connection");
@@ -329,7 +329,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
 
       const oldName = this.name;
 
-      this.room.internalRoom.ignoredNetIds = this.room.internalRoom.ignoredNetIds.concat([
+      this.lobby.internalLobby.ignoredNetIds = this.lobby.internalLobby.ignoredNetIds.concat([
         this.internalPlayer.gameObject.playerControl.id,
         this.internalPlayer.gameObject.playerPhysics.id,
         this.internalPlayer.gameObject.customNetworkTransform.id,
@@ -338,35 +338,35 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
       this.setName("");
 
       if (thisConnection.isActingHost) {
-        thisConnection.write(new RemovePlayerPacket(this.room.code, this.clientId, this.clientId, DisconnectReason.serverRequest()));
-        thisConnection.write(new JoinGameResponsePacket(this.room.code, this.clientId, this.clientId));
+        thisConnection.write(new RemovePlayerPacket(this.lobby.code, this.clientId, this.clientId, DisconnectReason.serverRequest()));
+        thisConnection.write(new JoinGameResponsePacket(this.lobby.code, this.clientId, this.clientId));
       } else {
-        thisConnection.write(new RemovePlayerPacket(this.room.code, this.clientId, this.room.internalRoom.host.id, DisconnectReason.serverRequest()));
-        thisConnection.write(new JoinGameResponsePacket(this.room.code, this.clientId, this.room.internalRoom.host.id));
+        thisConnection.write(new RemovePlayerPacket(this.lobby.code, this.clientId, this.lobby.internalLobby.host.id, DisconnectReason.serverRequest()));
+        thisConnection.write(new JoinGameResponsePacket(this.lobby.code, this.clientId, this.lobby.internalLobby.host.id));
       }
 
       this.setName(oldName);
 
-      for (let i = 0; i < this.room.internalRoom.connections.length; i++) {
-        const connection = this.room.internalRoom.connections[i];
+      for (let i = 0; i < this.lobby.internalLobby.connections.length; i++) {
+        const connection = this.lobby.internalLobby.connections[i];
 
         if (connection.id != this.clientId) {
           connection.write(new GameDataPacket([
             new DespawnPacket(this.internalPlayer.gameObject.playerControl.id),
             new DespawnPacket(this.internalPlayer.gameObject.playerPhysics.id),
             new DespawnPacket(this.internalPlayer.gameObject.customNetworkTransform.id),
-          ], this.room.code));
+          ], this.lobby.code));
         }
       }
 
       this.gameDataEntry.isDead = false;
       this.internalPlayer.gameObject = entity;
 
-      this.room.internalRoom.gameData.gameData.updateGameData([this.gameDataEntry], this.room.internalRoom.connections);
+      this.lobby.internalLobby.gameData.gameData.updateGameData([this.gameDataEntry], this.lobby.internalLobby.connections);
 
-      this.room.internalRoom.sendRootGamePacket(new GameDataPacket([
+      this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
         entity.spawn(),
-      ], this.room.code));
+      ], this.lobby.code));
     } else {
       throw new Error("Attempted to revive player without a custom host instance");
     }
@@ -375,7 +375,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   }
 
   sendChat(message: string): this {
-    this.internalPlayer.gameObject.playerControl.sendChat(message, this.room.internalRoom.connections);
+    this.internalPlayer.gameObject.playerControl.sendChat(message, this.lobby.internalLobby.connections);
 
     return this;
   }
@@ -386,28 +386,28 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
 
   // TODO: Delete?
   sendNote(message: TextComponent | string): this {
-    if (this.room.internalRoom.host instanceof CustomHost) {
+    if (this.lobby.internalLobby.host instanceof CustomHost) {
       const oldName = this.name.toString();
 
-      const tempFakeMHud = new EntityMeetingHud(this.room.internalRoom);
+      const tempFakeMHud = new EntityMeetingHud(this.lobby.internalLobby);
 
       tempFakeMHud.owner = GLOBAL_OWNER;
 
       tempFakeMHud.innerNetObjects = [
-        new InnerMeetingHud(this.room.internalRoom.host.nextNetId, tempFakeMHud),
+        new InnerMeetingHud(this.lobby.internalLobby.host.nextNetId, tempFakeMHud),
       ];
 
-      this.room.internalRoom.sendRootGamePacket(new GameDataPacket([
+      this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
         tempFakeMHud.spawn(),
-      ], this.room.code));
+      ], this.lobby.code));
 
       this.setName(`[FFFFFFFF]${message.toString()}[FFFFFF00]`);
-      this.internalPlayer.gameObject.playerControl.sendChatNote(this.playerId!, 0, this.room.internalRoom.connections);
+      this.internalPlayer.gameObject.playerControl.sendChatNote(this.playerId!, 0, this.lobby.internalLobby.connections);
       this.setName(oldName);
 
-      this.room.internalRoom.sendRootGamePacket(new GameDataPacket([
+      this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
         new DespawnPacket(tempFakeMHud.innerNetObjects[0].id),
-      ], this.room.code));
+      ], this.lobby.code));
     }
 
     return this;

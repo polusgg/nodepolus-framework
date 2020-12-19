@@ -16,12 +16,12 @@ export class EntitySkeldShipStatus extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(room: LobbyImplementation) {
-    super(SpawnType.ShipStatus, room);
+  constructor(lobby: LobbyImplementation) {
+    super(SpawnType.ShipStatus, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntitySkeldShipStatus {
-    const shipStatus = new EntitySkeldShipStatus(room);
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntitySkeldShipStatus {
+    const shipStatus = new EntitySkeldShipStatus(lobby);
 
     shipStatus.setSpawn(flags, owner, innerNetObjects);
 

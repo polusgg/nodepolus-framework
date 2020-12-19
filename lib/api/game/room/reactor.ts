@@ -18,20 +18,20 @@ export class ReactorGameRoom extends BaseDoorGameRoom {
   }
 
   sabotage(): void {
-    if (this.game.room.internalRoom.host instanceof CustomHost) {
+    if (this.game.lobby.internalLobby.host instanceof CustomHost) {
       this.internalBackupShipStatus();
 
-      if (!this.game.room.internalRoom.host.sabotageHandler) {
+      if (!this.game.lobby.internalLobby.host.sabotageHandler) {
         throw new Error("Host has no SabotageHandler instance");
       }
 
-      this.game.room.internalRoom.host.sabotageHandler.sabotageReactor(this.internalSystem);
+      this.game.lobby.internalLobby.host.sabotageHandler.sabotageReactor(this.internalSystem);
 
       this.internalUpdateShipStatus();
-    } else if (this.game.room.internalRoom.host instanceof Connection) {
+    } else if (this.game.lobby.internalLobby.host instanceof Connection) {
       this.internalShipStatus.repairSystem(
         SystemType.Sabotage,
-        this.game.room.players[0].internalPlayer.gameObject.playerControl.id,
+        this.game.lobby.players[0].internalPlayer.gameObject.playerControl.id,
         new SabotageAmount(SystemType.Reactor),
       );
     } else {
@@ -40,7 +40,7 @@ export class ReactorGameRoom extends BaseDoorGameRoom {
   }
 
   repair(): void {
-    const host = this.game.room.internalRoom.host;
+    const host = this.game.lobby.internalLobby.host;
 
     if (host instanceof CustomHost) {
       this.internalBackupShipStatus();
@@ -57,7 +57,7 @@ export class ReactorGameRoom extends BaseDoorGameRoom {
     } else {
       this.internalShipStatus.repairSystem(
         SystemType.Reactor,
-        this.game.room.players[0].internalPlayer.gameObject.playerControl.id,
+        this.game.lobby.players[0].internalPlayer.gameObject.playerControl.id,
         new ReactorAmount(0, ReactorAction.Repaired),
       );
     }

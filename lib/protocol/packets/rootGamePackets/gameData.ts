@@ -5,8 +5,8 @@ import { DespawnPacket } from "./gameDataPackets/despawn";
 import { ReadyPacket } from "./gameDataPackets/ready";
 import { SpawnPacket } from "./gameDataPackets/spawn";
 import { DataPacket } from "./gameDataPackets/data";
+import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootGamePacket } from "../basePacket";
-import { RoomCode } from "../../../util/roomCode";
 import { RPCPacket } from "./gameDataPackets/rpc";
 import { Level } from "../../../types/level";
 
@@ -15,7 +15,7 @@ export type GameDataPacketDataType = DespawnPacket | ReadyPacket | SceneChangePa
 export class GameDataPacket extends BaseRootGamePacket {
   constructor(
     public readonly packets: GameDataPacketDataType[],
-    public readonly roomCode: string,
+    public readonly lobbyCode: string,
     public readonly targetClientId?: number,
   ) {
     super(RootGamePacketType[targetClientId ? "GameDataTo" : "GameData"]);
@@ -24,12 +24,12 @@ export class GameDataPacket extends BaseRootGamePacket {
       this.targetClientId = targetClientId;
     }
 
-    this.roomCode = roomCode;
+    this.lobbyCode = lobbyCode;
     this.packets = packets;
   }
 
   static deserialize(reader: MessageReader, level?: Level): GameDataPacket {
-    const roomCode: string = RoomCode.decode(reader.readInt32());
+    const lobbyCode: string = LobbyCode.decode(reader.readInt32());
     let targetClientId: number | undefined;
 
     if (reader.tag == RootGamePacketType.GameDataTo) {
@@ -57,11 +57,11 @@ export class GameDataPacket extends BaseRootGamePacket {
       }
     });
 
-    return new GameDataPacket(packets, roomCode, targetClientId);
+    return new GameDataPacket(packets, lobbyCode, targetClientId);
   }
 
   serialize(): MessageWriter {
-    const writer = new MessageWriter().writeInt32(RoomCode.encode(this.roomCode));
+    const writer = new MessageWriter().writeInt32(LobbyCode.encode(this.lobbyCode));
 
     if (this.targetClientId || this.targetClientId === 0) {
       writer.writePackedUInt32(this.targetClientId);

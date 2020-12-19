@@ -2,7 +2,7 @@ lib/
   api/
     index.ts
     player.ts
-    room.ts
+    lobby.ts
     server.ts
 
     sabotage/
@@ -35,9 +35,9 @@ lib/
   server/
     index.ts
     packetHandler.ts
-    serverRoom.ts (extends Room)
+    serverLobby.ts (extends Lobby)
 
-  room/
+  lobby/
     index.ts
     packetHandler.ts
     gameDataPacketHandler.ts
@@ -49,15 +49,15 @@ lib/
 
   client/
     index.ts
-    clientRoom.ts (extends Room)
+    clientLobby.ts (extends Lobby)
     clientPlayer.ts (extends Player)
 
   proxy/
     index.ts
-    proxyRoom.ts (extends room)
+    proxyLobby.ts (extends Lobby)
 
   util/
-    roomCode.ts
+    lobbyCode.ts
     clientVersion.ts
     text.ts
     textMark.ts
@@ -160,7 +160,7 @@ timer    value
   00
     01 01 01 01 01 01 01 01 01 01 01 01 01 01 00 01 01
 00000000
-// 
+//
 00
 ffffffff
 00
@@ -197,10 +197,10 @@ ffffffff
   3433ef41 // Sabotage cooldown
 
 8020 // weapons, gaproom
-  02 // 
+  02 //
   07000000
   00
-08 // 
+08 //
 
 
 MovingPlatformBehaviour

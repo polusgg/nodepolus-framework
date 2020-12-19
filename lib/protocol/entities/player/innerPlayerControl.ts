@@ -48,10 +48,10 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   setInfected(infected: number[], sendTo: Connection[]): void {
-    const gameData = this.parent.room.gameData;
+    const gameData = this.parent.lobby.gameData;
 
     if (!gameData) {
-      throw new Error("GameData does not exist on the RoomImplementation");
+      throw new Error("GameData does not exist on the lobby instance");
     }
 
     for (let i = 0; i < infected.length; i++) {
@@ -73,10 +73,10 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   completeTask(taskIndex: number, sendTo: Connection[]): void {
-    const gameData = this.parent.room.gameData;
+    const gameData = this.parent.lobby.gameData;
 
     if (!gameData) {
-      throw new Error("GameData does not exist on the RoomImplementation");
+      throw new Error("GameData does not exist on the lobby instance");
     }
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
@@ -97,16 +97,16 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   syncSettings(options: GameOptionsData, sendTo: Connection[]): void {
-    this.parent.room.options = options;
+    this.parent.lobby.options = options;
 
     this.sendRPCPacketTo(sendTo, new SyncSettingsPacket(options));
   }
 
   exiled(_sendTo: Connection[]): void {
-    const gameData = this.parent.room.gameData;
+    const gameData = this.parent.lobby.gameData;
 
     if (!gameData) {
-      throw new Error("GameData does not exist on the RoomImplementation");
+      throw new Error("GameData does not exist on the lobby instance");
     }
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
@@ -117,7 +117,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     gameData.gameData.players[gameDataPlayerIndex].isDead = true;
 
-    const thisPlayer = this.parent.room.players.find(player => player.id == this.playerId);
+    const thisPlayer = this.parent.lobby.players.find(player => player.id == this.playerId);
 
     if (!thisPlayer) {
       throw new Error("Exiled packet sent to a recipient that has no connection or player instance");
@@ -131,27 +131,27 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   checkName(name: string, _sendTo: Connection[]): void {
-    if (this.parent.room.isHost) {
+    if (this.parent.lobby.isHost) {
       return;
     }
 
-    if (!this.parent.room.host) {
-      throw new Error("CheckName sent to a room without a host");
+    if (!this.parent.lobby.host) {
+      throw new Error("CheckName sent to a lobby without a host");
     }
 
-    this.sendRPCPacketTo([this.parent.room.host as Connection], new CheckNamePacket(name));
+    this.sendRPCPacketTo([this.parent.lobby.host as Connection], new CheckNamePacket(name));
   }
 
   setName(name: string, sendTo: Connection[]): void {
-    const gameData = this.parent.room.gameData;
+    const gameData = this.parent.lobby.gameData;
 
     if (!gameData) {
-      throw new Error("GameData does not exist on the RoomImplementation");
+      throw new Error("GameData does not exist on the lobby instance");
     }
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1 && this.parent.room.isHost) {
+    if (gameDataPlayerIndex == -1 && this.parent.lobby.isHost) {
       throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
@@ -163,27 +163,27 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   checkColor(color: PlayerColor, _sendTo: Connection[]): void {
-    if (this.parent.room.isHost) {
+    if (this.parent.lobby.isHost) {
       return;
     }
 
-    if (!this.parent.room.host) {
-      throw new Error("CheckColor sent to a room without a host");
+    if (!this.parent.lobby.host) {
+      throw new Error("CheckColor sent to a lobby without a host");
     }
 
-    this.sendRPCPacketTo([this.parent.room.host], new CheckColorPacket(color));
+    this.sendRPCPacketTo([this.parent.lobby.host], new CheckColorPacket(color));
   }
 
   setColor(color: PlayerColor, sendTo: Connection[]): void {
-    const gameData = this.parent.room.gameData;
+    const gameData = this.parent.lobby.gameData;
 
     if (!gameData) {
-      throw new Error("GameData does not exist on the RoomImplementation");
+      throw new Error("GameData does not exist on the lobby instance");
     }
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1 && this.parent.room.isHost) {
+    if (gameDataPlayerIndex == -1 && this.parent.lobby.isHost) {
       throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
@@ -195,15 +195,15 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   setHat(hat: PlayerHat, sendTo: Connection[]): void {
-    const gameData = this.parent.room.gameData;
+    const gameData = this.parent.lobby.gameData;
 
     if (!gameData) {
-      throw new Error("GameData does not exist on the RoomImplementation");
+      throw new Error("GameData does not exist on the lobby instance");
     }
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1 && this.parent.room.isHost) {
+    if (gameDataPlayerIndex == -1 && this.parent.lobby.isHost) {
       throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
@@ -215,15 +215,15 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   setSkin(skin: PlayerSkin, sendTo: Connection[]): void {
-    const gameData = this.parent.room.gameData;
+    const gameData = this.parent.lobby.gameData;
 
     if (!gameData) {
-      throw new Error("GameData does not exist on the RoomImplementation");
+      throw new Error("GameData does not exist on the lobby instance");
     }
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1 && this.parent.room.isHost) {
+    if (gameDataPlayerIndex == -1 && this.parent.lobby.isHost) {
       throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
@@ -239,16 +239,16 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   murderPlayer(victimPlayerControlNetId: number, sendTo: Connection[]): void {
-    const victimPlayer: Player | undefined = this.parent.room.players.find(player => player.gameObject.playerControl.id == victimPlayerControlNetId);
+    const victimPlayer: Player | undefined = this.parent.lobby.players.find(player => player.gameObject.playerControl.id == victimPlayerControlNetId);
 
     if (!victimPlayer) {
       throw new Error("Could not find victim Player");
     }
 
-    const gameData = this.parent.room.gameData;
+    const gameData = this.parent.lobby.gameData;
 
     if (!gameData) {
-      throw new Error("GameData does not exist on the RoomImplementation");
+      throw new Error("GameData does not exist on the lobby instance");
     }
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == victimPlayer.id);
@@ -281,15 +281,15 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   setPet(pet: PlayerPet, sendTo: Connection[]): void {
-    const gameData = this.parent.room.gameData;
+    const gameData = this.parent.lobby.gameData;
 
     if (!gameData) {
-      throw new Error("GameData does not exist on the RoomImplementation");
+      throw new Error("GameData does not exist on the lobby instance");
     }
 
     const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
 
-    if (gameDataPlayerIndex == -1 && this.parent.room.isHost) {
+    if (gameDataPlayerIndex == -1 && this.parent.lobby.isHost) {
       throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
@@ -301,7 +301,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   setStartCounter(sequenceId: number, timeRemaining: number, sendTo: Connection[]): void {
-    this.parent.room.host?.handleSetStartCounter(sequenceId, timeRemaining);
+    this.parent.lobby.host?.handleSetStartCounter(sequenceId, timeRemaining);
 
     this.sendRPCPacketTo(sendTo, new SetStartCounterPacket(sequenceId, timeRemaining));
   }

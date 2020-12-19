@@ -16,7 +16,7 @@ import { FakeClientId } from "../../types/fakeClientId";
 import { Player as InternalPlayer } from "../../player";
 import { Connection } from "../../protocol/connection";
 import { PlayerColor } from "../../types/playerColor";
-import { Lobby as InternalRoom } from "../../lobby";
+import { Lobby as InternalLobby } from "../../lobby";
 import { PlayerSkin } from "../../types/playerSkin";
 import { GameState } from "../../types/gameState";
 import { PlayerHat } from "../../types/playerHat";
@@ -60,7 +60,7 @@ export class CodeObject {
 
   constructor(
     value: string,
-    public room: Lobby,
+    public lobby: Lobby,
   ) {
     this.internalValue = CodeObject.convertToInternal(value);
   }
@@ -72,33 +72,33 @@ export class CodeObject {
           return `${code}[A]`;
         }
 
-        throw new Error(`Invalid 1-character room code, codes may only contain A-Z, \\, ^, _, and \`: ${code}`);
+        throw new Error(`Invalid 1-character lobby code, codes may only contain A-Z, \\, ^, _, and \`: ${code}`);
       case 2:
         if (/^[A-Z\\^_`]+$/.test(code) && code.split("[").length == 2) {
           return `${code}[]`;
         }
 
-        throw new Error(`Invalid 2-character room code, codes may only contain A-Z, \\, ^, _, and \`: ${code}`);
+        throw new Error(`Invalid 2-character lobby code, codes may only contain A-Z, \\, ^, _, and \`: ${code}`);
       case 3:
         if (/^[A-Z[\\^_`]+$/.test(code) && code.split("[").length == 2) {
           return code.split("[").join("[[");
         }
 
-        throw new Error(`Invalid 3-character room code, codes may only contain A-Z, [, \\, ^, _, and \`, and must contain exactly one [: ${code}`);
+        throw new Error(`Invalid 3-character lobby code, codes may only contain A-Z, [, \\, ^, _, and \`, and must contain exactly one [: ${code}`);
       case 4:
         if (/^[A-Z[\\\]^_`]+$/.test(code)) {
           return code;
         }
 
-        throw new Error(`Invalid 4-character room code, codes may only contain A-Z, [, \\, ], ^, _, and \`: ${code}`);
+        throw new Error(`Invalid 4-character lobby code, codes may only contain A-Z, [, \\, ], ^, _, and \`: ${code}`);
       case 6:
         if (/^[A-Z]+$/.test(code)) {
           return code;
         }
 
-        throw new Error(`Invalid 6-character room code, codes may only contain A-Z: ${code}`);
+        throw new Error(`Invalid 6-character lobby code, codes may only contain A-Z: ${code}`);
       default:
-        throw new Error(`Invalid room code, expected 1-4 or 6 characters: ${code}`);
+        throw new Error(`Invalid lobby code, expected 1-4 or 6 characters: ${code}`);
     }
   }
 
@@ -106,7 +106,7 @@ export class CodeObject {
     this.internalValue = CodeObject.convertToInternal(code);
 
     if (!this.internalIsHidden && !this.internalIsRemoved) {
-      this.room.internalRoom.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
+      this.lobby.internalLobby.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
     }
   }
 
@@ -114,7 +114,7 @@ export class CodeObject {
     this.internalIsHidden = true;
 
     if (!this.internalIsRemoved) {
-      this.room.internalRoom.sendRootGamePacket(new HostGameResponsePacket(CodeObject.hiddenCode));
+      this.lobby.internalLobby.sendRootGamePacket(new HostGameResponsePacket(CodeObject.hiddenCode));
     }
   }
 
@@ -122,20 +122,20 @@ export class CodeObject {
     this.internalIsHidden = false;
 
     if (!this.internalIsRemoved) {
-      this.room.internalRoom.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
+      this.lobby.internalLobby.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
     }
   }
 
   remove(): void {
     this.internalIsRemoved = true;
 
-    this.room.internalRoom.sendRootGamePacket(new HostGameResponsePacket(CodeObject.removedCode));
+    this.lobby.internalLobby.sendRootGamePacket(new HostGameResponsePacket(CodeObject.removedCode));
   }
 
   restore(): void {
     this.internalIsRemoved = false;
 
-    this.room.internalRoom.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
+    this.lobby.internalLobby.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
   }
 }
 
@@ -144,7 +144,7 @@ export type LobbyEvents = {
 };
 
 export class Lobby extends Emittery.Typed<LobbyEvents> {
-  public readonly internalRoom: InternalRoom;
+  public readonly internalLobby: InternalLobby;
   public readonly codeObject: CodeObject;
   public readonly players: Player[] = [];
   public readonly settings: LobbySettings = new LobbySettings(this);
@@ -152,42 +152,42 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
   public game?: Game;
 
   get state(): GameState {
-    return this.internalRoom.gameState;
+    return this.internalLobby.gameState;
   }
 
   get code(): string {
-    return this.internalRoom.code;
+    return this.internalLobby.code;
   }
 
   set code(code: string) {
     if ((code.length != 4 && code.length != 6) || !(/^[A-Z]+$/.test(code))) {
-      throw new Error(`Invalid room code, expected 4 or 6 alphabetical characters: ${code}`);
+      throw new Error(`Invalid lobby code, expected 4 or 6 alphabetical characters: ${code}`);
     }
 
-    server.internalServer.roomMap.delete(this.internalRoom.code);
-    server.internalServer.roomMap.set(code, this.internalRoom);
+    server.internalServer.lobbyMap.delete(this.internalLobby.code);
+    server.internalServer.lobbyMap.set(code, this.internalLobby);
 
-    this.internalRoom.code = code;
+    this.internalLobby.code = code;
   }
 
   constructor(
-    room?: InternalRoom,
+    lobby?: InternalLobby,
   ) {
     super();
 
-    if (room) {
-      this.internalRoom = room;
+    if (lobby) {
+      this.internalLobby = lobby;
     } else {
-      this.internalRoom = new InternalRoom(
-        server.internalServer.defaultRoomAddress,
-        server.internalServer.defaultRoomPort,
+      this.internalLobby = new InternalLobby(
+        server.internalServer.defaultLobbyAddress,
+        server.internalServer.defaultLobbyPort,
         server.internalServer.defaultHost == DefaultHostState.Server,
       );
     }
 
     this.codeObject = new CodeObject(this.code, this);
 
-    this.internalRoom.on("connection", (connection: Connection) => {
+    this.internalLobby.on("connection", (connection: Connection) => {
       const connectingPlayer = new Player(this, connection.id, connection.address, connection.port);
 
       this.players.push(connectingPlayer);
@@ -195,7 +195,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
       this.emit("player", connectingPlayer);
     });
 
-    this.internalRoom.on("player", (player: InternalPlayer) => {
+    this.internalLobby.on("player", (player: InternalPlayer) => {
       const spawnedPlayer = this.players.find(testPlayer => testPlayer.clientId == player.gameObject.owner);
 
       if (!spawnedPlayer) {
@@ -223,54 +223,54 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
   }
 
   changeLevel(level: Level): void {
-    if (!this.internalRoom.shipStatus) {
+    if (!this.internalLobby.shipStatus) {
       // TODO: Remove this call?
       //          You might want to switch from [NO MAP] to [SKELD]
       //          or something?
       throw new Error("Attempted to change current level from no level");
     }
 
-    if (this.internalRoom.host instanceof CustomHost) {
-      this.internalRoom.sendRootGamePacket(new EndGamePacket(this.code, GameOverReason.ImpostorsBySabotage, true));
+    if (this.internalLobby.host instanceof CustomHost) {
+      this.internalLobby.sendRootGamePacket(new EndGamePacket(this.code, GameOverReason.ImpostorsBySabotage, true));
 
-      this.internalRoom.connections.forEach(con => {
-        con.write(new JoinedGamePacket(this.code, con.id, this.internalRoom.host!.id, this.internalRoom.connections.map(c => c.id).filter(id => id != con.id)));
+      this.internalLobby.connections.forEach(con => {
+        con.write(new JoinedGamePacket(this.code, con.id, this.internalLobby.host!.id, this.internalLobby.connections.map(c => c.id).filter(id => id != con.id)));
       });
 
-      this.internalRoom.host.readyPlayerList = [];
-      this.internalRoom.options.options.levels = [level];
+      this.internalLobby.host.readyPlayerList = [];
+      this.internalLobby.options.options.levels = [level];
 
-      this.internalRoom.sendRootGamePacket(new StartGamePacket(this.code));
+      this.internalLobby.sendRootGamePacket(new StartGamePacket(this.code));
     }
   }
 
   clearMessage(): void {
-    if (this.internalRoom.host instanceof CustomHost) {
-      this.internalRoom.sendRootGamePacket(new EndGamePacket(this.code, 0, false));
+    if (this.internalLobby.host instanceof CustomHost) {
+      this.internalLobby.sendRootGamePacket(new EndGamePacket(this.code, 0, false));
 
       setTimeout(() => {
-        this.internalRoom.connections.forEach(connection => {
-          const player = this.internalRoom.findPlayerByConnection(connection);
+        this.internalLobby.connections.forEach(connection => {
+          const player = this.internalLobby.findPlayerByConnection(connection);
 
           if (player) {
             connection.write(new JoinedGamePacket(
               this.code,
               connection.id,
-              this.internalRoom.host!.id,
-              this.internalRoom.connections.map(e => e.id).filter(id => id != connection.id)),
+              this.internalLobby.host!.id,
+              this.internalLobby.connections.map(e => e.id).filter(id => id != connection.id)),
             );
-            connection.write(new GameDataPacket(this.internalRoom.players.map(p => p.gameObject.spawn()), this.code));
+            connection.write(new GameDataPacket(this.internalLobby.players.map(p => p.gameObject.spawn()), this.code));
 
-            if (this.internalRoom.lobbyBehavior) {
-              connection.write(new GameDataPacket([this.internalRoom.lobbyBehavior.spawn()], this.code));
+            if (this.internalLobby.lobbyBehavior) {
+              connection.write(new GameDataPacket([this.internalLobby.lobbyBehavior.spawn()], this.code));
             }
 
-            if (this.internalRoom.gameData) {
-              connection.write(new GameDataPacket([this.internalRoom.gameData.spawn()], this.code));
+            if (this.internalLobby.gameData) {
+              connection.write(new GameDataPacket([this.internalLobby.gameData.spawn()], this.code));
             }
 
-            if (this.internalRoom.shipStatus) {
-              connection.write(new GameDataPacket([this.internalRoom.shipStatus.spawn()], this.code));
+            if (this.internalLobby.shipStatus) {
+              connection.write(new GameDataPacket([this.internalLobby.shipStatus.spawn()], this.code));
             }
           }
         });
@@ -279,13 +279,13 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
   }
 
   sendMessage(message: TextComponent | string): void {
-    if (this.internalRoom.gameData == undefined) {
+    if (this.internalLobby.gameData == undefined) {
       throw new Error("sendMessage called without a GameData instance");
     }
 
-    if (this.internalRoom.host instanceof CustomHost) {
+    if (this.internalLobby.host instanceof CustomHost) {
       const playerId = 127;
-      const entity = new EntityPlayer(this.internalRoom);
+      const entity = new EntityPlayer(this.internalLobby);
       const playerData = new PlayerData(
         playerId,
         `[FFFFFFFF]${message.toString()}[FFFFFF00]`,
@@ -301,21 +301,21 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
 
       entity.owner = FakeClientId.Message;
       entity.innerNetObjects = [
-        new InnerPlayerControl(this.internalRoom.host.nextNetId, entity, false, playerId),
-        new InnerPlayerPhysics(this.internalRoom.host.nextNetId, entity),
-        new InnerCustomNetworkTransform(this.internalRoom.host.nextNetId, entity, 5, new Vector2(39, 39), new Vector2(0, 0)),
+        new InnerPlayerControl(this.internalLobby.host.nextNetId, entity, false, playerId),
+        new InnerPlayerPhysics(this.internalLobby.host.nextNetId, entity),
+        new InnerCustomNetworkTransform(this.internalLobby.host.nextNetId, entity, 5, new Vector2(39, 39), new Vector2(0, 0)),
       ];
 
-      this.internalRoom.sendRootGamePacket(new JoinGameResponsePacket(this.internalRoom.code, FakeClientId.Message, this.internalRoom.host.id));
-      this.internalRoom.sendRootGamePacket(new GameDataPacket([entity.spawn()], this.internalRoom.code));
+      this.internalLobby.sendRootGamePacket(new JoinGameResponsePacket(this.internalLobby.code, FakeClientId.Message, this.internalLobby.host.id));
+      this.internalLobby.sendRootGamePacket(new GameDataPacket([entity.spawn()], this.internalLobby.code));
 
       setTimeout(() => {
-        if (this.internalRoom.gameData == undefined) {
-          throw new Error("Attempted to send a room message without a GameData instance");
+        if (this.internalLobby.gameData == undefined) {
+          throw new Error("Attempted to send a lobby message without a GameData instance");
         }
 
-        this.internalRoom.gameData.gameData.updateGameData([playerData], this.internalRoom.connections);
-        this.internalRoom.sendRootGamePacket(new RemovePlayerPacket(this.code, FakeClientId.Message, this.internalRoom.host!.id));
+        this.internalLobby.gameData.gameData.updateGameData([playerData], this.internalLobby.connections);
+        this.internalLobby.sendRootGamePacket(new RemovePlayerPacket(this.code, FakeClientId.Message, this.internalLobby.host!.id));
       }, 51);
     }
   }

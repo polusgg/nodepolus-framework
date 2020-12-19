@@ -33,11 +33,11 @@ import {
 } from "../../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 
 export class SystemsHandler {
-  private oldShipStatus: InnerLevel = this.host.room.shipStatus!.innerNetObjects[0];
+  private oldShipStatus: InnerLevel = this.host.lobby.shipStatus!.innerNetObjects[0];
   private sabotageCountdownInterval: NodeJS.Timeout | undefined;
 
   private get shipStatus(): InnerLevel {
-    return this.host.room.shipStatus!.innerNetObjects[0];
+    return this.host.lobby.shipStatus!.innerNetObjects[0];
   }
 
   constructor(
@@ -244,9 +244,9 @@ export class SystemsHandler {
   }
 
   sendDataUpdate(): void {
-    this.host.room.sendRootGamePacket(new GameDataPacket([
+    this.host.lobby.sendRootGamePacket(new GameDataPacket([
       //@ts-ignore Talk to Cody about this?
       this.shipStatus.data(this.oldShipStatus),
-    ], this.host.room.code));
+    ], this.host.lobby.code));
   }
 }

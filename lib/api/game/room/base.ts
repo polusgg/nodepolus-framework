@@ -21,11 +21,11 @@ export class BaseGameRoom extends Emittery.Typed<GameEvents> {
   }
 
   get internalShipStatus(): InnerLevel {
-    if (!this.game.room.internalRoom.shipStatus) {
-      throw new Error("Attempted get ShipStatus without an instance on the room");
+    if (!this.game.lobby.internalLobby.shipStatus) {
+      throw new Error("Attempted get ShipStatus without an instance on the lobby");
     }
 
-    return this.game.room.internalRoom.shipStatus.innerNetObjects[0];
+    return this.game.lobby.internalLobby.shipStatus.innerNetObjects[0];
   }
 
   constructor(public game: Game, public systemType: SystemType) {
@@ -33,16 +33,16 @@ export class BaseGameRoom extends Emittery.Typed<GameEvents> {
   }
 
   internalBackupShipStatus(): void {
-    if (!this.game.room.internalRoom.shipStatus) {
-      throw new Error("Attempted to make a copy of ShipStatus without an instance on the room");
+    if (!this.game.lobby.internalLobby.shipStatus) {
+      throw new Error("Attempted to make a copy of ShipStatus without an instance on the lobby");
     }
 
-    this.shipStatusBackup = this.game.room.internalRoom.shipStatus.innerNetObjects[0].clone();
+    this.shipStatusBackup = this.game.lobby.internalLobby.shipStatus.innerNetObjects[0].clone();
   }
 
   internalUpdateShipStatus(): void {
-    if (!this.game.room.internalRoom.shipStatus) {
-      throw new Error("Attempted to update ShipStatus without an instance on the room");
+    if (!this.game.lobby.internalLobby.shipStatus) {
+      throw new Error("Attempted to update ShipStatus without an instance on the lobby");
     }
 
     if (!this.shipStatusBackup) {
@@ -50,9 +50,9 @@ export class BaseGameRoom extends Emittery.Typed<GameEvents> {
     }
 
     //@ts-ignore Talk to cody about this.
-    const data = this.game.room.internalRoom.shipStatus.innerNetObjects[0].getData(this.shipSatusBackup);
+    const data = this.game.lobby.internalLobby.shipStatus.innerNetObjects[0].getData(this.shipSatusBackup);
 
-    this.game.room.internalRoom.sendRootGamePacket(new GameDataPacket([data], this.game.room.code));
+    this.game.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([data], this.game.lobby.code));
   }
 }
 
@@ -62,14 +62,14 @@ export class BaseDoorGameRoom extends BaseGameRoom {
   constructor(game: Game, systemType: SystemType) {
     super(game, systemType);
 
-    this.doors = DOOR_DATA[this.game.room.settings.level == Level.AprilSkeld
+    this.doors = DOOR_DATA[this.game.lobby.settings.level == Level.AprilSkeld
       ? Level.TheSkeld
-      : this.game.room.settings.level
+      : this.game.lobby.settings.level
     ][this.systemType].map((id: number) => new Door(game, id));
   }
 
   closeDoors(): void {
-    const host = this.game.room.internalRoom.host;
+    const host = this.game.lobby.internalLobby.host;
 
     if (host instanceof CustomHost) {
       if (!host.doorHandler) {
@@ -87,7 +87,7 @@ export class BaseDoorGameRoom extends BaseGameRoom {
   }
 
   openDoors(): void {
-    if (this.game.room.settings.level == Level.TheSkeld) {
+    if (this.game.lobby.settings.level == Level.TheSkeld) {
       throw new Error("Cannot open doors on The Skeld due to client limitations");
     } else {
       this.internalBackupShipStatus();

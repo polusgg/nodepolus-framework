@@ -38,11 +38,11 @@ export const ANNOUNCEMENT_SERVER_PORT = 22024;
 export const DEFAULT_HOST_STATE = DefaultHostState.Server;
 
 /**
- * Room constants
+ * Lobby constants
  */
 export const GLOBAL_OWNER = -2;
 
-export const DEFAULT_ROOM = 32;
+export const DEFAULT_LOBBY = 32;
 
 export const DEFAULT_GAME_OPTIONS = new GameOptionsData({
   length: 46,

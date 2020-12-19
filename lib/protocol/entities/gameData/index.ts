@@ -21,12 +21,12 @@ export class EntityGameData extends BaseEntity {
     return this.innerNetObjects[1];
   }
 
-  constructor(room: LobbyImplementation) {
-    super(SpawnType.GameData, room);
+  constructor(lobby: LobbyImplementation) {
+    super(SpawnType.GameData, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntityGameData {
-    const gameData = new EntityGameData(room);
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityGameData {
+    const gameData = new EntityGameData(lobby);
 
     gameData.setSpawn(flags, owner, innerNetObjects);
 

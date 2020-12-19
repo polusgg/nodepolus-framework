@@ -9,12 +9,12 @@ const server: any = undefined;
 /* eslint-enable */
 
 // api/
-interface Room {
+interface Lobby {
   sendChat(name: string, color: PlayerColor, message: string | Text): void;
 }
 
 // lib/
-class InternalRoom implements Room {
+class InternalLobby implements Lobby {
   sendChat(_name: string, _color: PlayerColor, _message: string | Text): void {
     // ...
   }
@@ -25,17 +25,17 @@ class InternalRoom implements Room {
 }
 
 // api/
-class RoomCreatedEvent extends CancellableEvent {
-  constructor(public readonly room: Room) {
+class LobbyCreatedEvent extends CancellableEvent {
+  constructor(public readonly lobby: Lobby) {
     super();
   }
 }
 
 // bin/polus.ts
-server.on("roomCreated", (event: RoomCreatedEvent) => {
-  event.room.sendChat("Server", PlayerColor.Red, "Hello from the API");
+server.on("lobbyCreated", (event: LobbyCreatedEvent) => {
+  event.lobby.sendChat("Server", PlayerColor.Red, "Hello from the API");
 
-  event.room.someOtherMethod();
+  event.lobby.someOtherMethod();
 
-  (event.room as InternalRoom).someOtherMethod();
+  (event.lobby as InternalLobby).someOtherMethod();
 });

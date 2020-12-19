@@ -50,10 +50,12 @@ import { Vector2 } from "../util/vector2";
 import { Lobby } from ".";
 
 export class RPCHandler {
-  constructor(public readonly room: Lobby) {}
+  constructor(
+    public readonly lobby: Lobby,
+  ) {}
 
   handleBaseRPC(type: RPCPacketType, senderNetId: number, rawPacket: BaseRPCPacket, sendTo: Connection[]): void {
-    const sender = this.room.findInnerNetObject(senderNetId);
+    const sender = this.lobby.findInnerNetObject(senderNetId);
     const typeString = InnerNetObjectType[type];
 
     if (!sender) {
@@ -118,7 +120,7 @@ export class RPCHandler {
 
         this.handleCheckName(sender as InnerPlayerControl, packet.name, sendTo);
 
-        this.room.emit("player", this.room.findPlayerByConnection(this.room.findConnection(sender.parent.owner)!)!);
+        this.lobby.emit("player", this.lobby.findPlayerByConnection(this.lobby.findConnection(sender.parent.owner)!)!);
         break;
       }
       case RPCPacketType.SetName: {
@@ -382,7 +384,7 @@ export class RPCHandler {
           throw new Error(`Received UsePlatform packet from invalid InnerNetObject: expected PlayerPhysics but got ${type as number} (${typeString})`);
         }
 
-        this.room.host?.handleUsePlatform(sender as InnerPlayerControl);
+        this.lobby.host?.handleUsePlatform(sender as InnerPlayerControl);
 
         this.handleUsePlatform(sender as InnerPlayerControl);
         break;
@@ -397,11 +399,11 @@ export class RPCHandler {
   }
 
   handleCompleteTask(sender: InnerPlayerControl, taskIndex: number, sendTo: Connection[]): void {
-    if (!this.room.host) {
+    if (!this.lobby.host) {
       throw new Error("CompleteTask RPC handler called without a host");
     }
 
-    this.room.host.handleCompleteTask(sender, taskIndex);
+    this.lobby.host.handleCompleteTask(sender, taskIndex);
 
     sender.completeTask(taskIndex, sendTo);
   }
@@ -419,17 +421,17 @@ export class RPCHandler {
   }
 
   handleCheckName(sender: InnerPlayerControl, name: string, sendTo: Connection[]): void {
-    if (!this.room.host) {
+    if (!this.lobby.host) {
       throw new Error("CheckName RPC handler called without a host");
     }
 
-    this.room.host.handleCheckName(sender, name);
+    this.lobby.host.handleCheckName(sender, name);
 
     sender.checkName(name, sendTo);
   }
 
   handleSetName(sender: InnerPlayerControl, name: string, sendTo: Connection[]): void {
-    this.room.emit("nameChanged", {
+    this.lobby.emit("nameChanged", {
       clientId: sender.parent.owner,
       newName: name,
     });
@@ -438,17 +440,17 @@ export class RPCHandler {
   }
 
   handleCheckColor(sender: InnerPlayerControl, color: PlayerColor, sendTo: Connection[]): void {
-    if (!this.room.host) {
+    if (!this.lobby.host) {
       throw new Error("CheckColor RPC handler called without a host");
     }
 
-    this.room.host.handleCheckColor(sender, color);
+    this.lobby.host.handleCheckColor(sender, color);
 
     sender.checkColor(color, sendTo);
   }
 
   handleSetColor(sender: InnerPlayerControl, color: PlayerColor, sendTo: Connection[]): void {
-    this.room.emit("colorChanged", {
+    this.lobby.emit("colorChanged", {
       clientId: sender.parent.owner,
       newColor: color,
     });
@@ -457,7 +459,7 @@ export class RPCHandler {
   }
 
   handleSetHat(sender: InnerPlayerControl, hat: PlayerHat, sendTo: Connection[]): void {
-    this.room.emit("hatChanged", {
+    this.lobby.emit("hatChanged", {
       clientId: sender.parent.owner,
       newHat: hat,
     });
@@ -466,7 +468,7 @@ export class RPCHandler {
   }
 
   handleSetSkin(sender: InnerPlayerControl, skin: PlayerSkin, sendTo: Connection[]): void {
-    this.room.emit("skinChanged", {
+    this.lobby.emit("skinChanged", {
       clientId: sender.parent.owner,
       newSkin: skin,
     });
@@ -475,29 +477,29 @@ export class RPCHandler {
   }
 
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId: number | undefined, sendTo: Connection[]): void {
-    if (!this.room.host) {
+    if (!this.lobby.host) {
       throw new Error("ReportDeadBody RPC handler called without a host");
     }
 
-    this.room.host.handleReportDeadBody(sender, victimPlayerId);
+    this.lobby.host.handleReportDeadBody(sender, victimPlayerId);
 
     sender.reportDeadBody(victimPlayerId, sendTo);
   }
 
   handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number, sendTo: Connection[]): void {
-    if (!this.room.host) {
+    if (!this.lobby.host) {
       throw new Error("MurderPlayer RPC handler called without a host");
     }
 
     sender.murderPlayer(victimPlayerControlNetId, sendTo);
 
-    this.room.host.handleMurderPlayer(sender, victimPlayerControlNetId);
+    this.lobby.host.handleMurderPlayer(sender, victimPlayerControlNetId);
   }
 
   handleSendChat(sender: InnerPlayerControl, message: string, sendTo: Connection[]): void {
-    // const event = new ChatEvent(this.room.findPlayerByInnerNetObject(sender)!, TextComponent.from(message));
+    // const event = new ChatEvent(this.lobby.findPlayerByInnerNetObject(sender)!, TextComponent.from(message));
 
-    // this.room.emit("chat", event);
+    // this.lobby.emit("chat", event);
 
     // if (!event.isCancelled) {
     sender.sendChat(message, sendTo);
@@ -518,7 +520,7 @@ export class RPCHandler {
   }
 
   handleSetPet(sender: InnerPlayerControl, pet: PlayerPet, sendTo: Connection[]): void {
-    this.room.emit("petChanged", {
+    this.lobby.emit("petChanged", {
       clientId: sender.parent.owner,
       newPet: pet,
     });
@@ -545,7 +547,7 @@ export class RPCHandler {
   handleClose(sender: InnerMeetingHud, sendTo: Connection[]): void {
     sender.close(sendTo);
 
-    delete this.room.meetingHud;
+    delete this.lobby.meetingHud;
   }
 
   handleVotingComplete(sender: InnerMeetingHud, voteStates: VoteState[], didVotePlayerOff: boolean, exiledPlayerId: number, isTie: boolean, sendTo: Connection[]): void {
@@ -565,35 +567,35 @@ export class RPCHandler {
   }
 
   handleCloseDoorsOfType(sender: InnerLevel, system: SystemType): void {
-    if (!this.room.host) {
+    if (!this.lobby.host) {
       throw new Error("CloseDoorsOfType RPC handler called without a host");
     }
 
-    this.room.host.handleCloseDoorsOfType(sender, system);
+    this.lobby.host.handleCloseDoorsOfType(sender, system);
 
     sender.closeDoorsOfType(system);
   }
 
   handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
-    if (!this.room.host) {
+    if (!this.lobby.host) {
       throw new Error("RepairSystem RPC handler called without a host");
     }
 
-    this.room.host.handleRepairSystem(sender, systemId, playerControlNetId, amount);
+    this.lobby.host.handleRepairSystem(sender, systemId, playerControlNetId, amount);
 
     sender.repairSystem(systemId, playerControlNetId, amount);
   }
 
   handleClimbLadder(sender: InnerPlayerPhysics, ladderSize: LadderSize, ladderDirection: LadderDirection): void {
-    sender.climbLadder(ladderSize, ladderDirection, this.room.connections);
+    sender.climbLadder(ladderSize, ladderDirection, this.lobby.connections);
   }
 
   handleUsePlatform(sender: InnerPlayerControl): void {
-    if (!this.room.host) {
+    if (!this.lobby.host) {
       throw new Error("UsePlatform RPC handler called without a host");
     }
 
-    this.room.host.handleUsePlatform(sender);
+    this.lobby.host.handleUsePlatform(sender);
   }
 
   handleSetTasks(sender: InnerGameData, playerId: number, tasks: number[], sendTo: Connection[]): void {

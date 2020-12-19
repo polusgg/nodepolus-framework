@@ -16,12 +16,12 @@ export class EntityMiraShipStatus extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(room: LobbyImplementation) {
-    super(SpawnType.Headquarters, room);
+  constructor(lobby: LobbyImplementation) {
+    super(SpawnType.Headquarters, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntityMiraShipStatus {
-    const headquarters = new EntityMiraShipStatus(room);
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityMiraShipStatus {
+    const headquarters = new EntityMiraShipStatus(lobby);
 
     headquarters.setSpawn(flags, owner, innerNetObjects);
 

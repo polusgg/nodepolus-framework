@@ -9,8 +9,8 @@ declare const server: Server;
 
 const logger = new Logger("Debug");
 
-server.on("roomCreated", (room: Lobby) => {
-  room.on("player", (player: Player) => {
+server.on("lobbyCreated", (lobby: Lobby) => {
+  lobby.on("player", (player: Player) => {
     logger.log(player, " Connected");
 
     player.on("spawned", () => {

@@ -16,8 +16,8 @@ export class MedbayGameRoom extends BaseDoorGameRoom {
   }
 
   get playersScanning(): Player | undefined {
-    for (let i = 0; i < this.game.room.players.length; i++) {
-      const player = this.game.room.players[i];
+    for (let i = 0; i < this.game.lobby.players.length; i++) {
+      const player = this.game.lobby.players[i];
 
       if (player.isScanning) {
         return player;
@@ -31,10 +31,10 @@ export class MedbayGameRoom extends BaseDoorGameRoom {
     const players: Player[] = [];
 
     for (let i = 0; i < playerIds.length; i++) {
-      const player = this.game.room.players.find(p => playerIds[i] == p.playerId);
+      const player = this.game.lobby.players.find(p => playerIds[i] == p.playerId);
 
       if (!player) {
-        throw new Error("Player in queue for medscan is not on the room instance");
+        throw new Error("Player in queue for medscan is not on the lobby instance");
       }
 
       players.push(player);

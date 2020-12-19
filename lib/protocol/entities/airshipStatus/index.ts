@@ -16,12 +16,12 @@ export class EntityAirshipStatus extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(room: LobbyImplementation) {
-    super(SpawnType.Airship, room);
+  constructor(lobby: LobbyImplementation) {
+    super(SpawnType.Airship, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntityAirshipStatus {
-    const airshipStatus = new EntityAirshipStatus(room);
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityAirshipStatus {
+    const airshipStatus = new EntityAirshipStatus(lobby);
 
     airshipStatus.setSpawn(flags, owner, innerNetObjects);
 

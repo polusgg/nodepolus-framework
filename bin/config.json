@@ -2,6 +2,6 @@
   "serverAddress": "0.0.0.0",
   "serverPort": 22023,
   "defaultHost": 0,
-  "defaultRoomAddress": "0.0.0.0",
-  "defaultRoomPort": 22023
+  "defaultLobbyAddress": "0.0.0.0",
+  "defaultLobbyPort": 22023
 }

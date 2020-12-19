@@ -75,7 +75,7 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
   }
 
   votingComplete(voteStates: VoteState[], didVotePlayerOff: boolean, exiledPlayerId: number, isTie: boolean, sendTo: Connection[]): void {
-    if (this.parent.room.isHost) {
+    if (this.parent.lobby.isHost) {
       for (let i = 0; i < voteStates.length; i++) {
         this.playerStates[i] = voteStates[i];
       }
@@ -89,10 +89,10 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
   }
 
   castVote(votingPlayerId: number, suspectPlayerId: number): void {
-    if (this.parent.room.isHost) {
-      (this.parent.room.host as CustomHost).handleCastVote(votingPlayerId, suspectPlayerId);
+    if (this.parent.lobby.isHost) {
+      (this.parent.lobby.host as CustomHost).handleCastVote(votingPlayerId, suspectPlayerId);
     } else {
-      this.sendRPCPacketTo([this.parent.room.host as Connection], new CastVotePacket(votingPlayerId, suspectPlayerId));
+      this.sendRPCPacketTo([this.parent.lobby.host as Connection], new CastVotePacket(votingPlayerId, suspectPlayerId));
     }
   }
 

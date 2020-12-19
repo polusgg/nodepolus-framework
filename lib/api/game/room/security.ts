@@ -20,7 +20,7 @@ export class SecurityGameRoom extends BaseDoorGameRoom {
     const playersIds = [...this.internalSystem.playersViewingCams.values()];
 
     for (let i = 0; i < playersIds.length; i++) {
-      const player = this.game.room.players.find(p => p.playerId == playersIds[i]);
+      const player = this.game.lobby.players.find(p => p.playerId == playersIds[i]);
 
       // 212 is a magic number used to identify a fake player for when the
       // cameras are active without any players viewing them.

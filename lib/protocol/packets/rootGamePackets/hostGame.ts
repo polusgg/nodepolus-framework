@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { GameOptionsData } from "../../../types/gameOptionsData";
+import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootGamePacket } from "../basePacket";
-import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 
 export class HostGameRequestPacket extends BaseRootGamePacket {
@@ -26,16 +26,16 @@ export class HostGameRequestPacket extends BaseRootGamePacket {
 
 export class HostGameResponsePacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
+    public readonly lobbyCode: string,
   ) {
     super(RootGamePacketType.HostGame);
   }
 
   static deserialize(reader: MessageReader): HostGameResponsePacket {
-    return new HostGameResponsePacket(RoomCode.decode(reader.readInt32()));
+    return new HostGameResponsePacket(LobbyCode.decode(reader.readInt32()));
   }
 
   serialize(): MessageWriter {
-    return new MessageWriter().writeInt32(RoomCode.encode(this.roomCode));
+    return new MessageWriter().writeInt32(LobbyCode.encode(this.lobbyCode));
   }
 }

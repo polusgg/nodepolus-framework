@@ -1,12 +1,12 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { DisconnectReason } from "../../../types/disconnectReason";
+import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootGamePacket } from "../basePacket";
-import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 
 export class LateRejectionPacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
+    public readonly lobbyCode: string,
     public readonly removedClientId: number,
     public readonly disconnectReason: DisconnectReason,
   ) {
@@ -15,7 +15,7 @@ export class LateRejectionPacket extends BaseRootGamePacket {
 
   static deserialize(reader: MessageReader): LateRejectionPacket {
     return new LateRejectionPacket(
-      RoomCode.decode(reader.readInt32()),
+      LobbyCode.decode(reader.readInt32()),
       reader.readPackedUInt32(),
       new DisconnectReason(reader.readByte()),
     );
@@ -23,7 +23,7 @@ export class LateRejectionPacket extends BaseRootGamePacket {
 
   serialize(): MessageWriter {
     const writer = new MessageWriter()
-      .writeInt32(RoomCode.encode(this.roomCode))
+      .writeInt32(LobbyCode.encode(this.lobbyCode))
       .writePackedUInt32(this.removedClientId);
 
     this.disconnectReason.serialize(writer);
@@ -34,7 +34,7 @@ export class LateRejectionPacket extends BaseRootGamePacket {
 
 export class RemovePlayerPacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
+    public readonly lobbyCode: string,
     public readonly removedClientId: number,
     public readonly hostClientId: number,
     public readonly disconnectReason?: DisconnectReason,
@@ -44,7 +44,7 @@ export class RemovePlayerPacket extends BaseRootGamePacket {
 
   static deserialize(reader: MessageReader): RemovePlayerPacket {
     return new RemovePlayerPacket(
-      RoomCode.decode(reader.readInt32()),
+      LobbyCode.decode(reader.readInt32()),
       reader.readUInt32(),
       reader.readUInt32(),
       reader.hasBytesLeft() ? new DisconnectReason(reader.readByte()) : undefined,
@@ -53,7 +53,7 @@ export class RemovePlayerPacket extends BaseRootGamePacket {
 
   serialize(): MessageWriter {
     const writer = new MessageWriter()
-      .writeInt32(RoomCode.encode(this.roomCode))
+      .writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeUInt32(this.removedClientId)
       .writeUInt32(this.hostClientId);
 

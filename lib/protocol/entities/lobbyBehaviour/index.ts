@@ -17,12 +17,12 @@ export class EntityLobbyBehaviour extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(room: LobbyImplementation) {
-    super(SpawnType.LobbyBehaviour, room);
+  constructor(lobby: LobbyImplementation) {
+    super(SpawnType.LobbyBehaviour, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntityLobbyBehaviour {
-    const lobbyBehaviour = new EntityLobbyBehaviour(room);
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityLobbyBehaviour {
+    const lobbyBehaviour = new EntityLobbyBehaviour(lobby);
 
     lobbyBehaviour.setSpawn(flags, owner, innerNetObjects);
 

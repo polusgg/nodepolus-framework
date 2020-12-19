@@ -1,9 +1,9 @@
 import { CancellableEvent } from "../cancellableEvent";
 import { Lobby } from "../../../lobby";
 
-export class RoomCreatedEvent extends CancellableEvent {
+export class LobbyCreatedEvent extends CancellableEvent {
   constructor(
-    public readonly room: Lobby,
+    public readonly lobby: Lobby,
   ) {
     super();
   }

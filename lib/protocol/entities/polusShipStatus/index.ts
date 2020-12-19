@@ -16,12 +16,12 @@ export class EntityPolusShipStatus extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(room: LobbyImplementation) {
-    super(SpawnType.PlanetMap, room);
+  constructor(lobby: LobbyImplementation) {
+    super(SpawnType.PlanetMap, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntityPolusShipStatus {
-    const planetMap = new EntityPolusShipStatus(room);
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityPolusShipStatus {
+    const planetMap = new EntityPolusShipStatus(lobby);
 
     planetMap.setSpawn(flags, owner, innerNetObjects);
 

@@ -77,21 +77,21 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
   }
 
   closeDoorsOfType(systemId: SystemType): void {
-    if (this.parent.room.isHost) {
+    if (this.parent.lobby.isHost) {
       return;
     }
 
-    if (!this.parent.room.host) {
-      throw new Error("CloseDoorsOfType sent to room without a host");
+    if (!this.parent.lobby.host) {
+      throw new Error("CloseDoorsOfType sent to lobby without a host");
     }
 
-    this.sendRPCPacketTo([this.parent.room.host as Connection], new CloseDoorsOfTypePacket(systemId));
+    this.sendRPCPacketTo([this.parent.lobby.host as Connection], new CloseDoorsOfTypePacket(systemId));
   }
 
   repairSystem(systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
-    if (!this.parent.room.isHost) {
+    if (!this.parent.lobby.isHost) {
       this.sendRPCPacketTo(
-        [this.parent.room.host as Connection],
+        [this.parent.lobby.host as Connection],
         new RepairSystemPacket(systemId, playerControlNetId, amount.serialize(), this.level),
       );
     }

@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { GameOptionsData } from "../../../types/gameOptionsData";
+import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootGamePacket } from "../basePacket";
-import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 import { Level } from "../../../types/level";
 
@@ -9,7 +9,7 @@ export class LobbyListing {
   constructor(
     public readonly ipAddress: string,
     public readonly port: number,
-    public readonly roomCode: string,
+    public readonly lobbyCode: string,
     public readonly hostName: string,
     public readonly playerCount: number,
     public readonly age: number,
@@ -22,7 +22,7 @@ export class LobbyListing {
     return new LobbyListing(
       reader.readBytes(4).buffer.join("."),
       reader.readUInt16(),
-      RoomCode.decode(reader.readInt32()),
+      LobbyCode.decode(reader.readInt32()),
       reader.readString(),
       reader.readByte(),
       reader.readPackedUInt32(),
@@ -35,7 +35,7 @@ export class LobbyListing {
   serialize(writer: MessageWriter): void {
     writer.writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet, 10)))
       .writeUInt16(this.port)
-      .writeInt32(RoomCode.encode(this.roomCode))
+      .writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeString(this.hostName)
       .writeByte(this.playerCount)
       .writePackedUInt32(this.age)
@@ -106,7 +106,7 @@ export class GetGameListRequestPacket extends BaseRootGamePacket {
 
 export class GetGameListResponsePacket extends BaseRootGamePacket {
   constructor(
-    public readonly rooms: LobbyListing[],
+    public readonly lobbies: LobbyListing[],
     public readonly counts?: GameListCounts,
   ) {
     super(RootGamePacketType.GetGameList);
@@ -114,7 +114,7 @@ export class GetGameListResponsePacket extends BaseRootGamePacket {
 
   static deserialize(reader: MessageReader): GetGameListResponsePacket {
     let counts: GameListCounts | undefined;
-    const rooms: LobbyListing[] = [];
+    const lobbies: LobbyListing[] = [];
 
     reader.readAllChildMessages(child => {
       if (child.tag == 1) {
@@ -125,14 +125,14 @@ export class GetGameListResponsePacket extends BaseRootGamePacket {
           reader.readUInt32(),
         );
       } else if (child.tag == 0) {
-        child.readAllChildMessages(roomMessage => {
-          rooms.push(LobbyListing.deserialize(roomMessage));
+        child.readAllChildMessages(lobbyMessage => {
+          lobbies.push(LobbyListing.deserialize(lobbyMessage));
         });
       }
     });
 
     return new GetGameListResponsePacket(
-      rooms,
+      lobbies,
       counts,
     );
   }
@@ -150,9 +150,9 @@ export class GetGameListResponsePacket extends BaseRootGamePacket {
 
     writer.startMessage(0);
 
-    for (let i = 0; i < this.rooms.length; i++) {
+    for (let i = 0; i < this.lobbies.length; i++) {
       writer.startMessage(0x01);
-      this.rooms[i].serialize(writer);
+      this.lobbies[i].serialize(writer);
       writer.endMessage();
     }
 

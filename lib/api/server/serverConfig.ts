@@ -7,6 +7,6 @@ export interface ServerConfig {
   serverAddress?: string;
   serverPort?: number;
   defaultHost?: DefaultHostState;
-  defaultRoomAddress?: string;
-  defaultRoomPort?: number;
+  defaultLobbyAddress?: string;
+  defaultLobbyPort?: number;
 }

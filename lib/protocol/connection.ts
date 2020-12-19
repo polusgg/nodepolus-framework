@@ -44,7 +44,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   public isHost = false;
   public isActingHost = false;
   public id = -1;
-  public room?: Lobby;
+  public lobby?: Lobby;
   public limboState = LimboState.PreSpawn;
   public address: string;
   public port: number;
@@ -76,7 +76,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     this.family = remoteInfo.family;
 
     this.on("message", buf => {
-      const parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound == PacketDestination.Server, this.room?.options.options.levels[0]);
+      const parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound == PacketDestination.Server, this.lobby?.options.options.levels[0]);
 
       if (parsed.isReliable) {
         this.acknowledgePacket(parsed.nonce!);
@@ -146,7 +146,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     //     packet.type == RootGamePacketType.GameData ||
     //     packet.type == RootGamePacketType.GameDataTo
     //   ) &&
-    //   (lastElem as GameDataPacket).roomCode == (packet as GameDataPacket).roomCode &&
+    //   (lastElem as GameDataPacket).lobbyCode == (packet as GameDataPacket).lobbyCode &&
     //   (lastElem as GameDataPacket).targetClientId == (packet as GameDataPacket).targetClientId
     // ) {
     //   for (let i = 0; i < (packet as GameDataPacket).packets.length; i++) {
@@ -268,12 +268,12 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   }
 
   sendKick(isBanned: boolean, reason?: DisconnectReason): void {
-    if (!this.room) {
-      throw new Error("Cannot kick a connection that is not in a room");
+    if (!this.lobby) {
+      throw new Error("Cannot kick a connection that is not in a lobby");
     }
 
     this.write(new KickPlayerPacket(
-      this.room.code,
+      this.lobby.code,
       this.id,
       isBanned,
       reason,
@@ -281,46 +281,46 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   }
 
   sendLateRejection(reason: DisconnectReason): void {
-    if (!this.room) {
-      throw new Error("Cannot send a LateRejection packet to a connection that is not in a room");
+    if (!this.lobby) {
+      throw new Error("Cannot send a LateRejection packet to a connection that is not in a lobby");
     }
 
     this.write(new LateRejectionPacket(
-      this.room.code,
+      this.lobby.code,
       this.id,
       reason,
     ));
   }
 
   sendWaitingForHost(): void {
-    if (!this.room) {
-      throw new Error("Cannot send a WaitForHost packet to a connection that is not in a room");
+    if (!this.lobby) {
+      throw new Error("Cannot send a WaitForHost packet to a connection that is not in a lobby");
     }
 
     this.write(new WaitForHostPacket(
-      this.room.code,
+      this.lobby.code,
       this.id,
     ));
   }
 
   handleSceneChange(sender: Connection, scene: string): void {
-    if (!this.room) {
-      throw new Error("Cannot send a SceneChange packet to a connection that is not in a room");
+    if (!this.lobby) {
+      throw new Error("Cannot send a SceneChange packet to a connection that is not in a lobby");
     }
 
     this.write(new GameDataPacket([
       new SceneChangePacket(sender.id, scene),
-    ], this.room.code));
+    ], this.lobby.code));
   }
 
   handleReady(sender: Connection): void {
-    if (!this.room) {
-      throw new Error("Cannon send a Ready packet to a connection that is not in a room");
+    if (!this.lobby) {
+      throw new Error("Cannon send a Ready packet to a connection that is not in a lobby");
     }
 
     this.write(new GameDataPacket([
       new ReadyPacket(sender.id),
-    ], this.room.code));
+    ], this.lobby.code));
   }
 
   // These are no-ops because we expect the connection to implement these
@@ -433,7 +433,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     //   const prefix = " ".repeat(`[${this.id} @ ${this.address}:${this.port}] > [Server] : Sent `.length);
 
     //   console.log(`${prefix}│`);
-    //   console.log(`${prefix}├─[Room Code]─> ${(packet as GameDataPacket).roomCode}`);
+    //   console.log(`${prefix}├─[Lobby Code]─> ${(packet as GameDataPacket).lobbyCode}`);
     //   console.log(`${prefix}├─[Recipient]─> ${(packet as GameDataPacket).targetClientId ?? "ALL"}`);
     //   console.log(`${prefix}└─[Packets]`);
 

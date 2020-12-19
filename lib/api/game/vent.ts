@@ -5,7 +5,7 @@ export default class Vent {
   public players: Player[] = [];
 
   constructor(
-    public room: Lobby,
+    public lobby: Lobby,
     public id: number,
   ) {}
 }

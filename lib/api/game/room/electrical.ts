@@ -103,20 +103,20 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
   // TODO: Understand Airship's Electrical Doors, and add a serializer/deserializer
 
   sabotage(): void {
-    if (this.game.room.internalRoom.host instanceof CustomHost) {
+    if (this.game.lobby.internalLobby.host instanceof CustomHost) {
       this.internalBackupShipStatus();
 
-      if (!this.game.room.internalRoom.host.sabotageHandler) {
+      if (!this.game.lobby.internalLobby.host.sabotageHandler) {
         throw new Error("Host has no SabotageHandler instance");
       }
 
-      this.game.room.internalRoom.host.sabotageHandler.sabotageElectrical(this.internalSystem);
+      this.game.lobby.internalLobby.host.sabotageHandler.sabotageElectrical(this.internalSystem);
 
       this.internalUpdateShipStatus();
-    } else if (this.game.room.internalRoom.host instanceof Connection) {
+    } else if (this.game.lobby.internalLobby.host instanceof Connection) {
       this.internalShipStatus.repairSystem(
         SystemType.Sabotage,
-        this.game.room.players[0].internalPlayer.gameObject.playerControl.id,
+        this.game.lobby.players[0].internalPlayer.gameObject.playerControl.id,
         new SabotageAmount(SystemType.Electrical),
       );
     } else {
@@ -125,10 +125,10 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
   }
 
   repair(): void {
-    if (this.game.room.internalRoom.host instanceof CustomHost) {
+    if (this.game.lobby.internalLobby.host instanceof CustomHost) {
       this.internalBackupShipStatus();
 
-      if (!this.game.room.internalRoom.host.systemsHandler) {
+      if (!this.game.lobby.internalLobby.host.systemsHandler) {
         throw new Error("Host has no SystemsHandler instance");
       }
 
@@ -137,7 +137,7 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
         const expectedSwitch = this.internalSystem.actualSwitches[i];
 
         if (actualSwitch != expectedSwitch) {
-          this.game.room.internalRoom.host.systemsHandler.repairSwitch(
+          this.game.lobby.internalLobby.host.systemsHandler.repairSwitch(
             undefined as unknown as Player,
             this.internalSystem,
             new ElectricalAmount(i),
@@ -146,7 +146,7 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
       }
 
       this.internalUpdateShipStatus();
-    } else if (this.game.room.internalRoom.host instanceof Connection) {
+    } else if (this.game.lobby.internalLobby.host instanceof Connection) {
       for (let i = 0; i < this.internalSystem.actualSwitches.length; i++) {
         const actualSwitch = this.internalSystem.actualSwitches[i];
         const expectedSwitch = this.internalSystem.actualSwitches[i];
@@ -154,7 +154,7 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
         if (actualSwitch != expectedSwitch) {
           this.internalShipStatus.repairSystem(
             SystemType.Electrical,
-            this.game.room.players[0].internalPlayer.gameObject.playerControl.id,
+            this.game.lobby.players[0].internalPlayer.gameObject.playerControl.id,
             new ElectricalAmount(i),
           );
         }

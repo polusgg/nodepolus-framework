@@ -16,7 +16,7 @@ export class SabotageSystemHandler {
   ) {}
 
   sabotageReactor(system: ReactorSystem | LaboratorySystem): void {
-    switch (this.host.room.options.options.levels[0]) {
+    switch (this.host.lobby.options.options.levels[0]) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
         system.timer = 30;
@@ -73,7 +73,7 @@ export class SabotageSystemHandler {
   sabotageOxygen(system: LifeSuppSystem): void {
     system.completedConsoles.clear();
 
-    const level = this.host.room.options.options.levels[0];
+    const level = this.host.lobby.options.options.levels[0];
 
     switch (level) {
       case Level.TheSkeld:

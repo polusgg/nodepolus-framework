@@ -1,12 +1,12 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { GameOverReason } from "../../../types/gameOverReason";
+import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootGamePacket } from "../basePacket";
-import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 
 export class EndGamePacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
+    public readonly lobbyCode: string,
     public readonly reason: GameOverReason,
     public readonly showAd: boolean,
   ) {
@@ -14,12 +14,12 @@ export class EndGamePacket extends BaseRootGamePacket {
   }
 
   static deserialize(reader: MessageReader): EndGamePacket {
-    return new EndGamePacket(RoomCode.decode(reader.readInt32()), reader.readByte(), reader.readBoolean());
+    return new EndGamePacket(LobbyCode.decode(reader.readInt32()), reader.readByte(), reader.readBoolean());
   }
 
   serialize(): MessageWriter {
     return new MessageWriter()
-      .writeInt32(RoomCode.encode(this.roomCode))
+      .writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeByte(this.reason)
       .writeBoolean(this.showAd);
   }

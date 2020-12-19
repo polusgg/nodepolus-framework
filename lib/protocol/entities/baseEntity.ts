@@ -11,7 +11,7 @@ import { Player } from "../../player";
 export abstract class BaseEntity {
   constructor(
     public readonly type: SpawnType,
-    public readonly room: LobbyImplementation,
+    public readonly lobby: LobbyImplementation,
   ) {}
 
   abstract setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void;
@@ -55,6 +55,6 @@ export abstract class BaseGameObject<T> {
   }
 
   sendRPCPacketTo(to: (Player | HostInstance)[], packet: BaseRPCPacket): void {
-    this.parent.room.sendRPCPacket(this as unknown as InnerNetObject, packet, to);
+    this.parent.lobby.sendRPCPacket(this as unknown as InnerNetObject, packet, to);
   }
 }

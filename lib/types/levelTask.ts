@@ -110,3 +110,7 @@ export const TASKS_POLUS: LevelTask[] = [
   { id: 31, name: "Laboratory: Record Temperature", isVisual: false, length: TaskLength.Short, type: TaskType.RecordTemperature },
   { id: 32, name: "Outside: Record Temperature", isVisual: false, length: TaskLength.Short, type: TaskType.RecordTemperature },
 ];
+
+export const TASKS_AIRSHIP: LevelTask[] = [
+  // TODO
+];

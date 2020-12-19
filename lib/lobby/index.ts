@@ -50,8 +50,8 @@ import { PlayerHat } from "../types/playerHat";
 import { PlayerPet } from "../types/playerPet";
 import { SpawnFlag } from "../types/spawnFlag";
 import { SpawnType } from "../types/spawnType";
+import { LobbyCode } from "../util/lobbyCode";
 import { HostInstance } from "../host/types";
-import { RoomCode } from "../util/roomCode";
 import { RPCHandler } from "./rpcHandler";
 import { Vector2 } from "../util/vector2";
 import { CustomHost } from "../host";
@@ -138,7 +138,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         return this.customHostInstance;
       }
 
-      throw new Error("Room cannot be host without a custom host instance");
+      throw new Error("Lobby cannot be host without a custom host instance");
     } else {
       return this.connections.find(con => con.isHost);
     }
@@ -184,7 +184,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
     public address: string,
     public port: number,
     public isHost: boolean,
-    public code: string = RoomCode.generate(),
+    public code: string = LobbyCode.generate(),
   ) {
     super();
 
@@ -467,8 +467,8 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
 
     this.removeActingHosts();
 
-    if (!connection.room) {
-      connection.room = this;
+    if (!connection.lobby) {
+      connection.lobby = this;
 
       connection.on("packet", (packet: RootGamePacketDataType) => {
         this.handlePacket(packet, connection);
@@ -519,7 +519,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   }
 
   private handleRejoin(connection: Connection): void {
-    if (connection.room?.code != this.code) {
+    if (connection.lobby?.code != this.code) {
       connection.sendReliable([new JoinGameErrorPacket(DisconnectionType.GameStarted)]);
 
       return;

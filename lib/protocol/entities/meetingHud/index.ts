@@ -17,12 +17,12 @@ export class EntityMeetingHud extends BaseEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(room: LobbyImplementation) {
-    super(SpawnType.MeetingHud, room);
+  constructor(lobby: LobbyImplementation) {
+    super(SpawnType.MeetingHud, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], room: LobbyImplementation): EntityMeetingHud {
-    const meetingHud = new EntityMeetingHud(room);
+  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityMeetingHud {
+    const meetingHud = new EntityMeetingHud(lobby);
 
     meetingHud.setSpawn(flags, owner, innerNetObjects);
 

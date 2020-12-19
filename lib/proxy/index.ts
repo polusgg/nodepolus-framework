@@ -19,7 +19,7 @@ export interface ProxyConfig {
   server: dgram.RemoteInfo;
 }
 
-export class ProxyRoom implements LobbyImplementation {
+export class ProxyLobby implements LobbyImplementation {
   public players: Player[] = [];
   public gameData?: EntityGameData;
   public shipStatus?: EntityLevel;

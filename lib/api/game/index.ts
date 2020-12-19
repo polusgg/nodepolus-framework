@@ -14,10 +14,10 @@ export type GameEvents = {
 export class Game extends Emittery.Typed<GameEvents> {
   public rooms: BaseRoomCollection;
 
-  constructor(public room: Lobby) {
+  constructor(public lobby: Lobby) {
     super();
 
-    switch (room.settings.level) {
+    switch (lobby.settings.level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
         this.rooms = new SkeldRoomCollection(this);

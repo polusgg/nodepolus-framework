@@ -1,4 +1,4 @@
-export enum RoomCodeVersion {
+export enum LobbyCodeVersion {
   One = 4,
   Two = 6,
 }
@@ -9,8 +9,8 @@ export const CHAR_MAP: number[] = [
 
 export const CHAR_SET = "QWXRTYLPESDFGHUJKZOCVBINMA";
 
-export class RoomCode {
-  static generate(version: RoomCodeVersion = RoomCodeVersion.Two): string {
+export class LobbyCode {
+  static generate(version: LobbyCodeVersion = LobbyCodeVersion.Two): string {
     return Array(version)
       .fill(0)
       .map(() => CHAR_SET[Math.floor(Math.random() * CHAR_SET.length)])
@@ -21,14 +21,14 @@ export class RoomCode {
     code = code.toUpperCase();
 
     if (code.length == 4) {
-      return RoomCode.encodeV1(code);
+      return LobbyCode.encodeV1(code);
     }
 
     if (code.length == 6) {
-      return RoomCode.encodeV2(code);
+      return LobbyCode.encodeV2(code);
     }
 
-    throw new TypeError(`Invalid room code, expected 4 or 6 characters: ${code}`);
+    throw new TypeError(`Invalid lobby code, expected 4 or 6 characters: ${code}`);
   }
 
   static encodeV1(code: string): number {
@@ -54,7 +54,7 @@ export class RoomCode {
   }
 
   static decode(id: number): string {
-    return id < 0 ? RoomCode.decodeV2(id) : RoomCode.decodeV1(id);
+    return id < 0 ? LobbyCode.decodeV2(id) : LobbyCode.decodeV1(id);
   }
 
   static decodeV1(id: number): string {

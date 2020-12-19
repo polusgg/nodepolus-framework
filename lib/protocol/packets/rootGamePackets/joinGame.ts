@@ -1,13 +1,13 @@
 import { DisconnectionType, DisconnectReason } from "../../../types/disconnectReason";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootGamePacket } from "../basePacket";
-import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 import { Level } from "../../../types/level";
 
 export class JoinGameRequestPacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
+    public readonly lobbyCode: string,
     public readonly ownedMaps: Level[],
   ) {
     super(RootGamePacketType.JoinGame);
@@ -15,7 +15,7 @@ export class JoinGameRequestPacket extends BaseRootGamePacket {
 
   static deserialize(reader: MessageReader): JoinGameRequestPacket {
     return new JoinGameRequestPacket(
-      RoomCode.decode(reader.readInt32()),
+      LobbyCode.decode(reader.readInt32()),
       // TODO: Probably broken but just an example
       reader.readBitfield()
         .reverse()
@@ -26,14 +26,14 @@ export class JoinGameRequestPacket extends BaseRootGamePacket {
 
   serialize(): MessageWriter {
     return new MessageWriter()
-      .writeInt32(RoomCode.encode(this.roomCode))
+      .writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeInt32(this.ownedMaps.reduce((accum, val) => accum | val));
   }
 }
 
 export class JoinGameResponsePacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
+    public readonly lobbyCode: string,
     public readonly joiningClientId: number,
     public readonly hostClientId: number,
   ) {
@@ -41,12 +41,12 @@ export class JoinGameResponsePacket extends BaseRootGamePacket {
   }
 
   static deserialize(reader: MessageReader): JoinGameResponsePacket {
-    return new JoinGameResponsePacket(RoomCode.decode(reader.readInt32()), reader.readUInt32(), reader.readUInt32());
+    return new JoinGameResponsePacket(LobbyCode.decode(reader.readInt32()), reader.readUInt32(), reader.readUInt32());
   }
 
   serialize(): MessageWriter {
     return new MessageWriter()
-      .writeInt32(RoomCode.encode(this.roomCode))
+      .writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeUInt32(this.joiningClientId)
       .writeUInt32(this.hostClientId);
   }

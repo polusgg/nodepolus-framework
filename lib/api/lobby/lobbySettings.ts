@@ -36,7 +36,7 @@ export class LobbySettings {
 
   get maxPlayers(): number {
     if (this.povModifiedMaxPlayers === undefined) {
-      return this.room.internalRoom.options.options.maxPlayers;
+      return this.lobby.internalLobby.options.options.maxPlayers;
     }
 
     return this.povModifiedMaxPlayers;
@@ -44,7 +44,7 @@ export class LobbySettings {
 
   get languages(): Language[] {
     if (this.povModifiedLanguages === undefined) {
-      return this.room.internalRoom.options.options.languages;
+      return this.lobby.internalLobby.options.options.languages;
     }
 
     return this.povModifiedLanguages;
@@ -52,7 +52,7 @@ export class LobbySettings {
 
   get level(): Level {
     if (this.povModifiedLevel === undefined) {
-      return this.room.internalRoom.options.options.levels[0];
+      return this.lobby.internalLobby.options.options.levels[0];
     }
 
     return this.povModifiedLevel;
@@ -60,7 +60,7 @@ export class LobbySettings {
 
   get speed(): number {
     if (this.povModifiedSpeed === undefined) {
-      return this.room.internalRoom.options.options.playerSpeedModifier;
+      return this.lobby.internalLobby.options.options.playerSpeedModifier;
     }
 
     return this.povModifiedSpeed;
@@ -68,7 +68,7 @@ export class LobbySettings {
 
   get crewVision(): number {
     if (this.povModifiedCrewVision === undefined) {
-      return this.room.internalRoom.options.options.crewLightModifier;
+      return this.lobby.internalLobby.options.options.crewLightModifier;
     }
 
     return this.povModifiedCrewVision;
@@ -76,7 +76,7 @@ export class LobbySettings {
 
   get impostorVision(): number {
     if (this.povModifiedImpostorVision === undefined) {
-      return this.room.internalRoom.options.options.impostorLightModifier;
+      return this.lobby.internalLobby.options.options.impostorLightModifier;
     }
 
     return this.povModifiedImpostorVision;
@@ -84,7 +84,7 @@ export class LobbySettings {
 
   get killCooldown(): number {
     if (this.povModifiedKillCooldown === undefined) {
-      return this.room.internalRoom.options.options.killCooldown;
+      return this.lobby.internalLobby.options.options.killCooldown;
     }
 
     return this.povModifiedKillCooldown;
@@ -92,7 +92,7 @@ export class LobbySettings {
 
   get commonTaskCount(): number {
     if (this.povModifiedCommonTaskCount === undefined) {
-      return this.room.internalRoom.options.options.commonTasks;
+      return this.lobby.internalLobby.options.options.commonTasks;
     }
 
     return this.povModifiedCommonTaskCount;
@@ -100,7 +100,7 @@ export class LobbySettings {
 
   get longTaskCount(): number {
     if (this.povModifiedLongTaskCount === undefined) {
-      return this.room.internalRoom.options.options.longTasks;
+      return this.lobby.internalLobby.options.options.longTasks;
     }
 
     return this.povModifiedLongTaskCount;
@@ -108,7 +108,7 @@ export class LobbySettings {
 
   get shortTaskCount(): number {
     if (this.povModifiedShortTaskCount === undefined) {
-      return this.room.internalRoom.options.options.shortTasks;
+      return this.lobby.internalLobby.options.options.shortTasks;
     }
 
     return this.povModifiedShortTaskCount;
@@ -116,7 +116,7 @@ export class LobbySettings {
 
   get emergencyMeetingCount(): number {
     if (this.povModifiedEmergencyMeetingCount === undefined) {
-      return this.room.internalRoom.options.options.emergencies;
+      return this.lobby.internalLobby.options.options.emergencies;
     }
 
     return this.povModifiedEmergencyMeetingCount;
@@ -124,7 +124,7 @@ export class LobbySettings {
 
   get impostorCount(): number {
     if (this.povModifiedImpostorCount === undefined) {
-      return this.room.internalRoom.options.options.impostorCount;
+      return this.lobby.internalLobby.options.options.impostorCount;
     }
 
     return this.povModifiedImpostorCount;
@@ -132,7 +132,7 @@ export class LobbySettings {
 
   get killDistance(): KillDistance {
     if (this.povModifiedKillDistance === undefined) {
-      return this.room.internalRoom.options.options.killDistance;
+      return this.lobby.internalLobby.options.options.killDistance;
     }
 
     return this.povModifiedKillDistance;
@@ -140,7 +140,7 @@ export class LobbySettings {
 
   get discussionTime(): number {
     if (this.povModifiedDiscussionTime === undefined) {
-      return this.room.internalRoom.options.options.discussionTime;
+      return this.lobby.internalLobby.options.options.discussionTime;
     }
 
     return this.povModifiedDiscussionTime;
@@ -148,7 +148,7 @@ export class LobbySettings {
 
   get votingTime(): number {
     if (this.povModifiedVotingTime === undefined) {
-      return this.room.internalRoom.options.options.votingTime;
+      return this.lobby.internalLobby.options.options.votingTime;
     }
 
     return this.povModifiedVotingTime;
@@ -156,7 +156,7 @@ export class LobbySettings {
 
   get isDefault(): boolean {
     if (this.povModifiedIsDefault === undefined) {
-      return this.room.internalRoom.options.options.isDefault;
+      return this.lobby.internalLobby.options.options.isDefault;
     }
 
     return this.povModifiedIsDefault;
@@ -164,7 +164,7 @@ export class LobbySettings {
 
   get emergencyCooldown(): number {
     if (this.povModifiedEmergencyCooldown === undefined) {
-      return (this.room.internalRoom.options.options as GameOptionsDataV4).emergencyCooldown;
+      return (this.lobby.internalLobby.options.options as GameOptionsDataV4).emergencyCooldown;
     }
 
     return this.povModifiedEmergencyCooldown;
@@ -172,7 +172,7 @@ export class LobbySettings {
 
   get confirmEjects(): boolean {
     if (this.povModifiedConfirmEjects === undefined) {
-      return (this.room.internalRoom.options.options as GameOptionsDataV4).confirmEjects;
+      return (this.lobby.internalLobby.options.options as GameOptionsDataV4).confirmEjects;
     }
 
     return this.povModifiedConfirmEjects;
@@ -180,7 +180,7 @@ export class LobbySettings {
 
   get visualTasks(): boolean {
     if (this.povModifiedVisualTasks === undefined) {
-      return (this.room.internalRoom.options.options as GameOptionsDataV4).visualTasks;
+      return (this.lobby.internalLobby.options.options as GameOptionsDataV4).visualTasks;
     }
 
     return this.povModifiedVisualTasks;
@@ -188,7 +188,7 @@ export class LobbySettings {
 
   get anonymousVoting(): boolean {
     if (this.povModifiedAnonymousVoting === undefined) {
-      return (this.room.internalRoom.options.options as GameOptionsDataV4).anonymousVoting;
+      return (this.lobby.internalLobby.options.options as GameOptionsDataV4).anonymousVoting;
     }
 
     return this.povModifiedAnonymousVoting;
@@ -196,227 +196,227 @@ export class LobbySettings {
 
   get taskBarUpdates(): TaskBarUpdate {
     if (this.povModifiedTaskBarUpdates === undefined) {
-      return (this.room.internalRoom.options.options as GameOptionsDataV4).taskBarUpdates;
+      return (this.lobby.internalLobby.options.options as GameOptionsDataV4).taskBarUpdates;
     }
 
     return this.povModifiedTaskBarUpdates;
   }
 
   constructor(
-    public room: Lobby,
+    public lobby: Lobby,
   ) {}
 
   setMaxPlayers(param: number): void {
     if (this.isFromPov) {
       this.povModifiedMaxPlayers = param;
     } else {
-      this.room.internalRoom.options.options.maxPlayers = param;
+      this.lobby.internalLobby.options.options.maxPlayers = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setLanguages(param: Language[]): void {
     if (this.isFromPov) {
       this.povModifiedLanguages = param;
     } else {
-      this.room.internalRoom.options.options.languages = param;
+      this.lobby.internalLobby.options.options.languages = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setLevel(param: Level): void {
     if (this.isFromPov) {
       this.povModifiedLevel = param;
     } else {
-      this.room.internalRoom.options.options.levels = [param];
+      this.lobby.internalLobby.options.options.levels = [param];
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setSpeed(param: number): void {
     if (this.isFromPov) {
       this.povModifiedSpeed = param;
     } else {
-      this.room.internalRoom.options.options.playerSpeedModifier = param;
+      this.lobby.internalLobby.options.options.playerSpeedModifier = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setCrewVision(param: number): void {
     if (this.isFromPov) {
       this.povModifiedCrewVision = param;
     } else {
-      this.room.internalRoom.options.options.crewLightModifier = param;
+      this.lobby.internalLobby.options.options.crewLightModifier = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setImpostorVision(param: number): void {
     if (this.isFromPov) {
       this.povModifiedImpostorVision = param;
     } else {
-      this.room.internalRoom.options.options.impostorLightModifier = param;
+      this.lobby.internalLobby.options.options.impostorLightModifier = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setKillCooldown(param: number): void {
     if (this.isFromPov) {
       this.povModifiedKillCooldown = param;
     } else {
-      this.room.internalRoom.options.options.killCooldown = param;
+      this.lobby.internalLobby.options.options.killCooldown = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setCommonTaskCount(param: number): void {
     if (this.isFromPov) {
       this.povModifiedCommonTaskCount = param;
     } else {
-      this.room.internalRoom.options.options.commonTasks = param;
+      this.lobby.internalLobby.options.options.commonTasks = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setLongTaskCount(param: number): void {
     if (this.isFromPov) {
       this.povModifiedLongTaskCount = param;
     } else {
-      this.room.internalRoom.options.options.longTasks = param;
+      this.lobby.internalLobby.options.options.longTasks = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setShortTaskCount(param: number): void {
     if (this.isFromPov) {
       this.povModifiedShortTaskCount = param;
     } else {
-      this.room.internalRoom.options.options.shortTasks = param;
+      this.lobby.internalLobby.options.options.shortTasks = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setEmergencyMeetingCount(param: number): void {
     if (this.isFromPov) {
       this.povModifiedEmergencyMeetingCount = param;
     } else {
-      this.room.internalRoom.options.options.emergencies = param;
+      this.lobby.internalLobby.options.options.emergencies = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setImpostorCount(param: number): void {
     if (this.isFromPov) {
       this.povModifiedImpostorCount = param;
     } else {
-      this.room.internalRoom.options.options.impostorCount = param;
+      this.lobby.internalLobby.options.options.impostorCount = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setKillDistance(param: KillDistance): void {
     if (this.isFromPov) {
       this.povModifiedKillDistance = param;
     } else {
-      this.room.internalRoom.options.options.killDistance = param;
+      this.lobby.internalLobby.options.options.killDistance = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setDiscussionTime(param: number): void {
     if (this.isFromPov) {
       this.povModifiedDiscussionTime = param;
     } else {
-      this.room.internalRoom.options.options.discussionTime = param;
+      this.lobby.internalLobby.options.options.discussionTime = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setVotingTime(param: number): void {
     if (this.isFromPov) {
       this.povModifiedVotingTime = param;
     } else {
-      this.room.internalRoom.options.options.votingTime = param;
+      this.lobby.internalLobby.options.options.votingTime = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setIsDefault(param: boolean): void {
     if (this.isFromPov) {
       this.povModifiedIsDefault = param;
     } else {
-      this.room.internalRoom.options.options.isDefault = param;
+      this.lobby.internalLobby.options.options.isDefault = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setEmergencyCooldown(param: number): void {
     if (this.isFromPov) {
       this.povModifiedEmergencyCooldown = param;
     } else {
-      (this.room.internalRoom.options.options as GameOptionsDataV4).emergencyCooldown = param;
+      (this.lobby.internalLobby.options.options as GameOptionsDataV4).emergencyCooldown = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setConfirmEjects(param: boolean): void {
     if (this.isFromPov) {
       this.povModifiedConfirmEjects = param;
     } else {
-      (this.room.internalRoom.options.options as GameOptionsDataV4).confirmEjects = param;
+      (this.lobby.internalLobby.options.options as GameOptionsDataV4).confirmEjects = param;
     }
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setVisualTasks(param: boolean): void {
     if (this.isFromPov) {
       this.povModifiedVisualTasks = param;
     } else {
-      (this.room.internalRoom.options.options as GameOptionsDataV4).visualTasks = param;
+      (this.lobby.internalLobby.options.options as GameOptionsDataV4).visualTasks = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setAnonymousVoting(param: boolean): void {
     if (this.isFromPov) {
       this.povModifiedAnonymousVoting = param;
     } else {
-      (this.room.internalRoom.options.options as GameOptionsDataV4).anonymousVoting = param;
+      (this.lobby.internalLobby.options.options as GameOptionsDataV4).anonymousVoting = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   setTaskBarUpdates(param: TaskBarUpdate): void {
     if (this.isFromPov) {
       this.povModifiedTaskBarUpdates = param;
     } else {
-      (this.room.internalRoom.options.options as GameOptionsDataV4).taskBarUpdates = param;
+      (this.lobby.internalLobby.options.options as GameOptionsDataV4).taskBarUpdates = param;
     }
 
-    this.syncSettingsOnRoom();
+    this.syncSettingsOnLobby();
   }
 
   fromPov(player: Player): LobbySettings {
-    const connection = this.room.internalRoom.findConnection(player.internalPlayer.gameObject.owner);
+    const connection = this.lobby.internalLobby.findConnection(player.internalPlayer.gameObject.owner);
 
     if (connection && this.povCache.has(connection.id)) {
       return this.povCache.get(connection.id)!;
@@ -426,7 +426,7 @@ export class LobbySettings {
   }
 
   private static fromPov(baseSettings: LobbySettings, connection?: Connection): LobbySettings {
-    const povSettings = new LobbySettings(baseSettings.room);
+    const povSettings = new LobbySettings(baseSettings.lobby);
 
     povSettings.isFromPov = true;
     povSettings.fromPovConnection = connection;
@@ -434,8 +434,8 @@ export class LobbySettings {
     return povSettings;
   }
 
-  private syncSettingsOnRoom(): void {
-    if (this.room.internalRoom.players[0]) {
+  private syncSettingsOnLobby(): void {
+    if (this.lobby.internalLobby.players[0]) {
       const customOptions = new GameOptionsData({
         version: 4,
         length: 46,
@@ -470,15 +470,15 @@ export class LobbySettings {
         } else {
           sendToConnections = [];
 
-          console.warn("Attempted to sync room settings on a POV without a connection");
+          console.warn("Attempted to sync lobby settings on a POV without a connection");
         }
       } else {
-        sendToConnections = this.room.internalRoom.connections;
+        sendToConnections = this.lobby.internalLobby.connections;
       }
 
-      this.room.internalRoom.players[0].gameObject.playerControl.syncSettings(customOptions, sendToConnections);
+      this.lobby.internalLobby.players[0].gameObject.playerControl.syncSettings(customOptions, sendToConnections);
     } else {
-      console.warn("Attempted to sync room settings without a player");
+      console.warn("Attempted to sync lobby settings without a player");
     }
   }
 }

@@ -1,12 +1,12 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { AlterGameTag } from "../../../types/alterGameTag";
+import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootGamePacket } from "../basePacket";
-import { RoomCode } from "../../../util/roomCode";
 import { RootGamePacketType } from "../types";
 
 export class AlterGameTagPacket extends BaseRootGamePacket {
   constructor(
-    public readonly roomCode: string,
+    public readonly lobbyCode: string,
     public readonly tag: AlterGameTag,
     public readonly value: number,
   ) {
@@ -14,12 +14,12 @@ export class AlterGameTagPacket extends BaseRootGamePacket {
   }
 
   static deserialize(reader: MessageReader): AlterGameTagPacket {
-    return new AlterGameTagPacket(RoomCode.decode(reader.readInt32()), reader.readByte(), reader.readByte());
+    return new AlterGameTagPacket(LobbyCode.decode(reader.readInt32()), reader.readByte(), reader.readByte());
   }
 
   serialize(): MessageWriter {
     return new MessageWriter()
-      .writeInt32(RoomCode.encode(this.roomCode))
+      .writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeByte(this.tag)
       .writeByte(this.value);
   }
