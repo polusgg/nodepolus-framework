@@ -3,7 +3,7 @@ import { SystemType } from "../../../../types/systemType";
 import { BaseSystem } from "./baseSystem";
 
 export class SecurityCameraSystem extends BaseSystem<SecurityCameraSystem> {
-  public playersViewingCams: Set<number> = new Set();
+  public playersViewingCameras: Set<number> = new Set();
 
   constructor() {
     super(SystemType.Security);
@@ -26,24 +26,24 @@ export class SecurityCameraSystem extends BaseSystem<SecurityCameraSystem> {
   }
 
   getSpawn(): MessageWriter {
-    return new MessageWriter().writeList(this.playersViewingCams, (writer, player) => {
+    return new MessageWriter().writeList(this.playersViewingCameras, (writer, player) => {
       writer.writeByte(player);
     });
   }
 
   setSpawn(data: MessageReader): void {
-    this.playersViewingCams = new Set(data.readList(reader => reader.readByte()));
+    this.playersViewingCameras = new Set(data.readList(reader => reader.readByte()));
   }
 
   equals(old: SecurityCameraSystem): boolean {
-    if (this.playersViewingCams.size != old.playersViewingCams.size) {
+    if (this.playersViewingCameras.size != old.playersViewingCameras.size) {
       return false;
     }
 
-    const viewers = [...this.playersViewingCams];
-    const oldViewers = [...old.playersViewingCams];
+    const viewers = [...this.playersViewingCameras];
+    const oldViewers = [...old.playersViewingCameras];
 
-    for (let i = 0; i < this.playersViewingCams.size; i++) {
+    for (let i = 0; i < this.playersViewingCameras.size; i++) {
       if (viewers[i] != oldViewers[i]) {
         return false;
       }
@@ -55,7 +55,7 @@ export class SecurityCameraSystem extends BaseSystem<SecurityCameraSystem> {
   clone(): SecurityCameraSystem {
     const clone = new SecurityCameraSystem();
 
-    clone.playersViewingCams = new Set(this.playersViewingCams);
+    clone.playersViewingCameras = new Set(this.playersViewingCameras);
 
     return clone;
   }

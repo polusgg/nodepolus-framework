@@ -7,12 +7,12 @@ import { Player } from "../../../player";
 import { Game } from "..";
 
 export class ReactorGameRoom extends BaseDoorGameRoom {
-  get internalSystem(): ReactorSystem {
-    return this.internalShipStatus.systems[InternalSystemType.Reactor] as ReactorSystem;
-  }
-
   constructor(game: Game) {
     super(game, SystemType.Reactor);
+  }
+
+  getInternalSystem(): ReactorSystem {
+    return this.getInternalShipStatus().systems[InternalSystemType.Reactor] as ReactorSystem;
   }
 
   sabotage(): void {
@@ -22,7 +22,7 @@ export class ReactorGameRoom extends BaseDoorGameRoom {
       throw new Error("Host has no SabotageHandler instance");
     }
 
-    this.game.lobby.internalLobby.customHostInstance.sabotageHandler.sabotageReactor(this.internalSystem);
+    this.game.lobby.internalLobby.customHostInstance.sabotageHandler.sabotageReactor(this.getInternalSystem());
 
     this.internalUpdateShipStatus();
   }
@@ -38,7 +38,7 @@ export class ReactorGameRoom extends BaseDoorGameRoom {
 
     host.systemsHandler.repairReactor(
       undefined as unknown as Player,
-      this.internalSystem,
+      this.getInternalSystem(),
       new ReactorAmount(0, ReactorAction.Repaired),
     );
   }

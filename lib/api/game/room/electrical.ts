@@ -7,41 +7,41 @@ import { Player } from "../../../player";
 import { Game } from "..";
 
 export class Switch {
-  get state(): boolean {
-    return this.room.internalSystem.actualSwitches[this.index];
-  }
-
-  get preferredState(): boolean {
-    return this.room.internalSystem.expectedSwitches[this.index];
-  }
-
   constructor(
     public room: ElectricalGameRoom,
     public readonly index: number,
   ) {}
 
+  getState(): boolean {
+    return this.room.getInternalSystem().actualSwitches[this.index];
+  }
+
+  getPreferredState(): boolean {
+    return this.room.getInternalSystem().expectedSwitches[this.index];
+  }
+
   flip(): void {
     this.room.internalBackupShipStatus();
 
-    this.room.internalSystem.actualSwitches[this.index] = !this.state;
+    this.room.getInternalSystem().actualSwitches[this.index] = !this.getState();
 
     this.room.internalUpdateShipStatus();
   }
 
   setOn(): void {
-    if (!this.state) {
+    if (!this.getState()) {
       this.flip();
     }
   }
 
   setOff(): void {
-    if (this.state) {
+    if (this.getState()) {
       this.flip();
     }
   }
 
   repair(): void {
-    if (this.state != this.preferredState) {
+    if (this.getState() != this.getPreferredState()) {
       this.flip();
     }
   }
@@ -49,43 +49,25 @@ export class Switch {
   flipPreferred(): void {
     this.room.internalBackupShipStatus();
 
-    this.room.internalSystem.expectedSwitches[this.index] = !this.preferredState;
+    this.room.getInternalSystem().expectedSwitches[this.index] = !this.getPreferredState();
 
     this.room.internalUpdateShipStatus();
   }
 
   setPreferredOn(): void {
-    if (!this.preferredState) {
+    if (!this.getPreferredState()) {
       this.flipPreferred();
     }
   }
 
   setPreferredOff(): void {
-    if (this.preferredState) {
+    if (this.getPreferredState()) {
       this.flipPreferred();
     }
   }
 }
 
 export class ElectricalGameRoom extends BaseDoorGameRoom {
-  get switches(): Switch[] {
-    return this.internalSwitches;
-  }
-
-  get isSabotaged(): boolean {
-    for (let i = 0; i < this.switches.length; i++) {
-      if (this.switches[i].state != this.switches[i].preferredState) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  get internalSystem(): SwitchSystem {
-    return this.internalShipStatus.systems[InternalSystemType.Switch] as SwitchSystem;
-  }
-
   private readonly internalSwitches = [
     new Switch(this, 0),
     new Switch(this, 1),
@@ -98,6 +80,24 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
     super(game, SystemType.Electrical);
   }
 
+  getSwitches(): Switch[] {
+    return this.internalSwitches;
+  }
+
+  isSabotaged(): boolean {
+    for (let i = 0; i < this.getSwitches().length; i++) {
+      if (this.getSwitches()[i].getState() != this.getSwitches()[i].getPreferredState()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  getInternalSystem(): SwitchSystem {
+    return this.getInternalShipStatus().systems[InternalSystemType.Switch] as SwitchSystem;
+  }
+
   // TODO: Understand Airship's Electrical Doors, and add a serializer/deserializer
 
   sabotage(): void {
@@ -107,7 +107,7 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
       throw new Error("Host has no SabotageHandler instance");
     }
 
-    this.game.lobby.internalLobby.customHostInstance.sabotageHandler.sabotageElectrical(this.internalSystem);
+    this.game.lobby.internalLobby.customHostInstance.sabotageHandler.sabotageElectrical(this.getInternalSystem());
 
     this.internalUpdateShipStatus();
   }
@@ -119,14 +119,14 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
       throw new Error("Host has no SystemsHandler instance");
     }
 
-    for (let i = 0; i < this.internalSystem.actualSwitches.length; i++) {
-      const actualSwitch = this.internalSystem.actualSwitches[i];
-      const expectedSwitch = this.internalSystem.actualSwitches[i];
+    for (let i = 0; i < this.getInternalSystem().actualSwitches.length; i++) {
+      const actualSwitch = this.getInternalSystem().actualSwitches[i];
+      const expectedSwitch = this.getInternalSystem().actualSwitches[i];
 
       if (actualSwitch != expectedSwitch) {
         this.game.lobby.internalLobby.customHostInstance.systemsHandler.repairSwitch(
           undefined as unknown as Player,
-          this.internalSystem,
+          this.getInternalSystem(),
           new ElectricalAmount(i),
         );
       }

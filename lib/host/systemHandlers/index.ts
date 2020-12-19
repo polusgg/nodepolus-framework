@@ -36,10 +36,6 @@ export class SystemsHandler {
   private oldShipStatus: InnerLevel = this.host.lobby.shipStatus!.innerNetObjects[0];
   private sabotageCountdownInterval: NodeJS.Timeout | undefined;
 
-  private get shipStatus(): InnerLevel {
-    return this.host.lobby.shipStatus!.innerNetObjects[0];
-  }
-
   constructor(
     public readonly host: CustomHost,
   ) {}
@@ -166,7 +162,7 @@ export class SystemsHandler {
   repairSabotage<T extends SabotageSystem>(_repairer: Player, _system: T, amount: SabotageAmount): void {
     this.setOldShipStatus();
 
-    const ship = this.shipStatus;
+    const ship = this.getShipStatus();
     const type = amount.system;
 
     (ship.getSystemFromType(SystemType.Sabotage) as SabotageSystem).cooldown = 30;
@@ -207,9 +203,9 @@ export class SystemsHandler {
     this.setOldShipStatus();
 
     if (amount.isViewingCameras) {
-      system.playersViewingCams.add(repairer.id);
+      system.playersViewingCameras.add(repairer.id);
     } else {
-      system.playersViewingCams.delete(repairer.id);
+      system.playersViewingCameras.delete(repairer.id);
     }
 
     this.sendDataUpdate();
@@ -240,13 +236,17 @@ export class SystemsHandler {
   }
 
   setOldShipStatus(): void {
-    this.oldShipStatus = this.shipStatus.clone();
+    this.oldShipStatus = this.getShipStatus().clone();
   }
 
   sendDataUpdate(): void {
     this.host.lobby.sendRootGamePacket(new GameDataPacket([
       //@ts-ignore Talk to Cody about this?
-      this.shipStatus.data(this.oldShipStatus),
+      this.getShipStatus().data(this.oldShipStatus),
     ], this.host.lobby.code));
+  }
+
+  private getShipStatus(): InnerLevel {
+    return this.host.lobby.shipStatus!.innerNetObjects[0];
   }
 }

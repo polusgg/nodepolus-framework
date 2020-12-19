@@ -416,7 +416,7 @@ export class LobbySettings {
   }
 
   fromPov(player: Player): LobbySettings {
-    const connection = this.lobby.internalLobby.findConnection(player.internalPlayer.gameObject.owner);
+    const connection = this.lobby.internalLobby.findConnection(player.getInternalPlayer().gameObject.owner);
 
     if (connection && this.povCache.has(connection.id)) {
       return this.povCache.get(connection.id)!;

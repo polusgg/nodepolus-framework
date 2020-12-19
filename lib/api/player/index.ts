@@ -62,26 +62,6 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   private lastPosition: Vector2 = new Vector2(0, 0);
   private lastVelocity: Vector2 = new Vector2(0, 0);
 
-  get internalPlayer(): InternalPlayer {
-    if (this.state == PlayerState.Spawned || this.state == PlayerState.InGame) {
-      if (this.playerId === undefined) {
-        throw new Error("Player has no ID");
-      }
-
-      for (let i = 0; i < this.lobby.internalLobby.players.length; i++) {
-        const player = this.lobby.internalLobby.players[i];
-
-        if (player.id == this.playerId) {
-          return player;
-        }
-      }
-
-      throw new Error("Player was not found in the lobby's players array");
-    }
-
-    throw new Error("Attempted to get a player before they were spawned");
-  }
-
   get name(): TextComponent {
     /**
      * TODO: This is a really bad implementation.
@@ -94,7 +74,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
      * updated (e.g. in an event)
      */
     try {
-      return TextComponent.from(this.gameDataEntry.name);
+      return TextComponent.from(this.getGameDataEntry().name);
     } catch (error) {
       const connectionName = server.internalServer.connections.get(`${this.ip}:${this.port}`)?.name;
 
@@ -107,27 +87,27 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   }
 
   get color(): PlayerColor {
-    return this.gameDataEntry.color;
+    return this.getGameDataEntry().color;
   }
 
   get hat(): PlayerHat {
-    return this.gameDataEntry.hat;
+    return this.getGameDataEntry().hat;
   }
 
   get pet(): PlayerPet {
-    return this.gameDataEntry.pet;
+    return this.getGameDataEntry().pet;
   }
 
   get skin(): PlayerSkin {
-    return this.gameDataEntry.skin;
+    return this.getGameDataEntry().skin;
   }
 
   get isImpostor(): boolean {
-    return this.gameDataEntry.isImpostor;
+    return this.getGameDataEntry().isImpostor;
   }
 
   get isDead(): boolean {
-    return this.gameDataEntry.isDead;
+    return this.getGameDataEntry().isDead;
   }
 
   get tasks(): Task[] {
@@ -139,33 +119,9 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     return false;
   }
 
-  private get gameDataEntry(): PlayerData {
-    if (this.state == PlayerState.Spawned || this.state == PlayerState.InGame) {
-      if (this.playerId === undefined) {
-        throw new Error("Player has no ID");
-      }
-
-      if (!this.lobby.internalLobby.gameData) {
-        throw new Error("Lobby has no GameData instance");
-      }
-
-      for (let i = 0; i < this.lobby.internalLobby.gameData.gameData.players.length; i++) {
-        const player = this.lobby.internalLobby.gameData!.gameData.players[i];
-
-        if (player.id == this.playerId) {
-          return player;
-        }
-      }
-
-      throw new Error("Player was not found in the lobby's GameData instance");
-    }
-
-    throw new Error("Attempted to get a player's data before they were spawned");
-  }
-
   constructor(
     public lobby: Lobby,
-    public readonly clientId: number = server.internalServer.nextConnectionId,
+    public readonly clientId: number = server.internalServer.getNextConnectionId(),
     public readonly ip?: string,
     public readonly port?: number,
   ) {
@@ -220,10 +176,30 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     // });
   }
 
+  getInternalPlayer(): InternalPlayer {
+    if (this.state == PlayerState.Spawned || this.state == PlayerState.InGame) {
+      if (this.playerId === undefined) {
+        throw new Error("Player has no ID");
+      }
+
+      for (let i = 0; i < this.lobby.internalLobby.players.length; i++) {
+        const player = this.lobby.internalLobby.players[i];
+
+        if (player.id == this.playerId) {
+          return player;
+        }
+      }
+
+      throw new Error("Player was not found in the lobby's players array");
+    }
+
+    throw new Error("Attempted to get a player before they were spawned");
+  }
+
   setName(name: TextComponent | string): this {
     this.emit("nameChanged", this.name);
 
-    this.internalPlayer.gameObject.playerControl.setName(name.toString(), this.lobby.internalLobby.connections);
+    this.getInternalPlayer().gameObject.playerControl.setName(name.toString(), this.lobby.internalLobby.connections);
 
     return this;
   }
@@ -231,7 +207,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   setColor(color: PlayerColor): this {
     this.emit("colorChanged", this.color);
 
-    this.internalPlayer.gameObject.playerControl.setColor(color, this.lobby.internalLobby.connections);
+    this.getInternalPlayer().gameObject.playerControl.setColor(color, this.lobby.internalLobby.connections);
 
     return this;
   }
@@ -239,7 +215,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   setHat(hat: PlayerHat): this {
     this.emit("hatChanged", this.hat);
 
-    this.internalPlayer.gameObject.playerControl.setHat(hat, this.lobby.internalLobby.connections);
+    this.getInternalPlayer().gameObject.playerControl.setHat(hat, this.lobby.internalLobby.connections);
 
     return this;
   }
@@ -247,7 +223,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   setPet(pet: PlayerPet): this {
     this.emit("petChanged", this.pet);
 
-    this.internalPlayer.gameObject.playerControl.setPet(pet, this.lobby.internalLobby.connections);
+    this.getInternalPlayer().gameObject.playerControl.setPet(pet, this.lobby.internalLobby.connections);
 
     return this;
   }
@@ -255,7 +231,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   setSkin(skin: PlayerSkin): this {
     this.emit("skinChanged", this.skin);
 
-    this.internalPlayer.gameObject.playerControl.setSkin(skin, this.lobby.internalLobby.connections);
+    this.getInternalPlayer().gameObject.playerControl.setSkin(skin, this.lobby.internalLobby.connections);
 
     return this;
   }
@@ -265,16 +241,16 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
       throw new Error("Attempted to kill player without a GameData instance");
     }
 
-    this.internalPlayer.gameObject.playerControl.exiled([]);
+    this.getInternalPlayer().gameObject.playerControl.exiled([]);
 
     this.lobby.internalLobby.gameData.gameData.updateGameData([
-      this.gameDataEntry,
+      this.getGameDataEntry(),
     ], this.lobby.internalLobby.connections);
 
     if (this.isImpostor) {
       this.lobby.internalLobby.customHostInstance.handleImpostorDeath();
     } else {
-      this.lobby.internalLobby.customHostInstance.handleMurderPlayer(this.internalPlayer.gameObject.playerControl, 0);
+      this.lobby.internalLobby.customHostInstance.handleMurderPlayer(this.getInternalPlayer().gameObject.playerControl, 0);
     }
 
     // TODO: Finish once events are written
@@ -284,9 +260,9 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   }
 
   murder(player: Player): this {
-    const playerControl = this.internalPlayer.gameObject.playerControl;
+    const playerControl = this.getInternalPlayer().gameObject.playerControl;
 
-    playerControl.murderPlayer(player.internalPlayer.gameObject.playerControl.id, this.lobby.internalLobby.connections);
+    playerControl.murderPlayer(player.getInternalPlayer().gameObject.playerControl.id, this.lobby.internalLobby.connections);
     this.lobby.internalLobby.customHostInstance.handleMurderPlayer(playerControl, 0);
 
     return this;
@@ -301,20 +277,20 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
 
     entity.owner = this.clientId;
     entity.innerNetObjects = [
-      new InnerPlayerControl(this.lobby.internalLobby.customHostInstance.nextNetId, entity, false, this.playerId!),
-      new InnerPlayerPhysics(this.lobby.internalLobby.customHostInstance.nextNetId, entity),
+      new InnerPlayerControl(this.lobby.internalLobby.customHostInstance.getNextNetId(), entity, false, this.playerId!),
+      new InnerPlayerPhysics(this.lobby.internalLobby.customHostInstance.getNextNetId(), entity),
       new InnerCustomNetworkTransform(
-        this.lobby.internalLobby.customHostInstance.nextNetId,
+        this.lobby.internalLobby.customHostInstance.getNextNetId(),
         entity,
         0,
-        this.internalPlayer.gameObject.customNetworkTransform.position,
-        this.internalPlayer.gameObject.customNetworkTransform.velocity,
+        this.getInternalPlayer().gameObject.customNetworkTransform.position,
+        this.getInternalPlayer().gameObject.customNetworkTransform.velocity,
       ),
     ];
 
-    this.internalPlayer.gameObject.customNetworkTransform.position = new Vector2(-39, -39);
+    this.getInternalPlayer().gameObject.customNetworkTransform.position = new Vector2(-39, -39);
 
-    const thisConnection = this.lobby.internalLobby.findConnectionByPlayer(this.internalPlayer);
+    const thisConnection = this.lobby.internalLobby.findConnectionByPlayer(this.getInternalPlayer());
 
     if (!thisConnection) {
       throw new Error("Tried to respawn a player without a connection");
@@ -323,9 +299,9 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     const oldName = this.name;
 
     this.lobby.internalLobby.ignoredNetIds = this.lobby.internalLobby.ignoredNetIds.concat([
-      this.internalPlayer.gameObject.playerControl.id,
-      this.internalPlayer.gameObject.playerPhysics.id,
-      this.internalPlayer.gameObject.customNetworkTransform.id,
+      this.getInternalPlayer().gameObject.playerControl.id,
+      this.getInternalPlayer().gameObject.playerPhysics.id,
+      this.getInternalPlayer().gameObject.customNetworkTransform.id,
     ]);
 
     this.setName("");
@@ -345,17 +321,17 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
 
       if (connection.id != this.clientId) {
         connection.write(new GameDataPacket([
-          new DespawnPacket(this.internalPlayer.gameObject.playerControl.id),
-          new DespawnPacket(this.internalPlayer.gameObject.playerPhysics.id),
-          new DespawnPacket(this.internalPlayer.gameObject.customNetworkTransform.id),
+          new DespawnPacket(this.getInternalPlayer().gameObject.playerControl.id),
+          new DespawnPacket(this.getInternalPlayer().gameObject.playerPhysics.id),
+          new DespawnPacket(this.getInternalPlayer().gameObject.customNetworkTransform.id),
         ], this.lobby.code));
       }
     }
 
-    this.gameDataEntry.isDead = false;
-    this.internalPlayer.gameObject = entity;
+    this.getGameDataEntry().isDead = false;
+    this.getInternalPlayer().gameObject = entity;
 
-    this.lobby.internalLobby.gameData.gameData.updateGameData([this.gameDataEntry], this.lobby.internalLobby.connections);
+    this.lobby.internalLobby.gameData.gameData.updateGameData([this.getGameDataEntry()], this.lobby.internalLobby.connections);
 
     this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
       entity.spawn(),
@@ -365,7 +341,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   }
 
   sendChat(message: string): this {
-    this.internalPlayer.gameObject.playerControl.sendChat(message, this.lobby.internalLobby.connections);
+    this.getInternalPlayer().gameObject.playerControl.sendChat(message, this.lobby.internalLobby.connections);
 
     return this;
   }
@@ -383,7 +359,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     tempFakeMHud.owner = GLOBAL_OWNER;
 
     tempFakeMHud.innerNetObjects = [
-      new InnerMeetingHud(this.lobby.internalLobby.customHostInstance.nextNetId, tempFakeMHud),
+      new InnerMeetingHud(this.lobby.internalLobby.customHostInstance.getNextNetId(), tempFakeMHud),
     ];
 
     this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
@@ -391,7 +367,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     ], this.lobby.code));
 
     this.setName(`[FFFFFFFF]${message.toString()}[FFFFFF00]`);
-    this.internalPlayer.gameObject.playerControl.sendChatNote(this.playerId!, 0, this.lobby.internalLobby.connections);
+    this.getInternalPlayer().gameObject.playerControl.sendChatNote(this.playerId!, 0, this.lobby.internalLobby.connections);
     this.setName(oldName);
 
     this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
@@ -399,5 +375,29 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     ], this.lobby.code));
 
     return this;
+  }
+
+  private getGameDataEntry(): PlayerData {
+    if (this.state == PlayerState.Spawned || this.state == PlayerState.InGame) {
+      if (this.playerId === undefined) {
+        throw new Error("Player has no ID");
+      }
+
+      if (!this.lobby.internalLobby.gameData) {
+        throw new Error("Lobby has no GameData instance");
+      }
+
+      for (let i = 0; i < this.lobby.internalLobby.gameData.gameData.players.length; i++) {
+        const player = this.lobby.internalLobby.gameData!.gameData.players[i];
+
+        if (player.id == this.playerId) {
+          return player;
+        }
+      }
+
+      throw new Error("Player was not found in the lobby's GameData instance");
+    }
+
+    throw new Error("Attempted to get a player's data before they were spawned");
   }
 }

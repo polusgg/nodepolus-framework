@@ -11,21 +11,25 @@ export enum CameraState {
 }
 
 export class SecurityGameRoom extends BaseDoorGameRoom {
-  get internalSystem(): SecurityCameraSystem {
-    return this.internalShipStatus.systems[InternalSystemType.SecurityCamera] as SecurityCameraSystem;
+  constructor(game: Game) {
+    super(game, SystemType.Security);
   }
 
-  get playersViewingCameras(): Player[] {
-    const players: Player[] = [];
-    const playersIds = [...this.internalSystem.playersViewingCams.values()];
+  getInternalSystem(): SecurityCameraSystem {
+    return this.getInternalShipStatus().systems[InternalSystemType.SecurityCamera] as SecurityCameraSystem;
+  }
 
-    for (let i = 0; i < playersIds.length; i++) {
-      const player = this.game.lobby.players.find(p => p.playerId == playersIds[i]);
+  getPlayersViewingCameras(): Player[] {
+    const players: Player[] = [];
+    const playerIds = [...this.getInternalSystem().playersViewingCameras.values()];
+
+    for (let i = 0; i < playerIds.length; i++) {
+      const player = this.game.lobby.players.find(p => p.playerId == playerIds[i]);
 
       // 212 is a magic number used to identify a fake player for when the
       // cameras are active without any players viewing them.
-      if (!player && playersIds[i] != 212) {
-        throw new Error(`Unknown player viewing security cameras ${playersIds[i]}`);
+      if (!player && playerIds[i] != 212) {
+        throw new Error(`Unknown player viewing security cameras ${playerIds[i]}`);
       }
 
       if (player) {
@@ -36,25 +40,21 @@ export class SecurityGameRoom extends BaseDoorGameRoom {
     return players;
   }
 
-  get cameraState(): CameraState {
-    return (this.internalSystem.playersViewingCams.size > 0) ? CameraState.Active : CameraState.Inactive;
-  }
-
-  constructor(game: Game) {
-    super(game, SystemType.Security);
+  getCameraState(): CameraState {
+    return (this.getInternalSystem().playersViewingCameras.size > 0) ? CameraState.Active : CameraState.Inactive;
   }
 
   activateCameras(): void {
-    if (this.cameraState == CameraState.Active) {
+    if (this.getCameraState() == CameraState.Active) {
       this.internalBackupShipStatus();
-      this.internalSystem.playersViewingCams.clear();
+      this.getInternalSystem().playersViewingCameras.clear();
       this.internalUpdateShipStatus();
     }
   }
 
   deactivateCameras(): void {
     this.internalBackupShipStatus();
-    this.internalSystem.playersViewingCams.add(212);
+    this.getInternalSystem().playersViewingCameras.add(212);
     this.internalUpdateShipStatus();
   }
 }

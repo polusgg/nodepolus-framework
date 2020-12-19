@@ -32,14 +32,6 @@ export class Server extends Emittery.Typed<ServerEvents> {
   // Starts at 1 to allow the Server host implementation's ID to be 0
   private connectionIndex = Object.keys(FakeClientId).length / 2;
 
-  get nextConnectionId(): number {
-    if (++this.connectionIndex > MaxValue.UInt32) {
-      this.connectionIndex = 1;
-    }
-
-    return this.connectionIndex;
-  }
-
   get address(): string {
     return this.config.serverAddress ?? DEFAULT_SERVER_ADDRESS;
   }
@@ -68,6 +60,14 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
       sender.emit("message", buf);
     });
+  }
+
+  getNextConnectionId(): number {
+    if (++this.connectionIndex > MaxValue.UInt32) {
+      this.connectionIndex = 1;
+    }
+
+    return this.connectionIndex;
   }
 
   listen(onStart?: () => void): void {
@@ -109,7 +109,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
   private initializeConnection(remoteInfo: dgram.RemoteInfo): Connection {
     const newConnection = new Connection(remoteInfo, this.serverSocket, PacketDestination.Client);
 
-    newConnection.id = this.nextConnectionId;
+    newConnection.id = this.getNextConnectionId();
 
     newConnection.on("packet", (evt: RootGamePacketDataType) => this.handlePacket(evt, newConnection));
     newConnection.on("disconnected", (reason?: DisconnectReason) => {
@@ -140,7 +140,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         this.emit("lobbyCreated", event);
 
-        if (!event.isCancelled) {
+        if (!event.isCancelled()) {
           this.lobbies.push(newLobby);
           this.lobbyMap.set(newLobby.code, newLobby);
 
@@ -171,15 +171,17 @@ export class Server extends Emittery.Typed<ServerEvents> {
           const level: number = lobby.options.options.levels[0];
 
           // TODO: Add config option to include private games
-          if (!lobby.isPublic) {
+          if (!lobby.isPublic()) {
             continue;
           }
 
           counts.increment(level);
 
+          const listing = lobby.getLobbyListing();
+
           // TODO: Add config option for max player count and max results
-          if (lobby.lobbyListing.playerCount < 10 && results.length < 10) {
-            results[i] = lobby.lobbyListing;
+          if (listing.playerCount < 10 && results.length < 10) {
+            results[i] = listing;
           }
         }
 

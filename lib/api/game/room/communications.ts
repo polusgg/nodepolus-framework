@@ -6,33 +6,33 @@ import { BaseDoorGameRoom } from "./base";
 import { Game } from "..";
 
 export class BasicCommunicationsRoom extends BaseDoorGameRoom {
-  get isSabotaged(): boolean {
-    return this.internalSystem.sabotaged;
-  }
-
-  get internalSystem(): HudOverrideSystem {
-    return this.internalShipStatus.systems[InternalSystemType.HudOverride] as HudOverrideSystem;
-  }
-
   constructor(game: Game) {
     super(game, SystemType.Communications);
   }
 
+  isSabotaged(): boolean {
+    return this.getInternalSystem().sabotaged;
+  }
+
+  getInternalSystem(): HudOverrideSystem {
+    return this.getInternalShipStatus().systems[InternalSystemType.HudOverride] as HudOverrideSystem;
+  }
+
   sabotage(): void {
-    if (!this.isSabotaged) {
+    if (!this.isSabotaged()) {
       this.internalBackupShipStatus();
 
-      this.internalSystem.sabotaged = true;
+      this.getInternalSystem().sabotaged = true;
 
       this.internalUpdateShipStatus();
     }
   }
 
   repair(): void {
-    if (this.isSabotaged) {
+    if (this.isSabotaged()) {
       this.internalBackupShipStatus();
 
-      this.internalSystem.sabotaged = false;
+      this.getInternalSystem().sabotaged = false;
 
       this.internalUpdateShipStatus();
     }
@@ -40,33 +40,33 @@ export class BasicCommunicationsRoom extends BaseDoorGameRoom {
 }
 
 export class MiraCommunicationsRoom extends BaseDoorGameRoom {
-  get isSabotaged(): boolean {
-    return this.internalSystem.completedConsoles.size != 2;
-  }
-
-  get internalSystem(): HqHudSystem {
-    return this.internalShipStatus.systems[InternalSystemType.HqHud] as HqHudSystem;
-  }
-
   constructor(game: Game) {
     super(game, SystemType.Communications);
   }
 
+  isSabotaged(): boolean {
+    return this.getInternalSystem().completedConsoles.size != 2;
+  }
+
+  getInternalSystem(): HqHudSystem {
+    return this.getInternalShipStatus().systems[InternalSystemType.HqHud] as HqHudSystem;
+  }
+
   sabotage(): void {
-    if (!this.isSabotaged) {
+    if (!this.isSabotaged()) {
       this.internalBackupShipStatus();
 
-      this.internalSystem.completedConsoles.clear();
+      this.getInternalSystem().completedConsoles.clear();
 
       this.internalUpdateShipStatus();
     }
   }
 
   repair(): void {
-    if (this.isSabotaged) {
+    if (this.isSabotaged()) {
       this.internalBackupShipStatus();
 
-      this.internalSystem.completedConsoles.add(0).add(1);
+      this.getInternalSystem().completedConsoles.add(0).add(1);
 
       this.internalUpdateShipStatus();
     }

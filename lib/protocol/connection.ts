@@ -64,10 +64,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   private lastPingReceivedTime: number = Date.now();
   private requestedDisconnect = false;
 
-  get timeSinceLastPing(): number {
-    return Date.now() - this.lastPingReceivedTime;
-  }
-
   constructor(remoteInfo: dgram.RemoteInfo, public socket: dgram.Socket, public bound: PacketDestination) {
     super();
 
@@ -78,7 +74,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     this.on("message", buf => {
       const parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound == PacketDestination.Server, this.lobby?.options.options.levels[0]);
 
-      if (parsed.isReliable) {
+      if (parsed.isReliable()) {
         this.acknowledgePacket(parsed.nonce!);
       }
 
@@ -130,6 +126,10 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     //     this.disconnect(DisconnectReason.custom("Connection timed out"));
     //   }
     // }, 1000);
+  }
+
+  getTimeSinceLastPing(): number {
+    return Date.now() - this.lastPingReceivedTime;
   }
 
   async write(packet: RootGamePacketDataType): Promise<void> {

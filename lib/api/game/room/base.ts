@@ -13,21 +13,21 @@ import { Door } from "../door";
 export class BaseGameRoom extends Emittery.Typed<GameEvents> {
   private shipStatusBackup?: InnerLevel;
 
-  get players(): Player[] {
+  constructor(public game: Game, public systemType: SystemType) {
+    super();
+  }
+
+  getPlayers(): Player[] {
     // TODO
     return [];
   }
 
-  get internalShipStatus(): InnerLevel {
+  getInternalShipStatus(): InnerLevel {
     if (!this.game.lobby.internalLobby.shipStatus) {
-      throw new Error("Attempted get ShipStatus without an instance on the lobby");
+      throw new Error("Attempted to get ShipStatus without an instance on the lobby");
     }
 
     return this.game.lobby.internalLobby.shipStatus.innerNetObjects[0];
-  }
-
-  constructor(public game: Game, public systemType: SystemType) {
-    super();
   }
 
   internalBackupShipStatus(): void {
@@ -89,7 +89,7 @@ export class BaseDoorGameRoom extends BaseGameRoom {
       }
 
       for (let i = 0; i < doors.length; i++) {
-        (this.internalShipStatus.systems[InternalSystemType.Doors] as DoorsSystem).doorStates[doors[i]] = true;
+        (this.getInternalShipStatus().systems[InternalSystemType.Doors] as DoorsSystem).doorStates[doors[i]] = true;
       }
     }
   }

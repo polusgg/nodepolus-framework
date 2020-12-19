@@ -89,26 +89,13 @@ export class CustomHost implements HostInstance {
   private countdownInterval: NodeJS.Timeout | undefined;
   private meetingHudTimeout: NodeJS.Timeout | undefined;
 
-  get nextNetId(): number {
-    return this.netIdIndex++;
-  }
-
-  private get nextPlayerId(): number {
-    const taken = this.lobby.players.map(player => player.id);
-
-    // TODO: Change the max if necessary, but this is how the ID assignment should work
-    for (let i = 0; i < 10; i++) {
-      if (taken.indexOf(i) == -1) {
-        return i;
-      }
-    }
-
-    return -1;
-  }
-
   constructor(
     public lobby: Lobby,
   ) {}
+
+  getNextNetId(): number {
+    return this.netIdIndex++;
+  }
 
   /* eslint-disable @typescript-eslint/no-empty-function */
   sendKick(_banned: boolean, _reason: DisconnectReason): void {}
@@ -137,35 +124,35 @@ export class CustomHost implements HostInstance {
           this.lobby.shipStatus = new EntitySkeldShipStatus(this.lobby);
           this.lobby.shipStatus.owner = GLOBAL_OWNER;
           this.lobby.shipStatus.innerNetObjects = [
-            new InnerSkeldShipStatus(this.nextNetId, this.lobby.shipStatus),
+            new InnerSkeldShipStatus(this.getNextNetId(), this.lobby.shipStatus),
           ];
           break;
         case Level.AprilSkeld:
           this.lobby.shipStatus = new EntitySkeldAprilShipStatus(this.lobby);
           this.lobby.shipStatus.owner = GLOBAL_OWNER;
           this.lobby.shipStatus.innerNetObjects = [
-            new InnerSkeldAprilShipStatus(this.nextNetId, this.lobby.shipStatus),
+            new InnerSkeldAprilShipStatus(this.getNextNetId(), this.lobby.shipStatus),
           ];
           break;
         case Level.MiraHq:
           this.lobby.shipStatus = new EntityMiraShipStatus(this.lobby);
           this.lobby.shipStatus.owner = GLOBAL_OWNER;
           this.lobby.shipStatus.innerNetObjects = [
-            new InnerMiraShipStatus(this.nextNetId, this.lobby.shipStatus),
+            new InnerMiraShipStatus(this.getNextNetId(), this.lobby.shipStatus),
           ];
           break;
         case Level.Polus:
           this.lobby.shipStatus = new EntityPolusShipStatus(this.lobby);
           this.lobby.shipStatus.owner = GLOBAL_OWNER;
           this.lobby.shipStatus.innerNetObjects = [
-            new InnerPolusShipStatus(this.nextNetId, this.lobby.shipStatus),
+            new InnerPolusShipStatus(this.getNextNetId(), this.lobby.shipStatus),
           ];
           break;
         case Level.Airship:
           this.lobby.shipStatus = new EntityAirshipStatus(this.lobby);
           this.lobby.shipStatus.owner = GLOBAL_OWNER;
           this.lobby.shipStatus.innerNetObjects = [
-            new InnerAirshipStatus(this.nextNetId, this.lobby.shipStatus),
+            new InnerAirshipStatus(this.getNextNetId(), this.lobby.shipStatus),
           ];
           break;
       }
@@ -233,7 +220,7 @@ export class CustomHost implements HostInstance {
       throw new Error("Sender has already changed scene");
     }
 
-    const newPlayerId = this.nextPlayerId;
+    const newPlayerId = this.getNextPlayerId();
 
     if (newPlayerId == -1) {
       sender.sendLateRejection(DisconnectReason.gameFull());
@@ -245,7 +232,7 @@ export class CustomHost implements HostInstance {
       this.lobby.lobbyBehavior = new EntityLobbyBehaviour(this.lobby);
       this.lobby.lobbyBehavior.owner = GLOBAL_OWNER;
       this.lobby.lobbyBehavior.innerNetObjects = [
-        new InnerLobbyBehaviour(this.nextNetId, this.lobby.lobbyBehavior),
+        new InnerLobbyBehaviour(this.getNextNetId(), this.lobby.lobbyBehavior),
       ];
     }
 
@@ -255,8 +242,8 @@ export class CustomHost implements HostInstance {
       this.lobby.gameData = new EntityGameData(this.lobby);
       this.lobby.gameData.owner = GLOBAL_OWNER;
       this.lobby.gameData.innerNetObjects = [
-        new InnerGameData(this.nextNetId, this.lobby.gameData, []),
-        new InnerVoteBanSystem(this.nextNetId, this.lobby.gameData),
+        new InnerGameData(this.getNextNetId(), this.lobby.gameData, []),
+        new InnerVoteBanSystem(this.getNextNetId(), this.lobby.gameData),
       ];
     }
 
@@ -266,9 +253,9 @@ export class CustomHost implements HostInstance {
 
     entity.owner = sender.id;
     entity.innerNetObjects = [
-      new InnerPlayerControl(this.nextNetId, entity, true, newPlayerId),
-      new InnerPlayerPhysics(this.nextNetId, entity),
-      new InnerCustomNetworkTransform(this.nextNetId, entity, 5, new Vector2(0, 0), new Vector2(0, 0)),
+      new InnerPlayerControl(this.getNextNetId(), entity, true, newPlayerId),
+      new InnerPlayerPhysics(this.getNextNetId(), entity),
+      new InnerCustomNetworkTransform(this.getNextNetId(), entity, 5, new Vector2(0, 0), new Vector2(0, 0)),
     ];
 
     const player = new Player(entity);
@@ -308,7 +295,7 @@ export class CustomHost implements HostInstance {
 
     this.lobby.finishedSpawningPlayer(owner);
 
-    if (!this.lobby.isSpawningPlayers) {
+    if (!this.lobby.isSpawningPlayers()) {
       this.lobby.reapplyActingHosts();
     }
   }
@@ -355,7 +342,7 @@ export class CustomHost implements HostInstance {
 
     const crewmates = this.lobby.gameData.gameData.players.filter(playerData => !playerData.isImpostor);
 
-    if (crewmates.every(crewmate => crewmate.isDoneWithTasks)) {
+    if (crewmates.every(crewmate => crewmate.isDoneWithTasks())) {
       this.endGame(GameOverReason.CrewmatesByTask);
     }
   }
@@ -381,7 +368,7 @@ export class CustomHost implements HostInstance {
 
     this.lobby.meetingHud = new EntityMeetingHud(this.lobby);
     this.lobby.meetingHud.innerNetObjects = [
-      new InnerMeetingHud(this.nextNetId, this.lobby.meetingHud),
+      new InnerMeetingHud(this.getNextNetId(), this.lobby.meetingHud),
     ];
     this.lobby.meetingHud.innerNetObjects[0].playerStates = Array(this.lobby.gameData.gameData.players.length);
 
@@ -811,9 +798,22 @@ export class CustomHost implements HostInstance {
     this.lobby.gameData = new EntityGameData(this.lobby);
     this.lobby.gameData.owner = GLOBAL_OWNER;
     this.lobby.gameData.innerNetObjects = [
-      new InnerGameData(this.nextNetId, this.lobby.gameData, []),
-      new InnerVoteBanSystem(this.nextNetId, this.lobby.gameData),
+      new InnerGameData(this.getNextNetId(), this.lobby.gameData, []),
+      new InnerVoteBanSystem(this.getNextNetId(), this.lobby.gameData),
     ];
+  }
+
+  private getNextPlayerId(): number {
+    const taken = this.lobby.players.map(player => player.id);
+
+    // TODO: Change the max if necessary, but this is how the ID assignment should work
+    for (let i = 0; i < 10; i++) {
+      if (taken.indexOf(i) == -1) {
+        return i;
+      }
+    }
+
+    return -1;
   }
 
   private addTasksFromList(

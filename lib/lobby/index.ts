@@ -129,40 +129,6 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   private readonly rpcHandler: RPCHandler = new RPCHandler(this);
   private readonly spawningPlayers: Set<Connection> = new Set();
 
-  get actingHosts(): Connection[] {
-    return this.connections.filter(con => con.isActingHost);
-  }
-
-  get age(): number {
-    return (new Date().getTime() - this.createdAt) / 1000;
-  }
-
-  get hostName(): string {
-    return this.actingHosts[0]?.name ?? this.connections[0].name!;
-  }
-
-  get lobbyListing(): LobbyListing {
-    return new LobbyListing(
-      this.address,
-      this.port,
-      this.code,
-      this.hostName,
-      this.players.length,
-      this.age,
-      this.options.options.levels[0],
-      this.options.options.impostorCount,
-      this.options.options.maxPlayers,
-    );
-  }
-
-  get isPublic(): boolean {
-    return !!(this.gameTags.get(AlterGameTag.ChangePrivacy) ?? 0);
-  }
-
-  get isSpawningPlayers(): boolean {
-    return this.spawningPlayers.size > 0;
-  }
-
   constructor(
     public address: string,
     public port: number,
@@ -175,6 +141,40 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
     this.customHostInstance = new CustomHost(this);
   }
 
+  getActingHosts(): Connection[] {
+    return this.connections.filter(con => con.isActingHost);
+  }
+
+  getAge(): number {
+    return (new Date().getTime() - this.createdAt) / 1000;
+  }
+
+  getHostName(): string {
+    return this.getActingHosts()[0]?.name ?? this.connections[0].name!;
+  }
+
+  getLobbyListing(): LobbyListing {
+    return new LobbyListing(
+      this.address,
+      this.port,
+      this.code,
+      this.getHostName(),
+      this.players.length,
+      this.getAge(),
+      this.options.options.levels[0],
+      this.options.options.impostorCount,
+      this.options.options.maxPlayers,
+    );
+  }
+
+  isPublic(): boolean {
+    return !!(this.gameTags.get(AlterGameTag.ChangePrivacy) ?? 0);
+  }
+
+  isSpawningPlayers(): boolean {
+    return this.spawningPlayers.size > 0;
+  }
+
   finishedSpawningPlayer(connection: Connection): void {
     this.spawningPlayers.delete(connection);
   }
@@ -184,17 +184,21 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   }
 
   removeActingHosts(sendImmediately: boolean = true): void {
-    for (let i = 0; i < this.actingHosts.length; i++) {
-      if (this.actingHosts[i].limboState == LimboState.NotLimbo) {
-        this.sendRemoveHost(this.actingHosts[i], sendImmediately);
+    const actingHosts = this.getActingHosts();
+
+    for (let i = 0; i < actingHosts.length; i++) {
+      if (actingHosts[i].limboState == LimboState.NotLimbo) {
+        this.sendRemoveHost(actingHosts[i], sendImmediately);
       }
     }
   }
 
   reapplyActingHosts(sendImmediately: boolean = true): void {
-    for (let i = 0; i < this.actingHosts.length; i++) {
-      if (this.actingHosts[i].limboState == LimboState.NotLimbo) {
-        this.sendSetHost(this.actingHosts[i], sendImmediately);
+    const actingHosts = this.getActingHosts();
+
+    for (let i = 0; i < actingHosts.length; i++) {
+      if (actingHosts[i].limboState == LimboState.NotLimbo) {
+        this.sendSetHost(actingHosts[i], sendImmediately);
       }
     }
   }

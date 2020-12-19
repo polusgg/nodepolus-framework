@@ -18,10 +18,6 @@ export class Packet {
 
   public clientBound: boolean | undefined;
 
-  get isReliable(): boolean {
-    return Packet.isReliable(this.type);
-  }
-
   constructor(
     public readonly nonce: number | undefined,
     public readonly data: PacketDataType,
@@ -81,10 +77,14 @@ export class Packet {
     return new Packet(nonce, data).bound(clientBound);
   }
 
+  isReliable(): boolean {
+    return Packet.isReliable(this.type);
+  }
+
   serialize(): MessageWriter {
     const writer = new MessageWriter().writeByte(this.type);
 
-    if (this.isReliable) {
+    if (this.isReliable()) {
       if (this.nonce === undefined) {
         throw new Error("Missing nonce in reliable packet");
       }

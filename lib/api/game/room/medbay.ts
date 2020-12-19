@@ -11,11 +11,15 @@ export enum CamsState {
 }
 
 export class MedbayGameRoom extends BaseDoorGameRoom {
-  get internalSystem(): MedScanSystem {
-    return this.internalShipStatus.systems[InternalSystemType.MedScan] as MedScanSystem;
+  constructor(game: Game) {
+    super(game, SystemType.Medbay);
   }
 
-  get playersScanning(): Player | undefined {
+  getInternalSystem(): MedScanSystem {
+    return this.getInternalShipStatus().systems[InternalSystemType.MedScan] as MedScanSystem;
+  }
+
+  getPlayersScanning(): Player | undefined {
     for (let i = 0; i < this.game.lobby.players.length; i++) {
       const player = this.game.lobby.players[i];
 
@@ -25,9 +29,8 @@ export class MedbayGameRoom extends BaseDoorGameRoom {
     }
   }
 
-  get queue(): Player[] {
-    const medScanSystem = this.internalShipStatus.systems[InternalSystemType.MedScan] as MedScanSystem;
-    const playerIds = [...medScanSystem.playersInQueue.values()];
+  getQueue(): Player[] {
+    const playerIds = [...this.getInternalSystem().playersInQueue.values()];
     const players: Player[] = [];
 
     for (let i = 0; i < playerIds.length; i++) {
@@ -41,10 +44,6 @@ export class MedbayGameRoom extends BaseDoorGameRoom {
     }
 
     return players;
-  }
-
-  constructor(game: Game) {
-    super(game, SystemType.Medbay);
   }
 
   // TODO: API methods

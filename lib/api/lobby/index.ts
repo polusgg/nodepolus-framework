@@ -266,9 +266,9 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
 
     entity.owner = FakeClientId.Message;
     entity.innerNetObjects = [
-      new InnerPlayerControl(this.internalLobby.customHostInstance.nextNetId, entity, false, playerId),
-      new InnerPlayerPhysics(this.internalLobby.customHostInstance.nextNetId, entity),
-      new InnerCustomNetworkTransform(this.internalLobby.customHostInstance.nextNetId, entity, 5, new Vector2(39, 39), new Vector2(0, 0)),
+      new InnerPlayerControl(this.internalLobby.customHostInstance.getNextNetId(), entity, false, playerId),
+      new InnerPlayerPhysics(this.internalLobby.customHostInstance.getNextNetId(), entity),
+      new InnerCustomNetworkTransform(this.internalLobby.customHostInstance.getNextNetId(), entity, 5, new Vector2(39, 39), new Vector2(0, 0)),
     ];
 
     this.internalLobby.sendRootGamePacket(new JoinGameResponsePacket(this.internalLobby.code, FakeClientId.Message, this.internalLobby.customHostInstance.id));

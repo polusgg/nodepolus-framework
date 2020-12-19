@@ -481,7 +481,7 @@ export class RPCHandler {
 
     // this.lobby.emit("chat", event);
 
-    // if (!event.isCancelled) {
+    // if (!event.isCancelled()) {
     sender.sendChat(message, sendTo);
     // }
   }
