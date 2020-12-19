@@ -335,6 +335,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   handleCompleteTask(_sender: InnerPlayerControl, _taskIndex: number): void {}
   handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): void {}
   handleUsePlatform(_sender: InnerPlayerControl): void {}
+  handleImpostorDeath(): void {}
+  handleCastVote(_votingPlayerId: number, _suspectPlayerId: number): void {}
   setInfected(_impostorCount: number): void {}
   setTasks(): void {}
   /* eslint-enable @typescript-eslint/no-empty-function */

@@ -2,10 +2,8 @@ import { DoorsSystem, SYSTEM_DOORS } from "../../../protocol/entities/baseShipSt
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
 import { GameDataPacket } from "../../../protocol/packets/rootGamePackets/gameData";
 import { InnerLevel } from "../../../protocol/entities/types";
-import { Connection } from "../../../protocol/connection";
 import { SystemType } from "../../../types/systemType";
 import { Level } from "../../../types/level";
-import { CustomHost } from "../../../host";
 import { GameEvents, Game } from "..";
 import { Player } from "../../player";
 import { DOOR_DATA } from "../data";
@@ -69,21 +67,13 @@ export class BaseDoorGameRoom extends BaseGameRoom {
   }
 
   closeDoors(): void {
-    const host = this.game.lobby.internalLobby.host;
+    const host = this.game.lobby.internalLobby.customHostInstance;
 
-    if (host instanceof CustomHost) {
-      if (!host.doorHandler) {
-        throw new Error("Attempted to close doors without a DoorHandler instance");
-      }
-
-      host.doorHandler.closeDoor(host.doorHandler.getDoorsForSystem(this.systemType));
-    } else if (host instanceof Connection) {
-      this.internalBackupShipStatus();
-      this.internalShipStatus.closeDoorsOfType(this.systemType);
-      this.internalUpdateShipStatus();
-    } else {
-      throw new Error("Attempted to close doors with an unsupported host instance");
+    if (!host.doorHandler) {
+      throw new Error("Attempted to close doors without a DoorHandler instance");
     }
+
+    host.doorHandler.closeDoor(host.doorHandler.getDoorsForSystem(this.systemType));
   }
 
   openDoors(): void {

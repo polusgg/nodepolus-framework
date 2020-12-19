@@ -1,13 +1,13 @@
 import { LobbyCounts, GetGameListResponsePacket, LobbyListing } from "../protocol/packets/rootGamePackets/getGameList";
-import { DEFAULT_HOST_STATE, DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { HostGameResponsePacket, HostGameRequestPacket } from "../protocol/packets/rootGamePackets/hostGame";
 import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
+import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
 import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
-import { DefaultHostState, ServerConfig } from "../api/server/serverConfig";
 import { LobbyCreatedEvent } from "../api/events/server/lobbyCreated";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";
+import { ServerConfig } from "../api/server/serverConfig";
 import { FakeClientId } from "../types/fakeClientId";
 import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
@@ -46,10 +46,6 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
   get port(): number {
     return this.config.serverPort ?? DEFAULT_SERVER_PORT;
-  }
-
-  get defaultHost(): DefaultHostState {
-    return this.config.defaultHost ?? DEFAULT_HOST_STATE;
   }
 
   get defaultLobbyAddress(): string {
@@ -135,7 +131,6 @@ export class Server extends Emittery.Typed<ServerEvents> {
         const newLobby = new Lobby(
           this.defaultLobbyAddress,
           this.defaultLobbyPort,
-          this.defaultHost == DefaultHostState.Server,
           lobbyCode,
         );
 

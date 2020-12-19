@@ -384,7 +384,7 @@ export class RPCHandler {
           throw new Error(`Received UsePlatform packet from invalid InnerNetObject: expected PlayerPhysics but got ${type as number} (${typeString})`);
         }
 
-        this.lobby.host?.handleUsePlatform(sender as InnerPlayerControl);
+        this.lobby.customHostInstance.handleUsePlatform(sender as InnerPlayerControl);
 
         this.handleUsePlatform(sender as InnerPlayerControl);
         break;
@@ -399,11 +399,7 @@ export class RPCHandler {
   }
 
   handleCompleteTask(sender: InnerPlayerControl, taskIndex: number, sendTo: Connection[]): void {
-    if (!this.lobby.host) {
-      throw new Error("CompleteTask RPC handler called without a host");
-    }
-
-    this.lobby.host.handleCompleteTask(sender, taskIndex);
+    this.lobby.customHostInstance.handleCompleteTask(sender, taskIndex);
 
     sender.completeTask(taskIndex, sendTo);
   }
@@ -421,11 +417,7 @@ export class RPCHandler {
   }
 
   handleCheckName(sender: InnerPlayerControl, name: string, sendTo: Connection[]): void {
-    if (!this.lobby.host) {
-      throw new Error("CheckName RPC handler called without a host");
-    }
-
-    this.lobby.host.handleCheckName(sender, name);
+    this.lobby.customHostInstance.handleCheckName(sender, name);
 
     sender.checkName(name, sendTo);
   }
@@ -440,11 +432,7 @@ export class RPCHandler {
   }
 
   handleCheckColor(sender: InnerPlayerControl, color: PlayerColor, sendTo: Connection[]): void {
-    if (!this.lobby.host) {
-      throw new Error("CheckColor RPC handler called without a host");
-    }
-
-    this.lobby.host.handleCheckColor(sender, color);
+    this.lobby.customHostInstance.handleCheckColor(sender, color);
 
     sender.checkColor(color, sendTo);
   }
@@ -477,23 +465,15 @@ export class RPCHandler {
   }
 
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId: number | undefined, sendTo: Connection[]): void {
-    if (!this.lobby.host) {
-      throw new Error("ReportDeadBody RPC handler called without a host");
-    }
-
-    this.lobby.host.handleReportDeadBody(sender, victimPlayerId);
+    this.lobby.customHostInstance.handleReportDeadBody(sender, victimPlayerId);
 
     sender.reportDeadBody(victimPlayerId, sendTo);
   }
 
   handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number, sendTo: Connection[]): void {
-    if (!this.lobby.host) {
-      throw new Error("MurderPlayer RPC handler called without a host");
-    }
-
     sender.murderPlayer(victimPlayerControlNetId, sendTo);
 
-    this.lobby.host.handleMurderPlayer(sender, victimPlayerControlNetId);
+    this.lobby.customHostInstance.handleMurderPlayer(sender, victimPlayerControlNetId);
   }
 
   handleSendChat(sender: InnerPlayerControl, message: string, sendTo: Connection[]): void {
@@ -510,9 +490,8 @@ export class RPCHandler {
     sender.startMeeting(victimPlayerId, sendTo);
   }
 
-  handleSetScanner(sender: InnerPlayerControl, isScanning: boolean, _sequenceId: number, sendTo: Connection[]): void {
-    // TODO: Why is sequenceId not being passed?
-    sender.setScanner(isScanning, sendTo);
+  handleSetScanner(sender: InnerPlayerControl, isScanning: boolean, sequenceId: number, sendTo: Connection[]): void {
+    sender.setScanner(isScanning, sequenceId, sendTo);
   }
 
   handleSendChatNote(sender: InnerPlayerControl, playerId: number, noteType: ChatNoteType, sendTo: Connection[]): void {
@@ -567,21 +546,13 @@ export class RPCHandler {
   }
 
   handleCloseDoorsOfType(sender: InnerLevel, system: SystemType): void {
-    if (!this.lobby.host) {
-      throw new Error("CloseDoorsOfType RPC handler called without a host");
-    }
-
-    this.lobby.host.handleCloseDoorsOfType(sender, system);
+    this.lobby.customHostInstance.handleCloseDoorsOfType(sender, system);
 
     sender.closeDoorsOfType(system);
   }
 
   handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
-    if (!this.lobby.host) {
-      throw new Error("RepairSystem RPC handler called without a host");
-    }
-
-    this.lobby.host.handleRepairSystem(sender, systemId, playerControlNetId, amount);
+    this.lobby.customHostInstance.handleRepairSystem(sender, systemId, playerControlNetId, amount);
 
     sender.repairSystem(systemId, playerControlNetId, amount);
   }
@@ -591,11 +562,7 @@ export class RPCHandler {
   }
 
   handleUsePlatform(sender: InnerPlayerControl): void {
-    if (!this.lobby.host) {
-      throw new Error("UsePlatform RPC handler called without a host");
-    }
-
-    this.lobby.host.handleUsePlatform(sender);
+    this.lobby.customHostInstance.handleUsePlatform(sender);
   }
 
   handleSetTasks(sender: InnerGameData, playerId: number, tasks: number[], sendTo: Connection[]): void {

@@ -1,5 +1,4 @@
-import { RepairSystemPacket, RepairAmount } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
-import { CloseDoorsOfTypePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/closeDoorsOfType";
+import { RepairAmount } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
 import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
@@ -23,7 +22,6 @@ import { HqHudSystem } from "./systems/hqHudSystem";
 import { InternalSystemType } from "./systems/type";
 import { BaseSystem } from "./systems/baseSystem";
 import { BaseGameObject } from "../baseEntity";
-import { Connection } from "../../connection";
 import { Level } from "../../../types/level";
 
 export type System = AutoDoorsSystem
@@ -76,26 +74,11 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
     this.initializeSystems();
   }
 
-  closeDoorsOfType(systemId: SystemType): void {
-    if (this.parent.lobby.isHost) {
-      return;
-    }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  closeDoorsOfType(_systemId: SystemType): void {}
 
-    if (!this.parent.lobby.host) {
-      throw new Error("CloseDoorsOfType sent to lobby without a host");
-    }
-
-    this.sendRPCPacketTo([this.parent.lobby.host as Connection], new CloseDoorsOfTypePacket(systemId));
-  }
-
-  repairSystem(systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
-    if (!this.parent.lobby.isHost) {
-      this.sendRPCPacketTo(
-        [this.parent.lobby.host as Connection],
-        new RepairSystemPacket(systemId, playerControlNetId, amount.serialize(), this.level),
-      );
-    }
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  repairSystem(_systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
 
   getData(old: BaseShipStatus<T, U>): DataPacket {
     const changedSystemTypes: SystemType[] = this.systems.map((currentSystem, systemIndex) => {

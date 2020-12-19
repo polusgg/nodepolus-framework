@@ -29,6 +29,10 @@ export interface HostInstance extends ClientInstance {
 
   handleUsePlatform(sender: InnerPlayerControl): void;
 
+  handleImpostorDeath(): void;
+
+  handleCastVote(votingPlayerId: number, suspectPlayerId: number): void;
+
   setInfected(infectedCount: number): void;
 
   setTasks(): void;

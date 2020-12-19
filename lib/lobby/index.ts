@@ -10,7 +10,6 @@ import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericP
 import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
 import { AlterGameTagPacket } from "../protocol/packets/rootGamePackets/alterGameTag";
 import { DataPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/data";
-import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSystem";
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
 import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
 import { RPCPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/rpc";
@@ -26,7 +25,6 @@ import { LobbyListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
 import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
 import { EndGamePacket } from "../protocol/packets/rootGamePackets/endGame";
-import { InnerGameData } from "../protocol/entities/gameData/innerGameData";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityMiraShipStatus } from "../protocol/entities/miraShipStatus";
 import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
@@ -38,7 +36,6 @@ import { EntityPlayer } from "../protocol/entities/player";
 import { DEFAULT_GAME_OPTIONS } from "../util/constants";
 import { GameOverReason } from "../types/gameOverReason";
 import { AlterGameTag } from "../types/alterGameTag";
-import { FakeClientId } from "../types/fakeClientId";
 import { Connection } from "../protocol/connection";
 import { PlayerColor } from "../types/playerColor";
 import { notUndefined } from "../util/functions";
@@ -118,7 +115,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   public players: Player[] = [];
   public ignoredNetIds: number[] = [];
   public gameState = GameState.NotStarted;
-  public customHostInstance?: CustomHost;
+  public customHostInstance: CustomHost;
   public lobbyBehavior?: EntityLobbyBehaviour;
   public gameData?: EntityGameData;
   public shipStatus?: EntityLevel;
@@ -132,18 +129,6 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   private readonly rpcHandler: RPCHandler = new RPCHandler(this);
   private readonly spawningPlayers: Set<Connection> = new Set();
 
-  get host(): HostInstance | undefined {
-    if (this.isHost) {
-      if (this.customHostInstance) {
-        return this.customHostInstance;
-      }
-
-      throw new Error("Lobby cannot be host without a custom host instance");
-    } else {
-      return this.connections.find(con => con.isHost);
-    }
-  }
-
   get actingHosts(): Connection[] {
     return this.connections.filter(con => con.isActingHost);
   }
@@ -153,9 +138,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   }
 
   get hostName(): string {
-    return this.isHost
-      ? this.actingHosts[0]?.name ?? this.connections[0].name!
-      : (this.host as Connection).name!;
+    return this.actingHosts[0]?.name ?? this.connections[0].name!;
   }
 
   get lobbyListing(): LobbyListing {
@@ -183,16 +166,13 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   constructor(
     public address: string,
     public port: number,
-    public isHost: boolean,
     public code: string = LobbyCode.generate(),
   ) {
     super();
 
     this.family = RemoteInfo.fromString(`${address}:${port}`).family;
 
-    if (this.isHost) {
-      this.customHostInstance = new CustomHost(this);
-    }
+    this.customHostInstance = new CustomHost(this);
   }
 
   finishedSpawningPlayer(connection: Connection): void {
@@ -229,9 +209,9 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
 
   sendRemoveHost(connection: Connection, sendImmediately: boolean = true): void {
     if (sendImmediately) {
-      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.host?.id ?? FakeClientId.ServerAsHost)]);
+      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.customHostInstance.id)]);
     } else {
-      connection.write(new JoinGameResponsePacket(this.code, connection.id, this.host?.id ?? FakeClientId.ServerAsHost));
+      connection.write(new JoinGameResponsePacket(this.code, connection.id, this.customHostInstance.id));
     }
   }
 
@@ -436,9 +416,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   }
 
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
-    if (this.host instanceof CustomHost) {
-      this.host.handleDisconnect(connection);
-    }
+    this.customHostInstance.handleDisconnect(connection);
 
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
     const disconnectingPlayerIndex = this.findPlayerIndexByConnection(connection);
@@ -455,16 +433,12 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
       this.migrateHost();
     }
 
-    // console.log("handleDisconnect host id", this.host?.id ?? 0);
+    // console.log("handleDisconnect host id", 0);
 
-    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, this.host?.id ?? 0, reason));
+    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, 0, reason));
   }
 
   handleJoin(connection: Connection): void {
-    if (!this.isHost && this.connections.length >= 10) {
-      connection.sendReliable([new JoinGameErrorPacket(DisconnectionType.GameFull)]);
-    }
-
     this.removeActingHosts();
 
     if (!connection.lobby) {
@@ -488,10 +462,6 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   }
 
   despawn(innerNetObject: InnerNetObject): void {
-    if (!this.isHost) {
-      this.handleDespawn(innerNetObject.id);
-    }
-
     this.emit("despawn", innerNetObject);
 
     this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.id)], this.code));
@@ -502,13 +472,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
       this.connections.push(connection);
     }
 
-    if (!this.isHost && !this.host) {
-      connection.isHost = true;
-    } else if (this.isHost) {
-      // TODO: This will make everyone an acting host
-      connection.isActingHost = true;
-    }
-
+    connection.isActingHost = true;
     connection.limboState = LimboState.NotLimbo;
 
     this.startedSpawningPlayer(connection);
@@ -521,78 +485,11 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   private handleRejoin(connection: Connection): void {
     if (connection.lobby?.code != this.code) {
       connection.sendReliable([new JoinGameErrorPacket(DisconnectionType.GameStarted)]);
-
-      return;
     }
-
-    if (!this.isHost && !this.host) {
-      connection.isHost = true;
-    }
-
-    if (this.isHost) {
-      if (this.gameState == GameState.Ended) {
-        this.gameState = GameState.NotStarted;
-      }
-
-      this.handleNewJoin(connection);
-    } else if (connection.isHost) {
-      this.gameState = GameState.NotStarted;
-
-      this.handleNewJoin(connection);
-      this.takeFromLimbo(this.connections.filter(con => con.id != connection.id));
-    } else {
-      this.sendToLimbo(connection);
-    }
-  }
-
-  private sendToLimbo(connection: Connection): void {
-    connection.limboState = LimboState.WaitingForHost;
-
-    connection.sendReliable([new WaitForHostPacket(this.code, connection.id)]);
-
-    this.broadcastJoinMessage(connection);
-  }
-
-  private takeFromLimbo(connections: Connection[]): void {
-    connections.filter(con => con.limboState == LimboState.WaitingForHost).forEach(con => {
-      this.sendJoinedMessage(con);
-
-      con.limboState = LimboState.NotLimbo;
-    });
   }
 
   private migrateHost(): void {
-    // If the server is the host
-    if (this.isHost) {
-      // TODO: Assign new acting host if there are none
-      return;
-    }
-
-    // Don't change code below this point as it is for client-as-host logic.
-
-    // If we already have a client that is host then we don't need to migrate.
-    if (this.host) {
-      return;
-    }
-
-    /**
-     * Host priority:
-     *  1. First connection that is already in the lobby ("NotLimbo")
-     *     (if the host left while they and someone else were in the lobby)
-     *  2. First connection that clicked "Play Again" ("WaitingForHost")
-     *     (if the host left after one or more clients clicked "Play Again")
-     *  3. First connection in line
-     *     (if the host left and nobody clicked "Play Again" yet)
-     */
-    const newHost = this.connections.find(con => con.limboState == LimboState.NotLimbo)
-      ?? this.connections.find(con => con.limboState == LimboState.WaitingForHost)
-      ?? this.connections[0];
-
-    newHost.isHost = true;
-
-    if (this.gameState == GameState.Ended && newHost.limboState == LimboState.WaitingForHost) {
-      this.handleRejoin(newHost);
-    }
+    // TODO: Assign new acting host if there are none
   }
 
   private broadcastJoinMessage(connection: Connection): void {
@@ -600,7 +497,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
       new JoinGameResponsePacket(
         this.code,
         connection.id,
-        this.isHost ? FakeClientId.ServerAsHost : this.host!.id,
+        this.customHostInstance.id,
       ),
       this.connections
         .filter(con => con.id != connection.id)
@@ -613,7 +510,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
       new JoinedGamePacket(
         this.code,
         connection.id,
-        this.isHost ? FakeClientId.ServerAsHost : this.host!.id,
+        this.customHostInstance.id,
         this.connections
           .filter(con => con.id != connection.id && con.limboState == LimboState.NotLimbo)
           .map(con => con.id)),
@@ -634,9 +531,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         }
         break;
       case GameDataPacketType.Despawn:
-        if (sender.isHost && !this.ignoredNetIds.includes((packet as DespawnPacket).innerNetObjectID)) {
-          this.handleDespawn((packet as DespawnPacket).innerNetObjectID, sendTo);
-        }
+
         break;
       case GameDataPacketType.RPC:
         if (!this.ignoredNetIds.includes((packet as RPCPacket).senderNetId)) {
@@ -649,19 +544,11 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         }
         break;
       case GameDataPacketType.Ready:
-        if (!this.host) {
-          throw new Error("Ready packet received without a host");
-        }
-
-        this.host.handleReady(sender);
+        this.customHostInstance.handleReady(sender);
         break;
       case GameDataPacketType.SceneChange: {
         if ((packet as SceneChangePacket).scene != "OnlineGame") {
           return;
-        }
-
-        if (!this.host) {
-          throw new Error("SceneChange packet received without a host");
         }
 
         const connectionChangingScene = this.findConnection((packet as SceneChangePacket).clientId);
@@ -670,7 +557,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
           throw new Error(`SceneChange packet sent for unknown client: ${(packet as SceneChangePacket).clientId}`);
         }
 
-        this.host.handleSceneChange(connectionChangingScene, (packet as SceneChangePacket).scene);
+        this.customHostInstance.handleSceneChange(connectionChangingScene, (packet as SceneChangePacket).scene);
         break;
       }
       case GameDataPacketType.Spawn:
@@ -717,7 +604,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   private handleSpawn(type: SpawnType, flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], sendTo?: Connection[]): void {
     switch (type) {
       case SpawnType.ShipStatus: {
-        if (this.shipStatus && this.isHost) {
+        if (this.shipStatus) {
           throw new Error("Received duplicate spawn packet for ShipStatus");
         }
 
@@ -727,7 +614,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         break;
       }
       case SpawnType.AprilShipStatus: {
-        if (this.shipStatus && this.isHost) {
+        if (this.shipStatus) {
           throw new Error("Received duplicate spawn packet for AprilShipStatus");
         }
 
@@ -737,7 +624,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         break;
       }
       case SpawnType.Headquarters: {
-        if (this.shipStatus && this.isHost) {
+        if (this.shipStatus) {
           throw new Error("Received duplicate spawn packet for Headquarters");
         }
 
@@ -747,7 +634,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         break;
       }
       case SpawnType.PlanetMap: {
-        if (this.shipStatus && this.isHost) {
+        if (this.shipStatus) {
           throw new Error("Received duplicate spawn packet for PlanetMap");
         }
 
@@ -757,7 +644,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         break;
       }
       case SpawnType.Airship: {
-        if (this.shipStatus && this.isHost) {
+        if (this.shipStatus) {
           throw new Error("Received duplicate spawn packet for AirShip");
         }
 
@@ -767,7 +654,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         break;
       }
       case SpawnType.GameData: {
-        if (this.gameData && this.isHost) {
+        if (this.gameData) {
           throw new Error("Received duplicate spawn packet for GameData");
         }
 
@@ -777,7 +664,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         break;
       }
       case SpawnType.LobbyBehaviour: {
-        if (this.lobbyBehavior && this.isHost) {
+        if (this.lobbyBehavior) {
           throw new Error("Received duplicate spawn packet for LobbyBehaviour");
         }
 
@@ -787,7 +674,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         break;
       }
       case SpawnType.MeetingHud: {
-        if (this.meetingHud && this.isHost) {
+        if (this.meetingHud) {
           throw new Error("Received duplicate spawn packet for MeetingHud");
         }
 
@@ -809,117 +696,6 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         break;
       }
     }
-  }
-
-  private deleteIfEmpty(prop: string): void {
-    if (this[prop].innerNetObjects.filter(notUndefined).length == 0) {
-      delete this[prop];
-    }
-  }
-
-  private handleDespawn(netId: number, sendTo?: Connection[]): void {
-    if (this.isHost) {
-      return;
-    }
-
-    const innerNetObject = this.findInnerNetObject(netId);
-
-    if (!innerNetObject) {
-      throw new Error("Attempted to despawn an InnerNetObject that does not exist");
-    }
-
-    let connection: Connection | undefined;
-
-    if (
-      innerNetObject.type == InnerNetObjectType.PlayerControl ||
-      innerNetObject.type == InnerNetObjectType.PlayerPhysics ||
-      innerNetObject.type == InnerNetObjectType.CustomNetworkTransform
-    ) {
-      connection = this.findConnection(innerNetObject.parent.owner);
-
-      if (!connection) {
-        throw new Error("Attempted to despawn a player that has no connection");
-      }
-
-      if (!this.findPlayerByConnection(connection)) {
-        throw new Error("Attempted to despawn a player whose connection object is missing a player instance");
-      }
-    }
-
-    switch (innerNetObject.type) {
-      case InnerNetObjectType.SkeldShipStatus:
-      case InnerNetObjectType.SkeldAprilShipStatus:
-      case InnerNetObjectType.MiraShipStatus:
-      case InnerNetObjectType.PolusShipStatus:
-      case InnerNetObjectType.AirshipStatus:
-        if (!this.shipStatus) {
-          throw new Error("Attempted to despawn ShipStatus that is not currently spawned");
-        }
-
-        delete this.shipStatus;
-        break;
-      case InnerNetObjectType.VoteBanSystem:
-        if (!this.gameData) {
-          throw new Error("Attempted to despawn VoteBanSystem that is not currently spawned");
-        }
-
-        this.gameData.innerNetObjects[1] = undefined as unknown as InnerVoteBanSystem;
-
-        this.deleteIfEmpty("gameData");
-        break;
-      case InnerNetObjectType.GameData:
-        if (!this.gameData) {
-          throw new Error("Attempted to despawn GameData that is not currently spawned");
-        }
-
-        this.gameData.innerNetObjects[0] = undefined as unknown as InnerGameData;
-
-        this.deleteIfEmpty("gameData");
-        break;
-      case InnerNetObjectType.LobbyBehaviour:
-        if (!this.lobbyBehavior) {
-          throw new Error("Attempted to despawn LobbyBehaviour that is not currently spawned");
-        }
-
-        delete this.lobbyBehavior;
-        break;
-      case InnerNetObjectType.MeetingHud:
-        if (!this.meetingHud) {
-          throw new Error("Attempted to despawn MeetingHud that is not currently spawned");
-        }
-
-        delete this.meetingHud;
-        break;
-      case InnerNetObjectType.PlayerControl:
-        this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects[0] = undefined as unknown as InnerPlayerControl;
-
-        if (this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
-          this.players.splice(this.findPlayerIndexByConnection(connection!));
-        }
-        break;
-      case InnerNetObjectType.PlayerPhysics:
-        this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects[1] = undefined as unknown as InnerPlayerPhysics;
-
-        if (this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
-          this.players.splice(this.findPlayerIndexByConnection(connection!));
-        }
-        break;
-      case InnerNetObjectType.CustomNetworkTransform:
-        this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects[2] = undefined as unknown as InnerCustomNetworkTransform;
-
-        if (this.findPlayerByConnection(connection!)!.gameObject.innerNetObjects.filter(notUndefined).length == 0) {
-          this.players.splice(this.findPlayerIndexByConnection(connection!));
-        }
-        break;
-    }
-
-    this.sendRootGamePacket(
-      new GameDataPacket(
-        [new DespawnPacket(innerNetObject.id)],
-        this.code,
-      ),
-      sendTo,
-    );
   }
 
   private handleAlterGameTag(tag: AlterGameTag, value: number, sendTo?: Connection[]): void {

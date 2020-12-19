@@ -502,10 +502,6 @@ export class CustomHost implements HostInstance {
       throw new Error("Received RepairSystem without a ShipStatus instance");
     }
 
-    if (!this.lobby.isHost || !(this.lobby.host instanceof CustomHost)) {
-      throw new Error(`CustomHost received RepairSystem but server is not host`);
-    }
-
     const system = this.lobby.shipStatus.innerNetObjects[0].getSystemFromType(systemId);
     const player = this.lobby.players.find(thePlayer => thePlayer.gameObject.playerControl.id == playerControlNetId);
     const level = this.lobby.options.options.levels[0];
