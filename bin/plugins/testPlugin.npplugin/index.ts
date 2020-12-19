@@ -1,7 +1,7 @@
 import { TextComponent } from "../../../lib/api/text";
 import { Player } from "../../../lib/api/player";
 import { Server } from "../../../lib/api/server";
-import { Room } from "../../../lib/api/lobby";
+import { Lobby } from "../../../lib/api/lobby";
 import { Logger } from "../../../lib/logger";
 import repl from "repl";
 
@@ -9,7 +9,7 @@ declare const server: Server;
 
 const logger = new Logger("Debug");
 
-server.on("roomCreated", (room: Room) => {
+server.on("roomCreated", (room: Lobby) => {
   room.on("player", (player: Player) => {
     logger.log(player, " Connected");
 

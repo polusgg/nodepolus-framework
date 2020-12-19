@@ -1,16 +1,16 @@
 import { RoomCreatedEvent } from "../events/server/roomCreated";
 import { Server as InternalServer } from "../../server";
 import { ServerConfig } from "./serverConfig";
+import { Lobby } from "../lobby";
 import Emittery from "emittery";
-import { Room } from "../lobby";
 
 export type ServerEvents = {
-  roomCreated: Room;
+  roomCreated: Lobby;
 };
 
 export class Server extends Emittery.Typed<ServerEvents> {
   public internalServer: InternalServer;
-  public rooms: Room[] = [];
+  public rooms: Lobby[] = [];
 
   constructor(
     config?: ServerConfig,
@@ -20,7 +20,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
     this.internalServer = new InternalServer(config);
 
     this.internalServer.on("roomCreated", (room: RoomCreatedEvent) => {
-      const newRoom = new Room(room.room);
+      const newRoom = new Lobby(room.room);
 
       this.rooms.push(newRoom);
       this.emit("roomCreated", newRoom);

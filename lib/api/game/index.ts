@@ -4,8 +4,8 @@ import { SkeldRoomCollection } from "./room/collection/skeldRoomCollection";
 import { BaseRoomCollection } from "./room/collection/baseRoomCollection";
 import { MiraRoomCollection } from "./room/collection/miraRoomCollection";
 import { Level } from "../../types/level";
+import { Lobby } from "../lobby";
 import Emittery from "emittery";
-import { Room } from "../lobby";
 
 export type GameEvents = {
   ended: never;
@@ -14,7 +14,7 @@ export type GameEvents = {
 export class Game extends Emittery.Typed<GameEvents> {
   public rooms: BaseRoomCollection;
 
-  constructor(public room: Room) {
+  constructor(public room: Lobby) {
     super();
 
     switch (room.settings.level) {

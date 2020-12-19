@@ -22,8 +22,8 @@ import { CustomHost } from "../../host";
 import { TextComponent } from "../text";
 import { Task } from "../game/task";
 import { Server } from "../server";
+import { Lobby } from "../lobby";
 import Emittery from "emittery";
-import { Room } from "../lobby";
 import Vent from "../game/vent";
 
 declare const server: Server;
@@ -165,7 +165,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   }
 
   constructor(
-    public room: Room,
+    public room: Lobby,
     public readonly clientId: number = server.internalServer.nextConnectionId,
     public readonly ip?: string,
     public readonly port?: number,

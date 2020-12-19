@@ -60,7 +60,7 @@ export class CodeObject {
 
   constructor(
     value: string,
-    public room: Room,
+    public room: Lobby,
   ) {
     this.internalValue = CodeObject.convertToInternal(value);
   }
@@ -139,11 +139,11 @@ export class CodeObject {
   }
 }
 
-export type RoomEvents = {
+export type LobbyEvents = {
   player: Player;
 };
 
-export class Room extends Emittery.Typed<RoomEvents> {
+export class Lobby extends Emittery.Typed<LobbyEvents> {
   public readonly internalRoom: InternalRoom;
   public readonly codeObject: CodeObject;
   public readonly players: Player[] = [];

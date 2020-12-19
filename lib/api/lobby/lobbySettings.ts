@@ -5,7 +5,7 @@ import { Connection } from "../../protocol/connection";
 import { Language } from "../../types/language";
 import { Level } from "../../types/level";
 import { Player } from "../player";
-import { Room } from ".";
+import { Lobby } from ".";
 
 export class LobbySettings {
   private readonly povCache: Map<number, LobbySettings> = new Map();
@@ -203,7 +203,7 @@ export class LobbySettings {
   }
 
   constructor(
-    public room: Room,
+    public room: Lobby,
   ) {}
 
   setMaxPlayers(param: number): void {
