@@ -1,14 +1,14 @@
-import { Text } from "../../lib/api/text";
+import { TextComponent } from "../../lib/api/text";
 import test from "ava";
 
 test("encodes text", t => {
-  const text = new Text().add("ABC");
+  const text = new TextComponent().add("ABC");
 
   t.is(text.toString(), "ABC");
 });
 
 test("encodes colored text", t => {
-  const text = new Text()
+  const text = new TextComponent()
     .setColor(255, 0, 128)
     .add("ABC");
 
@@ -16,7 +16,7 @@ test("encodes colored text", t => {
 });
 
 test("encodes colored text with alpha channel", t => {
-  const text = new Text()
+  const text = new TextComponent()
     .setColor(255, 0, 128)
     .setOpacity(64)
     .add("ABC");
@@ -25,7 +25,7 @@ test("encodes colored text with alpha channel", t => {
 });
 
 test("encodes split colored text with alpha channel", t => {
-  const text = new Text()
+  const text = new TextComponent()
     .setColor(255, 0, 128)
     .setOpacity(64)
     .add("ABC")
@@ -35,7 +35,7 @@ test("encodes split colored text with alpha channel", t => {
 });
 
 test("encodes multiple colored texts with alpha channels", t => {
-  const text = new Text()
+  const text = new TextComponent()
     .setColor(255, 0, 128)
     .setOpacity(64)
     .add("ABC")
@@ -49,21 +49,21 @@ test("encodes multiple colored texts with alpha channels", t => {
 });
 
 test("encodes links from a string", t => {
-  const text = new Text()
+  const text = new TextComponent()
     .link("google", "https://www.google.com/");
 
   t.is(text.toString(), "[https://www.google.com/]google");
 });
 
 test("encodes links from a URL object", t => {
-  const text = new Text()
+  const text = new TextComponent()
     .link("google", new URL("https://www.google.com/"));
 
   t.is(text.toString(), "[https://www.google.com/]google");
 });
 
 test("encodes complex text", t => {
-  const text = new Text()
+  const text = new TextComponent()
     .link("Google", new URL("https://www.google.com/"))
     .add("Node")
     .reset()
@@ -82,7 +82,7 @@ test("encodes complex text", t => {
 });
 
 test("decodes complex text", t => {
-  const text = Text.from("ABC[FF00FF00]Outer[]Empty[https://www.google.com/]link[00FF00FF]Color");
+  const text = TextComponent.from("ABC[FF00FF00]Outer[]Empty[https://www.google.com/]link[00FF00FF]Color");
 
   t.deepEqual(text.elements, [
     {
