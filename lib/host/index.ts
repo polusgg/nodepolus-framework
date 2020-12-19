@@ -811,6 +811,13 @@ export class CustomHost implements HostInstance {
     delete this.systemsHandler;
 
     this.lobby.sendRootGamePacket(new EndGamePacket(this.lobby.code, reason, false));
+
+    this.lobby.gameData = new EntityGameData(this.lobby);
+    this.lobby.gameData.owner = GLOBAL_OWNER;
+    this.lobby.gameData.innerNetObjects = [
+      new InnerGameData(this.nextNetId, this.lobby.gameData, []),
+      new InnerVoteBanSystem(this.nextNetId, this.lobby.gameData),
+    ];
   }
 
   private addTasksFromList(
