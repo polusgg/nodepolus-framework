@@ -59,7 +59,7 @@ import { Player } from "../player";
 import Emittery from "emittery";
 import dgram from "dgram";
 
-export type RoomEvents = {
+export type LobbyEvents = {
   connection: Connection;
   player: Player;
   murder: {
@@ -111,7 +111,7 @@ export type RoomEvents = {
   despawn: InnerNetObject;
 };
 
-export class Lobby extends Emittery.Typed<RoomEvents> implements LobbyImplementation, dgram.RemoteInfo {
+export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplementation, dgram.RemoteInfo {
   public readonly createdAt: number = Date.now();
 
   public connections: Connection[] = [];

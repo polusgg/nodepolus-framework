@@ -7,8 +7,8 @@ import { Level } from "../../types/level";
 import { Player } from "../player";
 import { Room } from ".";
 
-export class Settings {
-  private readonly povCache: Map<number, Settings> = new Map();
+export class LobbySettings {
+  private readonly povCache: Map<number, LobbySettings> = new Map();
 
   private isFromPov = false;
   private fromPovConnection: Connection | undefined;
@@ -415,18 +415,18 @@ export class Settings {
     this.syncSettingsOnRoom();
   }
 
-  fromPov(player: Player): Settings {
+  fromPov(player: Player): LobbySettings {
     const connection = this.room.internalRoom.findConnection(player.internalPlayer.gameObject.owner);
 
     if (connection && this.povCache.has(connection.id)) {
       return this.povCache.get(connection.id)!;
     }
 
-    return Settings.fromPov(this, connection);
+    return LobbySettings.fromPov(this, connection);
   }
 
-  private static fromPov(baseSettings: Settings, connection?: Connection): Settings {
-    const povSettings = new Settings(baseSettings.room);
+  private static fromPov(baseSettings: LobbySettings, connection?: Connection): LobbySettings {
+    const povSettings = new LobbySettings(baseSettings.room);
 
     povSettings.isFromPov = true;
     povSettings.fromPovConnection = connection;

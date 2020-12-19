@@ -21,10 +21,10 @@ import { PlayerSkin } from "../../types/playerSkin";
 import { GameState } from "../../types/gameState";
 import { PlayerHat } from "../../types/playerHat";
 import { PlayerPet } from "../../types/playerPet";
+import { LobbySettings } from "./lobbySettings";
 import { Player, PlayerState } from "../player";
 import { Vector2 } from "../../util/vector2";
 import { Level } from "../../types/level";
-import { Settings } from "./roomSettings";
 import { CustomHost } from "../../host";
 import { TextComponent } from "../text";
 import { Server } from "../server";
@@ -147,7 +147,7 @@ export class Room extends Emittery.Typed<RoomEvents> {
   public readonly internalRoom: InternalRoom;
   public readonly codeObject: CodeObject;
   public readonly players: Player[] = [];
-  public readonly settings: Settings = new Settings(this);
+  public readonly settings: LobbySettings = new LobbySettings(this);
 
   public game?: Game;
 
