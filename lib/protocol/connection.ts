@@ -20,8 +20,8 @@ import { SystemType } from "../types/systemType";
 import { InnerLevel } from "./entities/types";
 import { HostInstance } from "../host/types";
 import { Packet } from "./packets";
+import { Lobby } from "../lobby";
 import Emittery from "emittery";
-import { Room } from "../lobby";
 import dgram from "dgram";
 
 interface ConnectionEvents {
@@ -44,7 +44,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   public isHost = false;
   public isActingHost = false;
   public id = -1;
-  public room?: Room;
+  public room?: Lobby;
   public limboState = LimboState.PreSpawn;
   public address: string;
   public port: number;

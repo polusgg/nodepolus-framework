@@ -12,8 +12,8 @@ import { FakeClientId } from "../types/fakeClientId";
 import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
 import { RoomCode } from "../util/roomCode";
+import { Lobby } from "../lobby";
 import Emittery from "emittery";
-import { Room } from "../lobby";
 import dgram from "dgram";
 
 export type ServerEvents = {
@@ -24,10 +24,10 @@ export class Server extends Emittery.Typed<ServerEvents> {
   public readonly startedAt = Date.now();
   public readonly serverSocket: dgram.Socket;
   public readonly connections: Map<string, Connection> = new Map();
-  public readonly connectionRoomMap: Map<string, Room> = new Map();
+  public readonly connectionRoomMap: Map<string, Lobby> = new Map();
 
-  public rooms: Room[] = [];
-  public roomMap: Map<string, Room> = new Map();
+  public rooms: Lobby[] = [];
+  public roomMap: Map<string, Lobby> = new Map();
 
   // Starts at 1 to allow the Server host implementation's ID to be 0
   private connectionIndex = Object.keys(FakeClientId).length / 2;
@@ -132,7 +132,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
           roomCode = RoomCode.generate();
         }
 
-        const newRoom = new Room(
+        const newRoom = new Lobby(
           this.defaultRoomAddress,
           this.defaultRoomPort,
           this.defaultHost == DefaultHostState.Server,

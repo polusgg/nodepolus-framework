@@ -47,10 +47,10 @@ import { SystemType } from "../types/systemType";
 import { PlayerHat } from "../types/playerHat";
 import { PlayerPet } from "../types/playerPet";
 import { Vector2 } from "../util/vector2";
-import { Room } from ".";
+import { Lobby } from ".";
 
 export class RPCHandler {
-  constructor(public readonly room: Room) {}
+  constructor(public readonly room: Lobby) {}
 
   handleBaseRPC(type: RPCPacketType, senderNetId: number, rawPacket: BaseRPCPacket, sendTo: Connection[]): void {
     const sender = this.room.findInnerNetObject(senderNetId);

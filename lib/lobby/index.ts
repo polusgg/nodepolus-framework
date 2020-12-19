@@ -111,7 +111,7 @@ export type RoomEvents = {
   despawn: InnerNetObject;
 };
 
-export class Room extends Emittery.Typed<RoomEvents> implements LobbyImplementation, dgram.RemoteInfo {
+export class Lobby extends Emittery.Typed<RoomEvents> implements LobbyImplementation, dgram.RemoteInfo {
   public readonly createdAt: number = Date.now();
 
   public connections: Connection[] = [];

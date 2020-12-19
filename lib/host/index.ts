@@ -59,7 +59,7 @@ import { Vector2 } from "../util/vector2";
 import { Level } from "../types/level";
 import { HostInstance } from "./types";
 import { Player } from "../player";
-import { Room } from "../lobby";
+import { Lobby } from "../lobby";
 import {
   NormalCommunicationsAmount,
   MiraCommunicationsAmount,
@@ -107,7 +107,7 @@ export class CustomHost implements HostInstance {
   }
 
   constructor(
-    public room: Room,
+    public room: Lobby,
   ) {}
 
   /* eslint-disable @typescript-eslint/no-empty-function */
