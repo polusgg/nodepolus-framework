@@ -1,10 +1,9 @@
-import { BaseDoorGameRoom } from "./base";
-import { SystemType } from "../../../types/systemType";
-import { Game } from "..";
-import { Player } from "../../player";
-import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
-import { SecurityCameraSystem } from "../../../protocol/entities/baseShipStatus/systems/securityCameraSystem";
 import { MedScanSystem } from "../../../protocol/entities/baseShipStatus/systems/medScanSystem";
+import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
+import { SystemType } from "../../../types/systemType";
+import { BaseDoorGameRoom } from "./base";
+import { Player } from "../../player";
+import { Game } from "..";
 
 export enum CamsState {
   Enabled = 1,
@@ -12,6 +11,10 @@ export enum CamsState {
 }
 
 export class MedbayGameRoom extends BaseDoorGameRoom {
+  get internalSystem(): MedScanSystem {
+    return this.internalShipStatus.systems[InternalSystemType.MedScan] as MedScanSystem;
+  }
+
   get playersScanning(): Player | undefined {
     for (let i = 0; i < this.game.room.players.length; i++) {
       const player = this.game.room.players[i];
@@ -31,8 +34,7 @@ export class MedbayGameRoom extends BaseDoorGameRoom {
       const player = this.game.room.players.find(p => playerIds[i] == p.playerId);
 
       if (!player) {
-        throw new Error();
-        // new err @Cody
+        throw new Error("Player in queue for medscan is not on the room instance");
       }
 
       players.push(player);
@@ -41,25 +43,9 @@ export class MedbayGameRoom extends BaseDoorGameRoom {
     return players;
   }
 
-  get camsState(): CamsState {
-    return ((this.internalShipStatus.systems[InternalSystemType.SecurityCamera] as SecurityCameraSystem).playersViewingCams.size > 0) ? CamsState.Enabled : CamsState.Disabled;
-  }
-
   constructor(game: Game) {
-    super(game, SystemType.Reactor);
+    super(game, SystemType.Medbay);
   }
 
-  turnOffCams(): void {
-    if (this.camsState == CamsState.Enabled) {
-      this.internalBackupShipStatus();
-      (this.internalShipStatus.systems[InternalSystemType.SecurityCamera] as SecurityCameraSystem).playersViewingCams.clear();
-      this.internalUpdateShipStatus();
-    }
-  }
-
-  turnOnCams(): void {
-    this.internalBackupShipStatus();
-    (this.internalShipStatus.systems[InternalSystemType.SecurityCamera] as SecurityCameraSystem).playersViewingCams.add(212);
-    this.internalUpdateShipStatus();
-  }
+  // TODO: API methods
 }

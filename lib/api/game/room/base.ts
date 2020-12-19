@@ -1,22 +1,22 @@
-import { InnerLevel } from "../../../protocol/entities/types";
-import Emittery from "emittery";
-import { GameEvents, Game } from "..";
+import { DoorsSystem, SYSTEM_DOORS } from "../../../protocol/entities/baseShipStatus/systems/doorsSystem";
+import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
 import { GameDataPacket } from "../../../protocol/packets/rootGamePackets/gameData";
-import { Player } from "../../player";
+import { InnerLevel } from "../../../protocol/entities/types";
+import { Connection } from "../../../protocol/connection";
 import { SystemType } from "../../../types/systemType";
-import { Door } from "../door";
-import { DOOR_DATA } from "../data";
 import { Level } from "../../../types/level";
 import { CustomHost } from "../../../host";
-import { Connection } from "../../../protocol/connection";
-import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
-import { DoorsSystem, SYSTEM_DOORS } from "../../../protocol/entities/baseShipStatus/systems/doorsSystem";
+import { GameEvents, Game } from "..";
+import { Player } from "../../player";
+import { DOOR_DATA } from "../data";
+import Emittery from "emittery";
+import { Door } from "../door";
 
 export class BaseGameRoom extends Emittery.Typed<GameEvents> {
   private shipStatusBackup?: InnerLevel;
 
   get players(): Player[] {
-    //todo
+    // TODO
     return [];
   }
 
@@ -82,7 +82,7 @@ export class BaseDoorGameRoom extends BaseGameRoom {
       this.internalShipStatus.closeDoorsOfType(this.systemType);
       this.internalUpdateShipStatus();
     } else {
-      // new error for unknown host type
+      throw new Error("Attempted to close doors with an unsupported host instance");
     }
   }
 

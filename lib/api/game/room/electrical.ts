@@ -100,7 +100,7 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
     super(game, SystemType.Electrical);
   }
 
-  //TODO: Understand Airship's Electrical Doors, and add a serializer/deserializer
+  // TODO: Understand Airship's Electrical Doors, and add a serializer/deserializer
 
   sabotage(): void {
     if (this.game.room.internalRoom.host instanceof CustomHost) {
@@ -120,7 +120,7 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
         new SabotageAmount(SystemType.Electrical),
       );
     } else {
-      //TODO: Throw error about unknown host?
+      throw new Error("Attempted to sabotage electrical with an unsupported host instance");
     }
   }
 

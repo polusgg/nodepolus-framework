@@ -1,9 +1,9 @@
 import { BaseRoomCollection } from "./baseRoomCollection";
-import { ElectricalGameRoom } from "../electrical";
-import { BaseDoorGameRoom } from "../base";
 import { SystemType } from "../../../../types/systemType";
-import { ReactorGameRoom } from "../reactor";
+import { ElectricalGameRoom } from "../electrical";
 import { SecurityGameRoom } from "../security";
+import { ReactorGameRoom } from "../reactor";
+import { BaseDoorGameRoom } from "../base";
 import { MedbayGameRoom } from "../medbay";
 import { Game } from "../..";
 

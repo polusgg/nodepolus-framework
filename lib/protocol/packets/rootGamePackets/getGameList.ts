@@ -47,11 +47,37 @@ export class RoomListing {
 
 export class GameListCounts {
   constructor(
-    public skeld: number,
-    public skeldApril: number,
-    public mira: number,
-    public polus: number,
+    public skeld: number = 0,
+    public mira: number = 0,
+    public polus: number = 0,
+    public airship: number = 0,
   ) {}
+
+  increment(level: Level): void {
+    this.add(level, 1);
+  }
+
+  decrement(level: Level): void {
+    this.add(level, -1);
+  }
+
+  add(level: Level, amount: number): void {
+    switch (level) {
+      case Level.TheSkeld:
+      case Level.AprilSkeld:
+        this.skeld += amount;
+        break;
+      case Level.MiraHq:
+        this.mira += amount;
+        break;
+      case Level.Polus:
+        this.polus += amount;
+        break;
+      case Level.Airship:
+        this.airship += amount;
+        break;
+    }
+  }
 }
 
 export class GetGameListRequestPacket extends BaseRootGamePacket {
@@ -81,24 +107,23 @@ export class GetGameListRequestPacket extends BaseRootGamePacket {
 export class GetGameListResponsePacket extends BaseRootGamePacket {
   constructor(
     public readonly rooms: RoomListing[],
-    public readonly skeldCount?: number,
-    public readonly miraCount?: number,
-    public readonly polusCount?: number,
+    public readonly counts?: GameListCounts,
   ) {
     super(RootGamePacketType.GetGameList);
   }
 
   static deserialize(reader: MessageReader): GetGameListResponsePacket {
-    let skeldCount: number | undefined;
-    let miraCount: number | undefined;
-    let polusCount: number | undefined;
+    let counts: GameListCounts | undefined;
     const rooms: RoomListing[] = [];
 
     reader.readAllChildMessages(child => {
       if (child.tag == 1) {
-        skeldCount = reader.readUInt32();
-        miraCount = reader.readUInt32();
-        polusCount = reader.readUInt32();
+        counts = new GameListCounts(
+          reader.readUInt32(),
+          reader.readUInt32(),
+          reader.readUInt32(),
+          reader.readUInt32(),
+        );
       } else if (child.tag == 0) {
         child.readAllChildMessages(roomMessage => {
           rooms.push(RoomListing.deserialize(roomMessage));
@@ -108,20 +133,18 @@ export class GetGameListResponsePacket extends BaseRootGamePacket {
 
     return new GetGameListResponsePacket(
       rooms,
-      skeldCount,
-      miraCount,
-      polusCount,
+      counts,
     );
   }
 
   serialize(): MessageWriter {
     const writer = new MessageWriter();
 
-    if (this.skeldCount && this.miraCount && this.polusCount) {
+    if (this.counts) {
       writer.startMessage(1)
-        .writeUInt32(this.skeldCount)
-        .writeUInt32(this.miraCount)
-        .writeUInt32(this.polusCount)
+        .writeUInt32(this.counts.skeld)
+        .writeUInt32(this.counts.mira)
+        .writeUInt32(this.counts.polus)
         .endMessage();
     }
 

@@ -1,9 +1,9 @@
-import { BaseDoorGameRoom } from "./base";
-import { SystemType } from "../../../types/systemType";
-import { Game } from "..";
-import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
 import { HudOverrideSystem } from "../../../protocol/entities/baseShipStatus/systems/hudOverrideSystem";
 import { HqHudSystem } from "../../../protocol/entities/baseShipStatus/systems/hqHudSystem";
+import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
+import { SystemType } from "../../../types/systemType";
+import { BaseDoorGameRoom } from "./base";
+import { Game } from "..";
 
 export class BasicCommunicationsRoom extends BaseDoorGameRoom {
   get isSabotaged(): boolean {

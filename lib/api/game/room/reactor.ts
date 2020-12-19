@@ -35,7 +35,7 @@ export class ReactorGameRoom extends BaseDoorGameRoom {
         new SabotageAmount(SystemType.Reactor),
       );
     } else {
-      // TODO: Throw error about unknown host?
+      throw new Error("Attempted to sabotage reactor with an unsupported host instance");
     }
   }
 

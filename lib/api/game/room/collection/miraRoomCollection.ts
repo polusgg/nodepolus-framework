@@ -1,6 +1,6 @@
 import { BaseRoomCollection } from "./baseRoomCollection";
-import { Game } from "../..";
 import { ElectricalGameRoom } from "../electrical";
+import { Game } from "../..";
 
 export class MiraRoomCollection extends BaseRoomCollection {
   public launchpad: undefined;

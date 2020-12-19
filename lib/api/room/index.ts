@@ -18,10 +18,10 @@ import { Connection } from "../../protocol/connection";
 import { PlayerColor } from "../../types/playerColor";
 import { PlayerSkin } from "../../types/playerSkin";
 import { GameState } from "../../types/gameState";
-import { Player, PlayerState } from "../player";
 import { PlayerHat } from "../../types/playerHat";
 import { PlayerPet } from "../../types/playerPet";
 import { Room as InternalRoom } from "../../room";
+import { Player, PlayerState } from "../player";
 import { Vector2 } from "../../util/vector2";
 import { Level } from "../../types/level";
 import { Settings } from "./roomSettings";
@@ -249,23 +249,28 @@ export class Room extends Emittery.Typed<RoomEvents> {
       this.internalRoom.sendRootGamePacket(new EndGamePacket(this.code, 0, false));
 
       setTimeout(() => {
-        this.internalRoom.connections.forEach(con => {
-          const player = this.internalRoom.findPlayerByConnection(con);
+        this.internalRoom.connections.forEach(connection => {
+          const player = this.internalRoom.findPlayerByConnection(connection);
 
           if (player) {
-            con.write(new JoinedGamePacket(this.code, con.id, this.internalRoom.host!.id, this.internalRoom.connections.map(e => e.id).filter(id => id != con.id)));
-            con.write(new GameDataPacket(this.internalRoom.players.map(p => p.gameObject.spawn()), this.code));
+            connection.write(new JoinedGamePacket(
+              this.code,
+              connection.id,
+              this.internalRoom.host!.id,
+              this.internalRoom.connections.map(e => e.id).filter(id => id != connection.id)),
+            );
+            connection.write(new GameDataPacket(this.internalRoom.players.map(p => p.gameObject.spawn()), this.code));
 
             if (this.internalRoom.lobbyBehavior) {
-              con.write(new GameDataPacket([this.internalRoom.lobbyBehavior.spawn()], this.code));
+              connection.write(new GameDataPacket([this.internalRoom.lobbyBehavior.spawn()], this.code));
             }
 
             if (this.internalRoom.gameData) {
-              con.write(new GameDataPacket([this.internalRoom.gameData.spawn()], this.code));
+              connection.write(new GameDataPacket([this.internalRoom.gameData.spawn()], this.code));
             }
 
             if (this.internalRoom.shipStatus) {
-              con.write(new GameDataPacket([this.internalRoom.shipStatus.spawn()], this.code));
+              connection.write(new GameDataPacket([this.internalRoom.shipStatus.spawn()], this.code));
             }
           }
         });
@@ -275,7 +280,7 @@ export class Room extends Emittery.Typed<RoomEvents> {
 
   sendMessage(message: TextComponent | string): void {
     if (this.internalRoom.gameData == undefined) {
-      throw new Error("sendMessage called without gameData");
+      throw new Error("sendMessage called without a GameData instance");
     }
 
     if (this.internalRoom.host instanceof CustomHost) {

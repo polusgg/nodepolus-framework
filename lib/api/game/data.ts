@@ -1,5 +1,5 @@
-import { Level } from "../../types/level";
 import { SystemType } from "../../types/systemType";
+import { Level } from "../../types/level";
 
 export const DOOR_DATA = {
   [Level.TheSkeld]: {
@@ -22,7 +22,7 @@ export const DOOR_DATA = {
     [SystemType.Office]: [7, 8],
   },
   [Level.Airship]: {
-    //TODO
+    // TODO
   },
 };
 
@@ -39,12 +39,10 @@ export const DOOR_NAMES = {
     "Cafeteria",
     "Electrical",
     "Medbay",
-    "LowerEngine",
+    "Lower Engine",
     "Storage",
   ],
-  [Level.MiraHq]: [
-    // MiraHQ has no doors.
-  ],
+  [Level.MiraHq]: [],
   [Level.Polus]: [
     "Outside to Electrical",
     "Inside Electrical",
@@ -60,6 +58,6 @@ export const DOOR_NAMES = {
     "Storage",
   ],
   [Level.Airship]: [
-    //TODO
+    // TODO
   ],
 };

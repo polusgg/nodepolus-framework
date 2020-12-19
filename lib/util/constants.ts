@@ -1,5 +1,5 @@
-import { GameOptionsData } from "../types/gameOptionsData";
 import { DefaultHostState } from "../api/server/serverConfig";
+import { GameOptionsData } from "../types/gameOptionsData";
 import { TaskBarUpdate } from "../types/taskBarUpdate";
 import { KillDistance } from "../types/killDistance";
 import { Language } from "../types/language";
@@ -29,11 +29,11 @@ export enum MinValue {
 /**
  * Server constants
  */
-export const ANNOUNCEMENT_SERVER_PORT = 22024;
-
 export const DEFAULT_SERVER_ADDRESS = "0.0.0.0";
 
 export const DEFAULT_SERVER_PORT = 22023;
+
+export const ANNOUNCEMENT_SERVER_PORT = 22024;
 
 export const DEFAULT_HOST_STATE = DefaultHostState.Server;
 
@@ -73,9 +73,9 @@ export const DEFAULT_GAME_OPTIONS = new GameOptionsData({
 /**
  * SystemType constansts
  */
-export const POLUS_DOOR_COUNT = 12;
-
 export const SKELD_DOOR_COUNT = 13;
+
+export const POLUS_DOOR_COUNT = 12;
 
 /**
  * RemoteInfo constants

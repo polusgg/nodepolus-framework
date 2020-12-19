@@ -103,7 +103,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
         return TextComponent.from(connectionName);
       }
 
-      throw new Error("Player has no connection on the server");
+      throw new Error("Player has no connection on the server instance");
     }
   }
 
@@ -384,6 +384,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     this.internalTasks = tasks;
   }
 
+  // TODO: Delete?
   sendNote(message: TextComponent | string): this {
     if (this.room.internalRoom.host instanceof CustomHost) {
       const oldName = this.name.toString();

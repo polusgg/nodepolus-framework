@@ -1,3 +1,2 @@
-export interface ProxyInstance {
-  todo(): void;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ProxyInstance {}

@@ -1,5 +1,5 @@
-import { Server as InternalServer } from "../../server";
 import { RoomCreatedEvent } from "../events/server/roomCreated";
+import { Server as InternalServer } from "../../server";
 import { ServerConfig } from "./serverConfig";
 import Emittery from "emittery";
 import { Room } from "../room";

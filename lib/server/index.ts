@@ -1,21 +1,21 @@
+import { GameListCounts, GetGameListResponsePacket, RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { DEFAULT_HOST_STATE, DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { HostGameResponsePacket, HostGameRequestPacket } from "../protocol/packets/rootGamePackets/hostGame";
 import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
-import { GetGameListResponsePacket, RoomListing } from "../protocol/packets/rootGamePackets/getGameList";
 import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
 import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { DefaultHostState, ServerConfig } from "../api/server/serverConfig";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";
+import { RoomCreatedEvent } from "../api/events/server/roomCreated";
 import { FakeClientId } from "../types/fakeClientId";
 import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
+import { Room as ApiRoom } from "../api/room";
 import { RoomCode } from "../util/roomCode";
-import { Level } from "../types/level";
 import Emittery from "emittery";
 import { Room } from "../room";
 import dgram from "dgram";
-import { RoomCreatedEvent } from "../api/events/server/roomCreated";
 
 export type ServerEvents = {
   roomCreated: RoomCreatedEvent;
@@ -142,7 +142,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         newRoom.options = (packet as HostGameRequestPacket).options;
 
-        const event = new RoomCreatedEvent(newRoom);
+        const event = new RoomCreatedEvent(new ApiRoom(newRoom));
 
         this.emit("roomCreated", event);
 
@@ -151,6 +151,8 @@ export class Server extends Emittery.Typed<ServerEvents> {
           this.roomMap.set(newRoom.code, newRoom);
 
           sender.sendReliable([new HostGameResponsePacket(newRoom.code)]);
+        } else {
+          sender.disconnect(DisconnectReason.custom("The server refused to create your game"));
         }
         break;
       }
@@ -168,7 +170,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
       }
       case RootGamePacketType.GetGameList: {
         const results: RoomListing[] = [];
-        const counts: [number, number, number, number] = [0, 0, 0, 0];
+        const counts = new GameListCounts();
 
         for (let i = 0; i < this.rooms.length; i++) {
           const room = this.rooms[i];
@@ -179,13 +181,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
             continue;
           }
 
-          if (level == Level.AprilSkeld) {
-            counts[0]++;
-          } else if (level < Level.AprilSkeld) {
-            counts[level]++;
-          } else {
-            counts[level - 1]++;
-          }
+          counts.increment(level);
 
           // TODO: Add config option for max player count and max results
           if (room.roomListing.playerCount < 10 && results.length < 10) {
@@ -195,7 +191,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         results.sort((a, b) => b.playerCount - a.playerCount);
 
-        sender.sendReliable([new GetGameListResponsePacket(results, counts[Level.TheSkeld], counts[Level.MiraHq], counts[Level.Polus])]);
+        sender.sendReliable([new GetGameListResponsePacket(results, counts)]);
         break;
       }
       default: {

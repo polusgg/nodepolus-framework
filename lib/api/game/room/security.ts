@@ -41,7 +41,7 @@ export class SecurityGameRoom extends BaseDoorGameRoom {
   }
 
   constructor(game: Game) {
-    super(game, SystemType.Reactor);
+    super(game, SystemType.Security);
   }
 
   activateCameras(): void {
