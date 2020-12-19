@@ -21,7 +21,7 @@ import { InnerLevel } from "./entities/types";
 import { HostInstance } from "../host/types";
 import { Packet } from "./packets";
 import Emittery from "emittery";
-import { Room } from "../room";
+import { Room } from "../lobby";
 import dgram from "dgram";
 
 interface ConnectionEvents {

@@ -5,7 +5,7 @@ import { BaseRoomCollection } from "./room/collection/baseRoomCollection";
 import { MiraRoomCollection } from "./room/collection/miraRoomCollection";
 import { Level } from "../../types/level";
 import Emittery from "emittery";
-import { Room } from "../room";
+import { Room } from "../lobby";
 
 export type GameEvents = {
   ended: never;

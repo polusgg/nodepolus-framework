@@ -59,7 +59,7 @@ import { Vector2 } from "../util/vector2";
 import { Level } from "../types/level";
 import { HostInstance } from "./types";
 import { Player } from "../player";
-import { Room } from "../room";
+import { Room } from "../lobby";
 import {
   NormalCommunicationsAmount,
   MiraCommunicationsAmount,

@@ -23,8 +23,8 @@ import { TextComponent } from "../text";
 import { Task } from "../game/task";
 import { Server } from "../server";
 import Emittery from "emittery";
+import { Room } from "../lobby";
 import Vent from "../game/vent";
-import { Room } from "../room";
 
 declare const server: Server;
 

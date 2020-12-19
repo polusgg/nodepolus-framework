@@ -1,9 +1,9 @@
+import { TextComponent } from "../../../lib/api/text";
 import { Player } from "../../../lib/api/player";
 import { Server } from "../../../lib/api/server";
-import { Room } from "../../../lib/api/room";
+import { Room } from "../../../lib/api/lobby";
 import { Logger } from "../../../lib/logger";
 import repl from "repl";
-import { TextComponent } from "../../../lib/api/text";
 
 declare const server: Server;
 

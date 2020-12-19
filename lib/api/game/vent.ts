@@ -1,5 +1,5 @@
 import { Player } from "../player";
-import { Room } from "../room";
+import { Room } from "../lobby";
 
 export default class Vent {
   public players: Player[] = [];

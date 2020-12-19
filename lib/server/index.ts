@@ -11,10 +11,9 @@ import { RoomCreatedEvent } from "../api/events/server/roomCreated";
 import { FakeClientId } from "../types/fakeClientId";
 import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
-import { Room as ApiRoom } from "../api/room";
 import { RoomCode } from "../util/roomCode";
 import Emittery from "emittery";
-import { Room } from "../room";
+import { Room } from "../lobby";
 import dgram from "dgram";
 
 export type ServerEvents = {
@@ -142,7 +141,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         newRoom.options = (packet as HostGameRequestPacket).options;
 
-        const event = new RoomCreatedEvent(new ApiRoom(newRoom));
+        const event = new RoomCreatedEvent(newRoom);
 
         this.emit("roomCreated", event);
 
