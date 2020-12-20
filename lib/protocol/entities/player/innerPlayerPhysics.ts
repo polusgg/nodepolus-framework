@@ -1,12 +1,11 @@
-import { ClimbLadderPacket, LadderSize, LadderDirection } from "../../packets/rpc/climbLadder";
+import { ClimbLadderPacket, EnterVentPacket, ExitVentPacket } from "../../packets/rpc";
+import { LadderSize, LadderDirection } from "../../packets/rpc/climbLadderPacket";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
-import { EnterVentPacket } from "../../packets/rpc/enterVent";
-import { ExitVentPacket } from "../../packets/rpc/exitVent";
-import { DataPacket } from "../../packets/gameData/data";
-import { BaseGameObject } from "../baseEntity";
+import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { InnerNetObjectType } from "../types/enums";
+import { DataPacket } from "../../packets/gameData";
 import { Connection } from "../../connection";
-import { InnerNetObjectType } from "../types";
+import { BaseGameObject } from "../types";
 import { EntityPlayer } from ".";
 
 export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {

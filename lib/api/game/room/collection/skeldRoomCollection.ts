@@ -1,10 +1,6 @@
+import { ElectricalGameRoom, SecurityGameRoom, ReactorGameRoom, MedbayGameRoom, BaseDoorGameRoom } from "..";
 import { BaseRoomCollection } from "./baseRoomCollection";
 import { SystemType } from "../../../../types/enums";
-import { ElectricalGameRoom } from "../electrical";
-import { SecurityGameRoom } from "../security";
-import { ReactorGameRoom } from "../reactor";
-import { BaseDoorGameRoom } from "../base";
-import { MedbayGameRoom } from "../medbay";
 import { Game } from "../..";
 
 export class SkeldRoomCollection extends BaseRoomCollection {

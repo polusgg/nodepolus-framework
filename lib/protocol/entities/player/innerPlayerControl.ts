@@ -1,30 +1,32 @@
 import { ChatNoteType, PlayerColor, PlayerHat, PlayerPet, PlayerSkin } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { SetStartCounterPacket } from "../../packets/rpc/setStartCounter";
-import { ReportDeadBodyPacket } from "../../packets/rpc/reportDeadBody";
-import { PlayAnimationPacket } from "../../packets/rpc/playAnimation";
-import { CompleteTaskPacket } from "../../packets/rpc/completeTask";
-import { MurderPlayerPacket } from "../../packets/rpc/murderPlayer";
-import { SendChatNotePacket } from "../../packets/rpc/sendChatNote";
-import { StartMeetingPacket } from "../../packets/rpc/startMeeting";
-import { SyncSettingsPacket } from "../../packets/rpc/syncSettings";
-import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
-import { SetInfectedPacket } from "../../packets/rpc/setInfected";
-import { GameOptionsData } from "../../../types/gameOptionsData";
-import { SetScannerPacket } from "../../packets/rpc/setScanner";
-import { SendChatPacket } from "../../packets/rpc/sendChat";
-import { SetColorPacket } from "../../packets/rpc/setColor";
-import { SetNamePacket } from "../../packets/rpc/setName";
-import { SetSkinPacket } from "../../packets/rpc/setSkin";
-import { DataPacket } from "../../packets/gameData/data";
-import { ExiledPacket } from "../../packets/rpc/exiled";
-import { SetHatPacket } from "../../packets/rpc/setHat";
-import { SetPetPacket } from "../../packets/rpc/setPet";
-import { BaseGameObject } from "../baseEntity";
+import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { InnerNetObjectType } from "../types/enums";
+import { DataPacket } from "../../packets/gameData";
+import { GameOptionsData } from "../../../types";
 import { Connection } from "../../connection";
-import { InnerNetObjectType } from "../types";
+import { BaseGameObject } from "../types";
 import { Player } from "../../../player";
 import { EntityPlayer } from ".";
+import {
+  CompleteTaskPacket,
+  ExiledPacket,
+  MurderPlayerPacket,
+  PlayAnimationPacket,
+  ReportDeadBodyPacket,
+  SendChatNotePacket,
+  SendChatPacket,
+  SetColorPacket,
+  SetHatPacket,
+  SetInfectedPacket,
+  SetNamePacket,
+  SetPetPacket,
+  SetScannerPacket,
+  SetSkinPacket,
+  SetStartCounterPacket,
+  StartMeetingPacket,
+  SyncSettingsPacket,
+} from "../../packets/rpc";
 
 export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   public scannerSequenceId = 1;

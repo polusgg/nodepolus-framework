@@ -1,5 +1,5 @@
 import { ServerConfig } from "../lib/api/server/serverConfig";
-import { NodePolusPlugin } from "../lib/api/plugin";
+import { Plugin } from "../lib/api/plugin";
 import { Server } from "../lib/api/server";
 import path from "path";
 import fs from "fs";
@@ -20,7 +20,7 @@ console.log("Loading plugins");
 
 const pathToPlugins = path.join(__dirname, "./plugins/");
 const pluginDirectories = fs.readdirSync(pathToPlugins);
-const plugins: NodePolusPlugin[] = [];
+const plugins: Plugin[] = [];
 
 for (let i = 0; i < pluginDirectories.length; i++) {
   const pathToPlugin = path.join(pathToPlugins, pluginDirectories[i]);
@@ -33,7 +33,7 @@ for (let i = 0; i < pluginDirectories.length; i++) {
 
   console.log(`Loading ${path.basename(pathToPlugin)}`);
 
-  const plugin: NodePolusPlugin = {
+  const plugin: Plugin = {
     folder: pluginDirectories[i],
     metadata: JSON.parse(fs.readFileSync(path.join(pathToPlugin, "plugin.json"), "utf-8")),
     entrypoint: import(path.join(pathToPlugin, "index")),

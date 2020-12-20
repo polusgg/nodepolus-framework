@@ -1,8 +1,8 @@
-import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
+import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { InnerNetObjectType } from "../types/enums";
 import { BaseShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../types/enums";
 import { EntitySkeldAprilShipStatus } from ".";
-import { InnerNetObjectType } from "../types";
 
 export class InnerSkeldAprilShipStatus extends BaseShipStatus<InnerSkeldAprilShipStatus, EntitySkeldAprilShipStatus> {
   constructor(netId: number, public parent: EntitySkeldAprilShipStatus) {

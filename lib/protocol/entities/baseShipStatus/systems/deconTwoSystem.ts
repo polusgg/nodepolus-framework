@@ -1,7 +1,6 @@
+import { DecontaminationDoorState, SystemType } from "../../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { DecontaminationDoorState } from "./deconSystem";
-import { SystemType } from "../../../../types/enums";
-import { BaseSystem } from "./baseSystem";
+import { BaseSystem } from ".";
 
 export class DeconTwoSystem extends BaseSystem<DeconTwoSystem> {
   public timer = 0;

@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
-import { BaseSystem } from "./baseSystem";
+import { BaseSystem } from ".";
 
 export class SabotageSystem extends BaseSystem<SabotageSystem> {
   public cooldown = 0;

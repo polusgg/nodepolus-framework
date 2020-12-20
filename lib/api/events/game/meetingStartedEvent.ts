@@ -1,4 +1,4 @@
-import { CancellableEvent } from "../cancellableEvent";
+import { CancellableEvent } from "..";
 import { Player } from "../../player";
 import { Game } from "../../game";
 

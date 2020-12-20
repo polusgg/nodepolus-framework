@@ -1,17 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { POLUS_DOOR_COUNT } from "../../../../util/constants";
 import { SystemType } from "../../../../types/enums";
-import { BaseSystem } from "./baseSystem";
-
-export const SYSTEM_DOORS: Map<SystemType, number[]> = new Map([
-  [SystemType.Electrical, [0, 1, 2]],
-  [SystemType.Oxygen, [3, 4]],
-  [SystemType.Weapons, [5]],
-  [SystemType.Communications, [6]],
-  [SystemType.Office, [7, 8]],
-  [SystemType.Laboratory, [9, 10]],
-  [SystemType.Storage, [11]],
-]);
+import { BaseSystem } from ".";
 
 export class DoorsSystem extends BaseSystem<DoorsSystem> {
   public timers: Map<SystemType, number> = new Map<SystemType, number>();

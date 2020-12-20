@@ -1,10 +1,10 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
-import { AddVotePacket } from "../../packets/rpc/addVote";
-import { DataPacket } from "../../packets/gameData/data";
-import { BaseGameObject } from "../baseEntity";
+import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { InnerNetObjectType } from "../types/enums";
+import { DataPacket } from "../../packets/gameData";
+import { AddVotePacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
-import { InnerNetObjectType } from "../types";
+import { BaseGameObject } from "../types";
 import { EntityGameData } from ".";
 
 export class InnerVoteBanSystem extends BaseGameObject<InnerVoteBanSystem> {

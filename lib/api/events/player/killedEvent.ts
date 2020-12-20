@@ -1,5 +1,5 @@
-import { CancellableEvent } from "../cancellableEvent";
-import { DeathReason } from "../../types/enums";
+import { DeathReason } from "../../../types/enums";
+import { CancellableEvent } from "..";
 import { Player } from "../../player";
 
 export class KilledEvent extends CancellableEvent {

@@ -1,13 +1,11 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { UpdateGameDataPacket } from "../../packets/rpc/updateGameData";
-import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
-import { SetTasksPacket } from "../../packets/rpc/setTasks";
-import { DataPacket } from "../../packets/gameData/data";
-import { BaseGameObject } from "../baseEntity";
+import { SetTasksPacket, UpdateGameDataPacket } from "../../packets/rpc";
+import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { InnerNetObjectType } from "../types/enums";
+import { DataPacket } from "../../packets/gameData";
+import { EntityGameData, PlayerData } from ".";
 import { Connection } from "../../connection";
-import { InnerNetObjectType } from "../types";
-import { PlayerData } from "./playerData";
-import { EntityGameData } from ".";
+import { BaseGameObject } from "../types";
 
 export class InnerGameData extends BaseGameObject<InnerGameData> {
   constructor(netId: number, public parent: EntityGameData, public players: PlayerData[]) {

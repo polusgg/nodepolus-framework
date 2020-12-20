@@ -1,6 +1,7 @@
-import { AutoDoorsSystem, SYSTEM_DOORS_AUTO } from "../../protocol/entities/baseShipStatus/systems/autoDoorsSystem";
-import { GameDataPacket } from "../../protocol/packets/root/gameData";
+import { AutoDoorsSystem } from "../../protocol/entities/baseShipStatus/systems";
+import { GameDataPacket } from "../../protocol/packets/root";
 import { InnerLevel } from "../../protocol/entities/types";
+import { SystemDoors } from "../../static/doors";
 import { SystemType } from "../../types/enums";
 import { CustomHost } from "..";
 
@@ -39,7 +40,7 @@ export class AutoDoorsHandler {
   }
 
   getDoorsForSystem(systemId: SystemType): number[] {
-    const doors = SYSTEM_DOORS_AUTO.get(systemId);
+    const doors = SystemDoors.forLevel(this.host.lobby.options.options.levels[0])[systemId];
 
     if (!doors) {
       throw new Error(`SystemType ${systemId} (${SystemType[systemId]}) does not have any doors`);

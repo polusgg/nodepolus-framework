@@ -1,48 +1,48 @@
+import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { ChatNoteType, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SystemType } from "../types/enums";
-import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
-import { ClimbLadderPacket, LadderSize, LadderDirection } from "../protocol/packets/rpc/climbLadder";
-import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud/innerMeetingHud";
-import { RepairAmount, RepairSystemPacket } from "../protocol/packets/rpc/repairSystem";
-import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSystem";
-import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
-import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
-import { CloseDoorsOfTypePacket } from "../protocol/packets/rpc/closeDoorsOfType";
-import { SetStartCounterPacket } from "../protocol/packets/rpc/setStartCounter";
-import { ReportDeadBodyPacket } from "../protocol/packets/rpc/reportDeadBody";
-import { UpdateGameDataPacket } from "../protocol/packets/rpc/updateGameData";
-import { VotingCompletePacket } from "../protocol/packets/rpc/votingComplete";
-import { InnerGameData } from "../protocol/entities/gameData/innerGameData";
-import { PlayAnimationPacket } from "../protocol/packets/rpc/playAnimation";
-import { InnerLevel, InnerNetObjectType } from "../protocol/entities/types";
-import { CompleteTaskPacket } from "../protocol/packets/rpc/completeTask";
-import { MurderPlayerPacket } from "../protocol/packets/rpc/murderPlayer";
-import { SendChatNotePacket } from "../protocol/packets/rpc/sendChatNote";
-import { StartMeetingPacket } from "../protocol/packets/rpc/startMeeting";
-import { SyncSettingsPacket } from "../protocol/packets/rpc/syncSettings";
-import { SetInfectedPacket } from "../protocol/packets/rpc/setInfected";
-import { CheckColorPacket } from "../protocol/packets/rpc/checkColor";
-import { PlayerData } from "../protocol/entities/gameData/playerData";
-import { SetScannerPacket } from "../protocol/packets/rpc/setScanner";
+import { InnerGameData, InnerVoteBanSystem, PlayerData } from "../protocol/entities/gameData";
+import { LadderSize, LadderDirection } from "../protocol/packets/rpc/climbLadderPacket";
+import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud";
+import { RepairAmount } from "../protocol/packets/rpc/repairSystem/amounts";
+import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { BaseShipStatus } from "../protocol/entities/baseShipStatus";
-import { CheckNamePacket } from "../protocol/packets/rpc/checkName";
-import { EnterVentPacket } from "../protocol/packets/rpc/enterVent";
-import { CastVotePacket } from "../protocol/packets/rpc/castVote";
-import { ExitVentPacket } from "../protocol/packets/rpc/exitVent";
-import { SendChatPacket } from "../protocol/packets/rpc/sendChat";
-import { SetColorPacket } from "../protocol/packets/rpc/setColor";
-import { SetTasksPacket } from "../protocol/packets/rpc/setTasks";
-import { AddVotePacket } from "../protocol/packets/rpc/addVote";
-import { SetNamePacket } from "../protocol/packets/rpc/setName";
-import { SetSkinPacket } from "../protocol/packets/rpc/setSkin";
-import { BaseRPCPacket } from "../protocol/packets/basePacket";
-import { SetHatPacket } from "../protocol/packets/rpc/setHat";
-import { SetPetPacket } from "../protocol/packets/rpc/setPet";
-import { SnapToPacket } from "../protocol/packets/rpc/snapTo";
-import { GameOptionsData } from "../types/gameOptionsData";
-import { RPCPacketType } from "../protocol/packets/types";
+import { RPCPacketType } from "../protocol/packets/types/enums";
+import { InnerLevel } from "../protocol/entities/types";
 import { Connection } from "../protocol/connection";
-import { Vector2 } from "../types/vector2";
+import { GameOptionsData, Vector2 } from "../types";
 import { Lobby } from ".";
+import {
+  AddVotePacket,
+  BaseRPCPacket,
+  CastVotePacket,
+  CheckColorPacket,
+  CheckNamePacket,
+  ClimbLadderPacket,
+  CloseDoorsOfTypePacket,
+  CompleteTaskPacket,
+  EnterVentPacket,
+  ExitVentPacket,
+  MurderPlayerPacket,
+  PlayAnimationPacket,
+  RepairSystemPacket,
+  ReportDeadBodyPacket,
+  SendChatNotePacket,
+  SendChatPacket,
+  SetColorPacket,
+  SetHatPacket,
+  SetInfectedPacket,
+  SetNamePacket,
+  SetPetPacket,
+  SetScannerPacket,
+  SetSkinPacket,
+  SetStartCounterPacket,
+  SetTasksPacket,
+  SnapToPacket,
+  StartMeetingPacket,
+  SyncSettingsPacket,
+  UpdateGameDataPacket,
+  VotingCompletePacket,
+} from "../protocol/packets/rpc";
 
 export class RPCHandler {
   constructor(

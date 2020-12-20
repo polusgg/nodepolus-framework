@@ -1,6 +1,7 @@
 import { KillDistance, Language, Level, TaskBarUpdate } from "../../types/enums";
-import { GameOptionsDataV4, GameOptionsData } from "../../types/gameOptionsData";
+import { GameOptionsDataV4 } from "../../types/gameOptionsData";
 import { Connection } from "../../protocol/connection";
+import { GameOptionsData } from "../../types";
 import { Player } from "../player";
 import { Lobby } from ".";
 

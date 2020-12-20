@@ -1,10 +1,10 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { BasePacket } from "../basePacket";
-import { PacketType } from "../types";
+import { HazelPacketType } from "../types/enums";
+import { BaseHazelPacket } from ".";
 
-export class AcknowledgementPacket extends BasePacket {
+export class AcknowledgementPacket extends BaseHazelPacket {
   constructor(public missingPackets: boolean[]) {
-    super(PacketType.Acknowledgement);
+    super(HazelPacketType.Acknowledgement);
   }
 
   static deserialize(reader: MessageReader): AcknowledgementPacket {

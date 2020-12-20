@@ -1,11 +1,11 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { ClientVersion } from "../../../types/clientVersion";
-import { BasePacket } from "../basePacket";
-import { PacketType } from "../types";
+import { HazelPacketType } from "../types/enums";
+import { ClientVersion } from "../../../types";
+import { BaseHazelPacket } from ".";
 
-export class HelloPacket extends BasePacket {
+export class HelloPacket extends BaseHazelPacket {
   constructor(public hazelVersion: number, public clientVersion: ClientVersion, public name: string) {
-    super(PacketType.Hello);
+    super(HazelPacketType.Hello);
   }
 
   static deserialize(reader: MessageReader): HelloPacket {

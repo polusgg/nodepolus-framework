@@ -1,5 +1,5 @@
 import { BaseRoomCollection } from "./baseRoomCollection";
-import { ElectricalGameRoom } from "../electrical";
+import { ElectricalGameRoom } from "..";
 import { Game } from "../..";
 
 export class PolusRoomCollection extends BaseRoomCollection {

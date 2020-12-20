@@ -1,8 +1,8 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
-import { BaseSystem } from "./baseSystem";
+import { BaseSystem } from ".";
 
-export enum MovingPlatformSides {
+enum MovingPlatformSide {
   Left = 0x00,
   Right = 0x01,
 }
@@ -10,7 +10,7 @@ export enum MovingPlatformSides {
 export class MovingPlatformSystem extends BaseSystem<MovingPlatformSystem> {
   public sequenceId = 0;
   public innerPlayerControlNetId?: number;
-  public side: MovingPlatformSides = MovingPlatformSides.Left;
+  public side: MovingPlatformSide = MovingPlatformSide.Left;
 
   constructor() {
     super(SystemType.Weapons);

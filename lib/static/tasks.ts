@@ -1,4 +1,4 @@
-import { LevelTask, TaskLength, TaskType } from "../types/enums";
+import { Level, LevelTask, TaskLength, TaskType } from "../types/enums";
 
 const TASKS_THE_SKELD: readonly LevelTask[] = [
   { id: 0, name: "Admin: Swipe Card", isVisual: false, length: TaskLength.Common, type: TaskType.SwipeCard },
@@ -116,5 +116,19 @@ export class Tasks {
 
   static get airship(): readonly LevelTask[] {
     return TASKS_AIRSHIP;
+  }
+
+  static forLevel(level: Level): readonly LevelTask[] {
+    switch (level) {
+      case Level.TheSkeld:
+      case Level.AprilSkeld:
+        return this.skeld;
+      case Level.MiraHq:
+        return this.miraHq;
+      case Level.Polus:
+        return this.polus;
+      case Level.Airship:
+        return this.airship;
+    }
   }
 }

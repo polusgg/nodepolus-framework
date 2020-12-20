@@ -1,11 +1,11 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
-import { DataPacket } from "../../packets/gameData/data";
-import { SnapToPacket } from "../../packets/rpc/snapTo";
-import { Vector2 } from "../../../types/vector2";
-import { BaseGameObject } from "../baseEntity";
+import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { InnerNetObjectType } from "../types/enums";
+import { DataPacket } from "../../packets/gameData";
+import { SnapToPacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
-import { InnerNetObjectType } from "../types";
+import { BaseGameObject } from "../types";
+import { Vector2 } from "../../../types";
 import { EntityPlayer } from ".";
 
 export class InnerCustomNetworkTransform extends BaseGameObject<InnerCustomNetworkTransform> {

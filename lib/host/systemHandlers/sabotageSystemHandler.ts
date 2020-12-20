@@ -1,11 +1,13 @@
-import { HudOverrideSystem } from "../../protocol/entities/baseShipStatus/systems/hudOverrideSystem";
-import { LaboratorySystem } from "../../protocol/entities/baseShipStatus/systems/laboratorySystem";
-import { LifeSuppSystem } from "../../protocol/entities/baseShipStatus/systems/lifeSuppSystem";
-import { ReactorSystem } from "../../protocol/entities/baseShipStatus/systems/reactorSystem";
-import { SwitchSystem } from "../../protocol/entities/baseShipStatus/systems/switchSystem";
-import { HqHudSystem } from "../../protocol/entities/baseShipStatus/systems/hqHudSystem";
 import { GameOverReason, Level } from "../../types/enums";
 import { CustomHost } from "..";
+import {
+  HqHudSystem,
+  HudOverrideSystem,
+  LaboratorySystem,
+  LifeSuppSystem,
+  ReactorSystem,
+  SwitchSystem,
+} from "../../protocol/entities/baseShipStatus/systems";
 
 export class SabotageSystemHandler {
   public timer: NodeJS.Timeout | undefined;

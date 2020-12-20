@@ -1,6 +1,6 @@
-import { CancellableEvent } from "../cancellableEvent";
+import { CancellableEvent } from "..";
 import { Player } from "../../player";
-import Vent from "../../game/vent";
+import { Vent } from "../../game";
 
 export class VentExitEvent extends CancellableEvent {
   constructor(

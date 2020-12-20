@@ -2,6 +2,10 @@ export { AlterGameTag } from "./alterGameTag";
 
 export { ChatNoteType } from "./chatNoteType";
 
+export { DeathReason } from "./deathReason";
+
+export { DecontaminationDoorState } from "./decontaminationDoorState";
+
 export { DisconnectReasonType } from "./disconnectReasonType";
 
 export { FakeClientId } from "./fakeClientId";
@@ -24,11 +28,15 @@ export { LimboState } from "./limboState";
 
 export { PlayerColor } from "./playerColor";
 
+export { PlayerFlagMask } from "./playerFlagMask";
+
 export { PlayerHat } from "./playerHat";
 
 export { PlayerPet } from "./playerPet";
 
 export { PlayerSkin } from "./playerSkin";
+
+export { PlayerState } from "./playerState";
 
 export { SpawnFlag } from "./spawnFlag";
 
@@ -41,3 +49,5 @@ export { TaskBarUpdate } from "./taskBarUpdate";
 export { TaskLength } from "./taskLength";
 
 export { TaskType } from "./taskType";
+
+export { VoteStateMask } from "./voteStateMask";

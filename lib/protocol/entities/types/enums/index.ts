@@ -1,0 +1,1 @@
+export { InnerNetObjectType } from "./innerNetObjectType";

@@ -1,11 +1,5 @@
-import { PlayerColor, PlayerHat, PlayerPet, PlayerSkin } from "../../../types/enums";
+import { PlayerColor, PlayerFlagMask, PlayerHat, PlayerPet, PlayerSkin } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-
-export enum PlayerFlags {
-  IsDisconnected = 1 << 0,
-  IsImpostor = 1 << 1,
-  IsDead = 1 << 2,
-}
 
 export class PlayerData {
   constructor(
@@ -30,9 +24,9 @@ export class PlayerData {
     const pet = reader.readPackedUInt32();
     const skin = reader.readPackedUInt32();
     const flags = reader.readByte();
-    const isDisconnected = (flags & PlayerFlags.IsDisconnected) == PlayerFlags.IsDisconnected;
-    const isImpostor = (flags & PlayerFlags.IsImpostor) == PlayerFlags.IsImpostor;
-    const isDead = (flags & PlayerFlags.IsDead) == PlayerFlags.IsDead;
+    const isDisconnected = (flags & PlayerFlagMask.IsDisconnected) == PlayerFlagMask.IsDisconnected;
+    const isImpostor = (flags & PlayerFlagMask.IsImpostor) == PlayerFlagMask.IsImpostor;
+    const isDead = (flags & PlayerFlagMask.IsDead) == PlayerFlagMask.IsDead;
 
     return new PlayerData(
       id, name, color, hat, pet, skin, isDisconnected, isImpostor, isDead,
@@ -65,9 +59,9 @@ export class PlayerData {
       .writePackedUInt32(this.pet)
       .writePackedUInt32(this.skin)
       .writeByte(
-        (this.isDisconnected ? PlayerFlags.IsDisconnected : 0) |
-        (this.isImpostor ? PlayerFlags.IsImpostor : 0) |
-        (this.isDead ? PlayerFlags.IsDead : 0),
+        (this.isDisconnected ? PlayerFlagMask.IsDisconnected : 0) |
+        (this.isImpostor ? PlayerFlagMask.IsImpostor : 0) |
+        (this.isDead ? PlayerFlagMask.IsDead : 0),
       )
       .writeList(this.tasks, (sub, task, i) => sub.writePackedUInt32(i).writeBoolean(task[1]));
   }

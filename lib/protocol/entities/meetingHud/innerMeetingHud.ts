@@ -1,54 +1,12 @@
+import { ClearVotePacket, ClosePacket, VotingCompletePacket } from "../../packets/rpc";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { VotingCompletePacket } from "../../packets/rpc/votingComplete";
-import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
-import { ClearVotePacket } from "../../packets/rpc/clearVote";
-import { DataPacket } from "../../packets/gameData/data";
+import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { shallowEqual } from "../../../util/functions";
-import { ClosePacket } from "../../packets/rpc/close";
-import { BaseGameObject } from "../baseEntity";
+import { InnerNetObjectType } from "../types/enums";
+import { DataPacket } from "../../packets/gameData";
+import { EntityMeetingHud, VoteState } from ".";
 import { Connection } from "../../connection";
-import { InnerNetObjectType } from "../types";
-import { EntityMeetingHud } from ".";
-
-export enum VoteStateMask {
-  DidReport = 0x20,
-  DidVote = 0x40,
-  IsDead = 0x80,
-  VotedFor = 0x0f,
-}
-
-export class VoteState {
-  constructor(
-    public didReport: boolean,
-    public didVote: boolean,
-    public isDead: boolean,
-    public votedFor: number,
-  ) {}
-
-  static deserialize(reader: MessageReader): VoteState {
-    const state = reader.readByte();
-
-    return new VoteState(
-      (state & VoteStateMask.DidReport) == VoteStateMask.DidReport,
-      (state & VoteStateMask.DidVote) == VoteStateMask.DidVote,
-      (state & VoteStateMask.IsDead) == VoteStateMask.IsDead,
-      (state & VoteStateMask.VotedFor) - 1,
-    );
-  }
-
-  serialize(writer: MessageWriter): void {
-    writer.writeByte(
-      (this.didReport ? VoteStateMask.DidReport : 0) |
-      (this.didVote ? VoteStateMask.DidVote : 0) |
-      (this.isDead ? VoteStateMask.IsDead : 0) |
-      ((this.votedFor + 1) & VoteStateMask.VotedFor),
-    );
-  }
-
-  clone(): VoteState {
-    return new VoteState(this.didReport, this.didVote, this.isDead, this.votedFor);
-  }
-}
+import { BaseGameObject } from "../types";
 
 export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
   public playerStates: VoteState[] = [];

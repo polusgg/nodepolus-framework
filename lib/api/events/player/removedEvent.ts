@@ -1,6 +1,6 @@
 import { Player } from "../../player";
 
-export class VentEnterEvent {
+export class RemovedEvent {
   constructor(
     public player: Player,
   ) {}

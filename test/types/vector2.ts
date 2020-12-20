@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../lib/util/hazelMessage";
-import { Vector2 } from "../../lib/types/vector2";
+import { Vector2 } from "../../lib/types";
 import test from "ava";
 
 function isEqual(actual: number, expected: number, epsilon: number = 0.001): boolean {

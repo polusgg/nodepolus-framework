@@ -1,10 +1,10 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { BasePacket } from "../basePacket";
-import { PacketType } from "../types";
+import { HazelPacketType } from "../types/enums";
+import { BaseHazelPacket } from ".";
 
-export class PingPacket extends BasePacket {
+export class PingPacket extends BaseHazelPacket {
   constructor() {
-    super(PacketType.Ping);
+    super(HazelPacketType.Ping);
   }
 
   static deserialize(_reader: MessageReader): PingPacket {

@@ -1,5 +1,5 @@
-import { CancellableEvent } from "../cancellableEvent";
 import { TextComponent } from "../../text";
+import { CancellableEvent } from "..";
 import { Player } from "../../player";
 
 export class ChatEvent extends CancellableEvent {

@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
-import { BaseSystem } from "./baseSystem";
+import { BaseSystem } from ".";
 
 export class SwitchSystem extends BaseSystem<SwitchSystem> {
   public actualSwitches: boolean[] = Array(5).fill(0).map(() => !!Math.round(Math.random() * 1));

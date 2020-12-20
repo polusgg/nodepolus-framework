@@ -1,4 +1,4 @@
-import { ClientVersion } from "../../lib/types/clientVersion";
+import { ClientVersion } from "../../lib/types";
 import test from "ava";
 
 test("encodes a client version", t => {

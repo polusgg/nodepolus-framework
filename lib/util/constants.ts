@@ -1,5 +1,5 @@
 import { KillDistance, Language, Level, TaskBarUpdate } from "../types/enums";
-import { GameOptionsData } from "../types/gameOptionsData";
+import { GameOptionsData } from "../types";
 
 /**
  * Primitive type constants

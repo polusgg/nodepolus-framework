@@ -1,7 +1,7 @@
-import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
+import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { InnerNetObjectType } from "../types/enums";
 import { BaseShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../types/enums";
-import { InnerNetObjectType } from "../types";
 import { EntityMiraShipStatus } from ".";
 
 export class InnerMiraShipStatus extends BaseShipStatus<InnerMiraShipStatus, EntityMiraShipStatus> {

@@ -1,7 +1,7 @@
 import { Player } from "../player";
 import { Lobby } from "../lobby";
 
-export default class Vent {
+export class Vent {
   public players: Player[] = [];
 
   constructor(
