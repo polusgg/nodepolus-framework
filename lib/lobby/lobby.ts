@@ -16,7 +16,6 @@ import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { DisconnectReason, GameOptionsData } from "../types";
-import { DEFAULT_GAME_OPTIONS } from "../util/constants";
 import { BaseRPCPacket } from "../protocol/packets/rpc";
 import { Connection } from "../protocol/connection";
 import { CustomHost, HostInstance } from "../host";
@@ -65,7 +64,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   public gameData?: EntityGameData;
   public shipStatus?: EntityLevel;
   public meetingHud?: EntityMeetingHud;
-  public options: GameOptionsData = DEFAULT_GAME_OPTIONS;
+  public options: GameOptionsData = new GameOptionsData();
   // TODO: Change back to 0
   public gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 1]]);
   public family: "IPv4" | "IPv6";
@@ -106,9 +105,9 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
       this.getHostName(),
       this.players.length,
       this.getAge(),
-      this.options.options.levels[0],
-      this.options.options.impostorCount,
-      this.options.options.maxPlayers,
+      this.options.levels[0],
+      this.options.impostorCount,
+      this.options.maxPlayers,
     );
   }
 

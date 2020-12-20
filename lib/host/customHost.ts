@@ -105,7 +105,7 @@ export class CustomHost implements HostInstance {
         this.lobby.despawn(this.lobby.lobbyBehavior.lobbyBehaviour);
       }
 
-      switch (this.lobby.options.options.levels[0]) {
+      switch (this.lobby.options.levels[0]) {
         case Level.TheSkeld:
           this.lobby.shipStatus = new EntitySkeldShipStatus(this.lobby);
           this.lobby.shipStatus.owner = GLOBAL_OWNER;
@@ -146,7 +146,7 @@ export class CustomHost implements HostInstance {
       this.systemsHandler = new SystemsHandler(this);
       this.sabotageHandler = new SabotageSystemHandler(this);
 
-      switch (this.lobby.options.options.levels[0]) {
+      switch (this.lobby.options.levels[0]) {
         case Level.TheSkeld:
           this.deconHandlers = [];
           this.doorHandler = new AutoDoorsHandler(this, this.lobby.shipStatus.innerNetObjects[0]);
@@ -179,7 +179,7 @@ export class CustomHost implements HostInstance {
 
       this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.shipStatus!.spawn()], this.lobby.code));
 
-      this.setInfected(this.lobby.options.options.impostorCount);
+      this.setInfected(this.lobby.options.impostorCount);
 
       // TODO: Uncomment when removing the for loop below
       // this.setTasks();
@@ -373,7 +373,7 @@ export class CustomHost implements HostInstance {
       this.lobby.meetingHud.spawn(),
     ], this.lobby.code));
 
-    this.meetingHudTimeout = setTimeout(this.endMeeting, (this.lobby.options.options.votingTime + this.lobby.options.options.discussionTime) * 1000);
+    this.meetingHudTimeout = setTimeout(this.endMeeting, (this.lobby.options.votingTime + this.lobby.options.discussionTime) * 1000);
   }
 
   endMeeting(): void {
@@ -477,7 +477,7 @@ export class CustomHost implements HostInstance {
 
     const system = this.lobby.shipStatus.innerNetObjects[0].getSystemFromType(systemId);
     const player = this.lobby.players.find(thePlayer => thePlayer.gameObject.playerControl.id == playerControlNetId);
-    const level = this.lobby.options.options.levels[0];
+    const level = this.lobby.options.levels[0];
 
     if (!player) {
       throw new Error(`Received RepairSystem from a non-player InnerNetObject: ${playerControlNetId}`);
@@ -663,12 +663,12 @@ export class CustomHost implements HostInstance {
   }
 
   setTasks(): void {
-    const options = this.lobby.options.options;
+    const options = this.lobby.options;
     const level = options.levels[0];
-    const numCommon = options.commonTasks;
-    const numLong = options.longTasks;
+    const numCommon = options.commonTaskCount;
+    const numLong = options.longTaskCount;
     // Minimum of 1 short task
-    const numShort = numCommon + numLong + options.shortTasks > 0 ? options.shortTasks : 1;
+    const numShort = numCommon + numLong + options.shortTaskCount > 0 ? options.shortTaskCount : 1;
 
     let allTasks: readonly LevelTask[];
 

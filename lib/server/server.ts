@@ -170,7 +170,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         for (let i = 0; i < this.lobbies.length; i++) {
           const lobby = this.lobbies[i];
-          const level: number = lobby.options.options.levels[0];
+          const level: number = lobby.options.levels[0];
 
           // TODO: Add config option to include private games
           if (!lobby.isPublic()) {

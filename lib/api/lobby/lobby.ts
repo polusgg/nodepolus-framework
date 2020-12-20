@@ -125,7 +125,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
     });
 
     this.internalLobby.customHostInstance.readyPlayerList = [];
-    this.internalLobby.options.options.levels = [level];
+    this.internalLobby.options.levels = [level];
 
     this.internalLobby.sendRootGamePacket(new StartGamePacket(this.code));
   }

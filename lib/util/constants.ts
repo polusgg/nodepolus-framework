@@ -1,6 +1,3 @@
-import { KillDistance, Language, Level, TaskBarUpdate } from "../types/enums";
-import { GameOptionsData } from "../types";
-
 /**
  * Primitive type constants
  */
@@ -37,32 +34,6 @@ export const ANNOUNCEMENT_SERVER_PORT = 22024;
 export const GLOBAL_OWNER = -2;
 
 export const DEFAULT_LOBBY = 32;
-
-export const DEFAULT_GAME_OPTIONS = new GameOptionsData({
-  length: 46,
-  version: 4,
-  maxPlayers: 10,
-  languages: [Language.Other],
-  levels: [Level.Polus],
-  playerSpeedModifier: 1,
-  crewLightModifier: 1,
-  impostorLightModifier: 1.5,
-  killCooldown: 45,
-  commonTasks: 1,
-  longTasks: 1,
-  shortTasks: 2,
-  emergencies: 1,
-  impostorCount: 2,
-  killDistance: KillDistance.Medium,
-  discussionTime: 15,
-  votingTime: 120,
-  isDefault: true,
-  emergencyCooldown: 15,
-  confirmEjects: true,
-  visualTasks: true,
-  anonymousVoting: false,
-  taskBarUpdates: TaskBarUpdate.Always,
-});
 
 /**
  * SystemType constansts

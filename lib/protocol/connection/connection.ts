@@ -53,7 +53,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     this.family = remoteInfo.family;
 
     this.on("message", buf => {
-      const parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound == PacketDestination.Server, this.lobby?.options.options.levels[0]);
+      const parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound == PacketDestination.Server, this.lobby?.options.levels[0]);
 
       if (parsed.isReliable()) {
         this.acknowledgePacket(parsed.nonce!);

@@ -2,7 +2,6 @@ import { LobbyImplementation, EntityLevel, InnerNetObject } from "../protocol/en
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { GameDataPacket } from "../protocol/packets/root";
-import { DEFAULT_GAME_OPTIONS } from "../util/constants";
 import { RPCPacket } from "../protocol/packets/gameData";
 import { BaseRPCPacket } from "../protocol/packets/rpc";
 import { GameState } from "../types/enums";
@@ -16,7 +15,7 @@ export class ProxyLobby implements LobbyImplementation {
   public gameData?: EntityGameData;
   public shipStatus?: EntityLevel;
   public meetingHud?: EntityMeetingHud;
-  public options: GameOptionsData = DEFAULT_GAME_OPTIONS;
+  public options: GameOptionsData = new GameOptionsData();
   public customHostInstance: HostInstance;
   public gameState: GameState = GameState.NotStarted;
 
