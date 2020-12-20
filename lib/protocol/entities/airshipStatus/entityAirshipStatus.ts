@@ -19,10 +19,10 @@ export class EntityAirshipStatus extends BaseEntity {
     super(SpawnType.Airship, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityAirshipStatus {
+  static spawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityAirshipStatus {
     const airshipStatus = new EntityAirshipStatus(lobby);
 
-    airshipStatus.setSpawn(flags, owner, innerNetObjects);
+    airshipStatus.setSpawn(owner, flags, innerNetObjects);
 
     return airshipStatus;
   }
@@ -38,7 +38,7 @@ export class EntityAirshipStatus extends BaseEntity {
     );
   }
 
-  setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
+  setSpawn(owner: number, _flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
       InnerAirshipStatus.spawn(innerNetObjects[0], this),

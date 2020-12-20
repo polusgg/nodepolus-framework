@@ -27,10 +27,10 @@ export class EntityPlayer extends BaseEntity {
     super(SpawnType.PlayerControl, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityPlayer {
+  static spawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityPlayer {
     const player = new EntityPlayer(lobby);
 
-    player.setSpawn(flags, owner, innerNetObjects);
+    player.setSpawn(owner, flags, innerNetObjects);
 
     return player;
   }
@@ -48,7 +48,7 @@ export class EntityPlayer extends BaseEntity {
     );
   }
 
-  setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
+  setSpawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.flags = flags;
     this.innerNetObjects = [

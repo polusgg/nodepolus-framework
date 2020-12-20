@@ -9,7 +9,7 @@ export abstract class BaseEntity {
     public readonly lobby: LobbyImplementation,
   ) {}
 
-  abstract setSpawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void;
+  abstract setSpawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[]): void;
 
   abstract getSpawn(): SpawnPacket;
 

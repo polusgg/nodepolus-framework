@@ -19,12 +19,12 @@ export class EntityMiraShipStatus extends BaseEntity {
     super(SpawnType.Headquarters, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityMiraShipStatus {
-    const headquarters = new EntityMiraShipStatus(lobby);
+  static spawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityMiraShipStatus {
+    const miraShipStatus = new EntityMiraShipStatus(lobby);
 
-    headquarters.setSpawn(flags, owner, innerNetObjects);
+    miraShipStatus.setSpawn(owner, flags, innerNetObjects);
 
-    return headquarters;
+    return miraShipStatus;
   }
 
   getSpawn(): SpawnPacket {
@@ -38,7 +38,7 @@ export class EntityMiraShipStatus extends BaseEntity {
     );
   }
 
-  setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
+  setSpawn(owner: number, _flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
       InnerMiraShipStatus.spawn(innerNetObjects[0], this),

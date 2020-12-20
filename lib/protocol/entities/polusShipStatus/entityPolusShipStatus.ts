@@ -19,12 +19,12 @@ export class EntityPolusShipStatus extends BaseEntity {
     super(SpawnType.PlanetMap, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityPolusShipStatus {
-    const planetMap = new EntityPolusShipStatus(lobby);
+  static spawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityPolusShipStatus {
+    const polusShipStatus = new EntityPolusShipStatus(lobby);
 
-    planetMap.setSpawn(flags, owner, innerNetObjects);
+    polusShipStatus.setSpawn(owner, flags, innerNetObjects);
 
-    return planetMap;
+    return polusShipStatus;
   }
 
   getSpawn(): SpawnPacket {
@@ -38,7 +38,7 @@ export class EntityPolusShipStatus extends BaseEntity {
     );
   }
 
-  setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
+  setSpawn(owner: number, _flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
       InnerPolusShipStatus.spawn(innerNetObjects[0], this),

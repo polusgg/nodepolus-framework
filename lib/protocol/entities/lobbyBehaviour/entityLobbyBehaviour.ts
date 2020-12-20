@@ -20,10 +20,10 @@ export class EntityLobbyBehaviour extends BaseEntity {
     super(SpawnType.LobbyBehaviour, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityLobbyBehaviour {
+  static spawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityLobbyBehaviour {
     const lobbyBehaviour = new EntityLobbyBehaviour(lobby);
 
-    lobbyBehaviour.setSpawn(flags, owner, innerNetObjects);
+    lobbyBehaviour.setSpawn(owner, flags, innerNetObjects);
 
     return lobbyBehaviour;
   }
@@ -39,7 +39,7 @@ export class EntityLobbyBehaviour extends BaseEntity {
     );
   }
 
-  setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
+  setSpawn(owner: number, _flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
       InnerLobbyBehaviour.spawn(innerNetObjects[0], this),

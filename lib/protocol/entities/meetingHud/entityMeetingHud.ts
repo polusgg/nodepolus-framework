@@ -20,10 +20,10 @@ export class EntityMeetingHud extends BaseEntity {
     super(SpawnType.MeetingHud, lobby);
   }
 
-  static spawn(flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityMeetingHud {
+  static spawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityMeetingHud {
     const meetingHud = new EntityMeetingHud(lobby);
 
-    meetingHud.setSpawn(flags, owner, innerNetObjects);
+    meetingHud.setSpawn(owner, flags, innerNetObjects);
 
     return meetingHud;
   }
@@ -39,7 +39,7 @@ export class EntityMeetingHud extends BaseEntity {
     );
   }
 
-  setSpawn(_flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[]): void {
+  setSpawn(owner: number, _flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[]): void {
     this.owner = owner;
     this.innerNetObjects = [
       InnerMeetingHud.spawn(innerNetObjects[0], this),

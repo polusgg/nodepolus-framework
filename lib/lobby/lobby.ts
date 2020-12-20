@@ -557,7 +557,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
           throw new Error("Received duplicate spawn packet for ShipStatus");
         }
 
-        this.shipStatus = EntitySkeldShipStatus.spawn(flags, owner, innerNetObjects, this);
+        this.shipStatus = EntitySkeldShipStatus.spawn(owner, flags, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
@@ -567,7 +567,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
           throw new Error("Received duplicate spawn packet for AprilShipStatus");
         }
 
-        this.shipStatus = EntitySkeldAprilShipStatus.spawn(flags, owner, innerNetObjects, this);
+        this.shipStatus = EntitySkeldAprilShipStatus.spawn(owner, flags, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
@@ -577,7 +577,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
           throw new Error("Received duplicate spawn packet for Headquarters");
         }
 
-        this.shipStatus = EntityMiraShipStatus.spawn(flags, owner, innerNetObjects, this);
+        this.shipStatus = EntityMiraShipStatus.spawn(owner, flags, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
@@ -587,7 +587,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
           throw new Error("Received duplicate spawn packet for PlanetMap");
         }
 
-        this.shipStatus = EntityPolusShipStatus.spawn(flags, owner, innerNetObjects, this);
+        this.shipStatus = EntityPolusShipStatus.spawn(owner, flags, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
@@ -597,7 +597,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
           throw new Error("Received duplicate spawn packet for AirShip");
         }
 
-        this.shipStatus = EntityAirshipStatus.spawn(flags, owner, innerNetObjects, this);
+        this.shipStatus = EntityAirshipStatus.spawn(owner, flags, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
         break;
@@ -607,7 +607,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
           throw new Error("Received duplicate spawn packet for GameData");
         }
 
-        this.gameData = EntityGameData.spawn(flags, owner, innerNetObjects, this);
+        this.gameData = EntityGameData.spawn(owner, flags, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.gameData.spawn()], this.code), sendTo);
         break;
@@ -617,7 +617,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
           throw new Error("Received duplicate spawn packet for LobbyBehaviour");
         }
 
-        this.lobbyBehavior = EntityLobbyBehaviour.spawn(flags, owner, innerNetObjects, this);
+        this.lobbyBehavior = EntityLobbyBehaviour.spawn(owner, flags, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.lobbyBehavior.spawn()], this.code), sendTo);
         break;
@@ -627,7 +627,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
           throw new Error("Received duplicate spawn packet for MeetingHud");
         }
 
-        this.meetingHud = EntityMeetingHud.spawn(flags, owner, innerNetObjects, this);
+        this.meetingHud = EntityMeetingHud.spawn(owner, flags, innerNetObjects, this);
 
         this.sendRootGamePacket(new GameDataPacket([this.meetingHud.spawn()], this.code), sendTo);
         break;
@@ -639,7 +639,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
           throw new Error("Spawn packet sent for a player on a connection that does not exist");
         }
 
-        this.players.push(new Player(EntityPlayer.spawn(flags, owner, innerNetObjects, this)));
+        this.players.push(new Player(EntityPlayer.spawn(owner, flags, innerNetObjects, this)));
 
         this.sendRootGamePacket(new GameDataPacket([this.findPlayerByConnection(connection)!.gameObject.spawn()], this.code), sendTo);
         break;
