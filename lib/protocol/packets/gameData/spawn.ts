@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { SpawnFlag } from "../../../types/spawnFlag";
 import { BaseGameDataPacket } from "../basePacket";
+import { SpawnFlag } from "../../../types/enums";
 import { GameDataPacketType } from "../types";
 
 export class SpawnInnerNetObject extends BaseGameDataPacket {

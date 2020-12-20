@@ -1,5 +1,5 @@
 import { CancellableEvent } from "../cancellableEvent";
-import { Vector2 } from "../../../util/vector2";
+import { Vector2 } from "../../../types/vector2";
 import { Player } from "../../player";
 
 export class MovedEvent extends CancellableEvent {

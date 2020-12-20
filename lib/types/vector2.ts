@@ -1,4 +1,4 @@
-import { MessageReader, MessageWriter } from "./hazelMessage";
+import { MessageReader, MessageWriter } from "../util/hazelMessage";
 
 export class Vector2 {
   constructor(

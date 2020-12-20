@@ -1,9 +1,9 @@
-import { DisconnectionType, DisconnectReason } from "../../../types/disconnectReason";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { DisconnectReason } from "../../../types/disconnectReason";
+import { DisconnectReasonType, Level } from "../../../types/enums";
 import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootGamePacket } from "../basePacket";
 import { RootGamePacketType } from "../types";
-import { Level } from "../../../types/level";
 
 export class JoinGameRequestPacket extends BaseRootGamePacket {
   constructor(
@@ -56,7 +56,7 @@ export class JoinGameErrorPacket extends BaseRootGamePacket {
   public readonly disconnectReason: DisconnectReason;
 
   constructor(
-    disconnectReason: DisconnectReason | DisconnectionType,
+    disconnectReason: DisconnectReason | DisconnectReasonType,
   ) {
     super(RootGamePacketType.JoinGame);
 

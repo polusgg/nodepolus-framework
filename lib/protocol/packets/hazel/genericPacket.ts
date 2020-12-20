@@ -17,7 +17,7 @@ import { StartGamePacket } from "../root/startGame";
 import { GameDataPacket } from "../root/gameData";
 import { RedirectPacket } from "../root/redirect";
 import { EndGamePacket } from "../root/endGame";
-import { Level } from "../../../types/level";
+import { Level } from "../../../types/enums";
 
 export type RootGamePacketDataType =
   | HostGameRequestPacket

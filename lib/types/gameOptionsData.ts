@@ -1,8 +1,5 @@
+import { KillDistance, Language, Level, TaskBarUpdate } from "./enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
-import { TaskBarUpdate } from "./taskBarUpdate";
-import { KillDistance } from "./killDistance";
-import { Language } from "../types/language";
-import { Level } from "./level";
 
 export interface BaseGameOptionsData {
   maxPlayers: number;

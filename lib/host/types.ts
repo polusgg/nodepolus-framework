@@ -1,9 +1,8 @@
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
 import { RepairAmount } from "../protocol/packets/rpc/repairSystem";
+import { PlayerColor, SystemType } from "../types/enums";
 import { InnerLevel } from "../protocol/entities/types";
 import { Connection } from "../protocol/connection";
-import { PlayerColor } from "../types/playerColor";
-import { SystemType } from "../types/systemType";
 import { ClientInstance } from "../client/types";
 
 export interface HostInstance extends ClientInstance {

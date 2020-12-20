@@ -1,7 +1,6 @@
 import { SpawnInnerNetObject, SpawnPacket } from "../../packets/gameData/spawn";
+import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { InnerAirshipStatus } from "./innerAirshipStatus";
-import { SpawnFlag } from "../../../types/spawnFlag";
-import { SpawnType } from "../../../types/spawnType";
 import { LobbyImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 

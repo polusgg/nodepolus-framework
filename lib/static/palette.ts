@@ -36,13 +36,13 @@ export class Palette {
   public static readonly clearWhite = [255, 255, 255, 0];
   public static readonly halfWhite = [255, 255, 255, 127];
   public static readonly white = [255, 255, 255, 255];
-  public static readonly lightblue = [127, 127, 255, 255];
+  public static readonly lightBlue = [127, 127, 255, 255];
   public static readonly blue = [51, 51, 255, 255];
   public static readonly orange = [255, 153, 0.005, 255];
   public static readonly purple = [153, 25, 153, 255];
   public static readonly brown = [183, 109, 28, 255];
-  public static readonly crewmateblue = [140, 255, 255, 255];
-  public static readonly impostorred = [255, 25, 25, 255];
+  public static readonly crewmateBlue = [140, 255, 255, 255];
+  public static readonly impostorRed = [255, 25, 25, 255];
 
   public static readonly playerColors = PlayerColors;
 

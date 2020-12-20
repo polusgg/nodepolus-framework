@@ -2,7 +2,7 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
 import { DataPacket } from "../../packets/gameData/data";
 import { SnapToPacket } from "../../packets/rpc/snapTo";
-import { Vector2 } from "../../../util/vector2";
+import { Vector2 } from "../../../types/vector2";
 import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";

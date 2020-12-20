@@ -1,5 +1,5 @@
 import { CancellableEvent } from "../cancellableEvent";
-import { PlayerPet } from "../../../types/playerPet";
+import { PlayerPet } from "../../../types/enums";
 import { Player } from "../../player";
 
 export class SetPetEvent extends CancellableEvent {

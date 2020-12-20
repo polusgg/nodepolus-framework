@@ -2,8 +2,7 @@ import { DoorsSystem, SYSTEM_DOORS } from "../../../protocol/entities/baseShipSt
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
 import { GameDataPacket } from "../../../protocol/packets/root/gameData";
 import { InnerLevel } from "../../../protocol/entities/types";
-import { SystemType } from "../../../types/systemType";
-import { Level } from "../../../types/level";
+import { Level, SystemType } from "../../../types/enums";
 import { GameEvents, Game } from "..";
 import { Player } from "../../player";
 import { DOOR_DATA } from "../data";

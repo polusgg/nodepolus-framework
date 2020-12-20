@@ -1,7 +1,6 @@
 import { SpawnInnerNetObject, SpawnPacket } from "../../packets/gameData/spawn";
+import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { InnerVoteBanSystem } from "./innerVoteBanSystem";
-import { SpawnFlag } from "../../../types/spawnFlag";
-import { SpawnType } from "../../../types/spawnType";
 import { InnerGameData } from "./innerGameData";
 import { LobbyImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";

@@ -1,5 +1,5 @@
 import { CancellableEvent } from "../cancellableEvent";
-import { PlayerSkin } from "../../../types/playerSkin";
+import { PlayerSkin } from "../../../types/enums";
 import { Player } from "../../player";
 
 export class SetSkinEvent extends CancellableEvent {

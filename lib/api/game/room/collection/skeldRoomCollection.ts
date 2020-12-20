@@ -1,5 +1,5 @@
 import { BaseRoomCollection } from "./baseRoomCollection";
-import { SystemType } from "../../../../types/systemType";
+import { SystemType } from "../../../../types/enums";
 import { ElectricalGameRoom } from "../electrical";
 import { SecurityGameRoom } from "../security";
 import { ReactorGameRoom } from "../reactor";

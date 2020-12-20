@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { Vector2 } from "../../../util/vector2";
+import { Vector2 } from "../../../types/vector2";
 import { BaseRPCPacket } from "../basePacket";
 import { RPCPacketType } from "../types";
 

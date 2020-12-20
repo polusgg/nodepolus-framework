@@ -1,7 +1,7 @@
 import { AutoDoorsSystem, SYSTEM_DOORS_AUTO } from "../../protocol/entities/baseShipStatus/systems/autoDoorsSystem";
 import { GameDataPacket } from "../../protocol/packets/root/gameData";
 import { InnerLevel } from "../../protocol/entities/types";
-import { SystemType } from "../../types/systemType";
+import { SystemType } from "../../types/enums";
 import { CustomHost } from "..";
 
 export class AutoDoorsHandler {

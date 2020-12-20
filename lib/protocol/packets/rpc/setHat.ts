@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { PlayerHat } from "../../../types/playerHat";
+import { PlayerHat } from "../../../types/enums";
 import { BaseRPCPacket } from "../basePacket";
 import { RPCPacketType } from "../types";
 

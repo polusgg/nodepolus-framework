@@ -4,8 +4,7 @@ import { LifeSuppSystem } from "../../protocol/entities/baseShipStatus/systems/l
 import { ReactorSystem } from "../../protocol/entities/baseShipStatus/systems/reactorSystem";
 import { SwitchSystem } from "../../protocol/entities/baseShipStatus/systems/switchSystem";
 import { HqHudSystem } from "../../protocol/entities/baseShipStatus/systems/hqHudSystem";
-import { GameOverReason } from "../../types/gameOverReason";
-import { Level } from "../../types/level";
+import { GameOverReason, Level } from "../../types/enums";
 import { CustomHost } from "..";
 
 export class SabotageSystemHandler {

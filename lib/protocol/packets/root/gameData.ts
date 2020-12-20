@@ -7,7 +7,7 @@ import { BaseRootGamePacket } from "../basePacket";
 import { ReadyPacket } from "../gameData/ready";
 import { SpawnPacket } from "../gameData/spawn";
 import { DataPacket } from "../gameData/data";
-import { Level } from "../../../types/level";
+import { Level } from "../../../types/enums";
 import { RPCPacket } from "../gameData/rpc";
 
 export type GameDataPacketDataType = DespawnPacket | ReadyPacket | SceneChangePacket | SpawnPacket | RPCPacket;

@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { ClientVersion } from "../../../util/clientVersion";
+import { ClientVersion } from "../../../types/clientVersion";
 import { BasePacket } from "../basePacket";
 import { PacketType } from "../types";
 

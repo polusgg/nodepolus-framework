@@ -1,4 +1,4 @@
-import { TaskLength, LevelTask, TASKS_THE_SKELD, TASKS_MIRA_HQ, TASKS_POLUS, TASKS_AIRSHIP } from "../types/levelTask";
+import { FakeClientId, GameOverReason, GameState, Level, LevelTask, LimboState, PlayerColor, SystemType, TaskLength, TaskType } from "../types/enums";
 import { InnerSkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus/innerSkeldAprilShipStatus";
 import { MovingPlatformSystem } from "../protocol/entities/baseShipStatus/systems/movingPlatformSystem";
 import { SecurityCameraSystem } from "../protocol/entities/baseShipStatus/systems/securityCameraSystem";
@@ -44,19 +44,12 @@ import { DeconHandler } from "./systemHandlers/deconHandler";
 import { DisconnectReason } from "../types/disconnectReason";
 import { DoorsHandler } from "./systemHandlers/doorsHandler";
 import { EntityPlayer } from "../protocol/entities/player";
-import { GameOverReason } from "../types/gameOverReason";
 import { InnerLevel } from "../protocol/entities/types";
-import { FakeClientId } from "../types/fakeClientId";
 import { Connection } from "../protocol/connection";
-import { PlayerColor } from "../types/playerColor";
 import { SystemsHandler } from "./systemHandlers";
 import { GLOBAL_OWNER } from "../util/constants";
-import { LimboState } from "../types/limboState";
-import { SystemType } from "../types/systemType";
-import { GameState } from "../types/gameState";
-import { TaskType } from "../types/taskType";
-import { Vector2 } from "../util/vector2";
-import { Level } from "../types/level";
+import { Vector2 } from "../types/vector2";
+import { Tasks } from "../static/tasks";
 import { HostInstance } from "./types";
 import { Player } from "../player";
 import { Lobby } from "../lobby";
@@ -684,20 +677,20 @@ export class CustomHost implements HostInstance {
     // Minimum of 1 short task
     const numShort = numCommon + numLong + options.shortTasks > 0 ? options.shortTasks : 1;
 
-    let allTasks: LevelTask[];
+    let allTasks: readonly LevelTask[];
 
     switch (level) {
       case Level.TheSkeld:
-        allTasks = TASKS_THE_SKELD;
+        allTasks = Tasks.skeld;
         break;
       case Level.MiraHq:
-        allTasks = TASKS_MIRA_HQ;
+        allTasks = Tasks.miraHq;
         break;
       case Level.Polus:
-        allTasks = TASKS_POLUS;
+        allTasks = Tasks.polus;
         break;
       case Level.Airship:
-        allTasks = TASKS_AIRSHIP;
+        allTasks = Tasks.airship;
         break;
       default:
         throw new Error(`Attempted to set tasks for an unimplemented level: ${level as Level} (${Level[level]})`);

@@ -1,7 +1,6 @@
 import { SpawnInnerNetObject, SpawnPacket } from "../../packets/gameData/spawn";
+import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { InnerMiraShipStatus } from "./innerMiraShipStatus";
-import { SpawnFlag } from "../../../types/spawnFlag";
-import { SpawnType } from "../../../types/spawnType";
 import { LobbyImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 

@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { POLUS_DOOR_COUNT } from "../../../../util/constants";
-import { SystemType } from "../../../../types/systemType";
+import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from "./baseSystem";
 
 export const SYSTEM_DOORS: Map<SystemType, number[]> = new Map([

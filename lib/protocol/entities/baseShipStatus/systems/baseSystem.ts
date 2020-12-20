@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { SystemType } from "../../../../types/systemType";
+import { SystemType } from "../../../../types/enums";
 
 export abstract class BaseSystem<T> {
   constructor(public readonly type: SystemType) {}

@@ -1,12 +1,13 @@
-import { DisconnectionType, DisconnectReason } from "../../../types/disconnectReason";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { DisconnectReason } from "../../../types/disconnectReason";
+import { DisconnectReasonType } from "../../../types/enums";
 import { BasePacket } from "../basePacket";
 import { PacketType } from "../types";
 
 export class DisconnectPacket extends BasePacket {
   public readonly disconnectReason?: DisconnectReason;
 
-  constructor(disconnectReason?: DisconnectReason | DisconnectionType) {
+  constructor(disconnectReason?: DisconnectReason | DisconnectReasonType) {
     super(PacketType.Acknowledgement);
 
     if (disconnectReason instanceof DisconnectReason) {

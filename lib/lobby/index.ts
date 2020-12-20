@@ -1,3 +1,4 @@
+import { AlterGameTag, DisconnectReasonType, GameOverReason, GameState, LimboState, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SpawnFlag, SpawnType } from "../types/enums";
 import { EntityLevel, InnerNetObject, InnerNetObjectType, LobbyImplementation } from "../protocol/entities/types";
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
 import { JoinGameErrorPacket, JoinGameResponsePacket } from "../protocol/packets/root/joinGame";
@@ -10,7 +11,6 @@ import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysi
 import { BaseRPCPacket, BaseRootGamePacket } from "../protocol/packets/basePacket";
 import { GameDataPacketType, RootGamePacketType } from "../protocol/packets/types";
 import { RootGamePacketDataType } from "../protocol/packets/hazel/genericPacket";
-import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
 import { SceneChangePacket } from "../protocol/packets/gameData/sceneChange";
 import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
@@ -30,27 +30,18 @@ import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { EndGamePacket } from "../protocol/packets/root/endGame";
 import { DataPacket } from "../protocol/packets/gameData/data";
 import { EntityGameData } from "../protocol/entities/gameData";
+import { DisconnectReason } from "../types/disconnectReason";
 import { RPCPacket } from "../protocol/packets/gameData/rpc";
 import { GameOptionsData } from "../types/gameOptionsData";
 import { EntityPlayer } from "../protocol/entities/player";
 import { DEFAULT_GAME_OPTIONS } from "../util/constants";
-import { GameOverReason } from "../types/gameOverReason";
-import { AlterGameTag } from "../types/alterGameTag";
 import { Connection } from "../protocol/connection";
-import { PlayerColor } from "../types/playerColor";
 import { notUndefined } from "../util/functions";
-import { LimboState } from "../types/limboState";
-import { PlayerSkin } from "../types/playerSkin";
 import { RemoteInfo } from "../util/remoteInfo";
-import { GameState } from "../types/gameState";
-import { PlayerHat } from "../types/playerHat";
-import { PlayerPet } from "../types/playerPet";
-import { SpawnFlag } from "../types/spawnFlag";
-import { SpawnType } from "../types/spawnType";
 import { LobbyCode } from "../util/lobbyCode";
 import { HostInstance } from "../host/types";
+import { Vector2 } from "../types/vector2";
 import { RPCHandler } from "./rpcHandler";
-import { Vector2 } from "../util/vector2";
 import { CustomHost } from "../host";
 import { Player } from "../player";
 import Emittery from "emittery";
@@ -461,7 +452,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         this.handleRejoin(connection);
         break;
       default:
-        connection.sendReliable([new JoinGameErrorPacket(DisconnectionType.GameStarted)]);
+        connection.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameStarted)]);
     }
   }
 
@@ -488,7 +479,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
 
   private handleRejoin(connection: Connection): void {
     if (connection.lobby?.code != this.code) {
-      connection.sendReliable([new JoinGameErrorPacket(DisconnectionType.GameStarted)]);
+      connection.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameStarted)]);
     }
   }
 

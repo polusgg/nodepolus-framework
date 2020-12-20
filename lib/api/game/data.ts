@@ -1,5 +1,4 @@
-import { SystemType } from "../../types/systemType";
-import { Level } from "../../types/level";
+import { Level, SystemType } from "../../types/enums";
 
 export const DOOR_DATA = {
   [Level.TheSkeld]: {

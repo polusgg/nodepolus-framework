@@ -3,7 +3,7 @@ import { PolusRoomCollection } from "./room/collection/polusRoomCollection";
 import { SkeldRoomCollection } from "./room/collection/skeldRoomCollection";
 import { BaseRoomCollection } from "./room/collection/baseRoomCollection";
 import { MiraRoomCollection } from "./room/collection/miraRoomCollection";
-import { Level } from "../../types/level";
+import { Level } from "../../types/enums";
 import { Lobby } from "../lobby";
 import Emittery from "emittery";
 

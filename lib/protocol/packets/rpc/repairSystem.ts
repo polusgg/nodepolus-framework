@@ -1,7 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { SystemType } from "../../../types/systemType";
+import { Level, SystemType } from "../../../types/enums";
 import { BaseRPCPacket } from "../basePacket";
-import { Level } from "../../../types/level";
 import { RPCPacketType } from "../types";
 
 export interface RepairAmount {

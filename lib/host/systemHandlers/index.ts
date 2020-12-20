@@ -12,7 +12,7 @@ import { DoorsSystem } from "../../protocol/entities/baseShipStatus/systems/door
 import { HqHudSystem } from "../../protocol/entities/baseShipStatus/systems/hqHudSystem";
 import { GameDataPacket } from "../../protocol/packets/root/gameData";
 import { InnerLevel } from "../../protocol/entities/types";
-import { SystemType } from "../../types/systemType";
+import { SystemType } from "../../types/enums";
 import { Player } from "../../player";
 import { CustomHost } from "..";
 import {

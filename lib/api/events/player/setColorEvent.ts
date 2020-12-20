@@ -1,5 +1,5 @@
-import { PlayerColor } from "../../../types/playerColor";
 import { CancellableEvent } from "../cancellableEvent";
+import { PlayerColor } from "../../../types/enums";
 import { Player } from "../../player";
 
 export class SetColorEvent extends CancellableEvent {

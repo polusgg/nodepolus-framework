@@ -1,3 +1,4 @@
+import { ChatNoteType, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SystemType } from "../types/enums";
 import { InnerCustomNetworkTransform } from "../protocol/entities/player/innerCustomNetworkTransform";
 import { ClimbLadderPacket, LadderSize, LadderDirection } from "../protocol/packets/rpc/climbLadder";
 import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud/innerMeetingHud";
@@ -39,14 +40,8 @@ import { SetPetPacket } from "../protocol/packets/rpc/setPet";
 import { SnapToPacket } from "../protocol/packets/rpc/snapTo";
 import { GameOptionsData } from "../types/gameOptionsData";
 import { RPCPacketType } from "../protocol/packets/types";
-import { ChatNoteType } from "../types/chatNoteType";
 import { Connection } from "../protocol/connection";
-import { PlayerColor } from "../types/playerColor";
-import { PlayerSkin } from "../types/playerSkin";
-import { SystemType } from "../types/systemType";
-import { PlayerHat } from "../types/playerHat";
-import { PlayerPet } from "../types/playerPet";
-import { Vector2 } from "../util/vector2";
+import { Vector2 } from "../types/vector2";
 import { Lobby } from ".";
 
 export class RPCHandler {

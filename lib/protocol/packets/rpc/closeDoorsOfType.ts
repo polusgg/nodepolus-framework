@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { SystemType } from "../../../types/systemType";
+import { SystemType } from "../../../types/enums";
 import { BaseRPCPacket } from "../basePacket";
 import { RPCPacketType } from "../types";
 

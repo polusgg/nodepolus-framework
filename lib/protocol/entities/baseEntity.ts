@@ -1,10 +1,9 @@
 import { Entity, InnerNetObject, InnerNetObjectType, LobbyImplementation } from "./types";
 import { SpawnInnerNetObject, SpawnPacket } from "../packets/gameData/spawn";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
+import { SpawnFlag, SpawnType } from "../../types/enums";
 import { BaseRPCPacket } from "../packets/basePacket";
 import { DataPacket } from "../packets/gameData/data";
-import { SpawnFlag } from "../../types/spawnFlag";
-import { SpawnType } from "../../types/spawnType";
 import { HostInstance } from "../../host/types";
 import { Player } from "../../player";
 

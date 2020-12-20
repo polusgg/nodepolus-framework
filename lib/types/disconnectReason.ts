@@ -1,35 +1,17 @@
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
-
-export enum DisconnectionType {
-  ExitGame = 0,
-  GameFull = 1,
-  GameStarted = 2,
-  GameNotFound = 3,
-  IncorrectVersion = 4,
-  Banned = 6,
-  Kicked = 7,
-  Custom = 8,
-  InvalidName = 9,
-  Hacking = 10,
-  Destroy = 16,
-  Error = 17,
-  IncorrectGame = 18,
-  ServerRequest = 19,
-  ServerFull = 20,
-  IntentionalLeaving = 208,
-  FocusLostBackground = 207,
-  FocusLost = 209,
-  NewConnection = 210,
-}
+import { DisconnectReasonType } from "./enums";
 
 export class DisconnectReason {
-  constructor(public type: DisconnectionType, public message: string = "") {}
+  constructor(
+    public type: DisconnectReasonType,
+    public message: string = "",
+  ) {}
 
   static deserialize(reader: MessageReader, asInt: boolean = false): DisconnectReason {
     const type = reader[asInt ? "readUInt32" : "readByte"]();
     let message = "";
 
-    if (type == DisconnectionType.Custom && reader.hasBytesLeft()) {
+    if (type == DisconnectReasonType.Custom && reader.hasBytesLeft()) {
       message = reader.readString();
     }
 
@@ -37,85 +19,85 @@ export class DisconnectReason {
   }
 
   static exitGame(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.ExitGame);
+    return new DisconnectReason(DisconnectReasonType.ExitGame);
   }
 
   static gameFull(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.GameFull);
+    return new DisconnectReason(DisconnectReasonType.GameFull);
   }
 
   static gameStarted(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.GameStarted);
+    return new DisconnectReason(DisconnectReasonType.GameStarted);
   }
 
   static gameNotFound(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.GameNotFound);
+    return new DisconnectReason(DisconnectReasonType.GameNotFound);
   }
 
   static incorrectVersion(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.IncorrectVersion);
+    return new DisconnectReason(DisconnectReasonType.IncorrectVersion);
   }
 
   static banned(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.Banned);
+    return new DisconnectReason(DisconnectReasonType.Banned);
   }
 
   static kicked(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.Kicked);
+    return new DisconnectReason(DisconnectReasonType.Kicked);
   }
 
   static custom(message: string): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.Custom, message);
+    return new DisconnectReason(DisconnectReasonType.Custom, message);
   }
 
   static invalidName(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.InvalidName);
+    return new DisconnectReason(DisconnectReasonType.InvalidName);
   }
 
   static hacking(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.Hacking);
+    return new DisconnectReason(DisconnectReasonType.Hacking);
   }
 
   static destroy(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.Destroy);
+    return new DisconnectReason(DisconnectReasonType.Destroy);
   }
 
   static error(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.Error);
+    return new DisconnectReason(DisconnectReasonType.Error);
   }
 
   static incorrectGame(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.IncorrectGame);
+    return new DisconnectReason(DisconnectReasonType.IncorrectGame);
   }
 
   static serverRequest(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.ServerRequest);
+    return new DisconnectReason(DisconnectReasonType.ServerRequest);
   }
 
   static serverFull(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.ServerFull);
+    return new DisconnectReason(DisconnectReasonType.ServerFull);
   }
 
   static intentionalLeaving(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.IntentionalLeaving);
+    return new DisconnectReason(DisconnectReasonType.IntentionalLeaving);
   }
 
   static focusLostBackground(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.FocusLostBackground);
+    return new DisconnectReason(DisconnectReasonType.FocusLostBackground);
   }
 
   static focusLost(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.FocusLost);
+    return new DisconnectReason(DisconnectReasonType.FocusLost);
   }
 
   static newConnection(): DisconnectReason {
-    return new DisconnectReason(DisconnectionType.NewConnection);
+    return new DisconnectReason(DisconnectReasonType.NewConnection);
   }
 
   serialize(writer: MessageWriter, asInt: boolean = false): void {
     writer[asInt ? "writeUInt32" : "writeByte"](this.type);
 
-    if (this.type == DisconnectionType.Custom && this.message.length > 0) {
+    if (this.type == DisconnectReasonType.Custom && this.message.length > 0) {
       writer.writeString(this.message);
     }
   }

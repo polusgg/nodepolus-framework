@@ -11,9 +11,9 @@ import { LifeSuppSystem } from "./systems/lifeSuppSystem";
 import { DeconTwoSystem } from "./systems/deconTwoSystem";
 import { SabotageSystem } from "./systems/sabotageSystem";
 import { DataPacket } from "../../packets/gameData/data";
+import { Level, SystemType } from "../../../types/enums";
 import { MedScanSystem } from "./systems/medScanSystem";
 import { ReactorSystem } from "./systems/reactorSystem";
-import { SystemType } from "../../../types/systemType";
 import { SwitchSystem } from "./systems/switchSystem";
 import { Entity, InnerNetObjectType } from "../types";
 import { DeconSystem } from "./systems/deconSystem";
@@ -22,7 +22,6 @@ import { HqHudSystem } from "./systems/hqHudSystem";
 import { InternalSystemType } from "./systems/type";
 import { BaseSystem } from "./systems/baseSystem";
 import { BaseGameObject } from "../baseEntity";
-import { Level } from "../../../types/level";
 
 export type System = AutoDoorsSystem
 | DeconSystem
@@ -133,8 +132,6 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
   }
 
   getSystemFromType(systemType: SystemType): BaseSystem<System> {
-    console.log("returning system from systemType", systemType);
-
     switch (systemType) {
       case SystemType.Doors:
         if (this.level == Level.TheSkeld) {

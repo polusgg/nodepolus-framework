@@ -1,5 +1,5 @@
-import { ChatNoteType } from "../../../types/chatNoteType";
 import { CancellableEvent } from "../cancellableEvent";
+import { ChatNoteType } from "../../../types/enums";
 import { Player } from "../../player";
 
 export class ChatNoteEvent extends CancellableEvent {

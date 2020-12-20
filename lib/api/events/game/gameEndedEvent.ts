@@ -1,5 +1,5 @@
-import { GameOverReason } from "../../../types/gameOverReason";
 import { CancellableEvent } from "../cancellableEvent";
+import { GameOverReason } from "../../../types/enums";
 import { Game } from "../../game";
 
 export class GameEndedEvent extends CancellableEvent {

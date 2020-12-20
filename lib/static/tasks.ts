@@ -1,20 +1,6 @@
-import { TaskType } from "./taskType";
+import { LevelTask, TaskLength, TaskType } from "../types/enums";
 
-export enum TaskLength {
-  Common,
-  Short,
-  Long,
-}
-
-export type LevelTask = {
-  id: number;
-  name: string;
-  length: TaskLength;
-  isVisual: boolean;
-  type: TaskType;
-};
-
-export const TASKS_THE_SKELD: LevelTask[] = [
+const TASKS_THE_SKELD: readonly LevelTask[] = [
   { id: 0, name: "Admin: Swipe Card", isVisual: false, length: TaskLength.Common, type: TaskType.SwipeCard },
   { id: 1, name: "Electrical: Fix Wiring", isVisual: false, length: TaskLength.Common, type: TaskType.FixWiring },
   { id: 2, name: "Weapons: Clear Asteroids", isVisual: true, length: TaskLength.Long, type: TaskType.ClearAsteroids },
@@ -46,7 +32,7 @@ export const TASKS_THE_SKELD: LevelTask[] = [
   { id: 28, name: "Electrical: Divert Power to Security", isVisual: false, length: TaskLength.Short, type: TaskType.DivertPower },
 ];
 
-export const TASKS_MIRA_HQ: LevelTask[] = [
+const TASKS_MIRA_HQ: readonly LevelTask[] = [
   { id: 0, name: "Hallway: Fix Wiring", isVisual: false, length: TaskLength.Common, type: TaskType.FixWiring },
   { id: 1, name: "Admin: Enter ID Code", isVisual: false, length: TaskLength.Common, type: TaskType.EnterIdCode },
   { id: 2, name: "Medbay: Submit Scan", isVisual: true, length: TaskLength.Long, type: TaskType.SubmitScan },
@@ -75,7 +61,7 @@ export const TASKS_MIRA_HQ: LevelTask[] = [
   { id: 25, name: "Reactor: Unlock Manifolds", isVisual: false, length: TaskLength.Short, type: TaskType.UnlockManifolds },
 ];
 
-export const TASKS_POLUS: LevelTask[] = [
+const TASKS_POLUS: readonly LevelTask[] = [
   { id: 0, name: "Office: Swipe Card", isVisual: false, length: TaskLength.Common, type: TaskType.SwipeCard },
   { id: 1, name: "Dropship: Insert Keys", isVisual: false, length: TaskLength.Common, type: TaskType.InsertKeys },
   { id: 2, name: "Office: Scan Boarding Pass", isVisual: false, length: TaskLength.Common, type: TaskType.ScanBoardingPass },
@@ -111,6 +97,24 @@ export const TASKS_POLUS: LevelTask[] = [
   { id: 32, name: "Outside: Record Temperature", isVisual: false, length: TaskLength.Short, type: TaskType.RecordTemperature },
 ];
 
-export const TASKS_AIRSHIP: LevelTask[] = [
+const TASKS_AIRSHIP: readonly LevelTask[] = [
   // TODO
 ];
+
+export class Tasks {
+  static get skeld(): readonly LevelTask[] {
+    return TASKS_THE_SKELD;
+  }
+
+  static get miraHq(): readonly LevelTask[] {
+    return TASKS_MIRA_HQ;
+  }
+
+  static get polus(): readonly LevelTask[] {
+    return TASKS_POLUS;
+  }
+
+  static get airship(): readonly LevelTask[] {
+    return TASKS_AIRSHIP;
+  }
+}

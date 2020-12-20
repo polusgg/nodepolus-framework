@@ -1,5 +1,5 @@
 import { TextComponent, ElementType } from "../api/text";
-import { Vector2 } from "../util/vector2";
+import { Vector2 } from "../types/vector2";
 import { Player } from "../api/player";
 import style from "ansi-styles";
 

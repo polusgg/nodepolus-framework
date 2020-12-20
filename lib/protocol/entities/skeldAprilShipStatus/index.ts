@@ -1,7 +1,6 @@
 import { SpawnInnerNetObject, SpawnPacket } from "../../packets/gameData/spawn";
 import { InnerSkeldAprilShipStatus } from "./innerSkeldAprilShipStatus";
-import { SpawnFlag } from "../../../types/spawnFlag";
-import { SpawnType } from "../../../types/spawnType";
+import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { LobbyImplementation } from "../types";
 import { BaseEntity } from "../baseEntity";
 

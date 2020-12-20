@@ -1,8 +1,5 @@
+import { PlayerColor, PlayerHat, PlayerPet, PlayerSkin } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { PlayerColor } from "../../../types/playerColor";
-import { PlayerSkin } from "../../../types/playerSkin";
-import { PlayerHat } from "../../../types/playerHat";
-import { PlayerPet } from "../../../types/playerPet";
 
 export enum PlayerFlags {
   IsDisconnected = 1 << 0,

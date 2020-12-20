@@ -4,7 +4,7 @@ import { DisconnectPacket } from "./hazel/disconnectPacket";
 import { RootGamePacket } from "./hazel/genericPacket";
 import { HelloPacket } from "./hazel/helloPacket";
 import { PingPacket } from "./hazel/pingPacket";
-import { Level } from "../../types/level";
+import { Level } from "../../types/enums";
 import { PacketType } from "./types";
 
 type PacketDataType = AcknowledgementPacket

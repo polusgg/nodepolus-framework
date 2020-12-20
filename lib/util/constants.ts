@@ -1,8 +1,5 @@
+import { KillDistance, Language, Level, TaskBarUpdate } from "../types/enums";
 import { GameOptionsData } from "../types/gameOptionsData";
-import { TaskBarUpdate } from "../types/taskBarUpdate";
-import { KillDistance } from "../types/killDistance";
-import { Language } from "../types/language";
-import { Level } from "../types/level";
 
 /**
  * Primitive type constants

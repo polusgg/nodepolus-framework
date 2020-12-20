@@ -4,11 +4,11 @@ import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/
 import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
 import { RootGamePacketDataType } from "../protocol/packets/hazel/genericPacket";
-import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { LobbyCreatedEvent } from "../api/events/server/lobbyCreated";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";
+import { DisconnectReasonType, FakeClientId } from "../types/enums";
+import { DisconnectReason } from "../types/disconnectReason";
 import { ServerConfig } from "../api/server/serverConfig";
-import { FakeClientId } from "../types/fakeClientId";
 import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
 import { LobbyCode } from "../util/lobbyCode";
@@ -158,7 +158,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
           lobby.handleJoin(sender);
         } else {
-          sender.sendReliable([new JoinGameErrorPacket(DisconnectionType.GameNotFound)]);
+          sender.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameNotFound)]);
         }
         break;
       }

@@ -3,7 +3,7 @@ import { GameOptionsData } from "../../../types/gameOptionsData";
 import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootGamePacket } from "../basePacket";
 import { RootGamePacketType } from "../types";
-import { Level } from "../../../types/level";
+import { Level } from "../../../types/enums";
 
 export class LobbyListing {
   constructor(

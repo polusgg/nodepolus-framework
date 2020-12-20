@@ -1,7 +1,7 @@
 import { DoorsSystem, SYSTEM_DOORS } from "../../protocol/entities/baseShipStatus/systems/doorsSystem";
 import { GameDataPacket } from "../../protocol/packets/root/gameData";
 import { InnerLevel } from "../../protocol/entities/types";
-import { SystemType } from "../../types/systemType";
+import { SystemType } from "../../types/enums";
 import { CustomHost } from "..";
 
 export class DoorsHandler {

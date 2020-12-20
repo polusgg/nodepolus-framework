@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { DisconnectReason } from "../../../types/disconnectReason";
-import { AlterGameTag } from "../../../types/alterGameTag";
+import { AlterGameTag } from "../../../types/enums";
 import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootGamePacket } from "../basePacket";
 import { RootGamePacketType } from "../types";

@@ -1,6 +1,6 @@
 import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
-import { SystemType } from "../../../types/systemType";
 import { BaseShipStatus } from "../baseShipStatus";
+import { SystemType } from "../../../types/enums";
 import { InnerNetObjectType } from "../types";
 import { EntityMiraShipStatus } from ".";
 

@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { GameOverReason } from "../../../types/gameOverReason";
+import { GameOverReason } from "../../../types/enums";
 import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootGamePacket } from "../basePacket";
 import { RootGamePacketType } from "../types";

@@ -1,7 +1,7 @@
 import { ReactorSystem } from "../../../protocol/entities/baseShipStatus/systems/reactorSystem";
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
 import { ReactorAmount, ReactorAction } from "../../../protocol/packets/rpc/repairSystem";
-import { SystemType } from "../../../types/systemType";
+import { SystemType } from "../../../types/enums";
 import { BaseDoorGameRoom } from "./base";
 import { Player } from "../../../player";
 import { Game } from "..";
