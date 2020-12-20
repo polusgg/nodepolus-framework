@@ -1,8 +1,8 @@
-import { UpdateGameDataPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/updateGameData";
-import { SetTasksPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/setTasks";
-import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
-import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { UpdateGameDataPacket } from "../../packets/rpc/updateGameData";
+import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
+import { SetTasksPacket } from "../../packets/rpc/setTasks";
+import { DataPacket } from "../../packets/gameData/data";
 import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";

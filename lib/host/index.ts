@@ -25,20 +25,20 @@ import { InnerVoteBanSystem } from "../protocol/entities/gameData/innerVoteBanSy
 import { InternalSystemType } from "../protocol/entities/baseShipStatus/systems/type";
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
 import { InnerPlayerPhysics } from "../protocol/entities/player/innerPlayerPhysics";
-import { StartGamePacket } from "../protocol/packets/rootGamePackets/startGame";
 import { SabotageSystemHandler } from "./systemHandlers/sabotageSystemHandler";
-import { GameDataPacket } from "../protocol/packets/rootGamePackets/gameData";
 import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
 import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
-import { EndGamePacket } from "../protocol/packets/rootGamePackets/endGame";
 import { InnerGameData } from "../protocol/entities/gameData/innerGameData";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityMiraShipStatus } from "../protocol/entities/miraShipStatus";
 import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
 import { PlayerData } from "../protocol/entities/gameData/playerData";
 import { AutoDoorsHandler } from "./systemHandlers/autoDoorsHandler";
+import { StartGamePacket } from "../protocol/packets/root/startGame";
+import { GameDataPacket } from "../protocol/packets/root/gameData";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
+import { EndGamePacket } from "../protocol/packets/root/endGame";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { DeconHandler } from "./systemHandlers/deconHandler";
 import { DisconnectReason } from "../types/disconnectReason";
@@ -72,7 +72,7 @@ import {
   MedbayAmount,
   OxygenAmount,
   RepairAmount,
-} from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
+} from "../protocol/packets/rpc/repairSystem";
 
 export class CustomHost implements HostInstance {
   public readonly id: number = FakeClientId.ServerAsHost;

@@ -1,10 +1,10 @@
-import { VotingCompletePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/votingComplete";
-import { ClearVotePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/clearVote";
-import { ClosePacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/close";
-import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
-import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { VotingCompletePacket } from "../../packets/rpc/votingComplete";
+import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
+import { ClearVotePacket } from "../../packets/rpc/clearVote";
+import { DataPacket } from "../../packets/gameData/data";
 import { shallowEqual } from "../../../util/functions";
+import { ClosePacket } from "../../packets/rpc/close";
 import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";

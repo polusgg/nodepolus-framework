@@ -1,5 +1,5 @@
-import { RepairAmount } from "../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { InnerPlayerControl } from "../protocol/entities/player/innerPlayerControl";
+import { RepairAmount } from "../protocol/packets/rpc/repairSystem";
 import { InnerLevel } from "../protocol/entities/types";
 import { Connection } from "../protocol/connection";
 import { PlayerColor } from "../types/playerColor";

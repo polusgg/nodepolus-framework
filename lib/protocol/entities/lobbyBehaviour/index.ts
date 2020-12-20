@@ -1,4 +1,4 @@
-import { SpawnInnerNetObject, SpawnPacket } from "../../packets/rootGamePackets/gameDataPackets/spawn";
+import { SpawnInnerNetObject, SpawnPacket } from "../../packets/gameData/spawn";
 import { InnerLobbyBehaviour } from "./innerLobbyBehaviour";
 import { GLOBAL_OWNER } from "../../../util/constants";
 import { SpawnFlag } from "../../../types/spawnFlag";

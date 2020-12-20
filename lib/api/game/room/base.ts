@@ -1,6 +1,6 @@
 import { DoorsSystem, SYSTEM_DOORS } from "../../../protocol/entities/baseShipStatus/systems/doorsSystem";
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
-import { GameDataPacket } from "../../../protocol/packets/rootGamePackets/gameData";
+import { GameDataPacket } from "../../../protocol/packets/root/gameData";
 import { InnerLevel } from "../../../protocol/entities/types";
 import { SystemType } from "../../../types/systemType";
 import { Level } from "../../../types/level";

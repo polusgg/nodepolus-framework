@@ -1,10 +1,10 @@
 import { LobbyImplementation, EntityLevel, InnerNetObject } from "../protocol/entities/types";
-import { RPCPacket } from "../protocol/packets/rootGamePackets/gameDataPackets/rpc";
 import { BaseRootGamePacket, BaseRPCPacket } from "../protocol/packets/basePacket";
-import { GameDataPacket } from "../protocol/packets/rootGamePackets/gameData";
+import { GameDataPacket } from "../protocol/packets/root/gameData";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { PacketDestination } from "../protocol/packets/types";
+import { RPCPacket } from "../protocol/packets/gameData/rpc";
 import { GameOptionsData } from "../types/gameOptionsData";
 import { DEFAULT_GAME_OPTIONS } from "../util/constants";
 import { Connection } from "../protocol/connection";

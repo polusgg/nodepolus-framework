@@ -1,9 +1,9 @@
-import { LobbyCounts, GetGameListResponsePacket, LobbyListing } from "../protocol/packets/rootGamePackets/getGameList";
-import { HostGameResponsePacket, HostGameRequestPacket } from "../protocol/packets/rootGamePackets/hostGame";
-import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/rootGamePackets/joinGame";
+import { LobbyCounts, GetGameListResponsePacket, LobbyListing } from "../protocol/packets/root/getGameList";
+import { HostGameResponsePacket, HostGameRequestPacket } from "../protocol/packets/root/hostGame";
+import { JoinGameErrorPacket, JoinGameRequestPacket } from "../protocol/packets/root/joinGame";
 import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
-import { RootGamePacketDataType } from "../protocol/packets/packetTypes/genericPacket";
 import { PacketDestination, RootGamePacketType } from "../protocol/packets/types";
+import { RootGamePacketDataType } from "../protocol/packets/hazel/genericPacket";
 import { DisconnectionType, DisconnectReason } from "../types/disconnectReason";
 import { LobbyCreatedEvent } from "../api/events/server/lobbyCreated";
 import { BaseRootGamePacket } from "../protocol/packets/basePacket";

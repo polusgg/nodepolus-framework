@@ -1,7 +1,7 @@
-import { SnapToPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/snapTo";
-import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
-import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
+import { DataPacket } from "../../packets/gameData/data";
+import { SnapToPacket } from "../../packets/rpc/snapTo";
 import { Vector2 } from "../../../util/vector2";
 import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";

@@ -1,9 +1,9 @@
-import { ClimbLadderPacket, LadderSize, LadderDirection } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/climbLadder";
-import { EnterVentPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/enterVent";
-import { ExitVentPacket } from "../../packets/rootGamePackets/gameDataPackets/rpcPackets/exitVent";
-import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
-import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
+import { ClimbLadderPacket, LadderSize, LadderDirection } from "../../packets/rpc/climbLadder";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
+import { EnterVentPacket } from "../../packets/rpc/enterVent";
+import { ExitVentPacket } from "../../packets/rpc/exitVent";
+import { DataPacket } from "../../packets/gameData/data";
 import { BaseGameObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "../types";

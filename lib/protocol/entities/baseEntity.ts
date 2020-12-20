@@ -1,8 +1,8 @@
-import { SpawnInnerNetObject, SpawnPacket } from "../packets/rootGamePackets/gameDataPackets/spawn";
 import { Entity, InnerNetObject, InnerNetObjectType, LobbyImplementation } from "./types";
-import { DataPacket } from "../packets/rootGamePackets/gameDataPackets/data";
+import { SpawnInnerNetObject, SpawnPacket } from "../packets/gameData/spawn";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
 import { BaseRPCPacket } from "../packets/basePacket";
+import { DataPacket } from "../packets/gameData/data";
 import { SpawnFlag } from "../../types/spawnFlag";
 import { SpawnType } from "../../types/spawnType";
 import { HostInstance } from "../../host/types";

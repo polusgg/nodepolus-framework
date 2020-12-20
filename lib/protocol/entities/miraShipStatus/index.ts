@@ -1,4 +1,4 @@
-import { SpawnInnerNetObject, SpawnPacket } from "../../packets/rootGamePackets/gameDataPackets/spawn";
+import { SpawnInnerNetObject, SpawnPacket } from "../../packets/gameData/spawn";
 import { InnerMiraShipStatus } from "./innerMiraShipStatus";
 import { SpawnFlag } from "../../../types/spawnFlag";
 import { SpawnType } from "../../../types/spawnType";

@@ -1,12 +1,12 @@
 import { InnerCustomNetworkTransform } from "../../protocol/entities/player/innerCustomNetworkTransform";
-import { DespawnPacket } from "../../protocol/packets/rootGamePackets/gameDataPackets/despawn";
-import { JoinGameResponsePacket } from "../../protocol/packets/rootGamePackets/joinGame";
-import { RemovePlayerPacket } from "../../protocol/packets/rootGamePackets/removePlayer";
 import { InnerPlayerControl } from "../../protocol/entities/player/innerPlayerControl";
 import { InnerPlayerPhysics } from "../../protocol/entities/player/innerPlayerPhysics";
 import { InnerMeetingHud } from "../../protocol/entities/meetingHud/innerMeetingHud";
-import { GameDataPacket } from "../../protocol/packets/rootGamePackets/gameData";
+import { JoinGameResponsePacket } from "../../protocol/packets/root/joinGame";
+import { RemovePlayerPacket } from "../../protocol/packets/root/removePlayer";
 import { PlayerData } from "../../protocol/entities/gameData/playerData";
+import { DespawnPacket } from "../../protocol/packets/gameData/despawn";
+import { GameDataPacket } from "../../protocol/packets/root/gameData";
 import { EntityMeetingHud } from "../../protocol/entities/meetingHud";
 import { DisconnectReason } from "../../types/disconnectReason";
 import { EntityPlayer } from "../../protocol/entities/player";

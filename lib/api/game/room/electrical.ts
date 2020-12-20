@@ -1,6 +1,6 @@
-import { ElectricalAmount } from "../../../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
 import { SwitchSystem } from "../../../protocol/entities/baseShipStatus/systems/switchSystem";
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus/systems/type";
+import { ElectricalAmount } from "../../../protocol/packets/rpc/repairSystem";
 import { SystemType } from "../../../types/systemType";
 import { BaseDoorGameRoom } from "./base";
 import { Player } from "../../../player";

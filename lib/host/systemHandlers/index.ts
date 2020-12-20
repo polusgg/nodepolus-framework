@@ -10,7 +10,7 @@ import { ReactorSystem } from "../../protocol/entities/baseShipStatus/systems/re
 import { SwitchSystem } from "../../protocol/entities/baseShipStatus/systems/switchSystem";
 import { DoorsSystem } from "../../protocol/entities/baseShipStatus/systems/doorsSystem";
 import { HqHudSystem } from "../../protocol/entities/baseShipStatus/systems/hqHudSystem";
-import { GameDataPacket } from "../../protocol/packets/rootGamePackets/gameData";
+import { GameDataPacket } from "../../protocol/packets/root/gameData";
 import { InnerLevel } from "../../protocol/entities/types";
 import { SystemType } from "../../types/systemType";
 import { Player } from "../../player";
@@ -30,7 +30,7 @@ import {
   OxygenAction,
   MiraCommunicationsAction,
   ReactorAction,
-} from "../../protocol/packets/rootGamePackets/gameDataPackets/rpcPackets/repairSystem";
+} from "../../protocol/packets/rpc/repairSystem";
 
 export class SystemsHandler {
   private oldShipStatus: InnerLevel = this.host.lobby.shipStatus!.innerNetObjects[0];

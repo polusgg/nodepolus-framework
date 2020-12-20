@@ -1,4 +1,4 @@
-import { LobbyCounts, LobbyListing } from "../../../protocol/packets/rootGamePackets/getGameList";
+import { LobbyCounts, LobbyListing } from "../../../protocol/packets/root/getGameList";
 import { CancellableEvent } from "../cancellableEvent";
 import { Player } from "../../player";
 

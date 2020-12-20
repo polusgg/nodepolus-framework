@@ -1,4 +1,4 @@
-import { SpawnInnerNetObject, SpawnPacket } from "../../packets/rootGamePackets/gameDataPackets/spawn";
+import { SpawnInnerNetObject, SpawnPacket } from "../../packets/gameData/spawn";
 import { InnerCustomNetworkTransform } from "./innerCustomNetworkTransform";
 import { InnerPlayerControl } from "./innerPlayerControl";
 import { InnerPlayerPhysics } from "./innerPlayerPhysics";

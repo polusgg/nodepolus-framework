@@ -1,4 +1,4 @@
-import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
+import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
 import { SystemType } from "../../../types/systemType";
 import { BaseShipStatus } from "../baseShipStatus";
 import { EntitySkeldAprilShipStatus } from ".";

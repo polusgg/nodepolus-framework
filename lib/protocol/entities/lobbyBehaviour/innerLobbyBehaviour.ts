@@ -1,6 +1,6 @@
-import { SpawnInnerNetObject } from "../../packets/rootGamePackets/gameDataPackets/spawn";
-import { DataPacket } from "../../packets/rootGamePackets/gameDataPackets/data";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { SpawnInnerNetObject } from "../../packets/gameData/spawn";
+import { DataPacket } from "../../packets/gameData/data";
 import { BaseGameObject } from "../baseEntity";
 import { InnerNetObjectType } from "../types";
 import { EntityLobbyBehaviour } from ".";
