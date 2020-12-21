@@ -284,7 +284,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         break;
       }
       case RootPacketType.RemovePlayer: {
-        if (!packet.clientBound) {
+        if (!packet.isClientBound) {
           const data = packet as LateRejectionPacket;
           const id = data.removedClientId;
           const con = this.findConnection(id);

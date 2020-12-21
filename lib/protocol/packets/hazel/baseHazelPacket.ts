@@ -3,14 +3,14 @@ import { HazelPacketType } from "../types/enums";
 import { Bindable } from "../types";
 
 export abstract class BaseHazelPacket implements Bindable<BaseHazelPacket> {
-  public clientBound?: boolean;
+  public isClientBound?: boolean;
 
   constructor(public type: HazelPacketType) {}
 
   abstract serialize(): MessageWriter;
 
-  bound(clientBound: boolean): this {
-    this.clientBound = clientBound;
+  bound(isClientBound: boolean): this {
+    this.isClientBound = isClientBound;
 
     return this;
   }

@@ -242,10 +242,6 @@ export class MessageWriter extends HazelMessage {
     }, lengthIsPacked);
   }
 
-  hasBytesLeft(): boolean {
-    return this.bytesRemainingLength() > 0;
-  }
-
   bytesRemainingLength(): number {
     return this.buffer.length - this.cursor;
   }
