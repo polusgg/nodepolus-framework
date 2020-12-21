@@ -5,14 +5,14 @@ import { GameOptionsData } from "../../lib/types";
 import test from "ava";
 
 test("deserializes a valid object", t => {
-  const buf = MessageReader.fromRawBytes("2e040a01000000010000803f0000803f0000c03f000034420101020100000001010f00000078000000000f01010000");
+  const buf = MessageReader.fromRawBytes("2e040a00010000010000803f0000803f0000c03f000034420101020100000001010f00000078000000000f01010000");
   const options = GameOptionsData.deserialize(buf);
 
   t.false(buf.hasBytesLeft());
   t.is(options.version, 4);
   t.is(options.maxPlayers, 10);
   t.is(options.languages.length, 1);
-  t.is(options.languages[0], Language.Other);
+  t.is(options.languages[0], Language.English);
   t.is(options.levels.length, 1);
   t.is(options.levels[0], Level.MiraHq);
   t.true(isFloatEqual(options.playerSpeedModifier, 1.0));

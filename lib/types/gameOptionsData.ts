@@ -62,7 +62,7 @@ export class GameOptionsData {
     return new GameOptionsData(
       version,
       reader.readByte(),
-      Bitfield.fromNumber(reader.readUInt32(), 32).asNumbers(1),
+      Bitfield.fromNumber(reader.readUInt32(), 32).asNumbers(),
       isSearching
         ? Bitfield.fromNumber(reader.readByte(), 8).asNumbers()
         : [reader.readByte()],

@@ -1,4 +1,5 @@
-import { Level, LevelTask, TaskLength, TaskType } from "../types/enums";
+import { Level, TaskLength, TaskType } from "../types/enums";
+import { LevelTask } from "../types";
 
 const TASKS_THE_SKELD: readonly LevelTask[] = [
   { id: 0, name: "Admin: Swipe Card", isVisual: false, length: TaskLength.Common, type: TaskType.SwipeCard },

@@ -1,4 +1,4 @@
-import { TaskLength, TaskType } from ".";
+import { TaskLength, TaskType } from "./enums";
 
 export type LevelTask = {
   id: number;

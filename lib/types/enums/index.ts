@@ -22,8 +22,6 @@ export { Language } from "./language";
 
 export { Level } from "./level";
 
-export { LevelTask } from "./levelTask";
-
 export { LimboState } from "./limboState";
 
 export { PlayerColor } from "./playerColor";

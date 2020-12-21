@@ -11,8 +11,8 @@ import { EntityAirshipStatus, InnerAirshipStatus } from "../protocol/entities/ai
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
 import { InternalSystemType } from "../protocol/entities/baseShipStatus";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
+import { DisconnectReason, LevelTask, Vector2 } from "../types";
 import { InnerLevel } from "../protocol/entities/types";
-import { DisconnectReason, Vector2 } from "../types";
 import { Connection } from "../protocol/connection";
 import { GLOBAL_OWNER } from "../util/constants";
 import { Player } from "../player";
@@ -52,7 +52,6 @@ import {
   GameOverReason,
   GameState,
   Level,
-  LevelTask,
   LimboState,
   PlayerColor,
   SystemType,
