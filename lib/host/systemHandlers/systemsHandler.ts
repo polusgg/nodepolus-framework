@@ -220,13 +220,13 @@ export class SystemsHandler {
 
     const index = 4 - amount.switchIndex;
 
-    system.actualSwitches[index] = !system.actualSwitches[index];
+    system.actualSwitches.bits[index] = !system.actualSwitches.bits[index];
 
-    if (system.actualSwitches.every((s, i) => s == system.expectedSwitches[i])) {
+    if (system.actualSwitches.bits.every((s, i) => s == system.expectedSwitches.bits[i])) {
       // TODO: Count back up (like +85 every second)
       setTimeout(() => {
         // Don't fix the lights if they somehow get immediately sabotaged again
-        if (system.actualSwitches.every((s, i) => s == system.expectedSwitches[i])) {
+        if (system.actualSwitches.bits.every((s, i) => s == system.expectedSwitches.bits[i])) {
           this.setOldShipStatus();
 
           system.visionModifier = 0xff;

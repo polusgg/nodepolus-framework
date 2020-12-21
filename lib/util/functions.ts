@@ -32,3 +32,18 @@ export function shallowEqual<T>(object1: T, object2: T): boolean {
 export function randomInRange(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+/**
+ * Checks if the supplied floating-point numbers are equal by comparing their
+ * difference with the supplied epsilon value.
+ */
+export function isFloatEqual(actual: number, expected: number, epsilon: number = 0.001): boolean {
+  return Math.abs(actual - expected) < epsilon;
+}
+
+/**
+ * Gets the minimum number of bits used to represent the supplied number.
+ */
+export function bitsInNumber(value: number): number {
+  return ((Math.log(value) / Math.log(2)) + 1) | 0;
+}

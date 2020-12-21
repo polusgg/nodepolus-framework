@@ -1,4 +1,5 @@
 import { GameOverReason, Level } from "../../types/enums";
+import { Bitfield } from "../../types";
 import { CustomHost } from "..";
 import {
   HqHudSystem,
@@ -56,13 +57,13 @@ export class SabotageSystemHandler {
   }
 
   sabotageElectrical(system: SwitchSystem): void {
-    system.expectedSwitches = Array(5).fill(false).map(() => Math.random() < 0.5);
-    system.actualSwitches = [...system.expectedSwitches];
+    system.expectedSwitches = new Bitfield(Array(5).fill(false).map(() => Math.random() < 0.5));
+    system.actualSwitches = new Bitfield(system.expectedSwitches.bits);
 
-    for (let i = 0; i < system.expectedSwitches.length; i++) {
-      const pos = Math.floor(Math.random() * (system.expectedSwitches.length - i)) * i;
+    for (let i = 0; i < system.expectedSwitches.bits.length; i++) {
+      const pos = Math.floor(Math.random() * (system.expectedSwitches.bits.length - i)) * i;
 
-      system.actualSwitches[pos] = !system.expectedSwitches[pos];
+      system.actualSwitches[pos] = !system.expectedSwitches.bits[pos];
     }
 
     // TODO: Actually count down like every other system (like -85 every second)

@@ -13,17 +13,17 @@ export class Switch {
   ) {}
 
   getState(): boolean {
-    return this.room.getInternalSystem().actualSwitches[this.index];
+    return this.room.getInternalSystem().actualSwitches.bits[this.index];
   }
 
   getPreferredState(): boolean {
-    return this.room.getInternalSystem().expectedSwitches[this.index];
+    return this.room.getInternalSystem().expectedSwitches.bits[this.index];
   }
 
   flip(): void {
     this.room.internalBackupShipStatus();
 
-    this.room.getInternalSystem().actualSwitches[this.index] = !this.getState();
+    this.room.getInternalSystem().actualSwitches.bits[this.index] = !this.getState();
 
     this.room.internalUpdateShipStatus();
   }
@@ -49,7 +49,7 @@ export class Switch {
   flipPreferred(): void {
     this.room.internalBackupShipStatus();
 
-    this.room.getInternalSystem().expectedSwitches[this.index] = !this.getPreferredState();
+    this.room.getInternalSystem().expectedSwitches.bits[this.index] = !this.getPreferredState();
 
     this.room.internalUpdateShipStatus();
   }
@@ -119,9 +119,9 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
       throw new Error("Host has no SystemsHandler instance");
     }
 
-    for (let i = 0; i < this.getInternalSystem().actualSwitches.length; i++) {
-      const actualSwitch = this.getInternalSystem().actualSwitches[i];
-      const expectedSwitch = this.getInternalSystem().actualSwitches[i];
+    for (let i = 0; i < this.getInternalSystem().actualSwitches.bits.length; i++) {
+      const actualSwitch = this.getInternalSystem().actualSwitches.bits[i];
+      const expectedSwitch = this.getInternalSystem().expectedSwitches.bits[i];
 
       if (actualSwitch != expectedSwitch) {
         this.game.lobby.internalLobby.customHostInstance.systemsHandler.repairSwitch(

@@ -1,5 +1,6 @@
 import { KillDistance, Language, Level, TaskBarUpdate } from "./enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
+import { Bitfield } from "./bitfield";
 
 const VERSIONS = [1, 2, 3, 4];
 
@@ -14,7 +15,7 @@ export class GameOptionsData {
     public playerSpeedModifier: number = 1.0,
     public crewmateLightModifier: number = 1.0,
     public impostorLightModifier: number = 1.5,
-    public killCooldown: number = 45,
+    public killCooldown: number = 45.0,
     public commonTaskCount: number = 1,
     public longTaskCount: number = 1,
     public shortTaskCount: number = 2,
@@ -61,16 +62,9 @@ export class GameOptionsData {
     return new GameOptionsData(
       version,
       reader.readByte(),
-      reader
-        .readBitfield(32)
-        .reverse()
-        .map((bit, index) => bit ? 1 << index : 0)
-        .filter(bit => bit),
+      Bitfield.fromNumber(reader.readUInt32(), 32).asNumbers(1),
       isSearching
-        ? reader.readBitfield(8)
-          .reverse()
-          .map((bit, index) => bit ? 1 << index : 0)
-          .filter(bit => bit)
+        ? Bitfield.fromNumber(reader.readByte(), 8).asNumbers()
         : [reader.readByte()],
       reader.readFloat32(),
       reader.readFloat32(),

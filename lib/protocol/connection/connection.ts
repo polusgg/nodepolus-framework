@@ -2,10 +2,10 @@ import { GameDataPacket, KickPlayerPacket, LateRejectionPacket, WaitForHostPacke
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { PacketDestination, HazelPacketType } from "../packets/types/enums";
 import { LimboState, PlayerColor, SystemType } from "../../types/enums";
+import { Bitfield, ClientVersion, DisconnectReason } from "../../types";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
 import { ReadyPacket, SceneChangePacket } from "../packets/gameData";
 import { RepairAmount } from "../packets/rpc/repairSystem/amounts";
-import { ClientVersion, DisconnectReason } from "../../types";
 import { RootPacketDataType } from "../packets/hazel/types";
 import { InnerPlayerControl } from "../entities/player";
 import { AwaitingPacket } from "../packets/types";
@@ -347,7 +347,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
   private acknowledgePacket(nonce: number): void {
     this.socket.send(
-      new Packet(nonce, new AcknowledgementPacket(this.getUnacknowledgedPacketArray())).serialize().buffer,
+      new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))).serialize().buffer,
       this.port,
       this.address,
     );

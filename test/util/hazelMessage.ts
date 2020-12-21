@@ -318,42 +318,6 @@ test("writes a message", t => {
   t.is(buf.buffer.toString("hex"), "12003205000104736f6d6507000206737472696e67");
 });
 
-test("reads a bitfield", t => {
-  const buf = MessageReader.fromRawBytes("6e");
-
-  t.deepEqual(buf.readBitfield(), [false, true, true, false, true, true, true, false]);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes a bitfield", t => {
-  const buf = new MessageWriter();
-
-  buf.writeBitfield([false, true, true, false, true, true, true, false]);
-
-  t.is(buf.buffer.toString("hex"), "6e");
-});
-
-test("reads a long bitfield", t => {
-  const buf = MessageReader.fromRawBytes("a52e");
-
-  t.deepEqual(buf.readBitfield(16), [
-    true, false, true, false, false, true, false, true,
-    false, false, true, false, true, true, true, false,
-  ]);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes a long bitfield", t => {
-  const buf = new MessageWriter();
-
-  buf.writeBitfield([
-    true, false, true, false, false, true, false, true,
-    false, false, true, false, true, true, true, false,
-  ]);
-
-  t.is(buf.buffer.toString("hex"), "a52e");
-});
-
 test("reads a list of objects", t => {
   const buf = MessageReader.fromMessage("0d000103010000000200000003000000");
   const results = buf.readList(sub => sub.readInt32());

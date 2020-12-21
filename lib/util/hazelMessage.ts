@@ -202,23 +202,6 @@ export class MessageWriter extends HazelMessage {
     return this;
   }
 
-  writeBitfield(arr: boolean[]): this {
-    for (let chunkIndex = 0; chunkIndex < arr.length; chunkIndex += 8) {
-      const tmparr = arr.slice(chunkIndex, chunkIndex + 8);
-      let n = 0;
-
-      for (let i = 0; i < tmparr.length; i++) {
-        if (tmparr[tmparr.length - (i + 1)]) {
-          n |= 1 << i;
-        }
-      }
-
-      this.writeByte(n);
-    }
-
-    return this;
-  }
-
   writeList<T>(
     items: Iterable<T>,
     writer: (subWriter: MessageWriter, item: T, index: number) => void,
@@ -416,17 +399,6 @@ export class MessageReader extends HazelMessage {
     this.cursor += length;
 
     return reader;
-  }
-
-  readBitfield(size: number = 8): boolean[] {
-    return [...this.readBytes(Math.ceil(size / 8)).buffer]
-      .map(v => v
-        .toString(2)
-        .padStart(8, "0"))
-      .join("")
-      .split("")
-      .map(c => c === "1")
-      .slice(0, size);
   }
 
   readList<T>(reader: (subReader: MessageReader) => T, lengthIsPacked: boolean = true): T[] {

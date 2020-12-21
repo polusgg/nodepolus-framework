@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { DisconnectReasonType, Level } from "../../../types/enums";
 import { LobbyCode } from "../../../util/lobbyCode";
-import { DisconnectReason } from "../../../types";
+import { Bitfield, DisconnectReason } from "../../../types";
 import { RootPacketType } from "../types/enums";
 import { BaseRootPacket } from "../root";
 
@@ -17,17 +17,14 @@ export class JoinGameRequestPacket extends BaseRootPacket {
     return new JoinGameRequestPacket(
       LobbyCode.decode(reader.readInt32()),
       // TODO: Probably broken but just an example
-      reader.readBitfield()
-        .reverse()
-        .map((bit, index) => (bit ? 1 << index : 0))
-        .filter(bit => bit),
+      Bitfield.fromNumber(reader.readByte(), 8).asNumbers(),
     );
   }
 
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeInt32(LobbyCode.encode(this.lobbyCode))
-      .writeInt32(this.ownedMaps.reduce((accum, val) => accum | val));
+      .writeByte(this.ownedMaps.reduce((accum, val) => accum | val));
   }
 }
 
