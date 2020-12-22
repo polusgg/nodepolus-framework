@@ -58,7 +58,7 @@ export class SabotageSystemHandler {
 
   sabotageElectrical(system: SwitchSystem): void {
     system.expectedSwitches = new Bitfield(Array(5).fill(false).map(() => Math.random() < 0.5));
-    system.actualSwitches = new Bitfield(system.expectedSwitches.bits);
+    system.actualSwitches = new Bitfield([...system.expectedSwitches.bits]);
 
     for (let i = 0; i < system.expectedSwitches.bits.length; i++) {
       const pos = Math.floor(Math.random() * (system.expectedSwitches.bits.length - i)) * i;
