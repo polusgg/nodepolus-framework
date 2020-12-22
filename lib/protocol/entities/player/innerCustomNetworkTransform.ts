@@ -40,7 +40,7 @@ export class InnerCustomNetworkTransform extends BaseGameObject<InnerCustomNetwo
     this.position.serialize(writer);
     this.velocity.serialize(writer);
 
-    return new DataPacket(this.id, writer);
+    return new DataPacket(this.netId, writer);
   }
 
   setData(packet: MessageReader | MessageWriter): void {
@@ -59,7 +59,7 @@ export class InnerCustomNetworkTransform extends BaseGameObject<InnerCustomNetwo
     this.position.serialize(writer);
     this.velocity.serialize(writer);
 
-    return new DataPacket(this.id, writer.endMessage());
+    return new DataPacket(this.netId, writer.endMessage());
   }
 
   setSpawn(data: MessageReader | MessageWriter): void {
@@ -67,6 +67,6 @@ export class InnerCustomNetworkTransform extends BaseGameObject<InnerCustomNetwo
   }
 
   clone(): InnerCustomNetworkTransform {
-    return new InnerCustomNetworkTransform(this.id, this.parent, this.sequenceId, this.position, this.velocity);
+    return new InnerCustomNetworkTransform(this.netId, this.parent, this.sequenceId, this.position, this.velocity);
   }
 }

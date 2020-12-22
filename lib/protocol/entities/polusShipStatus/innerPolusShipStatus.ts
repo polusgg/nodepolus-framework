@@ -28,7 +28,7 @@ export class InnerPolusShipStatus extends BaseShipStatus<InnerPolusShipStatus, E
   }
 
   clone(): InnerPolusShipStatus {
-    const clone = new InnerPolusShipStatus(this.id, this.parent);
+    const clone = new InnerPolusShipStatus(this.netId, this.parent);
 
     clone.systems = this.systems.map(system => system.clone());
 

@@ -217,7 +217,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   murderPlayer(victimPlayerControlNetId: number, sendTo: Connection[]): void {
-    const victimPlayer: Player | undefined = this.parent.lobby.players.find(player => player.gameObject.playerControl.id == victimPlayerControlNetId);
+    const victimPlayer: Player | undefined = this.parent.lobby.players.find(player => player.gameObject.playerControl.netId == victimPlayerControlNetId);
 
     if (!victimPlayer) {
       throw new Error("Could not find victim Player");
@@ -239,7 +239,7 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
     // console.log("Player", this.id, "Murdered", victimPlayer.id);
 
-    this.sendRPCPacketTo(sendTo, new MurderPlayerPacket(victimPlayer.gameObject.playerControl.id));
+    this.sendRPCPacketTo(sendTo, new MurderPlayerPacket(victimPlayer.gameObject.playerControl.netId));
   }
 
   sendChat(message: string, sendTo: Connection[]): void {
@@ -292,20 +292,20 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
 
   getData(): DataPacket {
     return new DataPacket(
-      this.id,
-      new MessageWriter().writeByte(this.id),
+      this.netId,
+      new MessageWriter().writeByte(this.netId),
     );
   }
 
   setData(packet: MessageReader | MessageWriter): void {
     const reader = MessageReader.fromRawBytes(packet.buffer);
 
-    this.id = reader.readByte();
+    this.netId = reader.readByte();
   }
 
   getSpawn(): SpawnInnerNetObject {
     return new DataPacket(
-      this.id,
+      this.netId,
       new MessageWriter()
         .startMessage(1)
         .writeBoolean(this.isNew)
@@ -322,6 +322,6 @@ export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
   }
 
   clone(): InnerPlayerControl {
-    return new InnerPlayerControl(this.id, this.parent, this.isNew, this.playerId);
+    return new InnerPlayerControl(this.netId, this.parent, this.isNew, this.playerId);
   }
 }

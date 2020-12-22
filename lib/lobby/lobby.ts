@@ -177,16 +177,16 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
 
   findInnerNetObject(netId: number): InnerNetObject | undefined {
     switch (netId) {
-      case this.lobbyBehavior?.lobbyBehaviour.id:
+      case this.lobbyBehavior?.lobbyBehaviour.netId:
         return this.lobbyBehavior!.lobbyBehaviour;
-      case this.gameData?.gameData.id:
+      case this.gameData?.gameData.netId:
         return this.gameData!.gameData;
-      case this.gameData?.voteBanSystem.id:
+      case this.gameData?.voteBanSystem.netId:
         return this.gameData!.voteBanSystem;
-      case this.shipStatus?.innerNetObjects[0].id:
+      case this.shipStatus?.innerNetObjects[0].netId:
         //@ts-ignore Talk to Cody about this?
         return this.shipStatus!.innerNetObjects[0];
-      case this.meetingHud?.meetingHud.id:
+      case this.meetingHud?.meetingHud.netId:
         return this.meetingHud!.meetingHud;
     }
 
@@ -196,7 +196,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
       for (let j = 0; j < player.gameObject.innerNetObjects.length; j++) {
         const object = player.gameObject.innerNetObjects[j];
 
-        if (notUndefined(object) && object.id == netId) {
+        if (notUndefined(object) && object.netId == netId) {
           return object;
         }
       }
@@ -360,7 +360,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
       }
     }
 
-    this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.id, packet)], this.code), sendToConnections);
+    this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.netId, packet)], this.code), sendToConnections);
   }
 
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
@@ -412,7 +412,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   despawn(innerNetObject: InnerNetObject): void {
     this.emit("despawn", innerNetObject);
 
-    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.id)], this.code));
+    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.netId)], this.code));
   }
 
   private handleNewJoin(connection: Connection): void {

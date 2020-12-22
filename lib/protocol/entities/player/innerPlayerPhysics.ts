@@ -34,7 +34,7 @@ export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
   }
 
   getData(): DataPacket {
-    return new DataPacket(this.id, new MessageWriter());
+    return new DataPacket(this.netId, new MessageWriter());
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -42,7 +42,7 @@ export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
 
   getSpawn(): SpawnInnerNetObject {
     return new DataPacket(
-      this.id,
+      this.netId,
       new MessageWriter().startMessage(1).endMessage(),
     );
   }
@@ -51,6 +51,6 @@ export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
   setSpawn(_data: MessageReader | MessageWriter): void {}
 
   clone(): InnerPlayerPhysics {
-    return new InnerPlayerPhysics(this.id, this.parent);
+    return new InnerPlayerPhysics(this.netId, this.parent);
   }
 }

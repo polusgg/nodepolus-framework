@@ -27,7 +27,7 @@ export class ProxyLobby implements LobbyImplementation {
 
   sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, _sendTo?: (Player | HostInstance)[]): void {
     this.proxy.serverConnection.write(new GameDataPacket([
-      new RPCPacket(from.id, packet),
+      new RPCPacket(from.netId, packet),
     ], this.code));
   }
 }

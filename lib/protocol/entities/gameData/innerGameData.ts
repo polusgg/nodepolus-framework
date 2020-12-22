@@ -62,7 +62,7 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
   // TODO: compare players and only send those that have updated
   getData(): DataPacket {
     return new DataPacket(
-      this.id,
+      this.netId,
       new MessageWriter().writeList(this.players, (sub, player) => player.serialize(sub), false),
     );
   }
@@ -77,7 +77,7 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
 
   getSpawn(): SpawnInnerNetObject {
     return new DataPacket(
-      this.id,
+      this.netId,
       new MessageWriter()
         .startMessage(1)
         .writeList(this.players, (sub, player) => player.serialize(sub))
@@ -90,6 +90,6 @@ export class InnerGameData extends BaseGameObject<InnerGameData> {
   }
 
   clone(): InnerGameData {
-    return new InnerGameData(this.id, this.parent, this.players);
+    return new InnerGameData(this.netId, this.parent, this.players);
   }
 }

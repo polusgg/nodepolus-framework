@@ -66,7 +66,7 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
       state.serialize(writer);
     }
 
-    return new DataPacket(this.id, writer);
+    return new DataPacket(this.netId, writer);
   }
 
   setData(packet: MessageReader | MessageWriter): void {
@@ -85,7 +85,7 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
       this.playerStates[i].serialize(writer);
     }
 
-    return new SpawnInnerNetObject(this.id, writer);
+    return new SpawnInnerNetObject(this.netId, writer);
   }
 
   setSpawn(data: MessageReader | MessageWriter): void {
@@ -97,7 +97,7 @@ export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
   }
 
   clone(): InnerMeetingHud {
-    const clone = new InnerMeetingHud(this.id, this.parent);
+    const clone = new InnerMeetingHud(this.netId, this.parent);
 
     clone.playerStates = this.playerStates.map(state => state.clone());
 

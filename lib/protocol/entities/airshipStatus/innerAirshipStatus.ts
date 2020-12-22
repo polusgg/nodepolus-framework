@@ -26,7 +26,7 @@ export class InnerAirshipStatus extends BaseShipStatus<InnerAirshipStatus, Entit
   }
 
   clone(): InnerAirshipStatus {
-    const clone = new InnerAirshipStatus(this.id, this.parent);
+    const clone = new InnerAirshipStatus(this.netId, this.parent);
 
     clone.systems = this.systems.map(system => system.clone());
 

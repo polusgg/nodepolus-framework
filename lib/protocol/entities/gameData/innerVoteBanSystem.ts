@@ -53,7 +53,7 @@ export class InnerVoteBanSystem extends BaseGameObject<InnerVoteBanSystem> {
       }
     }, false);
 
-    return new DataPacket(this.id, writer);
+    return new DataPacket(this.netId, writer);
   }
 
   setData(packet: MessageReader | MessageWriter): void {
@@ -73,7 +73,7 @@ export class InnerVoteBanSystem extends BaseGameObject<InnerVoteBanSystem> {
 
   getSpawn(): SpawnInnerNetObject {
     return new SpawnInnerNetObject(
-      this.id,
+      this.netId,
       new MessageWriter()
         .startMessage(1)
         .writeBytes(this.getData().data)
@@ -86,7 +86,7 @@ export class InnerVoteBanSystem extends BaseGameObject<InnerVoteBanSystem> {
   }
 
   clone(): InnerVoteBanSystem {
-    const clone = new InnerVoteBanSystem(this.id, this.parent);
+    const clone = new InnerVoteBanSystem(this.netId, this.parent);
 
     clone.votes = new Map(this.votes);
 

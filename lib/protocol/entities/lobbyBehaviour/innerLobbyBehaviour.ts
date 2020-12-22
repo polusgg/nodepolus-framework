@@ -19,7 +19,7 @@ export class InnerLobbyBehaviour extends BaseGameObject<InnerLobbyBehaviour> {
   }
 
   getData(): DataPacket {
-    return new DataPacket(this.id, new MessageWriter());
+    return new DataPacket(this.netId, new MessageWriter());
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -27,7 +27,7 @@ export class InnerLobbyBehaviour extends BaseGameObject<InnerLobbyBehaviour> {
 
   getSpawn(): SpawnInnerNetObject {
     return new DataPacket(
-      this.id,
+      this.netId,
       new MessageWriter().startMessage(1).endMessage(),
     );
   }
@@ -36,6 +36,6 @@ export class InnerLobbyBehaviour extends BaseGameObject<InnerLobbyBehaviour> {
   setSpawn(_data: MessageReader | MessageWriter): void {}
 
   clone(): InnerLobbyBehaviour {
-    return new InnerLobbyBehaviour(this.id, this.parent);
+    return new InnerLobbyBehaviour(this.netId, this.parent);
   }
 }

@@ -224,7 +224,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   murder(player: Player): this {
     const playerControl = this.getInternalPlayer().gameObject.playerControl;
 
-    playerControl.murderPlayer(player.getInternalPlayer().gameObject.playerControl.id, this.lobby.internalLobby.connections);
+    playerControl.murderPlayer(player.getInternalPlayer().gameObject.playerControl.netId, this.lobby.internalLobby.connections);
     this.lobby.internalLobby.customHostInstance.handleMurderPlayer(playerControl, 0);
 
     return this;
@@ -261,9 +261,9 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     const oldName = this.name;
 
     this.lobby.internalLobby.ignoredNetIds = this.lobby.internalLobby.ignoredNetIds.concat([
-      this.getInternalPlayer().gameObject.playerControl.id,
-      this.getInternalPlayer().gameObject.playerPhysics.id,
-      this.getInternalPlayer().gameObject.customNetworkTransform.id,
+      this.getInternalPlayer().gameObject.playerControl.netId,
+      this.getInternalPlayer().gameObject.playerPhysics.netId,
+      this.getInternalPlayer().gameObject.customNetworkTransform.netId,
     ]);
 
     this.setName("");
@@ -283,9 +283,9 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
 
       if (connection.id != this.clientId) {
         connection.write(new GameDataPacket([
-          new DespawnPacket(this.getInternalPlayer().gameObject.playerControl.id),
-          new DespawnPacket(this.getInternalPlayer().gameObject.playerPhysics.id),
-          new DespawnPacket(this.getInternalPlayer().gameObject.customNetworkTransform.id),
+          new DespawnPacket(this.getInternalPlayer().gameObject.playerControl.netId),
+          new DespawnPacket(this.getInternalPlayer().gameObject.playerPhysics.netId),
+          new DespawnPacket(this.getInternalPlayer().gameObject.customNetworkTransform.netId),
         ], this.lobby.code));
       }
     }
@@ -333,7 +333,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     this.setName(oldName);
 
     this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
-      new DespawnPacket(tempFakeMHud.innerNetObjects[0].id),
+      new DespawnPacket(tempFakeMHud.innerNetObjects[0].netId),
     ], this.lobby.code));
 
     return this;

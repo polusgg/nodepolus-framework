@@ -27,7 +27,7 @@ export class InnerSkeldAprilShipStatus extends BaseShipStatus<InnerSkeldAprilShi
   }
 
   clone(): InnerSkeldAprilShipStatus {
-    const clone = new InnerSkeldAprilShipStatus(this.id, this.parent);
+    const clone = new InnerSkeldAprilShipStatus(this.netId, this.parent);
 
     clone.systems = this.systems.map(system => system.clone());
 

@@ -10,7 +10,7 @@ import { Player } from "../../../player";
 export abstract class BaseGameObject<T> {
   constructor(
     public readonly type: InnerNetObjectType,
-    public id: number,
+    public netId: number,
     public parent: Entity,
   ) {}
 

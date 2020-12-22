@@ -107,7 +107,7 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
       .writeBytes(this.getSystems(old, changedSystemTypes, false));
 
     return new DataPacket(
-      this.id,
+      this.netId,
       writer,
     );
   }
@@ -124,7 +124,7 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
 
   getSpawn(): SpawnInnerNetObject {
     return new SpawnInnerNetObject(
-      this.id,
+      this.netId,
       this.getSystems(undefined, this.spawnSystemTypes, true),
     );
   }

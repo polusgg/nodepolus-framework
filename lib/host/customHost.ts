@@ -475,7 +475,7 @@ export class CustomHost implements HostInstance {
     }
 
     const system = this.lobby.shipStatus.innerNetObjects[0].getSystemFromType(systemId);
-    const player = this.lobby.players.find(thePlayer => thePlayer.gameObject.playerControl.id == playerControlNetId);
+    const player = this.lobby.players.find(thePlayer => thePlayer.gameObject.playerControl.netId == playerControlNetId);
     const level = this.lobby.options.levels[0];
 
     if (!player) {
@@ -604,7 +604,7 @@ export class CustomHost implements HostInstance {
     const oldData = this.lobby.shipStatus.innerNetObjects[0].clone();
     const movingPlatform = this.lobby.shipStatus.innerNetObjects[0].systems[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
 
-    movingPlatform.innerPlayerControlNetId = sender.parent.playerControl.id;
+    movingPlatform.innerPlayerControlNetId = sender.parent.playerControl.netId;
     movingPlatform.side = (movingPlatform.side + 1) % 2;
 
     movingPlatform.sequenceId++;
