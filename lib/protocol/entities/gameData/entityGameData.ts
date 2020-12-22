@@ -1,15 +1,13 @@
+import { BaseInnerNetEntity, LobbyImplementation } from "../types";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { BaseEntity, LobbyImplementation } from "../types";
 import { InnerGameData, InnerVoteBanSystem } from ".";
 import { SpawnPacket } from "../../packets/gameData";
 
-export type GameDataInnerNetObjects = [ InnerGameData, InnerVoteBanSystem ];
-
-export class EntityGameData extends BaseEntity {
+export class EntityGameData extends BaseInnerNetEntity {
   public owner!: number;
   public flags: SpawnFlag = SpawnFlag.None;
-  public innerNetObjects!: GameDataInnerNetObjects;
+  public innerNetObjects!: [ InnerGameData, InnerVoteBanSystem ];
 
   get gameData(): InnerGameData {
     return this.innerNetObjects[0];

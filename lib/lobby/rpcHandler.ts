@@ -7,7 +7,6 @@ import { RepairAmount } from "../protocol/packets/rpc/repairSystem/amounts";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { BaseShipStatus } from "../protocol/entities/baseShipStatus";
 import { RPCPacketType } from "../protocol/packets/types/enums";
-import { InnerLevel } from "../protocol/entities/types";
 import { Connection } from "../protocol/connection";
 import { GameOptionsData, Vector2 } from "../types";
 import { Lobby } from ".";
@@ -331,7 +330,7 @@ export class RPCHandler {
           throw new Error(`Received CloseDoorsOfType packet from invalid InnerNetObject: expected BaseShipStatus but got ${type as number} (${typeString})`);
         }
 
-        this.handleCloseDoorsOfType(sender as InnerLevel, packet.system);
+        this.handleCloseDoorsOfType(sender as BaseShipStatus, packet.system);
         break;
       }
       case RPCPacketType.RepairSystem: {
@@ -341,7 +340,7 @@ export class RPCHandler {
           throw new Error(`Received RepairSystem packet from invalid InnerNetObject: expected BaseShipStatus but got ${type as number} (${typeString})`);
         }
 
-        this.handleRepairSystem(sender as InnerLevel, packet.system, packet.playerControlNetId, packet.amount);
+        this.handleRepairSystem(sender as BaseShipStatus, packet.system, packet.playerControlNetId, packet.amount);
         break;
       }
       case RPCPacketType.SetTasks: {
@@ -540,13 +539,13 @@ export class RPCHandler {
     sender.addVote(votingClientId, targetClientId, sendTo);
   }
 
-  handleCloseDoorsOfType(sender: InnerLevel, system: SystemType): void {
+  handleCloseDoorsOfType(sender: BaseShipStatus, system: SystemType): void {
     this.lobby.customHostInstance.handleCloseDoorsOfType(sender, system);
 
     sender.closeDoorsOfType(system);
   }
 
-  handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
+  handleRepairSystem(sender: BaseShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
     this.lobby.customHostInstance.handleRepairSystem(sender, systemId, playerControlNetId, amount);
 
     sender.repairSystem(systemId, playerControlNetId, amount);

@@ -4,12 +4,18 @@ import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { SnapToPacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
-import { BaseGameObject } from "../types";
+import { BaseInnerNetObject } from "../types";
 import { Vector2 } from "../../../types";
 import { EntityPlayer } from ".";
 
-export class InnerCustomNetworkTransform extends BaseGameObject<InnerCustomNetworkTransform> {
-  constructor(public netId: number, public parent: EntityPlayer, public sequenceId: number, public position: Vector2, public velocity: Vector2) {
+export class InnerCustomNetworkTransform extends BaseInnerNetObject {
+  constructor(
+    netId: number,
+    public parent: EntityPlayer,
+    public sequenceId: number,
+    public position: Vector2,
+    public velocity: Vector2,
+  ) {
     super(InnerNetObjectType.CustomNetworkTransform, netId, parent);
   }
 

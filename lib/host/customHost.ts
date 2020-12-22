@@ -9,10 +9,9 @@ import { EntityMiraShipStatus, InnerMiraShipStatus } from "../protocol/entities/
 import { EntityMeetingHud, InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud";
 import { EntityAirshipStatus, InnerAirshipStatus } from "../protocol/entities/airshipStatus";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
-import { InternalSystemType } from "../protocol/entities/baseShipStatus";
+import { BaseShipStatus, InternalSystemType } from "../protocol/entities/baseShipStatus";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
 import { DisconnectReason, LevelTask, Vector2 } from "../types";
-import { InnerLevel } from "../protocol/entities/types";
 import { Connection } from "../protocol/connection";
 import { GLOBAL_OWNER } from "../util/constants";
 import { Player } from "../player";
@@ -469,7 +468,7 @@ export class CustomHost implements HostInstance {
     }
   }
 
-  handleRepairSystem(_sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
+  handleRepairSystem(_sender: BaseShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
     if (!this.lobby.shipStatus) {
       throw new Error("Received RepairSystem without a ShipStatus instance");
     }
@@ -529,7 +528,7 @@ export class CustomHost implements HostInstance {
     }
   }
 
-  handleCloseDoorsOfType(_sender: InnerLevel, systemId: SystemType): void {
+  handleCloseDoorsOfType(_sender: BaseShipStatus, systemId: SystemType): void {
     if (!this.doorHandler) {
       throw new Error("Received CloseDoorsOfType without a door handler");
     }
@@ -609,7 +608,6 @@ export class CustomHost implements HostInstance {
 
     movingPlatform.sequenceId++;
 
-    //@ts-ignore TODO: Talk to cody about this?
     const data = this.lobby.shipStatus.innerNetObjects[0].getData(oldData);
 
     this.lobby.sendRootGamePacket(new GameDataPacket([data], this.lobby.code));

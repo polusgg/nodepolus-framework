@@ -5,11 +5,14 @@ import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { Connection } from "../../connection";
-import { BaseGameObject } from "../types";
+import { BaseInnerNetObject } from "../types";
 import { EntityPlayer } from ".";
 
-export class InnerPlayerPhysics extends BaseGameObject<InnerPlayerPhysics> {
-  constructor(netId: number, public parent: EntityPlayer) {
+export class InnerPlayerPhysics extends BaseInnerNetObject {
+  constructor(
+    netId: number,
+    public parent: EntityPlayer,
+  ) {
     super(InnerNetObjectType.PlayerPhysics, netId, parent);
   }
 

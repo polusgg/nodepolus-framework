@@ -1,6 +1,6 @@
 import { DoorsSystem } from "../../protocol/entities/baseShipStatus/systems";
+import { BaseShipStatus } from "../../protocol/entities/baseShipStatus";
 import { GameDataPacket } from "../../protocol/packets/root";
-import { InnerLevel } from "../../protocol/entities/types";
 import { SystemDoors } from "../../static/doors";
 import { SystemType } from "../../types/enums";
 import { CustomHost } from "..";
@@ -8,9 +8,9 @@ import { CustomHost } from "..";
 export class DoorsHandler {
   private readonly systemTimers: NodeJS.Timeout[] = [];
 
-  private oldShipStatus: InnerLevel;
+  private oldShipStatus: BaseShipStatus;
 
-  constructor(public host: CustomHost, public shipStatus: InnerLevel) {
+  constructor(public host: CustomHost, public shipStatus: BaseShipStatus) {
     this.oldShipStatus = shipStatus.clone();
   }
 
@@ -68,7 +68,6 @@ export class DoorsHandler {
 
   sendDataUpdate(): void {
     this.host.lobby.sendRootGamePacket(new GameDataPacket([
-      //@ts-ignore Talk to Cody about this?
       this.shipStatus.data(this.oldShipStatus),
     ], this.host.lobby.code));
   }

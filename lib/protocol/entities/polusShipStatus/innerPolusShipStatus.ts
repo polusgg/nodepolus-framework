@@ -4,8 +4,11 @@ import { BaseShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../types/enums";
 import { EntityPolusShipStatus } from ".";
 
-export class InnerPolusShipStatus extends BaseShipStatus<InnerPolusShipStatus, EntityPolusShipStatus> {
-  constructor(netId: number, public parent: EntityPolusShipStatus) {
+export class InnerPolusShipStatus extends BaseShipStatus {
+  constructor(
+    netId: number,
+    public parent: EntityPolusShipStatus,
+  ) {
     super(InnerNetObjectType.PolusShipStatus, netId, parent, [
       SystemType.Electrical,
       SystemType.Medbay,

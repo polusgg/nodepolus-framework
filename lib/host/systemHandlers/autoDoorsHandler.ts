@@ -1,6 +1,6 @@
 import { AutoDoorsSystem } from "../../protocol/entities/baseShipStatus/systems";
+import { BaseShipStatus } from "../../protocol/entities/baseShipStatus";
 import { GameDataPacket } from "../../protocol/packets/root";
-import { InnerLevel } from "../../protocol/entities/types";
 import { SystemDoors } from "../../static/doors";
 import { SystemType } from "../../types/enums";
 import { CustomHost } from "..";
@@ -8,11 +8,11 @@ import { CustomHost } from "..";
 export class AutoDoorsHandler {
   private readonly systemTimers: NodeJS.Timeout[] = [];
 
-  private oldShipStatus: InnerLevel;
+  private oldShipStatus: BaseShipStatus;
 
   constructor(
     public host: CustomHost,
-    public shipStatus: InnerLevel,
+    public shipStatus: BaseShipStatus,
   ) {
     this.oldShipStatus = shipStatus.clone();
   }
@@ -65,7 +65,6 @@ export class AutoDoorsHandler {
 
   sendDataUpdate(): void {
     this.host.lobby.sendRootGamePacket(new GameDataPacket([
-      //@ts-ignore Talk to Cody about this?
       this.shipStatus.getData(this.oldShipStatus),
     ], this.host.lobby.code));
   }

@@ -1,15 +1,13 @@
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from ".";
+import { BaseInnerNetEntity, LobbyImplementation } from "../types";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { BaseEntity, LobbyImplementation } from "../types";
 import { SpawnPacket } from "../../packets/gameData";
 
-export type PlayerInnerNetObjects = [ InnerPlayerControl, InnerPlayerPhysics, InnerCustomNetworkTransform ];
-
-export class EntityPlayer extends BaseEntity {
+export class EntityPlayer extends BaseInnerNetEntity {
   public owner!: number;
   public flags: SpawnFlag = SpawnFlag.IsClientCharacter;
-  public innerNetObjects!: PlayerInnerNetObjects;
+  public innerNetObjects!: [ InnerPlayerControl, InnerPlayerPhysics, InnerCustomNetworkTransform ];
 
   get playerControl(): InnerPlayerControl {
     return this.innerNetObjects[0];

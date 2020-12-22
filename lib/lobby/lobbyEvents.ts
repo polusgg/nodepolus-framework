@@ -1,5 +1,5 @@
 import { PlayerColor, PlayerPet, PlayerHat, PlayerSkin } from "../types/enums";
-import { InnerNetObject } from "../protocol/entities/types";
+import { BaseInnerNetObject } from "../protocol/entities/types";
 import { Connection } from "../protocol/connection";
 import { Player } from "../player";
 import { Vector2 } from "../types";
@@ -53,5 +53,5 @@ export type LobbyEvents = {
     ventId: number;
   };
   setInfected: number[];
-  despawn: InnerNetObject;
+  despawn: BaseInnerNetObject;
 };

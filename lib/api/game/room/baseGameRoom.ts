@@ -1,12 +1,12 @@
+import { BaseShipStatus } from "../../../protocol/entities/baseShipStatus";
 import { GameDataPacket } from "../../../protocol/packets/root";
-import { InnerLevel } from "../../../protocol/entities/types";
 import { SystemType } from "../../../types/enums";
 import { Game, GameEvents } from "..";
 import { Player } from "../../player";
 import Emittery from "emittery";
 
 export class BaseGameRoom extends Emittery.Typed<GameEvents> {
-  private shipStatusBackup?: InnerLevel;
+  private shipStatusBackup?: BaseShipStatus;
 
   constructor(
     public game: Game,
@@ -20,7 +20,7 @@ export class BaseGameRoom extends Emittery.Typed<GameEvents> {
     return [];
   }
 
-  getInternalShipStatus(): InnerLevel {
+  getInternalShipStatus(): BaseShipStatus {
     if (!this.game.lobby.internalLobby.shipStatus) {
       throw new Error("Attempted to get ShipStatus without an instance on the lobby");
     }
@@ -45,8 +45,11 @@ export class BaseGameRoom extends Emittery.Typed<GameEvents> {
       this.internalBackupShipStatus();
     }
 
-    //@ts-ignore Talk to cody about this.
-    const data = this.game.lobby.internalLobby.shipStatus.innerNetObjects[0].getData(this.shipSatusBackup);
+    if (!this.shipStatusBackup) {
+      throw new Error("Attempted to update ShipStatus but failed to first make a backup");
+    }
+
+    const data = this.game.lobby.internalLobby.shipStatus.innerNetObjects[0].getData(this.shipStatusBackup);
 
     this.game.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([data], this.game.lobby.code));
   }

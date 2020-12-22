@@ -1,16 +1,14 @@
+import { BaseInnerNetEntity, LobbyImplementation } from "../types";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { BaseEntity, LobbyImplementation } from "../types";
 import { GLOBAL_OWNER } from "../../../util/constants";
 import { SpawnPacket } from "../../packets/gameData";
 import { InnerMeetingHud } from ".";
 
-export type MeetingHudInnerNetObjects = [ InnerMeetingHud ];
-
-export class EntityMeetingHud extends BaseEntity {
+export class EntityMeetingHud extends BaseInnerNetEntity {
   public owner!: number;
   public flags: SpawnFlag = SpawnFlag.None;
-  public innerNetObjects!: MeetingHudInnerNetObjects;
+  public innerNetObjects!: [ InnerMeetingHud ];
 
   get meetingHud(): InnerMeetingHud {
     return this.innerNetObjects[0];

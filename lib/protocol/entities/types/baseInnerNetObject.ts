@@ -2,21 +2,21 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { DataPacket } from "../../packets/gameData";
 import { BaseRPCPacket } from "../../packets/rpc";
-import { Entity, InnerNetObject } from "../types";
 import { HostInstance } from "../../../host";
 import { InnerNetObjectType } from "./enums";
 import { Player } from "../../../player";
+import { BaseInnerNetEntity } from ".";
 
-export abstract class BaseGameObject<T> {
+export abstract class BaseInnerNetObject {
   constructor(
     public readonly type: InnerNetObjectType,
     public netId: number,
-    public parent: Entity,
+    public parent: BaseInnerNetEntity,
   ) {}
 
-  abstract clone(): T;
+  abstract clone(): BaseInnerNetObject;
 
-  abstract getData(old: BaseGameObject<T>): DataPacket;
+  abstract getData(old: BaseInnerNetObject): DataPacket;
 
   abstract setData(packet: MessageReader | MessageWriter): void;
 
@@ -25,8 +25,8 @@ export abstract class BaseGameObject<T> {
   abstract setSpawn(data: MessageReader | MessageWriter): void;
 
   data(packet: MessageReader | MessageWriter): void;
-  data(old: BaseGameObject<T>): DataPacket;
-  data(arg0: MessageReader | MessageWriter | BaseGameObject<T>): DataPacket | undefined {
+  data(old: BaseInnerNetObject): DataPacket;
+  data(arg0: MessageReader | MessageWriter | BaseInnerNetObject): DataPacket | undefined {
     if (arg0 instanceof MessageReader || arg0 instanceof MessageWriter) {
       this.setData(arg0);
     } else {
@@ -39,6 +39,6 @@ export abstract class BaseGameObject<T> {
   }
 
   sendRPCPacketTo(to: (Player | HostInstance)[], packet: BaseRPCPacket): void {
-    this.parent.lobby.sendRPCPacket(this as unknown as InnerNetObject, packet, to);
+    this.parent.lobby.sendRPCPacket(this as unknown as BaseInnerNetObject, packet, to);
   }
 }

@@ -5,7 +5,7 @@ import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { GameOptionsData } from "../../../types";
 import { Connection } from "../../connection";
-import { BaseGameObject } from "../types";
+import { BaseInnerNetObject } from "../types";
 import { Player } from "../../../player";
 import { EntityPlayer } from ".";
 import {
@@ -28,10 +28,15 @@ import {
   SyncSettingsPacket,
 } from "../../packets/rpc";
 
-export class InnerPlayerControl extends BaseGameObject<InnerPlayerControl> {
+export class InnerPlayerControl extends BaseInnerNetObject {
   public scannerSequenceId = 1;
 
-  constructor(netId: number, public parent: EntityPlayer, public isNew: boolean, public playerId: number) {
+  constructor(
+    netId: number,
+    public parent: EntityPlayer,
+    public isNew: boolean,
+    public playerId: number,
+  ) {
     super(InnerNetObjectType.PlayerControl, netId, parent);
   }
 

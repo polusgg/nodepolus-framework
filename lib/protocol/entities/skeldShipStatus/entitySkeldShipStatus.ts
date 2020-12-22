@@ -1,15 +1,13 @@
+import { BaseInnerNetEntity, LobbyImplementation } from "../types";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { SpawnPacket } from "../../packets/gameData";
-import { BaseEntity, LobbyImplementation } from "../types";
 import { InnerSkeldShipStatus } from ".";
 
-export type SkeldShipStatusInnerNetObjects = [ InnerSkeldShipStatus ];
-
-export class EntitySkeldShipStatus extends BaseEntity {
+export class EntitySkeldShipStatus extends BaseInnerNetEntity {
   public owner!: number;
   public flags: SpawnFlag = SpawnFlag.None;
-  public innerNetObjects!: SkeldShipStatusInnerNetObjects;
+  public innerNetObjects!: [ InnerSkeldShipStatus ];
 
   get shipStatus(): InnerSkeldShipStatus {
     return this.innerNetObjects[0];

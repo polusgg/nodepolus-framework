@@ -5,10 +5,14 @@ import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { EntityGameData, PlayerData } from ".";
 import { Connection } from "../../connection";
-import { BaseGameObject } from "../types";
+import { BaseInnerNetObject } from "../types";
 
-export class InnerGameData extends BaseGameObject<InnerGameData> {
-  constructor(netId: number, public parent: EntityGameData, public players: PlayerData[]) {
+export class InnerGameData extends BaseInnerNetObject {
+  constructor(
+    netId: number,
+    public parent: EntityGameData,
+    public players: PlayerData[],
+  ) {
     super(InnerNetObjectType.GameData, netId, parent);
   }
 

@@ -2,11 +2,14 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
-import { BaseGameObject } from "../types";
+import { BaseInnerNetObject } from "../types";
 import { EntityLobbyBehaviour } from ".";
 
-export class InnerLobbyBehaviour extends BaseGameObject<InnerLobbyBehaviour> {
-  constructor(netId: number, public parent: EntityLobbyBehaviour) {
+export class InnerLobbyBehaviour extends BaseInnerNetObject {
+  constructor(
+    netId: number,
+    public parent: EntityLobbyBehaviour,
+  ) {
     super(InnerNetObjectType.LobbyBehaviour, netId, parent);
   }
 

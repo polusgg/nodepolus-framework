@@ -1,6 +1,6 @@
 import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { DataPacket, DespawnPacket, RPCPacket, SceneChangePacket, SpawnPacket } from "../protocol/packets/gameData";
-import { EntityLevel, InnerNetObject, LobbyImplementation } from "../protocol/entities/types";
+import { BaseInnerNetObject, EntityLevel, LobbyImplementation } from "../protocol/entities/types";
 import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
 import { GameDataPacketDataType, LobbyListing } from "../protocol/packets/root/types";
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
@@ -175,7 +175,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
     this.sendRemoveHost(connection, sendImmediately);
   }
 
-  findInnerNetObject(netId: number): InnerNetObject | undefined {
+  findInnerNetObject(netId: number): BaseInnerNetObject | undefined {
     switch (netId) {
       case this.lobbyBehavior?.lobbyBehaviour.netId:
         return this.lobbyBehavior!.lobbyBehaviour;
@@ -184,7 +184,6 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
       case this.gameData?.voteBanSystem.netId:
         return this.gameData!.voteBanSystem;
       case this.shipStatus?.innerNetObjects[0].netId:
-        //@ts-ignore Talk to Cody about this?
         return this.shipStatus!.innerNetObjects[0];
       case this.meetingHud?.meetingHud.netId:
         return this.meetingHud!.meetingHud;
@@ -341,7 +340,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
     }
   }
 
-  sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, sendTo?: (Player | HostInstance)[]): void {
+  sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: (Player | HostInstance)[]): void {
     const sendToConnections: Connection[] = new Array(sendTo?.length ?? 0);
 
     if (sendTo) {
@@ -409,7 +408,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
     }
   }
 
-  despawn(innerNetObject: InnerNetObject): void {
+  despawn(innerNetObject: BaseInnerNetObject): void {
     this.emit("despawn", innerNetObject);
 
     this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.netId)], this.code));
@@ -537,10 +536,8 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
           velocity: (netObject as InnerCustomNetworkTransform).velocity,
         });
 
-        //@ts-ignore Talk to Cody about this?
         this.sendUnreliableRootGamePacket(new GameDataPacket([netObject.data(oldNetObject)], this.code), sendTo ?? []);
       } else {
-      //@ts-ignore Talk to Cody about this?
         this.sendRootGamePacket(new GameDataPacket([netObject.data(oldNetObject)], this.code), sendTo ?? []);
       }
     } else {

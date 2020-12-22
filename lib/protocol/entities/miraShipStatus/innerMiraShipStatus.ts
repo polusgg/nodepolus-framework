@@ -4,8 +4,11 @@ import { BaseShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../types/enums";
 import { EntityMiraShipStatus } from ".";
 
-export class InnerMiraShipStatus extends BaseShipStatus<InnerMiraShipStatus, EntityMiraShipStatus> {
-  constructor(netId: number, public parent: EntityMiraShipStatus) {
+export class InnerMiraShipStatus extends BaseShipStatus {
+  constructor(
+    netId: number,
+    public parent: EntityMiraShipStatus,
+  ) {
     super(InnerNetObjectType.MiraShipStatus, netId, parent, [
       SystemType.Reactor,
       SystemType.Electrical,

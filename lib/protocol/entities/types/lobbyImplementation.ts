@@ -1,8 +1,8 @@
+import { BaseInnerNetObject, EntityLevel } from ".";
 import { BaseRPCPacket } from "../../packets/rpc";
 import { GameState } from "../../../types/enums";
 import { EntityMeetingHud } from "../meetingHud";
 import { GameOptionsData } from "../../../types";
-import { EntityLevel, InnerNetObject } from ".";
 import { EntityGameData } from "../gameData";
 import { HostInstance } from "../../../host";
 import { Player } from "../../../player";
@@ -16,5 +16,5 @@ export interface LobbyImplementation {
   customHostInstance: HostInstance;
   gameState: GameState;
 
-  sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, sendTo?: (Player | HostInstance)[]): void;
+  sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: (Player | HostInstance)[]): void;
 }

@@ -4,13 +4,16 @@ import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { AddVotePacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
-import { BaseGameObject } from "../types";
+import { BaseInnerNetObject } from "../types";
 import { EntityGameData } from ".";
 
-export class InnerVoteBanSystem extends BaseGameObject<InnerVoteBanSystem> {
+export class InnerVoteBanSystem extends BaseInnerNetObject {
   public votes: Map<number, number[]> = new Map<number, number[]>();
 
-  constructor(netId: number, public parent: EntityGameData) {
+  constructor(
+    netId: number,
+    public parent: EntityGameData,
+  ) {
     super(InnerNetObjectType.VoteBanSystem, netId, parent);
   }
 

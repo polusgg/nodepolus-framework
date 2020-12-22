@@ -6,15 +6,18 @@ import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { EntityMeetingHud, VoteState } from ".";
 import { Connection } from "../../connection";
-import { BaseGameObject } from "../types";
+import { BaseInnerNetObject } from "../types";
 
-export class InnerMeetingHud extends BaseGameObject<InnerMeetingHud> {
+export class InnerMeetingHud extends BaseInnerNetObject {
   public playerStates: VoteState[] = [];
   public ended = false;
   public isTie = false;
   public exiledPlayer = 0xff;
 
-  constructor(public netId: number, public parent: EntityMeetingHud) {
+  constructor(
+    netId: number,
+    public parent: EntityMeetingHud,
+  ) {
     super(InnerNetObjectType.MeetingHud, netId, parent);
   }
 

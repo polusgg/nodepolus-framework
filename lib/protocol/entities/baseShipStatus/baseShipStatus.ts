@@ -1,10 +1,10 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { RepairAmount } from "../../packets/rpc/repairSystem/amounts";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { BaseInnerNetEntity, BaseInnerNetObject } from "../types";
 import { Level, SystemType } from "../../../types/enums";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
-import { BaseGameObject, Entity } from "../types";
 import { InternalSystemType } from ".";
 import {
   AirshipReactorSystem,
@@ -41,13 +41,19 @@ type System = AirshipReactorSystem
 | SecurityCameraSystem
 | SwitchSystem;
 
-export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject<T> {
+export abstract class BaseShipStatus extends BaseInnerNetObject {
   public systems: BaseSystem<System>[] = [];
   public spawnSystemTypes: SystemType[];
 
   private readonly level: Level;
 
-  protected constructor(public type: InnerNetObjectType, netId: number, parent: U, public systemTypes: SystemType[], spawnSystemTypes?: SystemType[]) {
+  protected constructor(
+    public type: InnerNetObjectType,
+    netId: number,
+    parent: BaseInnerNetEntity,
+    public systemTypes: SystemType[],
+    spawnSystemTypes?: SystemType[],
+  ) {
     super(type, netId, parent);
 
     this.spawnSystemTypes = spawnSystemTypes ?? this.systemTypes;
@@ -75,13 +81,15 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
     this.initializeSystems();
   }
 
+  abstract clone(): BaseShipStatus;
+
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   closeDoorsOfType(_systemId: SystemType): void {}
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   repairSystem(_systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
 
-  getData(old: BaseShipStatus<T, U>): DataPacket {
+  getData(old: BaseShipStatus): DataPacket {
     const changedSystemTypes: SystemType[] = this.systems.map((currentSystem, systemIndex) => {
       const oldSystem = old.systems[systemIndex];
 
@@ -270,8 +278,8 @@ export abstract class BaseShipStatus<T, U extends Entity> extends BaseGameObject
   }
 
   private getSystems(old: undefined, systems: SystemType[], fromSpawn: true): MessageWriter;
-  private getSystems(old: BaseShipStatus<T, U>, systems: SystemType[], fromSpawn: false): MessageWriter;
-  private getSystems(old: BaseShipStatus<T, U> | undefined, systems: SystemType[], fromSpawn: boolean): MessageWriter {
+  private getSystems(old: BaseShipStatus, systems: SystemType[], fromSpawn: false): MessageWriter;
+  private getSystems(old: BaseShipStatus | undefined, systems: SystemType[], fromSpawn: boolean): MessageWriter {
     const writers: MessageWriter[] = new Array(systems.length);
 
     for (let i = 0; i < systems.length; i++) {

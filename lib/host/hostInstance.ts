@@ -1,7 +1,7 @@
 import { RepairAmount } from "../protocol/packets/rpc/repairSystem/amounts";
+import { BaseShipStatus } from "../protocol/entities/baseShipStatus";
 import { InnerPlayerControl } from "../protocol/entities/player";
 import { PlayerColor, SystemType } from "../types/enums";
-import { InnerLevel } from "../protocol/entities/types";
 import { Connection } from "../protocol/connection";
 import { ClientInstance } from "../client";
 
@@ -16,9 +16,9 @@ export interface HostInstance extends ClientInstance {
 
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void;
 
-  handleRepairSystem(sender: InnerLevel, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void;
+  handleRepairSystem(sender: BaseShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void;
 
-  handleCloseDoorsOfType(sender: InnerLevel, systemId: SystemType): void;
+  handleCloseDoorsOfType(sender: BaseShipStatus, systemId: SystemType): void;
 
   handleSetStartCounter(sequenceId: number, timeRemaining: number): void;
 

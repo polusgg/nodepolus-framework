@@ -1,4 +1,4 @@
-import { LobbyImplementation, EntityLevel, InnerNetObject } from "../protocol/entities/types";
+import { LobbyImplementation, EntityLevel, BaseInnerNetObject } from "../protocol/entities/types";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { GameDataPacket } from "../protocol/packets/root";
@@ -25,7 +25,7 @@ export class ProxyLobby implements LobbyImplementation {
     public code: string,
   ) {}
 
-  sendRPCPacket(from: InnerNetObject, packet: BaseRPCPacket, _sendTo?: (Player | HostInstance)[]): void {
+  sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, _sendTo?: (Player | HostInstance)[]): void {
     this.proxy.serverConnection.write(new GameDataPacket([
       new RPCPacket(from.netId, packet),
     ], this.code));

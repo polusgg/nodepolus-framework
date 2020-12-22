@@ -1,15 +1,13 @@
+import { BaseInnerNetEntity, LobbyImplementation } from "../types";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { BaseEntity, LobbyImplementation } from "../types";
 import { SpawnPacket } from "../../packets/gameData";
 import { InnerAirshipStatus } from ".";
 
-export type AirshipStatusInnerNetObjects = [ InnerAirshipStatus ];
-
-export class EntityAirshipStatus extends BaseEntity {
+export class EntityAirshipStatus extends BaseInnerNetEntity {
   public owner!: number;
   public flags: SpawnFlag = SpawnFlag.None;
-  public innerNetObjects!: AirshipStatusInnerNetObjects;
+  public innerNetObjects!: [ InnerAirshipStatus ];
 
   get aprilShipStatus(): InnerAirshipStatus {
     return this.innerNetObjects[0];

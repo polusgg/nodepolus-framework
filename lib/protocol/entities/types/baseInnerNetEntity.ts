@@ -1,9 +1,13 @@
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { BaseInnerNetObject, LobbyImplementation } from ".";
 import { SpawnType, SpawnFlag } from "../../../types/enums";
 import { SpawnPacket } from "../../packets/gameData";
-import { LobbyImplementation } from ".";
 
-export abstract class BaseEntity {
+export abstract class BaseInnerNetEntity {
+  public owner!: number;
+  public flags!: SpawnFlag;
+  public innerNetObjects!: BaseInnerNetObject[];
+
   constructor(
     public readonly type: SpawnType,
     public readonly lobby: LobbyImplementation,

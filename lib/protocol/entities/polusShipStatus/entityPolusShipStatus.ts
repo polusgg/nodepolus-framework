@@ -1,15 +1,13 @@
+import { BaseInnerNetEntity, LobbyImplementation } from "../types";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { BaseEntity, LobbyImplementation } from "../types";
 import { SpawnPacket } from "../../packets/gameData";
 import { InnerPolusShipStatus } from ".";
 
-export type PolusShipStatusInnerNetObjects = [ InnerPolusShipStatus ];
-
-export class EntityPolusShipStatus extends BaseEntity {
+export class EntityPolusShipStatus extends BaseInnerNetEntity {
   public owner!: number;
   public flags: SpawnFlag = SpawnFlag.None;
-  public innerNetObjects!: PolusShipStatusInnerNetObjects;
+  public innerNetObjects!: [ InnerPolusShipStatus ];
 
   get planetMap(): InnerPolusShipStatus {
     return this.innerNetObjects[0];
