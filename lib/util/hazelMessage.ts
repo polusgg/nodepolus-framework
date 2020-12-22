@@ -44,12 +44,14 @@ export class MessageWriter extends HazelMessage {
     const start = this.messageStarts.pop();
 
     if (start) {
-      if (this.cursor - start > MaxValue.UInt16) {
-        throw new Error(`Message length longer than UInt16 max of ${MaxValue.UInt16}`);
+      const length = this.cursor - start;
+
+      if (length > MaxValue.UInt16) {
+        throw new Error(`Message length is greater than UInt16 max: ${length} <= ${MaxValue.UInt16}`);
       }
 
-      this.buffer[start - 3] = (this.cursor - start) % 256;
-      this.buffer[start - 2] = (this.cursor - start >> 8) % 256;
+      this.buffer[start - 3] = (length) % 256;
+      this.buffer[start - 2] = (length >> 8) % 256;
     } else {
       throw new Error("No open nested messages to end");
     }
@@ -402,7 +404,6 @@ export class MessageReader extends HazelMessage {
     const results: T[] = [];
 
     for (let i = 0; i < length; i++) {
-      // results.push(reader(this));
       results.push(reader(this));
     }
 
