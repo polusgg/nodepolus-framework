@@ -63,7 +63,7 @@ export class SabotageSystemHandler {
     for (let i = 0; i < system.expectedSwitches.bits.length; i++) {
       const pos = Math.floor(Math.random() * (system.expectedSwitches.bits.length - i)) * i;
 
-      system.actualSwitches[pos] = !system.expectedSwitches.bits[pos];
+      system.actualSwitches.bits[pos] = !system.expectedSwitches.bits[pos];
     }
 
     // TODO: Actually count down like every other system (like -85 every second)
