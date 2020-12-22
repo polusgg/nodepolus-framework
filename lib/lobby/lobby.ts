@@ -479,7 +479,6 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         }
         break;
       case GameDataPacketType.Despawn:
-
         break;
       case GameDataPacketType.RPC:
         if (!this.ignoredNetIds.includes((packet as RPCPacket).senderNetId)) {
