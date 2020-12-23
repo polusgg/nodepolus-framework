@@ -1,7 +1,7 @@
 import { GameDataPacket, JoinGameResponsePacket, RemovePlayerPacket } from "../../protocol/packets/root";
 import { PlayerColor, PlayerHat, PlayerPet, PlayerSkin, PlayerState } from "../../types/enums";
+import { PlayerData } from "../../protocol/entities/gameData/types";
 import { DespawnPacket } from "../../protocol/packets/gameData";
-import { PlayerData } from "../../protocol/entities/gameData";
 import { EntityPlayer } from "../../protocol/entities/player";
 import { Player as InternalPlayer } from "../../player";
 import { DisconnectReason, Vector2 } from "../../types";

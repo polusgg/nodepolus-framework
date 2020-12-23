@@ -1,5 +1,5 @@
-import { PlayerColor, PlayerFlagMask, PlayerHat, PlayerPet, PlayerSkin } from "../../../types/enums";
-import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { PlayerColor, PlayerFlagMask, PlayerHat, PlayerPet, PlayerSkin } from "../../../../types/enums";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 
 export class PlayerData {
   constructor(

@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { VoteState } from "../../entities/meetingHud";
+import { VoteState } from "../../entities/meetingHud/types";
 import { RPCPacketType } from "../types/enums";
 import { BaseRPCPacket } from ".";
 

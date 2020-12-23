@@ -1,8 +1,9 @@
 import { BaseInnerNetEntity, LobbyImplementation } from "../types";
-import { InnerGameData, InnerVoteBanSystem, PlayerData } from ".";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { GLOBAL_OWNER } from "../../../util/constants";
+import { InnerGameData, InnerVoteBanSystem } from ".";
 import { SpawnPacket } from "../../packets/gameData";
+import { PlayerData } from "./types";
 
 export class EntityGameData extends BaseInnerNetEntity {
   public innerNetObjects: [ InnerGameData, InnerVoteBanSystem ];

@@ -1,11 +1,13 @@
 import { ChatNoteType, GameState, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SystemType } from "../types/enums";
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
-import { InnerGameData, InnerVoteBanSystem, PlayerData } from "../protocol/entities/gameData";
 import { LadderSize, LadderDirection } from "../protocol/packets/rpc/climbLadderPacket";
-import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud";
+import { InnerGameData, InnerVoteBanSystem } from "../protocol/entities/gameData";
 import { RepairAmount } from "../protocol/packets/rpc/repairSystem/amounts";
 import { BaseInnerShipStatus } from "../protocol/entities/baseShipStatus";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
+import { InnerMeetingHud } from "../protocol/entities/meetingHud";
+import { VoteState } from "../protocol/entities/meetingHud/types";
+import { PlayerData } from "../protocol/entities/gameData/types";
 import { RPCPacketType } from "../protocol/packets/types/enums";
 import { Connection } from "../protocol/connection";
 import { GameOptionsData, Vector2 } from "../types";

@@ -3,9 +3,10 @@ import { SetTasksPacket, UpdateGameDataPacket } from "../../packets/rpc";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
-import { EntityGameData, PlayerData } from ".";
 import { Connection } from "../../connection";
 import { BaseInnerNetObject } from "../types";
+import { PlayerData } from "./types";
+import { EntityGameData } from ".";
 
 export class InnerGameData extends BaseInnerNetObject {
   constructor(

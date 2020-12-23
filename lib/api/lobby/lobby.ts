@@ -1,4 +1,4 @@
-import { PlayerData } from "../../protocol/entities/gameData";
+import { PlayerData } from "../../protocol/entities/gameData/types";
 import { EntityPlayer } from "../../protocol/entities/player";
 import { CodeObject, LobbyEvents, LobbySettings } from ".";
 import { Player as InternalPlayer } from "../../player";

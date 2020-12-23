@@ -1,5 +1,5 @@
-import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { VoteStateMask } from "../../../types/enums";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { VoteStateMask } from "../../../../types/enums";
 
 export class VoteState {
   constructor(

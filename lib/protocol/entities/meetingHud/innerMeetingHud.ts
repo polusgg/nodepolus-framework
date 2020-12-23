@@ -4,9 +4,10 @@ import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { shallowEqual } from "../../../util/functions";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
-import { EntityMeetingHud, VoteState } from ".";
 import { Connection } from "../../connection";
 import { BaseInnerNetObject } from "../types";
+import { EntityMeetingHud } from ".";
+import { VoteState } from "./types";
 
 export class InnerMeetingHud extends BaseInnerNetObject {
   public playerStates: VoteState[] = [];

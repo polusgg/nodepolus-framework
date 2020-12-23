@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { PlayerData } from "../../entities/gameData";
+import { PlayerData } from "../../entities/gameData/types";
 import { RPCPacketType } from "../types/enums";
 import { BaseRPCPacket } from ".";
 
