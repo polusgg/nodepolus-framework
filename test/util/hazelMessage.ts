@@ -1,4 +1,5 @@
 import { MessageReader, MessageWriter } from "../../lib/util/hazelMessage";
+import { MaxValue, MinValue } from "../../lib/util/constants";
 import test from "ava";
 
 type Example = {
@@ -437,4 +438,48 @@ test("reads remaining bytes", t => {
   t.false(child!.hasBytesLeft());
   t.is(buf.readUInt32(), 1123477094);
   t.false(buf.hasBytesLeft());
+});
+
+test("throws an error when writing values outside of the allowed range", t => {
+  const buf = new MessageWriter();
+
+  t.throws(() => buf.writeSByte(MinValue.Int8 - 1));
+  t.throws(() => buf.writeSByte(MaxValue.Int8 + 1));
+
+  t.throws(() => buf.writeByte(MinValue.UInt8 - 1));
+  t.throws(() => buf.writeByte(MaxValue.UInt8 + 1));
+
+  t.throws(() => buf.writeInt16(MinValue.Int16 - 1));
+  t.throws(() => buf.writeInt16(MaxValue.Int16 + 1));
+
+  t.throws(() => buf.writeUInt16(MinValue.UInt16 - 1));
+  t.throws(() => buf.writeUInt16(MaxValue.UInt16 + 1));
+
+  t.throws(() => buf.writeInt32(MinValue.Int32 - 1));
+  t.throws(() => buf.writeInt32(MaxValue.Int32 + 1));
+
+  t.throws(() => buf.writeUInt32(MinValue.UInt32 - 1));
+  t.throws(() => buf.writeUInt32(MaxValue.UInt32 + 1));
+
+  t.throws(() => buf.writePackedInt32(MinValue.Int32 - 1));
+  t.throws(() => buf.writePackedInt32(MaxValue.Int32 + 1));
+
+  t.throws(() => buf.writePackedUInt32(MinValue.UInt32 - 1));
+  t.throws(() => buf.writePackedUInt32(MaxValue.UInt32 + 1));
+});
+
+test("throws an error when trying to end a message without an open message", t => {
+  const buf = new MessageWriter();
+
+  t.throws(() => buf.endMessage());
+});
+
+test("throws an error when writing a message that is too large", t => {
+  const buf = new MessageWriter();
+
+  buf.startMessage(0);
+
+  buf.writeBytes(Array(MaxValue.UInt16 + 1).fill(false));
+
+  t.throws(() => buf.endMessage());
 });
