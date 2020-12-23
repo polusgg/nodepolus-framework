@@ -1,7 +1,7 @@
-import { RootPacketDataType } from "../hazel/types";
+import { BaseRootPacket } from "../root";
 
 export interface AwaitingPacket {
-  packet: RootPacketDataType;
+  packet: BaseRootPacket;
 
   resolve(value?: unknown): void;
 }

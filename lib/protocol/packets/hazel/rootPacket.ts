@@ -1,7 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { RootPacketType } from "../types/enums";
 import { Level } from "../../../types/enums";
-import { RootPacketDataType } from "./types";
 import {
   AlterGameTagPacket,
   EndGamePacket,
@@ -22,13 +21,14 @@ import {
   ReselectServerPacket,
   StartGamePacket,
   WaitForHostPacket,
+  BaseRootPacket,
 } from "../root";
 
 export class RootPacket {
-  constructor(public readonly packets: RootPacketDataType[]) {}
+  constructor(public readonly packets: BaseRootPacket[]) {}
 
   static deserialize(reader: MessageReader, clientBound: boolean, level?: Level): RootPacket {
-    const packets: RootPacketDataType[] = [];
+    const packets: BaseRootPacket[] = [];
 
     reader.readAllChildMessages(child => {
       switch (child.tag) {

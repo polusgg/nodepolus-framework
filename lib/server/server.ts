@@ -1,7 +1,6 @@
 import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
 import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
-import { RootPacketDataType } from "../protocol/packets/hazel/types";
 import { DisconnectReasonType, FakeClientId } from "../types/enums";
 import { LobbyCreatedEvent } from "../api/events/server";
 import { Connection } from "../protocol/connection";
@@ -113,7 +112,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
     newConnection.id = this.getNextConnectionId();
 
-    newConnection.on("packet", (evt: RootPacketDataType) => this.handlePacket(evt, newConnection));
+    newConnection.on("packet", (evt: BaseRootPacket) => this.handlePacket(evt, newConnection));
     newConnection.on("disconnected", (reason?: DisconnectReason) => {
       this.handleDisconnection(newConnection, reason);
     });

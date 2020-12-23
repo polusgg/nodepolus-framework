@@ -1,13 +1,12 @@
-import { CacheDataPacket, AnnouncementDataPacket, FreeWeekendPacket } from "../announcement";
+import { CacheDataPacket, AnnouncementDataPacket, FreeWeekendPacket, BaseAnnouncementPacket } from "../announcement";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { AnnouncementPacketType } from "../types/enums";
-import { AnnouncementPacketDataType } from "./types";
 
 export class RootAnnouncementPacket {
-  constructor(public readonly packets: AnnouncementPacketDataType[]) {}
+  constructor(public readonly packets: BaseAnnouncementPacket[]) {}
 
   static deserialize(reader: MessageReader): RootAnnouncementPacket {
-    const packets: AnnouncementPacketDataType[] = [];
+    const packets: BaseAnnouncementPacket[] = [];
 
     reader.readAllChildMessages(child => {
       switch (child.tag) {

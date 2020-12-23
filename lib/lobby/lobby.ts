@@ -5,7 +5,6 @@ import { GameDataPacketDataType, LobbyListing } from "../protocol/packets/root/t
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
-import { RootPacketDataType } from "../protocol/packets/hazel/types";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { BaseInnerNetObject } from "../protocol/entities/types";
@@ -217,7 +216,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyInstance,
     return this.connections.find(con => con.id == id);
   }
 
-  handlePacket(packet: RootPacketDataType, sender: Connection): void {
+  handlePacket(packet: BaseRootPacket, sender: Connection): void {
     switch (packet.type) {
       case RootPacketType.AlterGameTag: {
         const data = packet as AlterGameTagPacket;
@@ -382,7 +381,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyInstance,
     if (!connection.lobby) {
       connection.lobby = this;
 
-      connection.on("packet", (packet: RootPacketDataType) => {
+      connection.on("packet", (packet: BaseRootPacket) => {
         this.handlePacket(packet, connection);
       });
     }

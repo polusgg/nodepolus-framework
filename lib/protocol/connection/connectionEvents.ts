@@ -1,8 +1,8 @@
-import { RootPacketDataType } from "../packets/hazel/types";
+import { BaseRootPacket } from "../packets/root";
 import { DisconnectReason } from "../../types";
 
 export type ConnectionEvents = {
-  packet: RootPacketDataType;
+  packet: BaseRootPacket;
   disconnected?: DisconnectReason;
   message: Buffer;
 };

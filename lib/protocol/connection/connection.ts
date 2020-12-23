@@ -1,4 +1,4 @@
-import { GameDataPacket, KickPlayerPacket, LateRejectionPacket, WaitForHostPacket } from "../packets/root";
+import { BaseRootPacket, GameDataPacket, KickPlayerPacket, LateRejectionPacket, WaitForHostPacket } from "../packets/root";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { PacketDestination, HazelPacketType } from "../packets/types/enums";
 import { LimboState, PlayerColor, SystemType } from "../../types/enums";
@@ -7,7 +7,6 @@ import { MessageReader, MessageWriter } from "../../util/hazelMessage";
 import { ReadyPacket, SceneChangePacket } from "../packets/gameData";
 import { RepairAmount } from "../packets/rpc/repairSystem/amounts";
 import { BaseInnerShipStatus } from "../entities/baseShipStatus";
-import { RootPacketDataType } from "../packets/hazel/types";
 import { InnerPlayerControl } from "../entities/player";
 import { AwaitingPacket } from "../packets/types";
 import { HostInstance } from "../../host";
@@ -39,7 +38,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
   private initialized = false;
   private packetBuffer: AwaitingPacket[] = [];
-  private unreliablePacketBuffer: RootPacketDataType[] = [];
+  private unreliablePacketBuffer: BaseRootPacket[] = [];
   private nonceIndex = 1;
   private disconnectTimeout: NodeJS.Timeout | undefined;
   private lastPingReceivedTime: number = Date.now();
@@ -113,7 +112,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     return Date.now() - this.lastPingReceivedTime;
   }
 
-  async write(packet: RootPacketDataType): Promise<void> {
+  async write(packet: BaseRootPacket): Promise<void> {
     return new Promise(resolve => {
       this.packetBuffer.push({ packet, resolve });
     });
@@ -140,11 +139,11 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     // }
   }
 
-  writeUnreliable(packet: RootPacketDataType): void {
+  writeUnreliable(packet: BaseRootPacket): void {
     this.unreliablePacketBuffer.push(packet);
   }
 
-  async sendReliable(packets: RootPacketDataType[]): Promise<void> {
+  async sendReliable(packets: BaseRootPacket[]): Promise<void> {
     return new Promise(resolve => {
       const temp: AwaitingPacket[] = [...this.packetBuffer];
 
@@ -154,8 +153,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     });
   }
 
-  sendUnreliable(packets: RootPacketDataType[]): void {
-    const temp: RootPacketDataType[] = [...this.unreliablePacketBuffer];
+  sendUnreliable(packets: BaseRootPacket[]): void {
+    const temp: BaseRootPacket[] = [...this.unreliablePacketBuffer];
 
     this.unreliablePacketBuffer = packets;
 
@@ -171,7 +170,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
     let nonce: number | undefined;
     let packet: Packet;
-    let packetBuffer: RootPacketDataType[] = [];
+    let packetBuffer: BaseRootPacket[] = [];
 
     if (reliable) {
       nonce = this.nonceIndex++ % 65536;
@@ -394,7 +393,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private log(packet: RootPacketDataType, parsed: Packet, isToServer: boolean): void {
+  private log(packet: BaseRootPacket, parsed: Packet, isToServer: boolean): void {
     // if (!parsed.isReliable) {
     //   return;
     // }
