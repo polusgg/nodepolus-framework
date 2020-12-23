@@ -19,7 +19,7 @@ export class Palette {
   public static readonly white: Color = [255, 255, 255, 255];
   public static readonly lightBlue: Color = [127, 127, 255, 255];
   public static readonly blue: Color = [51, 51, 255, 255];
-  public static readonly orange: Color = [255, 153, 0.005, 255];
+  public static readonly orange: Color = [255, 153, 1, 255];
   public static readonly purple: Color = [153, 25, 153, 255];
   public static readonly brown: Color = [183, 109, 28, 255];
   public static readonly crewmateBlue: Color = [140, 255, 255, 255];
