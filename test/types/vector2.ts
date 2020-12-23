@@ -4,20 +4,23 @@ import { Vector2 } from "../../lib/types";
 import test from "ava";
 
 test("reads a vector2", t => {
-  const buf = MessageReader.fromMessage("040001ff7fff7f");
-  const vec = Vector2.deserialize(buf);
+  const buf = MessageReader.fromRawBytes("ff7fff7fffff0000");
+  const vecOne = Vector2.deserialize(buf);
+  const vecTwo = Vector2.deserialize(buf);
 
-  t.true(isFloatEqual(vec.x, 0, 0.001));
-  t.true(isFloatEqual(vec.y, 0, 0.001));
+  t.true(isFloatEqual(vecOne.x, 0, 0.001));
+  t.true(isFloatEqual(vecOne.y, 0, 0.001));
+  t.true(isFloatEqual(vecTwo.x, 40, 0.001));
+  t.true(isFloatEqual(vecTwo.y, -40, 0.001));
 });
 
 test("writes a vector2", t => {
-  const buf = new MessageWriter().startMessage(1);
-  const vec = new Vector2(0, 0);
+  const buf = new MessageWriter();
+  const vecOne = new Vector2(0, 0);
+  const vecTwo = new Vector2(40, -40);
 
-  vec.serialize(buf);
+  vecOne.serialize(buf);
+  vecTwo.serialize(buf);
 
-  buf.endMessage();
-
-  t.is(buf.buffer.toString("hex"), "040001ff7fff7f");
+  t.is(buf.buffer.toString("hex"), "ff7fff7fffff0000");
 });

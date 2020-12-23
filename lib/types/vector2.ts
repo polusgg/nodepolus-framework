@@ -18,15 +18,15 @@ export class Vector2 {
     writer.writeUInt16(Vector2.unlerp(-40, 40, this.y) * 65535.0);
   }
 
-  private static lerp(min: number, max: number, val: number): number {
-    return min + ((max - min) * Vector2.clamp(0, 1, val));
+  private static lerp(min: number, max: number, value: number): number {
+    return min + ((max - min) * Vector2.clamp(0.0, 1.0, value));
   }
 
-  private static unlerp(min: number, max: number, val: number): number {
-    return Vector2.clamp(0, 1, (val - min) / (max - min));
+  private static unlerp(min: number, max: number, value: number): number {
+    return Vector2.clamp(0.0, 1.0, (value - min) / (max - min));
   }
 
-  private static clamp(min: number, max: number, val: number): number {
-    return Math.max(Math.min(val, max), min);
+  private static clamp(min: number, max: number, value: number): number {
+    return Math.max(Math.min(value, max), min);
   }
 }
