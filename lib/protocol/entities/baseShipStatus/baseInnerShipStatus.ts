@@ -81,11 +81,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         throw new Error(`Attempted comparison of two disperate SystemTypes: expected ${currentSystem.type} (${SystemType[currentSystem.type]}) but got ${oldSystem.type} (${SystemType[oldSystem.type]})`);
       }
 
-      // console.log({ oldSystem, currentSystem });
-
       const isEqual = currentSystem.equals(oldSystem);
-
-      // console.log(currentSystem.type, isEqual);
 
       if (!isEqual) {
         return currentSystem.type;
@@ -251,8 +247,6 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
       const system = this.getSystemFromType(systems[i]);
 
       system.data(data);
-
-      // console.log("Deserialized", system, "current reader", data);
     }
   }
 
@@ -261,8 +255,6 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
 
     for (let i = 0; i < systems.length; i++) {
       const system = this.getSystemFromType(systems[i]);
-
-      // console.log("Current status at cursor", this);
 
       if (old) {
         writers[i] = system.data(old.getSystemFromType(systems[i]));

@@ -97,7 +97,6 @@ export class InnerMeetingHud extends BaseInnerNetObject {
 
     for (let i = 0; i < this.playerStates.length; i++) {
       if (!shallowEqual(states[i], this.playerStates[i])) {
-        // console.log(states[i], this.playerStates[i], 1 << i);
         n |= 1 << i;
       }
     }

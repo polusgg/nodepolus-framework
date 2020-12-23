@@ -169,16 +169,12 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
       return;
     }
 
-    // console.log("Flushing with", this.packetBuffer.length, "packets");
-
     let nonce: number | undefined;
     let packet: Packet;
     let packetBuffer: RootPacketDataType[] = [];
 
     if (reliable) {
       nonce = this.nonceIndex++ % 65536;
-
-      // console.log(this.nonceIndex);
 
       const packetArr = new Array(this.packetBuffer.length);
       const resolveFuncs = new Array(this.packetBuffer.length);

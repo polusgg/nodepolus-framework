@@ -373,8 +373,6 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
       this.migrateHost();
     }
 
-    // console.log("handleDisconnect host id", 0);
-
     this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, 0, reason));
   }
 
