@@ -10,14 +10,6 @@ export class AutoDoorsSystem extends BaseSystem {
     super(SystemType.Doors);
   }
 
-  static spawn(data: MessageReader): AutoDoorsSystem {
-    const autoDoorsSystem = new AutoDoorsSystem();
-
-    autoDoorsSystem.setSpawn(data);
-
-    return autoDoorsSystem;
-  }
-
   getData(old: AutoDoorsSystem): MessageWriter {
     const writer = new MessageWriter();
     let mask = 0;
@@ -52,12 +44,6 @@ export class AutoDoorsSystem extends BaseSystem {
     }
 
     return writer;
-  }
-
-  setSpawn(data: MessageReader): void {
-    for (let i = 0; i < this.doors.length; i++) {
-      this.doors[i] = data.readBoolean();
-    }
   }
 
   equals(old: AutoDoorsSystem): boolean {

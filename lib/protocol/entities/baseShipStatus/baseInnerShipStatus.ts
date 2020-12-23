@@ -96,7 +96,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
 
     const writer = new MessageWriter()
       .writePackedUInt32(this.serializeSystemsToDirtyBits(changedSystemTypes))
-      .writeBytes(this.getSystems(old, changedSystemTypes, false));
+      .writeBytes(this.getSystems(old, changedSystemTypes));
 
     return new DataPacket(
       this.netId,
@@ -110,14 +110,13 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     this.setSystems(
       this.deserializeDirtyBitsToSystems(reader.readPackedUInt32()),
       reader.readRemainingBytes(),
-      false,
     );
   }
 
   serializeSpawn(): SpawnInnerNetObject {
     return new SpawnInnerNetObject(
       this.netId,
-      this.getSystems(undefined, this.spawnSystemTypes, true),
+      this.getSystems(undefined, this.spawnSystemTypes),
     );
   }
 
@@ -247,19 +246,17 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     return systemTypes;
   }
 
-  private setSystems(systems: SystemType[], data: MessageReader, fromSpawn: boolean): void {
+  private setSystems(systems: SystemType[], data: MessageReader): void {
     for (let i = 0; i < systems.length; i++) {
       const system = this.getSystemFromType(systems[i]);
 
-      system[fromSpawn ? "spawn" : "data"](data);
+      system.data(data);
 
       // console.log("Deserialized", system, "current reader", data);
     }
   }
 
-  private getSystems(old: undefined, systems: SystemType[], fromSpawn: true): MessageWriter;
-  private getSystems(old: BaseInnerShipStatus, systems: SystemType[], fromSpawn: false): MessageWriter;
-  private getSystems(old: BaseInnerShipStatus | undefined, systems: SystemType[], fromSpawn: boolean): MessageWriter {
+  private getSystems(old: BaseInnerShipStatus | undefined, systems: SystemType[]): MessageWriter {
     const writers: MessageWriter[] = new Array(systems.length);
 
     for (let i = 0; i < systems.length; i++) {
@@ -267,10 +264,10 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
 
       // console.log("Current status at cursor", this);
 
-      if (fromSpawn) {
-        writers[i] = system.spawn();
+      if (old) {
+        writers[i] = system.data(old.getSystemFromType(systems[i]));
       } else {
-        writers[i] = system.data(old!.getSystemFromType(systems[i]));
+        writers[i] = system.getSpawn();
       }
     }
 

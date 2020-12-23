@@ -10,8 +10,6 @@ export abstract class BaseSystem {
 
   abstract getSpawn(): MessageWriter;
 
-  abstract setSpawn(packet: MessageReader): void;
-
   abstract equals(old: BaseSystem): boolean;
 
   abstract clone(): BaseSystem;
@@ -23,16 +21,6 @@ export abstract class BaseSystem {
       this.setData(arg0);
     } else {
       return this.getData(arg0);
-    }
-  }
-
-  spawn(packet: MessageReader): undefined;
-  spawn(): MessageWriter;
-  spawn(fromPacket?: MessageReader): MessageWriter | undefined {
-    if (fromPacket) {
-      this.setSpawn(fromPacket);
-    } else {
-      return this.getSpawn();
     }
   }
 }

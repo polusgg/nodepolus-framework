@@ -10,20 +10,13 @@ export class LaboratorySystem extends BaseSystem {
     super(SystemType.Laboratory);
   }
 
-  static spawn(data: MessageReader): LaboratorySystem {
-    const laboratorySystem = new LaboratorySystem();
-
-    laboratorySystem.setSpawn(data);
-
-    return laboratorySystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
+    this.timer = data.readFloat32();
+    this.userConsoles = new Map(data.readList(reader => [reader.readByte(), reader.readByte()]));
   }
 
   getSpawn(): MessageWriter {
@@ -33,13 +26,6 @@ export class LaboratorySystem extends BaseSystem {
         writer.writeByte(pair[0]);
         writer.writeByte(pair[1]);
       });
-  }
-
-  setSpawn(data: MessageReader): void {
-    console.table({ data });
-
-    this.timer = data.readFloat32();
-    this.userConsoles = new Map(data.readList(reader => [reader.readByte(), reader.readByte()]));
   }
 
   equals(old: LaboratorySystem): boolean {

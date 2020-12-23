@@ -16,30 +16,11 @@ export class MovingPlatformSystem extends BaseSystem {
     super(SystemType.Weapons);
   }
 
-  static spawn(data: MessageReader): MovingPlatformSystem {
-    const movingPlatformSystem = new MovingPlatformSystem();
-
-    movingPlatformSystem.setSpawn(data);
-
-    return movingPlatformSystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
-  }
-
-  getSpawn(): MessageWriter {
-    return new MessageWriter()
-      .writeByte(this.sequenceId % 256)
-      .writeInt32(this.innerPlayerControlNetId ?? -1)
-      .writeByte(this.side);
-  }
-
-  setSpawn(data: MessageReader): void {
     this.sequenceId = data.readByte();
 
     const innerPlayerControlNetId = data.readInt32();
@@ -49,6 +30,13 @@ export class MovingPlatformSystem extends BaseSystem {
     }
 
     this.side = data.readByte();
+  }
+
+  getSpawn(): MessageWriter {
+    return new MessageWriter()
+      .writeByte(this.sequenceId % 256)
+      .writeInt32(this.innerPlayerControlNetId ?? -1)
+      .writeByte(this.side);
   }
 
   equals(old: MovingPlatformSystem): boolean {

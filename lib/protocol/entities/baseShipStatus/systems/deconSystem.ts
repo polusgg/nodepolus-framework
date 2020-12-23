@@ -10,31 +10,19 @@ export class DeconSystem extends BaseSystem {
     super(SystemType.Decontamination);
   }
 
-  static spawn(data: MessageReader): DeconSystem {
-    const deconSystem = new DeconSystem();
-
-    deconSystem.setSpawn(data);
-
-    return deconSystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
+    this.timer = data.readByte();
+    this.state = data.readByte();
   }
 
   getSpawn(): MessageWriter {
     return new MessageWriter()
       .writeByte(this.timer)
       .writeByte(this.state);
-  }
-
-  setSpawn(data: MessageReader): void {
-    this.timer = data.readByte();
-    this.state = data.readByte();
   }
 
   equals(old: DeconSystem): boolean {

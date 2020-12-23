@@ -10,20 +10,13 @@ export class ReactorSystem extends BaseSystem {
     super(SystemType.Reactor);
   }
 
-  static spawn(data: MessageReader): ReactorSystem {
-    const reactorSystem = new ReactorSystem();
-
-    reactorSystem.setSpawn(data);
-
-    return reactorSystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
+    this.timer = data.readFloat32();
+    this.userConsoles = new Map(data.readList(reader => [reader.readByte(), reader.readByte()]));
   }
 
   getSpawn(): MessageWriter {
@@ -33,13 +26,6 @@ export class ReactorSystem extends BaseSystem {
         writer.writeByte(pair[0]);
         writer.writeByte(pair[1]);
       });
-  }
-
-  setSpawn(data: MessageReader): void {
-    console.table({ data });
-
-    this.timer = data.readFloat32();
-    this.userConsoles = new Map(data.readList(reader => [reader.readByte(), reader.readByte()]));
   }
 
   equals(old: ReactorSystem): boolean {

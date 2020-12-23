@@ -10,31 +10,19 @@ export class LifeSuppSystem extends BaseSystem {
     super(SystemType.Oxygen);
   }
 
-  static spawn(data: MessageReader): LifeSuppSystem {
-    const lifeSuppSystem = new LifeSuppSystem();
-
-    lifeSuppSystem.setSpawn(data);
-
-    return lifeSuppSystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
+    this.timer = data.readFloat32();
+    this.completedConsoles = new Set(data.readList(reader => reader.readPackedUInt32()));
   }
 
   getSpawn(): MessageWriter {
     return new MessageWriter()
       .writeFloat32(this.timer)
       .writeList(this.completedConsoles, (writer, con) => writer.writePackedUInt32(con));
-  }
-
-  setSpawn(data: MessageReader): void {
-    this.timer = data.readFloat32();
-    this.completedConsoles = new Set(data.readList(reader => reader.readPackedUInt32()));
   }
 
   equals(old: LifeSuppSystem): boolean {

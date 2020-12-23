@@ -9,30 +9,18 @@ export class SecurityCameraSystem extends BaseSystem {
     super(SystemType.Security);
   }
 
-  static spawn(data: MessageReader): SecurityCameraSystem {
-    const securityCameraSystem = new SecurityCameraSystem();
-
-    securityCameraSystem.setSpawn(data);
-
-    return securityCameraSystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
+    this.playersViewingCameras = new Set(data.readList(reader => reader.readByte()));
   }
 
   getSpawn(): MessageWriter {
     return new MessageWriter().writeList(this.playersViewingCameras, (writer, player) => {
       writer.writeByte(player);
     });
-  }
-
-  setSpawn(data: MessageReader): void {
-    this.playersViewingCameras = new Set(data.readList(reader => reader.readByte()));
   }
 
   equals(old: SecurityCameraSystem): boolean {

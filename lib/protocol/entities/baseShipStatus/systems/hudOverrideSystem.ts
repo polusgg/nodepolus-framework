@@ -9,28 +9,16 @@ export class HudOverrideSystem extends BaseSystem {
     super(SystemType.Communications);
   }
 
-  static spawn(data: MessageReader): HudOverrideSystem {
-    const hudOverrideSystem = new HudOverrideSystem();
-
-    hudOverrideSystem.setSpawn(data);
-
-    return hudOverrideSystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
+    this.sabotaged = data.readBoolean();
   }
 
   getSpawn(): MessageWriter {
     return new MessageWriter().writeBoolean(this.sabotaged);
-  }
-
-  setSpawn(data: MessageReader): void {
-    this.sabotaged = data.readBoolean();
   }
 
   equals(old: HudOverrideSystem): boolean {

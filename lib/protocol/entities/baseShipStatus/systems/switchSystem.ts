@@ -12,21 +12,14 @@ export class SwitchSystem extends BaseSystem {
     super(SystemType.Electrical);
   }
 
-  // TODO: Remove
-  static spawn(data: MessageReader): SwitchSystem {
-    const switchSystem = new SwitchSystem();
-
-    switchSystem.setSpawn(data);
-
-    return switchSystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
+    this.expectedSwitches = Bitfield.fromNumber(data.readByte(), 5);
+    this.actualSwitches = Bitfield.fromNumber(data.readByte(), 5);
+    this.visionModifier = data.readByte();
   }
 
   getSpawn(): MessageWriter {
@@ -34,12 +27,6 @@ export class SwitchSystem extends BaseSystem {
       .writeByte(this.expectedSwitches.toNumber())
       .writeByte(this.actualSwitches.toNumber())
       .writeByte(this.visionModifier);
-  }
-
-  setSpawn(data: MessageReader): void {
-    this.expectedSwitches = Bitfield.fromNumber(data.readByte(), 5);
-    this.actualSwitches = Bitfield.fromNumber(data.readByte(), 5);
-    this.visionModifier = data.readByte();
   }
 
   equals(old: SwitchSystem): boolean {

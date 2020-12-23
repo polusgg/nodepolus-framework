@@ -9,30 +9,18 @@ export class MedScanSystem extends BaseSystem {
     super(SystemType.Medbay);
   }
 
-  static spawn(data: MessageReader): MedScanSystem {
-    const medScanSystem = new MedScanSystem();
-
-    medScanSystem.setSpawn(data);
-
-    return medScanSystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
+    this.playersInQueue = new Set(data.readList(reader => reader.readByte()));
   }
 
   getSpawn(): MessageWriter {
     return new MessageWriter().writeList(this.playersInQueue, (writer, player) => {
       writer.writeByte(player);
     });
-  }
-
-  setSpawn(data: MessageReader): void {
-    this.playersInQueue = new Set(data.readList(reader => reader.readByte()));
   }
 
   equals(old: MedScanSystem): boolean {

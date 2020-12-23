@@ -11,20 +11,16 @@ export class DoorsSystem extends BaseSystem {
     super(SystemType.Doors);
   }
 
-  static spawn(data: MessageReader): DoorsSystem {
-    const doorsSystem = new DoorsSystem();
-
-    doorsSystem.setSpawn(data);
-
-    return doorsSystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
+    this.timers = new Map(data.readList(reader => [reader.readByte(), reader.readFloat32()]));
+
+    for (let i = 0; i < POLUS_DOOR_COUNT; i++) {
+      this.doorStates[i] = data.readBoolean();
+    }
   }
 
   getSpawn(): MessageWriter {
@@ -38,14 +34,6 @@ export class DoorsSystem extends BaseSystem {
     }
 
     return writer;
-  }
-
-  setSpawn(data: MessageReader): void {
-    this.timers = new Map(data.readList(reader => [reader.readByte(), reader.readFloat32()]));
-
-    for (let i = 0; i < POLUS_DOOR_COUNT; i++) {
-      this.doorStates[i] = data.readBoolean();
-    }
   }
 
   equals(old: DoorsSystem): boolean {

@@ -10,20 +10,16 @@ export class HqHudSystem extends BaseSystem {
     super(SystemType.Communications);
   }
 
-  static spawn(data: MessageReader): HqHudSystem {
-    const hqHudSystem = new HqHudSystem();
-
-    hqHudSystem.setSpawn(data);
-
-    return hqHudSystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
+    this.activeConsoles = new Map(data.readList(reader => [
+      reader.readByte(),
+      reader.readByte(),
+    ]));
+    this.completedConsoles = new Set(data.readList(reader => reader.readByte()));
   }
 
   getSpawn(): MessageWriter {
@@ -31,14 +27,6 @@ export class HqHudSystem extends BaseSystem {
       writer.writeByte(pair[0]);
       writer.writeByte(pair[1]);
     }).writeList(this.completedConsoles, (writer, con) => writer.writeByte(con));
-  }
-
-  setSpawn(data: MessageReader): void {
-    this.activeConsoles = new Map(data.readList(reader => [
-      reader.readByte(),
-      reader.readByte(),
-    ]));
-    this.completedConsoles = new Set(data.readList(reader => reader.readByte()));
   }
 
   equals(old: HqHudSystem): boolean {

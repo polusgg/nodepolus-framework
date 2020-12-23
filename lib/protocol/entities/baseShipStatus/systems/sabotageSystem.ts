@@ -9,28 +9,16 @@ export class SabotageSystem extends BaseSystem {
     super(SystemType.Sabotage);
   }
 
-  static spawn(data: MessageReader): SabotageSystem {
-    const sabotageSystem = new SabotageSystem();
-
-    sabotageSystem.setSpawn(data);
-
-    return sabotageSystem;
-  }
-
   getData(): MessageWriter {
     return this.getSpawn();
   }
 
   setData(data: MessageReader): void {
-    this.setSpawn(data);
+    this.cooldown = data.readFloat32();
   }
 
   getSpawn(): MessageWriter {
     return new MessageWriter().writeFloat32(this.cooldown);
-  }
-
-  setSpawn(data: MessageReader): void {
-    this.cooldown = data.readFloat32();
   }
 
   equals(old: SabotageSystem): boolean {
