@@ -1,7 +1,8 @@
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from ".";
-import { BaseInnerNetEntity, LobbyImplementation } from "../types";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { SpawnPacket } from "../../packets/gameData";
+import { LobbyInstance } from "../../../lobby";
+import { BaseInnerNetEntity } from "../types";
 import { Vector2 } from "../../../types";
 
 export class EntityPlayer extends BaseInnerNetEntity {
@@ -20,7 +21,7 @@ export class EntityPlayer extends BaseInnerNetEntity {
   }
 
   constructor(
-    lobby: LobbyImplementation,
+    lobby: LobbyInstance,
     owner: number,
     playerControlNetId: number,
     playerId: number,

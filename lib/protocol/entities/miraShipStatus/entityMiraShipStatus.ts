@@ -1,11 +1,11 @@
 import { BaseEntityShipStatus } from "../baseShipStatus/baseEntityShipStatus";
 import { SpawnPacket } from "../../packets/gameData";
 import { SpawnType } from "../../../types/enums";
-import { LobbyImplementation } from "../types";
+import { LobbyInstance } from "../../../lobby";
 import { InnerMiraShipStatus } from ".";
 
 export class EntityMiraShipStatus extends BaseEntityShipStatus {
-  constructor(lobby: LobbyImplementation, shipStatusNetId: number) {
+  constructor(lobby: LobbyInstance, shipStatusNetId: number) {
     super(SpawnType.Headquarters, lobby);
 
     this.shipStatus = new InnerMiraShipStatus(shipStatusNetId, this);

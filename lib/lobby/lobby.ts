@@ -3,12 +3,12 @@ import { DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../prot
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { GameDataPacketDataType, LobbyListing } from "../protocol/packets/root/types";
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
-import { BaseInnerNetObject, LobbyImplementation } from "../protocol/entities/types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { RootPacketDataType } from "../protocol/packets/hazel/types";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
+import { BaseInnerNetObject } from "../protocol/entities/types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { DisconnectReason, GameOptionsData } from "../types";
 import { BaseRPCPacket } from "../protocol/packets/rpc";
@@ -16,10 +16,10 @@ import { Connection } from "../protocol/connection";
 import { CustomHost, HostInstance } from "../host";
 import { notUndefined } from "../util/functions";
 import { RemoteInfo } from "../util/remoteInfo";
+import { LobbyEvents, LobbyInstance } from ".";
 import { LobbyCode } from "../util/lobbyCode";
 import { RPCHandler } from "./rpcHandler";
 import { Player } from "../player";
-import { LobbyEvents } from ".";
 import Emittery from "emittery";
 import dgram from "dgram";
 import {
@@ -45,7 +45,7 @@ import {
   LimboState,
 } from "../types/enums";
 
-export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplementation, dgram.RemoteInfo {
+export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyInstance, dgram.RemoteInfo {
   public readonly createdAt: number = Date.now();
 
   public connections: Connection[] = [];

@@ -1,7 +1,8 @@
-import { BaseInnerNetEntity, LobbyImplementation } from "../types";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { GLOBAL_OWNER } from "../../../util/constants";
 import { SpawnPacket } from "../../packets/gameData";
+import { LobbyInstance } from "../../../lobby";
+import { BaseInnerNetEntity } from "../types";
 import { InnerLobbyBehaviour } from ".";
 
 export class EntityLobbyBehaviour extends BaseInnerNetEntity {
@@ -11,7 +12,7 @@ export class EntityLobbyBehaviour extends BaseInnerNetEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(lobby: LobbyImplementation, lobbyBehaviourNetId: number) {
+  constructor(lobby: LobbyInstance, lobbyBehaviourNetId: number) {
     super(SpawnType.LobbyBehaviour, lobby, GLOBAL_OWNER, SpawnFlag.None);
 
     this.innerNetObjects = [

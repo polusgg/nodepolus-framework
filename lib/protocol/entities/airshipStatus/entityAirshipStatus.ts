@@ -1,11 +1,11 @@
 import { BaseEntityShipStatus } from "../baseShipStatus/baseEntityShipStatus";
 import { SpawnPacket } from "../../packets/gameData";
 import { SpawnType } from "../../../types/enums";
-import { LobbyImplementation } from "../types";
+import { LobbyInstance } from "../../../lobby";
 import { InnerAirshipStatus } from ".";
 
 export class EntityAirshipStatus extends BaseEntityShipStatus {
-  constructor(lobby: LobbyImplementation, shipStatusNetId: number) {
+  constructor(lobby: LobbyInstance, shipStatusNetId: number) {
     super(SpawnType.Airship, lobby);
 
     this.shipStatus = new InnerAirshipStatus(shipStatusNetId, this);
