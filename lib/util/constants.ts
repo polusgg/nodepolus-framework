@@ -36,13 +36,6 @@ export const GLOBAL_OWNER = -2;
 export const DEFAULT_LOBBY = 32;
 
 /**
- * SystemType constansts
- */
-export const SKELD_DOOR_COUNT = 13;
-
-export const POLUS_DOOR_COUNT = 12;
-
-/**
  * RemoteInfo constants
  */
 export const IPV4_REGEX = /(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/gmi;

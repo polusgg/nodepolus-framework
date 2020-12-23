@@ -1,10 +1,10 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { SKELD_DOOR_COUNT } from "../../../../util/constants";
+import { SystemDoors } from "../../../../static/doors";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class AutoDoorsSystem extends BaseSystem {
-  public doors: boolean[] = Array(SKELD_DOOR_COUNT).fill(true);
+  public doors: boolean[] = Array(SystemDoors.skeldCount).fill(true);
 
   constructor() {
     super(SystemType.Doors);

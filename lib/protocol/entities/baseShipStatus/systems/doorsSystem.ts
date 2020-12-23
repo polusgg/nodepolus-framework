@@ -1,11 +1,11 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { POLUS_DOOR_COUNT } from "../../../../util/constants";
+import { SystemDoors } from "../../../../static/doors";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class DoorsSystem extends BaseSystem {
   public timers: Map<SystemType, number> = new Map<SystemType, number>();
-  public doorStates: boolean[] = Array(POLUS_DOOR_COUNT).fill(true);
+  public doorStates: boolean[] = Array(SystemDoors.polusCount).fill(true);
 
   constructor() {
     super(SystemType.Doors);
@@ -18,7 +18,7 @@ export class DoorsSystem extends BaseSystem {
   setData(data: MessageReader): void {
     this.timers = new Map(data.readList(reader => [reader.readByte(), reader.readFloat32()]));
 
-    for (let i = 0; i < POLUS_DOOR_COUNT; i++) {
+    for (let i = 0; i < SystemDoors.polusCount; i++) {
       this.doorStates[i] = data.readBoolean();
     }
   }
@@ -29,7 +29,7 @@ export class DoorsSystem extends BaseSystem {
       sub.writeFloat32(item[1]);
     });
 
-    for (let i = 0; i < POLUS_DOOR_COUNT; i++) {
+    for (let i = 0; i < SystemDoors.polusCount; i++) {
       writer.writeBoolean(this.doorStates[i]);
     }
 

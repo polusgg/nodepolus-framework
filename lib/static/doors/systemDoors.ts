@@ -28,6 +28,12 @@ const AIRSHIP_DOORS: Readonly<SystemDoorList> = {
   // TODO
 };
 
+const SKELD_COUNT: Readonly<number> = Object.values(SKELD_DOORS).flat().length;
+
+const POLUS_COUNT: Readonly<number> = Object.values(SKELD_DOORS).flat().length;
+
+const AIRSHIP_COUNT: Readonly<number> = Object.values(SKELD_DOORS).flat().length;
+
 export class SystemDoors {
   static get skeld(): Readonly<SystemDoorList> {
     return SKELD_DOORS;
@@ -56,6 +62,36 @@ export class SystemDoors {
         return this.polus;
       case Level.Airship:
         return this.airship;
+    }
+  }
+
+  static get skeldCount(): Readonly<number> {
+    return SKELD_COUNT;
+  }
+
+  static get miraHqCount(): Readonly<number> {
+    return 0;
+  }
+
+  static get polusCount(): Readonly<number> {
+    return POLUS_COUNT;
+  }
+
+  static get airshipCount(): Readonly<number> {
+    return AIRSHIP_COUNT;
+  }
+
+  static count(level: Level): Readonly<number> {
+    switch (level) {
+      case Level.TheSkeld:
+      case Level.AprilSkeld:
+        return this.skeldCount;
+      case Level.MiraHq:
+        return this.miraHqCount;
+      case Level.Polus:
+        return this.polusCount;
+      case Level.Airship:
+        return this.airshipCount;
     }
   }
 }
