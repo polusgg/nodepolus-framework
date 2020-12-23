@@ -4,14 +4,15 @@ import { Bitfield } from "../../../../types";
 import { BaseSystem } from ".";
 
 export class SwitchSystem extends BaseSystem {
-  public actualSwitches: Bitfield = new Bitfield(Array(5).fill(0).map(() => !!Math.round(Math.random() * 1)));
-  public expectedSwitches: Bitfield = this.actualSwitches;
+  public expectedSwitches: Bitfield = new Bitfield(Array(5).fill(0).map(() => !!Math.round(Math.random() * 1)));
+  public actualSwitches: Bitfield = new Bitfield([...this.expectedSwitches.bits]);
   public visionModifier = 0xff;
 
   constructor() {
     super(SystemType.Electrical);
   }
 
+  // TODO: Remove
   static spawn(data: MessageReader): SwitchSystem {
     const switchSystem = new SwitchSystem();
 
@@ -64,8 +65,8 @@ export class SwitchSystem extends BaseSystem {
   clone(): SwitchSystem {
     const clone = new SwitchSystem();
 
-    clone.actualSwitches = new Bitfield(this.actualSwitches.bits);
-    clone.expectedSwitches = new Bitfield(this.expectedSwitches.bits);
+    clone.actualSwitches = new Bitfield([...this.actualSwitches.bits]);
+    clone.expectedSwitches = new Bitfield([...this.expectedSwitches.bits]);
     clone.visionModifier = this.visionModifier;
 
     return clone;

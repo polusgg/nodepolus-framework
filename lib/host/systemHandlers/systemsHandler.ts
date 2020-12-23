@@ -218,9 +218,7 @@ export class SystemsHandler {
   repairSwitch<T extends SwitchSystem>(_repairer: Player, system: T, amount: ElectricalAmount): void {
     this.setOldShipStatus();
 
-    const index = 4 - amount.switchIndex;
-
-    system.actualSwitches.bits[index] = !system.actualSwitches.bits[index];
+    system.actualSwitches.toggle(amount.switchIndex);
 
     if (system.actualSwitches.bits.every((s, i) => s == system.expectedSwitches.bits[i])) {
       // TODO: Count back up (like +85 every second)
