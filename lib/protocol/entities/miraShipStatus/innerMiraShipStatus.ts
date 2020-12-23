@@ -1,4 +1,3 @@
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { InnerNetObjectType } from "../types/enums";
 import { BaseShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../types/enums";
@@ -25,14 +24,6 @@ export class InnerMiraShipStatus extends BaseShipStatus {
       SystemType.Communications,
       SystemType.Sabotage,
     ]);
-  }
-
-  static spawn(object: SpawnInnerNetObject, parent: EntityMiraShipStatus): InnerMiraShipStatus {
-    const headquarters = new InnerMiraShipStatus(object.innerNetObjectID, parent);
-
-    headquarters.setSpawn(object.data);
-
-    return headquarters;
   }
 
   clone(): InnerMiraShipStatus {

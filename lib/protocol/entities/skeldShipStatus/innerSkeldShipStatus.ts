@@ -1,4 +1,3 @@
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { InnerNetObjectType } from "../types/enums";
 import { BaseShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../types/enums";
@@ -19,14 +18,6 @@ export class InnerSkeldShipStatus extends BaseShipStatus {
       SystemType.Doors,
       SystemType.Sabotage,
     ]);
-  }
-
-  static spawn(object: SpawnInnerNetObject, parent: EntitySkeldShipStatus): InnerSkeldShipStatus {
-    const shipStatus = new InnerSkeldShipStatus(object.innerNetObjectID, parent);
-
-    shipStatus.setSpawn(object.data);
-
-    return shipStatus;
   }
 
   clone(): InnerSkeldShipStatus {

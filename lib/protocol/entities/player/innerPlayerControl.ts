@@ -40,14 +40,6 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     super(InnerNetObjectType.PlayerControl, netId, parent);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityPlayer): InnerPlayerControl {
-    const playerControl = new InnerPlayerControl(object.innerNetObjectID, parent, true, 256);
-
-    playerControl.setSpawn(object.data);
-
-    return playerControl;
-  }
-
   setInfected(infected: number[], sendTo: Connection[]): void {
     const gameData = this.parent.lobby.gameData;
 
@@ -308,22 +300,13 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.netId = reader.readByte();
   }
 
-  getSpawn(): SpawnInnerNetObject {
-    return new DataPacket(
+  serializeSpawn(): SpawnInnerNetObject {
+    return new SpawnInnerNetObject(
       this.netId,
       new MessageWriter()
-        .startMessage(1)
         .writeBoolean(this.isNew)
-        .writeByte(this.playerId)
-        .endMessage(),
+        .writeByte(this.playerId),
     );
-  }
-
-  setSpawn(data: MessageReader | MessageWriter): void {
-    const reader = MessageReader.fromMessage(data.buffer);
-
-    this.isNew = reader.readBoolean();
-    this.playerId = reader.readByte();
   }
 
   clone(): InnerPlayerControl {

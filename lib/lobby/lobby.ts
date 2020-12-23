@@ -1,15 +1,9 @@
-import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
-import { DataPacket, DespawnPacket, RPCPacket, SceneChangePacket, SpawnPacket } from "../protocol/packets/gameData";
+import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
+import { DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
 import { BaseInnerNetObject, EntityLevel, LobbyImplementation } from "../protocol/entities/types";
-import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
 import { GameDataPacketDataType, LobbyListing } from "../protocol/packets/root/types";
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
-import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
-import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
-import { EntityMiraShipStatus } from "../protocol/entities/miraShipStatus";
-import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
-import { SpawnInnerNetObject } from "../protocol/packets/gameData/types";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { RootPacketDataType } from "../protocol/packets/hazel/types";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
@@ -48,8 +42,6 @@ import {
   GameOverReason,
   GameState,
   LimboState,
-  SpawnFlag,
-  SpawnType,
 } from "../types/enums";
 
 export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplementation, dgram.RemoteInfo {
@@ -507,13 +499,6 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         break;
       }
       case GameDataPacketType.Spawn:
-        this.handleSpawn(
-          (packet as SpawnPacket).spawnType,
-          (packet as SpawnPacket).flags,
-          (packet as SpawnPacket).owner,
-          (packet as SpawnPacket).innerNetObjects,
-          sendTo,
-        );
         break;
       default:
         throw new Error(`Attempted to handle an unimplemented game data packet type: ${packet.type as number} (${GameDataPacketType[packet.type]})`);
@@ -542,103 +527,6 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
       }
     } else {
       throw new Error(`Data packet sent with unknown InnerNetObject ID: ${netId}`);
-    }
-  }
-
-  private handleSpawn(type: SpawnType, flags: SpawnFlag, owner: number, innerNetObjects: SpawnInnerNetObject[], sendTo?: Connection[]): void {
-    switch (type) {
-      case SpawnType.ShipStatus: {
-        if (this.shipStatus) {
-          throw new Error("Received duplicate spawn packet for ShipStatus");
-        }
-
-        this.shipStatus = EntitySkeldShipStatus.spawn(owner, flags, innerNetObjects, this);
-
-        this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
-        break;
-      }
-      case SpawnType.AprilShipStatus: {
-        if (this.shipStatus) {
-          throw new Error("Received duplicate spawn packet for AprilShipStatus");
-        }
-
-        this.shipStatus = EntitySkeldAprilShipStatus.spawn(owner, flags, innerNetObjects, this);
-
-        this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
-        break;
-      }
-      case SpawnType.Headquarters: {
-        if (this.shipStatus) {
-          throw new Error("Received duplicate spawn packet for Headquarters");
-        }
-
-        this.shipStatus = EntityMiraShipStatus.spawn(owner, flags, innerNetObjects, this);
-
-        this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
-        break;
-      }
-      case SpawnType.PlanetMap: {
-        if (this.shipStatus) {
-          throw new Error("Received duplicate spawn packet for PlanetMap");
-        }
-
-        this.shipStatus = EntityPolusShipStatus.spawn(owner, flags, innerNetObjects, this);
-
-        this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
-        break;
-      }
-      case SpawnType.Airship: {
-        if (this.shipStatus) {
-          throw new Error("Received duplicate spawn packet for AirShip");
-        }
-
-        this.shipStatus = EntityAirshipStatus.spawn(owner, flags, innerNetObjects, this);
-
-        this.sendRootGamePacket(new GameDataPacket([this.shipStatus.spawn()], this.code), sendTo);
-        break;
-      }
-      case SpawnType.GameData: {
-        if (this.gameData) {
-          throw new Error("Received duplicate spawn packet for GameData");
-        }
-
-        this.gameData = EntityGameData.spawn(owner, flags, innerNetObjects, this);
-
-        this.sendRootGamePacket(new GameDataPacket([this.gameData.spawn()], this.code), sendTo);
-        break;
-      }
-      case SpawnType.LobbyBehaviour: {
-        if (this.lobbyBehavior) {
-          throw new Error("Received duplicate spawn packet for LobbyBehaviour");
-        }
-
-        this.lobbyBehavior = EntityLobbyBehaviour.spawn(owner, flags, innerNetObjects, this);
-
-        this.sendRootGamePacket(new GameDataPacket([this.lobbyBehavior.spawn()], this.code), sendTo);
-        break;
-      }
-      case SpawnType.MeetingHud: {
-        if (this.meetingHud) {
-          throw new Error("Received duplicate spawn packet for MeetingHud");
-        }
-
-        this.meetingHud = EntityMeetingHud.spawn(owner, flags, innerNetObjects, this);
-
-        this.sendRootGamePacket(new GameDataPacket([this.meetingHud.spawn()], this.code), sendTo);
-        break;
-      }
-      case SpawnType.PlayerControl: {
-        const connection = this.findConnection(owner);
-
-        if (!connection) {
-          throw new Error("Spawn packet sent for a player on a connection that does not exist");
-        }
-
-        this.players.push(new Player(EntityPlayer.spawn(owner, flags, innerNetObjects, this)));
-
-        this.sendRootGamePacket(new GameDataPacket([this.findPlayerByConnection(connection)!.gameObject.spawn()], this.code), sendTo);
-        break;
-      }
     }
   }
 

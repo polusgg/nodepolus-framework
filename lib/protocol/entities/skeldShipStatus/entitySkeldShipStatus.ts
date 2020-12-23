@@ -1,45 +1,32 @@
 import { BaseInnerNetEntity, LobbyImplementation } from "../types";
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
+import { GLOBAL_OWNER } from "../../../util/constants";
 import { SpawnPacket } from "../../packets/gameData";
 import { InnerSkeldShipStatus } from ".";
 
 export class EntitySkeldShipStatus extends BaseInnerNetEntity {
-  public owner!: number;
-  public flags: SpawnFlag = SpawnFlag.None;
-  public innerNetObjects!: [ InnerSkeldShipStatus ];
+  public innerNetObjects: [ InnerSkeldShipStatus ];
 
   get shipStatus(): InnerSkeldShipStatus {
     return this.innerNetObjects[0];
   }
 
-  constructor(lobby: LobbyImplementation) {
-    super(SpawnType.ShipStatus, lobby);
+  constructor(lobby: LobbyImplementation, shipStatusNetId: number) {
+    super(SpawnType.ShipStatus, lobby, GLOBAL_OWNER, SpawnFlag.None);
+
+    this.innerNetObjects = [
+      new InnerSkeldShipStatus(shipStatusNetId, this),
+    ];
   }
 
-  static spawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntitySkeldShipStatus {
-    const shipStatus = new EntitySkeldShipStatus(lobby);
-
-    shipStatus.setSpawn(owner, flags, innerNetObjects);
-
-    return shipStatus;
-  }
-
-  getSpawn(): SpawnPacket {
+  serializeSpawn(): SpawnPacket {
     return new SpawnPacket(
       this.type,
       this.owner,
       this.flags,
       [
-        this.shipStatus.spawn(),
+        this.shipStatus.serializeSpawn(),
       ],
     );
-  }
-
-  setSpawn(owner: number, _flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[]): void {
-    this.owner = owner;
-    this.innerNetObjects = [
-      InnerSkeldShipStatus.spawn(innerNetObjects[0], this),
-    ];
   }
 }

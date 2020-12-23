@@ -1,4 +1,3 @@
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { InnerNetObjectType } from "../types/enums";
 import { BaseShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../types/enums";
@@ -18,14 +17,6 @@ export class InnerAirshipStatus extends BaseShipStatus {
       SystemType.Sabotage,
       SystemType.Weapons,
     ]);
-  }
-
-  static spawn(object: SpawnInnerNetObject, parent: EntityAirshipStatus): InnerAirshipStatus {
-    const airship = new InnerAirshipStatus(object.innerNetObjectID, parent);
-
-    airship.setSpawn(object.data);
-
-    return airship;
   }
 
   clone(): InnerAirshipStatus {

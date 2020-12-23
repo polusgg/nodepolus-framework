@@ -21,14 +21,6 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     super(InnerNetObjectType.MeetingHud, netId, parent);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityMeetingHud): InnerMeetingHud {
-    const meetingHud = new InnerMeetingHud(object.innerNetObjectID, parent);
-
-    meetingHud.setSpawn(object.data);
-
-    return meetingHud;
-  }
-
   close(sendTo: Connection[]): void {
     this.sendRPCPacketTo(sendTo, new ClosePacket());
   }
@@ -81,7 +73,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     }
   }
 
-  getSpawn(): SpawnInnerNetObject {
+  serializeSpawn(): SpawnInnerNetObject {
     const writer = new MessageWriter();
 
     for (let i = 0; i < this.playerStates.length; i++) {
@@ -89,14 +81,6 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     }
 
     return new SpawnInnerNetObject(this.netId, writer);
-  }
-
-  setSpawn(data: MessageReader | MessageWriter): void {
-    const reader = MessageReader.fromMessage(data.buffer);
-
-    for (let i = 0; i < data.length; i++) {
-      this.playerStates[i] = VoteState.deserialize(reader);
-    }
   }
 
   clone(): InnerMeetingHud {

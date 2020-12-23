@@ -17,14 +17,6 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     super(InnerNetObjectType.VoteBanSystem, netId, parent);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityGameData): InnerVoteBanSystem {
-    const voteBanSystem = new InnerVoteBanSystem(object.innerNetObjectID, parent);
-
-    voteBanSystem.setSpawn(object.data);
-
-    return voteBanSystem;
-  }
-
   addVote(votingClientId: number, targetClientId: number, sendTo: Connection[]): void {
     const votes = this.votes.get(targetClientId) ?? [];
 
@@ -74,18 +66,11 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     }, false);
   }
 
-  getSpawn(): SpawnInnerNetObject {
+  serializeSpawn(): SpawnInnerNetObject {
     return new SpawnInnerNetObject(
       this.netId,
-      new MessageWriter()
-        .startMessage(1)
-        .writeBytes(this.getData().data)
-        .endMessage(),
+      new MessageWriter().writeBytes(this.getData().data),
     );
-  }
-
-  setSpawn(data: MessageReader | MessageWriter): void {
-    this.setData(MessageReader.fromMessage(data.buffer).readRemainingBytes());
   }
 
   clone(): InnerVoteBanSystem {

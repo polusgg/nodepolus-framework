@@ -20,9 +20,7 @@ export abstract class BaseInnerNetObject {
 
   abstract setData(packet: MessageReader | MessageWriter): void;
 
-  abstract getSpawn(): SpawnInnerNetObject;
-
-  abstract setSpawn(data: MessageReader | MessageWriter): void;
+  abstract serializeSpawn(): SpawnInnerNetObject;
 
   data(packet: MessageReader | MessageWriter): void;
   data(old: BaseInnerNetObject): DataPacket;
@@ -32,10 +30,6 @@ export abstract class BaseInnerNetObject {
     } else {
       return this.getData(arg0);
     }
-  }
-
-  spawn(): SpawnInnerNetObject {
-    return this.getSpawn();
   }
 
   sendRPCPacketTo(to: (Player | HostInstance)[], packet: BaseRPCPacket): void {

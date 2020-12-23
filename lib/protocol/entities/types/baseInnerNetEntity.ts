@@ -1,23 +1,17 @@
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
-import { BaseInnerNetObject, LobbyImplementation } from ".";
 import { SpawnType, SpawnFlag } from "../../../types/enums";
 import { SpawnPacket } from "../../packets/gameData";
+import { LobbyImplementation } from ".";
 
 export abstract class BaseInnerNetEntity {
-  public owner!: number;
-  public flags!: SpawnFlag;
-  public innerNetObjects!: BaseInnerNetObject[];
-
   constructor(
     public readonly type: SpawnType,
     public readonly lobby: LobbyImplementation,
+    public readonly owner: number,
+    // TODO: Make this an array whenever the fuck I feel like it
+    public readonly flags: SpawnFlag,
   ) {}
 
-  abstract setSpawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[]): void;
+  // abstract getComponents(): BaseInnerNetObject[];
 
-  abstract getSpawn(): SpawnPacket;
-
-  spawn(): SpawnPacket {
-    return this.getSpawn();
-  }
+  abstract serializeSpawn(): SpawnPacket;
 }

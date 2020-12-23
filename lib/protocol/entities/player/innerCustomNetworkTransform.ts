@@ -19,20 +19,6 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     super(InnerNetObjectType.CustomNetworkTransform, netId, parent);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityPlayer): InnerCustomNetworkTransform {
-    const customNetworkTransform = new InnerCustomNetworkTransform(
-      object.innerNetObjectID,
-      parent,
-      0,
-      new Vector2(0, 0),
-      new Vector2(0, 0),
-    );
-
-    customNetworkTransform.setSpawn(object.data);
-
-    return customNetworkTransform;
-  }
-
   snapTo(position: Vector2, lastSequenceId: number, sendTo: Connection[]): void {
     this.position = position;
     this.velocity = new Vector2(0, 0);
@@ -57,19 +43,13 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     this.velocity = Vector2.deserialize(reader);
   }
 
-  getSpawn(): SpawnInnerNetObject {
-    const writer = new MessageWriter()
-      .startMessage(1)
-      .writeUInt16(this.sequenceId);
+  serializeSpawn(): SpawnInnerNetObject {
+    const writer = new MessageWriter().writeUInt16(this.sequenceId);
 
     this.position.serialize(writer);
     this.velocity.serialize(writer);
 
-    return new DataPacket(this.netId, writer.endMessage());
-  }
-
-  setSpawn(data: MessageReader | MessageWriter): void {
-    this.setData(MessageReader.fromMessage(data.buffer).readRemainingBytes());
+    return new SpawnInnerNetObject(this.netId, writer);
   }
 
   clone(): InnerCustomNetworkTransform {

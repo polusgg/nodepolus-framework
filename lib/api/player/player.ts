@@ -1,13 +1,11 @@
-import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../../protocol/entities/player";
 import { GameDataPacket, JoinGameResponsePacket, RemovePlayerPacket } from "../../protocol/packets/root";
 import { PlayerColor, PlayerHat, PlayerPet, PlayerSkin, PlayerState } from "../../types/enums";
-import { EntityMeetingHud, InnerMeetingHud } from "../../protocol/entities/meetingHud";
-import { PlayerData } from "../../protocol/entities/gameData";
 import { DespawnPacket } from "../../protocol/packets/gameData";
+import { PlayerData } from "../../protocol/entities/gameData";
+import { EntityPlayer } from "../../protocol/entities/player";
 import { Player as InternalPlayer } from "../../player";
 import { DisconnectReason, Vector2 } from "../../types";
 import { PlainPlayerEvents, PlayerEvents } from ".";
-import { GLOBAL_OWNER } from "../../util/constants";
 import { TextComponent } from "../text";
 import { Server } from "../server";
 import { Lobby } from "../lobby";
@@ -235,20 +233,17 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
       throw new Error("Attempted to revive player without a GameData instance");
     }
 
-    const entity = new EntityPlayer(this.lobby.internalLobby);
-
-    entity.owner = this.clientId;
-    entity.innerNetObjects = [
-      new InnerPlayerControl(this.lobby.internalLobby.customHostInstance.getNextNetId(), entity, false, this.playerId!),
-      new InnerPlayerPhysics(this.lobby.internalLobby.customHostInstance.getNextNetId(), entity),
-      new InnerCustomNetworkTransform(
-        this.lobby.internalLobby.customHostInstance.getNextNetId(),
-        entity,
-        0,
-        this.getInternalPlayer().gameObject.customNetworkTransform.position,
-        this.getInternalPlayer().gameObject.customNetworkTransform.velocity,
-      ),
-    ];
+    const entity = new EntityPlayer(
+      this.lobby.internalLobby,
+      this.clientId,
+      this.lobby.internalLobby.customHostInstance.getNextNetId(),
+      this.playerId!,
+      this.lobby.internalLobby.customHostInstance.getNextNetId(),
+      this.lobby.internalLobby.customHostInstance.getNextNetId(),
+      0,
+      this.getInternalPlayer().gameObject.customNetworkTransform.position,
+      this.getInternalPlayer().gameObject.customNetworkTransform.velocity,
+    );
 
     this.getInternalPlayer().gameObject.customNetworkTransform.position = new Vector2(-39, -39);
 
@@ -296,7 +291,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     this.lobby.internalLobby.gameData.gameData.updateGameData([this.getGameDataEntry()], this.lobby.internalLobby.connections);
 
     this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
-      entity.spawn(),
+      entity.serializeSpawn(),
     ], this.lobby.code));
 
     return this;
@@ -310,33 +305,6 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
 
   internalSetTasks(tasks: Task[]): void {
     this.internalTasks = tasks;
-  }
-
-  // TODO: Delete?
-  sendNote(message: TextComponent | string): this {
-    const oldName = this.name.toString();
-
-    const tempFakeMHud = new EntityMeetingHud(this.lobby.internalLobby);
-
-    tempFakeMHud.owner = GLOBAL_OWNER;
-
-    tempFakeMHud.innerNetObjects = [
-      new InnerMeetingHud(this.lobby.internalLobby.customHostInstance.getNextNetId(), tempFakeMHud),
-    ];
-
-    this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
-      tempFakeMHud.spawn(),
-    ], this.lobby.code));
-
-    this.setName(`[FFFFFFFF]${message.toString()}[FFFFFF00]`);
-    this.getInternalPlayer().gameObject.playerControl.sendChatNote(this.playerId!, 0, this.lobby.internalLobby.connections);
-    this.setName(oldName);
-
-    this.lobby.internalLobby.sendRootGamePacket(new GameDataPacket([
-      new DespawnPacket(tempFakeMHud.innerNetObjects[0].netId),
-    ], this.lobby.code));
-
-    return this;
   }
 
   private getGameDataEntry(): PlayerData {

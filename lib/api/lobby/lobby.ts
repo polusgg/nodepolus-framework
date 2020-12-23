@@ -1,5 +1,5 @@
-import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../../protocol/entities/player";
 import { PlayerData } from "../../protocol/entities/gameData";
+import { EntityPlayer } from "../../protocol/entities/player";
 import { CodeObject, LobbyEvents, LobbySettings } from ".";
 import { Player as InternalPlayer } from "../../player";
 import { Connection } from "../../protocol/connection";
@@ -141,7 +141,6 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
     }
 
     const playerId = 127;
-    const entity = new EntityPlayer(this.internalLobby);
     const playerData = new PlayerData(
       playerId,
       `[FFFFFFFF]${message.toString()}[FFFFFF00]`,
@@ -155,15 +154,20 @@ export class Lobby extends Emittery.Typed<LobbyEvents> {
       [],
     );
 
-    entity.owner = FakeClientId.Message;
-    entity.innerNetObjects = [
-      new InnerPlayerControl(this.internalLobby.customHostInstance.getNextNetId(), entity, false, playerId),
-      new InnerPlayerPhysics(this.internalLobby.customHostInstance.getNextNetId(), entity),
-      new InnerCustomNetworkTransform(this.internalLobby.customHostInstance.getNextNetId(), entity, 5, new Vector2(39, 39), new Vector2(0, 0)),
-    ];
+    const entity = new EntityPlayer(
+      this.internalLobby,
+      FakeClientId.Message,
+      this.internalLobby.customHostInstance.getNextNetId(),
+      playerId,
+      this.internalLobby.customHostInstance.getNextNetId(),
+      this.internalLobby.customHostInstance.getNextNetId(),
+      5,
+      new Vector2(39, 39),
+      new Vector2(0, 0),
+    );
 
     this.internalLobby.sendRootGamePacket(new JoinGameResponsePacket(this.internalLobby.code, FakeClientId.Message, this.internalLobby.customHostInstance.id));
-    this.internalLobby.sendRootGamePacket(new GameDataPacket([entity.spawn()], this.internalLobby.code));
+    this.internalLobby.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.internalLobby.code));
 
     this.internalLobby.connections.forEach(con => {
       con.flush();

@@ -1,13 +1,11 @@
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from ".";
 import { BaseInnerNetEntity, LobbyImplementation } from "../types";
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { SpawnPacket } from "../../packets/gameData";
+import { Vector2 } from "../../../types";
 
 export class EntityPlayer extends BaseInnerNetEntity {
-  public owner!: number;
-  public flags: SpawnFlag = SpawnFlag.IsClientCharacter;
-  public innerNetObjects!: [ InnerPlayerControl, InnerPlayerPhysics, InnerCustomNetworkTransform ];
+  public innerNetObjects: [ InnerPlayerControl, InnerPlayerPhysics, InnerCustomNetworkTransform ];
 
   get playerControl(): InnerPlayerControl {
     return this.innerNetObjects[0];
@@ -21,38 +19,36 @@ export class EntityPlayer extends BaseInnerNetEntity {
     return this.innerNetObjects[2];
   }
 
-  constructor(lobby: LobbyImplementation) {
-    super(SpawnType.PlayerControl, lobby);
+  constructor(
+    lobby: LobbyImplementation,
+    owner: number,
+    playerControlNetId: number,
+    playerId: number,
+    playerPhysicsNetId: number,
+    customNetworkTransformNetId: number,
+    sequenceId: number,
+    position: Vector2,
+    velocity: Vector2,
+  ) {
+    super(SpawnType.PlayerControl, lobby, owner, SpawnFlag.IsClientCharacter);
+
+    this.innerNetObjects = [
+      new InnerPlayerControl(playerControlNetId, this, true, playerId),
+      new InnerPlayerPhysics(playerPhysicsNetId, this),
+      new InnerCustomNetworkTransform(customNetworkTransformNetId, this, sequenceId, position, velocity),
+    ];
   }
 
-  static spawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityPlayer {
-    const player = new EntityPlayer(lobby);
-
-    player.setSpawn(owner, flags, innerNetObjects);
-
-    return player;
-  }
-
-  getSpawn(): SpawnPacket {
+  serializeSpawn(): SpawnPacket {
     return new SpawnPacket(
       SpawnType.PlayerControl,
       this.owner,
       this.flags,
       [
-        this.playerControl.spawn(),
-        this.playerPhysics.spawn(),
-        this.customNetworkTransform.spawn(),
+        this.playerControl.serializeSpawn(),
+        this.playerPhysics.serializeSpawn(),
+        this.customNetworkTransform.serializeSpawn(),
       ],
     );
-  }
-
-  setSpawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[]): void {
-    this.owner = owner;
-    this.flags = flags;
-    this.innerNetObjects = [
-      InnerPlayerControl.spawn(innerNetObjects[0], this),
-      InnerPlayerPhysics.spawn(innerNetObjects[1], this),
-      InnerCustomNetworkTransform.spawn(innerNetObjects[2], this),
-    ];
   }
 }

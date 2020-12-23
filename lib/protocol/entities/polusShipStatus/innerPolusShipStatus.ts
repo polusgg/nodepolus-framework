@@ -1,4 +1,3 @@
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { InnerNetObjectType } from "../types/enums";
 import { BaseShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../types/enums";
@@ -20,14 +19,6 @@ export class InnerPolusShipStatus extends BaseShipStatus {
       SystemType.Sabotage,
       SystemType.Laboratory,
     ]);
-  }
-
-  static spawn(object: SpawnInnerNetObject, parent: EntityPolusShipStatus): InnerPolusShipStatus {
-    const planetMap = new InnerPolusShipStatus(object.innerNetObjectID, parent);
-
-    planetMap.setSpawn(object.data);
-
-    return planetMap;
   }
 
   clone(): InnerPolusShipStatus {

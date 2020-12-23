@@ -16,14 +16,6 @@ export class InnerGameData extends BaseInnerNetObject {
     super(InnerNetObjectType.GameData, netId, parent);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityGameData): InnerGameData {
-    const gameData = new InnerGameData(object.innerNetObjectID, parent, []);
-
-    gameData.setSpawn(object.data);
-
-    return gameData;
-  }
-
   setTasks(playerId: number, tasks: number[], sendTo: Connection[]): void {
     for (let i = 0; i < this.players.length; i++) {
       if (this.players[i].id == playerId) {
@@ -79,18 +71,11 @@ export class InnerGameData extends BaseInnerNetObject {
     }, false);
   }
 
-  getSpawn(): SpawnInnerNetObject {
-    return new DataPacket(
+  serializeSpawn(): SpawnInnerNetObject {
+    return new SpawnInnerNetObject(
       this.netId,
-      new MessageWriter()
-        .startMessage(1)
-        .writeList(this.players, (sub, player) => player.serialize(sub))
-        .endMessage(),
+      new MessageWriter().writeList(this.players, (sub, player) => player.serialize(sub)),
     );
-  }
-
-  setSpawn(data: MessageReader | MessageWriter): void {
-    this.players = MessageReader.fromMessage(data.buffer).readList(sub => PlayerData.deserialize(sub));
   }
 
   clone(): InnerGameData {

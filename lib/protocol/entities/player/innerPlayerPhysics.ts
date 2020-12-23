@@ -16,14 +16,6 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     super(InnerNetObjectType.PlayerPhysics, netId, parent);
   }
 
-  static spawn(object: SpawnInnerNetObject, parent: EntityPlayer): InnerPlayerPhysics {
-    const playerPhysics = new InnerPlayerPhysics(object.innerNetObjectID, parent);
-
-    playerPhysics.setSpawn(object.data);
-
-    return playerPhysics;
-  }
-
   enterVent(ventId: number, sendTo: Connection[]): void {
     this.sendRPCPacketTo(sendTo, new EnterVentPacket(ventId));
   }
@@ -43,15 +35,12 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   setData(_packet: MessageReader | MessageWriter): void {}
 
-  getSpawn(): SpawnInnerNetObject {
-    return new DataPacket(
+  serializeSpawn(): SpawnInnerNetObject {
+    return new SpawnInnerNetObject(
       this.netId,
-      new MessageWriter().startMessage(1).endMessage(),
+      new MessageWriter(),
     );
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setSpawn(_data: MessageReader | MessageWriter): void {}
 
   clone(): InnerPlayerPhysics {
     return new InnerPlayerPhysics(this.netId, this.parent);

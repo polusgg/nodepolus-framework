@@ -1,13 +1,11 @@
 import { BaseInnerNetEntity, LobbyImplementation } from "../types";
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { InnerGameData, InnerVoteBanSystem, PlayerData } from ".";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { InnerGameData, InnerVoteBanSystem } from ".";
+import { GLOBAL_OWNER } from "../../../util/constants";
 import { SpawnPacket } from "../../packets/gameData";
 
 export class EntityGameData extends BaseInnerNetEntity {
-  public owner!: number;
-  public flags: SpawnFlag = SpawnFlag.None;
-  public innerNetObjects!: [ InnerGameData, InnerVoteBanSystem ];
+  public innerNetObjects: [ InnerGameData, InnerVoteBanSystem ];
 
   get gameData(): InnerGameData {
     return this.innerNetObjects[0];
@@ -17,35 +15,24 @@ export class EntityGameData extends BaseInnerNetEntity {
     return this.innerNetObjects[1];
   }
 
-  constructor(lobby: LobbyImplementation) {
-    super(SpawnType.GameData, lobby);
+  constructor(lobby: LobbyImplementation, gameDataNetId: number, players: PlayerData[], voteBanSystemNetId: number) {
+    super(SpawnType.GameData, lobby, GLOBAL_OWNER, SpawnFlag.None);
+
+    this.innerNetObjects = [
+      new InnerGameData(gameDataNetId, this, players),
+      new InnerVoteBanSystem(voteBanSystemNetId, this),
+    ];
   }
 
-  static spawn(owner: number, flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[], lobby: LobbyImplementation): EntityGameData {
-    const gameData = new EntityGameData(lobby);
-
-    gameData.setSpawn(owner, flags, innerNetObjects);
-
-    return gameData;
-  }
-
-  getSpawn(): SpawnPacket {
+  serializeSpawn(): SpawnPacket {
     return new SpawnPacket(
       SpawnType.GameData,
       this.owner,
       this.flags,
       [
-        this.gameData.spawn(),
-        this.voteBanSystem.spawn(),
+        this.gameData.serializeSpawn(),
+        this.voteBanSystem.serializeSpawn(),
       ],
     );
-  }
-
-  setSpawn(owner: number, _flags: SpawnFlag, innerNetObjects: SpawnInnerNetObject[]): void {
-    this.owner = owner;
-    this.innerNetObjects = [
-      InnerGameData.spawn(innerNetObjects[0], this),
-      InnerVoteBanSystem.spawn(innerNetObjects[1], this),
-    ];
   }
 }

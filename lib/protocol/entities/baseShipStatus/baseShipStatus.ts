@@ -130,15 +130,11 @@ export abstract class BaseShipStatus extends BaseInnerNetObject {
     );
   }
 
-  getSpawn(): SpawnInnerNetObject {
+  serializeSpawn(): SpawnInnerNetObject {
     return new SpawnInnerNetObject(
       this.netId,
       this.getSystems(undefined, this.spawnSystemTypes, true),
     );
-  }
-
-  setSpawn(data: MessageReader | MessageWriter): void {
-    this.setSystems(this.spawnSystemTypes, MessageReader.fromMessage(data), true);
   }
 
   getSystemFromType(systemType: SystemType): BaseSystem<System> {

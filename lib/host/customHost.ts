@@ -1,19 +1,18 @@
-import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { AutoDoorsHandler, DeconHandler, DoorsHandler, SabotageSystemHandler, SystemsHandler } from "./systemHandlers";
-import { EntitySkeldAprilShipStatus, InnerSkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
-import { EntityGameData, InnerGameData, InnerVoteBanSystem, PlayerData } from "../protocol/entities/gameData";
-import { EntityPolusShipStatus, InnerPolusShipStatus } from "../protocol/entities/polusShipStatus";
-import { EntitySkeldShipStatus, InnerSkeldShipStatus } from "../protocol/entities/skeldShipStatus";
-import { EntityLobbyBehaviour, InnerLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
-import { EntityMiraShipStatus, InnerMiraShipStatus } from "../protocol/entities/miraShipStatus";
-import { EntityMeetingHud, InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud";
-import { EntityAirshipStatus, InnerAirshipStatus } from "../protocol/entities/airshipStatus";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
 import { BaseShipStatus, InternalSystemType } from "../protocol/entities/baseShipStatus";
+import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
+import { EntityPlayer, InnerPlayerControl } from "../protocol/entities/player";
+import { EntityMeetingHud, VoteState } from "../protocol/entities/meetingHud";
+import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
+import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
+import { EntityGameData, PlayerData } from "../protocol/entities/gameData";
+import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
+import { EntityMiraShipStatus } from "../protocol/entities/miraShipStatus";
+import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
 import { DisconnectReason, LevelTask, Vector2 } from "../types";
 import { Connection } from "../protocol/connection";
-import { GLOBAL_OWNER } from "../util/constants";
 import { Player } from "../player";
 import { Tasks } from "../static";
 import { HostInstance } from ".";
@@ -105,39 +104,19 @@ export class CustomHost implements HostInstance {
 
       switch (this.lobby.options.levels[0]) {
         case Level.TheSkeld:
-          this.lobby.shipStatus = new EntitySkeldShipStatus(this.lobby);
-          this.lobby.shipStatus.owner = GLOBAL_OWNER;
-          this.lobby.shipStatus.innerNetObjects = [
-            new InnerSkeldShipStatus(this.getNextNetId(), this.lobby.shipStatus),
-          ];
+          this.lobby.shipStatus = new EntitySkeldShipStatus(this.lobby, this.getNextNetId());
           break;
         case Level.AprilSkeld:
-          this.lobby.shipStatus = new EntitySkeldAprilShipStatus(this.lobby);
-          this.lobby.shipStatus.owner = GLOBAL_OWNER;
-          this.lobby.shipStatus.innerNetObjects = [
-            new InnerSkeldAprilShipStatus(this.getNextNetId(), this.lobby.shipStatus),
-          ];
+          this.lobby.shipStatus = new EntitySkeldAprilShipStatus(this.lobby, this.getNextNetId());
           break;
         case Level.MiraHq:
-          this.lobby.shipStatus = new EntityMiraShipStatus(this.lobby);
-          this.lobby.shipStatus.owner = GLOBAL_OWNER;
-          this.lobby.shipStatus.innerNetObjects = [
-            new InnerMiraShipStatus(this.getNextNetId(), this.lobby.shipStatus),
-          ];
+          this.lobby.shipStatus = new EntityMiraShipStatus(this.lobby, this.getNextNetId());
           break;
         case Level.Polus:
-          this.lobby.shipStatus = new EntityPolusShipStatus(this.lobby);
-          this.lobby.shipStatus.owner = GLOBAL_OWNER;
-          this.lobby.shipStatus.innerNetObjects = [
-            new InnerPolusShipStatus(this.getNextNetId(), this.lobby.shipStatus),
-          ];
+          this.lobby.shipStatus = new EntityPolusShipStatus(this.lobby, this.getNextNetId());
           break;
         case Level.Airship:
-          this.lobby.shipStatus = new EntityAirshipStatus(this.lobby);
-          this.lobby.shipStatus.owner = GLOBAL_OWNER;
-          this.lobby.shipStatus.innerNetObjects = [
-            new InnerAirshipStatus(this.getNextNetId(), this.lobby.shipStatus),
-          ];
+          this.lobby.shipStatus = new EntityAirshipStatus(this.lobby, this.getNextNetId());
           break;
       }
 
@@ -175,7 +154,7 @@ export class CustomHost implements HostInstance {
         throw new Error("Attempted to start game without a GameData instance");
       }
 
-      this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.shipStatus!.spawn()], this.lobby.code));
+      this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.shipStatus!.serializeSpawn()], this.lobby.code));
 
       this.setInfected(this.lobby.options.impostorCount);
 
@@ -213,44 +192,38 @@ export class CustomHost implements HostInstance {
     this.playersInScene.set(sender.id, sceneName);
 
     if (!this.lobby.lobbyBehavior) {
-      this.lobby.lobbyBehavior = new EntityLobbyBehaviour(this.lobby);
-      this.lobby.lobbyBehavior.owner = GLOBAL_OWNER;
-      this.lobby.lobbyBehavior.innerNetObjects = [
-        new InnerLobbyBehaviour(this.getNextNetId(), this.lobby.lobbyBehavior),
-      ];
+      this.lobby.lobbyBehavior = new EntityLobbyBehaviour(this.lobby, this.getNextNetId());
     }
 
-    sender.write(new GameDataPacket([this.lobby.lobbyBehavior.spawn()], this.lobby.code));
+    sender.write(new GameDataPacket([this.lobby.lobbyBehavior.serializeSpawn()], this.lobby.code));
 
     if (!this.lobby.gameData) {
-      this.lobby.gameData = new EntityGameData(this.lobby);
-      this.lobby.gameData.owner = GLOBAL_OWNER;
-      this.lobby.gameData.innerNetObjects = [
-        new InnerGameData(this.getNextNetId(), this.lobby.gameData, []),
-        new InnerVoteBanSystem(this.getNextNetId(), this.lobby.gameData),
-      ];
+      this.lobby.gameData = new EntityGameData(this.lobby, this.getNextNetId(), [], this.getNextNetId());
     }
 
-    sender.write(new GameDataPacket([this.lobby.gameData.spawn()], this.lobby.code));
+    sender.write(new GameDataPacket([this.lobby.gameData.serializeSpawn()], this.lobby.code));
 
-    const entity = new EntityPlayer(this.lobby);
-
-    entity.owner = sender.id;
-    entity.innerNetObjects = [
-      new InnerPlayerControl(this.getNextNetId(), entity, true, newPlayerId),
-      new InnerPlayerPhysics(this.getNextNetId(), entity),
-      new InnerCustomNetworkTransform(this.getNextNetId(), entity, 5, new Vector2(0, 0), new Vector2(0, 0)),
-    ];
+    const entity = new EntityPlayer(
+      this.lobby,
+      sender.id,
+      this.getNextNetId(),
+      newPlayerId,
+      this.getNextNetId(),
+      this.getNextNetId(),
+      5,
+      new Vector2(0, 0),
+      new Vector2(0, 0),
+    );
 
     const player = new Player(entity);
 
     for (let i = 0; i < this.lobby.players.length; i++) {
-      sender.write(new GameDataPacket([this.lobby.players[i].gameObject.spawn()], this.lobby.code));
+      sender.write(new GameDataPacket([this.lobby.players[i].gameObject.serializeSpawn()], this.lobby.code));
     }
 
     this.lobby.players.push(player);
 
-    await this.lobby.sendRootGamePacket(new GameDataPacket([player.gameObject.spawn()], this.lobby.code));
+    await this.lobby.sendRootGamePacket(new GameDataPacket([player.gameObject.serializeSpawn()], this.lobby.code));
 
     player.gameObject.playerControl.syncSettings(this.lobby.options, [sender]);
 
@@ -350,16 +323,13 @@ export class CustomHost implements HostInstance {
 
     sender.startMeeting(victimPlayerId, this.lobby.connections);
 
-    this.lobby.meetingHud = new EntityMeetingHud(this.lobby);
-    this.lobby.meetingHud.innerNetObjects = [
-      new InnerMeetingHud(this.getNextNetId(), this.lobby.meetingHud),
-    ];
-    this.lobby.meetingHud.innerNetObjects[0].playerStates = Array(this.lobby.gameData.gameData.players.length);
+    this.lobby.meetingHud = new EntityMeetingHud(this.lobby, this.getNextNetId());
+    this.lobby.meetingHud.meetingHud.playerStates = Array(this.lobby.gameData.gameData.players.length);
 
     for (let i = 0; i < this.lobby.gameData.gameData.players.length; i++) {
       const player = this.lobby.gameData.gameData.players[i];
 
-      this.lobby.meetingHud!.innerNetObjects[0].playerStates[player.id] = new VoteState(
+      this.lobby.meetingHud!.meetingHud.playerStates[player.id] = new VoteState(
         player!.id == sender.playerId,
         false,
         player.isDead || player.isDisconnected,
@@ -368,7 +338,7 @@ export class CustomHost implements HostInstance {
     }
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
-      this.lobby.meetingHud.spawn(),
+      this.lobby.meetingHud.serializeSpawn(),
     ], this.lobby.code));
 
     this.meetingHudTimeout = setTimeout(this.endMeeting, (this.lobby.options.votingTime + this.lobby.options.discussionTime) * 1000);
@@ -778,12 +748,7 @@ export class CustomHost implements HostInstance {
 
     this.lobby.sendRootGamePacket(new EndGamePacket(this.lobby.code, reason, false));
 
-    this.lobby.gameData = new EntityGameData(this.lobby);
-    this.lobby.gameData.owner = GLOBAL_OWNER;
-    this.lobby.gameData.innerNetObjects = [
-      new InnerGameData(this.getNextNetId(), this.lobby.gameData, []),
-      new InnerVoteBanSystem(this.getNextNetId(), this.lobby.gameData),
-    ];
+    this.lobby.gameData = new EntityGameData(this.lobby, this.getNextNetId(), [], this.getNextNetId());
   }
 
   private getNextPlayerId(): number {

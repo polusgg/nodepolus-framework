@@ -1,5 +1,5 @@
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
-import { ChatNoteType, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SystemType } from "../types/enums";
+import { ChatNoteType, GameState, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SystemType } from "../types/enums";
 import { InnerGameData, InnerVoteBanSystem, PlayerData } from "../protocol/entities/gameData";
 import { LadderSize, LadderDirection } from "../protocol/packets/rpc/climbLadderPacket";
 import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud";
@@ -395,7 +395,9 @@ export class RPCHandler {
   handleCompleteTask(sender: InnerPlayerControl, taskIndex: number, sendTo: Connection[]): void {
     this.lobby.customHostInstance.handleCompleteTask(sender, taskIndex);
 
-    sender.completeTask(taskIndex, sendTo);
+    if (this.lobby.gameState != GameState.Ended) {
+      sender.completeTask(taskIndex, sendTo);
+    }
   }
 
   handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData, sendTo: Connection[]): void {
