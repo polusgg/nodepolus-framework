@@ -1,22 +1,14 @@
-import { BaseInnerNetEntity, LobbyImplementation } from "../types";
-import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { GLOBAL_OWNER } from "../../../util/constants";
+import { BaseEntityShipStatus } from "../baseShipStatus/baseEntityShipStatus";
 import { SpawnPacket } from "../../packets/gameData";
+import { SpawnType } from "../../../types/enums";
+import { LobbyImplementation } from "../types";
 import { InnerSkeldShipStatus } from ".";
 
-export class EntitySkeldShipStatus extends BaseInnerNetEntity {
-  public innerNetObjects: [ InnerSkeldShipStatus ];
-
-  get shipStatus(): InnerSkeldShipStatus {
-    return this.innerNetObjects[0];
-  }
-
+export class EntitySkeldShipStatus extends BaseEntityShipStatus {
   constructor(lobby: LobbyImplementation, shipStatusNetId: number) {
-    super(SpawnType.ShipStatus, lobby, GLOBAL_OWNER, SpawnFlag.None);
+    super(SpawnType.ShipStatus, lobby);
 
-    this.innerNetObjects = [
-      new InnerSkeldShipStatus(shipStatusNetId, this),
-    ];
+    this.shipStatus = new InnerSkeldShipStatus(shipStatusNetId, this);
   }
 
   serializeSpawn(): SpawnPacket {
@@ -25,7 +17,7 @@ export class EntitySkeldShipStatus extends BaseInnerNetEntity {
       this.owner,
       this.flags,
       [
-        this.shipStatus.serializeSpawn(),
+        this.getShipStatus().serializeSpawn(),
       ],
     );
   }

@@ -1,6 +1,6 @@
 import { AutoDoorsHandler, DeconHandler, DoorsHandler, SabotageSystemHandler, SystemsHandler } from "./systemHandlers";
+import { BaseInnerShipStatus, InternalSystemType } from "../protocol/entities/baseShipStatus";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
-import { BaseShipStatus, InternalSystemType } from "../protocol/entities/baseShipStatus";
 import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
 import { EntityPlayer, InnerPlayerControl } from "../protocol/entities/player";
 import { EntityMeetingHud, VoteState } from "../protocol/entities/meetingHud";
@@ -126,27 +126,27 @@ export class CustomHost implements HostInstance {
       switch (this.lobby.options.levels[0]) {
         case Level.TheSkeld:
           this.deconHandlers = [];
-          this.doorHandler = new AutoDoorsHandler(this, this.lobby.shipStatus.innerNetObjects[0]);
+          this.doorHandler = new AutoDoorsHandler(this, this.lobby.shipStatus.getShipStatus());
           break;
         case Level.AprilSkeld:
           this.deconHandlers = [];
-          this.doorHandler = new AutoDoorsHandler(this, this.lobby.shipStatus.innerNetObjects[0]);
+          this.doorHandler = new AutoDoorsHandler(this, this.lobby.shipStatus.getShipStatus());
           break;
         case Level.MiraHq:
           this.deconHandlers = [
-            new DeconHandler(this, this.lobby.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
+            new DeconHandler(this, this.lobby.shipStatus.getShipStatus().systems[InternalSystemType.Decon] as DeconSystem),
           ];
           break;
         case Level.Polus:
           this.deconHandlers = [
-            new DeconHandler(this, this.lobby.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon] as DeconSystem),
-            new DeconHandler(this, this.lobby.shipStatus.innerNetObjects[0].systems[InternalSystemType.Decon2] as DeconTwoSystem),
+            new DeconHandler(this, this.lobby.shipStatus.getShipStatus().systems[InternalSystemType.Decon] as DeconSystem),
+            new DeconHandler(this, this.lobby.shipStatus.getShipStatus().systems[InternalSystemType.Decon2] as DeconTwoSystem),
           ];
-          this.doorHandler = new DoorsHandler(this, this.lobby.shipStatus.innerNetObjects[0]);
+          this.doorHandler = new DoorsHandler(this, this.lobby.shipStatus.getShipStatus());
           break;
         case Level.Airship:
           this.deconHandlers = [];
-          this.doorHandler = new DoorsHandler(this, this.lobby.shipStatus.innerNetObjects[0]);
+          this.doorHandler = new DoorsHandler(this, this.lobby.shipStatus.getShipStatus());
           break;
       }
 
@@ -438,12 +438,12 @@ export class CustomHost implements HostInstance {
     }
   }
 
-  handleRepairSystem(_sender: BaseShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
+  handleRepairSystem(_sender: BaseInnerShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
     if (!this.lobby.shipStatus) {
       throw new Error("Received RepairSystem without a ShipStatus instance");
     }
 
-    const system = this.lobby.shipStatus.innerNetObjects[0].getSystemFromType(systemId);
+    const system = this.lobby.shipStatus.getShipStatus().getSystemFromType(systemId);
     const player = this.lobby.players.find(thePlayer => thePlayer.gameObject.playerControl.netId == playerControlNetId);
     const level = this.lobby.options.levels[0];
 
@@ -498,7 +498,7 @@ export class CustomHost implements HostInstance {
     }
   }
 
-  handleCloseDoorsOfType(_sender: BaseShipStatus, systemId: SystemType): void {
+  handleCloseDoorsOfType(_sender: BaseInnerShipStatus, systemId: SystemType): void {
     if (!this.doorHandler) {
       throw new Error("Received CloseDoorsOfType without a door handler");
     }
@@ -570,15 +570,15 @@ export class CustomHost implements HostInstance {
       throw new Error("Received UsePlatform without a ShipStatus instance");
     }
 
-    const oldData = this.lobby.shipStatus.innerNetObjects[0].clone();
-    const movingPlatform = this.lobby.shipStatus.innerNetObjects[0].systems[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
+    const oldData = this.lobby.shipStatus.getShipStatus().clone();
+    const movingPlatform = this.lobby.shipStatus.getShipStatus().systems[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
 
     movingPlatform.innerPlayerControlNetId = sender.parent.playerControl.netId;
     movingPlatform.side = (movingPlatform.side + 1) % 2;
 
     movingPlatform.sequenceId++;
 
-    const data = this.lobby.shipStatus.innerNetObjects[0].getData(oldData);
+    const data = this.lobby.shipStatus.getShipStatus().getData(oldData);
 
     this.lobby.sendRootGamePacket(new GameDataPacket([data], this.lobby.code));
   }

@@ -2,7 +2,7 @@ import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
-export class AirshipReactorSystem extends BaseSystem<AirshipReactorSystem> {
+export class AirshipReactorSystem extends BaseSystem {
   public activeConsoles: Map<number, number> = new Map();
   public completedConsoles: Set<number> = new Set([0, 1]);
 

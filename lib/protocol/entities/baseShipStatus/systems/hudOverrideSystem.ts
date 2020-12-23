@@ -2,7 +2,7 @@ import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
-export class HudOverrideSystem extends BaseSystem<HudOverrideSystem> {
+export class HudOverrideSystem extends BaseSystem {
   public sabotaged = false;
 
   constructor() {

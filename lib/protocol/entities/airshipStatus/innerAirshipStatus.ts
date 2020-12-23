@@ -1,9 +1,9 @@
+import { BaseInnerShipStatus } from "../baseShipStatus";
 import { InnerNetObjectType } from "../types/enums";
-import { BaseShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../types/enums";
 import { EntityAirshipStatus } from ".";
 
-export class InnerAirshipStatus extends BaseShipStatus {
+export class InnerAirshipStatus extends BaseInnerShipStatus {
   constructor(
     netId: number,
     public parent: EntityAirshipStatus,

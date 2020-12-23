@@ -1,5 +1,5 @@
+import { BaseInnerShipStatus } from "../../protocol/entities/baseShipStatus";
 import { DecontaminationDoorState, SystemType } from "../../types/enums";
-import { BaseShipStatus } from "../../protocol/entities/baseShipStatus";
 import { GameDataPacket } from "../../protocol/packets/root";
 import { Player } from "../../player";
 import { CustomHost } from "..";
@@ -37,7 +37,7 @@ import {
 } from "../../protocol/entities/baseShipStatus/systems";
 
 export class SystemsHandler {
-  private oldShipStatus: BaseShipStatus = this.host.lobby.shipStatus!.innerNetObjects[0];
+  private oldShipStatus: BaseInnerShipStatus = this.host.lobby.shipStatus!.getShipStatus();
   private sabotageCountdownInterval: NodeJS.Timeout | undefined;
 
   constructor(
@@ -249,7 +249,7 @@ export class SystemsHandler {
     ], this.host.lobby.code));
   }
 
-  private getShipStatus(): BaseShipStatus {
-    return this.host.lobby.shipStatus!.innerNetObjects[0];
+  private getShipStatus(): BaseInnerShipStatus {
+    return this.host.lobby.shipStatus!.getShipStatus();
   }
 }

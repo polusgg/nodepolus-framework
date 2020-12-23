@@ -2,7 +2,7 @@ import { DecontaminationDoorState, SystemType } from "../../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { BaseSystem } from ".";
 
-export class DeconTwoSystem extends BaseSystem<DeconTwoSystem> {
+export class DeconTwoSystem extends BaseSystem {
   public timer = 0;
   public state: DecontaminationDoorState = DecontaminationDoorState.Idle;
 

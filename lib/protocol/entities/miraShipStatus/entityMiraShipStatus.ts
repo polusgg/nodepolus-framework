@@ -1,22 +1,14 @@
-import { BaseInnerNetEntity, LobbyImplementation } from "../types";
-import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { GLOBAL_OWNER } from "../../../util/constants";
+import { BaseEntityShipStatus } from "../baseShipStatus/baseEntityShipStatus";
 import { SpawnPacket } from "../../packets/gameData";
+import { SpawnType } from "../../../types/enums";
+import { LobbyImplementation } from "../types";
 import { InnerMiraShipStatus } from ".";
 
-export class EntityMiraShipStatus extends BaseInnerNetEntity {
-  public innerNetObjects: [ InnerMiraShipStatus ];
-
-  get headquarters(): InnerMiraShipStatus {
-    return this.innerNetObjects[0];
-  }
-
+export class EntityMiraShipStatus extends BaseEntityShipStatus {
   constructor(lobby: LobbyImplementation, shipStatusNetId: number) {
-    super(SpawnType.Headquarters, lobby, GLOBAL_OWNER, SpawnFlag.None);
+    super(SpawnType.Headquarters, lobby);
 
-    this.innerNetObjects = [
-      new InnerMiraShipStatus(shipStatusNetId, this),
-    ];
+    this.shipStatus = new InnerMiraShipStatus(shipStatusNetId, this);
   }
 
   serializeSpawn(): SpawnPacket {
@@ -25,7 +17,7 @@ export class EntityMiraShipStatus extends BaseInnerNetEntity {
       this.owner,
       this.flags,
       [
-        this.headquarters.serializeSpawn(),
+        this.getShipStatus().serializeSpawn(),
       ],
     );
   }

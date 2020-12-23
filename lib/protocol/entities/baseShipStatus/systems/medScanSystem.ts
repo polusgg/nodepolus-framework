@@ -2,7 +2,7 @@ import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
-export class MedScanSystem extends BaseSystem<MedScanSystem> {
+export class MedScanSystem extends BaseSystem {
   public playersInQueue: Set<number> = new Set();
 
   constructor() {

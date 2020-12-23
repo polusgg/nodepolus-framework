@@ -3,7 +3,7 @@ import { SystemType } from "../../../../types/enums";
 import { Bitfield } from "../../../../types";
 import { BaseSystem } from ".";
 
-export class SwitchSystem extends BaseSystem<SwitchSystem> {
+export class SwitchSystem extends BaseSystem {
   public actualSwitches: Bitfield = new Bitfield(Array(5).fill(0).map(() => !!Math.round(Math.random() * 1)));
   public expectedSwitches: Bitfield = this.actualSwitches;
   public visionModifier = 0xff;

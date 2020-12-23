@@ -3,7 +3,7 @@ import { POLUS_DOOR_COUNT } from "../../../../util/constants";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
-export class DoorsSystem extends BaseSystem<DoorsSystem> {
+export class DoorsSystem extends BaseSystem {
   public timers: Map<SystemType, number> = new Map<SystemType, number>();
   public doorStates: boolean[] = Array(POLUS_DOOR_COUNT).fill(true);
 

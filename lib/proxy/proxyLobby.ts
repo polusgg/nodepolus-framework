@@ -1,4 +1,5 @@
-import { LobbyImplementation, EntityLevel, BaseInnerNetObject } from "../protocol/entities/types";
+import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
+import { LobbyImplementation, BaseInnerNetObject } from "../protocol/entities/types";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { GameDataPacket } from "../protocol/packets/root";
@@ -13,7 +14,7 @@ import { Proxy } from ".";
 export class ProxyLobby implements LobbyImplementation {
   public players: Player[] = [];
   public gameData?: EntityGameData;
-  public shipStatus?: EntityLevel;
+  public shipStatus?: BaseEntityShipStatus;
   public meetingHud?: EntityMeetingHud;
   public options: GameOptionsData = new GameOptionsData();
   public customHostInstance: HostInstance;

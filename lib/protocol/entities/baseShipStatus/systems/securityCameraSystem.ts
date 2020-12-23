@@ -2,7 +2,7 @@ import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
-export class SecurityCameraSystem extends BaseSystem<SecurityCameraSystem> {
+export class SecurityCameraSystem extends BaseSystem {
   public playersViewingCameras: Set<number> = new Set();
 
   constructor() {

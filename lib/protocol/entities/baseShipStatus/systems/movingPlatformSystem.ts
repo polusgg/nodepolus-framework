@@ -7,7 +7,7 @@ enum MovingPlatformSide {
   Right = 0x01,
 }
 
-export class MovingPlatformSystem extends BaseSystem<MovingPlatformSystem> {
+export class MovingPlatformSystem extends BaseSystem {
   public sequenceId = 0;
   public innerPlayerControlNetId?: number;
   public side: MovingPlatformSide = MovingPlatformSide.Left;

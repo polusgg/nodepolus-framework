@@ -2,7 +2,7 @@ import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
-export class LaboratorySystem extends BaseSystem<LaboratorySystem> {
+export class LaboratorySystem extends BaseSystem {
   public timer = 10000;
   public userConsoles: Map<number, number> = new Map();
 

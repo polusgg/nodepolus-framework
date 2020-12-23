@@ -3,7 +3,7 @@ import { SKELD_DOOR_COUNT } from "../../../../util/constants";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
-export class AutoDoorsSystem extends BaseSystem<AutoDoorsSystem> {
+export class AutoDoorsSystem extends BaseSystem {
   public doors: boolean[] = Array(SKELD_DOOR_COUNT).fill(true);
 
   constructor() {

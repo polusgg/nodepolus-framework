@@ -1,22 +1,14 @@
-import { BaseInnerNetEntity, LobbyImplementation } from "../types";
-import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { GLOBAL_OWNER } from "../../../util/constants";
+import { BaseEntityShipStatus } from "../baseShipStatus/baseEntityShipStatus";
 import { SpawnPacket } from "../../packets/gameData";
+import { SpawnType } from "../../../types/enums";
+import { LobbyImplementation } from "../types";
 import { InnerAirshipStatus } from ".";
 
-export class EntityAirshipStatus extends BaseInnerNetEntity {
-  public innerNetObjects: [ InnerAirshipStatus ];
-
-  get aprilShipStatus(): InnerAirshipStatus {
-    return this.innerNetObjects[0];
-  }
-
+export class EntityAirshipStatus extends BaseEntityShipStatus {
   constructor(lobby: LobbyImplementation, shipStatusNetId: number) {
-    super(SpawnType.Airship, lobby, GLOBAL_OWNER, SpawnFlag.None);
+    super(SpawnType.Airship, lobby);
 
-    this.innerNetObjects = [
-      new InnerAirshipStatus(shipStatusNetId, this),
-    ];
+    this.shipStatus = new InnerAirshipStatus(shipStatusNetId, this);
   }
 
   serializeSpawn(): SpawnPacket {
@@ -25,7 +17,7 @@ export class EntityAirshipStatus extends BaseInnerNetEntity {
       this.owner,
       this.flags,
       [
-        this.aprilShipStatus.serializeSpawn(),
+        this.getShipStatus().serializeSpawn(),
       ],
     );
   }

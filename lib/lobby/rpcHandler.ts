@@ -1,11 +1,11 @@
-import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { ChatNoteType, GameState, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SystemType } from "../types/enums";
+import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { InnerGameData, InnerVoteBanSystem, PlayerData } from "../protocol/entities/gameData";
 import { LadderSize, LadderDirection } from "../protocol/packets/rpc/climbLadderPacket";
 import { InnerMeetingHud, VoteState } from "../protocol/entities/meetingHud";
 import { RepairAmount } from "../protocol/packets/rpc/repairSystem/amounts";
+import { BaseInnerShipStatus } from "../protocol/entities/baseShipStatus";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
-import { BaseShipStatus } from "../protocol/entities/baseShipStatus";
 import { RPCPacketType } from "../protocol/packets/types/enums";
 import { Connection } from "../protocol/connection";
 import { GameOptionsData, Vector2 } from "../types";
@@ -326,21 +326,21 @@ export class RPCHandler {
       case RPCPacketType.CloseDoorsOfType: {
         const packet: CloseDoorsOfTypePacket = rawPacket as CloseDoorsOfTypePacket;
 
-        if (!(sender instanceof BaseShipStatus)) {
+        if (!(sender instanceof BaseInnerShipStatus)) {
           throw new Error(`Received CloseDoorsOfType packet from invalid InnerNetObject: expected BaseShipStatus but got ${type as number} (${typeString})`);
         }
 
-        this.handleCloseDoorsOfType(sender as BaseShipStatus, packet.system);
+        this.handleCloseDoorsOfType(sender as BaseInnerShipStatus, packet.system);
         break;
       }
       case RPCPacketType.RepairSystem: {
         const packet: RepairSystemPacket = rawPacket as RepairSystemPacket;
 
-        if (!(sender instanceof BaseShipStatus)) {
+        if (!(sender instanceof BaseInnerShipStatus)) {
           throw new Error(`Received RepairSystem packet from invalid InnerNetObject: expected BaseShipStatus but got ${type as number} (${typeString})`);
         }
 
-        this.handleRepairSystem(sender as BaseShipStatus, packet.system, packet.playerControlNetId, packet.amount);
+        this.handleRepairSystem(sender as BaseInnerShipStatus, packet.system, packet.playerControlNetId, packet.amount);
         break;
       }
       case RPCPacketType.SetTasks: {
@@ -541,13 +541,13 @@ export class RPCHandler {
     sender.addVote(votingClientId, targetClientId, sendTo);
   }
 
-  handleCloseDoorsOfType(sender: BaseShipStatus, system: SystemType): void {
+  handleCloseDoorsOfType(sender: BaseInnerShipStatus, system: SystemType): void {
     this.lobby.customHostInstance.handleCloseDoorsOfType(sender, system);
 
     sender.closeDoorsOfType(system);
   }
 
-  handleRepairSystem(sender: BaseShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
+  handleRepairSystem(sender: BaseInnerShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
     this.lobby.customHostInstance.handleRepairSystem(sender, systemId, playerControlNetId, amount);
 
     sender.repairSystem(systemId, playerControlNetId, amount);

@@ -1,22 +1,14 @@
-import { BaseInnerNetEntity, LobbyImplementation } from "../types";
-import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { GLOBAL_OWNER } from "../../../util/constants";
+import { BaseEntityShipStatus } from "../baseShipStatus/baseEntityShipStatus";
 import { SpawnPacket } from "../../packets/gameData";
+import { SpawnType } from "../../../types/enums";
+import { LobbyImplementation } from "../types";
 import { InnerSkeldAprilShipStatus } from ".";
 
-export class EntitySkeldAprilShipStatus extends BaseInnerNetEntity {
-  public innerNetObjects: [ InnerSkeldAprilShipStatus ];
-
-  get aprilShipStatus(): InnerSkeldAprilShipStatus {
-    return this.innerNetObjects[0];
-  }
-
+export class EntitySkeldAprilShipStatus extends BaseEntityShipStatus {
   constructor(lobby: LobbyImplementation, shipStatusNetId: number) {
-    super(SpawnType.AprilShipStatus, lobby, GLOBAL_OWNER, SpawnFlag.None);
+    super(SpawnType.AprilShipStatus, lobby);
 
-    this.innerNetObjects = [
-      new InnerSkeldAprilShipStatus(shipStatusNetId, this),
-    ];
+    this.shipStatus = new InnerSkeldAprilShipStatus(shipStatusNetId, this);
   }
 
   serializeSpawn(): SpawnPacket {
@@ -25,7 +17,7 @@ export class EntitySkeldAprilShipStatus extends BaseInnerNetEntity {
       this.owner,
       this.flags,
       [
-        this.aprilShipStatus.serializeSpawn(),
+        this.getShipStatus().serializeSpawn(),
       ],
     );
   }

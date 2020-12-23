@@ -6,7 +6,7 @@ import { Bitfield, ClientVersion, DisconnectReason } from "../../types";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
 import { ReadyPacket, SceneChangePacket } from "../packets/gameData";
 import { RepairAmount } from "../packets/rpc/repairSystem/amounts";
-import { BaseShipStatus } from "../entities/baseShipStatus";
+import { BaseInnerShipStatus } from "../entities/baseShipStatus";
 import { RootPacketDataType } from "../packets/hazel/types";
 import { InnerPlayerControl } from "../entities/player";
 import { AwaitingPacket } from "../packets/types";
@@ -310,8 +310,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
   handleCheckName(_sender: InnerPlayerControl, _name: string): void {}
   handleCheckColor(_sender: InnerPlayerControl, _color: PlayerColor): void {}
   handleReportDeadBody(_sender: InnerPlayerControl, _victimPlayerId: number): void {}
-  handleRepairSystem(_sender: BaseShipStatus, _systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
-  handleCloseDoorsOfType(_sender: BaseShipStatus, _systemId: SystemType): void {}
+  handleRepairSystem(_sender: BaseInnerShipStatus, _systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
+  handleCloseDoorsOfType(_sender: BaseInnerShipStatus, _systemId: SystemType): void {}
   handleSetStartCounter(_sequenceId: number, _timeRemaining: number): void {}
   handleCompleteTask(_sender: InnerPlayerControl, _taskIndex: number): void {}
   handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): void {}

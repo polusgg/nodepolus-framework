@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 
-export abstract class BaseSystem<T> {
+export abstract class BaseSystem {
   constructor(public readonly type: SystemType) {}
 
   abstract getData(old: this): MessageWriter;
@@ -12,9 +12,9 @@ export abstract class BaseSystem<T> {
 
   abstract setSpawn(packet: MessageReader): void;
 
-  abstract equals(old: BaseSystem<T>): boolean;
+  abstract equals(old: BaseSystem): boolean;
 
-  abstract clone(): T;
+  abstract clone(): BaseSystem;
 
   data(packet: MessageReader): undefined;
   data(old: this): MessageWriter;

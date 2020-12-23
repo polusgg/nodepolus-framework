@@ -25,24 +25,8 @@ import {
   SwitchSystem,
 } from "./systems";
 
-type System = AirshipReactorSystem
-| AutoDoorsSystem
-| DeconSystem
-| DeconTwoSystem
-| DoorsSystem
-| HqHudSystem
-| HudOverrideSystem
-| LaboratorySystem
-| LifeSuppSystem
-| MedScanSystem
-| MovingPlatformSystem
-| ReactorSystem
-| SabotageSystem
-| SecurityCameraSystem
-| SwitchSystem;
-
-export abstract class BaseShipStatus extends BaseInnerNetObject {
-  public systems: BaseSystem<System>[] = [];
+export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
+  public systems: BaseSystem[] = [];
   public spawnSystemTypes: SystemType[];
 
   private readonly level: Level;
@@ -81,7 +65,7 @@ export abstract class BaseShipStatus extends BaseInnerNetObject {
     this.initializeSystems();
   }
 
-  abstract clone(): BaseShipStatus;
+  abstract clone(): BaseInnerShipStatus;
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   closeDoorsOfType(_systemId: SystemType): void {}
@@ -89,7 +73,7 @@ export abstract class BaseShipStatus extends BaseInnerNetObject {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   repairSystem(_systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
 
-  getData(old: BaseShipStatus): DataPacket {
+  getData(old: BaseInnerShipStatus): DataPacket {
     const changedSystemTypes: SystemType[] = this.systems.map((currentSystem, systemIndex) => {
       const oldSystem = old.systems[systemIndex];
 
@@ -137,7 +121,7 @@ export abstract class BaseShipStatus extends BaseInnerNetObject {
     );
   }
 
-  getSystemFromType(systemType: SystemType): BaseSystem<System> {
+  getSystemFromType(systemType: SystemType): BaseSystem {
     switch (systemType) {
       case SystemType.Doors:
         if (this.level == Level.TheSkeld) {
@@ -274,8 +258,8 @@ export abstract class BaseShipStatus extends BaseInnerNetObject {
   }
 
   private getSystems(old: undefined, systems: SystemType[], fromSpawn: true): MessageWriter;
-  private getSystems(old: BaseShipStatus, systems: SystemType[], fromSpawn: false): MessageWriter;
-  private getSystems(old: BaseShipStatus | undefined, systems: SystemType[], fromSpawn: boolean): MessageWriter {
+  private getSystems(old: BaseInnerShipStatus, systems: SystemType[], fromSpawn: false): MessageWriter;
+  private getSystems(old: BaseInnerShipStatus | undefined, systems: SystemType[], fromSpawn: boolean): MessageWriter {
     const writers: MessageWriter[] = new Array(systems.length);
 
     for (let i = 0; i < systems.length; i++) {

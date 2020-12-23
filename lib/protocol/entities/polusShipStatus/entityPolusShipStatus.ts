@@ -1,22 +1,14 @@
-import { BaseInnerNetEntity, LobbyImplementation } from "../types";
-import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { GLOBAL_OWNER } from "../../../util/constants";
+import { BaseEntityShipStatus } from "../baseShipStatus/baseEntityShipStatus";
 import { SpawnPacket } from "../../packets/gameData";
+import { SpawnType } from "../../../types/enums";
+import { LobbyImplementation } from "../types";
 import { InnerPolusShipStatus } from ".";
 
-export class EntityPolusShipStatus extends BaseInnerNetEntity {
-  public innerNetObjects: [ InnerPolusShipStatus ];
-
-  get planetMap(): InnerPolusShipStatus {
-    return this.innerNetObjects[0];
-  }
-
+export class EntityPolusShipStatus extends BaseEntityShipStatus {
   constructor(lobby: LobbyImplementation, shipStatusNetId: number) {
-    super(SpawnType.PlanetMap, lobby, GLOBAL_OWNER, SpawnFlag.None);
+    super(SpawnType.PlanetMap, lobby);
 
-    this.innerNetObjects = [
-      new InnerPolusShipStatus(shipStatusNetId, this),
-    ];
+    this.shipStatus = new InnerPolusShipStatus(shipStatusNetId, this);
   }
 
   serializeSpawn(): SpawnPacket {
@@ -25,7 +17,7 @@ export class EntityPolusShipStatus extends BaseInnerNetEntity {
       this.owner,
       this.flags,
       [
-        this.planetMap.serializeSpawn(),
+        this.getShipStatus().serializeSpawn(),
       ],
     );
   }

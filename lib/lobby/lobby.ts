@@ -1,8 +1,9 @@
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
-import { BaseInnerNetObject, EntityLevel, LobbyImplementation } from "../protocol/entities/types";
+import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { GameDataPacketDataType, LobbyListing } from "../protocol/packets/root/types";
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
+import { BaseInnerNetObject, LobbyImplementation } from "../protocol/entities/types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { RootPacketDataType } from "../protocol/packets/hazel/types";
@@ -54,7 +55,7 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
   public customHostInstance: CustomHost;
   public lobbyBehavior?: EntityLobbyBehaviour;
   public gameData?: EntityGameData;
-  public shipStatus?: EntityLevel;
+  public shipStatus?: BaseEntityShipStatus;
   public meetingHud?: EntityMeetingHud;
   public options: GameOptionsData = new GameOptionsData();
   // TODO: Change back to 0
@@ -175,8 +176,8 @@ export class Lobby extends Emittery.Typed<LobbyEvents> implements LobbyImplement
         return this.gameData!.gameData;
       case this.gameData?.voteBanSystem.netId:
         return this.gameData!.voteBanSystem;
-      case this.shipStatus?.innerNetObjects[0].netId:
-        return this.shipStatus!.innerNetObjects[0];
+      case this.shipStatus?.getShipStatus().netId:
+        return this.shipStatus!.getShipStatus();
       case this.meetingHud?.meetingHud.netId:
         return this.meetingHud!.meetingHud;
     }
