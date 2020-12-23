@@ -41,49 +41,44 @@ export class GameOptionsData {
   }
 
   static deserialize(reader: MessageReader, isSearching: boolean = false): GameOptionsData {
-    const length = reader.readPackedUInt32();
-    const version = reader.readByte();
+    const bytes = reader.readBytesAndSize();
+    const version = bytes.readByte();
 
     if (!GameOptionsData.isVersionSupported(version)) {
       throw new Error(`Invalid GameOptionsData version: ${version}`);
     }
 
     const expectedLength = LENGTHS[version - 1];
-    const byteLength = reader.getReadableBytesLength();
 
-    if (!GameOptionsData.isExpectedLength(version, length)) {
-      throw new Error(`Invalid GameOptionsData length for version ${version}: expected ${expectedLength} but got ${length}`);
-    }
-
-    if (byteLength < length - 1) {
-      throw new Error(`Not enough bytes: expected ${expectedLength} but got ${byteLength}`);
+    if (!GameOptionsData.isExpectedLength(version, bytes.length)) {
+      throw new Error(`Invalid GameOptionsData length for version ${version}: expected ${expectedLength} but got ${bytes.length}`);
     }
 
     return new GameOptionsData(
       version,
-      reader.readByte(),
-      Bitfield.fromNumber(reader.readUInt32(), 32).asNumbers(),
+      bytes.readByte(),
+      Bitfield.fromNumber(bytes.readUInt32(), 32).asNumbers(),
       isSearching
-        ? Bitfield.fromNumber(reader.readByte(), 8).asNumbers()
-        : [reader.readByte()],
-      reader.readFloat32(),
-      reader.readFloat32(),
-      reader.readFloat32(),
-      reader.readFloat32(),
-      reader.readByte(),
-      reader.readByte(),
-      reader.readByte(),
-      reader.readUInt32(),
-      reader.readByte(),
-      reader.readByte() as KillDistance,
-      reader.readUInt32(),
-      reader.readUInt32(),
-      reader.readBoolean(),
-      version > 1 ? reader.readByte() : 15,
-      version > 2 ? reader.readBoolean() : true,
-      version > 2 ? reader.readBoolean() : true,
-      version > 3 ? reader.readBoolean() : false,
-      version > 3 ? reader.readByte() as TaskBarUpdate : TaskBarUpdate.Always,
+        ? Bitfield.fromNumber(bytes.readByte(), 8).asNumbers()
+        : [bytes.readByte()],
+      bytes.readFloat32(),
+      bytes.readFloat32(),
+      bytes.readFloat32(),
+      bytes.readFloat32(),
+      bytes.readByte(),
+      bytes.readByte(),
+      bytes.readByte(),
+      bytes.readUInt32(),
+      bytes.readByte(),
+      bytes.readByte() as KillDistance,
+      bytes.readUInt32(),
+      bytes.readUInt32(),
+      bytes.readBoolean(),
+      version > 1 ? bytes.readByte() : 15,
+      version > 2 ? bytes.readBoolean() : true,
+      version > 2 ? bytes.readBoolean() : true,
+      version > 3 ? bytes.readBoolean() : false,
+      version > 3 ? bytes.readByte() as TaskBarUpdate : TaskBarUpdate.Always,
     );
   }
 

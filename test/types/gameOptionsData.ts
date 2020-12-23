@@ -34,3 +34,17 @@ test("deserializes a valid object", t => {
   t.false(options.anonymousVoting);
   t.is(options.taskBarUpdates, TaskBarUpdate.Always);
 });
+
+test("throws an error for an unexpected version", t => {
+  const buf = MessageReader.fromRawBytes("2e000a00010000010000803f0000803f0000c03f000034420101020100000001010f00000078000000000f01010000");
+  const error = t.throws(() => GameOptionsData.deserialize(buf));
+
+  t.true(error.message.startsWith("Invalid GameOptionsData version"));
+});
+
+test("throws an error for an incorrect length", t => {
+  const buf = MessageReader.fromRawBytes("2f040a00010000010000803f0000803f0000c03f000034420101020100000001010f00000078000000000f0101000000");
+  const error = t.throws(() => GameOptionsData.deserialize(buf));
+
+  t.true(error.message.startsWith("Invalid GameOptionsData length for version"));
+});

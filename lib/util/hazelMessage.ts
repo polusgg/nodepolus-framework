@@ -392,11 +392,23 @@ export class MessageReader extends HazelMessage {
   }
 
   readBytes(length: number): MessageReader {
+    const available = this.getReadableBytesLength();
+
+    if (length > available) {
+      throw new Error(`Not enough bytes to read: ${length} > ${available}`);
+    }
+
     const reader = MessageReader.fromRawBytes(this.buffer.slice(this.cursor, this.cursor + length));
 
     this.cursor += length;
 
     return reader;
+  }
+
+  readBytesAndSize(): MessageReader {
+    const length = this.readPackedUInt32();
+
+    return this.readBytes(length);
   }
 
   readList<T>(reader: (subReader: MessageReader) => T, lengthIsPacked: boolean = true): T[] {

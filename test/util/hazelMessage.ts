@@ -483,3 +483,25 @@ test("throws an error when writing a message that is too large", t => {
 
   t.throws(() => buf.endMessage());
 });
+
+test("throws an error when reading more bytes than are avaialble", t => {
+  const buf = MessageReader.fromRawBytes("0102030405");
+
+  t.is(buf.readByte(), 1);
+  t.is(buf.getReadableBytesLength(), 4);
+  t.throws(() => buf.readBytes(5));
+  t.is(buf.getReadableBytesLength(), 4);
+  t.is(buf.readBytes(4).buffer.toString("hex"), "02030405");
+  t.false(buf.hasBytesLeft());
+});
+
+test("reads bytes and size", t => {
+  const rawBytes = "69".repeat(128);
+  const buf = MessageReader.fromRawBytes(`8001${rawBytes}03020100`);
+  const bytes = buf.readBytesAndSize();
+
+  t.is(buf.getReadableBytesLength(), 4);
+  t.is(bytes.length, 128);
+  t.is(buf.readRemainingBytes().buffer.toString("hex"), "03020100");
+  t.is(bytes.buffer.toString("hex"), rawBytes);
+});
