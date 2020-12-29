@@ -98,6 +98,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
             this.lastVelocity.x != velocity.x ||
             this.lastVelocity.y != velocity.y
         ) {
+          // TODO: Add an equals method to Vector2 and use isFloatEqual
           this.emit("moved", { position, velocity });
 
           this.lastPosition = position;
