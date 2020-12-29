@@ -1,7 +1,7 @@
 import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { GLOBAL_OWNER } from "../../../util/constants";
 import { SpawnPacket } from "../../packets/gameData";
-import { LobbyInstance } from "../../../lobby";
+import { LobbyInstance } from "../../../api/lobby";
 import { BaseInnerNetEntity } from "../types";
 import { InnerLobbyBehaviour } from ".";
 

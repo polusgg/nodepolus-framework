@@ -3,14 +3,14 @@ import { DoorsSystem } from "../../protocol/entities/baseShipStatus/systems";
 import { GameDataPacket } from "../../protocol/packets/root";
 import { SystemDoors } from "../../static/doors";
 import { SystemType } from "../../types/enums";
-import { CustomHost } from "..";
+import { InternalHost } from "..";
 
 export class DoorsHandler {
   private readonly systemTimers: NodeJS.Timeout[] = [];
 
   private oldShipStatus: BaseInnerShipStatus;
 
-  constructor(public host: CustomHost, public shipStatus: BaseInnerShipStatus) {
+  constructor(public host: InternalHost, public shipStatus: BaseInnerShipStatus) {
     this.oldShipStatus = shipStatus.clone();
   }
 

@@ -1,5 +1,1 @@
-export { Lobby } from "./lobby";
-
-export { LobbyEvents } from "./lobbyEvents";
-
-export { LobbyInstance } from "./lobbyInstance";
+export { InternalLobby } from "./internalLobby";

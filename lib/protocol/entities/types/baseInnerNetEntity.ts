@@ -1,6 +1,6 @@
 import { SpawnType, SpawnFlag } from "../../../types/enums";
 import { SpawnPacket } from "../../packets/gameData";
-import { LobbyInstance } from "../../../lobby";
+import { LobbyInstance } from "../../../api/lobby";
 
 export abstract class BaseInnerNetEntity {
   constructor(

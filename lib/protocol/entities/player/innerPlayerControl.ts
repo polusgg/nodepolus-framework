@@ -3,10 +3,10 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
+import { InternalPlayer } from "../../../player";
 import { GameOptionsData } from "../../../types";
 import { Connection } from "../../connection";
 import { BaseInnerNetObject } from "../types";
-import { Player } from "../../../player";
 import { EntityPlayer } from ".";
 import {
   CompleteTaskPacket,
@@ -214,7 +214,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   murderPlayer(victimPlayerControlNetId: number, sendTo: Connection[]): void {
-    const victimPlayer: Player | undefined = this.parent.lobby.players.find(player => player.gameObject.playerControl.netId == victimPlayerControlNetId);
+    const victimPlayer: InternalPlayer | undefined = this.parent.lobby.players.find(player => player.gameObject.playerControl.netId == victimPlayerControlNetId);
 
     if (!victimPlayer) {
       throw new Error("Could not find victim Player");

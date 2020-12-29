@@ -11,7 +11,7 @@ import { PlayerData } from "../protocol/entities/gameData/types";
 import { RPCPacketType } from "../protocol/packets/types/enums";
 import { Connection } from "../protocol/connection";
 import { GameOptionsData, Vector2 } from "../types";
-import { Lobby } from ".";
+import { InternalLobby } from ".";
 import {
   AddVotePacket,
   BaseRPCPacket,
@@ -47,7 +47,7 @@ import {
 
 export class RPCHandler {
   constructor(
-    public readonly lobby: Lobby,
+    public readonly lobby: InternalLobby,
   ) {}
 
   handleBaseRPC(type: RPCPacketType, senderNetId: number, rawPacket: BaseRPCPacket, sendTo: Connection[]): void {
@@ -116,7 +116,7 @@ export class RPCHandler {
 
         this.handleCheckName(sender as InnerPlayerControl, packet.name, sendTo);
 
-        this.lobby.emit("player", this.lobby.findPlayerByConnection(this.lobby.findConnection(sender.parent.owner)!)!);
+        // this.lobby.emit("player", this.lobby.findPlayerByConnection(this.lobby.findConnection(sender.parent.owner)!)!);
         break;
       }
       case RPCPacketType.SetName: {
@@ -421,10 +421,10 @@ export class RPCHandler {
   }
 
   handleSetName(sender: InnerPlayerControl, name: string, sendTo: Connection[]): void {
-    this.lobby.emit("nameChanged", {
-      clientId: sender.parent.owner,
-      newName: name,
-    });
+    // this.lobby.emit("nameChanged", {
+    //   clientId: sender.parent.owner,
+    //   newName: name,
+    // });
 
     sender.setName(name, sendTo);
   }
@@ -436,28 +436,28 @@ export class RPCHandler {
   }
 
   handleSetColor(sender: InnerPlayerControl, color: PlayerColor, sendTo: Connection[]): void {
-    this.lobby.emit("colorChanged", {
-      clientId: sender.parent.owner,
-      newColor: color,
-    });
+    // this.lobby.emit("colorChanged", {
+    //   clientId: sender.parent.owner,
+    //   newColor: color,
+    // });
 
     sender.setColor(color, sendTo);
   }
 
   handleSetHat(sender: InnerPlayerControl, hat: PlayerHat, sendTo: Connection[]): void {
-    this.lobby.emit("hatChanged", {
-      clientId: sender.parent.owner,
-      newHat: hat,
-    });
+    // this.lobby.emit("hatChanged", {
+    //   clientId: sender.parent.owner,
+    //   newHat: hat,
+    // });
 
     sender.setHat(hat, sendTo);
   }
 
   handleSetSkin(sender: InnerPlayerControl, skin: PlayerSkin, sendTo: Connection[]): void {
-    this.lobby.emit("skinChanged", {
-      clientId: sender.parent.owner,
-      newSkin: skin,
-    });
+    // this.lobby.emit("skinChanged", {
+    //   clientId: sender.parent.owner,
+    //   newSkin: skin,
+    // });
 
     sender.setSkin(skin, sendTo);
   }
@@ -497,10 +497,10 @@ export class RPCHandler {
   }
 
   handleSetPet(sender: InnerPlayerControl, pet: PlayerPet, sendTo: Connection[]): void {
-    this.lobby.emit("petChanged", {
-      clientId: sender.parent.owner,
-      newPet: pet,
-    });
+    // this.lobby.emit("petChanged", {
+    //   clientId: sender.parent.owner,
+    //   newPet: pet,
+    // });
 
     sender.setPet(pet, sendTo);
   }

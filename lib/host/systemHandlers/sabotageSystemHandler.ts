@@ -1,6 +1,6 @@
 import { GameOverReason, Level } from "../../types/enums";
 import { Bitfield } from "../../types";
-import { CustomHost } from "..";
+import { InternalHost } from "..";
 import {
   HqHudSystem,
   HudOverrideSystem,
@@ -14,7 +14,7 @@ export class SabotageSystemHandler {
   public timer: NodeJS.Timeout | undefined;
 
   constructor(
-    public host: CustomHost,
+    public host: InternalHost,
   ) {}
 
   sabotageReactor(system: ReactorSystem | LaboratorySystem): void {

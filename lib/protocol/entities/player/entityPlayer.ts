@@ -1,7 +1,7 @@
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from ".";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { SpawnPacket } from "../../packets/gameData";
-import { LobbyInstance } from "../../../lobby";
+import { LobbyInstance } from "../../../api/lobby";
 import { BaseInnerNetEntity } from "../types";
 import { Vector2 } from "../../../types";
 

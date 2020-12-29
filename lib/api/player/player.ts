@@ -3,24 +3,22 @@ import { PlayerColor, PlayerHat, PlayerPet, PlayerSkin, PlayerState } from "../.
 import { PlayerData } from "../../protocol/entities/gameData/types";
 import { DespawnPacket } from "../../protocol/packets/gameData";
 import { EntityPlayer } from "../../protocol/entities/player";
-import { Player as InternalPlayer } from "../../player";
 import { DisconnectReason, Vector2 } from "../../types";
-import { PlainPlayerEvents, PlayerEvents } from ".";
+import { InternalPlayer } from "../../player";
 import { TextComponent } from "../text";
-import { Server } from "../server";
+import { Server } from "../../server";
 import { Lobby } from "../lobby";
-import Emittery from "emittery";
 import { Task } from "../game";
 
 declare const server: Server;
 
-export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
+export class Player {
   public playerId?: number;
   public state: PlayerState = PlayerState.PreSpawn;
 
   private internalTasks: Task[] = [];
-  private lastPosition: Vector2 = new Vector2(0, 0);
-  private lastVelocity: Vector2 = new Vector2(0, 0);
+  // private lastPosition: Vector2 = new Vector2(0, 0);
+  // private lastVelocity: Vector2 = new Vector2(0, 0);
 
   get name(): TextComponent {
     /**
@@ -36,7 +34,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
     try {
       return TextComponent.from(this.getGameDataEntry().name);
     } catch (error) {
-      const connectionName = server.internalServer.connections.get(`${this.ip}:${this.port}`)?.name;
+      const connectionName = server.connections.get(`${this.ip}:${this.port}`)?.name;
 
       if (connectionName) {
         return TextComponent.from(connectionName);
@@ -81,54 +79,52 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
 
   constructor(
     public lobby: Lobby,
-    public readonly clientId: number = server.internalServer.getNextConnectionId(),
+    public readonly clientId: number = server.getNextConnectionId(),
     public readonly ip?: string,
     public readonly port?: number,
   ) {
-    super();
+    // lobby.internalLobby.on("playerMoved", ({ clientId: id, position, velocity }) => {
+    //   if (this.state == PlayerState.PreSpawn) {
+    //     // TODO
+    //   }
 
-    lobby.internalLobby.on("movement", ({ clientId: id, position, velocity }) => {
-      if (this.state == PlayerState.PreSpawn) {
-        // TODO
-      }
+    //   if (id == this.clientId) {
+    //     if (this.lastPosition.x != position.x ||
+    //         this.lastPosition.y != position.y ||
+    //         this.lastVelocity.x != velocity.x ||
+    //         this.lastVelocity.y != velocity.y
+    //     ) {
+    //       // TODO: Add an equals method to Vector2 and use isFloatEqual
+    //       this.emit("moved", { position, velocity });
 
-      if (id == this.clientId) {
-        if (this.lastPosition.x != position.x ||
-            this.lastPosition.y != position.y ||
-            this.lastVelocity.x != velocity.x ||
-            this.lastVelocity.y != velocity.y
-        ) {
-          // TODO: Add an equals method to Vector2 and use isFloatEqual
-          this.emit("moved", { position, velocity });
+    //       this.lastPosition = position;
+    //       this.lastVelocity = velocity;
+    //     }
+    //   }
+    // });
 
-          this.lastPosition = position;
-          this.lastVelocity = velocity;
-        }
-      }
-    });
+    // lobby.internalLobby.on("chat", ({ clientId: id, message }) => {
+    //   if (id == this.clientId) {
+    //     // TODO: See name getter
+    //     this.emit("chat", TextComponent.from(message));
+    //   }
+    // });
 
-    lobby.internalLobby.on("chat", ({ clientId: id, message }) => {
-      if (id == this.clientId) {
-        // TODO: See name getter
-        this.emit("chat", TextComponent.from(message));
-      }
-    });
+    // lobby.internalLobby.on("setInfected", infected => {
+    //   for (let i = 0; i < infected.length; i++) {
+    //     const id = infected[i];
 
-    lobby.internalLobby.on("setInfected", infected => {
-      for (let i = 0; i < infected.length; i++) {
-        const id = infected[i];
+    //     if (id === this.playerId) {
+    //       this.emit("assignedImpostor");
+    //     }
+    //   }
+    // });
 
-        if (id === this.playerId) {
-          this.emit("assignedImpostor");
-        }
-      }
-    });
-
-    lobby.internalLobby.on("despawn", innerNetObject => {
-      if (innerNetObject.parent.owner == this.clientId) {
-        this.state = PlayerState.PreSpawn;
-      }
-    });
+    // lobby.internalLobby.on("despawn", innerNetObject => {
+    //   if (innerNetObject.parent.owner == this.clientId) {
+    //     this.state = PlayerState.PreSpawn;
+    //   }
+    // });
 
     // lobby.internalLobby.on("nameChanged", ({ clientId: id, newName }) => {
     //   if (id == this.clientId) {
@@ -158,7 +154,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   }
 
   setName(name: TextComponent | string): this {
-    this.emit("nameChanged", this.name);
+    // this.emit("nameChanged", this.name);
 
     this.getInternalPlayer().gameObject.playerControl.setName(name.toString(), this.lobby.internalLobby.connections);
 
@@ -166,7 +162,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   }
 
   setColor(color: PlayerColor): this {
-    this.emit("colorChanged", this.color);
+    // this.emit("colorChanged", this.color);
 
     this.getInternalPlayer().gameObject.playerControl.setColor(color, this.lobby.internalLobby.connections);
 
@@ -174,7 +170,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   }
 
   setHat(hat: PlayerHat): this {
-    this.emit("hatChanged", this.hat);
+    // this.emit("hatChanged", this.hat);
 
     this.getInternalPlayer().gameObject.playerControl.setHat(hat, this.lobby.internalLobby.connections);
 
@@ -182,7 +178,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   }
 
   setPet(pet: PlayerPet): this {
-    this.emit("petChanged", this.pet);
+    // this.emit("petChanged", this.pet);
 
     this.getInternalPlayer().gameObject.playerControl.setPet(pet, this.lobby.internalLobby.connections);
 
@@ -190,7 +186,7 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
   }
 
   setSkin(skin: PlayerSkin): this {
-    this.emit("skinChanged", this.skin);
+    // this.emit("skinChanged", this.skin);
 
     this.getInternalPlayer().gameObject.playerControl.setSkin(skin, this.lobby.internalLobby.connections);
 
@@ -268,8 +264,8 @@ export class Player extends Emittery.Typed<PlayerEvents, PlainPlayerEvents> {
       thisConnection.write(new RemovePlayerPacket(this.lobby.code, this.clientId, this.clientId, DisconnectReason.serverRequest()));
       thisConnection.write(new JoinGameResponsePacket(this.lobby.code, this.clientId, this.clientId));
     } else {
-      thisConnection.write(new RemovePlayerPacket(this.lobby.code, this.clientId, this.lobby.internalLobby.customHostInstance.id, DisconnectReason.serverRequest()));
-      thisConnection.write(new JoinGameResponsePacket(this.lobby.code, this.clientId, this.lobby.internalLobby.customHostInstance.id));
+      thisConnection.write(new RemovePlayerPacket(this.lobby.code, this.clientId, this.lobby.internalLobby.customHostInstance.getId(), DisconnectReason.serverRequest()));
+      thisConnection.write(new JoinGameResponsePacket(this.lobby.code, this.clientId, this.lobby.internalLobby.customHostInstance.getId()));
     }
 
     this.setName(oldName);

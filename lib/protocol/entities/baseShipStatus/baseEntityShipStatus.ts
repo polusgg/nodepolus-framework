@@ -2,7 +2,7 @@ import { BaseInnerShipStatus } from "./baseInnerShipStatus";
 import { SpawnType, SpawnFlag } from "../../../types/enums";
 import { GLOBAL_OWNER } from "../../../util/constants";
 import { SpawnPacket } from "../../packets/gameData";
-import { LobbyInstance } from "../../../lobby";
+import { LobbyInstance } from "../../../api/lobby";
 import { BaseInnerNetEntity } from "../types";
 
 export abstract class BaseEntityShipStatus extends BaseInnerNetEntity {

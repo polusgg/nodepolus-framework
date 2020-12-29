@@ -5,15 +5,15 @@ import { EntityGameData } from "../protocol/entities/gameData";
 import { GameDataPacket } from "../protocol/packets/root";
 import { RPCPacket } from "../protocol/packets/gameData";
 import { BaseRPCPacket } from "../protocol/packets/rpc";
+import { LobbyInstance } from "../api/lobby";
 import { GameState } from "../types/enums";
+import { HostInstance } from "../api/host";
+import { InternalPlayer } from "../player";
 import { GameOptionsData } from "../types";
-import { LobbyInstance } from "../lobby";
-import { HostInstance } from "../host";
-import { Player } from "../player";
-import { Proxy } from ".";
+import { InternalProxy } from ".";
 
 export class ProxyLobby implements LobbyInstance {
-  public players: Player[] = [];
+  public players: InternalPlayer[] = [];
   public gameData?: EntityGameData;
   public shipStatus?: BaseEntityShipStatus;
   public meetingHud?: EntityMeetingHud;
@@ -22,12 +22,12 @@ export class ProxyLobby implements LobbyInstance {
   public gameState: GameState = GameState.NotStarted;
 
   constructor(
-    private readonly proxy: Proxy,
+    private readonly proxy: InternalProxy,
     public isHost: boolean,
     public code: string,
   ) {}
 
-  sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, _sendTo?: (Player | HostInstance)[]): void {
+  sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, _sendTo?: (InternalPlayer | HostInstance)[]): void {
     this.proxy.serverConnection.write(new GameDataPacket([
       new RPCPacket(from.netId, packet),
     ], this.code));

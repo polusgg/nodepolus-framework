@@ -1,7 +1,7 @@
 import { BaseEntityShipStatus } from "../baseShipStatus/baseEntityShipStatus";
 import { SpawnPacket } from "../../packets/gameData";
+import { LobbyInstance } from "../../../api/lobby";
 import { SpawnType } from "../../../types/enums";
-import { LobbyInstance } from "../../../lobby";
 import { InnerSkeldShipStatus } from ".";
 
 export class EntitySkeldShipStatus extends BaseEntityShipStatus {

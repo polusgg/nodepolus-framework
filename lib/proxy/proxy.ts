@@ -1,11 +1,11 @@
 import { PacketDestination } from "../protocol/packets/types/enums";
+import { ProxyEvents, ProxyInstance } from "../api/proxy";
 import { Connection } from "../protocol/connection";
-import { ProxyInstance } from "./proxyInstance";
-import { ProxyConfig, ProxyEvents } from ".";
+import { ProxyConfig } from "../api/config";
 import Emittery from "emittery";
 import dgram from "dgram";
 
-export class Proxy extends Emittery.Typed<ProxyEvents> implements ProxyInstance {
+export class InternalProxy extends Emittery.Typed<ProxyEvents> implements ProxyInstance {
   public readonly serverConnection: Connection;
 
   private readonly toServerSocket: dgram.Socket = dgram.createSocket("udp4");

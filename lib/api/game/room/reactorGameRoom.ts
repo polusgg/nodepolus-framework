@@ -3,7 +3,7 @@ import { ReactorAmount } from "../../../protocol/packets/rpc/repairSystem/amount
 import { ReactorSystem } from "../../../protocol/entities/baseShipStatus/systems";
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus";
 import { SystemType } from "../../../types/enums";
-import { Player } from "../../../player";
+import { InternalPlayer } from "../../../player";
 import { BaseDoorGameRoom } from ".";
 import { Game } from "..";
 
@@ -38,7 +38,7 @@ export class ReactorGameRoom extends BaseDoorGameRoom {
     }
 
     host.systemsHandler.repairReactor(
-      undefined as unknown as Player,
+      undefined as unknown as InternalPlayer,
       this.getInternalSystem(),
       new ReactorAmount(0, ReactorAction.Repaired),
     );

@@ -1,3 +1,1 @@
-export { CustomHost } from "./customHost";
-
-export { HostInstance } from "./hostInstance";
+export { InternalHost } from "./internalHost";

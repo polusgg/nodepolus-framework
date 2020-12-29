@@ -1,9 +1,9 @@
-import { Lobby } from "../../../lobby";
+import { InternalLobby } from "../../../lobby";
 import { CancellableEvent } from "..";
 
 export class LobbyCreatedEvent extends CancellableEvent {
   constructor(
-    public readonly lobby: Lobby,
+    public readonly lobby: InternalLobby,
   ) {
     super();
   }

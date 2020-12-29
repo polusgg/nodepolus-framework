@@ -1,29 +1,29 @@
-export { ChatEvent } from "./chatEvent";
+export { PlayerChatEvent } from "./playerChatEvent";
 
-export { ChatNoteEvent } from "./chatNoteEvent";
+export { PlayerChatNoteEvent } from "./playerChatNoteEvent";
 
-export { KickedEvent } from "./kickedEvent";
+export { PlayerExiledEvent } from "./playerExiledEvent";
 
-export { KilledEvent } from "./killedEvent";
+export { PlayerKilledEvent } from "./playerKilledEvent";
 
-export { MovedEvent } from "./movedEvent";
+export { PlayerMovedEvent } from "./playerMovedEvent";
 
-export { RemovedEvent } from "./removedEvent";
+export { PlayerLeaveEvent } from "./playerLeaveEvent";
 
-export { SetColorEvent } from "./setColorEvent";
+export { PlayerSetColorEvent } from "./playerSetColorEvent";
 
-export { SetHatEvent } from "./setHatEvent";
+export { PlayerSetHatEvent } from "./playerSetHatEvent";
 
-export { SetNameEvent } from "./setNameEvent";
+export { PlayerSetNameEvent } from "./playerSetNameEvent";
 
-export { SetPetEvent } from "./setPetEvent";
+export { PlayerSetPetEvent } from "./playerSetPetEvent";
 
-export { SetSkinEvent } from "./setSkinEvent";
+export { PlayerSetSkinEvent } from "./playerSetSkinEvent";
 
-export { TeleportedEvent } from "./teleportedEvent";
+export { PlayerTeleportedEvent } from "./playerTeleportedEvent";
+
+export { PlayerVotedEvent } from "./playerVotedEvent";
 
 export { VentEnterEvent } from "./ventEnterEvent";
 
 export { VentExitEvent } from "./ventExitEvent";
-
-export { VotedEvent } from "./votedEvent";

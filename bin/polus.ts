@@ -1,6 +1,6 @@
 import { ServerConfig } from "../lib/api/server/serverConfig";
 import { Plugin } from "../lib/api/plugin";
-import { Server } from "../lib/api/server";
+import { Server } from "../lib/server";
 import path from "path";
 import fs from "fs";
 
@@ -44,7 +44,7 @@ for (let i = 0; i < pluginDirectories.length; i++) {
 }
 
 server.listen().then(() => {
-  console.log(`Server listening on ${server.internalServer.address}:${server.internalServer.port}`);
+  console.log(`Server listening on ${server.address}:${server.port}`);
 });
 
 process.on("uncaughtException", err => {

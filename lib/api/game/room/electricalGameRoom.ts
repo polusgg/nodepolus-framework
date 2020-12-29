@@ -2,7 +2,7 @@ import { ElectricalAmount } from "../../../protocol/packets/rpc/repairSystem/amo
 import { SwitchSystem } from "../../../protocol/entities/baseShipStatus/systems";
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus";
 import { SystemType } from "../../../types/enums";
-import { Player } from "../../../player";
+import { InternalPlayer } from "../../../player";
 import { BaseDoorGameRoom } from ".";
 import { Game } from "..";
 
@@ -125,7 +125,7 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
 
       if (actualSwitch != expectedSwitch) {
         this.game.lobby.internalLobby.customHostInstance.systemsHandler.repairSwitch(
-          undefined as unknown as Player,
+          undefined as unknown as InternalPlayer,
           this.getInternalSystem(),
           new ElectricalAmount(i),
         );

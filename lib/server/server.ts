@@ -6,10 +6,10 @@ import { LobbyCreatedEvent } from "../api/events/server";
 import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
 import { LobbyCode } from "../util/lobbyCode";
-import { ServerConfig } from "../api/server";
+import { ServerConfig } from "../api/config";
+import { ServerEvents } from "../api/events";
 import { DisconnectReason } from "../types";
-import { ServerEvents } from ".";
-import { Lobby } from "../lobby";
+import { InternalLobby } from "../lobby";
 import Emittery from "emittery";
 import dgram from "dgram";
 import {
@@ -25,10 +25,10 @@ export class Server extends Emittery.Typed<ServerEvents> {
   public readonly startedAt = Date.now();
   public readonly serverSocket: dgram.Socket;
   public readonly connections: Map<string, Connection> = new Map();
-  public readonly connectionLobbyMap: Map<string, Lobby> = new Map();
+  public readonly connectionLobbyMap: Map<string, InternalLobby> = new Map();
 
-  public lobbies: Lobby[] = [];
-  public lobbyMap: Map<string, Lobby> = new Map();
+  public lobbies: InternalLobby[] = [];
+  public lobbyMap: Map<string, InternalLobby> = new Map();
 
   // Starts at 1 to allow the Server host implementation's ID to be 0
   private connectionIndex = Object.keys(FakeClientId).length / 2;
@@ -129,7 +129,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
           lobbyCode = LobbyCode.generate();
         }
 
-        const newLobby = new Lobby(
+        const newLobby = new InternalLobby(
           this.defaultLobbyAddress,
           this.defaultLobbyPort,
           lobbyCode,
