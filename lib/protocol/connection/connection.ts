@@ -94,7 +94,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
 
     // TODO: This breaks. No clue why.
     // this.timeoutInterval = setInterval(() => {
-    //   if (this.timeSinceLastPing > this.timeoutLength) {
+    //   if (this.getTimeSinceLastPing() > this.timeoutLength) {
     //     this.disconnect(DisconnectReason.custom("Connection timed out"));
     //   }
     // }, 1000);
