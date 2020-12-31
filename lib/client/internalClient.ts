@@ -1,8 +1,8 @@
 import { PacketDestination } from "../protocol/packets/types/enums";
+import { ConnectionInfo, DisconnectReason } from "../types";
 import { Connection } from "../protocol/connection";
 import { ClientInstance } from "../api/client";
 import { ClientConfig } from "../api/config";
-import { DisconnectReason } from "../types";
 import dgram from "dgram";
 
 export class InternalClient implements ClientInstance {
@@ -12,12 +12,11 @@ export class InternalClient implements ClientInstance {
 
   constructor(protected config: ClientConfig) {
     this.socket = dgram.createSocket("udp4");
-    this.connection = new Connection({
-      address: config.address,
-      port: config.port,
-      family: "IPv4",
-      size: 0,
-    }, this.socket, PacketDestination.Server);
+    this.connection = new Connection(
+      ConnectionInfo.fromString(`${config.address}:${config.port}`),
+      this.socket,
+      PacketDestination.Server,
+    );
 
     this.socket.on("message", buffer => {
       this.connection.emit("message", buffer);

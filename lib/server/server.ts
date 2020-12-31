@@ -2,12 +2,11 @@ import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/c
 import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
 import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
 import { DisconnectReasonType, FakeClientId } from "../types/enums";
+import { ConnectionInfo, DisconnectReason } from "../types";
 import { LobbyCreatedEvent } from "../api/events/server";
 import { Connection } from "../protocol/connection";
-import { RemoteInfo } from "../util/remoteInfo";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
-import { DisconnectReason } from "../types";
 import { AllEvents } from "../api/events";
 import { InternalLobby } from "../lobby";
 import Emittery from "emittery";
@@ -57,7 +56,7 @@ export class Server extends Emittery.Typed<AllEvents> {
     this.serverSocket = dgram.createSocket("udp4");
 
     this.serverSocket.on("message", (buf, remoteInfo) => {
-      const sender = this.getConnection(remoteInfo);
+      const sender = this.getConnection(ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`));
 
       sender.emit("message", buf);
     });
@@ -77,20 +76,27 @@ export class Server extends Emittery.Typed<AllEvents> {
     });
   }
 
-  getConnection(remoteInfo: string | dgram.RemoteInfo): Connection {
-    if (typeof remoteInfo != "string") {
-      remoteInfo = RemoteInfo.toString(remoteInfo);
+  getConnection(connectionInfo: string | ConnectionInfo): Connection {
+    let info: ConnectionInfo;
+    let identifier: string;
+
+    if (typeof connectionInfo != "string") {
+      info = connectionInfo;
+      identifier = info.toString();
+    } else {
+      info = ConnectionInfo.fromString(connectionInfo);
+      identifier = connectionInfo;
     }
 
-    let connection = this.connections.get(remoteInfo);
+    let connection = this.connections.get(identifier);
 
     if (connection) {
       return connection;
     }
 
-    connection = this.initializeConnection(RemoteInfo.fromString(remoteInfo));
+    connection = this.initializeConnection(info);
 
-    this.connections.set(remoteInfo, connection);
+    this.connections.set(identifier, connection);
 
     return connection;
   }
@@ -98,7 +104,7 @@ export class Server extends Emittery.Typed<AllEvents> {
   private handleDisconnection(connection: Connection, reason?: DisconnectReason): void {
     if (connection.lobby) {
       connection.lobby.handleDisconnect(connection, reason);
-      this.connectionLobbyMap.delete(RemoteInfo.toString(connection));
+      this.connectionLobbyMap.delete(connection.getConnectionInfo().toString());
 
       if (connection.lobby.getConnections().length == 0) {
         this.lobbies.splice(this.lobbies.indexOf(connection.lobby), 1);
@@ -106,11 +112,11 @@ export class Server extends Emittery.Typed<AllEvents> {
       }
     }
 
-    this.connections.delete(RemoteInfo.toString(connection));
+    this.connections.delete(connection.getConnectionInfo().toString());
   }
 
-  private initializeConnection(remoteInfo: dgram.RemoteInfo): Connection {
-    const newConnection = new Connection(remoteInfo, this.serverSocket, PacketDestination.Client);
+  private initializeConnection(connectionInfo: ConnectionInfo): Connection {
+    const newConnection = new Connection(connectionInfo, this.serverSocket, PacketDestination.Client);
 
     newConnection.id = this.getNextConnectionId();
 
@@ -157,7 +163,7 @@ export class Server extends Emittery.Typed<AllEvents> {
         const lobby = this.lobbyMap.get((packet as JoinGameRequestPacket).lobbyCode);
 
         if (lobby) {
-          this.connectionLobbyMap.set(RemoteInfo.toString(sender), lobby);
+          this.connectionLobbyMap.set(sender.getConnectionInfo().toString(), lobby);
 
           lobby.handleJoin(sender);
         } else {
@@ -194,7 +200,7 @@ export class Server extends Emittery.Typed<AllEvents> {
         break;
       }
       default: {
-        const lobby = this.connectionLobbyMap.get(RemoteInfo.toString(sender));
+        const lobby = this.connectionLobbyMap.get(sender.getConnectionInfo().toString());
 
         if (!lobby) {
           throw new Error(`Client ${sender.id} sent root game packet type ${packet.type} (${RootPacketType[packet.type]}) while not in a lobby`);

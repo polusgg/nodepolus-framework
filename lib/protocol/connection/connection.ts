@@ -1,7 +1,7 @@
 import { BaseRootPacket, GameDataPacket, KickPlayerPacket, LateRejectionPacket, WaitForHostPacket } from "../packets/root";
+import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, NetworkAccessible } from "../../types";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { PacketDestination, HazelPacketType } from "../packets/types/enums";
-import { Bitfield, ClientVersion, DisconnectReason } from "../../types";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
 import { ReadyPacket, SceneChangePacket } from "../packets/gameData";
 import { AwaitingPacket } from "../packets/types";
@@ -12,7 +12,7 @@ import { Packet } from "../packets";
 import Emittery from "emittery";
 import dgram from "dgram";
 
-export class Connection extends Emittery.Typed<ConnectionEvents> implements dgram.RemoteInfo {
+export class Connection extends Emittery.Typed<ConnectionEvents> implements NetworkAccessible {
   public hazelVersion?: number;
   public clientVersion?: ClientVersion;
   public name?: string;
@@ -22,10 +22,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements dgra
   public id = -1;
   public lobby?: InternalLobby;
   public limboState = LimboState.PreSpawn;
-  public address: string;
-  public port: number;
-  public family: "IPv4" | "IPv6";
-  public size = -1;
 
   private readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
   private readonly unacknowledgedPackets: Map<number, number> = new Map();
@@ -40,12 +36,12 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements dgra
   private lastPingReceivedTime: number = Date.now();
   private requestedDisconnect = false;
 
-  constructor(remoteInfo: dgram.RemoteInfo, public socket: dgram.Socket, public bound: PacketDestination) {
+  constructor(
+    private readonly connectionInfo: ConnectionInfo,
+    public socket: dgram.Socket,
+    public bound: PacketDestination,
+  ) {
     super();
-
-    this.address = remoteInfo.address;
-    this.port = remoteInfo.port;
-    this.family = remoteInfo.family;
 
     this.on("message", buf => {
       const parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound == PacketDestination.Server, this.lobby?.options.levels[0]);
@@ -102,6 +98,10 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements dgra
     //     this.disconnect(DisconnectReason.custom("Connection timed out"));
     //   }
     // }, 1000);
+  }
+
+  getConnectionInfo(): ConnectionInfo {
+    return this.connectionInfo;
   }
 
   getTimeSinceLastPing(): number {
@@ -212,7 +212,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements dgra
 
             clearInterval(resendInterval);
           } else {
-            this.socket.send(packetToSend.buffer, this.port, this.address);
+            this.socket.send(packetToSend.buffer, this.connectionInfo.getPort(), this.connectionInfo.getAddress());
           }
         } else {
           clearInterval(resendInterval);
@@ -220,7 +220,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements dgra
       }, 1000);
     }
 
-    this.socket.send(packetToSend.buffer, this.port, this.address);
+    this.socket.send(packetToSend.buffer, this.connectionInfo.getPort(), this.connectionInfo.getAddress());
 
     if (reliable) {
       this.packetBuffer = [];
@@ -234,7 +234,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements dgra
 
     const packetToSend: MessageWriter = new Packet(undefined, new DisconnectPacket(reason)).serialize();
 
-    this.socket.send(packetToSend.buffer, this.port, this.address);
+    this.socket.send(packetToSend.buffer, this.connectionInfo.getPort(), this.connectionInfo.getAddress());
 
     this.disconnectTimeout = setTimeout(() => this.cleanup(reason), 6000);
   }
@@ -321,8 +321,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements dgra
   private acknowledgePacket(nonce: number): void {
     this.socket.send(
       new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))).serialize().buffer,
-      this.port,
-      this.address,
+      this.connectionInfo.getPort(),
+      this.connectionInfo.getAddress(),
     );
 
     const resolveFunArr = this.acknowledgementResolveMap.get(nonce);
@@ -353,7 +353,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements dgra
 
   private handleDisconnection(reason?: DisconnectReason): void {
     if (!this.requestedDisconnect) {
-      this.socket.send(Buffer.from([HazelPacketType.Disconnect]), this.port, this.address);
+      this.socket.send(Buffer.from([HazelPacketType.Disconnect]), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
     }
 
     this.cleanup(reason);
