@@ -1,11 +1,13 @@
+import { SystemsHandler, SabotageSystemHandler, DoorsHandler, AutoDoorsHandler, DecontaminationHandler } from "../../host/systemHandlers";
 import { RepairAmount } from "../../protocol/packets/rpc/repairSystem/amounts";
 import { BaseInnerShipStatus } from "../../protocol/entities/baseShipStatus";
 import { GameOverReason, PlayerColor, SystemType } from "../../types/enums";
 import { InnerPlayerControl } from "../../protocol/entities/player";
 import { Connection } from "../../protocol/connection";
-import { ClientInstance } from "../client";
 
-export interface HostInstance extends ClientInstance {
+export interface HostInstance {
+  getId(): number;
+
   getNextNetId(): number;
 
   handleReady(sender: Connection): void;
@@ -49,4 +51,12 @@ export interface HostInstance extends ClientInstance {
   endMeeting(): void;
 
   endGame(reason: GameOverReason): void;
+
+  getSystemsHandler(): SystemsHandler | undefined;
+
+  getSabotageHandler(): SabotageSystemHandler | undefined;
+
+  getDoorHandler(): DoorsHandler | AutoDoorsHandler | undefined;
+
+  getDecontaminationHandlers(): DecontaminationHandler[];
 }

@@ -1,5 +1,5 @@
 import { HostGameResponsePacket } from "../../protocol/packets/root";
-import { Lobby } from ".";
+import { InternalLobby } from "../../lobby";
 
 export class CodeObject {
   private internalValue: string;
@@ -28,7 +28,7 @@ export class CodeObject {
 
   constructor(
     value: string,
-    public lobby: Lobby,
+    public lobby: InternalLobby,
   ) {
     this.internalValue = CodeObject.convertToInternal(value);
   }
@@ -74,7 +74,7 @@ export class CodeObject {
     this.internalValue = CodeObject.convertToInternal(code);
 
     if (!this.internalIsHidden && !this.internalIsRemoved) {
-      this.lobby.internalLobby.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
+      this.lobby.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
     }
   }
 
@@ -82,7 +82,7 @@ export class CodeObject {
     this.internalIsHidden = true;
 
     if (!this.internalIsRemoved) {
-      this.lobby.internalLobby.sendRootGamePacket(new HostGameResponsePacket(CodeObject.hiddenCode));
+      this.lobby.sendRootGamePacket(new HostGameResponsePacket(CodeObject.hiddenCode));
     }
   }
 
@@ -90,19 +90,19 @@ export class CodeObject {
     this.internalIsHidden = false;
 
     if (!this.internalIsRemoved) {
-      this.lobby.internalLobby.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
+      this.lobby.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
     }
   }
 
   remove(): void {
     this.internalIsRemoved = true;
 
-    this.lobby.internalLobby.sendRootGamePacket(new HostGameResponsePacket(CodeObject.removedCode));
+    this.lobby.sendRootGamePacket(new HostGameResponsePacket(CodeObject.removedCode));
   }
 
   restore(): void {
     this.internalIsRemoved = false;
 
-    this.lobby.internalLobby.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
+    this.lobby.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
   }
 }

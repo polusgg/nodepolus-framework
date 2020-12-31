@@ -1,6 +1,6 @@
 import { ElementType } from "../api/text/types/enums";
 import { TextComponent } from "../api/text";
-import { Player } from "../api/player";
+import { InternalPlayer } from "../player";
 import { Vector2 } from "../types";
 import style from "ansi-styles";
 
@@ -53,7 +53,7 @@ export class Logger {
             case element instanceof TextComponent:
               this.printRich(element);
               break;
-            case element instanceof Player:
+            case element instanceof InternalPlayer:
               this.printPlayer(element);
               break;
             case element instanceof Vector2:
@@ -110,31 +110,23 @@ export class Logger {
     this.endColor();
   }
 
-  private printPlayer(player: Player): void {
+  private printPlayer(player: InternalPlayer): void {
     this.startColor("7f7fff");
     this.print("[");
     this.endColor();
     this.startColor("cacaff");
-    this.print((player.playerId ?? "X").toString());
+    this.print((player.getId()).toString());
     this.endColor();
     this.startColor("7f7fff");
     this.print("-");
     this.endColor();
     this.startColor("cacaff");
-    this.print(player.clientId.toString());
+    this.print(player.gameObject.owner.toString());
     this.endColor();
     this.startColor("7f7fff");
     this.print(" (");
     this.endColor();
-
-    if (player.playerId !== undefined) {
-      this.printRich(player.name);
-    } else {
-      this.startColor("cacaff");
-      this.print("Awaiting Name");
-      this.endColor();
-    }
-
+    this.printRich(player.getName());
     this.startColor("7f7fff");
     this.print(")]");
     this.endColor();

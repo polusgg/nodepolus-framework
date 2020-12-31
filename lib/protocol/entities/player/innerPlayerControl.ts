@@ -27,6 +27,7 @@ import {
   StartMeetingPacket,
   SyncSettingsPacket,
 } from "../../packets/rpc";
+import { InternalLobby } from "../../../lobby";
 
 export class InnerPlayerControl extends BaseInnerNetObject {
   public scannerSequenceId = 1;
@@ -41,7 +42,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   setInfected(infected: number[], sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.gameData;
+    const gameData = this.parent.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("GameData does not exist on the lobby instance");
@@ -66,7 +67,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   completeTask(taskIndex: number, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.gameData;
+    const gameData = this.parent.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("GameData does not exist on the lobby instance");
@@ -90,13 +91,14 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   syncSettings(options: GameOptionsData, sendTo: Connection[]): void {
-    this.parent.lobby.options = options;
+    // TODO: Don't cast to an internal class from within the API folder
+    (this.parent.lobby as InternalLobby).setOptions(options);
 
     this.sendRPCPacketTo(sendTo, new SyncSettingsPacket(options));
   }
 
   exiled(_sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.gameData;
+    const gameData = this.parent.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("GameData does not exist on the lobby instance");
@@ -110,13 +112,17 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     gameData.gameData.players[gameDataPlayerIndex].isDead = true;
 
-    const thisPlayer = this.parent.lobby.players.find(player => player.id == this.playerId);
+    const thisPlayer = this.parent.lobby.findPlayerByPlayerId(this.playerId);
 
     if (!thisPlayer) {
       throw new Error("Exiled packet sent to a recipient that has no connection or player instance");
     }
 
-    this.sendRPCPacketTo([thisPlayer], new ExiledPacket());
+    const playerConnection = this.parent.lobby.findConnectionByPlayer(thisPlayer);
+
+    if (playerConnection) {
+      this.sendRPCPacketTo([playerConnection], new ExiledPacket());
+    }
   }
 
   exile(player: InnerPlayerControl, sendTo: Connection[]): void {
@@ -127,7 +133,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   checkName(_name: string, _sendTo: Connection[]): void {}
 
   setName(name: string, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.gameData;
+    const gameData = this.parent.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("GameData does not exist on the lobby instance");
@@ -150,7 +156,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   checkColor(_color: PlayerColor, _sendTo: Connection[]): void {}
 
   setColor(color: PlayerColor, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.gameData;
+    const gameData = this.parent.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("GameData does not exist on the lobby instance");
@@ -170,7 +176,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   setHat(hat: PlayerHat, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.gameData;
+    const gameData = this.parent.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("GameData does not exist on the lobby instance");
@@ -182,15 +188,11 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
     }
 
-    if (gameDataPlayerIndex != -1) {
-      gameData.gameData.players[gameDataPlayerIndex].hat = hat;
-    }
-
     this.sendRPCPacketTo(sendTo, new SetHatPacket(hat));
   }
 
   setSkin(skin: PlayerSkin, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.gameData;
+    const gameData = this.parent.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("GameData does not exist on the lobby instance");
@@ -214,13 +216,13 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   murderPlayer(victimPlayerControlNetId: number, sendTo: Connection[]): void {
-    const victimPlayer: InternalPlayer | undefined = this.parent.lobby.players.find(player => player.gameObject.playerControl.netId == victimPlayerControlNetId);
+    const victimPlayer: InternalPlayer | undefined = this.parent.lobby.getPlayers().find(player => player.gameObject.playerControl.netId == victimPlayerControlNetId);
 
     if (!victimPlayer) {
       throw new Error("Could not find victim Player");
     }
 
-    const gameData = this.parent.lobby.gameData;
+    const gameData = this.parent.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("GameData does not exist on the lobby instance");
@@ -260,7 +262,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   setPet(pet: PlayerPet, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.gameData;
+    const gameData = this.parent.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("GameData does not exist on the lobby instance");
@@ -280,7 +282,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   setStartCounter(sequenceId: number, timeRemaining: number, sendTo: Connection[]): void {
-    this.parent.lobby.customHostInstance.handleSetStartCounter(sequenceId, timeRemaining);
+    this.parent.lobby.getHostInstance().handleSetStartCounter(sequenceId, timeRemaining);
 
     this.sendRPCPacketTo(sendTo, new SetStartCounterPacket(sequenceId, timeRemaining));
   }

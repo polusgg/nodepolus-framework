@@ -1,11 +1,11 @@
-import { ElectricalAmount } from "../../../protocol/packets/rpc/repairSystem/amounts";
 import { SwitchSystem } from "../../../protocol/entities/baseShipStatus/systems";
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus";
 import { SystemType } from "../../../types/enums";
-import { InternalPlayer } from "../../../player";
+import { Bitfield } from "../../../types";
 import { BaseDoorGameRoom } from ".";
 import { Game } from "..";
 
+// TODO: Extract to separate file
 export class Switch {
   constructor(
     public room: ElectricalGameRoom,
@@ -101,37 +101,31 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
   // TODO: Understand Airship's Electrical Doors, and add a serializer/deserializer
 
   sabotage(): void {
-    this.internalBackupShipStatus();
+    if (!this.isSabotaged()) {
+      this.internalBackupShipStatus();
 
-    if (!this.game.lobby.internalLobby.customHostInstance.sabotageHandler) {
-      throw new Error("Host has no SabotageHandler instance");
+      const sabotageHandler = this.game.lobby.getHostInstance().getSabotageHandler();
+
+      if (!sabotageHandler) {
+        throw new Error("Attempted to sabotage electrical without a SabotageHandler instance");
+      }
+
+      sabotageHandler.sabotageElectrical(this.getInternalSystem());
+
+      this.internalUpdateShipStatus();
     }
-
-    this.game.lobby.internalLobby.customHostInstance.sabotageHandler.sabotageElectrical(this.getInternalSystem());
-
-    this.internalUpdateShipStatus();
   }
 
   repair(): void {
-    this.internalBackupShipStatus();
+    if (this.isSabotaged()) {
+      const system = this.getInternalSystem();
 
-    if (!this.game.lobby.internalLobby.customHostInstance.systemsHandler) {
-      throw new Error("Host has no SystemsHandler instance");
+      this.internalBackupShipStatus();
+
+      system.expectedSwitches = new Bitfield([false, false, false, false, false]);
+      system.actualSwitches = new Bitfield([false, false, false, false, false]);
+
+      this.internalUpdateShipStatus();
     }
-
-    for (let i = 0; i < this.getInternalSystem().actualSwitches.bits.length; i++) {
-      const actualSwitch = this.getInternalSystem().actualSwitches.bits[i];
-      const expectedSwitch = this.getInternalSystem().expectedSwitches.bits[i];
-
-      if (actualSwitch != expectedSwitch) {
-        this.game.lobby.internalLobby.customHostInstance.systemsHandler.repairSwitch(
-          undefined as unknown as InternalPlayer,
-          this.getInternalSystem(),
-          new ElectricalAmount(i),
-        );
-      }
-    }
-
-    this.internalUpdateShipStatus();
   }
 }

@@ -19,24 +19,29 @@ import {
   VentExitEvent,
 } from "../events/player";
 
-export type ServerEvents = {
-  // TODO
-  // despawn: DespawnEvent;
+type GameEvents = {
   gameEnded: GameEndedEvent;
-  gameList: GameListEvent;
   gameStarted: GameStartedEvent;
   gameStart: GameStartEvent;
-  lobbyCreated: LobbyCreatedEvent;
-  lobbyRemoved: LobbyRemovedEvent;
+  setInfected: SetInfectedEvent;
+};
+
+type LobbyEvents = {
+  playerJoin: PlayerJoinEvent;
+  playerKicked: PlayerKickedEvent;
+  playerLeave: PlayerLeaveEvent;
+};
+
+type MeetingEvents = {
   meetingEnded: MeetingEndedEvent;
   meetingStarted: MeetingStartedEvent;
+};
+
+type PlayerEvents = {
   playerChat: PlayerChatEvent;
   playerChatNote: PlayerChatNoteEvent;
   playerExiled: PlayerExiledEvent;
-  playerJoin: PlayerJoinEvent;
-  playerKicked: PlayerKickedEvent;
   playerKilled: PlayerKilledEvent;
-  playerLeave: PlayerLeaveEvent;
   playerMoved: PlayerMovedEvent;
   playerSetColor: PlayerSetColorEvent;
   playerSetHat: PlayerSetHatEvent;
@@ -45,7 +50,20 @@ export type ServerEvents = {
   playerSetSkin: PlayerSetSkinEvent;
   playerTeleported: PlayerTeleportedEvent;
   playerVoted: PlayerVotedEvent;
-  setInfected: SetInfectedEvent;
   ventEnter: VentEnterEvent;
   ventExit: VentExitEvent;
 };
+
+type ServerEvents = {
+  gameList: GameListEvent;
+  lobbyCreated: LobbyCreatedEvent;
+  lobbyRemoved: LobbyRemovedEvent;
+};
+
+// TODO: DespawnEvent
+
+export type AllEvents = GameEvents
+& LobbyEvents
+& MeetingEvents
+& PlayerEvents
+& ServerEvents;

@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { HazelPacketType } from "../types/enums";
-import { BaseHazelPacket } from ".";
 import { Bitfield } from "../../../types";
+import { BaseHazelPacket } from ".";
 
 export class AcknowledgementPacket extends BaseHazelPacket {
   constructor(public missingPackets: Bitfield) {

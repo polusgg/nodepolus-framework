@@ -66,6 +66,6 @@ export class AutoDoorsHandler {
   sendDataUpdate(): void {
     this.host.lobby.sendRootGamePacket(new GameDataPacket([
       this.shipStatus.getData(this.oldShipStatus),
-    ], this.host.lobby.code));
+    ], this.host.lobby.getCode()));
   }
 }

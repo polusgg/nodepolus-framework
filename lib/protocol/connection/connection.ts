@@ -1,22 +1,18 @@
 import { BaseRootPacket, GameDataPacket, KickPlayerPacket, LateRejectionPacket, WaitForHostPacket } from "../packets/root";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { PacketDestination, HazelPacketType } from "../packets/types/enums";
-import { LimboState, PlayerColor, SystemType } from "../../types/enums";
 import { Bitfield, ClientVersion, DisconnectReason } from "../../types";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
 import { ReadyPacket, SceneChangePacket } from "../packets/gameData";
-import { RepairAmount } from "../packets/rpc/repairSystem/amounts";
-import { BaseInnerShipStatus } from "../entities/baseShipStatus";
-import { InnerPlayerControl } from "../entities/player";
 import { AwaitingPacket } from "../packets/types";
-import { HostInstance } from "../../api/host";
+import { LimboState } from "../../types/enums";
 import { InternalLobby } from "../../lobby";
 import { ConnectionEvents } from ".";
 import { Packet } from "../packets";
 import Emittery from "emittery";
 import dgram from "dgram";
 
-export class Connection extends Emittery.Typed<ConnectionEvents> implements HostInstance, dgram.RemoteInfo {
+export class Connection extends Emittery.Typed<ConnectionEvents> implements dgram.RemoteInfo {
   public hazelVersion?: number;
   public clientVersion?: ClientVersion;
   public name?: string;
@@ -249,7 +245,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     }
 
     this.write(new KickPlayerPacket(
-      this.lobby.code,
+      this.lobby.getCode(),
       this.id,
       isBanned,
       reason,
@@ -262,7 +258,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     }
 
     this.write(new LateRejectionPacket(
-      this.lobby.code,
+      this.lobby.getCode(),
       this.id,
       reason,
     ));
@@ -274,19 +270,19 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
     }
 
     this.write(new WaitForHostPacket(
-      this.lobby.code,
+      this.lobby.getCode(),
       this.id,
     ));
   }
 
-  handleSceneChange(sender: Connection, scene: string): void {
+  async handleSceneChange(sender: Connection, sceneName: string): Promise<void> {
     if (!this.lobby) {
       throw new Error("Cannot send a SceneChange packet to a connection that is not in a lobby");
     }
 
-    this.write(new GameDataPacket([
-      new SceneChangePacket(sender.id, scene),
-    ], this.lobby.code));
+    return this.write(new GameDataPacket([
+      new SceneChangePacket(sender.id, sceneName),
+    ], this.lobby.getCode()));
   }
 
   handleReady(sender: Connection): void {
@@ -296,26 +292,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Host
 
     this.write(new GameDataPacket([
       new ReadyPacket(sender.id),
-    ], this.lobby.code));
+    ], this.lobby.getCode()));
   }
-
-  // These are no-ops because we expect the connection to implement these
-
-  /* eslint-disable @typescript-eslint/no-empty-function */
-  handleCheckName(_sender: InnerPlayerControl, _name: string): void {}
-  handleCheckColor(_sender: InnerPlayerControl, _color: PlayerColor): void {}
-  handleReportDeadBody(_sender: InnerPlayerControl, _victimPlayerId: number): void {}
-  handleRepairSystem(_sender: BaseInnerShipStatus, _systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
-  handleCloseDoorsOfType(_sender: BaseInnerShipStatus, _systemId: SystemType): void {}
-  handleSetStartCounter(_sequenceId: number, _timeRemaining: number): void {}
-  handleCompleteTask(_sender: InnerPlayerControl, _taskIndex: number): void {}
-  handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): void {}
-  handleUsePlatform(_sender: InnerPlayerControl): void {}
-  handleImpostorDeath(): void {}
-  handleCastVote(_votingPlayerId: number, _suspectPlayerId: number): void {}
-  setInfected(_impostorCount: number): void {}
-  setTasks(): void {}
-  /* eslint-enable @typescript-eslint/no-empty-function */
 
   private handlePing(): void {
     this.lastPingReceivedTime = Date.now();

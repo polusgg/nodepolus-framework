@@ -1,7 +1,7 @@
 import { SecurityCameraSystem } from "../../../protocol/entities/baseShipStatus/systems";
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus";
 import { SystemType } from "../../../types/enums";
-import { Player } from "../../player";
+import { PlayerInstance } from "../../player";
 import { BaseDoorGameRoom } from ".";
 import { Game } from "..";
 
@@ -19,12 +19,12 @@ export class SecurityGameRoom extends BaseDoorGameRoom {
     return this.getInternalShipStatus().systems[InternalSystemType.SecurityCamera] as SecurityCameraSystem;
   }
 
-  getPlayersViewingCameras(): Player[] {
-    const players: Player[] = [];
+  getPlayersViewingCameras(): PlayerInstance[] {
+    const players: PlayerInstance[] = [];
     const playerIds = [...this.getInternalSystem().playersViewingCameras.values()];
 
     for (let i = 0; i < playerIds.length; i++) {
-      const player = this.game.lobby.players.find(p => p.playerId == playerIds[i]);
+      const player = this.game.lobby.findPlayerByPlayerId(playerIds[i]);
 
       // 212 is a magic number used to identify a fake player for when the
       // cameras are active without any players viewing them.

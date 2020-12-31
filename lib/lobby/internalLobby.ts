@@ -11,18 +11,16 @@ import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { BaseInnerNetObject } from "../protocol/entities/types";
 import { EntityGameData } from "../protocol/entities/gameData";
+import { LobbyInstance, LobbySettings } from "../api/lobby";
 import { BaseRPCPacket } from "../protocol/packets/rpc";
 import { Connection } from "../protocol/connection";
 import { notUndefined } from "../util/functions";
-import { RemoteInfo } from "../util/remoteInfo";
 import { LobbyCode } from "../util/lobbyCode";
-import { LobbyInstance } from "../api/lobby";
 import { TextComponent } from "../api/text";
 import { HostInstance } from "../api/host";
 import { InternalPlayer } from "../player";
 import { RPCHandler } from "./rpcHandler";
 import { InternalHost } from "../host";
-import dgram from "dgram";
 import {
   AlterGameTagPacket,
   BaseRootPacket,
@@ -52,43 +50,185 @@ import {
   PlayerSkin,
 } from "../types/enums";
 
-export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
-  public readonly createdAt: number = Date.now();
-
-  public connections: Connection[] = [];
-  public players: InternalPlayer[] = [];
+export class InternalLobby implements LobbyInstance {
   public ignoredNetIds: number[] = [];
-  public gameState = GameState.NotStarted;
-  public customHostInstance: InternalHost;
-  public lobbyBehavior?: EntityLobbyBehaviour;
-  public gameData?: EntityGameData;
-  public shipStatus?: BaseEntityShipStatus;
-  public meetingHud?: EntityMeetingHud;
   public options: GameOptionsData = new GameOptionsData();
-  // TODO: Change back to 0
-  public gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 1]]);
-  public family: "IPv4" | "IPv6";
-  public size = -1;
 
+  private readonly createdAt: number = Date.now();
+  private readonly hostInstance: HostInstance;
   private readonly rpcHandler: RPCHandler = new RPCHandler(this);
   private readonly spawningPlayers: Set<Connection> = new Set();
+  private readonly connections: Connection[] = [];
+  private readonly settings: LobbySettings = new LobbySettings(this);
+  private readonly gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
+
+  private players: InternalPlayer[] = [];
+  private gameState = GameState.NotStarted;
+  private gameData?: EntityGameData;
+  private lobbyBehaviour?: EntityLobbyBehaviour;
+  private shipStatus?: BaseEntityShipStatus;
+  private meetingHud?: EntityMeetingHud;
 
   constructor(
-    public address: string,
-    public port: number,
-    public code: string = LobbyCode.generate(),
+    private readonly address: string,
+    private readonly port: number,
+    private code: string = LobbyCode.generate(),
   ) {
-    this.family = RemoteInfo.fromString(`${address}:${port}`).family;
-
-    this.customHostInstance = new InternalHost(this);
+    this.hostInstance = new InternalHost(this);
   }
 
-  getActingHosts(): Connection[] {
-    return this.connections.filter(con => con.isActingHost);
+  getCreationTime(): number {
+    return this.createdAt;
   }
 
   getAge(): number {
     return (new Date().getTime() - this.createdAt) / 1000;
+  }
+
+  getHostInstance(): HostInstance {
+    return this.hostInstance;
+  }
+
+  getConnections(): Connection[] {
+    return this.connections;
+  }
+
+  addConnection(connection: Connection): void {
+    this.connections.push(connection);
+  }
+
+  findConnectionByPlayer(player: InternalPlayer): Connection | undefined {
+    return this.findConnection(player.gameObject.owner);
+  }
+
+  removeConnection(connection: Connection): void {
+    this.connections.splice(this.connections.indexOf(connection), 1);
+  }
+
+  getPlayers(): InternalPlayer[] {
+    return this.players;
+  }
+
+  addPlayer(player: InternalPlayer): void {
+    this.players.push(player);
+  }
+
+  findPlayerByClientId(clientId: number): InternalPlayer | undefined {
+    return this.players.find(player => player.gameObject.owner == clientId);
+  }
+
+  findPlayerByPlayerId(playerId: number): InternalPlayer | undefined {
+    return this.players.find(player => player.getId() == playerId);
+  }
+
+  findPlayerByNetId(netId: number): InternalPlayer | undefined {
+    return this.players.find(player => player.gameObject.innerNetObjects.some(object => object.netId == netId));
+  }
+
+  clearPlayers(): void {
+    this.players = [];
+  }
+
+  removePlayer(player: InternalPlayer): void {
+    this.players.splice(this.players.indexOf(player), 1);
+  }
+
+  getGameData(): EntityGameData | undefined {
+    return this.gameData;
+  }
+
+  setGameData(gameData: EntityGameData): void {
+    this.gameData = gameData;
+  }
+
+  deleteGameData(): void {
+    delete this.gameData;
+  }
+
+  getLobbyBehaviour(): EntityLobbyBehaviour | undefined {
+    return this.lobbyBehaviour;
+  }
+
+  setLobbyBehaviour(lobbyBehaviour: EntityLobbyBehaviour): void {
+    this.lobbyBehaviour = lobbyBehaviour;
+  }
+
+  deleteLobbyBehaviour(): void {
+    delete this.lobbyBehaviour;
+  }
+
+  getShipStatus(): BaseEntityShipStatus | undefined {
+    return this.shipStatus;
+  }
+
+  setShipStatus(shipStatus: BaseEntityShipStatus): void {
+    this.shipStatus = shipStatus;
+  }
+
+  deleteShipStatus(): void {
+    delete this.shipStatus;
+  }
+
+  getMeetingHud(): EntityMeetingHud | undefined {
+    return this.meetingHud;
+  }
+
+  setMeetingHud(meetingHud: EntityMeetingHud): void {
+    this.meetingHud = meetingHud;
+  }
+
+  deleteMeetingHud(): void {
+    delete this.meetingHud;
+  }
+
+  getSettings(): LobbySettings {
+    return this.settings;
+  }
+
+  getGameTags(): Map<AlterGameTag, number> {
+    return this.gameTags;
+  }
+
+  getGameTag(gameTag: AlterGameTag): number | undefined {
+    return this.gameTags.get(gameTag);
+  }
+
+  setGameTag(gameTag: AlterGameTag, value: number): void {
+    this.gameTags.set(gameTag, value);
+  }
+
+  getGameState(): GameState {
+    return this.gameState;
+  }
+
+  setGameState(gameState: GameState): void {
+    this.gameState = gameState;
+  }
+
+  getAddress(): string {
+    return this.address;
+  }
+
+  getPort(): number {
+    return this.port;
+  }
+
+  getCode(): string {
+    return this.code;
+  }
+
+  setOptions(options: GameOptionsData): void {
+    this.options = options;
+  }
+
+  setCode(code: string): void {
+    // TODO: Send code update packet to connections
+
+    this.code = code;
+  }
+
+  getActingHosts(): Connection[] {
+    return this.connections.filter(con => con.isActingHost);
   }
 
   getHostName(): string {
@@ -110,7 +250,7 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
   }
 
   isPublic(): boolean {
-    return !!(this.gameTags.get(AlterGameTag.ChangePrivacy) ?? 0);
+    return !!(this.getGameTag(AlterGameTag.ChangePrivacy) ?? 0);
   }
 
   isSpawningPlayers(): boolean {
@@ -155,9 +295,9 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
 
   sendRemoveHost(connection: Connection, sendImmediately: boolean = true): void {
     if (sendImmediately) {
-      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.customHostInstance.getId())]);
+      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId())]);
     } else {
-      connection.write(new JoinGameResponsePacket(this.code, connection.id, this.customHostInstance.getId()));
+      connection.write(new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId()));
     }
   }
 
@@ -175,8 +315,8 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
 
   findInnerNetObject(netId: number): BaseInnerNetObject | undefined {
     switch (netId) {
-      case this.lobbyBehavior?.lobbyBehaviour.netId:
-        return this.lobbyBehavior!.lobbyBehaviour;
+      case this.lobbyBehaviour!.lobbyBehaviour.netId:
+        return this.lobbyBehaviour!.lobbyBehaviour;
       case this.gameData?.gameData.netId:
         return this.gameData!.gameData;
       case this.gameData?.voteBanSystem.netId:
@@ -210,10 +350,6 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
     return this.players.find(player => player.gameObject == netObject.parent);
   }
 
-  findConnectionByPlayer(player: InternalPlayer): Connection | undefined {
-    return this.findConnection(player.gameObject.owner);
-  }
-
   findPlayerIndexByConnection(connection: Connection): number {
     return this.players.findIndex(player => player.gameObject.owner == connection.id);
   }
@@ -228,7 +364,6 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
         const data = packet as AlterGameTagPacket;
 
         this.handleAlterGameTag(data.tag, data.value);
-
         this.gameTags.set(data.tag, data.value);
         break;
       }
@@ -338,7 +473,7 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
     }
   }
 
-  sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: (InternalPlayer | HostInstance)[]): void {
+  sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void {
     const sendToConnections: Connection[] = new Array(sendTo?.length ?? 0);
 
     if (sendTo) {
@@ -346,7 +481,7 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
         if (sendTo[i] instanceof Connection) {
           sendToConnections[i] = sendTo[i] as unknown as Connection;
         } else {
-          const connection = this.connections.find(con => this.findPlayerByConnection(con)?.getId() == sendTo[i].getId());
+          const connection = this.connections.find(con => con.id == sendTo[i].id);
 
           if (connection) {
             sendToConnections[i] = connection;
@@ -361,7 +496,7 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
   }
 
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
-    this.customHostInstance.handleDisconnect(connection);
+    this.hostInstance.handleDisconnect(connection);
 
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
     const disconnectingPlayerIndex = this.findPlayerIndexByConnection(connection);
@@ -412,7 +547,8 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
 
   sendChat(name: string, color: PlayerColor, message: string | TextComponent, _onLeft: boolean): void {
     if (this.players.length != 0) {
-      const { name: oldName, color: oldColor } = this.players[0];
+      const oldName = this.players[0].getName();
+      const oldColor = this.players[0].getColor();
 
       this.players[0]
         .setName(name)
@@ -434,10 +570,10 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
     this.sendRootGamePacket(new EndGamePacket(this.code, GameOverReason.ImpostorsBySabotage, true));
 
     this.connections.forEach(con => {
-      con.write(new JoinedGamePacket(this.code, con.id, this.customHostInstance.getId(), this.connections.map(c => c.id).filter(id => id != con.id)));
+      con.write(new JoinedGamePacket(this.code, con.id, this.hostInstance.getId(), this.connections.map(c => c.id).filter(id => id != con.id)));
     });
 
-    this.customHostInstance.readyPlayerList = [];
+    (this.hostInstance as InternalHost).readyPlayerList = [];
     this.options.levels = [level];
 
     this.sendRootGamePacket(new StartGamePacket(this.code));
@@ -470,16 +606,16 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
     const entity = new EntityPlayer(
       this,
       FakeClientId.Message,
-      this.customHostInstance.getNextNetId(),
+      this.hostInstance.getNextNetId(),
       playerId,
-      this.customHostInstance.getNextNetId(),
-      this.customHostInstance.getNextNetId(),
+      this.hostInstance.getNextNetId(),
+      this.hostInstance.getNextNetId(),
       5,
       new Vector2(39, 39),
       new Vector2(0, 0),
     );
 
-    this.sendRootGamePacket(new JoinGameResponsePacket(this.code, FakeClientId.Message, this.customHostInstance.getId()));
+    this.sendRootGamePacket(new JoinGameResponsePacket(this.code, FakeClientId.Message, this.hostInstance.getId()));
     this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code));
 
     this.connections.forEach(con => {
@@ -487,7 +623,7 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
     });
 
     this.gameData.gameData.updateGameData([playerData], this.connections);
-    this.sendRootGamePacket(new RemovePlayerPacket(this.code, FakeClientId.Message, this.customHostInstance.getId()));
+    this.sendRootGamePacket(new RemovePlayerPacket(this.code, FakeClientId.Message, this.hostInstance.getId()));
   }
 
   private handleNewJoin(connection: Connection): void {
@@ -520,7 +656,7 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
       new JoinGameResponsePacket(
         this.code,
         connection.id,
-        this.customHostInstance.getId(),
+        this.hostInstance.getId(),
       ),
       this.connections
         .filter(con => con.id != connection.id)
@@ -533,14 +669,14 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
       new JoinedGamePacket(
         this.code,
         connection.id,
-        this.customHostInstance.getId(),
+        this.hostInstance.getId(),
         this.connections
           .filter(con => con.id != connection.id && con.limboState == LimboState.NotLimbo)
           .map(con => con.id)),
       new AlterGameTagPacket(
         this.code,
         AlterGameTag.ChangePrivacy,
-        this.gameTags.get(AlterGameTag.ChangePrivacy) ?? 0),
+        this.getGameTag(AlterGameTag.ChangePrivacy) ?? 0),
     ]);
   }
 
@@ -566,7 +702,7 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
         }
         break;
       case GameDataPacketType.Ready:
-        this.customHostInstance.handleReady(sender);
+        this.hostInstance.handleReady(sender);
         break;
       case GameDataPacketType.SceneChange: {
         if ((packet as SceneChangePacket).scene != "OnlineGame") {
@@ -579,7 +715,7 @@ export class InternalLobby implements LobbyInstance, dgram.RemoteInfo {
           throw new Error(`SceneChange packet sent for unknown client: ${(packet as SceneChangePacket).clientId}`);
         }
 
-        this.customHostInstance.handleSceneChange(connectionChangingScene, (packet as SceneChangePacket).scene);
+        this.hostInstance.handleSceneChange(connectionChangingScene, (packet as SceneChangePacket).scene);
         break;
       }
       case GameDataPacketType.Spawn:

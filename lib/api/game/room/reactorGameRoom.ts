@@ -1,9 +1,6 @@
-import { ReactorAction } from "../../../protocol/packets/rpc/repairSystem/actions";
-import { ReactorAmount } from "../../../protocol/packets/rpc/repairSystem/amounts";
 import { ReactorSystem } from "../../../protocol/entities/baseShipStatus/systems";
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus";
 import { SystemType } from "../../../types/enums";
-import { InternalPlayer } from "../../../player";
 import { BaseDoorGameRoom } from ".";
 import { Game } from "..";
 
@@ -12,35 +9,41 @@ export class ReactorGameRoom extends BaseDoorGameRoom {
     super(game, SystemType.Reactor);
   }
 
+  isSabotaged(): boolean {
+    return this.getInternalSystem().timer < 10000;
+  }
+
   getInternalSystem(): ReactorSystem {
     return this.getInternalShipStatus().systems[InternalSystemType.Reactor] as ReactorSystem;
   }
 
   sabotage(): void {
-    this.internalBackupShipStatus();
+    if (!this.isSabotaged()) {
+      this.internalBackupShipStatus();
 
-    if (!this.game.lobby.internalLobby.customHostInstance.sabotageHandler) {
-      throw new Error("Host has no SabotageHandler instance");
+      const sabotageHandler = this.game.lobby.getHostInstance().getSabotageHandler();
+
+      if (!sabotageHandler) {
+        throw new Error("Attempted to sabotage reactor without a SabotageHandler instance");
+      }
+
+      sabotageHandler.sabotageReactor(this.getInternalSystem());
+
+      this.internalUpdateShipStatus();
     }
-
-    this.game.lobby.internalLobby.customHostInstance.sabotageHandler.sabotageReactor(this.getInternalSystem());
-
-    this.internalUpdateShipStatus();
   }
 
   repair(): void {
-    const host = this.game.lobby.internalLobby.customHostInstance;
+    if (this.isSabotaged()) {
+      const system = this.getInternalSystem();
 
-    this.internalBackupShipStatus();
+      this.internalBackupShipStatus();
 
-    if (!host.systemsHandler) {
-      throw new Error("Host has no SystemsHandler instance");
+      system.timer = 10000;
+
+      system.userConsoles.clear();
+
+      this.internalUpdateShipStatus();
     }
-
-    host.systemsHandler.repairReactor(
-      undefined as unknown as InternalPlayer,
-      this.getInternalSystem(),
-      new ReactorAmount(0, ReactorAction.Repaired),
-    );
   }
 }

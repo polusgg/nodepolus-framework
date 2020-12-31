@@ -1,11 +1,11 @@
-import { Player } from "../player";
-import { Lobby } from "../lobby";
+import { PlayerInstance } from "../player";
+import { LobbyInstance } from "../lobby";
 
 export class Vent {
-  public players: Player[] = [];
+  public players: PlayerInstance[] = [];
 
   constructor(
-    public lobby: Lobby,
+    public lobby: LobbyInstance,
     public id: number,
   ) {}
 }

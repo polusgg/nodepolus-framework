@@ -21,7 +21,13 @@ export class NormalCommunicationsGameRoom extends BaseDoorGameRoom {
     if (!this.isSabotaged()) {
       this.internalBackupShipStatus();
 
-      this.getInternalSystem().sabotaged = true;
+      const sabotageHandler = this.game.lobby.getHostInstance().getSabotageHandler();
+
+      if (!sabotageHandler) {
+        throw new Error("Attempted to sabotage communications without a SabotageHandler instance");
+      }
+
+      sabotageHandler.sabotageCommunications(this.getInternalSystem());
 
       this.internalUpdateShipStatus();
     }

@@ -1,9 +1,9 @@
 import { CancellableEvent } from "..";
-import { Player } from "../../player";
+import { PlayerInstance } from "../../player";
 
 export class PlayerExiledEvent extends CancellableEvent {
   constructor(
-    public readonly player: Player,
+    public readonly player: PlayerInstance,
   ) {
     super();
   }

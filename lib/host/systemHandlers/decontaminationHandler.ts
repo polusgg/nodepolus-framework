@@ -2,7 +2,7 @@ import { DeconSystem, DeconTwoSystem } from "../../protocol/entities/baseShipSta
 import { DecontaminationDoorState } from "../../types/enums";
 import { InternalHost } from "..";
 
-export class DeconHandler {
+export class DecontaminationHandler {
   private timer: NodeJS.Timeout | undefined;
 
   constructor(
@@ -48,17 +48,23 @@ export class DeconHandler {
   }
 
   start(from: DecontaminationDoorState): void {
+    const systemsHandler = this.host.getSystemsHandler();
+
+    if (!systemsHandler) {
+      throw new Error("Attempted to decontaminate without a SystemsHandler instance");
+    }
+
     this.system.state = from;
     this.system.timer = 3;
 
     this.timer = setInterval(() => {
-      this.host.systemsHandler!.setOldShipStatus();
+      systemsHandler.setOldShipStatus();
       this.update();
-      this.host.systemsHandler!.sendDataUpdate();
+      systemsHandler.sendDataUpdate();
     }, 1000);
 
-    this.host.systemsHandler!.setOldShipStatus();
+    systemsHandler.setOldShipStatus();
     this.update();
-    this.host.systemsHandler!.sendDataUpdate();
+    systemsHandler.sendDataUpdate();
   }
 }

@@ -1,10 +1,10 @@
 import { Vector2 } from "../../../types";
 import { CancellableEvent } from "..";
-import { Player } from "../../player";
+import { PlayerInstance } from "../../player";
 
 export class PlayerMovedEvent extends CancellableEvent {
   constructor(
-    public readonly player: Player,
+    public readonly player: PlayerInstance,
     public readonly oldPosition: Vector2,
     public readonly oldVelocity: Vector2,
     public readonly newPosition: Vector2,

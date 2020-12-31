@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { DisconnectReasonType, Level } from "../../../types/enums";
-import { LobbyCode } from "../../../util/lobbyCode";
 import { Bitfield, DisconnectReason } from "../../../types";
+import { LobbyCode } from "../../../util/lobbyCode";
 import { RootPacketType } from "../types/enums";
 import { BaseRootPacket } from "../root";
 

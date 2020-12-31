@@ -1,7 +1,7 @@
 import { MedScanSystem } from "../../../protocol/entities/baseShipStatus/systems";
 import { InternalSystemType } from "../../../protocol/entities/baseShipStatus";
 import { SystemType } from "../../../types/enums";
-import { Player } from "../../player";
+import { PlayerInstance } from "../../player";
 import { BaseDoorGameRoom } from ".";
 import { Game } from "..";
 
@@ -11,25 +11,25 @@ export class MedbayGameRoom extends BaseDoorGameRoom {
   }
 
   getInternalSystem(): MedScanSystem {
-    return this.getInternalShipStatus().systems[InternalSystemType.MedScan] as MedScanSystem;
+    return this.getInternalShipStatus().systems[InternalSystemType.MedScan] as unknown as MedScanSystem;
   }
 
-  getPlayersScanning(): Player | undefined {
-    for (let i = 0; i < this.game.lobby.players.length; i++) {
-      const player = this.game.lobby.players[i];
+  getPlayersScanning(): PlayerInstance | undefined {
+    for (let i = 0; i < this.game.lobby.getPlayers().length; i++) {
+      const player = this.game.lobby.getPlayers()[i];
 
-      if (player.isScanning) {
+      if (player.isScanning()) {
         return player;
       }
     }
   }
 
-  getQueue(): Player[] {
+  getQueue(): PlayerInstance[] {
     const playerIds = [...this.getInternalSystem().playersInQueue.values()];
-    const players: Player[] = [];
+    const players: PlayerInstance[] = [];
 
     for (let i = 0; i < playerIds.length; i++) {
-      const player = this.game.lobby.players.find(p => playerIds[i] == p.playerId);
+      const player = this.game.lobby.findPlayerByPlayerId(playerIds[i]);
 
       if (!player) {
         throw new Error("Player in queue for medscan is not on the lobby instance");

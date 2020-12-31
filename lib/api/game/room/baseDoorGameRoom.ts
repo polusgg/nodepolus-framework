@@ -15,29 +15,32 @@ export class BaseDoorGameRoom extends BaseGameRoom {
   }
 
   closeDoors(): void {
-    const host = this.game.lobby.internalLobby.customHostInstance;
+    const host = this.game.lobby.getHostInstance();
+    const doorHandler = host.getDoorHandler();
 
-    if (!host.doorHandler) {
+    if (!doorHandler) {
       throw new Error("Attempted to close doors without a DoorHandler instance");
     }
 
-    host.doorHandler.closeDoor(host.doorHandler.getDoorsForSystem(this.systemType));
+    doorHandler.closeDoor(doorHandler.getDoorsForSystem(this.systemType));
   }
 
   openDoors(): void {
-    if (this.game.lobby.settings.level == Level.TheSkeld) {
+    const settings = this.game.lobby.getSettings();
+
+    if (settings.level == Level.TheSkeld) {
       throw new Error("Cannot open doors on The Skeld due to client limitations");
     } else {
       this.internalBackupShipStatus();
 
-      const doors = SystemDoors.forLevel(this.game.lobby.settings.level)[this.systemType];
+      const doors = SystemDoors.forLevel(settings.level)[this.systemType];
 
       if (!doors) {
         throw new Error(`SystemType ${this.systemType} (${SystemType[this.systemType]}) does not have any doors`);
       }
 
       for (let i = 0; i < doors.length; i++) {
-        (this.getInternalShipStatus().systems[InternalSystemType.Doors] as DoorsSystem).doorStates[doors[i]] = true;
+        (this.getInternalShipStatus().systems[InternalSystemType.Doors] as unknown as DoorsSystem).doorStates[doors[i]] = true;
       }
     }
   }

@@ -21,8 +21,13 @@ export class MiraCommunicationsGameRoom extends BaseDoorGameRoom {
     if (!this.isSabotaged()) {
       this.internalBackupShipStatus();
 
-      this.getInternalSystem().completedConsoles.clear();
+      const sabotageHandler = this.game.lobby.getHostInstance().getSabotageHandler();
 
+      if (!sabotageHandler) {
+        throw new Error("Attempted to sabotage communications without a SabotageHandler instance");
+      }
+
+      sabotageHandler.sabotageCommunications(this.getInternalSystem());
       this.internalUpdateShipStatus();
     }
   }
@@ -30,9 +35,7 @@ export class MiraCommunicationsGameRoom extends BaseDoorGameRoom {
   repair(): void {
     if (this.isSabotaged()) {
       this.internalBackupShipStatus();
-
       this.getInternalSystem().completedConsoles.add(0).add(1);
-
       this.internalUpdateShipStatus();
     }
   }

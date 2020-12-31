@@ -1,7 +1,7 @@
-import { Player } from "../../player";
+import { PlayerInstance } from "../../player";
 
 export class PlayerLeaveEvent {
   constructor(
-    public player: Player,
+    public player: PlayerInstance,
   ) {}
 }

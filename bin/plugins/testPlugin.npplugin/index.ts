@@ -1,17 +1,14 @@
-import { Player } from "../../../lib/api/player";
-import { Server } from "../../../lib/server";
+import { PlayerJoinEvent } from "../../../lib/api/events/lobby";
 import { Logger } from "../../../lib/logger";
+import { Server } from "../../../lib/server";
 import repl from "repl";
-import { LobbyCreatedEvent } from "../../../lib/api/events/server";
 
 declare const server: Server;
 
 const logger = new Logger("Debug");
 
-server.on("lobbyCreated", (event: LobbyCreatedEvent) => {
-  event.lobby.on("player", (player: Player) => {
-    logger.log(player, " Connected");
-  });
+server.on("playerJoin", (event: PlayerJoinEvent) => {
+  logger.log(event.player, " Connected");
 });
 
 repl.start();

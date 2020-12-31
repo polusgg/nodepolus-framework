@@ -1,11 +1,11 @@
 import { CancellableEvent } from "..";
-import { Player } from "../../player";
+import { PlayerInstance } from "../../player";
 import { Game } from "../../game";
 
 export class GameStartEvent extends CancellableEvent {
   constructor(
     public game: Game,
-    public starter: Player,
+    public starter: PlayerInstance,
     public secondsLeft: number,
   ) {
     super();

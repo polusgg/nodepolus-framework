@@ -1,1 +1,1 @@
-export { Player } from "./player";
+export { PlayerInstance } from "./playerInstance";

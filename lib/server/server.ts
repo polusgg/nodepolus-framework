@@ -7,8 +7,8 @@ import { Connection } from "../protocol/connection";
 import { RemoteInfo } from "../util/remoteInfo";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
-import { ServerEvents } from "../api/events";
 import { DisconnectReason } from "../types";
+import { AllEvents } from "../api/events";
 import { InternalLobby } from "../lobby";
 import Emittery from "emittery";
 import dgram from "dgram";
@@ -21,7 +21,7 @@ import {
   JoinGameRequestPacket,
 } from "../protocol/packets/root";
 
-export class Server extends Emittery.Typed<ServerEvents> {
+export class Server extends Emittery.Typed<AllEvents> {
   public readonly startedAt = Date.now();
   public readonly serverSocket: dgram.Socket;
   public readonly connections: Map<string, Connection> = new Map();
@@ -71,8 +71,10 @@ export class Server extends Emittery.Typed<ServerEvents> {
     return this.connectionIndex;
   }
 
-  listen(onStart?: () => void): void {
-    this.serverSocket.bind(this.port, this.address, onStart);
+  async listen(): Promise<void> {
+    return new Promise((resolve, _reject) => {
+      this.serverSocket.bind(this.port, this.address, resolve);
+    });
   }
 
   getConnection(remoteInfo: string | dgram.RemoteInfo): Connection {
@@ -98,9 +100,9 @@ export class Server extends Emittery.Typed<ServerEvents> {
       connection.lobby.handleDisconnect(connection, reason);
       this.connectionLobbyMap.delete(RemoteInfo.toString(connection));
 
-      if (connection.lobby.connections.length == 0) {
+      if (connection.lobby.getConnections().length == 0) {
         this.lobbies.splice(this.lobbies.indexOf(connection.lobby), 1);
-        this.lobbyMap.delete(connection.lobby.code);
+        this.lobbyMap.delete(connection.lobby.getCode());
       }
     }
 
@@ -143,9 +145,9 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         if (!event.isCancelled()) {
           this.lobbies.push(newLobby);
-          this.lobbyMap.set(newLobby.code, newLobby);
+          this.lobbyMap.set(newLobby.getCode(), newLobby);
 
-          sender.sendReliable([new HostGameResponsePacket(newLobby.code)]);
+          sender.sendReliable([new HostGameResponsePacket(newLobby.getCode())]);
         } else {
           sender.disconnect(DisconnectReason.custom("The server refused to create your game"));
         }

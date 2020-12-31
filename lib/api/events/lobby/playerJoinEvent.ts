@@ -1,11 +1,11 @@
 import { InternalLobby } from "../../../lobby";
 import { CancellableEvent } from "..";
-import { Player } from "../../player";
+import { PlayerInstance } from "../../player";
 
 export class PlayerJoinEvent extends CancellableEvent {
   constructor(
     public readonly lobby: InternalLobby,
-    public readonly player: Player,
+    public readonly player: PlayerInstance,
   ) {
     super();
   }

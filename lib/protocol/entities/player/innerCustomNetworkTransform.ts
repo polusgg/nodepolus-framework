@@ -19,11 +19,12 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     super(InnerNetObjectType.CustomNetworkTransform, netId, parent);
   }
 
-  snapTo(position: Vector2, lastSequenceId: number, sendTo: Connection[]): void {
+  snapTo(position: Vector2, sendTo: Connection[]): void {
     this.position = position;
     this.velocity = new Vector2(0, 0);
+    this.sequenceId += 5;
 
-    this.sendRPCPacketTo(sendTo, new SnapToPacket(position, lastSequenceId));
+    this.sendRPCPacketTo(sendTo, new SnapToPacket(position, this.sequenceId));
   }
 
   getData(): DataPacket {

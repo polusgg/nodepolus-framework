@@ -1,6 +1,6 @@
 export { AutoDoorsHandler } from "./autoDoorsHandler";
 
-export { DeconHandler } from "./deconHandler";
+export { DecontaminationHandler } from "./decontaminationHandler";
 
 export { DoorsHandler } from "./doorsHandler";
 

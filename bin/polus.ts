@@ -1,4 +1,4 @@
-import { ServerConfig } from "../lib/api/server/serverConfig";
+import { ServerConfig } from "../lib/api/config/serverConfig";
 import { Plugin } from "../lib/api/plugin";
 import { Server } from "../lib/server";
 import path from "path";

@@ -37,7 +37,7 @@ import {
 } from "../../protocol/entities/baseShipStatus/systems";
 
 export class SystemsHandler {
-  private oldShipStatus: BaseInnerShipStatus = this.host.lobby.shipStatus!.getShipStatus();
+  private oldShipStatus: BaseInnerShipStatus = this.host.lobby.getShipStatus()!.getShipStatus();
   private sabotageCountdownInterval: NodeJS.Timeout | undefined;
 
   constructor(
@@ -57,7 +57,7 @@ export class SystemsHandler {
       state |= DecontaminationDoorState.HeadingUp;
     }
 
-    this.host.deconHandlers[system instanceof DeconSystem ? 0 : 1].start(state);
+    this.host.getDecontaminationHandlers()[system instanceof DeconSystem ? 0 : 1].start(state);
   }
 
   repairPolusDoors<T extends DoorsSystem>(_repairer: InternalPlayer, system: T, amount: PolusDoorsAmount): void {
@@ -97,6 +97,12 @@ export class SystemsHandler {
   repairOxygen<T extends LifeSuppSystem>(_repairer: InternalPlayer, system: T, amount: OxygenAmount): void {
     this.setOldShipStatus();
 
+    const sabotageHandler = this.host.getSabotageHandler();
+
+    if (!sabotageHandler) {
+      throw new Error("Attempted to repair oxygen without a SabotageHandler instance");
+    }
+
     switch (amount.action) {
       case OxygenAction.Completed:
         system.completedConsoles.add(amount.consoleId);
@@ -104,16 +110,16 @@ export class SystemsHandler {
         if (system.completedConsoles.size == 2) {
           system.timer = 10000;
 
-          if (this.host.sabotageHandler!.timer) {
-            clearInterval(this.host.sabotageHandler!.timer);
+          if (sabotageHandler.timer) {
+            clearInterval(sabotageHandler.timer);
           }
         }
         break;
       case OxygenAction.Repaired:
         system.timer = 10000;
 
-        if (this.host.sabotageHandler!.timer) {
-          clearInterval(this.host.sabotageHandler!.timer);
+        if (sabotageHandler.timer) {
+          clearInterval(sabotageHandler.timer);
         }
         break;
     }
@@ -136,6 +142,12 @@ export class SystemsHandler {
   repairReactor<T extends ReactorSystem | LaboratorySystem>(repairer: InternalPlayer, system: T, amount: ReactorAmount): void {
     this.setOldShipStatus();
 
+    const sabotageHandler = this.host.getSabotageHandler();
+
+    if (!sabotageHandler) {
+      throw new Error("Attempted to repair reactor without a SabotageHandler instance");
+    }
+
     switch (amount.action) {
       case ReactorAction.PlacedHand:
         system.userConsoles.set(repairer.id, amount.consoleId);
@@ -143,8 +155,8 @@ export class SystemsHandler {
         if (system.userConsoles.size == 2) {
           system.timer = 10000;
 
-          if (this.host.sabotageHandler!.timer) {
-            clearInterval(this.host.sabotageHandler!.timer);
+          if (sabotageHandler.timer) {
+            clearInterval(sabotageHandler.timer);
           }
         }
         break;
@@ -154,8 +166,8 @@ export class SystemsHandler {
       case ReactorAction.Repaired:
         system.timer = 10000;
 
-        if (this.host.sabotageHandler!.timer) {
-          clearInterval(this.host.sabotageHandler!.timer);
+        if (sabotageHandler.timer) {
+          clearInterval(sabotageHandler.timer);
         }
         break;
     }
@@ -168,6 +180,11 @@ export class SystemsHandler {
 
     const ship = this.getShipStatus();
     const type = amount.system;
+    const sabotageHandler = this.host.getSabotageHandler();
+
+    if (!sabotageHandler) {
+      throw new Error("Attempted to sabotage without a SabotageHandler instance");
+    }
 
     (ship.getSystemFromType(SystemType.Sabotage) as SabotageSystem).cooldown = 30;
 
@@ -185,16 +202,16 @@ export class SystemsHandler {
     switch (type) {
       case SystemType.Reactor:
       case SystemType.Laboratory:
-        this.host.sabotageHandler!.sabotageReactor(ship.getSystemFromType(type) as ReactorSystem | LaboratorySystem);
+        sabotageHandler.sabotageReactor(ship.getSystemFromType(type) as ReactorSystem | LaboratorySystem);
         break;
       case SystemType.Oxygen:
-        this.host.sabotageHandler!.sabotageOxygen(ship.getSystemFromType(type) as LifeSuppSystem);
+        sabotageHandler.sabotageOxygen(ship.getSystemFromType(type) as LifeSuppSystem);
         break;
       case SystemType.Communications:
-        this.host.sabotageHandler!.sabotageCommunications(ship.getSystemFromType(type) as HudOverrideSystem | HqHudSystem);
+        sabotageHandler.sabotageCommunications(ship.getSystemFromType(type) as HudOverrideSystem | HqHudSystem);
         break;
       case SystemType.Electrical:
-        this.host.sabotageHandler!.sabotageElectrical(ship.getSystemFromType(type) as SwitchSystem);
+        sabotageHandler.sabotageElectrical(ship.getSystemFromType(type) as SwitchSystem);
         break;
       default:
         throw new Error(`Attempted to sabotage an unsupported SystemType: ${type} (${SystemType[type]})`);
@@ -244,10 +261,10 @@ export class SystemsHandler {
   sendDataUpdate(): void {
     this.host.lobby.sendRootGamePacket(new GameDataPacket([
       this.getShipStatus().data(this.oldShipStatus),
-    ], this.host.lobby.code));
+    ], this.host.lobby.getCode()));
   }
 
   private getShipStatus(): BaseInnerShipStatus {
-    return this.host.lobby.shipStatus!.getShipStatus();
+    return this.host.lobby.getShipStatus()!.getShipStatus();
   }
 }

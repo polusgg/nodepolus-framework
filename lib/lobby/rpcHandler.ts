@@ -380,7 +380,7 @@ export class RPCHandler {
           throw new Error(`Received UsePlatform packet from invalid InnerNetObject: expected PlayerPhysics but got ${type as number} (${typeString})`);
         }
 
-        this.lobby.customHostInstance.handleUsePlatform(sender as InnerPlayerControl);
+        this.lobby.getHostInstance().handleUsePlatform(sender as InnerPlayerControl);
 
         this.handleUsePlatform(sender as InnerPlayerControl);
         break;
@@ -395,9 +395,9 @@ export class RPCHandler {
   }
 
   handleCompleteTask(sender: InnerPlayerControl, taskIndex: number, sendTo: Connection[]): void {
-    this.lobby.customHostInstance.handleCompleteTask(sender, taskIndex);
+    this.lobby.getHostInstance().handleCompleteTask(sender, taskIndex);
 
-    if (this.lobby.gameState != GameState.Ended) {
+    if (this.lobby.getGameState() != GameState.Ended) {
       sender.completeTask(taskIndex, sendTo);
     }
   }
@@ -415,7 +415,7 @@ export class RPCHandler {
   }
 
   handleCheckName(sender: InnerPlayerControl, name: string, sendTo: Connection[]): void {
-    this.lobby.customHostInstance.handleCheckName(sender, name);
+    this.lobby.getHostInstance().handleCheckName(sender, name);
 
     sender.checkName(name, sendTo);
   }
@@ -430,7 +430,7 @@ export class RPCHandler {
   }
 
   handleCheckColor(sender: InnerPlayerControl, color: PlayerColor, sendTo: Connection[]): void {
-    this.lobby.customHostInstance.handleCheckColor(sender, color);
+    this.lobby.getHostInstance().handleCheckColor(sender, color);
 
     sender.checkColor(color, sendTo);
   }
@@ -463,7 +463,7 @@ export class RPCHandler {
   }
 
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId: number | undefined, sendTo: Connection[]): void {
-    this.lobby.customHostInstance.handleReportDeadBody(sender, victimPlayerId);
+    this.lobby.getHostInstance().handleReportDeadBody(sender, victimPlayerId);
 
     sender.reportDeadBody(victimPlayerId, sendTo);
   }
@@ -471,7 +471,7 @@ export class RPCHandler {
   handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number, sendTo: Connection[]): void {
     sender.murderPlayer(victimPlayerControlNetId, sendTo);
 
-    this.lobby.customHostInstance.handleMurderPlayer(sender, victimPlayerControlNetId);
+    this.lobby.getHostInstance().handleMurderPlayer(sender, victimPlayerControlNetId);
   }
 
   handleSendChat(sender: InnerPlayerControl, message: string, sendTo: Connection[]): void {
@@ -517,14 +517,14 @@ export class RPCHandler {
     sender.exitVent(ventId, sendTo);
   }
 
-  handleSnapTo(sender: InnerCustomNetworkTransform, position: Vector2, lastSequenceId: number, sendTo: Connection[]): void {
-    sender.snapTo(position, lastSequenceId, sendTo);
+  handleSnapTo(sender: InnerCustomNetworkTransform, position: Vector2, _lastSequenceId: number, sendTo: Connection[]): void {
+    sender.snapTo(position, sendTo);
   }
 
   handleClose(sender: InnerMeetingHud, sendTo: Connection[]): void {
     sender.close(sendTo);
 
-    delete this.lobby.meetingHud;
+    this.lobby.deleteMeetingHud();
   }
 
   handleVotingComplete(sender: InnerMeetingHud, voteStates: VoteState[], didVotePlayerOff: boolean, exiledPlayerId: number, isTie: boolean, sendTo: Connection[]): void {
@@ -544,23 +544,23 @@ export class RPCHandler {
   }
 
   handleCloseDoorsOfType(sender: BaseInnerShipStatus, system: SystemType): void {
-    this.lobby.customHostInstance.handleCloseDoorsOfType(sender, system);
+    this.lobby.getHostInstance().handleCloseDoorsOfType(sender, system);
 
     sender.closeDoorsOfType(system);
   }
 
   handleRepairSystem(sender: BaseInnerShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
-    this.lobby.customHostInstance.handleRepairSystem(sender, systemId, playerControlNetId, amount);
+    this.lobby.getHostInstance().handleRepairSystem(sender, systemId, playerControlNetId, amount);
 
     sender.repairSystem(systemId, playerControlNetId, amount);
   }
 
   handleClimbLadder(sender: InnerPlayerPhysics, ladderSize: LadderSize, ladderDirection: LadderDirection): void {
-    sender.climbLadder(ladderSize, ladderDirection, this.lobby.connections);
+    sender.climbLadder(ladderSize, ladderDirection, this.lobby.getConnections());
   }
 
   handleUsePlatform(sender: InnerPlayerControl): void {
-    this.lobby.customHostInstance.handleUsePlatform(sender);
+    this.lobby.getHostInstance().handleUsePlatform(sender);
   }
 
   handleSetTasks(sender: InnerGameData, playerId: number, tasks: number[], sendTo: Connection[]): void {

@@ -39,7 +39,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   }
 
   castVote(votingPlayerId: number, suspectPlayerId: number): void {
-    this.parent.lobby.customHostInstance.handleCastVote(votingPlayerId, suspectPlayerId);
+    this.parent.lobby.getHostInstance().handleCastVote(votingPlayerId, suspectPlayerId);
   }
 
   clearVote(player: Connection[]): void {
