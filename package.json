@@ -26,6 +26,7 @@
     "ansi-styles": "^4.3.0",
     "commonjs": "^0.0.1",
     "emittery": "^0.7.2",
+    "ipaddr.js": "^2.0.0",
     "public-ip": "^4.0.2",
     "ts-node": "^9.1.0"
   },
@@ -34,7 +35,7 @@
     "@types/node": "^14.14.10",
     "@typescript-eslint/eslint-plugin": "^4.8.2",
     "@typescript-eslint/parser": "^4.8.2",
-    "ava": "^3.13.0",
+    "ava": "^3.14.0",
     "eslint": "^7.14.0",
     "eslint-config-recommended": "^4.1.0",
     "eslint-plugin-import": "^2.22.1",

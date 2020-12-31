@@ -245,7 +245,7 @@ export class InternalHost implements HostInstance {
 
     player.gameObject.playerControl.syncSettings(this.lobby.options, [sender]);
 
-    this.confirmPlayerData(sender, player);
+    this.confirmPlayerData(player);
 
     player.gameObject.playerControl.isNew = false;
 
@@ -267,7 +267,7 @@ export class InternalHost implements HostInstance {
     const player = this.lobby.findPlayerByInnerNetObject(sender);
 
     if (player) {
-      this.confirmPlayerData(owner, player);
+      this.confirmPlayerData(player);
     } else {
       // TODO:
       throw new Error(`Failed to confirm playerData for sender: ${sender.parent.owner}.`);
@@ -296,7 +296,7 @@ export class InternalHost implements HostInstance {
       throw new Error("Received CheckColor from an InnerPlayerControl without an owner");
     }
 
-    this.confirmPlayerData(owner, new InternalPlayer(this.lobby, sender.parent));
+    this.confirmPlayerData(new InternalPlayer(this.lobby, sender.parent));
 
     if (this.lobby.getPlayers().length <= 12) {
       while (takenColors.indexOf(setColor) != -1) {
@@ -924,7 +924,7 @@ export class InternalHost implements HostInstance {
     return gameData.gameData.players.map(player => player.color);
   }
 
-  private confirmPlayerData(connection: Connection, player: InternalPlayer): void {
+  private confirmPlayerData(player: InternalPlayer): void {
     const gameData = this.lobby.getGameData();
 
     if (!gameData) {

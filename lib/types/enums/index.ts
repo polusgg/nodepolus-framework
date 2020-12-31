@@ -1,3 +1,5 @@
+export { AddressFamily } from "./addressFamily";
+
 export { AlterGameTag } from "./alterGameTag";
 
 export { ChatNoteType } from "./chatNoteType";
