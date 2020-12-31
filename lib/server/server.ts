@@ -1,9 +1,9 @@
 import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
+import { LobbyCreatedEvent, LobbyJoinRequestEvent } from "../api/events/server";
 import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
 import { DisconnectReasonType, FakeClientId } from "../types/enums";
 import { ConnectionInfo, DisconnectReason } from "../types";
-import { LobbyCreatedEvent } from "../api/events/server";
 import { Connection } from "../protocol/connection";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
@@ -120,7 +120,7 @@ export class Server extends Emittery.Typed<AllEvents> {
 
     newConnection.id = this.getNextConnectionId();
 
-    newConnection.on("packet", (evt: BaseRootPacket) => this.handlePacket(evt, newConnection));
+    newConnection.on("packet", async (evt: BaseRootPacket) => this.handlePacket(evt, newConnection));
     newConnection.on("disconnected", (reason?: DisconnectReason) => {
       this.handleDisconnection(newConnection, reason);
     });
@@ -128,7 +128,7 @@ export class Server extends Emittery.Typed<AllEvents> {
     return newConnection;
   }
 
-  private handlePacket(packet: BaseRootPacket, sender: Connection): void {
+  private async handlePacket(packet: BaseRootPacket, sender: Connection): Promise<void> {
     switch (packet.type) {
       case RootPacketType.HostGame: {
         let lobbyCode = LobbyCode.generate();
@@ -160,14 +160,20 @@ export class Server extends Emittery.Typed<AllEvents> {
         break;
       }
       case RootPacketType.JoinGame: {
-        const lobby = this.lobbyMap.get((packet as JoinGameRequestPacket).lobbyCode);
+        const lobbyCode = (packet as JoinGameRequestPacket).lobbyCode;
+        const lobby = this.lobbyMap.get(lobbyCode);
+        const event = new LobbyJoinRequestEvent(sender, lobbyCode, lobby);
 
-        if (lobby) {
-          this.connectionLobbyMap.set(sender.getConnectionInfo().toString(), lobby);
+        await this.emit("joinLobbyRequest", event);
 
-          lobby.handleJoin(sender);
-        } else {
-          sender.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameNotFound)]);
+        if (!event.isCancelled()) {
+          if (event.lobby) {
+            this.connectionLobbyMap.set(sender.getConnectionInfo().toString(), event.lobby);
+
+            event.lobby.handleJoin(sender);
+          } else {
+            sender.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameNotFound)]);
+          }
         }
         break;
       }

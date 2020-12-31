@@ -1,6 +1,6 @@
+import { GameListEvent, LobbyCreatedEvent, LobbyJoinRequestEvent, LobbyRemovedEvent } from "../events/server";
 import { GameEndedEvent, GameStartedEvent, GameStartEvent, SetInfectedEvent } from "../events/game";
 import { PlayerJoinEvent, PlayerKickedEvent, PlayerLeaveEvent } from "../events/lobby";
-import { GameListEvent, LobbyCreatedEvent, LobbyRemovedEvent } from "../events/server";
 import { MeetingEndedEvent, MeetingStartedEvent } from "../events/meeting";
 import {
   PlayerChatEvent,
@@ -56,6 +56,7 @@ type PlayerEvents = {
 
 type ServerEvents = {
   gameList: GameListEvent;
+  joinLobbyRequest: LobbyJoinRequestEvent;
   lobbyCreated: LobbyCreatedEvent;
   lobbyRemoved: LobbyRemovedEvent;
 };
