@@ -1,6 +1,6 @@
 import { DeathReason } from "../../../types/enums";
-import { CancellableEvent } from "..";
 import { PlayerInstance } from "../../player";
+import { CancellableEvent } from "..";
 
 export class PlayerKilledEvent extends CancellableEvent {
   constructor(

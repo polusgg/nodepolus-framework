@@ -5,15 +5,11 @@ import { BaseRoomCollection } from "./room/collection/baseRoomCollection";
 import { MiraRoomCollection } from "./room/collection/miraRoomCollection";
 import { Level } from "../../types/enums";
 import { LobbyInstance } from "../lobby";
-import Emittery from "emittery";
-import { GameEvents } from ".";
 
-export class Game extends Emittery.Typed<GameEvents> {
+export class Game {
   public rooms: BaseRoomCollection;
 
   constructor(public lobby: LobbyInstance) {
-    super();
-
     switch (lobby.getSettings().level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:

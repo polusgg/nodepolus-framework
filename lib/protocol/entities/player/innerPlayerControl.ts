@@ -3,7 +3,6 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
-import { InternalPlayer } from "../../../player";
 import { GameOptionsData } from "../../../types";
 import { Connection } from "../../connection";
 import { BaseInnerNetObject } from "../types";
@@ -216,9 +215,9 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   murderPlayer(victimPlayerControlNetId: number, sendTo: Connection[]): void {
-    const victimPlayer: InternalPlayer | undefined = this.parent.lobby.getPlayers().find(player => player.gameObject.playerControl.netId == victimPlayerControlNetId);
+    const victim = this.parent.lobby.findPlayerByNetId(victimPlayerControlNetId);
 
-    if (!victimPlayer) {
+    if (!victim) {
       throw new Error("Could not find victim Player");
     }
 
@@ -228,15 +227,15 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       throw new Error("GameData does not exist on the lobby instance");
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == victimPlayer.id);
+    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == victim.getId());
 
     if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player ${victimPlayer.id} does not have an instance in GameData`);
+      throw new Error(`Player ${victim.getId()} does not have an instance in GameData`);
     }
 
     gameData.gameData.players[gameDataPlayerIndex].isDead = true;
 
-    this.sendRPCPacketTo(sendTo, new MurderPlayerPacket(victimPlayer.gameObject.playerControl.netId));
+    this.sendRPCPacketTo(sendTo, new MurderPlayerPacket(victimPlayerControlNetId));
   }
 
   sendChat(message: string, sendTo: Connection[]): void {

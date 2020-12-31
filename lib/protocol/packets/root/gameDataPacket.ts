@@ -1,14 +1,13 @@
-import { DataPacket, DespawnPacket, ReadyPacket, RPCPacket, SceneChangePacket, SpawnPacket } from "../gameData";
+import { BaseGameDataPacket, DataPacket, DespawnPacket, ReadyPacket, RPCPacket, SceneChangePacket, SpawnPacket } from "../gameData";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { GameDataPacketType, RootPacketType } from "../types/enums";
 import { LobbyCode } from "../../../util/lobbyCode";
-import { GameDataPacketDataType } from "./types";
 import { Level } from "../../../types/enums";
 import { BaseRootPacket } from "../root";
 
 export class GameDataPacket extends BaseRootPacket {
   constructor(
-    public readonly packets: GameDataPacketDataType[],
+    public readonly packets: BaseGameDataPacket[],
     public readonly lobbyCode: string,
     public readonly targetClientId?: number,
   ) {
@@ -30,7 +29,7 @@ export class GameDataPacket extends BaseRootPacket {
       targetClientId = reader.readPackedUInt32();
     }
 
-    const packets: GameDataPacketDataType[] = [];
+    const packets: BaseGameDataPacket[] = [];
 
     reader.readAllChildMessages(child => {
       switch (child.tag) {

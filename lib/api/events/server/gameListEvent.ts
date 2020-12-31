@@ -1,6 +1,6 @@
 import { LobbyCount, LobbyListing } from "../../../protocol/packets/root/types";
-import { CancellableEvent } from "..";
 import { PlayerInstance } from "../../player";
+import { CancellableEvent } from "..";
 
 export class GameListEvent extends CancellableEvent {
   constructor(

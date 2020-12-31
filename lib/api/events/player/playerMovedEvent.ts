@@ -1,6 +1,6 @@
+import { PlayerInstance } from "../../player";
 import { Vector2 } from "../../../types";
 import { CancellableEvent } from "..";
-import { PlayerInstance } from "../../player";
 
 export class PlayerMovedEvent extends CancellableEvent {
   constructor(

@@ -1,9 +1,15 @@
-import { SystemsHandler, SabotageSystemHandler, DoorsHandler, AutoDoorsHandler, DecontaminationHandler } from "../../host/systemHandlers";
 import { RepairAmount } from "../../protocol/packets/rpc/repairSystem/amounts";
 import { BaseInnerShipStatus } from "../../protocol/entities/baseShipStatus";
 import { GameOverReason, PlayerColor, SystemType } from "../../types/enums";
 import { InnerPlayerControl } from "../../protocol/entities/player";
 import { Connection } from "../../protocol/connection";
+import {
+  AutoDoorsHandler,
+  DecontaminationHandler,
+  DoorsHandler,
+  SabotageSystemHandler,
+  SystemsHandler,
+} from "../../host/systemHandlers";
 
 export interface HostInstance {
   getId(): number;

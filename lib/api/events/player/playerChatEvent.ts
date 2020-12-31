@@ -1,6 +1,6 @@
+import { PlayerInstance } from "../../player";
 import { TextComponent } from "../../text";
 import { CancellableEvent } from "..";
-import { PlayerInstance } from "../../player";
 
 export class PlayerChatEvent extends CancellableEvent {
   constructor(

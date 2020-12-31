@@ -1,5 +1,5 @@
-import { CancellableEvent } from "..";
 import { PlayerInstance } from "../../player";
+import { CancellableEvent } from "..";
 import { Vent } from "../../game";
 
 export class VentEnterEvent extends CancellableEvent {

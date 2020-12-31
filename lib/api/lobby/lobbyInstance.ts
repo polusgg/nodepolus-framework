@@ -3,11 +3,11 @@ import { EntityLobbyBehaviour } from "../../protocol/entities/lobbyBehaviour";
 import { EntityMeetingHud } from "../../protocol/entities/meetingHud";
 import { BaseInnerNetObject } from "../../protocol/entities/types";
 import { EntityGameData } from "../../protocol/entities/gameData";
+import { GameState, AlterGameTag } from "../../types/enums";
 import { BaseRPCPacket } from "../../protocol/packets/rpc";
 import { Connection } from "../../protocol/connection";
 import { LobbySettings } from "./lobbySettings";
-import { GameState, AlterGameTag } from "../../types/enums";
-import { InternalPlayer } from "../../player";
+import { PlayerInstance } from "../player";
 import { HostInstance } from "../host";
 
 export interface LobbyInstance {
@@ -21,23 +21,23 @@ export interface LobbyInstance {
 
   addConnection(connection: Connection): void;
 
-  findConnectionByPlayer(player: InternalPlayer): Connection | undefined;
+  findConnectionByPlayer(player: PlayerInstance): Connection | undefined;
 
   removeConnection(connection: Connection): void;
 
-  getPlayers(): InternalPlayer[];
+  getPlayers(): PlayerInstance[];
 
-  addPlayer(player: InternalPlayer): void;
+  addPlayer(player: PlayerInstance): void;
 
-  findPlayerByClientId(clientId: number): InternalPlayer | undefined;
+  findPlayerByClientId(clientId: number): PlayerInstance | undefined;
 
-  findPlayerByPlayerId(playerId: number): InternalPlayer | undefined;
+  findPlayerByPlayerId(playerId: number): PlayerInstance | undefined;
 
-  findPlayerByNetId(netId: number): InternalPlayer | undefined;
+  findPlayerByNetId(netId: number): PlayerInstance | undefined;
 
   clearPlayers(): void;
 
-  removePlayer(player: InternalPlayer): void;
+  removePlayer(player: PlayerInstance): void;
 
   getGameData(): EntityGameData | undefined;
 

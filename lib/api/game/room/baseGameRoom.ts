@@ -3,18 +3,15 @@ import { GameDataPacket } from "../../../protocol/packets/root";
 import { SystemType } from "../../../types/enums";
 import { InternalLobby } from "../../../lobby";
 import { PlayerInstance } from "../../player";
-import { Game, GameEvents } from "..";
-import Emittery from "emittery";
+import { Game } from "..";
 
-export class BaseGameRoom extends Emittery.Typed<GameEvents> {
+export class BaseGameRoom {
   private shipStatusBackup?: BaseInnerShipStatus;
 
   constructor(
     public game: Game,
     public systemType: SystemType,
-  ) {
-    super();
-  }
+  ) {}
 
   getPlayers(): PlayerInstance[] {
     // TODO

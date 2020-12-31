@@ -1,6 +1,6 @@
 import { InternalLobby } from "../../../lobby";
-import { CancellableEvent } from "..";
 import { PlayerInstance } from "../../player";
+import { CancellableEvent } from "..";
 
 export class PlayerJoinEvent extends CancellableEvent {
   constructor(

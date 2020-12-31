@@ -1,7 +1,6 @@
 import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
-import { DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
+import { BaseGameDataPacket, DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
-import { GameDataPacketDataType, LobbyListing } from "../protocol/packets/root/types";
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
@@ -11,6 +10,7 @@ import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { BaseInnerNetObject } from "../protocol/entities/types";
 import { EntityGameData } from "../protocol/entities/gameData";
+import { LobbyListing } from "../protocol/packets/root/types";
 import { LobbyInstance, LobbySettings } from "../api/lobby";
 import { BaseRPCPacket } from "../protocol/packets/rpc";
 import { Connection } from "../protocol/connection";
@@ -580,8 +580,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   clearMessage(): void {
-    //TODO: this *is* possible....
-    //      somehow...
+    // TODO: this *is* possible, somehow
   }
 
   sendMessage(message: TextComponent | string): void {
@@ -680,7 +679,7 @@ export class InternalLobby implements LobbyInstance {
     ]);
   }
 
-  private handleGameDataPacket(packet: GameDataPacketDataType, sender: Connection, sendTo?: Connection[]): void {
+  private handleGameDataPacket(packet: BaseGameDataPacket, sender: Connection, sendTo?: Connection[]): void {
     sendTo = ((sendTo && sendTo.length > 0) ? sendTo : this.connections).filter(c => c.id != sender.id);
 
     switch (packet.type) {

@@ -418,9 +418,7 @@ export class LobbySettings {
   }
 
   fromPov(player: PlayerInstance): LobbySettings {
-    //TODO: Pretty error for if the PlayerInstance is not an InternalPlayer, as is assumed below
-
-    const connection = this.lobby.findConnectionByPlayer((player as InternalPlayer));
+    const connection = this.lobby.findConnectionByPlayer(player);
 
     if (connection && this.povCache.has(connection.id)) {
       return this.povCache.get(connection.id)!;
@@ -479,7 +477,8 @@ export class LobbySettings {
         sendToConnections = this.lobby.getConnections();
       }
 
-      this.lobby.getPlayers()[0].gameObject.playerControl.syncSettings(customOptions, sendToConnections);
+      // TODO: Don't cast to an internal class from within the API folder
+      (this.lobby.getPlayers()[0] as InternalPlayer).gameObject.playerControl.syncSettings(customOptions, sendToConnections);
     } else {
       console.warn("Attempted to sync lobby settings without a player");
     }

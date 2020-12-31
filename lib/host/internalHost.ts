@@ -1,4 +1,3 @@
-import { AutoDoorsHandler, DecontaminationHandler, DoorsHandler, SabotageSystemHandler, SystemsHandler } from "./systemHandlers";
 import { BaseInnerShipStatus, InternalSystemType } from "../protocol/entities/baseShipStatus";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
 import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
@@ -47,6 +46,13 @@ import {
   SecurityCameraSystem,
   SwitchSystem,
 } from "../protocol/entities/baseShipStatus/systems";
+import {
+  AutoDoorsHandler,
+  DecontaminationHandler,
+  DoorsHandler,
+  SabotageSystemHandler,
+  SystemsHandler,
+} from "./systemHandlers";
 import {
   FakeClientId,
   GameOverReason,

@@ -16,7 +16,6 @@ export class JoinGameRequestPacket extends BaseRootPacket {
   static deserialize(reader: MessageReader): JoinGameRequestPacket {
     return new JoinGameRequestPacket(
       LobbyCode.decode(reader.readInt32()),
-      // TODO: Probably broken but just an example
       Bitfield.fromNumber(reader.readByte(), 8).asNumbers(),
     );
   }
