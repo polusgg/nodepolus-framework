@@ -1,29 +1,45 @@
-export { PlayerChatEvent } from "./playerChatEvent";
+export { PlayerBannedEvent } from "./playerBannedEvent";
+
+export { PlayerChatMessageEvent } from "./playerChatMessageEvent";
 
 export { PlayerChatNoteEvent } from "./playerChatNoteEvent";
 
+export { PlayerColorUpdatedEvent } from "./playerColorUpdatedEvent";
+
+export { PlayerDiedEvent } from "./playerDiedEvent";
+
 export { PlayerExiledEvent } from "./playerExiledEvent";
 
-export { PlayerKilledEvent } from "./playerKilledEvent";
+export { PlayerHatUpdatedEvent } from "./playerHatUpdatedEvent";
 
-export { PlayerMovedEvent } from "./playerMovedEvent";
+export { PlayerJoinedEvent } from "./playerJoinedEvent";
 
-export { PlayerLeaveEvent } from "./playerLeaveEvent";
+export { PlayerKickedEvent } from "./playerKickedEvent";
 
-export { PlayerSetColorEvent } from "./playerSetColorEvent";
+export { PlayerLeftEvent } from "./playerLeftEvent";
 
-export { PlayerSetHatEvent } from "./playerSetHatEvent";
+export { PlayerMurderedEvent } from "./playerMurderedEvent";
 
-export { PlayerSetNameEvent } from "./playerSetNameEvent";
+export { PlayerNameUpdatedEvent } from "./playerNameUpdatedEvent";
 
-export { PlayerSetPetEvent } from "./playerSetPetEvent";
+export { PlayerPetUpdatedEvent } from "./playerPetUpdatedEvent";
 
-export { PlayerSetSkinEvent } from "./playerSetSkinEvent";
+export { PlayerPositionTeleportedEvent } from "./playerPositionTeleportedEvent";
 
-export { PlayerTeleportedEvent } from "./playerTeleportedEvent";
+export { PlayerPositionUpdatedEvent } from "./playerPositionUpdatedEvent";
 
-export { PlayerVotedEvent } from "./playerVotedEvent";
+export { PlayerPositionWalkedEvent } from "./playerPositionWalkedEvent";
 
-export { VentEnterEvent } from "./ventEnterEvent";
+export { PlayerRevivedEvent } from "./playerRevivedEvent";
 
-export { VentExitEvent } from "./ventExitEvent";
+export { PlayerRoleUpdatedEvent } from "./playerRoleUpdatedEvent";
+
+export { PlayerSkinUpdatedEvent } from "./playerSkinUpdatedEvent";
+
+export { PlayerTaskAddedEvent } from "./playerTaskAddedEvent";
+
+export { PlayerTaskCompletedEvent } from "./playerTaskCompletedEvent";
+
+export { PlayerTaskRemovedEvent } from "./playerTaskRemovedEvent";
+
+export { PlayerTaskUncompletedEvent } from "./playerTaskUncompletedEvent";

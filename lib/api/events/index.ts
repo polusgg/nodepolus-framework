@@ -1,3 +1,3 @@
 export { CancellableEvent } from "./cancellableEvent";
 
-export { AllEvents } from "./serverEvents";
+export { ServerEvents } from "./serverEvents";

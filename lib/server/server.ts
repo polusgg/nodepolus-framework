@@ -1,13 +1,13 @@
 import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
-import { LobbyCreatedEvent, LobbyJoinRequestEvent } from "../api/events/server";
+import { ServerLobbyCreatedEvent, ServerLobbyJoinEvent } from "../api/events/server";
 import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
 import { DisconnectReasonType, FakeClientId } from "../types/enums";
 import { ConnectionInfo, DisconnectReason } from "../types";
 import { Connection } from "../protocol/connection";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
-import { AllEvents } from "../api/events";
+import { ServerEvents } from "../api/events";
 import { InternalLobby } from "../lobby";
 import Emittery from "emittery";
 import dgram from "dgram";
@@ -20,7 +20,7 @@ import {
   JoinGameRequestPacket,
 } from "../protocol/packets/root";
 
-export class Server extends Emittery.Typed<AllEvents> {
+export class Server extends Emittery.Typed<ServerEvents> {
   public readonly startedAt = Date.now();
   public readonly serverSocket: dgram.Socket;
   public readonly connections: Map<string, Connection> = new Map();
@@ -145,9 +145,9 @@ export class Server extends Emittery.Typed<AllEvents> {
 
         newLobby.options = (packet as HostGameRequestPacket).options;
 
-        const event = new LobbyCreatedEvent(newLobby);
+        const event = new ServerLobbyCreatedEvent(sender, newLobby);
 
-        this.emit("lobbyCreated", event);
+        this.emit("server.lobby.created", event);
 
         if (!event.isCancelled()) {
           this.lobbies.push(newLobby);
@@ -162,15 +162,15 @@ export class Server extends Emittery.Typed<AllEvents> {
       case RootPacketType.JoinGame: {
         const lobbyCode = (packet as JoinGameRequestPacket).lobbyCode;
         const lobby = this.lobbyMap.get(lobbyCode);
-        const event = new LobbyJoinRequestEvent(sender, lobbyCode, lobby);
+        const event = new ServerLobbyJoinEvent(sender, lobbyCode, lobby);
 
-        await this.emit("joinLobbyRequest", event);
+        await this.emit("server.lobby.join", event);
 
         if (!event.isCancelled()) {
           if (event.lobby) {
-            this.connectionLobbyMap.set(sender.getConnectionInfo().toString(), event.lobby);
+            this.connectionLobbyMap.set(sender.getConnectionInfo().toString(), event.lobby as InternalLobby);
 
-            event.lobby.handleJoin(sender);
+            (event.lobby as InternalLobby).handleJoin(sender);
           } else {
             sender.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameNotFound)]);
           }

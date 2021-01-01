@@ -1,6 +1,9 @@
 import { PlayerInstance } from "../../player";
 
-export class PlayerLeaveEvent {
+/**
+ * Fired when a player has left a lobby.
+ */
+export class PlayerLeftEvent {
   constructor(
     public player: PlayerInstance,
   ) {}

@@ -1,7 +1,7 @@
-export { GameListEvent } from "./gameListEvent";
+export { ServerLobbyCreatedEvent } from "./serverLobbyCreatedEvent";
 
-export { LobbyCreatedEvent } from "./lobbyCreatedEvent";
+export { ServerLobbyDestroyedEvent } from "./serverLobbyDestroyedEvent";
 
-export { LobbyJoinRequestEvent } from "./lobbyJoinRequestEvent";
+export { ServerLobbyJoinEvent } from "./serverLobbyJoinEvent";
 
-export { LobbyRemovedEvent } from "./lobbyRemovedEvent";
+export { ServerLobbyListEvent } from "./serverLobbyListEvent";

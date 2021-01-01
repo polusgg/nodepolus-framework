@@ -1,11 +1,13 @@
 import { PlayerInstance } from "../../player";
-import { TextComponent } from "../../text";
 import { CancellableEvent } from "..";
 
-export class PlayerChatEvent extends CancellableEvent {
+/**
+ * Fired when a player has been banned from a lobby.
+ */
+export class PlayerBannedEvent extends CancellableEvent {
   constructor(
     public readonly player: PlayerInstance,
-    public readonly message: TextComponent,
+    public readonly kickedBy: PlayerInstance,
   ) {
     super();
   }

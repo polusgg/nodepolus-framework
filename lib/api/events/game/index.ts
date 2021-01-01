@@ -1,7 +1,19 @@
+export { GameCamerasClosedEvent } from "./gameCamerasClosedEvent";
+
+export { GameCamerasOpenedEvent } from "./gameCamerasOpenedEvent";
+
 export { GameEndedEvent } from "./gameEndedEvent";
+
+export { GameScannerDequeuedEvent } from "./gameScannerDequeuedEvent";
+
+export { GameScannerQueuedEvent } from "./gameScannerQueuedEvent";
+
+export { GameScannerStartedEvent } from "./gameScannerStartedEvent";
+
+export { GameScannerStoppedEvent } from "./gameScannerStoppedEvent";
 
 export { GameStartedEvent } from "./gameStartedEvent";
 
-export { GameStartEvent } from "./gameStartEvent";
+export { GameVentEnteredEvent } from "./gameVentEnteredEvent";
 
-export { SetInfectedEvent } from "./setInfectedEvent";
+export { GameVentExitedEvent } from "./gameVentExitedEvent";

@@ -1,6 +1,6 @@
 import { HostGameResponsePacket } from "../../../lib/protocol/packets/root";
-import { LobbyJoinRequestEvent } from "../../../lib/api/events/server";
-import { PlayerJoinEvent } from "../../../lib/api/events/lobby";
+import { ServerLobbyJoinEvent } from "../../../lib/api/events/server";
+import { PlayerJoinedEvent } from "../../../lib/api/events/player";
 import { shuffleArrayClone } from "../../../lib/util/shuffle";
 import { Logger } from "../../../lib/logger";
 import { Server } from "../../../lib/server";
@@ -10,11 +10,11 @@ declare const server: Server;
 
 const logger = new Logger("Debug");
 
-server.on("playerJoin", (event: PlayerJoinEvent) => {
+server.on("player.joined", (event: PlayerJoinedEvent) => {
   logger.log(event.player, " Connected");
 });
 
-server.on("joinLobbyRequest", (event: LobbyJoinRequestEvent) => {
+server.on("server.lobby.join", (event: ServerLobbyJoinEvent) => {
   if (event.lobbyCode !== "RANDOM") {
     return;
   }

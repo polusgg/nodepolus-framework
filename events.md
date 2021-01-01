@@ -1,99 +1,105 @@
-[ Server Events ]
+Server Events
+- "server.lobby.host"
+- "server.lobby.join"
+- "server.lobby.list"
+- "server.lobby.created"
+- "server.lobby.destroyed"
 
-- roomCreated
-- roomDestroyed
-- gameListRequest
+Lobby Events
+- "lobby.countdown.started"
+- "lobby.countdown.stopped"
+  - wasInterrupted: boolean
+- "lobby.privacy.updated" (when the lobby goes from Private <=> Public)
 
-[ Lobby Events ]
-
-- countdownStarted
-- countdownInterrupted
-- public *emitted whenever the lobby goes from Private => Public*
-- private *emitted whenever the lobby goes from Public => Private, and when the lobby is created*
-
-[ Settings Events ]
+Settings Events
 - changed
 - [...all settings]Changed
 
-[ Player Events ]
+Connection Events
+- "connection.open" (after receiving a Hello packet)
+- "connection.close" (after a connection disconnects itself)
+  - wasDisconnectedByServer: boolean
 
-- connected *emitted when the server recieves a Hello packet*
-- joined *emitted when the server recieves a joinGame packet*
-- rejoined *emitted when the player rejoins a game*
-- disconnected *emitted when the server recieves a 09 disconnect packet*
-- kicked
-- banned
-- colorChanged
-- nameChanged
-- skinChanged
-- hatChanged
-- petChanged
-- moved *emitted when the player either teleports OR walks (CNT:Data OR CNT:RPCSnapTo)*
-- teleported *emittede only on CNT:RPCSnapTO*
-- walked *emitted only on CNT:Data*
-- died *emitted whenever a player dies*
-- murdered *emitted whenever a player gets murdered*
-- exiled *emitted whenever a player gets exiled*
-- taskCompleted *emitted whenever a player completes a task*
-- taskUndone *emitted whenever a task goes from a complete to incomplete state*
-- taskAssigned
-- taskRemoved
-- impostor *emitted whenever a player is assigned impostor*
-- crewmate *emitted at the start of the game, and when a player goes from a Impostor => Crewmate*
-- chat
-- chatNote
-- watchingCameras
-- stoppedWatchingCamers
-- startedScanning
-- stoppedScanning *includes boolean isFinished*
-- enterVent
-- exitVent
-- castVote
-- clearVote
-- castVoteKick
+Object Events
+- "object.spawn"
+- "object.despawn"
 
-[ Game Events ]
+Player Events
+- "player.joined" (after receiving a JoinGame packet)
+  - isRejoining: boolean
+- "player.kicked"
+- "player.banned"
+- "player.left"
+- "player.color.updated"
+- "player.name.updated"
+- "player.skin.updated"
+- "player.hat.updated"
+- "player.pet.updated"
+- "player.position.updated" (walking or snapto)
+- "player.position.teleported" (snapto)
+- "player.position.walked" (walking)
+- "player.died" (when a player dies)
+  - killer?: PlayerInstance
+- "player.murdered" (when a player is killed by another player)
+  - extends "player.died" event
+- "player.exiled" (when a player is exiled)
+  - extends "player.died" event
+- "player.revived"
+- "player.task.completed" (when a player completes a task)
+- "player.task.uncompleted" (when a task is marked as incomplete)
+- "player.task.added"
+- "player.task.removed"
+- "player.role.updated" (when a player is assigned crewmate or impostor)
+  - role: Role (enum: Impostor, Crewmate)
+- "player.chat.message"
+- "player.chat.note"
 
-- started
-- finishedVoting *when all the players have voted*
-- closed *when the animation starts*
-- ended *when players are back in-map*
+Game Events
+- "game.started"
+- "game.vent.enter"
+- "game.vent.exit"
+- "game.scanner.started"
+- "game.scanner.stopped"
+  - finishedScanning: boolean
+- "game.scanner.queued"
+- "game.scanner.dequeued"
+  - didStartScanning: boolean
+- "game.cameras.opened"
+- "game.cameras.closed"
 
-[ Meeting Events ]
+Meeting Events
+- "meeting.started"
+- "meeting.vote.added"
+- "meeting.vote.removed"
+- "meeting.concluded" (when all players have voted or the time has run out)
+- "meeting.closed" (when the meeting HUD closes)
+- "meeting.ended" (after the exile animation)
+- "meeting.votekick"
 
-- called
-- ended
-
-[ Room Events ]
-
+Room (Map Rooms) Events
 - sabotaged
 - fixed
 - doorsClosed *emitted with a Doors[] of doors that closed, in case of an API call to only close one door*
 - doorsOpened *emitted with a Doors[] of doors that opened, in case of an API call to only open one door*
 
-[ Sabotage Events / Electrical Sabotage ]
-
+Sabotage: Electrical
 - switchFlipped
 
-[ Sabotage Events / HQHud Sabotage ]
-
+Sabotage: Mira Comms
 - consoleOpened
 - consoleClosed
 - consoleRepaired
 - consoleDamaged
 
-[ Sabotage Events / Oxygen Sabotage ]
-
+Sabotage: Oxygen
 - consoleRepaired
 - consoleDamaged
 
-[ Sabotage Events / Reactor Sabotage ]
-
+Sabotage: Reactor
 - consoleRepaired
 - consoleDamaged
 
-[ Decontamination Events ]
-
+Decontamination
 - entered
 - exited
 - gassed

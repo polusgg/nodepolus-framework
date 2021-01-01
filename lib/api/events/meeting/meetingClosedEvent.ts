@@ -1,11 +1,13 @@
-import { InternalLobby } from "../../../lobby";
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "..";
 
-export class PlayerJoinEvent extends CancellableEvent {
+/**
+ * Fired when a meeting window has been closed.
+ */
+export class MeetingClosedEvent extends CancellableEvent {
   constructor(
-    public readonly lobby: InternalLobby,
     public readonly player: PlayerInstance,
+    public readonly kickedBy: PlayerInstance,
   ) {
     super();
   }

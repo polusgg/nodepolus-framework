@@ -1,12 +1,12 @@
 import { Connection } from "../../../protocol/connection";
-import { InternalLobby } from "../../../lobby";
 import { CancellableEvent } from "..";
 
-export class LobbyJoinRequestEvent extends CancellableEvent {
+/**
+ * Fired when a connection to the server has been initialized with a Hello packet.
+ */
+export class ConnectionOpenedEvent extends CancellableEvent {
   constructor(
     public readonly connection: Connection,
-    public readonly lobbyCode: string,
-    public lobby?: InternalLobby,
   ) {
     super();
   }

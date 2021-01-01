@@ -2,11 +2,12 @@ import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "..";
 
 /**
- * Fired when a player has been exiled at the end of a meeting.
+ * Fired when a player has completed one of their tasks.
  */
-export class PlayerExiledEvent extends CancellableEvent {
+export class PlayerTaskCompletedEvent extends CancellableEvent {
   constructor(
     public readonly player: PlayerInstance,
+    public readonly kickedBy: PlayerInstance,
   ) {
     super();
   }

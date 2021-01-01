@@ -1,70 +1,142 @@
-import { GameListEvent, LobbyCreatedEvent, LobbyJoinRequestEvent, LobbyRemovedEvent } from "../events/server";
-import { GameEndedEvent, GameStartedEvent, GameStartEvent, SetInfectedEvent } from "../events/game";
-import { PlayerJoinEvent, PlayerKickedEvent, PlayerLeaveEvent } from "../events/lobby";
-import { MeetingEndedEvent, MeetingStartedEvent } from "../events/meeting";
 import {
-  PlayerChatEvent,
+  ConnectionClosedEvent,
+  ConnectionOpenedEvent,
+} from "./connection";
+import {
+  GameCamerasClosedEvent,
+  GameCamerasOpenedEvent,
+  GameEndedEvent,
+  GameScannerDequeuedEvent,
+  GameScannerQueuedEvent,
+  GameScannerStartedEvent,
+  GameScannerStoppedEvent,
+  GameStartedEvent,
+  GameVentEnteredEvent,
+  GameVentExitedEvent,
+} from "./game";
+import {
+  LobbyCountdownStartedEvent,
+  LobbyCountdownStoppedEvent,
+  LobbyPrivacyUpdatedEvent,
+} from "./lobby";
+import {
+  MeetingClosedEvent,
+  MeetingConcludedEvent,
+  MeetingEndedEvent,
+  MeetingStartedEvent,
+  MeetingVoteAddedEvent,
+  MeetingVotekickEvent,
+  MeetingVoteRemovedEvent,
+} from "./meeting";
+import {
+  PlayerBannedEvent,
+  PlayerChatMessageEvent,
   PlayerChatNoteEvent,
+  PlayerColorUpdatedEvent,
+  PlayerDiedEvent,
   PlayerExiledEvent,
-  PlayerKilledEvent,
-  PlayerMovedEvent,
-  PlayerSetColorEvent,
-  PlayerSetHatEvent,
-  PlayerSetNameEvent,
-  PlayerSetPetEvent,
-  PlayerSetSkinEvent,
-  PlayerTeleportedEvent,
-  PlayerVotedEvent,
-  VentEnterEvent,
-  VentExitEvent,
-} from "../events/player";
+  PlayerHatUpdatedEvent,
+  PlayerJoinedEvent,
+  PlayerKickedEvent,
+  PlayerLeftEvent,
+  PlayerMurderedEvent,
+  PlayerNameUpdatedEvent,
+  PlayerPetUpdatedEvent,
+  PlayerPositionTeleportedEvent,
+  PlayerPositionUpdatedEvent,
+  PlayerPositionWalkedEvent,
+  PlayerRevivedEvent,
+  PlayerRoleUpdatedEvent,
+  PlayerSkinUpdatedEvent,
+  PlayerTaskAddedEvent,
+  PlayerTaskCompletedEvent,
+  PlayerTaskRemovedEvent,
+  PlayerTaskUncompletedEvent,
+} from "./player";
+import {
+  ServerLobbyCreatedEvent,
+  ServerLobbyDestroyedEvent,
+  ServerLobbyJoinEvent,
+  ServerLobbyListEvent,
+} from "./server";
 
-type GameEvents = {
-  gameEnded: GameEndedEvent;
-  gameStarted: GameStartedEvent;
-  gameStart: GameStartEvent;
-  setInfected: SetInfectedEvent;
+export type ServerEvents = {
+  /**
+   * Connection Events
+   */
+  "connection.closed": ConnectionClosedEvent;
+  "connection.opened": ConnectionOpenedEvent;
+
+  /**
+   * Game Events
+   */
+  "game.cameras.closed": GameCamerasClosedEvent;
+  "game.cameras.opened": GameCamerasOpenedEvent;
+  "game.ended": GameEndedEvent;
+  "game.scanner.dequeued": GameScannerDequeuedEvent;
+  "game.scanner.queued": GameScannerQueuedEvent;
+  "game.scanner.started": GameScannerStartedEvent;
+  "game.scanner.stopped": GameScannerStoppedEvent;
+  "game.started": GameStartedEvent;
+  "game.vent.entered": GameVentEnteredEvent;
+  "game.vent.exited": GameVentExitedEvent;
+
+  /**
+   * Lobby Events
+   */
+  "lobby.countdown.started": LobbyCountdownStartedEvent;
+  "lobby.countdown.stopped": LobbyCountdownStoppedEvent;
+  "lobby.privacy.updated": LobbyPrivacyUpdatedEvent;
+
+  /**
+   * Meeting Events
+   */
+  "meeting.closed": MeetingClosedEvent;
+  "meeting.concluded": MeetingConcludedEvent;
+  "meeting.ended": MeetingEndedEvent;
+  "meeting.started": MeetingStartedEvent;
+  "meeting.vote.added": MeetingVoteAddedEvent;
+  "meeting.vote.removed": MeetingVoteRemovedEvent;
+  "meeting.votekick": MeetingVotekickEvent;
+
+  /**
+   * Player Events
+   */
+  "player.banned": PlayerBannedEvent;
+  "player.chat.message": PlayerChatMessageEvent;
+  "player.chat.note": PlayerChatNoteEvent;
+  "player.color.updated": PlayerColorUpdatedEvent;
+  "player.died": PlayerDiedEvent;
+  "player.exiled": PlayerExiledEvent;
+  "player.hat.updated": PlayerHatUpdatedEvent;
+  "player.joined": PlayerJoinedEvent;
+  "player.kicked": PlayerKickedEvent;
+  "player.left": PlayerLeftEvent;
+  "player.murdered": PlayerMurderedEvent;
+  "player.name.updated": PlayerNameUpdatedEvent;
+  "player.pet.updated": PlayerPetUpdatedEvent;
+  "player.position.teleported": PlayerPositionTeleportedEvent;
+  "player.position.updated": PlayerPositionUpdatedEvent;
+  "player.position.walked": PlayerPositionWalkedEvent;
+  "player.revived": PlayerRevivedEvent;
+  "player.role.updated": PlayerRoleUpdatedEvent;
+  "player.skin.updated": PlayerSkinUpdatedEvent;
+  "player.task.added": PlayerTaskAddedEvent;
+  "player.task.completed": PlayerTaskCompletedEvent;
+  "player.task.removed": PlayerTaskRemovedEvent;
+  "player.task.uncompleted": PlayerTaskUncompletedEvent;
+
+  /**
+   * Server Events
+   */
+  "server.lobby.created": ServerLobbyCreatedEvent;
+  "server.lobby.destroyed": ServerLobbyDestroyedEvent;
+  "server.lobby.join": ServerLobbyJoinEvent;
+  "server.lobby.list": ServerLobbyListEvent;
 };
 
-type LobbyEvents = {
-  playerJoin: PlayerJoinEvent;
-  playerKicked: PlayerKickedEvent;
-  playerLeave: PlayerLeaveEvent;
-};
-
-type MeetingEvents = {
-  meetingEnded: MeetingEndedEvent;
-  meetingStarted: MeetingStartedEvent;
-};
-
-type PlayerEvents = {
-  playerChat: PlayerChatEvent;
-  playerChatNote: PlayerChatNoteEvent;
-  playerExiled: PlayerExiledEvent;
-  playerKilled: PlayerKilledEvent;
-  playerMoved: PlayerMovedEvent;
-  playerSetColor: PlayerSetColorEvent;
-  playerSetHat: PlayerSetHatEvent;
-  playerSetName: PlayerSetNameEvent;
-  playerSetPet: PlayerSetPetEvent;
-  playerSetSkin: PlayerSetSkinEvent;
-  playerTeleported: PlayerTeleportedEvent;
-  playerVoted: PlayerVotedEvent;
-  ventEnter: VentEnterEvent;
-  ventExit: VentExitEvent;
-};
-
-type ServerEvents = {
-  gameList: GameListEvent;
-  joinLobbyRequest: LobbyJoinRequestEvent;
-  lobbyCreated: LobbyCreatedEvent;
-  lobbyRemoved: LobbyRemovedEvent;
-};
-
-// TODO: DespawnEvent
-
-export type AllEvents = GameEvents
-& LobbyEvents
-& MeetingEvents
-& PlayerEvents
-& ServerEvents;
+// export type InternalEvents = {
+//   // Object Events
+//   "object.spawned": ObjectSpawnedEvent;
+//   "object.despawned": ObjectDespawnedEvent;
+// };

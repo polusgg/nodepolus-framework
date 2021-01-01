@@ -1,6 +1,5 @@
-export { PlayerJoinEvent } from "./playerJoinEvent";
+export { LobbyCountdownStartedEvent } from "./lobbyCountdownStartedEvent";
 
-export { PlayerKickedEvent } from "./playerKickedEvent";
+export { LobbyCountdownStoppedEvent } from "./lobbyCountdownStoppedEvent";
 
-export { PlayerLeaveEvent } from "./playerLeaveEvent";
-
+export { LobbyPrivacyUpdatedEvent } from "./lobbyPrivacyUpdatedEvent";
