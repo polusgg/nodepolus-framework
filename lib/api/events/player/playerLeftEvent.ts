@@ -1,10 +1,12 @@
 import { PlayerInstance } from "../../player";
+import { LobbyInstance } from "../../lobby";
 
 /**
  * Fired when a player has left a lobby.
  */
 export class PlayerLeftEvent {
   constructor(
-    public player: PlayerInstance,
+    public readonly lobby: LobbyInstance,
+    public readonly player: PlayerInstance,
   ) {}
 }

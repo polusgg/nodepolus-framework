@@ -1,6 +1,6 @@
 import { PlayerInstance } from "../../player";
 import { LobbyInstance } from "../../lobby";
-import { CancellableEvent } from "..";
+import { CancellableEvent } from "../types";
 
 /**
  * Fired when the start-game countdown has begun.

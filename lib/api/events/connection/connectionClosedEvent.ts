@@ -7,6 +7,6 @@ import { DisconnectReason } from "../../../types";
 export class ConnectionClosedEvent {
   constructor(
     public readonly connection: Connection,
-    public readonly reason: DisconnectReason,
+    public readonly reason: DisconnectReason = DisconnectReason.serverRequest(),
   ) {}
 }

@@ -1,6 +1,6 @@
 import { PlayerInstance } from "../../player";
+import { CancellableEvent } from "../types";
 import { TextComponent } from "../../text";
-import { CancellableEvent } from "..";
 
 /**
  * Fired when a player has sent a chat message in a lobby.
@@ -8,7 +8,7 @@ import { CancellableEvent } from "..";
 export class PlayerChatMessageEvent extends CancellableEvent {
   constructor(
     public readonly player: PlayerInstance,
-    public readonly message: TextComponent,
+    public message: TextComponent,
   ) {
     super();
   }

@@ -33,4 +33,22 @@ export class LobbyCount {
         break;
     }
   }
+
+  set(level: Level, amount: number): void {
+    switch (level) {
+      case Level.TheSkeld:
+      case Level.AprilSkeld:
+        this.skeld = amount;
+        break;
+      case Level.MiraHq:
+        this.mira = amount;
+        break;
+      case Level.Polus:
+        this.polus = amount;
+        break;
+      case Level.Airship:
+        this.airship = amount;
+        break;
+    }
+  }
 }

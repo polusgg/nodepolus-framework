@@ -1,5 +1,5 @@
 import { GameOverReason } from "../../../types/enums";
-import { CancellableEvent } from "..";
+import { CancellableEvent } from "../types";
 import { Game } from "../../game";
 
 /**
@@ -7,7 +7,7 @@ import { Game } from "../../game";
  */
 export class GameEndedEvent extends CancellableEvent {
   constructor(
-    public game: Game,
+    public readonly game: Game,
     public gameOverReason: GameOverReason,
   ) {
     super();

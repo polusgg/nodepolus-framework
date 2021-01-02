@@ -1,5 +1,5 @@
 import { BaseRootPacket } from "../../../protocol/packets/root";
-import { CancellableEvent } from "..";
+import { CancellableEvent } from "../types";
 
 export class ProxyPacketFromClientEvent extends CancellableEvent {
   constructor(

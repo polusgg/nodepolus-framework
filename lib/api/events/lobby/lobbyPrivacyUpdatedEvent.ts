@@ -1,5 +1,5 @@
 import { LobbyInstance } from "../../lobby";
-import { CancellableEvent } from "..";
+import { CancellableEvent } from "../types";
 
 /**
  * Fired when a lobby's privacy has been changed to either private or public

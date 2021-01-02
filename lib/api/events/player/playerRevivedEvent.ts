@@ -1,5 +1,5 @@
 import { PlayerInstance } from "../../player";
-import { CancellableEvent } from "..";
+import { CancellableEvent } from "../types";
 
 /**
  * Fired when a player has been brought back to life.
@@ -7,7 +7,6 @@ import { CancellableEvent } from "..";
 export class PlayerRevivedEvent extends CancellableEvent {
   constructor(
     public readonly player: PlayerInstance,
-    public readonly kickedBy: PlayerInstance,
   ) {
     super();
   }

@@ -1,5 +1,5 @@
 import { PlayerInstance } from "../../player";
-import { CancellableEvent } from "..";
+import { CancellableEvent } from "../types";
 import { Game } from "../../game";
 
 /**
@@ -7,8 +7,8 @@ import { Game } from "../../game";
  */
 export class MeetingStartedEvent extends CancellableEvent {
   constructor(
-    public game: Game,
-    public player: PlayerInstance,
+    public readonly game: Game,
+    public caller: PlayerInstance,
     public victim?: PlayerInstance,
   ) {
     super();

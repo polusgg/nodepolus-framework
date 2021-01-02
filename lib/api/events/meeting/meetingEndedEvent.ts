@@ -6,9 +6,18 @@ import { Game } from "../../game";
  */
 export class MeetingEndedEvent {
   constructor(
-    public game: Game,
-    public isTie: boolean,
-    public exiled?: PlayerInstance,
-    // TODO: Include final vote states
+    public readonly game: Game,
+    // TODO
+    public readonly votes: [],
   ) {}
+
+  isTie(): boolean {
+    // TODO
+    return false;
+  }
+
+  getExiledPlayer(): PlayerInstance | undefined {
+    // TODO
+    return undefined;
+  }
 }

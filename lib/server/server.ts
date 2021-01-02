@@ -155,7 +155,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
           sender.sendReliable([new HostGameResponsePacket(newLobby.getCode())]);
         } else {
-          sender.disconnect(DisconnectReason.custom("The server refused to create your game"));
+          sender.disconnect(event.getDisconnectReason());
         }
         break;
       }

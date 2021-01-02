@@ -34,6 +34,8 @@ export { PlayerHat } from "./playerHat";
 
 export { PlayerPet } from "./playerPet";
 
+export { PlayerRole } from "./playerRole";
+
 export { PlayerSkin } from "./playerSkin";
 
 export { PlayerState } from "./playerState";

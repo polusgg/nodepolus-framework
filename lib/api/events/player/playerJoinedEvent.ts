@@ -1,15 +1,13 @@
-import { InternalLobby } from "../../../lobby";
 import { PlayerInstance } from "../../player";
-import { CancellableEvent } from "..";
+import { LobbyInstance } from "../../lobby";
 
 /**
  * Fired when a player has joined a lobby.
  */
-export class PlayerJoinedEvent extends CancellableEvent {
+export class PlayerJoinedEvent {
   constructor(
-    public readonly lobby: InternalLobby,
+    public readonly lobby: LobbyInstance,
     public readonly player: PlayerInstance,
-  ) {
-    super();
-  }
+    public readonly isRejoining: boolean = false,
+  ) {}
 }
