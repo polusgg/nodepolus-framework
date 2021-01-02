@@ -8,6 +8,4 @@ export { MeetingStartedEvent } from "./meetingStartedEvent";
 
 export { MeetingVoteAddedEvent } from "./meetingVoteAddedEvent";
 
-export { MeetingVotekickEvent } from "./meetingVotekickEvent";
-
 export { MeetingVoteRemovedEvent } from "./meetingVoteRemovedEvent";

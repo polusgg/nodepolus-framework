@@ -43,3 +43,7 @@ export { PlayerTaskCompletedEvent } from "./playerTaskCompletedEvent";
 export { PlayerTaskRemovedEvent } from "./playerTaskRemovedEvent";
 
 export { PlayerTaskUncompletedEvent } from "./playerTaskUncompletedEvent";
+
+export { PlayerVotekickAddedEvent } from "./playerVotekickAddedEvent";
+
+export { PlayerVotekickRemovedEvent } from "./playerVotekickRemovedEvent";

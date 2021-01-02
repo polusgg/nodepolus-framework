@@ -5,7 +5,7 @@ import { Game } from "../../game";
 /**
  * Fired when a player has cast a vote to kick another player.
  */
-export class MeetingVotekickEvent extends CancellableEvent {
+export class PlayerVotekickAddedEvent extends CancellableEvent {
   constructor(
     public readonly game: Game,
     public player: PlayerInstance,

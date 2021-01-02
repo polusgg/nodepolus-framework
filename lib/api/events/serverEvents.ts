@@ -25,7 +25,6 @@ import {
   MeetingEndedEvent,
   MeetingStartedEvent,
   MeetingVoteAddedEvent,
-  MeetingVotekickEvent,
   MeetingVoteRemovedEvent,
 } from "./meeting";
 import {
@@ -52,6 +51,8 @@ import {
   PlayerTaskCompletedEvent,
   PlayerTaskRemovedEvent,
   PlayerTaskUncompletedEvent,
+  PlayerVotekickAddedEvent,
+  PlayerVotekickRemovedEvent,
 } from "./player";
 import {
   ServerLobbyCreatedEvent,
@@ -97,7 +98,6 @@ export type ServerEvents = {
   "meeting.started": MeetingStartedEvent;
   "meeting.vote.added": MeetingVoteAddedEvent;
   "meeting.vote.removed": MeetingVoteRemovedEvent;
-  "meeting.votekick": MeetingVotekickEvent;
 
   /**
    * Player Events
@@ -125,6 +125,8 @@ export type ServerEvents = {
   "player.task.completed": PlayerTaskCompletedEvent;
   "player.task.removed": PlayerTaskRemovedEvent;
   "player.task.uncompleted": PlayerTaskUncompletedEvent;
+  "player.votekick.added": PlayerVotekickAddedEvent;
+  "player.votekick.removed": PlayerVotekickRemovedEvent;
 
   /**
    * Server Events
