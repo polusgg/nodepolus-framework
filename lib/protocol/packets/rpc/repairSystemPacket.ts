@@ -31,7 +31,7 @@ export class RepairSystemPacket extends BaseRPCPacket {
   }
 
   static deserialize(reader: MessageReader, level?: Level): RepairSystemPacket {
-    if (!level && level !== 0) {
+    if (level === undefined) {
       throw new Error("Attempted to deserialize RepairSystem without a level");
     }
 

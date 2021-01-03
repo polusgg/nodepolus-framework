@@ -3,14 +3,21 @@ import { EntityLobbyBehaviour } from "../../protocol/entities/lobbyBehaviour";
 import { EntityMeetingHud } from "../../protocol/entities/meetingHud";
 import { BaseInnerNetObject } from "../../protocol/entities/types";
 import { EntityGameData } from "../../protocol/entities/gameData";
-import { GameState, AlterGameTag } from "../../types/enums";
+import { GameState, AlterGameTag, Level } from "../../types/enums";
 import { BaseRPCPacket } from "../../protocol/packets/rpc";
+import { GameOptionsData, Immutable } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { LobbySettings } from "./lobbySettings";
 import { PlayerInstance } from "../player";
 import { HostInstance } from "../host";
+import { Server } from "../../server";
+import { Game } from "../game";
 
 export interface LobbyInstance {
+  getServer(): Server;
+
+  getGame(): Game | undefined;
+
   getCreationTime(): number;
 
   getAge(): number;
@@ -64,6 +71,10 @@ export interface LobbyInstance {
   deleteMeetingHud(): void;
 
   getSettings(): LobbySettings;
+
+  getOptions(): Immutable<GameOptionsData>;
+
+  getLevel(): Level;
 
   getGameTags(): Map<AlterGameTag, number>;
 

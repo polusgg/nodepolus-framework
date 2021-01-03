@@ -1,6 +1,4 @@
-import { PlayerRole } from "../../../types/enums";
 import { PlayerInstance } from "../../player";
-import { CancellableEvent } from "../types";
 import { Game } from "../../game";
 
 /**
@@ -8,28 +6,21 @@ import { Game } from "../../game";
  *
  * TODO: Add note about adding a player to more than one role
  */
-export class GameStartedEvent extends CancellableEvent {
+export class GameStartedEvent {
   constructor(
     private readonly game: Game,
-    private readonly starter: PlayerInstance,
-    private roles: Map<PlayerRole, PlayerInstance[]>,
-  ) {
-    super();
-  }
+    private impostors: PlayerInstance[],
+  ) {}
 
   getGame(): Game {
     return this.game;
   }
 
-  getStarter(): PlayerInstance {
-    return this.starter;
+  getImpostors(): PlayerInstance[] {
+    return this.impostors;
   }
 
-  getRoles(): Map<PlayerRole, PlayerInstance[]> {
-    return this.roles;
-  }
-
-  setRoles(roles: Map<PlayerRole, PlayerInstance[]>): void {
-    this.roles = roles;
+  setImpostors(impostors: PlayerInstance[]): void {
+    this.impostors = impostors;
   }
 }

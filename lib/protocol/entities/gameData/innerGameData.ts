@@ -7,6 +7,7 @@ import { Connection } from "../../connection";
 import { BaseInnerNetObject } from "../types";
 import { PlayerData } from "./types";
 import { EntityGameData } from ".";
+import { Tasks } from "../../../static";
 
 export class InnerGameData extends BaseInnerNetObject {
   constructor(
@@ -17,22 +18,24 @@ export class InnerGameData extends BaseInnerNetObject {
     super(InnerNetObjectType.GameData, netId, parent);
   }
 
-  setTasks(playerId: number, tasks: number[], sendTo: Connection[]): void {
-    for (let i = 0; i < this.players.length; i++) {
-      if (this.players[i].id == playerId) {
-        this.players[i].tasks = new Array(tasks.length);
+  setTasks(playerId: number, taskIds: number[], sendTo: Connection[]): void {
+    const tasks = Tasks.fromId(this.parent.lobby.getLevel(), taskIds);
+    const playerIndex = this.players.findIndex(p => p.id == playerId);
 
-        for (let j = 0; j < tasks.length; j++) {
-          this.players[i].tasks[j] = [
-            tasks[j],
-            false,
-          ];
-        }
-        break;
+    if (playerIndex > -1) {
+      const player = this.players[playerIndex];
+
+      player.tasks = new Array(tasks.length);
+
+      for (let j = 0; j < tasks.length; j++) {
+        player.tasks[j] = [
+          tasks[j],
+          false,
+        ];
       }
     }
 
-    this.sendRPCPacketTo(sendTo, new SetTasksPacket(playerId, tasks));
+    this.sendRPCPacketTo(sendTo, new SetTasksPacket(playerId, taskIds));
   }
 
   updateGameData(playerData: PlayerData[], sendTo: Connection[]): void {
@@ -66,7 +69,7 @@ export class InnerGameData extends BaseInnerNetObject {
 
   setData(packet: MessageReader | MessageWriter): void {
     MessageReader.fromRawBytes(packet.getBuffer()).readList(sub => {
-      const player = PlayerData.deserialize(sub);
+      const player = PlayerData.deserialize(sub, this.parent.lobby.getLevel());
 
       this.players[player.id] = player;
     }, false);

@@ -8,8 +8,8 @@ import { CancellableEvent } from "../types";
 export class LobbyCountdownStartedEvent extends CancellableEvent {
   constructor(
     private readonly lobby: LobbyInstance,
-    private readonly starter: PlayerInstance,
     private secondsUntilStart: number,
+    private readonly starter?: PlayerInstance,
   ) {
     super();
   }
@@ -18,7 +18,7 @@ export class LobbyCountdownStartedEvent extends CancellableEvent {
     return this.lobby;
   }
 
-  getStarter(): PlayerInstance {
+  getStarter(): PlayerInstance | undefined {
     return this.starter;
   }
 

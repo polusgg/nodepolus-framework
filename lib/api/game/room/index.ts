@@ -1,6 +1,6 @@
-export { BaseDoorGameRoom } from "./baseDoorGameRoom";
-
 export { BaseGameRoom } from "./baseGameRoom";
+
+export { BaseDoorGameRoom } from "./baseDoorGameRoom";
 
 export { NormalCommunicationsGameRoom } from "./normalCommunicationsGameRoom";
 

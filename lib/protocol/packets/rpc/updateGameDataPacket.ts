@@ -1,6 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { PlayerData } from "../../entities/gameData/types";
 import { RPCPacketType } from "../types/enums";
+import { Level } from "../../../types/enums";
 import { BaseRPCPacket } from ".";
 
 export class UpdateGameDataPacket extends BaseRPCPacket {
@@ -10,8 +11,12 @@ export class UpdateGameDataPacket extends BaseRPCPacket {
     super(RPCPacketType.UpdateGameData);
   }
 
-  static deserialize(reader: MessageReader): UpdateGameDataPacket {
-    return new UpdateGameDataPacket(reader.readAllChildMessages(sub => PlayerData.deserialize(sub, sub.getTag())));
+  static deserialize(reader: MessageReader, level?: Level): UpdateGameDataPacket {
+    if (level === undefined) {
+      throw new Error("Attempted to deserialize RepairSystem without a level");
+    }
+
+    return new UpdateGameDataPacket(reader.readAllChildMessages(sub => PlayerData.deserialize(sub, level, sub.getTag())));
   }
 
   serialize(): MessageWriter {

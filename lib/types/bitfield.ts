@@ -11,7 +11,7 @@ export class Bitfield {
     }
 
     return new Bitfield(
-      [...Array(size)].map((_, i) => !!((value >> i) & 1)),
+      [...new Array(size)].map((_, i) => !!((value >> i) & 1)),
     );
   }
 

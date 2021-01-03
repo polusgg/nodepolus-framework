@@ -26,7 +26,7 @@ export class PlayerPetUpdatedEvent extends CancellableEvent {
     return this.newPet;
   }
 
-  setNetPet(newPet: PlayerPet): void {
+  setNewPet(newPet: PlayerPet): void {
     this.newPet = newPet;
   }
 }

@@ -19,6 +19,7 @@ export abstract class BaseEntityShipStatus extends BaseInnerNetEntity {
       return this.shipStatus;
     }
 
+    // TODO:
     throw new Error("");
   }
 }

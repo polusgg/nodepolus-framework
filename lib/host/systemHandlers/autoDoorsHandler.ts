@@ -40,7 +40,7 @@ export class AutoDoorsHandler {
   }
 
   getDoorsForSystem(systemId: SystemType): number[] {
-    const doors = SystemDoors.forLevel(this.host.lobby.options.levels[0])[systemId];
+    const doors = SystemDoors.forLevel(this.host.lobby.getLevel())[systemId];
 
     if (!doors) {
       throw new Error(`SystemType ${systemId} (${SystemType[systemId]}) does not have any doors`);

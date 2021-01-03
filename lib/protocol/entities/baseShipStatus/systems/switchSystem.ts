@@ -4,7 +4,7 @@ import { Bitfield } from "../../../../types";
 import { BaseSystem } from ".";
 
 export class SwitchSystem extends BaseSystem {
-  public expectedSwitches: Bitfield = new Bitfield(Array(5).fill(0).map(() => !!Math.round(Math.random() * 1)));
+  public expectedSwitches: Bitfield = new Bitfield(new Array(5).fill(0).map(() => !!Math.round(Math.random() * 1)));
   public actualSwitches: Bitfield = new Bitfield([...this.expectedSwitches.bits]);
   public visionModifier = 0xff;
 

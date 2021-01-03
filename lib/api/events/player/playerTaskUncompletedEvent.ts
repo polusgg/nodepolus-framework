@@ -1,6 +1,6 @@
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
-import { Task } from "../../game";
+import { LevelTask } from "../../../types";
 
 /**
  * Fired when a player has had one of their tasks updated to an incomplete state.
@@ -8,7 +8,8 @@ import { Task } from "../../game";
 export class PlayerTaskUncompletedEvent extends CancellableEvent {
   constructor(
     private readonly player: PlayerInstance,
-    private readonly task: Task,
+    private readonly taskIndex: number,
+    private readonly taskInfo: LevelTask,
   ) {
     super();
   }
@@ -17,7 +18,11 @@ export class PlayerTaskUncompletedEvent extends CancellableEvent {
     return this.player;
   }
 
-  getTask(): Task {
-    return this.task;
+  getTaskIndex(): number {
+    return this.taskIndex;
+  }
+
+  getTaskInfo(): LevelTask {
+    return this.taskInfo;
   }
 }

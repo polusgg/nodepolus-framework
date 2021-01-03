@@ -1,3 +1,10 @@
+Conventions:
+  Convert boolean to number: `val ? 1 : 0`
+  Convert number to boolean: `!!val`
+  New array: `new Array(size)`
+
+
+
 timer    value
 3        9          Enter  | HeadingUp    <---
 2        9          Enter  | HeadingUp       | - Office doors opened from outside and counting down to close

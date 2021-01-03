@@ -1,6 +1,6 @@
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
-import { Task } from "../../game";
+import { LevelTask } from "../../../types";
 
 /**
  * Fired when a player has had one or more of their tasks removed.
@@ -8,7 +8,7 @@ import { Task } from "../../game";
 export class PlayerTaskRemovedEvent extends CancellableEvent {
   constructor(
     private readonly player: PlayerInstance,
-    private readonly tasks: Task[],
+    private readonly tasks: LevelTask[],
   ) {
     super();
   }
@@ -17,7 +17,7 @@ export class PlayerTaskRemovedEvent extends CancellableEvent {
     return this.player;
   }
 
-  getTasks(): Task[] {
+  getTasks(): LevelTask[] {
     return this.tasks;
   }
 }

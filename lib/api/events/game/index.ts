@@ -14,6 +14,8 @@ export { GameScannerStoppedEvent } from "./gameScannerStoppedEvent";
 
 export { GameStartedEvent } from "./gameStartedEvent";
 
+export { GameStartingEvent } from "./gameStartingEvent";
+
 export { GameVentEnteredEvent } from "./gameVentEnteredEvent";
 
 export { GameVentExitedEvent } from "./gameVentExitedEvent";

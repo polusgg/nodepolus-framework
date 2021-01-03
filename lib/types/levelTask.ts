@@ -1,9 +1,9 @@
 import { TaskLength, TaskType } from "./enums";
 
-export type LevelTask = {
-  id: number;
-  name: string;
-  length: TaskLength;
-  isVisual: boolean;
-  type: TaskType;
-};
+export type LevelTask = Readonly<{
+  id: Readonly<number>;
+  name: Readonly<string>;
+  length: Readonly<TaskLength>;
+  isVisual: Readonly<boolean>;
+  type: Readonly<TaskType>;
+}>;

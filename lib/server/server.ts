@@ -1,6 +1,7 @@
-import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
-import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
 import { ServerLobbyCreatedEvent, ServerLobbyDestroyedEvent, ServerLobbyJoinEvent, ServerLobbyListEvent } from "../api/events/server";
+import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
+import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
+import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
 import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
 import { DisconnectReasonType, FakeClientId } from "../types/enums";
 import { ConnectionInfo, DisconnectReason } from "../types";
@@ -20,7 +21,6 @@ import {
   JoinGameErrorPacket,
   JoinGameRequestPacket,
 } from "../protocol/packets/root";
-import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
 
 export class Server extends Emittery.Typed<ServerEvents> {
   public readonly startedAt = Date.now();
@@ -158,12 +158,12 @@ export class Server extends Emittery.Typed<ServerEvents> {
         }
 
         const newLobby = new InternalLobby(
+          this,
           this.defaultLobbyAddress,
           this.defaultLobbyPort,
+          (packet as HostGameRequestPacket).options,
           lobbyCode,
         );
-
-        newLobby.options = (packet as HostGameRequestPacket).options;
 
         const event = new ServerLobbyCreatedEvent(sender, newLobby);
 
@@ -206,7 +206,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         for (let i = 0; i < this.lobbies.length; i++) {
           const lobby = this.lobbies[i];
-          const level: number = lobby.options.levels[0];
+          const level: number = lobby.getLevel();
 
           // TODO: Add config option to include private games
           if (!lobby.isPublic()) {

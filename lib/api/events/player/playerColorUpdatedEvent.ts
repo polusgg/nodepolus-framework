@@ -26,7 +26,7 @@ export class PlayerColorUpdatedEvent extends CancellableEvent {
     return this.newColor;
   }
 
-  setNetColor(newColor: PlayerColor): void {
+  setNewColor(newColor: PlayerColor): void {
     this.newColor = newColor;
   }
 }

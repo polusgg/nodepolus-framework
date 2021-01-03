@@ -5,7 +5,7 @@ import { BaseSystem } from ".";
 
 export class DoorsSystem extends BaseSystem {
   public timers: Map<SystemType, number> = new Map<SystemType, number>();
-  public doorStates: boolean[] = Array(SystemDoors.polusCount).fill(true);
+  public doorStates: boolean[] = new Array(SystemDoors.polusCount).fill(true);
 
   constructor() {
     super(SystemType.Doors);

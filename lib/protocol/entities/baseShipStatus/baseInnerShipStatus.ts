@@ -88,7 +88,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
       }
 
       return -1;
-    }).filter(systemType => systemType != -1);
+    }).filter(systemType => systemType > -1);
 
     const writer = new MessageWriter()
       .writePackedUInt32(this.serializeSystemsToDirtyBits(changedSystemTypes))
@@ -100,14 +100,8 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     );
   }
 
-  setData(data: MessageReader | MessageWriter): void {
-    const reader = MessageReader.fromRawBytes(data.getBuffer());
-
-    this.setSystems(
-      this.deserializeDirtyBitsToSystems(reader.readPackedUInt32()),
-      reader.readRemainingBytes(),
-    );
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setData(_packet: MessageReader | MessageWriter): void {}
 
   serializeSpawn(): SpawnInnerNetObject {
     return new SpawnInnerNetObject(
@@ -222,32 +216,12 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     let n = 0;
 
     for (let i = 0; i < this.systemTypes.length; i++) {
-      if (otherSystems.indexOf(this.systemTypes[i]) != -1) {
+      if (otherSystems.indexOf(this.systemTypes[i]) > -1) {
         n |= 1 << this.systemTypes[i];
       }
     }
 
     return n;
-  }
-
-  private deserializeDirtyBitsToSystems(dirtyBits: number): SystemType[] {
-    const systemTypes: SystemType[] = [];
-
-    for (let i = 0; i < Object.keys(SystemType).length / 2; i++) {
-      if ((dirtyBits & (1 << i)) != 0) {
-        systemTypes.push(i);
-      }
-    }
-
-    return systemTypes;
-  }
-
-  private setSystems(systems: SystemType[], data: MessageReader): void {
-    for (let i = 0; i < systems.length; i++) {
-      const system = this.getSystemFromType(systems[i]);
-
-      system.data(data);
-    }
   }
 
   private getSystems(old: BaseInnerShipStatus | undefined, systems: SystemType[]): MessageWriter {

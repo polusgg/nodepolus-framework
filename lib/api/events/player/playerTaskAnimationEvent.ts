@@ -1,15 +1,14 @@
+import { TaskType } from "../../../types/enums";
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
-import { LevelTask } from "../../../types";
 
 /**
  * Fired when a player has completed one of their tasks.
  */
-export class PlayerTaskCompletedEvent extends CancellableEvent {
+export class PlayerTaskAnimationEvent extends CancellableEvent {
   constructor(
     private readonly player: PlayerInstance,
-    private readonly taskIndex: number,
-    private readonly task: LevelTask,
+    private taskType: TaskType,
   ) {
     super();
   }
@@ -18,11 +17,11 @@ export class PlayerTaskCompletedEvent extends CancellableEvent {
     return this.player;
   }
 
-  getTaskIndex(): number {
-    return this.taskIndex;
+  getTaskType(): TaskType {
+    return this.taskType;
   }
 
-  getTask(): LevelTask {
-    return this.task;
+  setTaskType(task: TaskType): void {
+    this.taskType = task;
   }
 }

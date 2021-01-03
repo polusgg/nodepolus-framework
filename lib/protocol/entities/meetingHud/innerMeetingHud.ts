@@ -65,14 +65,8 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     return new DataPacket(this.netId, writer);
   }
 
-  setData(packet: MessageReader | MessageWriter): void {
-    const data = MessageReader.fromRawBytes(packet);
-    const dirtyStates = this.deserializeDirtyBitsToStates(data.readPackedUInt32());
-
-    for (let i = 0; i < dirtyStates.length; i++) {
-      this.playerStates[dirtyStates[i]] = VoteState.deserialize(data);
-    }
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setData(_packet: MessageReader | MessageWriter): void {}
 
   serializeSpawn(): SpawnInnerNetObject {
     const writer = new MessageWriter();
@@ -102,17 +96,5 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     }
 
     return n;
-  }
-
-  private deserializeDirtyBitsToStates(dirtyBits: number): number[] {
-    const voteStates: number[] = [];
-
-    for (let i = 0; i < this.playerStates.length; i++) {
-      if ((dirtyBits & (1 << i)) != 0) {
-        voteStates.push(i);
-      }
-    }
-
-    return voteStates;
   }
 }

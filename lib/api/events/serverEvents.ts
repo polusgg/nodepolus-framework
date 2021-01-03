@@ -11,6 +11,7 @@ import {
   GameScannerStartedEvent,
   GameScannerStoppedEvent,
   GameStartedEvent,
+  GameStartingEvent,
   GameVentEnteredEvent,
   GameVentExitedEvent,
 } from "./game";
@@ -48,6 +49,7 @@ import {
   PlayerRoleUpdatedEvent,
   PlayerSkinUpdatedEvent,
   PlayerTaskAddedEvent,
+  PlayerTaskAnimationEvent,
   PlayerTaskCompletedEvent,
   PlayerTaskRemovedEvent,
   PlayerTaskUncompletedEvent,
@@ -79,6 +81,7 @@ export type ServerEvents = {
   "game.scanner.started": GameScannerStartedEvent;
   "game.scanner.stopped": GameScannerStoppedEvent;
   "game.started": GameStartedEvent;
+  "game.starting": GameStartingEvent;
   "game.vent.entered": GameVentEnteredEvent;
   "game.vent.exited": GameVentExitedEvent;
 
@@ -122,6 +125,7 @@ export type ServerEvents = {
   "player.role.updated": PlayerRoleUpdatedEvent;
   "player.skin.updated": PlayerSkinUpdatedEvent;
   "player.task.added": PlayerTaskAddedEvent;
+  "player.task.animation": PlayerTaskAnimationEvent;
   "player.task.completed": PlayerTaskCompletedEvent;
   "player.task.removed": PlayerTaskRemovedEvent;
   "player.task.uncompleted": PlayerTaskUncompletedEvent;

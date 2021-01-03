@@ -4,7 +4,7 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class AutoDoorsSystem extends BaseSystem {
-  public doors: boolean[] = Array(SystemDoors.skeldCount).fill(true);
+  public doors: boolean[] = new Array(SystemDoors.skeldCount).fill(true);
 
   constructor() {
     super(SystemType.Doors);

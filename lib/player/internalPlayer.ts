@@ -1,26 +1,24 @@
 import { RemovePlayerPacket, JoinGameResponsePacket, GameDataPacket } from "../protocol/packets/root";
 import { PlayerSkin, PlayerPet, PlayerHat, PlayerColor } from "../types/enums";
 import { PlayerData } from "../protocol/entities/gameData/types";
+import { DisconnectReason, LevelTask, Vector2 } from "../types";
 import { DespawnPacket } from "../protocol/packets/gameData";
 import { EntityPlayer } from "../protocol/entities/player";
-import { DisconnectReason, Vector2 } from "../types";
 import { PlayerInstance } from "../api/player";
 import { TextComponent } from "../api/text";
 import { InternalLobby } from "../lobby";
-import { Task } from "../api/game/task";
 
 export class InternalPlayer implements PlayerInstance {
   public readonly id: number;
 
-  private internalTasks: Task[] = [];
-  private internalName: TextComponent;
+  private name: TextComponent;
 
   constructor(
     public lobby: InternalLobby,
     public gameObject: EntityPlayer,
   ) {
     this.id = gameObject.playerControl.playerId;
-    this.internalName = TextComponent.from("");
+    this.name = TextComponent.from("");
   }
 
   getId(): number {
@@ -28,7 +26,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getName(): TextComponent {
-    return this.internalName;
+    return this.name;
   }
 
   getColor(): PlayerColor {
@@ -55,8 +53,42 @@ export class InternalPlayer implements PlayerInstance {
     return this.getGameDataEntry().isDead;
   }
 
-  getTasks(): Task[] {
-    return this.internalTasks;
+  getTasks(): [LevelTask, boolean][] {
+    return this.getGameDataEntry().tasks;
+  }
+
+  setTasks(tasks: [LevelTask, boolean][]): this {
+    this.getGameDataEntry().tasks = tasks;
+
+    return this;
+  }
+
+  addTasks(_tasks: LevelTask[]): this {
+    // TODO: Implement with duplicate checking
+
+    return this;
+  }
+
+  removeTasks(_tasks: LevelTask[]): this {
+    // TODO: Implement
+
+    return this;
+  }
+
+  isTaskAtIndexCompleted(index: number): boolean {
+    return this.getGameDataEntry().isTaskAtIndexCompleted(index);
+  }
+
+  isTaskCompleted(task: LevelTask): boolean {
+    return this.getGameDataEntry().isTaskCompleted(task);
+  }
+
+  completeTaskAtIndex(index: number, isComplete: boolean = true): boolean {
+    return this.getGameDataEntry().completeTaskAtIndex(index, isComplete);
+  }
+
+  completeTask(task: LevelTask, isComplete: boolean = true): boolean {
+    return this.getGameDataEntry().completeTask(task, isComplete);
   }
 
   isScanning(): boolean {
@@ -68,9 +100,9 @@ export class InternalPlayer implements PlayerInstance {
     // this.emit("nameChanged", this.name);
 
     if (name instanceof TextComponent) {
-      this.internalName = name;
+      this.name = name;
     } else {
-      this.internalName = TextComponent.from(name);
+      this.name = TextComponent.from(name);
     }
 
     this.gameObject.playerControl.setName(name.toString(), this.lobby.getConnections());
@@ -110,12 +142,6 @@ export class InternalPlayer implements PlayerInstance {
     return this;
   }
 
-  setTasks(tasks: Task[]): this {
-    this.internalTasks = tasks;
-
-    return this;
-  }
-
   kill(): this {
     const gameData = this.lobby.getGameData();
 
@@ -123,7 +149,7 @@ export class InternalPlayer implements PlayerInstance {
       throw new Error("Attempted to kill player without a GameData instance");
     }
 
-    this.gameObject.playerControl.exiled([]);
+    this.gameObject.playerControl.exile();
 
     gameData.gameData.updateGameData([
       this.getGameDataEntry(),
@@ -227,6 +253,12 @@ export class InternalPlayer implements PlayerInstance {
 
   sendChat(message: string): this {
     this.gameObject.playerControl.sendChat(message, this.lobby.getConnections());
+
+    return this;
+  }
+
+  startMeeting(victim?: PlayerInstance): this {
+    this.lobby.getHostInstance().handleReportDeadBody(this.gameObject.playerControl, victim?.getId());
 
     return this;
   }

@@ -38,6 +38,8 @@ export { PlayerSkinUpdatedEvent } from "./playerSkinUpdatedEvent";
 
 export { PlayerTaskAddedEvent } from "./playerTaskAddedEvent";
 
+export { PlayerTaskAnimationEvent } from "./playerTaskAnimationEvent";
+
 export { PlayerTaskCompletedEvent } from "./playerTaskCompletedEvent";
 
 export { PlayerTaskRemovedEvent } from "./playerTaskRemovedEvent";

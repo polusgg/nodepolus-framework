@@ -11,7 +11,7 @@ export const CHAR_SET = "QWXRTYLPESDFGHUJKZOCVBINMA";
 
 export class LobbyCode {
   static generate(version: LobbyCodeVersion = LobbyCodeVersion.Two): string {
-    return Array(version)
+    return new Array(version)
       .fill(0)
       .map(() => CHAR_SET[Math.floor(Math.random() * CHAR_SET.length)])
       .join("");

@@ -18,7 +18,7 @@ export class SabotageSystemHandler {
   ) {}
 
   sabotageReactor(system: ReactorSystem | LaboratorySystem): void {
-    switch (this.host.lobby.options.levels[0]) {
+    switch (this.host.lobby.getLevel()) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
         system.timer = 30;
@@ -57,7 +57,7 @@ export class SabotageSystemHandler {
   }
 
   sabotageElectrical(system: SwitchSystem): void {
-    system.expectedSwitches = new Bitfield(Array(5).fill(false).map(() => Math.random() < 0.5));
+    system.expectedSwitches = new Bitfield(new Array(5).fill(false).map(() => Math.random() < 0.5));
     system.actualSwitches = new Bitfield([...system.expectedSwitches.bits]);
 
     for (let i = 0; i < system.expectedSwitches.bits.length; i++) {
@@ -75,7 +75,7 @@ export class SabotageSystemHandler {
   sabotageOxygen(system: LifeSuppSystem): void {
     system.completedConsoles.clear();
 
-    const level = this.host.lobby.options.levels[0];
+    const level = this.host.lobby.getLevel();
 
     switch (level) {
       case Level.TheSkeld:

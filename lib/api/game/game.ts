@@ -10,7 +10,7 @@ export class Game {
   public rooms: BaseRoomCollection;
 
   constructor(public lobby: LobbyInstance) {
-    switch (lobby.getSettings().level) {
+    switch (lobby.getLevel()) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
         this.rooms = new SkeldRoomCollection(this);

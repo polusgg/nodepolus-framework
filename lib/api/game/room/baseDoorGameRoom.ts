@@ -28,12 +28,12 @@ export class BaseDoorGameRoom extends BaseGameRoom {
   openDoors(): void {
     const settings = this.game.lobby.getSettings();
 
-    if (settings.level == Level.TheSkeld) {
+    if (settings.getLevel() == Level.TheSkeld) {
       throw new Error("Cannot open doors on The Skeld due to client limitations");
     } else {
       this.internalBackupShipStatus();
 
-      const doors = SystemDoors.forLevel(settings.level)[this.systemType];
+      const doors = SystemDoors.forLevel(settings.getLevel())[this.systemType];
 
       if (!doors) {
         throw new Error(`SystemType ${this.systemType} (${SystemType[this.systemType]}) does not have any doors`);

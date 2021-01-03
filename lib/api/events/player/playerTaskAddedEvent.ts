@@ -1,6 +1,6 @@
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
-import { Task } from "../../game";
+import { LevelTask } from "../../../types";
 
 /**
  * Fired when a player has been assigned one or more new tasks.
@@ -8,7 +8,7 @@ import { Task } from "../../game";
 export class PlayerTaskAddedEvent extends CancellableEvent {
   constructor(
     private readonly player: PlayerInstance,
-    private tasks: Task[],
+    private tasks: LevelTask[],
   ) {
     super();
   }
@@ -17,11 +17,11 @@ export class PlayerTaskAddedEvent extends CancellableEvent {
     return this.player;
   }
 
-  getTasks(): Task[] {
+  getTasks(): LevelTask[] {
     return this.tasks;
   }
 
-  setTasks(tasks: Task[]): void {
+  setTasks(tasks: LevelTask[]): void {
     this.tasks = tasks;
   }
 }

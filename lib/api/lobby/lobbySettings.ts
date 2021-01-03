@@ -1,13 +1,10 @@
 import { KillDistance, Language, Level, TaskBarUpdate } from "../../types/enums";
 import { Connection } from "../../protocol/connection";
+import { GameOptionsData, Mutable } from "../../types";
 import { LobbyInstance } from "./lobbyInstance";
 import { InternalPlayer } from "../../player";
-import { GameOptionsData } from "../../types";
 import { InternalLobby } from "../../lobby";
 import { PlayerInstance } from "../player";
-
-// TODO: Rewrite: don't cast to an internal class from within the API folder
-//       Options should just be a getter on the interface
 
 export class LobbySettings {
   private readonly povCache: Map<number, LobbySettings> = new Map();
@@ -36,183 +33,99 @@ export class LobbySettings {
   private povModifiedAnonymousVoting: boolean | undefined;
   private povModifiedTaskBarUpdates: TaskBarUpdate | undefined;
 
-  get maxPlayers(): number {
-    if (this.povModifiedMaxPlayers === undefined) {
-      return (this.lobby as InternalLobby).options.maxPlayers;
-    }
-
-    return this.povModifiedMaxPlayers;
-  }
-
-  get languages(): Language[] {
-    if (this.povModifiedLanguages === undefined) {
-      return (this.lobby as InternalLobby).options.languages;
-    }
-
-    return this.povModifiedLanguages;
-  }
-
-  get level(): Level {
-    if (this.povModifiedLevel === undefined) {
-      return (this.lobby as InternalLobby).options.levels[0];
-    }
-
-    return this.povModifiedLevel;
-  }
-
-  get speed(): number {
-    if (this.povModifiedSpeed === undefined) {
-      return (this.lobby as InternalLobby).options.playerSpeedModifier;
-    }
-
-    return this.povModifiedSpeed;
-  }
-
-  get crewVision(): number {
-    if (this.povModifiedCrewVision === undefined) {
-      return (this.lobby as InternalLobby).options.crewmateLightModifier;
-    }
-
-    return this.povModifiedCrewVision;
-  }
-
-  get impostorVision(): number {
-    if (this.povModifiedImpostorVision === undefined) {
-      return (this.lobby as InternalLobby).options.impostorLightModifier;
-    }
-
-    return this.povModifiedImpostorVision;
-  }
-
-  get killCooldown(): number {
-    if (this.povModifiedKillCooldown === undefined) {
-      return (this.lobby as InternalLobby).options.killCooldown;
-    }
-
-    return this.povModifiedKillCooldown;
-  }
-
-  get commonTaskCount(): number {
-    if (this.povModifiedCommonTaskCount === undefined) {
-      return (this.lobby as InternalLobby).options.commonTaskCount;
-    }
-
-    return this.povModifiedCommonTaskCount;
-  }
-
-  get longTaskCount(): number {
-    if (this.povModifiedLongTaskCount === undefined) {
-      return (this.lobby as InternalLobby).options.longTaskCount;
-    }
-
-    return this.povModifiedLongTaskCount;
-  }
-
-  get shortTaskCount(): number {
-    if (this.povModifiedShortTaskCount === undefined) {
-      return (this.lobby as InternalLobby).options.shortTaskCount;
-    }
-
-    return this.povModifiedShortTaskCount;
-  }
-
-  get emergencyMeetingCount(): number {
-    if (this.povModifiedEmergencyMeetingCount === undefined) {
-      return (this.lobby as InternalLobby).options.emergencyMeetingCount;
-    }
-
-    return this.povModifiedEmergencyMeetingCount;
-  }
-
-  get impostorCount(): number {
-    if (this.povModifiedImpostorCount === undefined) {
-      return (this.lobby as InternalLobby).options.impostorCount;
-    }
-
-    return this.povModifiedImpostorCount;
-  }
-
-  get killDistance(): KillDistance {
-    if (this.povModifiedKillDistance === undefined) {
-      return (this.lobby as InternalLobby).options.killDistance;
-    }
-
-    return this.povModifiedKillDistance;
-  }
-
-  get discussionTime(): number {
-    if (this.povModifiedDiscussionTime === undefined) {
-      return (this.lobby as InternalLobby).options.discussionTime;
-    }
-
-    return this.povModifiedDiscussionTime;
-  }
-
-  get votingTime(): number {
-    if (this.povModifiedVotingTime === undefined) {
-      return (this.lobby as InternalLobby).options.votingTime;
-    }
-
-    return this.povModifiedVotingTime;
-  }
-
-  get isDefault(): boolean {
-    if (this.povModifiedIsDefault === undefined) {
-      return (this.lobby as InternalLobby).options.isDefault;
-    }
-
-    return this.povModifiedIsDefault;
-  }
-
-  get emergencyCooldown(): number {
-    if (this.povModifiedEmergencyCooldown === undefined) {
-      return (this.lobby as InternalLobby).options.emergencyCooldown;
-    }
-
-    return this.povModifiedEmergencyCooldown;
-  }
-
-  get confirmEjects(): boolean {
-    if (this.povModifiedConfirmEjects === undefined) {
-      return (this.lobby as InternalLobby).options.confirmEjects;
-    }
-
-    return this.povModifiedConfirmEjects;
-  }
-
-  get visualTasks(): boolean {
-    if (this.povModifiedVisualTasks === undefined) {
-      return (this.lobby as InternalLobby).options.visualTasks;
-    }
-
-    return this.povModifiedVisualTasks;
-  }
-
-  get anonymousVoting(): boolean {
-    if (this.povModifiedAnonymousVoting === undefined) {
-      return (this.lobby as InternalLobby).options.anonymousVoting;
-    }
-
-    return this.povModifiedAnonymousVoting;
-  }
-
-  get taskBarUpdates(): TaskBarUpdate {
-    if (this.povModifiedTaskBarUpdates === undefined) {
-      return (this.lobby as InternalLobby).options.taskBarUpdates;
-    }
-
-    return this.povModifiedTaskBarUpdates;
-  }
-
   constructor(
     public lobby: LobbyInstance,
   ) {}
+
+  getMaxPlayers(): number {
+    return this.povModifiedMaxPlayers ?? this.lobby.getOptions().maxPlayers;
+  }
+
+  getLanguages(): Language[] {
+    return this.povModifiedLanguages ?? (this.lobby.getOptions().languages as Mutable<Language[]>);
+  }
+
+  getLevel(): Level {
+    return this.povModifiedLevel ?? this.lobby.getOptions().levels[0];
+  }
+
+  getSpeed(): number {
+    return this.povModifiedSpeed ?? this.lobby.getOptions().playerSpeedModifier;
+  }
+
+  getCrewVision(): number {
+    return this.povModifiedCrewVision ?? this.lobby.getOptions().crewmateLightModifier;
+  }
+
+  getImpostorVision(): number {
+    return this.povModifiedImpostorVision ?? this.lobby.getOptions().impostorLightModifier;
+  }
+
+  getKillCooldown(): number {
+    return this.povModifiedKillCooldown ?? this.lobby.getOptions().killCooldown;
+  }
+
+  getCommonTaskCount(): number {
+    return this.povModifiedCommonTaskCount ?? this.lobby.getOptions().commonTaskCount;
+  }
+
+  getLongTaskCount(): number {
+    return this.povModifiedLongTaskCount ?? this.lobby.getOptions().longTaskCount;
+  }
+
+  getShortTaskCount(): number {
+    return this.povModifiedShortTaskCount ?? this.lobby.getOptions().shortTaskCount;
+  }
+
+  getEmergencyMeetingCount(): number {
+    return this.povModifiedEmergencyMeetingCount ?? this.lobby.getOptions().emergencyMeetingCount;
+  }
+
+  getImpostorCount(): number {
+    return this.povModifiedImpostorCount ?? this.lobby.getOptions().impostorCount;
+  }
+
+  getKillDistance(): KillDistance {
+    return this.povModifiedKillDistance ?? this.lobby.getOptions().killDistance;
+  }
+
+  getDiscussionTime(): number {
+    return this.povModifiedDiscussionTime ?? this.lobby.getOptions().discussionTime;
+  }
+
+  getVotingTime(): number {
+    return this.povModifiedVotingTime ?? this.lobby.getOptions().votingTime;
+  }
+
+  getIsDefault(): boolean {
+    return this.povModifiedIsDefault ?? this.lobby.getOptions().isDefault;
+  }
+
+  getEmergencyCooldown(): number {
+    return this.povModifiedEmergencyCooldown ?? this.lobby.getOptions().emergencyCooldown;
+  }
+
+  getConfirmEjects(): boolean {
+    return this.povModifiedConfirmEjects ?? this.lobby.getOptions().confirmEjects;
+  }
+
+  getVisualTasks(): boolean {
+    return this.povModifiedVisualTasks ?? this.lobby.getOptions().visualTasks;
+  }
+
+  getAnonymousVoting(): boolean {
+    return this.povModifiedAnonymousVoting ?? this.lobby.getOptions().anonymousVoting;
+  }
+
+  getTaskBarUpdates(): TaskBarUpdate {
+    return this.povModifiedTaskBarUpdates ?? this.lobby.getOptions().taskBarUpdates;
+  }
 
   setMaxPlayers(param: number): void {
     if (this.isFromPov) {
       this.povModifiedMaxPlayers = param;
     } else {
-      (this.lobby as InternalLobby).options.maxPlayers = param;
+      (this.lobby as InternalLobby).getMutableOptions().maxPlayers = param;
     }
 
     this.syncSettingsOnLobby();
@@ -222,7 +135,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedLanguages = param;
     } else {
-      (this.lobby as InternalLobby).options.languages = param;
+      (this.lobby as InternalLobby).getMutableOptions().languages = param;
     }
 
     this.syncSettingsOnLobby();
@@ -232,7 +145,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedLevel = param;
     } else {
-      (this.lobby as InternalLobby).options.levels = [param];
+      (this.lobby as InternalLobby).getMutableOptions().levels = [param];
     }
 
     this.syncSettingsOnLobby();
@@ -242,7 +155,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedSpeed = param;
     } else {
-      (this.lobby as InternalLobby).options.playerSpeedModifier = param;
+      (this.lobby as InternalLobby).getMutableOptions().playerSpeedModifier = param;
     }
 
     this.syncSettingsOnLobby();
@@ -252,7 +165,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedCrewVision = param;
     } else {
-      (this.lobby as InternalLobby).options.crewmateLightModifier = param;
+      (this.lobby as InternalLobby).getMutableOptions().crewmateLightModifier = param;
     }
 
     this.syncSettingsOnLobby();
@@ -262,7 +175,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedImpostorVision = param;
     } else {
-      (this.lobby as InternalLobby).options.impostorLightModifier = param;
+      (this.lobby as InternalLobby).getMutableOptions().impostorLightModifier = param;
     }
 
     this.syncSettingsOnLobby();
@@ -272,7 +185,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedKillCooldown = param;
     } else {
-      (this.lobby as InternalLobby).options.killCooldown = param;
+      (this.lobby as InternalLobby).getMutableOptions().killCooldown = param;
     }
 
     this.syncSettingsOnLobby();
@@ -282,7 +195,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedCommonTaskCount = param;
     } else {
-      (this.lobby as InternalLobby).options.commonTaskCount = param;
+      (this.lobby as InternalLobby).getMutableOptions().commonTaskCount = param;
     }
 
     this.syncSettingsOnLobby();
@@ -292,7 +205,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedLongTaskCount = param;
     } else {
-      (this.lobby as InternalLobby).options.longTaskCount = param;
+      (this.lobby as InternalLobby).getMutableOptions().longTaskCount = param;
     }
 
     this.syncSettingsOnLobby();
@@ -302,7 +215,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedShortTaskCount = param;
     } else {
-      (this.lobby as InternalLobby).options.shortTaskCount = param;
+      (this.lobby as InternalLobby).getMutableOptions().shortTaskCount = param;
     }
 
     this.syncSettingsOnLobby();
@@ -312,7 +225,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedEmergencyMeetingCount = param;
     } else {
-      (this.lobby as InternalLobby).options.emergencyMeetingCount = param;
+      (this.lobby as InternalLobby).getMutableOptions().emergencyMeetingCount = param;
     }
 
     this.syncSettingsOnLobby();
@@ -322,7 +235,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedImpostorCount = param;
     } else {
-      (this.lobby as InternalLobby).options.impostorCount = param;
+      (this.lobby as InternalLobby).getMutableOptions().impostorCount = param;
     }
 
     this.syncSettingsOnLobby();
@@ -332,7 +245,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedKillDistance = param;
     } else {
-      (this.lobby as InternalLobby).options.killDistance = param;
+      (this.lobby as InternalLobby).getMutableOptions().killDistance = param;
     }
 
     this.syncSettingsOnLobby();
@@ -342,7 +255,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedDiscussionTime = param;
     } else {
-      (this.lobby as InternalLobby).options.discussionTime = param;
+      (this.lobby as InternalLobby).getMutableOptions().discussionTime = param;
     }
 
     this.syncSettingsOnLobby();
@@ -352,7 +265,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedVotingTime = param;
     } else {
-      (this.lobby as InternalLobby).options.votingTime = param;
+      (this.lobby as InternalLobby).getMutableOptions().votingTime = param;
     }
 
     this.syncSettingsOnLobby();
@@ -362,7 +275,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedIsDefault = param;
     } else {
-      (this.lobby as InternalLobby).options.isDefault = param;
+      (this.lobby as InternalLobby).getMutableOptions().isDefault = param;
     }
 
     this.syncSettingsOnLobby();
@@ -372,7 +285,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedEmergencyCooldown = param;
     } else {
-      (this.lobby as InternalLobby).options.emergencyCooldown = param;
+      (this.lobby as InternalLobby).getMutableOptions().emergencyCooldown = param;
     }
 
     this.syncSettingsOnLobby();
@@ -382,7 +295,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedConfirmEjects = param;
     } else {
-      (this.lobby as InternalLobby).options.confirmEjects = param;
+      (this.lobby as InternalLobby).getMutableOptions().confirmEjects = param;
     }
     this.syncSettingsOnLobby();
   }
@@ -391,7 +304,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedVisualTasks = param;
     } else {
-      (this.lobby as InternalLobby).options.visualTasks = param;
+      (this.lobby as InternalLobby).getMutableOptions().visualTasks = param;
     }
 
     this.syncSettingsOnLobby();
@@ -401,7 +314,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedAnonymousVoting = param;
     } else {
-      (this.lobby as InternalLobby).options.anonymousVoting = param;
+      (this.lobby as InternalLobby).getMutableOptions().anonymousVoting = param;
     }
 
     this.syncSettingsOnLobby();
@@ -411,7 +324,7 @@ export class LobbySettings {
     if (this.isFromPov) {
       this.povModifiedTaskBarUpdates = param;
     } else {
-      (this.lobby as InternalLobby).options.taskBarUpdates = param;
+      (this.lobby as InternalLobby).getMutableOptions().taskBarUpdates = param;
     }
 
     this.syncSettingsOnLobby();
@@ -440,27 +353,27 @@ export class LobbySettings {
     if (this.lobby.getPlayers()[0]) {
       const customOptions = new GameOptionsData(
         4,
-        this.maxPlayers,
-        this.languages,
-        [this.level],
-        this.speed,
-        this.crewVision,
-        this.impostorVision,
-        this.killCooldown,
-        this.commonTaskCount,
-        this.longTaskCount,
-        this.shortTaskCount,
-        this.emergencyMeetingCount,
-        this.impostorCount,
-        this.killDistance,
-        this.discussionTime,
-        this.votingTime,
-        this.isDefault,
-        this.emergencyCooldown,
-        this.confirmEjects,
-        this.visualTasks,
-        this.anonymousVoting,
-        this.taskBarUpdates,
+        this.getMaxPlayers(),
+        this.getLanguages(),
+        [this.getLevel()],
+        this.getSpeed(),
+        this.getCrewVision(),
+        this.getImpostorVision(),
+        this.getKillCooldown(),
+        this.getCommonTaskCount(),
+        this.getLongTaskCount(),
+        this.getShortTaskCount(),
+        this.getEmergencyMeetingCount(),
+        this.getImpostorCount(),
+        this.getKillDistance(),
+        this.getDiscussionTime(),
+        this.getVotingTime(),
+        this.getIsDefault(),
+        this.getEmergencyCooldown(),
+        this.getConfirmEjects(),
+        this.getVisualTasks(),
+        this.getAnonymousVoting(),
+        this.getTaskBarUpdates(),
       );
 
       let sendToConnections: Connection[];
@@ -477,7 +390,6 @@ export class LobbySettings {
         sendToConnections = this.lobby.getConnections();
       }
 
-      // TODO: Don't cast to an internal class from within the API folder
       (this.lobby.getPlayers()[0] as InternalPlayer).gameObject.playerControl.syncSettings(customOptions, sendToConnections);
     } else {
       console.warn("Attempted to sync lobby settings without a player");

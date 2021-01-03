@@ -1,6 +1,6 @@
 import { PlayerColor, PlayerHat, PlayerPet, PlayerSkin } from "../../types/enums";
 import { TextComponent } from "../text";
-import { Task } from "../game";
+import { LevelTask } from "../../types";
 
 export interface PlayerInstance {
   getId(): number;
@@ -19,7 +19,21 @@ export interface PlayerInstance {
 
   isDead(): boolean;
 
-  getTasks(): Task[];
+  getTasks(): [LevelTask, boolean][];
+
+  setTasks(tasks: [LevelTask, boolean][]): this;
+
+  addTasks(tasks: LevelTask[]): this;
+
+  removeTasks(tasks: LevelTask[]): this;
+
+  isTaskAtIndexCompleted(index: number): boolean;
+
+  isTaskCompleted(task: LevelTask): boolean;
+
+  completeTaskAtIndex(index: number, isComplete: boolean): boolean;
+
+  completeTask(task: LevelTask, isComplete: boolean): boolean;
 
   isScanning(): boolean;
 
@@ -40,4 +54,6 @@ export interface PlayerInstance {
   revive(): this;
 
   sendChat(message: string): this;
+
+  startMeeting(victim?: PlayerInstance): this;
 }

@@ -3,6 +3,7 @@ import { BaseInnerShipStatus } from "../../protocol/entities/baseShipStatus";
 import { GameOverReason, PlayerColor, SystemType } from "../../types/enums";
 import { InnerPlayerControl } from "../../protocol/entities/player";
 import { Connection } from "../../protocol/connection";
+import { PlayerInstance } from "../player";
 import {
   AutoDoorsHandler,
   DecontaminationHandler,
@@ -38,13 +39,13 @@ export interface HostInstance {
 
   handleCloseDoorsOfType(sender: BaseInnerShipStatus, systemId: SystemType): void;
 
-  handleSetStartCounter(sequenceId: number, timeRemaining: number): void;
+  handleSetStartCounter(player: PlayerInstance, sequenceId: number, timeRemaining: number): void;
 
   handleDisconnect(connection: Connection): void;
 
   handleUsePlatform(sender: InnerPlayerControl): void;
 
-  startCountdown(count: number): void;
+  startCountdown(count: number, starter?: PlayerInstance): void;
 
   stopCountdown(): void;
 

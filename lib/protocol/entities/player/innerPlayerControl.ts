@@ -1,32 +1,46 @@
-import { ChatNoteType, PlayerColor, PlayerHat, PlayerPet, PlayerSkin } from "../../../types/enums";
+import { ChatNoteType, DeathReason, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, TaskType } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { PlayerInstance } from "../../../api/player";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { GameOptionsData } from "../../../types";
+import { InternalLobby } from "../../../lobby";
+import { PlayerData } from "../gameData/types";
 import { Connection } from "../../connection";
 import { BaseInnerNetObject } from "../types";
+import { EntityGameData } from "../gameData";
 import { EntityPlayer } from ".";
+import {
+  PlayerChatMessageEvent,
+  PlayerChatNoteEvent,
+  PlayerColorUpdatedEvent,
+  PlayerDiedEvent,
+  PlayerHatUpdatedEvent,
+  PlayerMurderedEvent,
+  PlayerNameUpdatedEvent,
+  PlayerPetUpdatedEvent,
+  PlayerSkinUpdatedEvent,
+  PlayerTaskAnimationEvent,
+  PlayerTaskCompletedEvent,
+} from "../../../api/events/player";
 import {
   CompleteTaskPacket,
   ExiledPacket,
   MurderPlayerPacket,
   PlayAnimationPacket,
-  ReportDeadBodyPacket,
   SendChatNotePacket,
   SendChatPacket,
   SetColorPacket,
   SetHatPacket,
-  SetInfectedPacket,
   SetNamePacket,
   SetPetPacket,
   SetScannerPacket,
   SetSkinPacket,
-  SetStartCounterPacket,
-  StartMeetingPacket,
+  SetTasksPacket,
   SyncSettingsPacket,
 } from "../../packets/rpc";
-import { InternalLobby } from "../../../lobby";
+import { TextComponent } from "../../../api/text";
 
 export class InnerPlayerControl extends BaseInnerNetObject {
   public scannerSequenceId = 1;
@@ -40,210 +54,191 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     super(InnerNetObjectType.PlayerControl, netId, parent);
   }
 
-  setInfected(infected: number[], sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.getGameData();
+  async playAnimation(taskType: TaskType, sendTo: Connection[]): Promise<void> {
+    const event = new PlayerTaskAnimationEvent(this.getPlayerInstance(), taskType);
 
-    if (!gameData) {
-      throw new Error("GameData does not exist on the lobby instance");
+    await this.parent.lobby.getServer().emit("player.task.animation", event);
+
+    if (event.isCancelled()) {
+      return;
     }
 
-    for (let i = 0; i < infected.length; i++) {
-      const infectedPlayerId = infected[i];
-      const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == infectedPlayerId);
-
-      if (gameDataPlayerIndex == -1) {
-        throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
-      }
-
-      gameData.gameData.players[gameDataPlayerIndex].isImpostor = true;
-    }
-
-    this.sendRPCPacketTo(sendTo, new SetInfectedPacket(infected));
+    this.sendRPCPacketTo(sendTo, new PlayAnimationPacket(event.getTaskType()));
   }
 
-  playAnimation(taskId: number, sendTo: Connection[]): void {
-    this.sendRPCPacketTo(sendTo, new PlayAnimationPacket(taskId));
-  }
-
-  completeTask(taskIndex: number, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.getGameData();
-
-    if (!gameData) {
-      throw new Error("GameData does not exist on the lobby instance");
-    }
-
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
-
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
-    }
-
-    const taskCount = gameData.gameData.players[gameDataPlayerIndex].tasks.length;
+  async completeTask(taskIndex: number, sendTo: Connection[]): Promise<void> {
+    const playerData = this.getPlayerData();
+    const taskCount = playerData.tasks.length;
 
     if (taskCount < taskIndex) {
       throw new Error(`Player ${this.playerId} has fewer tasks (${taskCount}) than the requested index (${taskIndex})`);
     }
 
-    gameData.gameData.players[gameDataPlayerIndex].tasks[taskIndex][1] = true;
+    const event = new PlayerTaskCompletedEvent(this.getPlayerInstance(), taskIndex, playerData.tasks[taskIndex][0]);
+
+    await this.parent.lobby.getServer().emit("player.task.completed", event);
+
+    if (event.isCancelled()) {
+      const connection = this.getConnection();
+      const tasks = [...playerData.tasks];
+      const deleted = tasks.splice(taskIndex, 1);
+
+      this.sendRPCPacketTo([connection], new SetTasksPacket(this.playerId, tasks.map(task => task[0].id)));
+      tasks.splice(taskIndex, 0, deleted[0]);
+      this.sendRPCPacketTo([connection], new SetTasksPacket(this.playerId, tasks.map(task => task[0].id)));
+
+      for (let i = 0; i < tasks.length; i++) {
+        if (!tasks[1]) {
+          continue;
+        }
+
+        this.sendRPCPacketTo([connection], new CompleteTaskPacket(i));
+      }
+
+      return;
+    }
+
+    playerData.tasks[taskIndex][1] = true;
 
     this.sendRPCPacketTo(sendTo, new CompleteTaskPacket(taskIndex));
   }
 
   syncSettings(options: GameOptionsData, sendTo: Connection[]): void {
-    // TODO: Don't cast to an internal class from within the API folder
     (this.parent.lobby as InternalLobby).setOptions(options);
 
     this.sendRPCPacketTo(sendTo, new SyncSettingsPacket(options));
   }
 
-  exiled(_sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.getGameData();
+  async exile(): Promise<void> {
+    const event = new PlayerDiedEvent(this.getPlayerInstance(), DeathReason.Unknown);
 
-    if (!gameData) {
-      throw new Error("GameData does not exist on the lobby instance");
+    await this.parent.lobby.getServer().emit("player.died", event);
+
+    if (event.isCancelled()) {
+      return;
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
+    this.getPlayerData().isDead = true;
 
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
-    }
-
-    gameData.gameData.players[gameDataPlayerIndex].isDead = true;
-
-    const thisPlayer = this.parent.lobby.findPlayerByPlayerId(this.playerId);
-
-    if (!thisPlayer) {
-      throw new Error("Exiled packet sent to a recipient that has no connection or player instance");
-    }
-
-    const playerConnection = this.parent.lobby.findConnectionByPlayer(thisPlayer);
-
-    if (playerConnection) {
-      this.sendRPCPacketTo([playerConnection], new ExiledPacket());
-    }
+    this.sendRPCPacketTo([this.getConnection()], new ExiledPacket());
   }
 
-  exile(player: InnerPlayerControl, sendTo: Connection[]): void {
-    player.exiled(sendTo);
+  async setName(name: string, sendTo: Connection[]): Promise<void> {
+    const player = this.getPlayerInstance();
+    const event = new PlayerNameUpdatedEvent(player, player.getName(), TextComponent.from(name));
+
+    await this.parent.lobby.getServer().emit("player.name.updated", event);
+
+    if (event.isCancelled()) {
+      sendTo = [this.getConnection()];
+
+      event.setNewName(event.getOldName());
+    }
+
+    this.getPlayerData().name = event.getNewName().toString();
+
+    this.sendRPCPacketTo(sendTo, new SetNamePacket(event.getNewName().toString()));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  checkName(_name: string, _sendTo: Connection[]): void {}
+  async setColor(color: PlayerColor, sendTo: Connection[]): Promise<void> {
+    const player = this.getPlayerInstance();
+    const event = new PlayerColorUpdatedEvent(player, player.getColor(), color);
 
-  setName(name: string, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.getGameData();
+    await this.parent.lobby.getServer().emit("player.color.updated", event);
 
-    if (!gameData) {
-      throw new Error("GameData does not exist on the lobby instance");
+    if (event.isCancelled()) {
+      sendTo = [this.getConnection()];
+
+      event.setNewColor(event.getOldColor());
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
+    this.getPlayerData().color = event.getNewColor();
 
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
-    }
-
-    if (gameDataPlayerIndex != -1) {
-      gameData.gameData.players[gameDataPlayerIndex].name = name;
-    }
-
-    this.sendRPCPacketTo(sendTo, new SetNamePacket(name));
+    this.sendRPCPacketTo(sendTo, new SetColorPacket(event.getNewColor()));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  checkColor(_color: PlayerColor, _sendTo: Connection[]): void {}
+  async setHat(hat: PlayerHat, sendTo: Connection[]): Promise<void> {
+    const player = this.getPlayerInstance();
+    const event = new PlayerHatUpdatedEvent(player, player.getHat(), hat);
 
-  setColor(color: PlayerColor, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.getGameData();
+    await this.parent.lobby.getServer().emit("player.hat.updated", event);
 
-    if (!gameData) {
-      throw new Error("GameData does not exist on the lobby instance");
+    if (event.isCancelled()) {
+      sendTo = [this.getConnection()];
+
+      event.setNewHat(event.getOldHat());
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
+    this.getPlayerData().hat = event.getNewHat();
 
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
-    }
-
-    if (gameDataPlayerIndex != -1) {
-      gameData.gameData.players[gameDataPlayerIndex].color = color;
-    }
-
-    this.sendRPCPacketTo(sendTo, new SetColorPacket(color));
+    this.sendRPCPacketTo(sendTo, new SetHatPacket(event.getNewHat()));
   }
 
-  setHat(hat: PlayerHat, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.getGameData();
+  async setPet(pet: PlayerPet, sendTo: Connection[]): Promise<void> {
+    const player = this.getPlayerInstance();
+    const event = new PlayerPetUpdatedEvent(player, player.getPet(), pet);
 
-    if (!gameData) {
-      throw new Error("GameData does not exist on the lobby instance");
+    await this.parent.lobby.getServer().emit("player.pet.updated", event);
+
+    if (event.isCancelled()) {
+      sendTo = [this.getConnection()];
+
+      event.setNewPet(event.getOldPet());
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
+    this.getPlayerData().pet = event.getNewPet();
 
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
-    }
-
-    this.sendRPCPacketTo(sendTo, new SetHatPacket(hat));
+    this.sendRPCPacketTo(sendTo, new SetPetPacket(event.getNewPet()));
   }
 
-  setSkin(skin: PlayerSkin, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.getGameData();
+  async setSkin(skin: PlayerSkin, sendTo: Connection[]): Promise<void> {
+    const player = this.getPlayerInstance();
+    const event = new PlayerSkinUpdatedEvent(player, player.getSkin(), skin);
 
-    if (!gameData) {
-      throw new Error("GameData does not exist on the lobby instance");
+    await this.parent.lobby.getServer().emit("player.skin.updated", event);
+
+    if (event.isCancelled()) {
+      sendTo = [this.getConnection()];
+
+      event.setNewSkin(event.getOldSkin());
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
+    this.getPlayerData().skin = event.getNewSkin();
 
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
-    }
-
-    if (gameDataPlayerIndex != -1) {
-      gameData.gameData.players[gameDataPlayerIndex].skin = skin;
-    }
-
-    this.sendRPCPacketTo(sendTo, new SetSkinPacket(skin));
+    this.sendRPCPacketTo(sendTo, new SetSkinPacket(event.getNewSkin()));
   }
 
-  reportDeadBody(victimPlayerId: number | undefined, sendTo: Connection[]): void {
-    this.sendRPCPacketTo(sendTo, new ReportDeadBodyPacket(victimPlayerId));
-  }
-
-  murderPlayer(victimPlayerControlNetId: number, sendTo: Connection[]): void {
+  async murderPlayer(victimPlayerControlNetId: number, sendTo: Connection[]): Promise<void> {
     const victim = this.parent.lobby.findPlayerByNetId(victimPlayerControlNetId);
 
     if (!victim) {
-      throw new Error("Could not find victim Player");
+      throw new Error("Victim does not have a PlayerInstance on the lobby instance");
     }
 
-    const gameData = this.parent.lobby.getGameData();
+    const event = new PlayerMurderedEvent(victim, this.getPlayerInstance());
 
-    if (!gameData) {
-      throw new Error("GameData does not exist on the lobby instance");
+    await this.parent.lobby.getServer().emit("player.murdered", event);
+
+    if (event.isCancelled()) {
+      // TODO: Find way to despawn dead body
+      return;
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == victim.getId());
-
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player ${victim.getId()} does not have an instance in GameData`);
-    }
-
-    gameData.gameData.players[gameDataPlayerIndex].isDead = true;
+    this.getPlayerData(victim.getId()).isDead = true;
 
     this.sendRPCPacketTo(sendTo, new MurderPlayerPacket(victimPlayerControlNetId));
   }
 
-  sendChat(message: string, sendTo: Connection[]): void {
-    this.sendRPCPacketTo(sendTo, new SendChatPacket(message));
-  }
+  async sendChat(message: string, sendTo: Connection[]): Promise<void> {
+    const event = new PlayerChatMessageEvent(this.getPlayerInstance(), TextComponent.from(message));
 
-  startMeeting(victimPlayerId: number | undefined, sendTo: Connection[]): void {
-    this.sendRPCPacketTo(sendTo, new StartMeetingPacket(victimPlayerId));
+    await this.parent.lobby.getServer().emit("player.chat.message", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
+    this.sendRPCPacketTo(sendTo, new SendChatPacket(message));
   }
 
   setScanner(isScanning: boolean, sequenceId: number, sendTo: Connection[]): void {
@@ -256,34 +251,16 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRPCPacketTo(sendTo, new SetScannerPacket(isScanning, this.scannerSequenceId));
   }
 
-  sendChatNote(playerId: number, noteType: ChatNoteType, sendTo: Connection[]): void {
-    this.sendRPCPacketTo(sendTo, new SendChatNotePacket(playerId, noteType));
-  }
+  async sendChatNote(playerId: number, chatNoteType: ChatNoteType, sendTo: Connection[]): Promise<void> {
+    const event = new PlayerChatNoteEvent(this.getPlayerInstance(), chatNoteType);
 
-  setPet(pet: PlayerPet, sendTo: Connection[]): void {
-    const gameData = this.parent.lobby.getGameData();
+    await this.parent.lobby.getServer().emit("player.chat.note", event);
 
-    if (!gameData) {
-      throw new Error("GameData does not exist on the lobby instance");
+    if (event.isCancelled()) {
+      return;
     }
 
-    const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == this.playerId);
-
-    if (gameDataPlayerIndex == -1) {
-      throw new Error(`Player ${this.playerId} does not have an instance in GameData`);
-    }
-
-    if (gameDataPlayerIndex != -1) {
-      gameData.gameData.players[gameDataPlayerIndex].pet = pet;
-    }
-
-    this.sendRPCPacketTo(sendTo, new SetPetPacket(pet));
-  }
-
-  setStartCounter(sequenceId: number, timeRemaining: number, sendTo: Connection[]): void {
-    this.parent.lobby.getHostInstance().handleSetStartCounter(sequenceId, timeRemaining);
-
-    this.sendRPCPacketTo(sendTo, new SetStartCounterPacket(sequenceId, timeRemaining));
+    this.sendRPCPacketTo(sendTo, new SendChatNotePacket(playerId, chatNoteType));
   }
 
   getData(): DataPacket {
@@ -310,5 +287,53 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
   clone(): InnerPlayerControl {
     return new InnerPlayerControl(this.netId, this.parent, this.isNew, this.playerId);
+  }
+
+  private getPlayerInstance(): PlayerInstance {
+    const playerInstance = this.parent.lobby.findPlayerByPlayerId(this.playerId);
+
+    if (!playerInstance) {
+      throw new Error(`Player ${this.playerId} has no PlayerInstance on the lobby instance`);
+    }
+
+    return playerInstance;
+  }
+
+  private getConnection(): Connection {
+    const playerInstance = this.getPlayerInstance();
+    const playerConnection = this.parent.lobby.findConnectionByPlayer(playerInstance);
+
+    if (!playerConnection) {
+      throw new Error(`Player ${playerInstance.getId()} has no connection on the lobby instance`);
+    }
+
+    return playerConnection;
+  }
+
+  private getGameData(): EntityGameData {
+    const gameData = this.parent.lobby.getGameData();
+
+    if (!gameData) {
+      throw new Error("GameData does not exist on the lobby instance");
+    }
+
+    return gameData;
+  }
+
+  private getGameDataIndex(playerId: number = this.playerId): number {
+    const gameDataIndex: number = this.getGameData().gameData.players.findIndex(p => p.id == playerId);
+
+    if (gameDataIndex == -1) {
+      throw new Error(`Player ${playerId} does not have a PlayerData instance in GameData`);
+    }
+
+    return gameDataIndex;
+  }
+
+  private getPlayerData(playerId: number = this.playerId): PlayerData {
+    const gameData = this.getGameData();
+    const gameDataPlayerIndex = this.getGameDataIndex(playerId);
+
+    return gameData.gameData.players[gameDataPlayerIndex];
   }
 }

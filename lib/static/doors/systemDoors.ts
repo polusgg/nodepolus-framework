@@ -30,9 +30,9 @@ const AIRSHIP_DOORS: Readonly<SystemDoorList> = {
 
 const SKELD_COUNT: Readonly<number> = Object.values(SKELD_DOORS).flat().length;
 
-const POLUS_COUNT: Readonly<number> = Object.values(SKELD_DOORS).flat().length;
+const POLUS_COUNT: Readonly<number> = Object.values(POLUS_DOORS).flat().length;
 
-const AIRSHIP_COUNT: Readonly<number> = Object.values(SKELD_DOORS).flat().length;
+const AIRSHIP_COUNT: Readonly<number> = Object.values(AIRSHIP_DOORS).flat().length;
 
 export class SystemDoors {
   static get skeld(): Readonly<SystemDoorList> {

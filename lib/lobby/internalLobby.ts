@@ -2,14 +2,15 @@ import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPla
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
+import { DisconnectReason, GameOptionsData, Immutable, Vector2 } from "../types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
-import { DisconnectReason, GameOptionsData, Vector2 } from "../types";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { BaseInnerNetObject } from "../protocol/entities/types";
 import { EntityGameData } from "../protocol/entities/gameData";
+import { LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
 import { LobbyListing } from "../protocol/packets/root/types";
 import { LobbyInstance, LobbySettings } from "../api/lobby";
 import { BaseRPCPacket } from "../protocol/packets/rpc";
@@ -21,6 +22,8 @@ import { HostInstance } from "../api/host";
 import { InternalPlayer } from "../player";
 import { RPCHandler } from "./rpcHandler";
 import { InternalHost } from "../host";
+import { Game } from "../api/game";
+import { Server } from "../server";
 import {
   AlterGameTagPacket,
   BaseRootPacket,
@@ -52,7 +55,6 @@ import {
 
 export class InternalLobby implements LobbyInstance {
   public ignoredNetIds: number[] = [];
-  public options: GameOptionsData = new GameOptionsData();
 
   private readonly createdAt: number = Date.now();
   private readonly hostInstance: HostInstance;
@@ -62,6 +64,7 @@ export class InternalLobby implements LobbyInstance {
   private readonly settings: LobbySettings = new LobbySettings(this);
   private readonly gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
 
+  private game?: Game;
   private players: InternalPlayer[] = [];
   private gameState = GameState.NotStarted;
   private gameData?: EntityGameData;
@@ -70,11 +73,25 @@ export class InternalLobby implements LobbyInstance {
   private meetingHud?: EntityMeetingHud;
 
   constructor(
+    private readonly server: Server,
     private readonly address: string,
     private readonly port: number,
+    private options: GameOptionsData = new GameOptionsData(),
     private code: string = LobbyCode.generate(),
   ) {
     this.hostInstance = new InternalHost(this);
+  }
+
+  getServer(): Server {
+    return this.server;
+  }
+
+  getGame(): Game | undefined {
+    return this.game;
+  }
+
+  setGame(game?: Game): void {
+    this.game = game;
   }
 
   getCreationTime(): number {
@@ -185,6 +202,18 @@ export class InternalLobby implements LobbyInstance {
     return this.settings;
   }
 
+  getOptions(): Immutable<GameOptionsData> {
+    return this.options;
+  }
+
+  getMutableOptions(): GameOptionsData {
+    return this.options;
+  }
+
+  getLevel(): Level {
+    return this.options.levels[0];
+  }
+
   getGameTags(): Map<AlterGameTag, number> {
     return this.gameTags;
   }
@@ -193,8 +222,24 @@ export class InternalLobby implements LobbyInstance {
     return this.gameTags.get(gameTag);
   }
 
-  setGameTag(gameTag: AlterGameTag, value: number): void {
+  async setGameTag(gameTag: AlterGameTag, value: number): Promise<void> {
+    switch (gameTag) {
+      case AlterGameTag.ChangePrivacy: {
+        const event = new LobbyPrivacyUpdatedEvent(this, !!value);
+
+        await this.server.emit("lobby.privacy.updated", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
+
+        value = event.isPublic() ? 1 : 0;
+        break;
+      }
+    }
+
     this.gameTags.set(gameTag, value);
+    this.handleAlterGameTag(gameTag, value);
   }
 
   getGameState(): GameState {
@@ -363,8 +408,7 @@ export class InternalLobby implements LobbyInstance {
       case RootPacketType.AlterGameTag: {
         const data = packet as AlterGameTagPacket;
 
-        this.handleAlterGameTag(data.tag, data.value);
-        this.gameTags.set(data.tag, data.value);
+        this.setGameTag(data.tag, data.value);
         break;
       }
       case RootPacketType.EndGame: {
@@ -501,7 +545,7 @@ export class InternalLobby implements LobbyInstance {
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
     const disconnectingPlayerIndex = this.findPlayerIndexByConnection(connection);
 
-    if (disconnectingConnectionIndex != -1) {
+    if (disconnectingConnectionIndex > -1) {
       this.connections.splice(disconnectingConnectionIndex, 1);
     }
 
@@ -557,26 +601,6 @@ export class InternalLobby implements LobbyInstance {
         .setName(oldName)
         .setColor(oldColor);
     }
-  }
-
-  changeLevel(level: Level): void {
-    if (!this.shipStatus) {
-      // TODO: Remove this call?
-      //          You might want to switch from [NO MAP] to [SKELD]
-      //          or something?
-      throw new Error("Attempted to change current level from no level");
-    }
-
-    this.sendRootGamePacket(new EndGamePacket(this.code, GameOverReason.ImpostorsBySabotage, true));
-
-    this.connections.forEach(con => {
-      con.write(new JoinedGamePacket(this.code, con.id, this.hostInstance.getId(), this.connections.map(c => c.id).filter(id => id != con.id)));
-    });
-
-    (this.hostInstance as InternalHost).readyPlayerList = [];
-    this.options.levels = [level];
-
-    this.sendRootGamePacket(new StartGamePacket(this.code));
   }
 
   clearMessage(): void {

@@ -1,13 +1,11 @@
-import { ChatNoteType, GameState, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SystemType } from "../types/enums";
+import { ChatNoteType, GameState, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SystemType, TaskType } from "../types/enums";
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { LadderSize, LadderDirection } from "../protocol/packets/rpc/climbLadderPacket";
-import { InnerGameData, InnerVoteBanSystem } from "../protocol/entities/gameData";
 import { RepairAmount } from "../protocol/packets/rpc/repairSystem/amounts";
 import { BaseInnerShipStatus } from "../protocol/entities/baseShipStatus";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
+import { InnerVoteBanSystem } from "../protocol/entities/gameData";
 import { InnerMeetingHud } from "../protocol/entities/meetingHud";
-import { VoteState } from "../protocol/entities/meetingHud/types";
-import { PlayerData } from "../protocol/entities/gameData/types";
 import { RPCPacketType } from "../protocol/packets/types/enums";
 import { Connection } from "../protocol/connection";
 import { GameOptionsData, Vector2 } from "../types";
@@ -29,20 +27,13 @@ import {
   ReportDeadBodyPacket,
   SendChatNotePacket,
   SendChatPacket,
-  SetColorPacket,
   SetHatPacket,
-  SetInfectedPacket,
-  SetNamePacket,
   SetPetPacket,
   SetScannerPacket,
   SetSkinPacket,
   SetStartCounterPacket,
-  SetTasksPacket,
   SnapToPacket,
-  StartMeetingPacket,
   SyncSettingsPacket,
-  UpdateGameDataPacket,
-  VotingCompletePacket,
 } from "../protocol/packets/rpc";
 
 export class RPCHandler {
@@ -66,7 +57,7 @@ export class RPCHandler {
           throw new Error(`Received PlayAnimation packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handlePlayAnimation(sender as InnerPlayerControl, packet.taskId, sendTo);
+        this.handlePlayAnimation(sender as InnerPlayerControl, packet.taskType, sendTo);
         break;
       }
       case RPCPacketType.CompleteTask: {
@@ -90,21 +81,11 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetInfected: {
-        const packet: SetInfectedPacket = rawPacket as SetInfectedPacket;
-
-        if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received SetInfected packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
-        }
-
-        this.handleSetInfected(sender as InnerPlayerControl, packet.impostorPlayerIds, sendTo);
+        // TODO: Log warning about receiving a SetInfected packet from a connection
         break;
       }
       case RPCPacketType.Exiled: {
-        if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received Exiled packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
-        }
-
-        this.handleExiled(sender as InnerPlayerControl, sendTo);
+        // TODO: Log warning about receiving an Exiled packet from a connection
         break;
       }
       case RPCPacketType.CheckName: {
@@ -114,19 +95,13 @@ export class RPCHandler {
           throw new Error(`Received CheckName packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleCheckName(sender as InnerPlayerControl, packet.name, sendTo);
+        this.handleCheckName(sender as InnerPlayerControl, packet.name);
 
         // this.lobby.emit("player", this.lobby.findPlayerByConnection(this.lobby.findConnection(sender.parent.owner)!)!);
         break;
       }
       case RPCPacketType.SetName: {
-        const packet: SetNamePacket = rawPacket as SetNamePacket;
-
-        if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received SetName packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
-        }
-
-        this.handleSetName(sender as InnerPlayerControl, packet.name, sendTo);
+        // TODO: Log warning about receiving a SetName packet from a connection
         break;
       }
       case RPCPacketType.CheckColor: {
@@ -136,17 +111,11 @@ export class RPCHandler {
           throw new Error(`Received CheckColor packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleCheckColor(sender as InnerPlayerControl, packet.color, sendTo);
+        this.handleCheckColor(sender as InnerPlayerControl, packet.color);
         break;
       }
       case RPCPacketType.SetColor: {
-        const packet: SetColorPacket = rawPacket as SetColorPacket;
-
-        if (!(sender instanceof InnerPlayerControl)) {
-          throw new Error(`Received SetColor packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
-        }
-
-        this.handleSetColor(sender as InnerPlayerControl, packet.color, sendTo);
+        // TODO: Log warning about receiving a SetColor packet from a connection
         break;
       }
       case RPCPacketType.SetHat: {
@@ -176,7 +145,7 @@ export class RPCHandler {
           throw new Error(`Received ReportDeadBody packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleReportDeadBody(sender as InnerPlayerControl, packet.victimPlayerId, sendTo);
+        this.handleReportDeadBody(sender as InnerPlayerControl, packet.victimPlayerId);
         break;
       }
       case RPCPacketType.MurderPlayer: {
@@ -200,13 +169,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.StartMeeting: {
-        const packet: StartMeetingPacket = rawPacket as StartMeetingPacket;
-
-        if (sender.type != InnerNetObjectType.PlayerControl) {
-          throw new Error(`Received StartMeeting packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
-        }
-
-        this.handleStartMeeting(sender as InnerPlayerControl, packet.victimPlayerId, sendTo);
+        // TODO: Log warning about receiving a StartMeeting packet from a connection
         break;
       }
       case RPCPacketType.SetScanner: {
@@ -246,7 +209,7 @@ export class RPCHandler {
           throw new Error(`Received SetStartCounter packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSetStartCounter(sender as InnerPlayerControl, packet.sequenceId, packet.timeRemaining, sendTo);
+        this.handleSetStartCounter(sender as InnerPlayerControl, packet.sequenceId, packet.timeRemaining);
         break;
       }
       case RPCPacketType.EnterVent: {
@@ -280,21 +243,11 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.Close: {
-        if (sender.type != InnerNetObjectType.MeetingHud) {
-          throw new Error(`Received Close packet from invalid InnerNetObject: expected MeetingHud but got ${type as number} (${typeString})`);
-        }
-
-        this.handleClose(sender as InnerMeetingHud, sendTo);
+        // TODO: Log warning about receiving a Close packet from a connection
         break;
       }
       case RPCPacketType.VotingComplete: {
-        const packet: VotingCompletePacket = rawPacket as VotingCompletePacket;
-
-        if (sender.type != InnerNetObjectType.MeetingHud) {
-          throw new Error(`Received VotingComplete packet from invalid InnerNetObject: expected MeetingHud but got ${type as number} (${typeString})`);
-        }
-
-        this.handleVotingComplete(sender as InnerMeetingHud, packet.states, packet.didVotePlayerOff, packet.exiledPlayerId, packet.isTie, sendTo);
+        // TODO: Log warning about receiving a VotingComplete packet from a connection
         break;
       }
       case RPCPacketType.CastVote: {
@@ -308,11 +261,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.ClearVote: {
-        if (sender.type != InnerNetObjectType.MeetingHud) {
-          throw new Error(`Received ClearVote packet from invalid InnerNetObject: expected MeetingHud but got ${type as number} (${typeString})`);
-        }
-
-        this.handleClearVote(sender as InnerMeetingHud, sendTo);
+        // TODO: Log warning about receiving a ClearVote packet from a connection
         break;
       }
       case RPCPacketType.AddVote: {
@@ -346,23 +295,11 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetTasks: {
-        const packet: SetTasksPacket = rawPacket as SetTasksPacket;
-
-        if (sender.type != InnerNetObjectType.GameData) {
-          throw new Error(`Received SetTasks packet from invalid InnerNetObject: expected GameData but got ${type as number} (${typeString})`);
-        }
-
-        this.handleSetTasks(sender as InnerGameData, packet.playerId, packet.tasks, sendTo);
+        // TODO: Log warning about receiving a SetTasks packet from a connection
         break;
       }
       case RPCPacketType.UpdateGameData: {
-        const packet: UpdateGameDataPacket = rawPacket as UpdateGameDataPacket;
-
-        if (sender.type != InnerNetObjectType.GameData) {
-          throw new Error(`Received UpdateGameData packet from invalid InnerNetObject: expected GameData but got ${type as number} (${typeString})`);
-        }
-
-        this.handleUpdateGameData(sender as InnerGameData, packet.players, sendTo);
+        // TODO: Log warning about receiving an UpdateGameData packet from a connection
         break;
       }
       case RPCPacketType.ClimbLadder: {
@@ -390,8 +327,8 @@ export class RPCHandler {
     }
   }
 
-  handlePlayAnimation(sender: InnerPlayerControl, taskId: number, sendTo: Connection[]): void {
-    sender.playAnimation(taskId, sendTo);
+  handlePlayAnimation(sender: InnerPlayerControl, taskType: TaskType, sendTo: Connection[]): void {
+    sender.playAnimation(taskType, sendTo);
   }
 
   handleCompleteTask(sender: InnerPlayerControl, taskIndex: number, sendTo: Connection[]): void {
@@ -406,42 +343,12 @@ export class RPCHandler {
     sender.syncSettings(options, sendTo);
   }
 
-  handleSetInfected(sender: InnerPlayerControl, impostorPlayerIds: number[], sendTo: Connection[]): void {
-    sender.setInfected(impostorPlayerIds, sendTo);
-  }
-
-  handleExiled(sender: InnerPlayerControl, sendTo: Connection[]): void {
-    sender.exiled(sendTo);
-  }
-
-  handleCheckName(sender: InnerPlayerControl, name: string, sendTo: Connection[]): void {
+  handleCheckName(sender: InnerPlayerControl, name: string): void {
     this.lobby.getHostInstance().handleCheckName(sender, name);
-
-    sender.checkName(name, sendTo);
   }
 
-  handleSetName(sender: InnerPlayerControl, name: string, sendTo: Connection[]): void {
-    // this.lobby.emit("nameChanged", {
-    //   clientId: sender.parent.owner,
-    //   newName: name,
-    // });
-
-    sender.setName(name, sendTo);
-  }
-
-  handleCheckColor(sender: InnerPlayerControl, color: PlayerColor, sendTo: Connection[]): void {
+  handleCheckColor(sender: InnerPlayerControl, color: PlayerColor): void {
     this.lobby.getHostInstance().handleCheckColor(sender, color);
-
-    sender.checkColor(color, sendTo);
-  }
-
-  handleSetColor(sender: InnerPlayerControl, color: PlayerColor, sendTo: Connection[]): void {
-    // this.lobby.emit("colorChanged", {
-    //   clientId: sender.parent.owner,
-    //   newColor: color,
-    // });
-
-    sender.setColor(color, sendTo);
   }
 
   handleSetHat(sender: InnerPlayerControl, hat: PlayerHat, sendTo: Connection[]): void {
@@ -462,10 +369,8 @@ export class RPCHandler {
     sender.setSkin(skin, sendTo);
   }
 
-  handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId: number | undefined, sendTo: Connection[]): void {
+  handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId: number | undefined): void {
     this.lobby.getHostInstance().handleReportDeadBody(sender, victimPlayerId);
-
-    sender.reportDeadBody(victimPlayerId, sendTo);
   }
 
   handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number, sendTo: Connection[]): void {
@@ -482,10 +387,6 @@ export class RPCHandler {
     // if (!event.isCancelled()) {
     sender.sendChat(message, sendTo);
     // }
-  }
-
-  handleStartMeeting(sender: InnerPlayerControl, victimPlayerId: number | undefined, sendTo: Connection[]): void {
-    sender.startMeeting(victimPlayerId, sendTo);
   }
 
   handleSetScanner(sender: InnerPlayerControl, isScanning: boolean, sequenceId: number, sendTo: Connection[]): void {
@@ -505,8 +406,14 @@ export class RPCHandler {
     sender.setPet(pet, sendTo);
   }
 
-  handleSetStartCounter(sender: InnerPlayerControl, sequenceId: number, timeRemaining: number, sendTo: Connection[]): void {
-    sender.setStartCounter(sequenceId, timeRemaining, sendTo);
+  handleSetStartCounter(sender: InnerPlayerControl, sequenceId: number, timeRemaining: number): void {
+    const player = sender.parent.lobby.findPlayerByClientId(sender.parent.owner);
+
+    if (!player) {
+      throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    this.lobby.getHostInstance().handleSetStartCounter(player, sequenceId, timeRemaining);
   }
 
   handleEnterVent(sender: InnerPlayerPhysics, ventId: number, sendTo: Connection[]): void {
@@ -521,22 +428,8 @@ export class RPCHandler {
     sender.snapTo(position, sendTo);
   }
 
-  handleClose(sender: InnerMeetingHud, sendTo: Connection[]): void {
-    sender.close(sendTo);
-
-    this.lobby.deleteMeetingHud();
-  }
-
-  handleVotingComplete(sender: InnerMeetingHud, voteStates: VoteState[], didVotePlayerOff: boolean, exiledPlayerId: number, isTie: boolean, sendTo: Connection[]): void {
-    sender.votingComplete(voteStates, didVotePlayerOff, exiledPlayerId, isTie, sendTo);
-  }
-
   handleCastVote(sender: InnerMeetingHud, votingPlayerId: number, suspectPlayerId: number): void {
     sender.castVote(votingPlayerId, suspectPlayerId);
-  }
-
-  handleClearVote(sender: InnerMeetingHud, sendTo: Connection[]): void {
-    sender.clearVote(sendTo);
   }
 
   handleAddVote(sender: InnerVoteBanSystem, votingClientId: number, targetClientId: number, sendTo: Connection[]): void {
@@ -561,13 +454,5 @@ export class RPCHandler {
 
   handleUsePlatform(sender: InnerPlayerControl): void {
     this.lobby.getHostInstance().handleUsePlatform(sender);
-  }
-
-  handleSetTasks(sender: InnerGameData, playerId: number, tasks: number[], sendTo: Connection[]): void {
-    sender.setTasks(playerId, tasks, sendTo);
-  }
-
-  handleUpdateGameData(sender: InnerGameData, players: PlayerData[], sendTo: Connection[]): void {
-    sender.updateGameData(players, sendTo);
   }
 }

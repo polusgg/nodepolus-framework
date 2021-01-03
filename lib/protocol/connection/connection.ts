@@ -45,7 +45,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     super();
 
     this.on("message", buf => {
-      const parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound == PacketDestination.Server, this.lobby?.options.levels[0]);
+      const parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound == PacketDestination.Server, this.lobby?.getLevel());
 
       if (parsed.isReliable()) {
         this.acknowledgePacket(parsed.nonce!);
@@ -293,7 +293,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
   private getUnacknowledgedPacketArray(): boolean[] {
     let index = this.nonceIndex;
-    const packets = Array(8).fill(true);
+    const packets = new Array(8).fill(true);
 
     for (let i = 7; i >= 0; i--) {
       if (index < 1) {
@@ -334,6 +334,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
   private handleHello(helloPacket: HelloPacket): void {
     if (this.initialized) {
+      // TODO: Change to debug log
       throw new Error(`Connection ${this.id} sent more than one Hello packet`);
     }
 

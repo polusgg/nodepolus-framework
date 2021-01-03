@@ -1,3 +1,4 @@
+import { Immutable, VoteResult } from "../../../types";
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
 import { Game } from "../../game";
@@ -8,8 +9,7 @@ import { Game } from "../../game";
 export class MeetingClosedEvent extends CancellableEvent {
   constructor(
     private readonly game: Game,
-    // TODO
-    private readonly votes: [],
+    private readonly votes: Immutable<VoteResult>[],
     private readonly tie: boolean,
     private readonly exiledPlayer?: PlayerInstance,
   ) {
@@ -20,7 +20,7 @@ export class MeetingClosedEvent extends CancellableEvent {
     return this.game;
   }
 
-  getVotes(): [] {
+  getVotes(): Immutable<VoteResult>[] {
     return this.votes;
   }
 

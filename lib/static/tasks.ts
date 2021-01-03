@@ -119,6 +119,36 @@ export class Tasks {
     return TASKS_AIRSHIP;
   }
 
+  static skeldFromId(ids: number[]): LevelTask[] {
+    return this.skeld.filter(t => ids.includes(t.id));
+  }
+
+  static miraHqFromId(ids: number[]): LevelTask[] {
+    return this.miraHq.filter(t => ids.includes(t.id));
+  }
+
+  static polusFromId(ids: number[]): LevelTask[] {
+    return this.polus.filter(t => ids.includes(t.id));
+  }
+
+  static airshipFromId(ids: number[]): LevelTask[] {
+    return this.airship.filter(t => ids.includes(t.id));
+  }
+
+  static fromId(level: Level, ids: number[]): LevelTask[] {
+    switch (level) {
+      case Level.TheSkeld:
+      case Level.AprilSkeld:
+        return this.skeldFromId(ids);
+      case Level.MiraHq:
+        return this.miraHqFromId(ids);
+      case Level.Polus:
+        return this.polusFromId(ids);
+      case Level.Airship:
+        return this.airshipFromId(ids);
+    }
+  }
+
   static forLevel(level: Level): readonly LevelTask[] {
     switch (level) {
       case Level.TheSkeld:

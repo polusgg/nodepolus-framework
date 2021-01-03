@@ -1,9 +1,12 @@
+import { SetInfectedPacket, SetStartCounterPacket, StartMeetingPacket } from "../protocol/packets/rpc";
 import { BaseInnerShipStatus, InternalSystemType } from "../protocol/entities/baseShipStatus";
+import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent } from "../api/events/lobby";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
 import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
 import { EntityPlayer, InnerPlayerControl } from "../protocol/entities/player";
 import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
 import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
+import { DisconnectReason, LevelTask, Vector2, VoteResult } from "../types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityMiraShipStatus } from "../protocol/entities/miraShipStatus";
 import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
@@ -11,12 +14,13 @@ import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
 import { VoteState } from "../protocol/entities/meetingHud/types";
 import { PlayerData } from "../protocol/entities/gameData/types";
-import { DisconnectReason, LevelTask, Vector2 } from "../types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { Connection } from "../protocol/connection";
+import { PlayerInstance } from "../api/player";
 import { HostInstance } from "../api/host";
 import { InternalPlayer } from "../player";
 import { InternalLobby } from "../lobby";
+import { Game } from "../api/game";
 import { Tasks } from "../static";
 import {
   NormalCommunicationsAmount,
@@ -47,6 +51,15 @@ import {
   SwitchSystem,
 } from "../protocol/entities/baseShipStatus/systems";
 import {
+  MeetingClosedEvent,
+  MeetingConcludedEvent,
+  MeetingEndedEvent,
+} from "../api/events/meeting";
+import {
+  GameEndedEvent,
+  GameStartedEvent, GameStartingEvent,
+} from "../api/events/game";
+import {
   AutoDoorsHandler,
   DecontaminationHandler,
   DoorsHandler,
@@ -73,6 +86,7 @@ export class InternalHost implements HostInstance {
 
   private netIdIndex = 1;
   private counterSequenceId = 0;
+  private secondsUntilStart = -1;
   private countdownInterval: NodeJS.Timeout | undefined;
   private meetingHudTimeout: NodeJS.Timeout | undefined;
   private systemsHandler?: SystemsHandler;
@@ -112,7 +126,7 @@ export class InternalHost implements HostInstance {
         this.lobby.despawn(lobbyBehaviour.lobbyBehaviour);
       }
 
-      switch (this.lobby.options.levels[0]) {
+      switch (this.lobby.getLevel()) {
         case Level.TheSkeld:
           this.lobby.setShipStatus(new EntitySkeldShipStatus(this.lobby, this.getNextNetId()));
           break;
@@ -133,7 +147,7 @@ export class InternalHost implements HostInstance {
       this.systemsHandler = new SystemsHandler(this);
       this.sabotageHandler = new SabotageSystemHandler(this);
 
-      switch (this.lobby.options.levels[0]) {
+      switch (this.lobby.getLevel()) {
         case Level.TheSkeld:
           this.decontaminationHandlers = [];
           this.doorHandler = new AutoDoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
@@ -165,8 +179,7 @@ export class InternalHost implements HostInstance {
       }
 
       this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getShipStatus()!.serializeSpawn()], this.lobby.getCode()));
-
-      this.setInfected(this.lobby.options.impostorCount);
+      this.setInfected(this.lobby.getOptions().impostorCount);
 
       // TODO: Uncomment when removing the for loop below
       // this.setTasks();
@@ -243,7 +256,7 @@ export class InternalHost implements HostInstance {
 
     await this.lobby.sendRootGamePacket(new GameDataPacket([player.gameObject.serializeSpawn()], this.lobby.getCode()));
 
-    player.gameObject.playerControl.syncSettings(this.lobby.options, [sender]);
+    player.gameObject.playerControl.syncSettings(this.lobby.getMutableOptions(), [sender]);
 
     this.confirmPlayerData(player);
 
@@ -269,8 +282,7 @@ export class InternalHost implements HostInstance {
     if (player) {
       this.confirmPlayerData(player);
     } else {
-      // TODO:
-      throw new Error(`Failed to confirm playerData for sender: ${sender.parent.owner}.`);
+      throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
     }
 
     while (this.isNameTaken(checkName)) {
@@ -299,7 +311,7 @@ export class InternalHost implements HostInstance {
     this.confirmPlayerData(new InternalPlayer(this.lobby, sender.parent));
 
     if (this.lobby.getPlayers().length <= 12) {
-      while (takenColors.indexOf(setColor) != -1) {
+      while (takenColors.indexOf(setColor) > -1) {
         for (let i = 0; i < 12; i++) {
           if (takenColors.indexOf(i) == -1) {
             setColor = i;
@@ -326,7 +338,7 @@ export class InternalHost implements HostInstance {
       throw new Error("Received CompleteTask from a connection without an InnerPlayerControl instance");
     }
 
-    gameData.gameData.players[playerIndex].completeTask(taskIndex);
+    gameData.gameData.players[playerIndex].completeTaskAtIndex(taskIndex);
 
     const crewmates = gameData.gameData.players.filter(playerData => !playerData.isImpostor);
 
@@ -354,13 +366,13 @@ export class InternalHost implements HostInstance {
       throw new Error("Received ReportDeadBody without a GameData instance");
     }
 
-    sender.startMeeting(victimPlayerId, this.lobby.getConnections());
+    sender.sendRPCPacketTo(this.lobby.getConnections(), new StartMeetingPacket(victimPlayerId));
 
     const meetingHud = new EntityMeetingHud(this.lobby, this.getNextNetId());
 
     this.lobby.setMeetingHud(meetingHud);
 
-    meetingHud.meetingHud.playerStates = Array(gameData.gameData.players.length);
+    meetingHud.meetingHud.playerStates = new Array(gameData.gameData.players.length);
 
     for (let i = 0; i < gameData.gameData.players.length; i++) {
       const player = gameData.gameData.players[i];
@@ -377,7 +389,7 @@ export class InternalHost implements HostInstance {
       meetingHud.serializeSpawn(),
     ], this.lobby.getCode()));
 
-    this.meetingHudTimeout = setTimeout(this.endMeeting, (this.lobby.options.votingTime + this.lobby.options.discussionTime) * 1000);
+    this.meetingHudTimeout = setTimeout(this.endMeeting, (this.lobby.getOptions().votingTime + this.lobby.getOptions().discussionTime) * 1000);
   }
 
   handleCastVote(votingPlayerId: number, suspectPlayerId: number): void {
@@ -411,7 +423,7 @@ export class InternalHost implements HostInstance {
 
     const system = shipStatus.getShipStatus().getSystemFromType(systemId);
     const player = this.lobby.getPlayers().find(thePlayer => thePlayer.gameObject.playerControl.netId == playerControlNetId);
-    const level = this.lobby.options.levels[0];
+    const level = this.lobby.getLevel();
 
     if (!player) {
       throw new Error(`Received RepairSystem from a non-player InnerNetObject: ${playerControlNetId}`);
@@ -473,8 +485,7 @@ export class InternalHost implements HostInstance {
     this.doorHandler.setSystemTimeout(systemId, 30);
   }
 
-  handleSetStartCounter(sequenceId: number, timeRemaining: number): void {
-    // TODO: This breaks the logic of stopping the counter when someone joins or leaves
+  handleSetStartCounter(player: PlayerInstance, sequenceId: number, timeRemaining: number): void {
     if (timeRemaining == -1) {
       return;
     }
@@ -486,7 +497,7 @@ export class InternalHost implements HostInstance {
     if (timeRemaining == 5 && this.counterSequenceId != sequenceId) {
       this.lobby.removeActingHosts(true);
       // TODO: Config option
-      this.startCountdown(5);
+      this.startCountdown(5, player);
     }
   }
 
@@ -554,12 +565,24 @@ export class InternalHost implements HostInstance {
     this.lobby.sendRootGamePacket(new GameDataPacket([data], this.lobby.getCode()));
   }
 
-  startCountdown(count: number): void {
-    let currentCount = count;
-    const countdownFunction = (): void => {
-      const time = currentCount--;
+  async startCountdown(count: number, starter?: PlayerInstance): Promise<void> {
+    const event = new LobbyCountdownStartedEvent(this.lobby, count, starter);
 
-      this.lobby.getPlayers()[0].gameObject.playerControl.setStartCounter(this.counterSequenceId += 5, time, this.lobby.getConnections());
+    await this.lobby.getServer().emit("lobby.countdown.started", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
+    this.secondsUntilStart = event.getSecondsUntilStart();
+
+    const countdownFunction = (): void => {
+      const time = this.secondsUntilStart--;
+
+      this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
+        this.lobby.getConnections(),
+        new SetStartCounterPacket(this.counterSequenceId += 5, time),
+      );
 
       if (time <= 0) {
         if (this.countdownInterval) {
@@ -575,9 +598,22 @@ export class InternalHost implements HostInstance {
     this.countdownInterval = setInterval(countdownFunction, 1000);
   }
 
-  stopCountdown(): void {
+  async stopCountdown(): Promise<void> {
+    const event = new LobbyCountdownStoppedEvent(this.lobby, this.secondsUntilStart);
+
+    this.secondsUntilStart = -1;
+
+    await this.lobby.getServer().emit("lobby.countdown.stopped", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
     if (this.lobby.getPlayers().length > 0) {
-      this.lobby.getPlayers()[0].gameObject.playerControl.setStartCounter(this.counterSequenceId += 5, -1, this.lobby.getConnections());
+      this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
+        this.lobby.getConnections(),
+        new SetStartCounterPacket(this.counterSequenceId += 5, -1),
+      );
     }
 
     if (this.countdownInterval) {
@@ -585,23 +621,56 @@ export class InternalHost implements HostInstance {
     }
   }
 
-  startGame(): void {
+  async startGame(): Promise<void> {
+    this.lobby.setGame(new Game(this.lobby));
+
+    const event = new GameStartingEvent(this.lobby.getGame()!);
+
+    await this.lobby.getServer().emit("game.starting", event);
+
+    if (event.isCancelled()) {
+      this.lobby.setGame();
+
+      return;
+    }
+
     this.lobby.sendRootGamePacket(new StartGamePacket(this.lobby.getCode()));
   }
 
-  setInfected(infectedCount: number): void {
-    const shuffledPlayers = shuffleArrayClone(this.lobby.getPlayers());
-    const impostors = new Array(infectedCount);
+  async setInfected(infectedCount: number): Promise<void> {
+    const gameData = this.lobby.getGameData();
 
-    for (let i = 0; i < infectedCount; i++) {
-      impostors[i] = shuffledPlayers[i].id;
+    if (!gameData) {
+      throw new Error("GameData does not exist on the lobby instance");
     }
 
-    this.lobby.getPlayers()[0].gameObject.playerControl.setInfected(impostors, this.lobby.getConnections());
+    let impostors = shuffleArrayClone(this.lobby.getPlayers())
+      .slice(0, infectedCount)
+      .map(player => player);
+    const event = new GameStartedEvent(this.lobby.getGame()!, impostors);
+
+    await this.lobby.getServer().emit("game.started", event);
+
+    impostors = event.getImpostors() as InternalPlayer[];
+
+    for (let i = 0; i < impostors.length; i++) {
+      const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == impostors[i].id);
+
+      if (gameDataPlayerIndex == -1) {
+        throw new Error(`Player ${impostors[i].id} does not have an instance in GameData`);
+      }
+
+      gameData.gameData.players[gameDataPlayerIndex].isImpostor = true;
+    }
+
+    this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
+      this.lobby.getConnections(),
+      new SetInfectedPacket(impostors.map(player => player.id)),
+    );
   }
 
   setTasks(): void {
-    const options = this.lobby.options;
+    const options = this.lobby.getOptions();
     const level = options.levels[0];
     const numCommon = options.commonTaskCount;
     const numLong = options.longTaskCount;
@@ -700,7 +769,7 @@ export class InternalHost implements HostInstance {
     }
   }
 
-  endMeeting(): void {
+  async endMeeting(): Promise<void> {
     const gameData = this.lobby.getGameData();
     const meetingHud = this.lobby.getMeetingHud();
 
@@ -713,51 +782,120 @@ export class InternalHost implements HostInstance {
     }
 
     const oldData = meetingHud.meetingHud.clone();
-    const votes: Map<number, number[]> = new Map();
-
-    for (let i = 0; i < gameData.gameData.players.length; i++) {
-      const player = gameData.gameData.players[i];
-      const state = meetingHud!.meetingHud.playerStates[player.id];
-
-      if (!votes.has(state.votedFor)) {
-        votes.set(state.votedFor, []);
+    const voteResults: Map<number, VoteResult> = new Map();
+    const playerInstanceCache: Map<number, PlayerInstance> = new Map();
+    const fetchPlayerById = (playerId: number): PlayerInstance | undefined => {
+      if (playerId == -1) {
+        return;
       }
 
-      votes.get(state.votedFor)!.push(player.id);
+      if (playerInstanceCache.has(playerId)) {
+        return playerInstanceCache.get(playerId);
+      }
+
+      const playerInstance = this.lobby.findPlayerByPlayerId(playerId);
+
+      if (!playerInstance) {
+        return;
+      }
+
+      playerInstanceCache.set(playerId, playerInstance);
+
+      return playerInstance;
+    };
+
+    const players = this.lobby.getPlayers();
+
+    for (let i = 0; i < players.length; i++) {
+      const player = players[i];
+      const state = meetingHud!.meetingHud.playerStates[player.getId()];
+
+      if (state.isDead) {
+        continue;
+      }
+
+      if (!voteResults.has(player.getId())) {
+        voteResults.set(player.getId(), new VoteResult(player));
+      }
+
+      const vote = voteResults.get(player.getId())!;
+
+      if (state.didVote) {
+        const votedFor = fetchPlayerById(state.votedFor);
+
+        if (!votedFor) {
+          if (state.votedFor == -1) {
+            vote.setSkipping();
+          } else {
+            voteResults.delete(player.getId());
+
+            continue;
+          }
+        } else {
+          vote.setVotedFor(votedFor);
+        }
+      }
     }
 
-    const voteCounts = [...votes.values()].map(playersVotedFor => playersVotedFor.length);
-    const largestVoteCount = Math.max(...voteCounts);
-    const allLargestVotes = [...votes.entries()].filter(entry => entry[1].length == largestVoteCount);
+    const concludedEvent = new MeetingConcludedEvent(this.lobby.getGame()!, [...voteResults.values()]);
 
-    if (allLargestVotes.length == 1 && allLargestVotes[0][0] != -1) {
-      meetingHud.meetingHud.votingComplete(meetingHud.meetingHud.playerStates, true, allLargestVotes[0][0], false, this.lobby.getConnections());
+    await this.lobby.getServer().emit("meeting.concluded", concludedEvent);
+
+    const isTied = concludedEvent.isTied();
+    const exiledPlayer = concludedEvent.getExiledPlayer();
+
+    if (concludedEvent.isCancelled()) {
+      return;
+    }
+
+    if (isTied) {
+      meetingHud.meetingHud.votingComplete(meetingHud.meetingHud.playerStates, false, 0xff, true, this.lobby.getConnections());
     } else {
-      meetingHud.meetingHud.votingComplete(meetingHud.meetingHud.playerStates, false, 255, true, this.lobby.getConnections());
+      meetingHud.meetingHud.votingComplete(meetingHud.meetingHud.playerStates, true, exiledPlayer?.getId() ?? 0xff, false, this.lobby.getConnections());
     }
 
-    const exiledPlayer = gameData.gameData.players.find(playerData => playerData.id == allLargestVotes[0][0]);
+    const exiledPlayerData = gameData.gameData.players.find(playerData => playerData.id == exiledPlayer?.getId());
 
-    if (allLargestVotes[0][0] != -1 && allLargestVotes.length == 1) {
-      if (!exiledPlayer) {
+    if (!isTied && exiledPlayer) {
+      if (!exiledPlayerData) {
         throw new Error("Exiled player has no data stored in GameData instance");
       }
 
-      exiledPlayer.isDead = true;
+      exiledPlayerData.isDead = true;
     }
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.meetingHud.data(oldData),
     ], this.lobby.getCode()));
 
-    setTimeout(() => {
+    setTimeout(async () => {
+      const closedEvent = new MeetingClosedEvent(
+        this.lobby.getGame()!,
+        concludedEvent.getVotes(),
+        isTied,
+        exiledPlayer,
+      );
+
+      await this.lobby.getServer().emit("meeting.closed", closedEvent);
+
+      if (closedEvent.isCancelled()) {
+        return;
+      }
+
       meetingHud.meetingHud.close(this.lobby.getConnections());
 
       this.lobby.deleteMeetingHud();
 
       setTimeout(() => {
+        this.lobby.getServer().emit("meeting.ended", new MeetingEndedEvent(
+          this.lobby.getGame()!,
+          concludedEvent.getVotes(),
+          isTied,
+          exiledPlayer,
+        ));
+
         if (this.shouldEndGame()) {
-          if (exiledPlayer!.isImpostor) {
+          if (exiledPlayerData!.isImpostor) {
             this.endGame(GameOverReason.CrewmatesByVote);
           } else {
             this.endGame(GameOverReason.ImpostorsByVote);
@@ -769,7 +907,15 @@ export class InternalHost implements HostInstance {
     }, 5000);
   }
 
-  endGame(reason: GameOverReason): void {
+  async endGame(reason: GameOverReason): Promise<void> {
+    const event = new GameEndedEvent(this.lobby.getGame()!, reason);
+
+    await this.lobby.getServer().emit("game.ended", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
     this.lobby.setGameState(GameState.NotStarted);
     this.decontaminationHandlers = [];
     this.readyPlayerList = [];
@@ -790,7 +936,7 @@ export class InternalHost implements HostInstance {
 
     this.lobby.setGameData(new EntityGameData(this.lobby, this.getNextNetId(), [], this.getNextNetId()));
 
-    this.lobby.sendRootGamePacket(new EndGamePacket(this.lobby.getCode(), reason, false));
+    this.lobby.sendRootGamePacket(new EndGamePacket(this.lobby.getCode(), event.getReason(), false));
   }
 
   getSystemsHandler(): SystemsHandler | undefined {
@@ -847,7 +993,6 @@ export class InternalHost implements HostInstance {
         shuffleArray(unusedTasks);
 
         // If the player already has every single task...
-        // if (unusedTasks.every(task => usedTaskTypes.indexOf(task.type) != -1)) {
         if (unusedTasks.every(task => usedTaskTypes.has(task.type))) {
           // ...then clear the used task array so they can have duplicates
           usedTaskTypes.clear();

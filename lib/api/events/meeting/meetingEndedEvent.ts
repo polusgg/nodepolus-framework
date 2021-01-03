@@ -1,5 +1,6 @@
 import { PlayerInstance } from "../../player";
 import { Game } from "../../game";
+import { VoteResult } from "../../../types";
 
 /**
  * Fired when the post-meeting exile animation has finished.
@@ -7,8 +8,7 @@ import { Game } from "../../game";
 export class MeetingEndedEvent {
   constructor(
     private readonly game: Game,
-    // TODO
-    private readonly votes: [],
+    private readonly votes: VoteResult[],
     private readonly tie: boolean,
     private readonly exiledPlayer?: PlayerInstance,
   ) {}
@@ -17,7 +17,7 @@ export class MeetingEndedEvent {
     return this.game;
   }
 
-  getVotes(): [] {
+  getVotes(): VoteResult[] {
     return this.votes;
   }
 

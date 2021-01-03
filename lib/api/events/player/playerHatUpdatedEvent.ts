@@ -26,7 +26,7 @@ export class PlayerHatUpdatedEvent extends CancellableEvent {
     return this.newHat;
   }
 
-  setNetHat(newHat: PlayerHat): void {
+  setNewHat(newHat: PlayerHat): void {
     this.newHat = newHat;
   }
 }

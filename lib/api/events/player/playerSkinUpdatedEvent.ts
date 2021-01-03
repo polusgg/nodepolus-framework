@@ -26,7 +26,7 @@ export class PlayerSkinUpdatedEvent extends CancellableEvent {
     return this.newSkin;
   }
 
-  setNetSkin(newSkin: PlayerSkin): void {
+  setNewSkin(newSkin: PlayerSkin): void {
     this.newSkin = newSkin;
   }
 }

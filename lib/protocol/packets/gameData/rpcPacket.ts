@@ -113,7 +113,7 @@ export class RPCPacket extends BaseGameDataPacket {
       case RPCPacketType.SetTasks:
         return new RPCPacket(senderNetId, SetTasksPacket.deserialize(reader));
       case RPCPacketType.UpdateGameData:
-        return new RPCPacket(senderNetId, UpdateGameDataPacket.deserialize(reader));
+        return new RPCPacket(senderNetId, UpdateGameDataPacket.deserialize(reader, level));
       case RPCPacketType.ClimbLadder:
         return new RPCPacket(senderNetId, ClimbLadderPacket.deserialize(reader));
       case RPCPacketType.UsePlatform:

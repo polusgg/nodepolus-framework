@@ -1,5 +1,7 @@
-import { PlayerColor, PlayerFlagMask, PlayerHat, PlayerPet, PlayerSkin } from "../../../../types/enums";
+import { Level, PlayerColor, PlayerFlagMask, PlayerHat, PlayerPet, PlayerSkin } from "../../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { LevelTask } from "../../../../types";
+import { Tasks } from "../../../../static";
 
 export class PlayerData {
   constructor(
@@ -12,11 +14,10 @@ export class PlayerData {
     public isDisconnected: boolean,
     public isImpostor: boolean,
     public isDead: boolean,
-    // TODO: TaskType or map-specific task type (e.g. PolusTask)
-    public tasks: [number, boolean][],
+    public tasks: [task: LevelTask, isComplete: boolean][],
   ) {}
 
-  static deserialize(reader: MessageReader, tag?: number): PlayerData {
+  static deserialize(reader: MessageReader, level: Level, tag?: number): PlayerData {
     const id = tag ?? reader.readByte();
     const name = reader.readString();
     const color = reader.readPackedUInt32();
@@ -30,7 +31,7 @@ export class PlayerData {
 
     return new PlayerData(
       id, name, color, hat, pet, skin, isDisconnected, isImpostor, isDead,
-      reader.readList(tasks => [tasks.readByte(), tasks.readBoolean()]),
+      reader.readList(list => [Tasks.fromId(level, [list.readByte()])[0], list.readBoolean()]),
     );
   }
 
@@ -44,8 +45,41 @@ export class PlayerData {
     return true;
   }
 
-  completeTask(index: number, isComplete: boolean = true): void {
+  isTaskAtIndexCompleted(index: number): boolean {
+    return this.tasks[index][1];
+  }
+
+  isTaskCompleted(task: LevelTask): boolean {
+    const tasks = this.tasks;
+    const index = tasks.findIndex(t => t[0] == task);
+
+    if (index == -1) {
+      return false;
+    }
+
+    return this.tasks[index][1];
+  }
+
+  completeTask(task: LevelTask, isComplete: boolean = true): boolean {
+    const index = this.tasks.findIndex(t => t[0] == task);
+
+    if (index == -1) {
+      return false;
+    }
+
     this.tasks[index][1] = isComplete;
+
+    return true;
+  }
+
+  completeTaskAtIndex(index: number, isComplete: boolean = true): boolean {
+    if (index < 0 || this.tasks.length < index) {
+      return false;
+    }
+
+    this.tasks[index][1] = isComplete;
+
+    return true;
   }
 
   serialize(writer: MessageWriter, includeId: boolean = true): void {

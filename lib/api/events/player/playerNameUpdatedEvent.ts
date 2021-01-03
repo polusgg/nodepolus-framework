@@ -26,7 +26,7 @@ export class PlayerNameUpdatedEvent extends CancellableEvent {
     return this.newName;
   }
 
-  setNetName(newName: TextComponent): void {
+  setNewName(newName: TextComponent): void {
     this.newName = newName;
   }
 }
