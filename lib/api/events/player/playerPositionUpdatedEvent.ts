@@ -7,12 +7,40 @@ import { Vector2 } from "../../../types";
  */
 export class PlayerPositionUpdatedEvent extends CancellableEvent {
   constructor(
-    public readonly player: PlayerInstance,
-    public readonly oldPosition: Vector2,
-    public readonly oldVelocity: Vector2,
-    public newPosition: Vector2,
-    public newVelocity: Vector2,
+    private readonly player: PlayerInstance,
+    private readonly oldPosition: Vector2,
+    private readonly oldVelocity: Vector2,
+    private newPosition: Vector2,
+    private newVelocity: Vector2,
   ) {
     super();
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getOldPosition(): Vector2 {
+    return this.oldPosition;
+  }
+
+  getOldVelocity(): Vector2 {
+    return this.oldVelocity;
+  }
+
+  getNewPosition(): Vector2 {
+    return this.newPosition;
+  }
+
+  setNewPosition(newPosition: Vector2): void {
+    this.newPosition = newPosition;
+  }
+
+  getNewVelocity(): Vector2 {
+    return this.newVelocity;
+  }
+
+  setNewVelocity(newVelocity: Vector2): void {
+    this.newVelocity = newVelocity;
   }
 }

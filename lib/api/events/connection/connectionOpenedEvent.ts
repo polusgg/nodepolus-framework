@@ -7,8 +7,12 @@ import { DisconnectableEvent } from "../types";
  */
 export class ConnectionOpenedEvent extends DisconnectableEvent {
   constructor(
-    public readonly connection: Connection,
+    private readonly connection: Connection,
   ) {
     super(DisconnectReason.custom("The server refused your connection"));
+  }
+
+  getConnection(): Connection {
+    return this.connection;
   }
 }

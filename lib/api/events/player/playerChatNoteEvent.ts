@@ -7,9 +7,21 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerChatNoteEvent extends CancellableEvent {
   constructor(
-    public readonly player: PlayerInstance,
-    public chatNoteType: ChatNoteType,
+    private readonly player: PlayerInstance,
+    private chatNoteType: ChatNoteType,
   ) {
     super();
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getChatNoteType(): ChatNoteType {
+    return this.chatNoteType;
+  }
+
+  setChatNoteType(chatNoteType: ChatNoteType): void {
+    this.chatNoteType = chatNoteType;
   }
 }

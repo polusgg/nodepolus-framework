@@ -6,8 +6,12 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerRevivedEvent extends CancellableEvent {
   constructor(
-    public readonly player: PlayerInstance,
+    private readonly player: PlayerInstance,
   ) {
     super();
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
   }
 }

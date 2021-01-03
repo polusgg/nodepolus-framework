@@ -7,10 +7,26 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerHatUpdatedEvent extends CancellableEvent {
   constructor(
-    public readonly player: PlayerInstance,
-    public readonly oldHat: PlayerHat,
-    public newHat: PlayerHat,
+    private readonly player: PlayerInstance,
+    private readonly oldHat: PlayerHat,
+    private newHat: PlayerHat,
   ) {
     super();
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getOldHat(): PlayerHat {
+    return this.oldHat;
+  }
+
+  getNewHat(): PlayerHat {
+    return this.newHat;
+  }
+
+  setNetHat(newHat: PlayerHat): void {
+    this.newHat = newHat;
   }
 }

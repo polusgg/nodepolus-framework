@@ -7,10 +7,26 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerRoleUpdatedEvent extends CancellableEvent {
   constructor(
-    public readonly player: PlayerInstance,
-    public readonly oldRole: PlayerRole,
-    public newRole: PlayerRole,
+    private readonly player: PlayerInstance,
+    private readonly oldRole: PlayerRole,
+    private newRole: PlayerRole,
   ) {
     super();
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getOldRole(): PlayerRole {
+    return this.oldRole;
+  }
+
+  getNewRole(): PlayerRole {
+    return this.newRole;
+  }
+
+  setNetRole(newRole: PlayerRole): void {
+    this.newRole = newRole;
   }
 }

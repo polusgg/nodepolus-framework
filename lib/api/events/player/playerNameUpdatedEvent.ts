@@ -7,10 +7,26 @@ import { TextComponent } from "../../text";
  */
 export class PlayerNameUpdatedEvent extends CancellableEvent {
   constructor(
-    public readonly player: PlayerInstance,
-    public readonly oldName: TextComponent,
-    public newName: TextComponent,
+    private readonly player: PlayerInstance,
+    private readonly oldName: TextComponent,
+    private newName: TextComponent,
   ) {
     super();
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getOldName(): TextComponent {
+    return this.oldName;
+  }
+
+  getNewName(): TextComponent {
+    return this.newName;
+  }
+
+  setNetName(newName: TextComponent): void {
+    this.newName = newName;
   }
 }

@@ -7,10 +7,22 @@ import { Game } from "../../game";
  */
 export class GameScannerStoppedEvent extends CancellableEvent {
   constructor(
-    public readonly game: Game,
-    public readonly player: PlayerInstance,
-    public readonly didFinishScanning: boolean,
+    private readonly game: Game,
+    private readonly player: PlayerInstance,
+    private readonly finishedScanning: boolean,
   ) {
     super();
+  }
+
+  getGame(): Game {
+    return this.game;
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  didFinishScanning(): boolean {
+    return this.finishedScanning;
   }
 }

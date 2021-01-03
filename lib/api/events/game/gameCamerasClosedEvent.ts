@@ -7,9 +7,17 @@ import { Game } from "../../game";
  */
 export class GameCamerasClosedEvent extends CancellableEvent {
   constructor(
-    public readonly game: Game,
-    public readonly player: PlayerInstance,
+    private readonly game: Game,
+    private readonly player: PlayerInstance,
   ) {
     super();
+  }
+
+  getGame(): Game {
+    return this.game;
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
   }
 }

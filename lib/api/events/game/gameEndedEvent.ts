@@ -7,9 +7,21 @@ import { Game } from "../../game";
  */
 export class GameEndedEvent extends CancellableEvent {
   constructor(
-    public readonly game: Game,
-    public gameOverReason: GameOverReason,
+    private readonly game: Game,
+    private reason: GameOverReason,
   ) {
     super();
+  }
+
+  getGame(): Game {
+    return this.game;
+  }
+
+  getReason(): GameOverReason {
+    return this.reason;
+  }
+
+  setReason(reason: GameOverReason): void {
+    this.reason = reason;
   }
 }

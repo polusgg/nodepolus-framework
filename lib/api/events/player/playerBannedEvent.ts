@@ -7,10 +7,22 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerBannedEvent extends CancellableEvent {
   constructor(
-    public readonly lobby: LobbyInstance,
-    public readonly player: PlayerInstance,
-    public readonly bannedBy: PlayerInstance,
+    private readonly lobby: LobbyInstance,
+    private readonly player: PlayerInstance,
+    private readonly banningPlayer?: PlayerInstance,
   ) {
     super();
+  }
+
+  getLobby(): LobbyInstance {
+    return this.lobby;
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getBanningPlayer(): PlayerInstance | undefined {
+    return this.banningPlayer;
   }
 }

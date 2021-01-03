@@ -1,16 +1,26 @@
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
-import { Game } from "../../game";
 
 /**
  * Fired when a player has cast a vote to kick another player.
  */
 export class PlayerVotekickAddedEvent extends CancellableEvent {
   constructor(
-    public readonly game: Game,
-    public player: PlayerInstance,
-    public target: PlayerInstance,
+    private readonly voter: PlayerInstance,
+    private target: PlayerInstance,
   ) {
     super();
+  }
+
+  getVoter(): PlayerInstance {
+    return this.voter;
+  }
+
+  getTarget(): PlayerInstance {
+    return this.target;
+  }
+
+  setTarget(target: PlayerInstance): void {
+    this.target = target;
   }
 }

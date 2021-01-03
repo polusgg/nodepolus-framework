@@ -161,16 +161,17 @@ export class Server extends Emittery.Typed<ServerEvents> {
       }
       case RootPacketType.JoinGame: {
         const lobbyCode = (packet as JoinGameRequestPacket).lobbyCode;
-        const lobby = this.lobbyMap.get(lobbyCode);
+        let lobby = this.lobbyMap.get(lobbyCode);
         const event = new ServerLobbyJoinEvent(sender, lobbyCode, lobby);
 
         await this.emit("server.lobby.join", event);
 
         if (!event.isCancelled()) {
-          if (event.lobby) {
-            this.connectionLobbyMap.set(sender.getConnectionInfo().toString(), event.lobby as InternalLobby);
+          if (event.getLobby()) {
+            lobby = event.getLobby() as InternalLobby;
 
-            (event.lobby as InternalLobby).handleJoin(sender);
+            this.connectionLobbyMap.set(sender.getConnectionInfo().toString(), lobby);
+            lobby.handleJoin(sender);
           } else {
             sender.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameNotFound)]);
           }

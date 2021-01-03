@@ -7,10 +7,26 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerSkinUpdatedEvent extends CancellableEvent {
   constructor(
-    public readonly player: PlayerInstance,
-    public readonly oldSkin: PlayerSkin,
-    public newSkin: PlayerSkin,
+    private readonly player: PlayerInstance,
+    private readonly oldSkin: PlayerSkin,
+    private newSkin: PlayerSkin,
   ) {
     super();
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getOldSkin(): PlayerSkin {
+    return this.oldSkin;
+  }
+
+  getNewSkin(): PlayerSkin {
+    return this.newSkin;
+  }
+
+  setNetSkin(newSkin: PlayerSkin): void {
+    this.newSkin = newSkin;
   }
 }

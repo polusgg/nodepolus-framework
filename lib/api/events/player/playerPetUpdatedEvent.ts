@@ -7,10 +7,26 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerPetUpdatedEvent extends CancellableEvent {
   constructor(
-    public readonly player: PlayerInstance,
-    public readonly oldPet: PlayerPet,
-    public newPet: PlayerPet,
+    private readonly player: PlayerInstance,
+    private readonly oldPet: PlayerPet,
+    private newPet: PlayerPet,
   ) {
     super();
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getOldPet(): PlayerPet {
+    return this.oldPet;
+  }
+
+  getNewPet(): PlayerPet {
+    return this.newPet;
+  }
+
+  setNetPet(newPet: PlayerPet): void {
+    this.newPet = newPet;
   }
 }

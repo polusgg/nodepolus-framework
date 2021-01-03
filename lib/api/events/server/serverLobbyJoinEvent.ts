@@ -8,10 +8,26 @@ import { LobbyInstance } from "../../lobby";
  */
 export class ServerLobbyJoinEvent extends DisconnectableEvent {
   constructor(
-    public readonly connection: Connection,
-    public readonly lobbyCode: string,
-    public lobby?: LobbyInstance,
+    private readonly connection: Connection,
+    private readonly lobbyCode: string,
+    private lobby?: LobbyInstance,
   ) {
     super(DisconnectReason.custom("The server refused to let you join that game"));
+  }
+
+  getConnection(): Connection {
+    return this.connection;
+  }
+
+  getLobbyCode(): string {
+    return this.lobbyCode;
+  }
+
+  getLobby(): LobbyInstance | undefined {
+    return this.lobby;
+  }
+
+  setLobby(lobby?: LobbyInstance): void {
+    this.lobby = lobby;
   }
 }

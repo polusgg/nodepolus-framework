@@ -7,10 +7,26 @@ import { Game } from "../../game";
  */
 export class GameScannerQueuedEvent extends CancellableEvent {
   constructor(
-    public readonly game: Game,
-    public readonly player: PlayerInstance,
-    public queue: PlayerInstance[],
+    private readonly game: Game,
+    private readonly player: PlayerInstance,
+    private queue: Set<PlayerInstance>,
   ) {
     super();
+  }
+
+  getGame(): Game {
+    return this.game;
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getQueue(): Set<PlayerInstance> {
+    return this.queue;
+  }
+
+  setQueue(queue: Set<PlayerInstance>): void {
+    this.queue = queue;
   }
 }

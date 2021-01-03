@@ -7,10 +7,22 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerDiedEvent extends CancellableEvent {
   constructor(
-    public readonly player: PlayerInstance,
-    public readonly deathReason: DeathReason,
-    public readonly killer?: PlayerInstance,
+    private readonly player: PlayerInstance,
+    private readonly reason: DeathReason,
+    private readonly killer?: PlayerInstance,
   ) {
     super();
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getReason(): DeathReason {
+    return this.reason;
+  }
+
+  getKiller(): PlayerInstance | undefined {
+    return this.killer;
   }
 }

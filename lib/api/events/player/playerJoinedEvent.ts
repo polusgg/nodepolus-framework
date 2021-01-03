@@ -6,8 +6,20 @@ import { LobbyInstance } from "../../lobby";
  */
 export class PlayerJoinedEvent {
   constructor(
-    public readonly lobby: LobbyInstance,
-    public readonly player: PlayerInstance,
-    public readonly isRejoining: boolean = false,
+    private readonly lobby: LobbyInstance,
+    private readonly player: PlayerInstance,
+    private readonly rejoining: boolean = false,
   ) {}
+
+  getLobby(): LobbyInstance {
+    return this.lobby;
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  isRejoining(): boolean {
+    return this.rejoining;
+  }
 }

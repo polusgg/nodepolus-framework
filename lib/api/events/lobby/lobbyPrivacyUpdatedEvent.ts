@@ -6,9 +6,21 @@ import { CancellableEvent } from "../types";
  */
 export class LobbyPrivacyUpdatedEvent extends CancellableEvent {
   constructor(
-    public readonly lobby: LobbyInstance,
-    public isPublic: boolean,
+    private readonly lobby: LobbyInstance,
+    private publicity: boolean,
   ) {
     super();
+  }
+
+  getLobby(): LobbyInstance {
+    return this.lobby;
+  }
+
+  isPublic(): boolean {
+    return this.publicity;
+  }
+
+  setPublic(isPublic: boolean): void {
+    this.publicity = isPublic;
   }
 }

@@ -5,6 +5,10 @@ import { LobbyInstance } from "../../lobby";
  */
 export class ServerLobbyDestroyedEvent {
   constructor(
-    public readonly lobby: LobbyInstance,
+    private readonly lobby: LobbyInstance,
   ) {}
+
+  getLobby(): LobbyInstance {
+    return this.lobby;
+  }
 }

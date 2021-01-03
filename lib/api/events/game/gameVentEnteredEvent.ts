@@ -7,10 +7,22 @@ import { Game, Vent } from "../../game";
  */
 export class GameVentEnteredEvent extends CancellableEvent {
   constructor(
-    public readonly game: Game,
-    public readonly player: PlayerInstance,
-    public readonly vent: Vent,
+    private readonly game: Game,
+    private readonly player: PlayerInstance,
+    private readonly vent: Vent,
   ) {
     super();
+  }
+
+  getGame(): Game {
+    return this.game;
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getVent(): Vent {
+    return this.vent;
   }
 }

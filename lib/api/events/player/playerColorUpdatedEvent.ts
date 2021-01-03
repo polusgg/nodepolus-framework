@@ -7,10 +7,26 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerColorUpdatedEvent extends CancellableEvent {
   constructor(
-    public readonly player: PlayerInstance,
-    public readonly oldColor: PlayerColor,
-    public newColor: PlayerColor,
+    private readonly player: PlayerInstance,
+    private readonly oldColor: PlayerColor,
+    private newColor: PlayerColor,
   ) {
     super();
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getOldColor(): PlayerColor {
+    return this.oldColor;
+  }
+
+  getNewColor(): PlayerColor {
+    return this.newColor;
+  }
+
+  setNetColor(newColor: PlayerColor): void {
+    this.newColor = newColor;
   }
 }

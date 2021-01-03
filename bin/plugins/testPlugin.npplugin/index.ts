@@ -15,15 +15,14 @@ server.on("player.joined", (event: PlayerJoinedEvent) => {
 });
 
 server.on("server.lobby.join", (event: ServerLobbyJoinEvent) => {
-  if (event.lobbyCode !== "RANDOM") {
+  if (event.getLobbyCode() !== "RANDOM") {
     return;
   }
 
   const lobby = shuffleArrayClone(server.lobbies.filter(lob => lob.getConnections().length < 10 && lob.isPublic()))[0];
 
-  event.connection.sendReliable([new HostGameResponsePacket(lobby.getCode())]);
-
-  event.lobby = lobby;
+  event.getConnection().sendReliable([new HostGameResponsePacket(lobby.getCode())]);
+  event.setLobby(lobby);
 });
 
 repl.start();

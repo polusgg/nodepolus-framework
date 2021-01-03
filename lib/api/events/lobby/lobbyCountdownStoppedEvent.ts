@@ -7,11 +7,27 @@ import { CancellableEvent } from "../types";
  */
 export class LobbyCountdownStoppedEvent extends CancellableEvent {
   constructor(
-    public readonly lobby: LobbyInstance,
-    public readonly starter: PlayerInstance,
-    public readonly secondsLeft: number,
-    public readonly wasInterrupted: boolean,
+    private readonly lobby: LobbyInstance,
+    private readonly starter: PlayerInstance,
+    private readonly secondsLeft: number,
+    private readonly interrupted: boolean,
   ) {
     super();
+  }
+
+  getLobby(): LobbyInstance {
+    return this.lobby;
+  }
+
+  getStarter(): PlayerInstance {
+    return this.starter;
+  }
+
+  getSecondsLeft(): number {
+    return this.secondsLeft;
+  }
+
+  wasInterrupted(): boolean {
+    return this.interrupted;
   }
 }

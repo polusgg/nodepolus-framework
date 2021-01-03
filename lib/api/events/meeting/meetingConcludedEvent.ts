@@ -7,11 +7,23 @@ import { Game } from "../../game";
  */
 export class MeetingConcludedEvent extends CancellableEvent {
   constructor(
-    public readonly game: Game,
+    private readonly game: Game,
     // TODO
-    public votes: [],
+    private votes: [],
   ) {
     super();
+  }
+
+  getGame(): Game {
+    return this.game;
+  }
+
+  getVotes(): [] {
+    return this.votes;
+  }
+
+  setVotes(votes: []): void {
+    this.votes = votes;
   }
 
   isTie(): boolean {

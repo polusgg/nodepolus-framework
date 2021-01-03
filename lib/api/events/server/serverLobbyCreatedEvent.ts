@@ -8,9 +8,17 @@ import { LobbyInstance } from "../../lobby";
  */
 export class ServerLobbyCreatedEvent extends DisconnectableEvent {
   constructor(
-    public readonly connection: Connection,
-    public readonly lobby: LobbyInstance,
+    private readonly connection: Connection,
+    private readonly lobby: LobbyInstance,
   ) {
     super(DisconnectReason.custom("The server refused to create your game"));
+  }
+
+  getConnection(): Connection {
+    return this.connection;
+  }
+
+  getLobby(): LobbyInstance {
+    return this.lobby;
   }
 }

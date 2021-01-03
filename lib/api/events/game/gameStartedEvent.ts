@@ -10,10 +10,26 @@ import { Game } from "../../game";
  */
 export class GameStartedEvent extends CancellableEvent {
   constructor(
-    public readonly game: Game,
-    public readonly starter: PlayerInstance,
-    public roles: Map<PlayerRole, PlayerInstance[]>,
+    private readonly game: Game,
+    private readonly starter: PlayerInstance,
+    private roles: Map<PlayerRole, PlayerInstance[]>,
   ) {
     super();
+  }
+
+  getGame(): Game {
+    return this.game;
+  }
+
+  getStarter(): PlayerInstance {
+    return this.starter;
+  }
+
+  getRoles(): Map<PlayerRole, PlayerInstance[]> {
+    return this.roles;
+  }
+
+  setRoles(roles: Map<PlayerRole, PlayerInstance[]>): void {
+    this.roles = roles;
   }
 }

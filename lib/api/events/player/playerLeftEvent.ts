@@ -6,7 +6,15 @@ import { LobbyInstance } from "../../lobby";
  */
 export class PlayerLeftEvent {
   constructor(
-    public readonly lobby: LobbyInstance,
-    public readonly player: PlayerInstance,
+    private readonly lobby: LobbyInstance,
+    private readonly player: PlayerInstance,
   ) {}
+
+  getLobby(): LobbyInstance {
+    return this.lobby;
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
 }

@@ -7,9 +7,21 @@ import { Game } from "../../game";
  */
 export class MeetingVoteRemovedEvent extends CancellableEvent {
   constructor(
-    public readonly game: Game,
-    public player: PlayerInstance,
+    private readonly game: Game,
+    private player: PlayerInstance,
   ) {
     super();
+  }
+
+  getGame(): Game {
+    return this.game;
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  setPlayer(player: PlayerInstance): void {
+    this.player = player;
   }
 }

@@ -7,9 +7,21 @@ import { Task } from "../../game";
  */
 export class PlayerTaskAddedEvent extends CancellableEvent {
   constructor(
-    public readonly player: PlayerInstance,
-    public tasks: Task[],
+    private readonly player: PlayerInstance,
+    private tasks: Task[],
   ) {
     super();
+  }
+
+  getPlayer(): PlayerInstance {
+    return this.player;
+  }
+
+  getTasks(): Task[] {
+    return this.tasks;
+  }
+
+  setTasks(tasks: Task[]): void {
+    this.tasks = tasks;
   }
 }

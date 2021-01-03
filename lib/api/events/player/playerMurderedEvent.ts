@@ -1,14 +1,15 @@
+import { PlayerDiedEvent } from "./playerDiedEvent";
+import { DeathReason } from "../../../types/enums";
 import { PlayerInstance } from "../../player";
-import { CancellableEvent } from "../types";
 
 /**
  * Fired when a player has been killed by another player.
  */
-export class PlayerMurderedEvent extends CancellableEvent {
+export class PlayerMurderedEvent extends PlayerDiedEvent {
   constructor(
-    public readonly player: PlayerInstance,
-    public readonly killer: PlayerInstance,
+    player: PlayerInstance,
+    killer: PlayerInstance,
   ) {
-    super();
+    super(player, DeathReason.Murder, killer);
   }
 }

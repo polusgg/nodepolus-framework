@@ -3,8 +3,16 @@ import { CancellableEvent } from "../types";
 
 export class ProxyPacketFromClientEvent extends CancellableEvent {
   constructor(
-    public packet: BaseRootPacket,
+    private packet: BaseRootPacket,
   ) {
     super();
+  }
+
+  getPacket(): BaseRootPacket {
+    return this.packet;
+  }
+
+  setPacket(packet: BaseRootPacket): void {
+    this.packet = packet;
   }
 }
