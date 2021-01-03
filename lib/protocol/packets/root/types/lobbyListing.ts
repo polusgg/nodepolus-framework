@@ -17,7 +17,7 @@ export class LobbyListing {
 
   static deserialize(reader: MessageReader): LobbyListing {
     return new LobbyListing(
-      reader.readBytes(4).buffer.join("."),
+      reader.readBytes(4).getBuffer().join("."),
       reader.readUInt16(),
       LobbyCode.decode(reader.readInt32()),
       reader.readString(),

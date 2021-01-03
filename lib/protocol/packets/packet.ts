@@ -70,7 +70,7 @@ export class Packet {
         throw new Error(`Attempted to deserialize an unimplemented packet type: ${type} (${HazelPacketType[type]})`);
     }
 
-    return new Packet(nonce, data).bound(clientBound);
+    return new Packet(nonce, data).setClientBound(clientBound);
   }
 
   isReliable(): boolean {
@@ -91,7 +91,7 @@ export class Packet {
     return writer.writeBytes(this.data.serialize());
   }
 
-  bound(clientBound: boolean): this {
+  setClientBound(clientBound: boolean): this {
     this.clientBound = clientBound;
 
     return this;

@@ -14,7 +14,7 @@ export abstract class DisconnectableEvent extends CancellableEvent {
     return this.defaultDisconnectReason;
   }
 
-  getDisconnectReason(): DisconnectReason | undefined {
+  getDisconnectReason(): DisconnectReason {
     return this.disconnectReason ?? this.defaultDisconnectReason;
   }
 

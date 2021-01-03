@@ -294,7 +294,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   setData(packet: MessageReader | MessageWriter): void {
-    const reader = MessageReader.fromRawBytes(packet.buffer);
+    const reader = MessageReader.fromRawBytes(packet.getBuffer());
 
     this.netId = reader.readByte();
   }

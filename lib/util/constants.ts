@@ -29,6 +29,11 @@ export const DEFAULT_SERVER_PORT = 22023;
 export const ANNOUNCEMENT_SERVER_PORT = 22024;
 
 /**
+ * Connection constants
+ */
+export const MAX_PACKET_BYTE_SIZE = 508;
+
+/**
  * Lobby constants
  */
 export const GLOBAL_OWNER = -2;

@@ -13,7 +13,7 @@ export class MasterServer {
   static deserialize(reader: MessageReader): MasterServer {
     return new MasterServer(
       reader.readString(),
-      reader.readBytes(4).buffer.join("."),
+      reader.readBytes(4).getBuffer().join("."),
       reader.readUInt16(),
       reader.readPackedUInt32(),
     );

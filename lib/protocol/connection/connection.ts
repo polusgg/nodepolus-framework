@@ -4,6 +4,7 @@ import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from
 import { PacketDestination, HazelPacketType } from "../packets/types/enums";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
 import { ReadyPacket, SceneChangePacket } from "../packets/gameData";
+import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
 import { AwaitingPacket } from "../packets/types";
 import { LimboState } from "../../types/enums";
 import { InternalLobby } from "../../lobby";
@@ -12,7 +13,7 @@ import { Packet } from "../packets";
 import Emittery from "emittery";
 import dgram from "dgram";
 
-export class Connection extends Emittery.Typed<ConnectionEvents> implements NetworkAccessible {
+export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implements NetworkAccessible {
   public hazelVersion?: number;
   public clientVersion?: ClientVersion;
   public name?: string;
@@ -60,7 +61,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
           const packets = (parsed.data as RootPacket).packets;
 
           for (let i = 0; i < packets.length; i++) {
-            this.log(packets[i], parsed, true);
             this.emit("packet", packets[i]);
           }
           break;
@@ -92,12 +92,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
       }
     }, 50);
 
-    // TODO: This breaks. No clue why.
-    // this.timeoutInterval = setInterval(() => {
-    //   if (this.getTimeSinceLastPing() > this.timeoutLength) {
-    //     this.disconnect(DisconnectReason.custom("Connection timed out"));
-    //   }
-    // }, 1000);
+    // TODO: Timeout clients and remove dead connections
   }
 
   getConnectionInfo(): ConnectionInfo {
@@ -111,28 +106,31 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
   async write(packet: BaseRootPacket): Promise<void> {
     return new Promise(resolve => {
       this.packetBuffer.push({ packet, resolve });
+
+      const currentPacket = new Packet(0, new RootPacket(this.packetBuffer.map(p => p.packet)));
+
+      currentPacket.setClientBound(true);
+
+      const currentPacketSerialized = currentPacket.serialize();
+
+      if (currentPacketSerialized.getLength() > MAX_PACKET_BYTE_SIZE) {
+        this.packetBuffer.pop();
+
+        const singlePacket = new Packet(0, new RootPacket([packet]));
+
+        singlePacket.setClientBound(true);
+
+        const singlePacketSerialized = singlePacket.serialize();
+
+        if (singlePacketSerialized.getLength() > MAX_PACKET_BYTE_SIZE) {
+          throw new Error(`Attempted to write a packet that is longer than the maximum byte size of ${MAX_PACKET_BYTE_SIZE}`);
+        } else {
+          this.flush();
+
+          this.packetBuffer = [{ packet, resolve }];
+        }
+      }
     });
-
-    // const lastElem: RootGamePacketDataType = this.packetBuffer[this.packetBuffer.length - 1];
-
-    // if (
-    //   this.packetBuffer.length != 0 &&
-    //   lastElem.type == packet.type &&
-    //   (
-    //     packet.type == RootGamePacketType.GameData ||
-    //     packet.type == RootGamePacketType.GameDataTo
-    //   ) &&
-    //   (lastElem as GameDataPacket).lobbyCode == (packet as GameDataPacket).lobbyCode &&
-    //   (lastElem as GameDataPacket).targetClientId == (packet as GameDataPacket).targetClientId
-    // ) {
-    //   for (let i = 0; i < (packet as GameDataPacket).packets.length; i++) {
-    //     const gameDataSinglePacket = (packet as GameDataPacket).packets[i];
-
-    //     (this.packetBuffer[this.packetBuffer.length - 1] as GameDataPacket).packets.push(gameDataSinglePacket);
-    //   }
-    // } else {
-    //   this.packetBuffer.push(packet);
-    // }
   }
 
   writeUnreliable(packet: BaseRootPacket): void {
@@ -144,7 +142,9 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
       const temp: AwaitingPacket[] = [...this.packetBuffer];
 
       this.packetBuffer = packets.map(packet => ({ packet, resolve }));
+
       this.flush(true);
+
       this.packetBuffer = temp;
     });
   }
@@ -185,20 +185,12 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
       packet = new Packet(nonce, new RootPacket(packetBuffer));
 
       this.acknowledgementResolveMap.set(nonce!, resolveFuncs);
-
-      for (let i = 0; i < packetBuffer.length; i++) {
-        this.log(packetBuffer[i], packet, false);
-      }
     } else {
       packet = new Packet(nonce, new RootPacket(this.unreliablePacketBuffer));
       packetBuffer = this.unreliablePacketBuffer;
-
-      for (let i = 0; i < packetBuffer.length; i++) {
-        this.log(packetBuffer[i], packet, false);
-      }
     }
 
-    packet.bound(true);
+    packet.setClientBound(true);
 
     const packetToSend: MessageWriter = packet.serialize();
 
@@ -212,7 +204,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
 
             clearInterval(resendInterval);
           } else {
-            this.socket.send(packetToSend.buffer, this.connectionInfo.getPort(), this.connectionInfo.getAddress());
+            this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
           }
         } else {
           clearInterval(resendInterval);
@@ -220,7 +212,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
       }, 1000);
     }
 
-    this.socket.send(packetToSend.buffer, this.connectionInfo.getPort(), this.connectionInfo.getAddress());
+    this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
 
     if (reliable) {
       this.packetBuffer = [];
@@ -234,7 +226,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
 
     const packetToSend: MessageWriter = new Packet(undefined, new DisconnectPacket(reason)).serialize();
 
-    this.socket.send(packetToSend.buffer, this.connectionInfo.getPort(), this.connectionInfo.getAddress());
+    this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
 
     this.disconnectTimeout = setTimeout(() => this.cleanup(reason), 6000);
   }
@@ -320,7 +312,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
 
   private acknowledgePacket(nonce: number): void {
     this.socket.send(
-      new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))).serialize().buffer,
+      new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))).serialize().getBuffer(),
       this.connectionInfo.getPort(),
       this.connectionInfo.getAddress(),
     );
@@ -342,13 +334,15 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
 
   private handleHello(helloPacket: HelloPacket): void {
     if (this.initialized) {
-      throw new Error("Connection already received a Hello packet");
+      throw new Error(`Connection ${this.id} sent more than one Hello packet`);
     }
 
     this.initialized = true;
     this.name = helloPacket.name;
     this.hazelVersion = helloPacket.hazelVersion;
     this.clientVersion = helloPacket.clientVersion;
+
+    this.emit("hello");
   }
 
   private handleDisconnection(reason?: DisconnectReason): void {
@@ -368,34 +362,5 @@ export class Connection extends Emittery.Typed<ConnectionEvents> implements Netw
     }
 
     this.emit("disconnected", reason);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private log(packet: BaseRootPacket, parsed: Packet, isToServer: boolean): void {
-    // if (!parsed.isReliable) {
-    //   return;
-    // }
-
-    // if (isToServer) {
-    //   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    //   console.log(`[${this.id} @ ${this.address}:${this.port}] > [Server] : Sent ${RootGamePacketType[packet.type]} in a ${parsed.isReliable ? "Reliable" : "Unreliable"} packet${parsed.isReliable ? ` with nonce ${parsed.nonce}` : ""}`);
-    // } else {
-    //   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    //   console.log(`[Server] > [${this.id} @ ${this.address}:${this.port}] : Sent ${RootGamePacketType[packet.type]} in a ${parsed.isReliable ? "Reliable" : "Unreliable"} packet${parsed.isReliable ? ` with nonce ${parsed.nonce}` : ""}`);
-    // }
-
-    // if (packet.type == RootGamePacketType.GameData || packet.type == RootGamePacketType.GameDataTo) {
-    //   // console.log((packet as GameDataPacket).packets);
-    //   const prefix = " ".repeat(`[${this.id} @ ${this.address}:${this.port}] > [Server] : Sent `.length);
-
-    //   console.log(`${prefix}│`);
-    //   console.log(`${prefix}├─[Lobby Code]─> ${(packet as GameDataPacket).lobbyCode}`);
-    //   console.log(`${prefix}├─[Recipient]─> ${(packet as GameDataPacket).targetClientId ?? "ALL"}`);
-    //   console.log(`${prefix}└─[Packets]`);
-
-    //   (packet as GameDataPacket).packets.forEach((subpacket, index, { length }) => {
-    //     console.log(`${prefix}  ${index == length - 1 ? "└" : "├"}─[${index}]─> ${GameDataPacketType[subpacket.type]}${subpacket.type == GameDataPacketType.RPC ? ` > ${RPCPacketType[(subpacket as RPCPacket).packet.type]}` : ""}`);
-    //   });
-    // }
   }
 }

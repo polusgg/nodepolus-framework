@@ -9,7 +9,7 @@ export class RootAnnouncementPacket {
     const packets: BaseAnnouncementPacket[] = [];
 
     reader.readAllChildMessages(child => {
-      switch (child.tag) {
+      switch (child.getTag()) {
         case AnnouncementPacketType.CacheData:
           packets.push(CacheDataPacket.deserialize(child));
           break;

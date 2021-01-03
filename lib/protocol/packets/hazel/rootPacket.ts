@@ -31,7 +31,7 @@ export class RootPacket {
     const packets: BaseRootPacket[] = [];
 
     reader.readAllChildMessages(child => {
-      switch (child.tag) {
+      switch (child.getTag()) {
         case RootPacketType.HostGame:
           if (clientBound) {
             packets.push(HostGameResponsePacket.deserialize(child));
@@ -41,7 +41,7 @@ export class RootPacket {
           break;
         case RootPacketType.JoinGame:
           if (clientBound) {
-            if (child.buffer.length <= 4) {
+            if (child.getBuffer().length <= 4) {
               packets.push(JoinGameErrorPacket.deserialize(child));
             } else {
               packets.push(JoinGameResponsePacket.deserialize(child));
@@ -96,7 +96,7 @@ export class RootPacket {
           }
           break;
         default:
-          throw new Error(`Attempted to deserialize an unimplemented root game packet type: ${child.tag} (${RootPacketType[child.tag]})`);
+          throw new Error(`Attempted to deserialize an unimplemented root game packet type: ${child.getTag()} (${RootPacketType[child.getTag()]})`);
       }
     });
 

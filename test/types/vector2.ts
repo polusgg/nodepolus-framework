@@ -22,5 +22,5 @@ test("writes a vector2", t => {
   vecOne.serialize(buf);
   vecTwo.serialize(buf);
 
-  t.is(buf.buffer.toString("hex"), "ff7fff7fffff0000");
+  t.is(buf.getBuffer().toString("hex"), "ff7fff7fffff0000");
 });

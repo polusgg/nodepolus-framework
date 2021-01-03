@@ -21,8 +21,8 @@ test("writes a boolean", t => {
   buf.writeBoolean(true);
   buf.writeBoolean(false);
 
-  t.is(buf.buffer.toString("hex"), "0100");
-  t.is(buf.length, 2);
+  t.is(buf.getBuffer().toString("hex"), "0100");
+  t.is(buf.getLength(), 2);
 });
 
 test("reads an int8", t => {
@@ -43,8 +43,8 @@ test("writes an int8", t => {
   buf.writeSByte(86);
   buf.writeSByte(-128);
 
-  t.is(buf.buffer.toString("hex"), "7ff05680");
-  t.is(buf.length, 4);
+  t.is(buf.getBuffer().toString("hex"), "7ff05680");
+  t.is(buf.getLength(), 4);
 });
 
 test("reads a uint8", t => {
@@ -63,8 +63,8 @@ test("writes a uint8", t => {
   buf.writeByte(240);
   buf.writeByte(86);
 
-  t.is(buf.buffer.toString("hex"), "fff056");
-  t.is(buf.length, 3);
+  t.is(buf.getBuffer().toString("hex"), "fff056");
+  t.is(buf.getLength(), 3);
 });
 
 test("reads an int16", t => {
@@ -85,8 +85,8 @@ test("writes an int16", t => {
   buf.writeInt16(22102);
   buf.writeInt16(-32768);
 
-  t.is(buf.buffer.toString("hex"), "ff7ff0f056560080");
-  t.is(buf.length, 8);
+  t.is(buf.getBuffer().toString("hex"), "ff7ff0f056560080");
+  t.is(buf.getLength(), 8);
 });
 
 test("reads a uint16", t => {
@@ -105,8 +105,8 @@ test("writes a uint16", t => {
   buf.writeUInt16(61680);
   buf.writeUInt16(22102);
 
-  t.is(buf.buffer.toString("hex"), "fffff0f05656");
-  t.is(buf.length, 6);
+  t.is(buf.getBuffer().toString("hex"), "fffff0f05656");
+  t.is(buf.getLength(), 6);
 });
 
 test("reads an int32", t => {
@@ -127,8 +127,8 @@ test("writes an int32", t => {
   buf.writeInt32(1448498774);
   buf.writeInt32(-2147483648);
 
-  t.is(buf.buffer.toString("hex"), "ffffff7ff0f0f0f05656565600000080");
-  t.is(buf.length, 16);
+  t.is(buf.getBuffer().toString("hex"), "ffffff7ff0f0f0f05656565600000080");
+  t.is(buf.getLength(), 16);
 });
 
 test("reads a uint32", t => {
@@ -147,8 +147,8 @@ test("writes a uint32", t => {
   buf.writeUInt32(4042322160);
   buf.writeUInt32(1448498774);
 
-  t.is(buf.buffer.toString("hex"), "fffffffff0f0f0f056565656");
-  t.is(buf.length, 12);
+  t.is(buf.getBuffer().toString("hex"), "fffffffff0f0f0f056565656");
+  t.is(buf.getLength(), 12);
 });
 
 test("reads a float32", t => {
@@ -167,8 +167,8 @@ test("writes a float32", t => {
   buf.writeFloat32(10000);
   buf.writeFloat32(1);
 
-  t.is(buf.buffer.toString("hex"), "00401cc600401c460000803f");
-  t.is(buf.length, 12);
+  t.is(buf.getBuffer().toString("hex"), "00401cc600401c460000803f");
+  t.is(buf.getLength(), 12);
 });
 
 test("reads a packed int32", t => {
@@ -201,8 +201,8 @@ test("writes a packed int32", t => {
   buf.writePackedInt32(-1);
   buf.writePackedInt32(-2147483648);
 
-  t.is(buf.buffer.toString("hex"), "0001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
-  t.is(buf.length, 26);
+  t.is(buf.getBuffer().toString("hex"), "0001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
+  t.is(buf.getLength(), 26);
 });
 
 test("reads a packed uint32", t => {
@@ -235,8 +235,8 @@ test("writes a packed uint32", t => {
   buf.writePackedUInt32(4294967295);
   buf.writePackedUInt32(2147483648);
 
-  t.is(buf.buffer.toString("hex"), "0001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
-  t.is(buf.length, 26);
+  t.is(buf.getBuffer().toString("hex"), "0001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
+  t.is(buf.getLength(), 26);
 });
 
 test("reads a string", t => {
@@ -260,16 +260,16 @@ test("writes a string", t => {
   buf.writeString("");
 
   t.is(
-    buf.buffer.toString("hex"),
+    buf.getBuffer().toString("hex"),
     "0548656c6c6f8008202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202cd094d0bcd0b8d182d180d0b8d0b920d098d0b2d0b0d0bdd0bed0b2d0b8d18720d09fd0b5d182d180d0bed0b200",
   );
-  t.is(buf.length, 1078);
+  t.is(buf.getLength(), 1078);
 });
 
 test("reads bytes", t => {
   const buf = MessageReader.fromMessage("0200010a0b");
 
-  t.is(buf.readBytes(2).buffer.toString("hex"), "0a0b");
+  t.is(buf.readBytes(2).getBuffer().toString("hex"), "0a0b");
 });
 
 test("writes bytes", t => {
@@ -277,27 +277,27 @@ test("writes bytes", t => {
 
   buf.writeBytes([0, 1, 2, 3]);
 
-  t.is(buf.buffer.toString("hex"), "00010203");
+  t.is(buf.getBuffer().toString("hex"), "00010203");
 });
 
 test("reads a message", t => {
   const buf = MessageReader.fromMessage("12003205000104736f6d6507000206737472696e67");
 
-  t.is(buf.length, 0x0012);
-  t.is(buf.tag, 0x32);
+  t.is(buf.getLength(), 0x0012);
+  t.is(buf.getTag(), 0x32);
 
   const one = buf.readMessage();
   const two = buf.readMessage();
 
   t.truthy(one);
-  t.is(one!.length, 0x05);
-  t.is(one!.tag, 0x01);
+  t.is(one!.getLength(), 0x05);
+  t.is(one!.getTag(), 0x01);
   t.is(one!.readString(), "some");
   t.false(one!.hasBytesLeft());
 
   t.truthy(two);
-  t.is(two!.length, 0x07);
-  t.is(two!.tag, 0x02);
+  t.is(two!.getLength(), 0x07);
+  t.is(two!.getTag(), 0x02);
   t.is(two!.readString(), "string");
   t.false(two!.hasBytesLeft());
 
@@ -316,7 +316,7 @@ test("writes a message", t => {
   buf.endMessage();
   buf.endMessage();
 
-  t.is(buf.buffer.toString("hex"), "12003205000104736f6d6507000206737472696e67");
+  t.is(buf.getBuffer().toString("hex"), "12003205000104736f6d6507000206737472696e67");
 });
 
 test("reads a list of objects", t => {
@@ -338,7 +338,7 @@ test("writes a list of objects", t => {
   buf.writeList(list, (writer, item) => writer.writeInt32(item));
   buf.endMessage();
 
-  t.is(buf.buffer.toString("hex"), "0d000103010000000200000003000000");
+  t.is(buf.getBuffer().toString("hex"), "0d000103010000000200000003000000");
 });
 
 test("reads a list of messages", t => {
@@ -386,7 +386,7 @@ test("writes a list of messages with custom tags", t => {
   });
   buf.endMessage();
 
-  t.is(buf.buffer.toString("hex"), "1d0000020a0000054a656e6e79ed5f84000c0001074d696e7574657320050800");
+  t.is(buf.getBuffer().toString("hex"), "1d0000020a0000054a656e6e79ed5f84000c0001074d696e7574657320050800");
 });
 
 test("writes a list of messages with zeroed tags", t => {
@@ -405,7 +405,7 @@ test("writes a list of messages with zeroed tags", t => {
   });
   buf.endMessage();
 
-  t.is(buf.buffer.toString("hex"), "1d0000020a0000054a656e6e79ed5f84000c0000074d696e7574657320050800");
+  t.is(buf.getBuffer().toString("hex"), "1d0000020a0000054a656e6e79ed5f84000c0000074d696e7574657320050800");
 });
 
 test("reads all child messages", t => {
@@ -434,7 +434,7 @@ test("reads remaining bytes", t => {
 
   t.false(typeof child == "undefined");
   t.is(child!.readByte(), 15);
-  t.is(child!.readRemainingBytes().buffer.toString(), "hello");
+  t.is(child!.readRemainingBytes().getBuffer().toString(), "hello");
   t.false(child!.hasBytesLeft());
   t.is(buf.readUInt32(), 1123477094);
   t.false(buf.hasBytesLeft());
@@ -491,7 +491,7 @@ test("throws an error when reading more bytes than are avaialble", t => {
   t.is(buf.getReadableBytesLength(), 4);
   t.throws(() => buf.readBytes(5));
   t.is(buf.getReadableBytesLength(), 4);
-  t.is(buf.readBytes(4).buffer.toString("hex"), "02030405");
+  t.is(buf.readBytes(4).getBuffer().toString("hex"), "02030405");
   t.false(buf.hasBytesLeft());
 });
 
@@ -501,7 +501,7 @@ test("reads bytes and size", t => {
   const bytes = buf.readBytesAndSize();
 
   t.is(buf.getReadableBytesLength(), 4);
-  t.is(bytes.length, 128);
-  t.is(buf.readRemainingBytes().buffer.toString("hex"), "03020100");
-  t.is(bytes.buffer.toString("hex"), rawBytes);
+  t.is(bytes.getLength(), 128);
+  t.is(buf.readRemainingBytes().getBuffer().toString("hex"), "03020100");
+  t.is(bytes.getBuffer().toString("hex"), rawBytes);
 });

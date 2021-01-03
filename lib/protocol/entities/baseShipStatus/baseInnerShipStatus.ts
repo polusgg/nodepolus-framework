@@ -101,7 +101,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   }
 
   setData(data: MessageReader | MessageWriter): void {
-    const reader = MessageReader.fromRawBytes(data.buffer);
+    const reader = MessageReader.fromRawBytes(data.getBuffer());
 
     this.setSystems(
       this.deserializeDirtyBitsToSystems(reader.readPackedUInt32()),

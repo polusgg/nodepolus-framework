@@ -11,7 +11,7 @@ declare const server: Server;
 const logger = new Logger("Debug");
 
 server.on("player.joined", (event: PlayerJoinedEvent) => {
-  logger.log(event.player, " Connected");
+  logger.log(event.getPlayer(), " Connected");
 });
 
 server.on("server.lobby.join", (event: ServerLobbyJoinEvent) => {

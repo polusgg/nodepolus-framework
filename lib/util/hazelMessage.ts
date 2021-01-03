@@ -6,7 +6,7 @@ import { MaxValue, MinValue } from "./constants";
 export type BuildFrom = number | Buffer | string | number[] | HazelMessage;
 
 export abstract class HazelMessage {
-  public buffer!: Buffer;
+  protected buffer: Buffer;
 
   constructor(buildFrom: BuildFrom = 0, isHex: boolean = true) {
     if (buildFrom instanceof HazelMessage) {
@@ -21,15 +21,23 @@ export abstract class HazelMessage {
       this.buffer = Buffer.alloc(buildFrom);
     }
   }
+
+  getBuffer(): Buffer {
+    return this.buffer;
+  }
 }
 
 export class MessageWriter extends HazelMessage {
-  public cursor = 0;
-
   private readonly messageStarts: number[] = [];
+
+  private cursor = 0;
 
   static concat(...writers: MessageWriter[]): MessageWriter {
     return new MessageWriter(Buffer.concat(writers.map(writer => writer.buffer)));
+  }
+
+  getLength(): number {
+    return this.buffer.length;
   }
 
   startMessage(flag: number): this {
@@ -190,7 +198,7 @@ export class MessageWriter extends HazelMessage {
 
   writeBytes(bytes: Buffer | number[] | string | HazelMessage): this {
     if (bytes instanceof HazelMessage) {
-      bytes = bytes.buffer;
+      bytes = bytes.getBuffer();
     }
 
     this.resizeBuffer(bytes.length);
@@ -244,14 +252,6 @@ export class MessageWriter extends HazelMessage {
     }, lengthIsPacked);
   }
 
-  bytesRemainingLength(): number {
-    return this.buffer.length - this.cursor;
-  }
-
-  get length(): number {
-    return this.buffer.length;
-  }
-
   private resizeBuffer(addsize: number): void {
     let newlen = this.cursor + addsize;
 
@@ -267,9 +267,9 @@ export class MessageWriter extends HazelMessage {
 }
 
 export class MessageReader extends HazelMessage {
-  public cursor = 0;
-  public tag = 0xff;
-  public length = 0;
+  private cursor = 0;
+  private tag = 0xff;
+  private length = 0;
 
   constructor(source: BuildFrom = 0, isHex: boolean = true) {
     super(source, isHex);
@@ -293,6 +293,14 @@ export class MessageReader extends HazelMessage {
     reader.tag = 0xff;
 
     return reader;
+  }
+
+  getLength(): number {
+    return this.length;
+  }
+
+  getTag(): number {
+    return this.tag;
   }
 
   readMessage(): MessageReader | undefined {

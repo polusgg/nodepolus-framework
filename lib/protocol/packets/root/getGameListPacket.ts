@@ -41,14 +41,14 @@ export class GetGameListResponsePacket extends BaseRootPacket {
     const lobbies: LobbyListing[] = [];
 
     reader.readAllChildMessages(child => {
-      if (child.tag == 1) {
+      if (child.getTag() == 1) {
         counts = new LobbyCount(
           reader.readUInt32(),
           reader.readUInt32(),
           reader.readUInt32(),
           reader.readUInt32(),
         );
-      } else if (child.tag == 0) {
+      } else if (child.getTag() == 0) {
         child.readAllChildMessages(lobbyMessage => {
           lobbies.push(LobbyListing.deserialize(lobbyMessage));
         });

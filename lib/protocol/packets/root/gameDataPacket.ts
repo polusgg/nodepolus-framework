@@ -25,14 +25,14 @@ export class GameDataPacket extends BaseRootPacket {
     const lobbyCode: string = LobbyCode.decode(reader.readInt32());
     let targetClientId: number | undefined;
 
-    if (reader.tag == RootPacketType.GameDataTo) {
+    if (reader.getTag() == RootPacketType.GameDataTo) {
       targetClientId = reader.readPackedUInt32();
     }
 
     const packets: BaseGameDataPacket[] = [];
 
     reader.readAllChildMessages(child => {
-      switch (child.tag) {
+      switch (child.getTag()) {
         case GameDataPacketType.Data:
           return packets.push(DataPacket.deserialize(child));
         case GameDataPacketType.RPC:
@@ -46,7 +46,7 @@ export class GameDataPacket extends BaseRootPacket {
         case GameDataPacketType.Ready:
           return packets.push(ReadyPacket.deserialize(child));
         default:
-          throw new Error(`Attempted to deserialize an unimplemented game data packet type: ${child.tag} (${GameDataPacketType[child.tag]})`);
+          throw new Error(`Attempted to deserialize an unimplemented game data packet type: ${child.getTag()} (${GameDataPacketType[child.getTag()]})`);
       }
     });
 

@@ -1,6 +1,6 @@
 import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
-import { ServerLobbyCreatedEvent, ServerLobbyJoinEvent } from "../api/events/server";
+import { ServerLobbyCreatedEvent, ServerLobbyDestroyedEvent, ServerLobbyJoinEvent, ServerLobbyListEvent } from "../api/events/server";
 import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
 import { DisconnectReasonType, FakeClientId } from "../types/enums";
 import { ConnectionInfo, DisconnectReason } from "../types";
@@ -13,12 +13,14 @@ import Emittery from "emittery";
 import dgram from "dgram";
 import {
   BaseRootPacket,
+  GetGameListRequestPacket,
   GetGameListResponsePacket,
   HostGameRequestPacket,
   HostGameResponsePacket,
   JoinGameErrorPacket,
   JoinGameRequestPacket,
 } from "../protocol/packets/root";
+import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
 
 export class Server extends Emittery.Typed<ServerEvents> {
   public readonly startedAt = Date.now();
@@ -101,12 +103,20 @@ export class Server extends Emittery.Typed<ServerEvents> {
     return connection;
   }
 
-  private handleDisconnection(connection: Connection, reason?: DisconnectReason): void {
+  private async handleDisconnection(connection: Connection, reason?: DisconnectReason): Promise<void> {
     if (connection.lobby) {
       connection.lobby.handleDisconnect(connection, reason);
       this.connectionLobbyMap.delete(connection.getConnectionInfo().toString());
 
       if (connection.lobby.getConnections().length == 0) {
+        const event = new ServerLobbyDestroyedEvent(connection.lobby);
+
+        await this.emit("server.lobby.destroyed", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
+
         this.lobbies.splice(this.lobbies.indexOf(connection.lobby), 1);
         this.lobbyMap.delete(connection.lobby.getCode());
       }
@@ -122,7 +132,17 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
     newConnection.on("packet", async (evt: BaseRootPacket) => this.handlePacket(evt, newConnection));
     newConnection.on("disconnected", (reason?: DisconnectReason) => {
+      this.emit("connection.closed", new ConnectionClosedEvent(newConnection, reason));
       this.handleDisconnection(newConnection, reason);
+    });
+    newConnection.once("hello").then(async () => {
+      const event = new ConnectionOpenedEvent(newConnection);
+
+      await this.emit("connection.opened", event);
+
+      if (event.isCancelled()) {
+        newConnection.disconnect(event.getDisconnectReason());
+      }
     });
 
     return newConnection;
@@ -147,7 +167,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         const event = new ServerLobbyCreatedEvent(sender, newLobby);
 
-        this.emit("server.lobby.created", event);
+        await this.emit("server.lobby.created", event);
 
         if (!event.isCancelled()) {
           this.lobbies.push(newLobby);
@@ -175,6 +195,8 @@ export class Server extends Emittery.Typed<ServerEvents> {
           } else {
             sender.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameNotFound)]);
           }
+        } else {
+          sender.sendReliable([new JoinGameErrorPacket(event.getDisconnectReason())]);
         }
         break;
       }
@@ -203,7 +225,15 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         results.sort((a, b) => b.playerCount - a.playerCount);
 
-        sender.sendReliable([new GetGameListResponsePacket(results, counts)]);
+        const event = new ServerLobbyListEvent(sender, (packet as GetGameListRequestPacket).includePrivate, results, counts);
+
+        await this.emit("server.lobby.list", event);
+
+        if (!event.isCancelled()) {
+          sender.sendReliable([new GetGameListResponsePacket(event.getLobbies(), event.getLobbyCounts())]);
+        } else {
+          sender.disconnect(event.getDisconnectReason());
+        }
         break;
       }
       default: {

@@ -50,8 +50,8 @@ export class GameOptionsData {
 
     const expectedLength = LENGTHS[version - 1];
 
-    if (!GameOptionsData.isExpectedLength(version, bytes.length)) {
-      throw new Error(`Invalid GameOptionsData length for version ${version}: expected ${expectedLength} but got ${bytes.length}`);
+    if (!GameOptionsData.isExpectedLength(version, bytes.getLength())) {
+      throw new Error(`Invalid GameOptionsData length for version ${version}: expected ${expectedLength} but got ${bytes.getLength()}`);
     }
 
     return new GameOptionsData(

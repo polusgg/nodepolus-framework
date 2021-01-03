@@ -11,7 +11,7 @@ export class UpdateGameDataPacket extends BaseRPCPacket {
   }
 
   static deserialize(reader: MessageReader): UpdateGameDataPacket {
-    return new UpdateGameDataPacket(reader.readAllChildMessages(sub => PlayerData.deserialize(sub, sub.tag)));
+    return new UpdateGameDataPacket(reader.readAllChildMessages(sub => PlayerData.deserialize(sub, sub.getTag())));
   }
 
   serialize(): MessageWriter {

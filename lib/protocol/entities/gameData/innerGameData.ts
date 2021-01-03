@@ -65,7 +65,7 @@ export class InnerGameData extends BaseInnerNetObject {
   }
 
   setData(packet: MessageReader | MessageWriter): void {
-    MessageReader.fromRawBytes(packet.buffer).readList(sub => {
+    MessageReader.fromRawBytes(packet.getBuffer()).readList(sub => {
       const player = PlayerData.deserialize(sub);
 
       this.players[player.id] = player;
