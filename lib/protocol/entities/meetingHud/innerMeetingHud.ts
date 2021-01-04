@@ -1,49 +1,47 @@
-import { ClearVotePacket, ClosePacket, VotingCompletePacket } from "../../packets/rpc";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { MeetingVoteRemovedEvent } from "../../../api/events/meeting";
+import { notUndefined, shallowEqual } from "../../../util/functions";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
-import { shallowEqual } from "../../../util/functions";
+import { PlayerInstance } from "../../../api/player";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
-import { Connection } from "../../connection";
+import { ClearVotePacket } from "../../packets/rpc";
 import { BaseInnerNetObject } from "../types";
 import { EntityMeetingHud } from ".";
 import { VoteState } from "./types";
 
 export class InnerMeetingHud extends BaseInnerNetObject {
   public playerStates: VoteState[] = [];
-  public ended = false;
-  public isTie = false;
-  public exiledPlayer = 0xff;
 
   constructor(
     netId: number,
-    public parent: EntityMeetingHud,
+    public readonly parent: EntityMeetingHud,
   ) {
     super(InnerNetObjectType.MeetingHud, netId, parent);
-  }
-
-  close(sendTo: Connection[]): void {
-    this.sendRPCPacketTo(sendTo, new ClosePacket());
-  }
-
-  votingComplete(voteStates: VoteState[], didVotePlayerOff: boolean, exiledPlayerId: number, isTie: boolean, sendTo: Connection[]): void {
-    for (let i = 0; i < voteStates.length; i++) {
-      this.playerStates[i] = voteStates[i];
-    }
-
-    this.ended = true;
-    this.isTie = isTie;
-    this.exiledPlayer = didVotePlayerOff ? exiledPlayerId : 0xff;
-
-    this.sendRPCPacketTo(sendTo, new VotingCompletePacket(this.playerStates, this.exiledPlayer, this.isTie));
   }
 
   castVote(votingPlayerId: number, suspectPlayerId: number): void {
     this.parent.lobby.getHostInstance().handleCastVote(votingPlayerId, suspectPlayerId);
   }
 
-  clearVote(player: Connection[]): void {
-    this.sendRPCPacketTo(player, new ClearVotePacket());
+  async clearVote(players: PlayerInstance[]): Promise<void> {
+    const promises = (await Promise.all(players.map(async player => {
+      const event = new MeetingVoteRemovedEvent(this.parent.lobby.getGame()!, player);
+
+      await this.parent.lobby.getServer().emit("meeting.vote.removed", event);
+
+      return event;
+    }))).filter(event => !event.isCancelled()).map(event => {
+      const connection = this.parent.lobby.findConnectionByPlayer(event.getPlayer());
+      const state = this.playerStates[event.getPlayer().getId()];
+
+      state.didVote = false;
+      state.votedFor = -1;
+
+      return connection;
+    }).filter(notUndefined);
+
+    this.sendRPCPacketTo(promises, new ClearVotePacket());
   }
 
   getData(old: InnerMeetingHud): DataPacket {

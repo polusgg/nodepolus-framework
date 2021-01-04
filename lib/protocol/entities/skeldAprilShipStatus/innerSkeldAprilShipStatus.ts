@@ -6,7 +6,7 @@ import { EntitySkeldAprilShipStatus } from ".";
 export class InnerSkeldAprilShipStatus extends BaseInnerShipStatus {
   constructor(
     netId: number,
-    public parent: EntitySkeldAprilShipStatus,
+    public readonly parent: EntitySkeldAprilShipStatus,
   ) {
     super(InnerNetObjectType.SkeldAprilShipStatus, netId, parent, [
       SystemType.Reactor,

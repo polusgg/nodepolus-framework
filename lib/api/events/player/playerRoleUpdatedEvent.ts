@@ -8,8 +8,8 @@ import { CancellableEvent } from "../types";
 export class PlayerRoleUpdatedEvent extends CancellableEvent {
   constructor(
     private readonly player: PlayerInstance,
-    private readonly oldRole: PlayerRole,
     private newRole: PlayerRole,
+    private readonly oldRole?: PlayerRole,
   ) {
     super();
   }
@@ -18,7 +18,7 @@ export class PlayerRoleUpdatedEvent extends CancellableEvent {
     return this.player;
   }
 
-  getOldRole(): PlayerRole {
+  getOldRole(): PlayerRole | undefined {
     return this.oldRole;
   }
 

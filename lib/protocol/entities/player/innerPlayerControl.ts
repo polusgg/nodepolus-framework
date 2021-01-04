@@ -4,6 +4,7 @@ import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { PlayerInstance } from "../../../api/player";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
+import { TextComponent } from "../../../api/text";
 import { GameOptionsData } from "../../../types";
 import { InternalLobby } from "../../../lobby";
 import { PlayerData } from "../gameData/types";
@@ -40,14 +41,13 @@ import {
   SetTasksPacket,
   SyncSettingsPacket,
 } from "../../packets/rpc";
-import { TextComponent } from "../../../api/text";
 
 export class InnerPlayerControl extends BaseInnerNetObject {
   public scannerSequenceId = 1;
 
   constructor(
     netId: number,
-    public parent: EntityPlayer,
+    public readonly parent: EntityPlayer,
     public isNew: boolean,
     public playerId: number,
   ) {
@@ -217,6 +217,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     const event = new PlayerMurderedEvent(victim, this.getPlayerInstance());
 
+    await this.parent.lobby.getServer().emit("player.died", event);
     await this.parent.lobby.getServer().emit("player.murdered", event);
 
     if (event.isCancelled()) {
@@ -266,14 +267,14 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   getData(): DataPacket {
     return new DataPacket(
       this.netId,
-      new MessageWriter().writeByte(this.netId),
+      new MessageWriter().writeByte(this.playerId),
     );
   }
 
   setData(packet: MessageReader | MessageWriter): void {
     const reader = MessageReader.fromRawBytes(packet.getBuffer());
 
-    this.netId = reader.readByte();
+    this.playerId = reader.readByte();
   }
 
   serializeSpawn(): SpawnInnerNetObject {
@@ -293,7 +294,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     const playerInstance = this.parent.lobby.findPlayerByPlayerId(this.playerId);
 
     if (!playerInstance) {
-      throw new Error(`Player ${this.playerId} has no PlayerInstance on the lobby instance`);
+      throw new Error(`Player ${this.playerId} does not have a PlayerInstance on the lobby instance`);
     }
 
     return playerInstance;
@@ -304,7 +305,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     const playerConnection = this.parent.lobby.findConnectionByPlayer(playerInstance);
 
     if (!playerConnection) {
-      throw new Error(`Player ${playerInstance.getId()} has no connection on the lobby instance`);
+      throw new Error(`Player ${playerInstance.getId()} does not have a connection on the lobby instance`);
     }
 
     return playerConnection;

@@ -9,8 +9,8 @@ import { BaseInnerNetEntity } from ".";
 export abstract class BaseInnerNetObject {
   constructor(
     public readonly type: InnerNetObjectType,
-    public netId: number,
-    public parent: BaseInnerNetEntity,
+    public readonly netId: number,
+    public readonly parent: BaseInnerNetEntity,
   ) {}
 
   abstract clone(): BaseInnerNetObject;
@@ -32,6 +32,10 @@ export abstract class BaseInnerNetObject {
   }
 
   sendRPCPacketTo(to: Connection[], packet: BaseRPCPacket): void {
+    if (to.length == 0) {
+      return;
+    }
+
     this.parent.lobby.sendRPCPacket(this as unknown as BaseInnerNetObject, packet, to);
   }
 }

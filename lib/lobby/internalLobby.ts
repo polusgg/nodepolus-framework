@@ -13,6 +13,7 @@ import { EntityGameData } from "../protocol/entities/gameData";
 import { LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
 import { LobbyListing } from "../protocol/packets/root/types";
 import { LobbyInstance, LobbySettings } from "../api/lobby";
+import { PlayerJoinedEvent } from "../api/events/player";
 import { BaseRPCPacket } from "../protocol/packets/rpc";
 import { Connection } from "../protocol/connection";
 import { notUndefined } from "../util/functions";
@@ -304,6 +305,14 @@ export class InternalLobby implements LobbyInstance {
 
   finishedSpawningPlayer(connection: Connection): void {
     this.spawningPlayers.delete(connection);
+
+    const player = this.findPlayerByConnection(connection);
+
+    if (player) {
+      this.getServer().emit("player.joined", new PlayerJoinedEvent(this, player, !connection.firstJoin));
+
+      connection.firstJoin = false;
+    }
   }
 
   startedSpawningPlayer(connection: Connection): void {
@@ -451,7 +460,7 @@ export class InternalLobby implements LobbyInstance {
         }
 
         if (sender.isHost) {
-          con.sendKick(data.banned, data.disconnectReason);
+          con.sendKick(data.banned, this.findPlayerByConnection(sender), data.disconnectReason);
         }
         break;
       }
@@ -540,7 +549,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
-    this.hostInstance.handleDisconnect(connection);
+    this.hostInstance.handleDisconnect(connection, reason);
 
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
     const disconnectingPlayerIndex = this.findPlayerIndexByConnection(connection);
@@ -576,6 +585,7 @@ export class InternalLobby implements LobbyInstance {
         this.handleNewJoin(connection);
         break;
       case GameState.Ended:
+        // TODO: Dead code, InternalHost#endGame sets gameState to NotStarted
         this.handleRejoin(connection);
         break;
       default:

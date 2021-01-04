@@ -12,6 +12,8 @@ export { GameOptionsData } from "./gameOptionsData";
 
 export { LevelTask } from "./levelTask";
 
+export { LevelVent } from "./levelVent";
+
 export { Mutable } from "./mutable";
 
 export { NetworkAccessible } from "./networkAccessible";

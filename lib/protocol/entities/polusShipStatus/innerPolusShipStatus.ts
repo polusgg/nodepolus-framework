@@ -6,7 +6,7 @@ import { EntityPolusShipStatus } from ".";
 export class InnerPolusShipStatus extends BaseInnerShipStatus {
   constructor(
     netId: number,
-    public parent: EntityPolusShipStatus,
+    public readonly parent: EntityPolusShipStatus,
   ) {
     super(InnerNetObjectType.PolusShipStatus, netId, parent, [
       SystemType.Electrical,

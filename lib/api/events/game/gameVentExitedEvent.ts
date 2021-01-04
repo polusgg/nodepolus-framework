@@ -1,6 +1,7 @@
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
-import { Game, Vent } from "../../game";
+import { LevelVent } from "../../../types";
+import { Game } from "../../game";
 
 /**
  * Fired when a player has exited a vent.
@@ -9,7 +10,7 @@ export class GameVentExitedEvent extends CancellableEvent {
   constructor(
     private readonly game: Game,
     private readonly player: PlayerInstance,
-    private readonly vent: Vent,
+    private vent: LevelVent,
   ) {
     super();
   }
@@ -22,7 +23,11 @@ export class GameVentExitedEvent extends CancellableEvent {
     return this.player;
   }
 
-  getVent(): Vent {
+  getVent(): LevelVent {
     return this.vent;
+  }
+
+  setVent(vent: LevelVent): void {
+    this.vent = vent;
   }
 }

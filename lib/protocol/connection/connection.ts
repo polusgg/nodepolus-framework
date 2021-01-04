@@ -12,6 +12,7 @@ import { ConnectionEvents } from ".";
 import { Packet } from "../packets";
 import Emittery from "emittery";
 import dgram from "dgram";
+import { PlayerInstance } from "../../api/player";
 
 export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implements NetworkAccessible {
   public hazelVersion?: number;
@@ -23,6 +24,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   public id = -1;
   public lobby?: InternalLobby;
   public limboState = LimboState.PreSpawn;
+  public firstJoin = true;
 
   private readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
   private readonly unacknowledgedPackets: Map<number, number> = new Map();
@@ -231,7 +233,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     this.disconnectTimeout = setTimeout(() => this.cleanup(reason), 6000);
   }
 
-  sendKick(isBanned: boolean, reason?: DisconnectReason): void {
+  sendKick(isBanned: boolean, kickingPlayer?: PlayerInstance, reason?: DisconnectReason): void {
     if (!this.lobby) {
       throw new Error("Cannot kick a connection that is not in a lobby");
     }
@@ -242,6 +244,12 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
       isBanned,
       reason,
     ));
+
+    this.emit("kicked", {
+      isBanned,
+      kickingPlayer,
+      reason,
+    });
   }
 
   sendLateRejection(reason: DisconnectReason): void {

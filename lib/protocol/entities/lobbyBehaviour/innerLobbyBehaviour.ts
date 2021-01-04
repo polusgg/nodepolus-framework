@@ -8,7 +8,7 @@ import { EntityLobbyBehaviour } from ".";
 export class InnerLobbyBehaviour extends BaseInnerNetObject {
   constructor(
     netId: number,
-    public parent: EntityLobbyBehaviour,
+    public readonly parent: EntityLobbyBehaviour,
   ) {
     super(InnerNetObjectType.LobbyBehaviour, netId, parent);
   }

@@ -8,7 +8,7 @@ import { LevelTask } from "../../../types";
 export class PlayerTaskRemovedEvent extends CancellableEvent {
   constructor(
     private readonly player: PlayerInstance,
-    private readonly tasks: LevelTask[],
+    private readonly tasks: Set<LevelTask>,
   ) {
     super();
   }
@@ -17,7 +17,7 @@ export class PlayerTaskRemovedEvent extends CancellableEvent {
     return this.player;
   }
 
-  getTasks(): LevelTask[] {
+  getTasks(): Set<LevelTask> {
     return this.tasks;
   }
 }

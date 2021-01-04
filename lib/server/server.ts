@@ -1,4 +1,5 @@
 import { ServerLobbyCreatedEvent, ServerLobbyDestroyedEvent, ServerLobbyJoinEvent, ServerLobbyListEvent } from "../api/events/server";
+import { PlayerBannedEvent, PlayerKickedEvent, PlayerLeftEvent } from "../api/events/player";
 import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
 import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
@@ -31,7 +32,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
   public lobbies: InternalLobby[] = [];
   public lobbyMap: Map<string, InternalLobby> = new Map();
 
-  // Starts at 1 to allow the Server host implementation's ID to be 0
+  // Reserve the fake client IDs
   private connectionIndex = Object.keys(FakeClientId).length / 2;
 
   get address(): string {
@@ -105,6 +106,12 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
   private async handleDisconnection(connection: Connection, reason?: DisconnectReason): Promise<void> {
     if (connection.lobby) {
+      const player = connection.lobby.findPlayerByConnection(connection);
+
+      if (player) {
+        this.emit("player.left", new PlayerLeftEvent(connection.lobby, player));
+      }
+
       connection.lobby.handleDisconnect(connection, reason);
       this.connectionLobbyMap.delete(connection.getConnectionInfo().toString());
 
@@ -130,10 +137,28 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
     newConnection.id = this.getNextConnectionId();
 
-    newConnection.on("packet", async (evt: BaseRootPacket) => this.handlePacket(evt, newConnection));
-    newConnection.on("disconnected", (reason?: DisconnectReason) => {
+    newConnection.on("packet", async (packet: BaseRootPacket) => this.handlePacket(packet, newConnection));
+    newConnection.once("disconnected").then((reason?: DisconnectReason) => {
       this.emit("connection.closed", new ConnectionClosedEvent(newConnection, reason));
       this.handleDisconnection(newConnection, reason);
+    });
+    newConnection.once("kicked").then(({ isBanned, kickingPlayer, reason }) => {
+      if (!newConnection.lobby) {
+        return;
+      }
+
+      const lobby = newConnection.lobby;
+      const player = lobby.findPlayerByConnection(newConnection);
+
+      if (!player) {
+        return;
+      }
+
+      if (isBanned) {
+        this.emit("player.banned", new PlayerBannedEvent(lobby, player, kickingPlayer, reason));
+      } else {
+        this.emit("player.kicked", new PlayerKickedEvent(lobby, player, kickingPlayer, reason));
+      }
     });
     newConnection.once("hello").then(async () => {
       const event = new ConnectionOpenedEvent(newConnection);

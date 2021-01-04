@@ -1,3 +1,4 @@
+import { PlayerPositionTeleportedEvent, PlayerPositionWalkedEvent } from "../../../api/events/player";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { InnerNetObjectType } from "../types/enums";
@@ -11,7 +12,7 @@ import { EntityPlayer } from ".";
 export class InnerCustomNetworkTransform extends BaseInnerNetObject {
   constructor(
     netId: number,
-    public parent: EntityPlayer,
+    public readonly parent: EntityPlayer,
     public sequenceId: number,
     public position: Vector2,
     public velocity: Vector2,
@@ -19,12 +20,27 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     super(InnerNetObjectType.CustomNetworkTransform, netId, parent);
   }
 
-  snapTo(position: Vector2, sendTo: Connection[]): void {
-    this.position = position;
-    this.velocity = new Vector2(0, 0);
+  async snapTo(position: Vector2, sendTo: Connection[]): Promise<void> {
+    const player = this.parent.lobby.findPlayerByNetId(this.netId);
+
+    if (!player) {
+      throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    const event = new PlayerPositionTeleportedEvent(player, this.position, this.velocity, position, new Vector2(0, 0));
+
+    await this.parent.lobby.getServer().emit("player.position.updated", event);
+    await this.parent.lobby.getServer().emit("player.position.teleported", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
+    this.position = event.getNewPosition();
+    this.velocity = event.getNewVelocity();
     this.sequenceId += 5;
 
-    this.sendRPCPacketTo(sendTo, new SnapToPacket(position, this.sequenceId));
+    this.sendRPCPacketTo(sendTo, new SnapToPacket(this.position, this.sequenceId));
   }
 
   getData(): DataPacket {
@@ -36,12 +52,36 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     return new DataPacket(this.netId, writer);
   }
 
-  setData(packet: MessageReader | MessageWriter): void {
+  async setData(packet: MessageReader | MessageWriter): Promise<void> {
+    const player = this.parent.lobby.findPlayerByNetId(this.netId);
+
+    if (!player) {
+      throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
+    }
+
     const reader = MessageReader.fromRawBytes(packet.getBuffer());
 
     this.sequenceId = reader.readUInt16();
-    this.position = Vector2.deserialize(reader);
-    this.velocity = Vector2.deserialize(reader);
+
+    const position = Vector2.deserialize(reader);
+    const velocity = Vector2.deserialize(reader);
+    const event = new PlayerPositionWalkedEvent(player, this.position, this.velocity, position, velocity);
+
+    await this.parent.lobby.getServer().emit("player.position.updated", event);
+    await this.parent.lobby.getServer().emit("player.position.walked", event);
+
+    if (event.isCancelled()) {
+      const connection = this.parent.lobby.findConnectionByPlayer(player);
+
+      if (connection) {
+        this.sendRPCPacketTo([connection], new SnapToPacket(this.position, this.sequenceId += 5));
+      }
+
+      return;
+    }
+
+    this.position = event.getNewPosition();
+    this.velocity = event.getNewVelocity();
   }
 
   serializeSpawn(): SpawnInnerNetObject {

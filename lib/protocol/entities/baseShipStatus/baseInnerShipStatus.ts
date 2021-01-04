@@ -26,16 +26,17 @@ import {
 } from "./systems";
 
 export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
+  public readonly spawnSystemTypes: SystemType[];
+
   public systems: BaseSystem[] = [];
-  public spawnSystemTypes: SystemType[];
 
   private readonly level: Level;
 
   protected constructor(
-    public type: InnerNetObjectType,
+    public readonly type: InnerNetObjectType,
     netId: number,
     parent: BaseInnerNetEntity,
-    public systemTypes: SystemType[],
+    public readonly systemTypes: SystemType[],
     spawnSystemTypes?: SystemType[],
   ) {
     super(type, netId, parent);

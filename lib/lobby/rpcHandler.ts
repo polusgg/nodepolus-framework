@@ -35,6 +35,7 @@ import {
   SnapToPacket,
   SyncSettingsPacket,
 } from "../protocol/packets/rpc";
+import { Vents } from "../static";
 
 export class RPCHandler {
   constructor(
@@ -96,8 +97,6 @@ export class RPCHandler {
         }
 
         this.handleCheckName(sender as InnerPlayerControl, packet.name);
-
-        // this.lobby.emit("player", this.lobby.findPlayerByConnection(this.lobby.findConnection(sender.parent.owner)!)!);
         break;
       }
       case RPCPacketType.SetName: {
@@ -417,11 +416,11 @@ export class RPCHandler {
   }
 
   handleEnterVent(sender: InnerPlayerPhysics, ventId: number, sendTo: Connection[]): void {
-    sender.enterVent(ventId, sendTo);
+    sender.enterVent(Vents.fromId(this.lobby.getLevel(), [ventId])[0], sendTo);
   }
 
   handleExitVent(sender: InnerPlayerPhysics, ventId: number, sendTo: Connection[]): void {
-    sender.exitVent(ventId, sendTo);
+    sender.exitVent(Vents.fromId(this.lobby.getLevel(), [ventId])[0], sendTo);
   }
 
   handleSnapTo(sender: InnerCustomNetworkTransform, position: Vector2, _lastSequenceId: number, sendTo: Connection[]): void {
@@ -433,7 +432,18 @@ export class RPCHandler {
   }
 
   handleAddVote(sender: InnerVoteBanSystem, votingClientId: number, targetClientId: number, sendTo: Connection[]): void {
-    sender.addVote(votingClientId, targetClientId, sendTo);
+    const voter = this.lobby.findPlayerByClientId(votingClientId);
+    const target = this.lobby.findPlayerByClientId(targetClientId);
+
+    if (!voter) {
+      throw new Error(`Voting client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    if (!target) {
+      throw new Error(`Target client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    sender.addVote(voter, target, sendTo);
   }
 
   handleCloseDoorsOfType(sender: BaseInnerShipStatus, system: SystemType): void {

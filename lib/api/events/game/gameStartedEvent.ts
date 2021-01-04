@@ -3,8 +3,6 @@ import { Game } from "../../game";
 
 /**
  * Fired when a game has started.
- *
- * TODO: Add note about adding a player to more than one role
  */
 export class GameStartedEvent {
   constructor(

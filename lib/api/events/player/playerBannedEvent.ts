@@ -1,3 +1,4 @@
+import { DisconnectReason } from "../../../types";
 import { PlayerInstance } from "../../player";
 import { LobbyInstance } from "../../lobby";
 import { CancellableEvent } from "../types";
@@ -10,6 +11,7 @@ export class PlayerBannedEvent extends CancellableEvent {
     private readonly lobby: LobbyInstance,
     private readonly player: PlayerInstance,
     private readonly banningPlayer?: PlayerInstance,
+    private readonly reason?: DisconnectReason,
   ) {
     super();
   }
@@ -24,5 +26,9 @@ export class PlayerBannedEvent extends CancellableEvent {
 
   getBanningPlayer(): PlayerInstance | undefined {
     return this.banningPlayer;
+  }
+
+  getReason(): DisconnectReason | undefined {
+    return this.reason;
   }
 }

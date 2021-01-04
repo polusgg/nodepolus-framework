@@ -45,6 +45,28 @@ export class PlayerData {
     return true;
   }
 
+  addTasks(tasks: Set<LevelTask>): void {
+    const newTasks = [...this.tasks];
+
+    for (let i = 0; i < tasks.size; i++) {
+      if (this.tasks.findIndex(task => task[0] == tasks[i]) > -1) {
+        continue;
+      }
+
+      newTasks.push(tasks[i]);
+    }
+  }
+
+  removeTasks(tasks: Set<LevelTask>): void {
+    for (let i = 0; i < tasks.size; i++) {
+      const index = this.tasks.findIndex(task => task[0] == tasks[i]);
+
+      if (index > -1) {
+        this.tasks.splice(index, 1);
+      }
+    }
+  }
+
   isTaskAtIndexCompleted(index: number): boolean {
     return this.tasks[index][1];
   }

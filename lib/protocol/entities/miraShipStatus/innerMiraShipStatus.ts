@@ -6,7 +6,7 @@ import { EntityMiraShipStatus } from ".";
 export class InnerMiraShipStatus extends BaseInnerShipStatus {
   constructor(
     netId: number,
-    public parent: EntityMiraShipStatus,
+    public readonly parent: EntityMiraShipStatus,
   ) {
     super(InnerNetObjectType.MiraShipStatus, netId, parent, [
       SystemType.Reactor,

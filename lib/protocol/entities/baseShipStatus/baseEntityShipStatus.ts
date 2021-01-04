@@ -20,6 +20,6 @@ export abstract class BaseEntityShipStatus extends BaseInnerNetEntity {
     }
 
     // TODO:
-    throw new Error("");
+    throw new Error("ShipStatus entity does not have a ShipStatus InnerNetObject instance");
   }
 }

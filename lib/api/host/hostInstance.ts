@@ -2,6 +2,7 @@ import { RepairAmount } from "../../protocol/packets/rpc/repairSystem/amounts";
 import { BaseInnerShipStatus } from "../../protocol/entities/baseShipStatus";
 import { GameOverReason, PlayerColor, SystemType } from "../../types/enums";
 import { InnerPlayerControl } from "../../protocol/entities/player";
+import { DisconnectReason, LevelTask } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { PlayerInstance } from "../player";
 import {
@@ -41,7 +42,7 @@ export interface HostInstance {
 
   handleSetStartCounter(player: PlayerInstance, sequenceId: number, timeRemaining: number): void;
 
-  handleDisconnect(connection: Connection): void;
+  handleDisconnect(connection: Connection, reason: DisconnectReason | undefined): void;
 
   handleUsePlatform(sender: InnerPlayerControl): void;
 
@@ -54,6 +55,8 @@ export interface HostInstance {
   setInfected(infectedCount: number): void;
 
   setTasks(): void;
+
+  setPlayerTasks(player: PlayerInstance, tasks: LevelTask[]): void;
 
   endMeeting(): void;
 

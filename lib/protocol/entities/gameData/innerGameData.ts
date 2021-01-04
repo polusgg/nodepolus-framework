@@ -12,8 +12,8 @@ import { Tasks } from "../../../static";
 export class InnerGameData extends BaseInnerNetObject {
   constructor(
     netId: number,
-    public parent: EntityGameData,
-    public players: PlayerData[],
+    public readonly parent: EntityGameData,
+    public readonly players: PlayerData[],
   ) {
     super(InnerNetObjectType.GameData, netId, parent);
   }

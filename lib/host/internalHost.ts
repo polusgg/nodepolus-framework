@@ -1,4 +1,4 @@
-import { SetInfectedPacket, SetStartCounterPacket, StartMeetingPacket } from "../protocol/packets/rpc";
+import { PlayerExiledEvent, PlayerRoleUpdatedEvent, PlayerTaskAddedEvent } from "../api/events/player";
 import { BaseInnerShipStatus, InternalSystemType } from "../protocol/entities/baseShipStatus";
 import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent } from "../api/events/lobby";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
@@ -51,13 +51,24 @@ import {
   SwitchSystem,
 } from "../protocol/entities/baseShipStatus/systems";
 import {
+  ClearVotePacket,
+  ClosePacket,
+  SetInfectedPacket,
+  SetStartCounterPacket,
+  StartMeetingPacket,
+  VotingCompletePacket,
+} from "../protocol/packets/rpc";
+import {
   MeetingClosedEvent,
   MeetingConcludedEvent,
   MeetingEndedEvent,
+  MeetingStartedEvent,
+  MeetingVoteAddedEvent,
 } from "../api/events/meeting";
 import {
   GameEndedEvent,
-  GameStartedEvent, GameStartingEvent,
+  GameStartedEvent,
+  GameStartingEvent,
 } from "../api/events/game";
 import {
   AutoDoorsHandler,
@@ -73,6 +84,7 @@ import {
   Level,
   LimboState,
   PlayerColor,
+  PlayerRole,
   SystemType,
   TaskLength,
   TaskType,
@@ -359,14 +371,33 @@ export class InternalHost implements HostInstance {
     }
   }
 
-  handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void {
+  async handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): Promise<void> {
     const gameData = this.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("Received ReportDeadBody without a GameData instance");
     }
 
-    sender.sendRPCPacketTo(this.lobby.getConnections(), new StartMeetingPacket(victimPlayerId));
+    const player = this.lobby.findPlayerByInnerNetObject(sender);
+
+    if (!player) {
+      throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    const event = new MeetingStartedEvent(
+      this.lobby.getGame()!,
+      player,
+      victimPlayerId ? this.lobby.findPlayerByPlayerId(victimPlayerId) : undefined,
+    );
+
+    await this.lobby.getServer().emit("meeting.started", event);
+
+    if (event.isCancelled()) {
+      // TODO: Try to remove "Waiting for host" text on button window
+      return;
+    }
+
+    sender.sendRPCPacketTo(this.lobby.getConnections(), new StartMeetingPacket(event.getVictim()?.getId() ?? 0xff));
 
     const meetingHud = new EntityMeetingHud(this.lobby, this.getNextNetId());
 
@@ -375,12 +406,12 @@ export class InternalHost implements HostInstance {
     meetingHud.meetingHud.playerStates = new Array(gameData.gameData.players.length);
 
     for (let i = 0; i < gameData.gameData.players.length; i++) {
-      const player = gameData.gameData.players[i];
+      const playerData = gameData.gameData.players[i];
 
-      meetingHud!.meetingHud.playerStates[player.id] = new VoteState(
-        player!.id == sender.playerId,
+      meetingHud!.meetingHud.playerStates[playerData.id] = new VoteState(
+        playerData!.id == event.getCaller().getId(),
         false,
-        player.isDead || player.isDisconnected,
+        playerData.isDead || playerData.isDisconnected,
         -1,
       );
     }
@@ -392,23 +423,48 @@ export class InternalHost implements HostInstance {
     this.meetingHudTimeout = setTimeout(this.endMeeting, (this.lobby.getOptions().votingTime + this.lobby.getOptions().discussionTime) * 1000);
   }
 
-  handleCastVote(votingPlayerId: number, suspectPlayerId: number): void {
+  async handleCastVote(votingPlayerId: number, suspectPlayerId: number): Promise<void> {
     const meetingHud = this.lobby.getMeetingHud();
 
     if (!meetingHud) {
       throw new Error("Received CastVote without a MeetingHud instance");
     }
 
-    const oldMeetingHud = meetingHud.meetingHud.clone();
+    const player = this.lobby.findPlayerByPlayerId(votingPlayerId);
 
-    meetingHud.meetingHud.playerStates[votingPlayerId].votedFor = suspectPlayerId;
-    meetingHud.meetingHud.playerStates[votingPlayerId].didVote = true;
+    if (!player) {
+      throw new Error(`Player ${votingPlayerId} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    const event = new MeetingVoteAddedEvent(
+      this.lobby.getGame()!,
+      player,
+      suspectPlayerId ? this.lobby.findPlayerByPlayerId(suspectPlayerId) : undefined,
+    );
+
+    await this.lobby.getServer().emit("meeting.vote.added", event);
+
+    if (event.isCancelled()) {
+      const connection = this.lobby.findConnectionByPlayer(player);
+
+      if (connection) {
+        meetingHud.meetingHud.sendRPCPacketTo([connection], new ClearVotePacket());
+      }
+
+      return;
+    }
+
+    const oldMeetingHud = meetingHud.meetingHud.clone();
+    const states = meetingHud.meetingHud.playerStates;
+
+    states[event.getVoter().getId()].votedFor = event.getSuspect()?.getId() ?? -1;
+    states[event.getVoter().getId()].didVote = true;
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.meetingHud.data(oldMeetingHud),
     ], this.lobby.getCode()));
 
-    if (this.meetingHudTimeout && meetingHud.meetingHud.playerStates.every(p => p.didVote || p.isDead)) {
+    if (this.meetingHudTimeout && states.every(p => p.didVote || p.isDead)) {
       this.endMeeting();
       clearInterval(this.meetingHudTimeout);
     }
@@ -501,7 +557,7 @@ export class InternalHost implements HostInstance {
     }
   }
 
-  handleDisconnect(connection: Connection): void {
+  handleDisconnect(connection: Connection, _reason?: DisconnectReason): void {
     const gameState = this.lobby.getGameState();
     const gameData = this.lobby.getGameData();
 
@@ -535,6 +591,7 @@ export class InternalHost implements HostInstance {
     }
 
     gameData.gameData.updateGameData(gameData.gameData.players, this.lobby.getConnections());
+    gameData.voteBanSystem.votes.delete(connection.id);
 
     if (this.shouldEndGame()) {
       if (playerData.isImpostor) {
@@ -542,6 +599,14 @@ export class InternalHost implements HostInstance {
       } else {
         this.endGame(GameOverReason.CrewmateDisconnect);
       }
+
+      return;
+    }
+
+    const meetingHud = this.lobby.getMeetingHud();
+
+    if (meetingHud) {
+      meetingHud.meetingHud.clearVote([player]);
     }
   }
 
@@ -644,9 +709,35 @@ export class InternalHost implements HostInstance {
       throw new Error("GameData does not exist on the lobby instance");
     }
 
-    let impostors = shuffleArrayClone(this.lobby.getPlayers())
+    const players = this.lobby.getPlayers();
+    let impostors = shuffleArrayClone(players)
       .slice(0, infectedCount)
       .map(player => player);
+    const selectedIds = impostors.map(player => player.getId());
+    const promises = (await Promise.all(players.map(async player => {
+      const event = new PlayerRoleUpdatedEvent(player, selectedIds.includes(player.getId()) ? PlayerRole.Impostor : PlayerRole.Crewmate);
+
+      await this.lobby.getServer().emit("player.role.updated", event);
+
+      return event;
+    })));
+
+    for (let i = 0; i < promises.length; i++) {
+      const event = promises[i];
+
+      if (event.isCancelled() || event.getNewRole() == PlayerRole.Crewmate) {
+        const index = impostors.findIndex(impostor => impostor.getId() == event.getPlayer().getId());
+
+        if (index > -1) {
+          impostors.splice(index, 1);
+        }
+      } else if (event.getNewRole() == PlayerRole.Impostor) {
+        if (impostors.findIndex(impostor => impostor.getId() == event.getPlayer().getId()) == -1) {
+          impostors.push(event.getPlayer() as InternalPlayer);
+        }
+      }
+    }
+
     const event = new GameStartedEvent(this.lobby.getGame()!, impostors);
 
     await this.lobby.getServer().emit("game.started", event);
@@ -657,10 +748,11 @@ export class InternalHost implements HostInstance {
       const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == impostors[i].id);
 
       if (gameDataPlayerIndex == -1) {
-        throw new Error(`Player ${impostors[i].id} does not have an instance in GameData`);
+        throw new Error(`Player ${impostors[i].id} does not have a PlayerData instance o the GameData instance`);
       }
 
       gameData.gameData.players[gameDataPlayerIndex].isImpostor = true;
+      impostors[i].setRole(PlayerRole.Impostor);
     }
 
     this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
@@ -758,15 +850,31 @@ export class InternalHost implements HostInstance {
       const player = this.lobby.getPlayers().find(pl => pl.id == pid);
 
       if (player) {
-        const gameData = this.lobby.getGameData();
-
-        if (!gameData) {
-          throw new Error("Attempted to set tasks without a GameData instance");
-        }
-
-        gameData.gameData.setTasks(player.id, tasks.map(task => task.id), this.lobby.getConnections());
+        this.setPlayerTasks(player, tasks);
       }
     }
+  }
+
+  async setPlayerTasks(player: PlayerInstance, tasks: LevelTask[]): Promise<void> {
+    const event = new PlayerTaskAddedEvent(player, new Set(tasks));
+
+    await this.lobby.getServer().emit("player.task.added", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
+    this.updatePlayerTasks(player, tasks);
+  }
+
+  updatePlayerTasks(player: PlayerInstance, tasks: LevelTask[]): void {
+    const gameData = this.lobby.getGameData();
+
+    if (!gameData) {
+      throw new Error("Attempted to set tasks without a GameData instance");
+    }
+
+    gameData.gameData.setTasks(player.getId(), tasks.map(task => task.id), this.lobby.getConnections());
   }
 
   async endMeeting(): Promise<void> {
@@ -842,27 +950,38 @@ export class InternalHost implements HostInstance {
     await this.lobby.getServer().emit("meeting.concluded", concludedEvent);
 
     const isTied = concludedEvent.isTied();
-    const exiledPlayer = concludedEvent.getExiledPlayer();
+    let exiledPlayer = concludedEvent.getExiledPlayer();
 
     if (concludedEvent.isCancelled()) {
       return;
     }
 
-    if (isTied) {
-      meetingHud.meetingHud.votingComplete(meetingHud.meetingHud.playerStates, false, 0xff, true, this.lobby.getConnections());
-    } else {
-      meetingHud.meetingHud.votingComplete(meetingHud.meetingHud.playerStates, true, exiledPlayer?.getId() ?? 0xff, false, this.lobby.getConnections());
-    }
-
-    const exiledPlayerData = gameData.gameData.players.find(playerData => playerData.id == exiledPlayer?.getId());
+    let exiledPlayerData: PlayerData | undefined;
 
     if (!isTied && exiledPlayer) {
-      if (!exiledPlayerData) {
-        throw new Error("Exiled player has no data stored in GameData instance");
-      }
+      const voters = [...voteResults.values()]
+        .filter(vote => vote.getVotedFor()?.getId() == exiledPlayer?.getId())
+        .map(vote => vote.getPlayer());
+      const exiledEvent = new PlayerExiledEvent(exiledPlayer, voters);
 
-      exiledPlayerData.isDead = true;
+      await this.lobby.getServer().emit("player.died", exiledEvent);
+      await this.lobby.getServer().emit("player.exiled", exiledEvent);
+
+      if (!exiledEvent.isCancelled()) {
+        exiledPlayerData = gameData.gameData.players.find(playerData => playerData.id == exiledPlayer?.getId());
+
+        if (!exiledPlayerData) {
+          throw new Error("Exiled player does not have a PlayerData instance on the GameData instance");
+        }
+
+        exiledPlayer = exiledEvent.getPlayer();
+        exiledPlayerData.isDead = true;
+      }
     }
+
+    meetingHud.meetingHud.sendRPCPacketTo(this.lobby.getConnections(), new VotingCompletePacket(
+      meetingHud.meetingHud.playerStates, isTied ? 0xff : (exiledPlayer?.getId() ?? 0xff), isTied),
+    );
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.meetingHud.data(oldData),
@@ -882,7 +1001,7 @@ export class InternalHost implements HostInstance {
         return;
       }
 
-      meetingHud.meetingHud.close(this.lobby.getConnections());
+      meetingHud.meetingHud.sendRPCPacketTo(this.lobby.getConnections(), new ClosePacket());
 
       this.lobby.deleteMeetingHud();
 
@@ -917,10 +1036,11 @@ export class InternalHost implements HostInstance {
     }
 
     this.lobby.setGameState(GameState.NotStarted);
+
     this.decontaminationHandlers = [];
     this.readyPlayerList = [];
-    this.lobby.clearPlayers();
 
+    this.lobby.clearPlayers();
     this.playersInScene.clear();
 
     for (let i = 0; i < this.lobby.getConnections().length; i++) {
@@ -935,7 +1055,6 @@ export class InternalHost implements HostInstance {
     delete this.systemsHandler;
 
     this.lobby.setGameData(new EntityGameData(this.lobby, this.getNextNetId(), [], this.getNextNetId()));
-
     this.lobby.sendRootGamePacket(new EndGamePacket(this.lobby.getCode(), event.getReason(), false));
   }
 

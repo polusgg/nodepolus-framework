@@ -1,59 +1,97 @@
-import { PlayerColor, PlayerHat, PlayerPet, PlayerSkin } from "../../types/enums";
+import { PlayerColor, PlayerHat, PlayerPet, PlayerRole, PlayerSkin } from "../../types/enums";
+import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../../types";
 import { TextComponent } from "../text";
-import { LevelTask } from "../../types";
 
 export interface PlayerInstance {
   getId(): number;
 
   getName(): TextComponent;
 
+  setName(name: TextComponent | string): this;
+
   getColor(): PlayerColor;
+
+  setColor(color: PlayerColor): this;
 
   getHat(): PlayerHat;
 
+  setHat(hat: PlayerHat): this;
+
   getPet(): PlayerPet;
+
+  setPet(pet: PlayerPet): this;
 
   getSkin(): PlayerSkin;
 
+  setSkin(skin: PlayerSkin): this;
+
+  getRole(): PlayerRole;
+
   isImpostor(): boolean;
+
+  setImpostor(): void;
+
+  setCrewmate(): void;
 
   isDead(): boolean;
 
   getTasks(): [LevelTask, boolean][];
 
-  setTasks(tasks: [LevelTask, boolean][]): this;
+  setTasks(tasks: Set<LevelTask>): this;
 
-  addTasks(tasks: LevelTask[]): this;
+  addTasks(tasks: Set<LevelTask>): void;
 
-  removeTasks(tasks: LevelTask[]): this;
+  removeTasks(tasks: Set<LevelTask>): void;
 
-  isTaskAtIndexCompleted(index: number): boolean;
+  isTaskAtIndexCompleted(taskIndex: number): boolean;
 
   isTaskCompleted(task: LevelTask): boolean;
 
-  completeTaskAtIndex(index: number, isComplete: boolean): boolean;
+  completeTaskAtIndex(taskIndex: number): this;
 
-  completeTask(task: LevelTask, isComplete: boolean): boolean;
+  completeTask(task: LevelTask): this;
+
+  uncompleteTaskAtIndex(taskIndex: number): void;
+
+  uncompleteTask(task: LevelTask): void;
+
+  getPosition(): Vector2;
+
+  setPosition(position: Vector2): this;
+
+  getVelocity(): Vector2;
+
+  getVent(): LevelVent | undefined;
+
+  enterVent(vent: LevelVent): this;
+
+  exitVent(vent: LevelVent): this;
 
   isScanning(): boolean;
-
-  setName(name: TextComponent | string): this;
-
-  setColor(color: PlayerColor): this;
-
-  setHat(hat: PlayerHat): this;
-
-  setPet(pet: PlayerPet): this;
-
-  setSkin(skin: PlayerSkin): this;
 
   kill(): this;
 
   murder(player: PlayerInstance): this;
 
-  revive(): this;
+  revive(): void;
 
   sendChat(message: string): this;
 
   startMeeting(victim?: PlayerInstance): this;
+
+  castVote(suspect?: PlayerInstance): this;
+
+  clearVote(): this;
+
+  castVotekick(target: PlayerInstance): this;
+
+  clearVotekick(target: PlayerInstance): this;
+
+  clearVotekicksForMe(): this;
+
+  clearVotekicksFromMe(): this;
+
+  kick(reason: DisconnectReason | undefined): this;
+
+  ban(reason: DisconnectReason | undefined): this;
 }
