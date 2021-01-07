@@ -416,11 +416,11 @@ export class RPCHandler {
   }
 
   handleEnterVent(sender: InnerPlayerPhysics, ventId: number, sendTo: Connection[]): void {
-    sender.enterVent(Vents.fromId(this.lobby.getLevel(), [ventId])[0], sendTo);
+    sender.enterVent(Vents.forLevelFromId(this.lobby.getLevel(), [ventId])[0], sendTo);
   }
 
   handleExitVent(sender: InnerPlayerPhysics, ventId: number, sendTo: Connection[]): void {
-    sender.exitVent(Vents.fromId(this.lobby.getLevel(), [ventId])[0], sendTo);
+    sender.exitVent(Vents.forLevelFromId(this.lobby.getLevel(), [ventId])[0], sendTo);
   }
 
   handleSnapTo(sender: InnerCustomNetworkTransform, position: Vector2, _lastSequenceId: number, sendTo: Connection[]): void {

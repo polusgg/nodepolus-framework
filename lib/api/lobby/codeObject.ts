@@ -6,26 +6,6 @@ export class CodeObject {
   private internalIsHidden = false;
   private internalIsRemoved = false;
 
-  get value(): string {
-    return this.internalValue;
-  }
-
-  get isHidden(): boolean {
-    return this.internalIsHidden;
-  }
-
-  get isRemoved(): boolean {
-    return this.internalIsRemoved;
-  }
-
-  private static get hiddenCode(): string {
-    return "A[][";
-  }
-
-  private static get removedCode(): string {
-    return "9999";
-  }
-
   constructor(
     value: string,
     public lobby: InternalLobby,
@@ -70,6 +50,18 @@ export class CodeObject {
     }
   }
 
+  getValue(): string {
+    return this.internalValue;
+  }
+
+  isHidden(): boolean {
+    return this.internalIsHidden;
+  }
+
+  isRemoved(): boolean {
+    return this.internalIsRemoved;
+  }
+
   set(code: string): void {
     this.internalValue = CodeObject.convertToInternal(code);
 
@@ -82,7 +74,7 @@ export class CodeObject {
     this.internalIsHidden = true;
 
     if (!this.internalIsRemoved) {
-      this.lobby.sendRootGamePacket(new HostGameResponsePacket(CodeObject.hiddenCode));
+      this.lobby.sendRootGamePacket(new HostGameResponsePacket(CodeObject.getHiddenCode()));
     }
   }
 
@@ -97,12 +89,20 @@ export class CodeObject {
   remove(): void {
     this.internalIsRemoved = true;
 
-    this.lobby.sendRootGamePacket(new HostGameResponsePacket(CodeObject.removedCode));
+    this.lobby.sendRootGamePacket(new HostGameResponsePacket(CodeObject.getRemovedCode()));
   }
 
   restore(): void {
     this.internalIsRemoved = false;
 
     this.lobby.sendRootGamePacket(new HostGameResponsePacket(this.internalValue));
+  }
+
+  private static getHiddenCode(): string {
+    return "A[][";
+  }
+
+  private static getRemovedCode(): string {
+    return "9999";
   }
 }

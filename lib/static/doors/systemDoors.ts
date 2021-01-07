@@ -35,19 +35,19 @@ const POLUS_COUNT: Readonly<number> = Object.values(POLUS_DOORS).flat().length;
 const AIRSHIP_COUNT: Readonly<number> = Object.values(AIRSHIP_DOORS).flat().length;
 
 export class SystemDoors {
-  static get skeld(): Readonly<SystemDoorList> {
+  static forSkeld(): Readonly<SystemDoorList> {
     return SKELD_DOORS;
   }
 
-  static get miraHq(): Readonly<SystemDoorList> {
+  static forMiraHq(): Readonly<SystemDoorList> {
     return {};
   }
 
-  static get polus(): Readonly<SystemDoorList> {
+  static forPolus(): Readonly<SystemDoorList> {
     return POLUS_DOORS;
   }
 
-  static get airship(): Readonly<SystemDoorList> {
+  static forAirship(): Readonly<SystemDoorList> {
     return AIRSHIP_DOORS;
   }
 
@@ -55,43 +55,43 @@ export class SystemDoors {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.skeld;
+        return this.forSkeld();
       case Level.MiraHq:
-        return this.miraHq;
+        return this.forMiraHq();
       case Level.Polus:
-        return this.polus;
+        return this.forPolus();
       case Level.Airship:
-        return this.airship;
+        return this.forAirship();
     }
   }
 
-  static get skeldCount(): Readonly<number> {
+  static countForSkeld(): Readonly<number> {
     return SKELD_COUNT;
   }
 
-  static get miraHqCount(): Readonly<number> {
+  static countForMiraHq(): Readonly<number> {
     return 0;
   }
 
-  static get polusCount(): Readonly<number> {
+  static countForPolus(): Readonly<number> {
     return POLUS_COUNT;
   }
 
-  static get airshipCount(): Readonly<number> {
+  static countForAirship(): Readonly<number> {
     return AIRSHIP_COUNT;
   }
 
-  static count(level: Level): Readonly<number> {
+  static countForLevel(level: Level): Readonly<number> {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.skeldCount;
+        return this.countForSkeld();
       case Level.MiraHq:
-        return this.miraHqCount;
+        return this.countForMiraHq();
       case Level.Polus:
-        return this.polusCount;
+        return this.countForPolus();
       case Level.Airship:
-        return this.airshipCount;
+        return this.countForAirship();
     }
   }
 }

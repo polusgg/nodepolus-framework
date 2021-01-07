@@ -104,3 +104,16 @@ Decontamination
 - exited
 - gassed
 
+
+----------
+
+Internal Events
+
+
+- "packet" (when receiving any packet)
+- "packet.{name}" (when receiving a root packet)
+- "packet.gamedata.{name}" (when receiving a gamedata packet)
+- "packet.gamedata.rpc.{name}" (when receiving an rpc packet)
+- "packet.gamedata.data.{innernetobject name}" (when receiving a data packet)
+
+

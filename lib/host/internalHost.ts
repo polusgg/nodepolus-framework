@@ -768,26 +768,7 @@ export class InternalHost implements HostInstance {
     const numLong = options.longTaskCount;
     // Minimum of 1 short task
     const numShort = numCommon + numLong + options.shortTaskCount > 0 ? options.shortTaskCount : 1;
-
-    let allTasks: readonly LevelTask[];
-
-    switch (level) {
-      case Level.TheSkeld:
-        allTasks = Tasks.skeld;
-        break;
-      case Level.MiraHq:
-        allTasks = Tasks.miraHq;
-        break;
-      case Level.Polus:
-        allTasks = Tasks.polus;
-        break;
-      case Level.Airship:
-        allTasks = Tasks.airship;
-        break;
-      default:
-        throw new Error(`Attempted to set tasks for an unimplemented level: ${level as Level} (${Level[level]})`);
-    }
-
+    const allTasks = Tasks.forLevel(level);
     const allCommon: LevelTask[] = [];
     const allShort: LevelTask[] = [];
     const allLong: LevelTask[] = [];

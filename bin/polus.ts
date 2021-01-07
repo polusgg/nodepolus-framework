@@ -44,7 +44,7 @@ for (let i = 0; i < pluginDirectories.length; i++) {
 }
 
 server.listen().then(() => {
-  console.log(`Server listening on ${server.address}:${server.port}`);
+  console.log(`Server listening on ${server.getAddress()}:${server.getPort()}`);
 });
 
 process.on("uncaughtException", err => {

@@ -36,19 +36,19 @@ const AIRSHIP_DOOR_NAMES: readonly string[] = [
 ];
 
 export class DoorNames {
-  static get skeld(): readonly string[] {
+  static forSkeld(): readonly string[] {
     return SKELD_DOOR_NAMES;
   }
 
-  static get miraHq(): readonly string[] {
+  static forMiraHq(): readonly string[] {
     return [];
   }
 
-  static get polus(): readonly string[] {
+  static forPolus(): readonly string[] {
     return POLUS_DOOR_NAMES;
   }
 
-  static get airship(): readonly string[] {
+  static forAirship(): readonly string[] {
     return AIRSHIP_DOOR_NAMES;
   }
 
@@ -56,13 +56,13 @@ export class DoorNames {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.skeld;
+        return this.forSkeld();
       case Level.MiraHq:
-        return this.miraHq;
+        return this.forMiraHq();
       case Level.Polus:
-        return this.polus;
+        return this.forPolus();
       case Level.Airship:
-        return this.airship;
+        return this.forAirship();
     }
   }
 }

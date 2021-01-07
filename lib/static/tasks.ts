@@ -103,63 +103,63 @@ const TASKS_AIRSHIP: readonly LevelTask[] = [
 ];
 
 export class Tasks {
-  static get skeld(): readonly LevelTask[] {
+  static forSkeld(): readonly LevelTask[] {
     return TASKS_THE_SKELD;
   }
 
-  static get miraHq(): readonly LevelTask[] {
+  static forMiraHq(): readonly LevelTask[] {
     return TASKS_MIRA_HQ;
   }
 
-  static get polus(): readonly LevelTask[] {
+  static forPolus(): readonly LevelTask[] {
     return TASKS_POLUS;
   }
 
-  static get airship(): readonly LevelTask[] {
+  static forAirship(): readonly LevelTask[] {
     return TASKS_AIRSHIP;
-  }
-
-  static skeldFromId(ids: number[]): LevelTask[] {
-    return this.skeld.filter(t => ids.includes(t.id));
-  }
-
-  static miraHqFromId(ids: number[]): LevelTask[] {
-    return this.miraHq.filter(t => ids.includes(t.id));
-  }
-
-  static polusFromId(ids: number[]): LevelTask[] {
-    return this.polus.filter(t => ids.includes(t.id));
-  }
-
-  static airshipFromId(ids: number[]): LevelTask[] {
-    return this.airship.filter(t => ids.includes(t.id));
-  }
-
-  static fromId(level: Level, ids: number[]): LevelTask[] {
-    switch (level) {
-      case Level.TheSkeld:
-      case Level.AprilSkeld:
-        return this.skeldFromId(ids);
-      case Level.MiraHq:
-        return this.miraHqFromId(ids);
-      case Level.Polus:
-        return this.polusFromId(ids);
-      case Level.Airship:
-        return this.airshipFromId(ids);
-    }
   }
 
   static forLevel(level: Level): readonly LevelTask[] {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.skeld;
+        return this.forSkeld();
       case Level.MiraHq:
-        return this.miraHq;
+        return this.forMiraHq();
       case Level.Polus:
-        return this.polus;
+        return this.forPolus();
       case Level.Airship:
-        return this.airship;
+        return this.forAirship();
+    }
+  }
+
+  static forSkeldFromId(ids: number[]): LevelTask[] {
+    return this.forSkeld().filter(t => ids.includes(t.id));
+  }
+
+  static forMiraHqFromId(ids: number[]): LevelTask[] {
+    return this.forMiraHq().filter(t => ids.includes(t.id));
+  }
+
+  static forPolusFromId(ids: number[]): LevelTask[] {
+    return this.forPolus().filter(t => ids.includes(t.id));
+  }
+
+  static forAirshipFromId(ids: number[]): LevelTask[] {
+    return this.forAirship().filter(t => ids.includes(t.id));
+  }
+
+  static forLevelFromId(level: Level, ids: number[]): LevelTask[] {
+    switch (level) {
+      case Level.TheSkeld:
+      case Level.AprilSkeld:
+        return this.forSkeldFromId(ids);
+      case Level.MiraHq:
+        return this.forMiraHqFromId(ids);
+      case Level.Polus:
+        return this.forPolusFromId(ids);
+      case Level.Airship:
+        return this.forAirshipFromId(ids);
     }
   }
 }

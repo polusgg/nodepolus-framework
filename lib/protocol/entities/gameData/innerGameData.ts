@@ -19,7 +19,7 @@ export class InnerGameData extends BaseInnerNetObject {
   }
 
   setTasks(playerId: number, taskIds: number[], sendTo: Connection[]): void {
-    const tasks = Tasks.fromId(this.parent.lobby.getLevel(), taskIds);
+    const tasks = Tasks.forLevelFromId(this.parent.lobby.getLevel(), taskIds);
     const playerIndex = this.players.findIndex(p => p.id == playerId);
 
     if (playerIndex > -1) {

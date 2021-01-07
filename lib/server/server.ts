@@ -35,22 +35,6 @@ export class Server extends Emittery.Typed<ServerEvents> {
   // Reserve the fake client IDs
   private connectionIndex = Object.keys(FakeClientId).length / 2;
 
-  get address(): string {
-    return this.config.serverAddress ?? DEFAULT_SERVER_ADDRESS;
-  }
-
-  get port(): number {
-    return this.config.serverPort ?? DEFAULT_SERVER_PORT;
-  }
-
-  get defaultLobbyAddress(): string {
-    return this.config.defaultLobbyAddress ?? this.address;
-  }
-
-  get defaultLobbyPort(): number {
-    return this.config.defaultLobbyPort ?? this.port;
-  }
-
   constructor(
     public config: ServerConfig = {},
   ) {
@@ -65,6 +49,22 @@ export class Server extends Emittery.Typed<ServerEvents> {
     });
   }
 
+  getAddress(): string {
+    return this.config.serverAddress ?? DEFAULT_SERVER_ADDRESS;
+  }
+
+  getPort(): number {
+    return this.config.serverPort ?? DEFAULT_SERVER_PORT;
+  }
+
+  getDefaultLobbyAddress(): string {
+    return this.config.defaultLobbyAddress ?? this.getAddress();
+  }
+
+  getDefaultLobbyPort(): number {
+    return this.config.defaultLobbyPort ?? this.getPort();
+  }
+
   getNextConnectionId(): number {
     if (++this.connectionIndex > MaxValue.UInt32) {
       this.connectionIndex = 1;
@@ -75,7 +75,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
   async listen(): Promise<void> {
     return new Promise((resolve, _reject) => {
-      this.serverSocket.bind(this.port, this.address, resolve);
+      this.serverSocket.bind(this.getPort(), this.getAddress(), resolve);
     });
   }
 
@@ -184,8 +184,8 @@ export class Server extends Emittery.Typed<ServerEvents> {
 
         const newLobby = new InternalLobby(
           this,
-          this.defaultLobbyAddress,
-          this.defaultLobbyPort,
+          this.getDefaultLobbyAddress(),
+          this.getDefaultLobbyPort(),
           (packet as HostGameRequestPacket).options,
           lobbyCode,
         );

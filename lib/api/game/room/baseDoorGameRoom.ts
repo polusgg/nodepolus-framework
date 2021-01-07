@@ -11,7 +11,7 @@ export class BaseDoorGameRoom extends BaseGameRoom {
   constructor(game: Game, systemType: SystemType) {
     super(game, systemType);
 
-    this.doors = SystemDoors.skeld[this.systemType]?.map((id: number) => new Door(game, id)) ?? [];
+    this.doors = SystemDoors.forSkeld()[this.systemType]?.map((id: number) => new Door(game, id)) ?? [];
   }
 
   closeDoors(): void {

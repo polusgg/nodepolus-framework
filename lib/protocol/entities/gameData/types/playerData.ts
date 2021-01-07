@@ -31,7 +31,7 @@ export class PlayerData {
 
     return new PlayerData(
       id, name, color, hat, pet, skin, isDisconnected, isImpostor, isDead,
-      reader.readList(list => [Tasks.fromId(level, [list.readByte()])[0], list.readBoolean()]),
+      reader.readList(list => [Tasks.forLevelFromId(level, [list.readByte()])[0], list.readBoolean()]),
     );
   }
 

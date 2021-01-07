@@ -5,7 +5,7 @@ import { BaseSystem } from ".";
 
 export class DoorsSystem extends BaseSystem {
   public timers: Map<SystemType, number> = new Map<SystemType, number>();
-  public doorStates: boolean[] = new Array(SystemDoors.polusCount).fill(true);
+  public doorStates: boolean[] = new Array(SystemDoors.countForPolus()).fill(true);
 
   constructor() {
     super(SystemType.Doors);
@@ -18,7 +18,7 @@ export class DoorsSystem extends BaseSystem {
   setData(data: MessageReader): void {
     this.timers = new Map(data.readList(reader => [reader.readByte(), reader.readFloat32()]));
 
-    for (let i = 0; i < SystemDoors.polusCount; i++) {
+    for (let i = 0; i < SystemDoors.countForPolus(); i++) {
       this.doorStates[i] = data.readBoolean();
     }
   }
@@ -29,7 +29,7 @@ export class DoorsSystem extends BaseSystem {
       sub.writeFloat32(item[1]);
     });
 
-    for (let i = 0; i < SystemDoors.polusCount; i++) {
+    for (let i = 0; i < SystemDoors.countForPolus(); i++) {
       writer.writeBoolean(this.doorStates[i]);
     }
 

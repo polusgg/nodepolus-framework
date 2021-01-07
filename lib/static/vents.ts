@@ -63,93 +63,93 @@ const VENTS_AIRSHIP: readonly LevelVent[] = [
 ];
 
 export class Vents {
-  static get skeld(): readonly LevelVent[] {
+  static forSkeld(): readonly LevelVent[] {
     return VENTS_THE_SKELD;
   }
 
-  static get miraHq(): readonly LevelVent[] {
+  static forMiraHq(): readonly LevelVent[] {
     return VENTS_MIRA_HQ;
   }
 
-  static get polus(): readonly LevelVent[] {
+  static forPolus(): readonly LevelVent[] {
     return VENTS_POLUS;
   }
 
-  static get airship(): readonly LevelVent[] {
+  static forAirship(): readonly LevelVent[] {
     return VENTS_AIRSHIP;
-  }
-
-  static skeldFromId(ids: number[]): LevelVent[] {
-    return this.skeld.filter(v => ids.includes(v.id));
-  }
-
-  static miraHqFromId(ids: number[]): LevelVent[] {
-    return this.miraHq.filter(v => ids.includes(v.id));
-  }
-
-  static polusFromId(ids: number[]): LevelVent[] {
-    return this.polus.filter(v => ids.includes(v.id));
-  }
-
-  static airshipFromId(ids: number[]): LevelVent[] {
-    return this.airship.filter(v => ids.includes(v.id));
-  }
-
-  static fromId(level: Level, ids: number[]): LevelVent[] {
-    switch (level) {
-      case Level.TheSkeld:
-      case Level.AprilSkeld:
-        return this.skeldFromId(ids);
-      case Level.MiraHq:
-        return this.miraHqFromId(ids);
-      case Level.Polus:
-        return this.polusFromId(ids);
-      case Level.Airship:
-        return this.airshipFromId(ids);
-    }
-  }
-
-  static skeldFromPosition(position: Vector2): LevelVent | undefined {
-    return this.skeld.find(v => v.position.equals(position));
-  }
-
-  static miraHqFromPosition(position: Vector2): LevelVent | undefined {
-    return this.miraHq.find(v => v.position.equals(position));
-  }
-
-  static polusFromPosition(position: Vector2): LevelVent | undefined {
-    return this.polus.find(v => v.position.equals(position));
-  }
-
-  static airshipFromPosition(position: Vector2): LevelVent | undefined {
-    return this.airship.find(v => v.position.equals(position));
-  }
-
-  static fromPosition(level: Level, position: Vector2): LevelVent | undefined {
-    switch (level) {
-      case Level.TheSkeld:
-      case Level.AprilSkeld:
-        return this.skeldFromPosition(position);
-      case Level.MiraHq:
-        return this.miraHqFromPosition(position);
-      case Level.Polus:
-        return this.polusFromPosition(position);
-      case Level.Airship:
-        return this.airshipFromPosition(position);
-    }
   }
 
   static forLevel(level: Level): readonly LevelVent[] {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.skeld;
+        return this.forSkeld();
       case Level.MiraHq:
-        return this.miraHq;
+        return this.forMiraHq();
       case Level.Polus:
-        return this.polus;
+        return this.forPolus();
       case Level.Airship:
-        return this.airship;
+        return this.forAirship();
+    }
+  }
+
+  static forSkeldFromId(ids: number[]): LevelVent[] {
+    return this.forSkeld().filter(v => ids.includes(v.id));
+  }
+
+  static forMiraHqFromId(ids: number[]): LevelVent[] {
+    return this.forMiraHq().filter(v => ids.includes(v.id));
+  }
+
+  static forPolusFromId(ids: number[]): LevelVent[] {
+    return this.forPolus().filter(v => ids.includes(v.id));
+  }
+
+  static forAirshipFromId(ids: number[]): LevelVent[] {
+    return this.forAirship().filter(v => ids.includes(v.id));
+  }
+
+  static forLevelFromId(level: Level, ids: number[]): LevelVent[] {
+    switch (level) {
+      case Level.TheSkeld:
+      case Level.AprilSkeld:
+        return this.forSkeldFromId(ids);
+      case Level.MiraHq:
+        return this.forMiraHqFromId(ids);
+      case Level.Polus:
+        return this.forPolusFromId(ids);
+      case Level.Airship:
+        return this.forAirshipFromId(ids);
+    }
+  }
+
+  static forSkeldFromPosition(position: Vector2): LevelVent | undefined {
+    return this.forSkeld().find(v => v.position.equals(position));
+  }
+
+  static forMiraHqFromPosition(position: Vector2): LevelVent | undefined {
+    return this.forMiraHq().find(v => v.position.equals(position));
+  }
+
+  static forPolusFromPosition(position: Vector2): LevelVent | undefined {
+    return this.forPolus().find(v => v.position.equals(position));
+  }
+
+  static forAirshipFromPosition(position: Vector2): LevelVent | undefined {
+    return this.forAirship().find(v => v.position.equals(position));
+  }
+
+  static forLevelFromPosition(level: Level, position: Vector2): LevelVent | undefined {
+    switch (level) {
+      case Level.TheSkeld:
+      case Level.AprilSkeld:
+        return this.forSkeldFromPosition(position);
+      case Level.MiraHq:
+        return this.forMiraHqFromPosition(position);
+      case Level.Polus:
+        return this.forPolusFromPosition(position);
+      case Level.Airship:
+        return this.forAirshipFromPosition(position);
     }
   }
 }
