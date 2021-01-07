@@ -43,9 +43,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
     this.serverSocket = dgram.createSocket("udp4");
 
     this.serverSocket.on("message", (buf, remoteInfo) => {
-      const sender = this.getConnection(ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`));
-
-      sender.emit("message", buf);
+      this.getConnection(ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`)).emit("message", buf);
     });
   }
 
@@ -104,7 +102,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
     return connection;
   }
 
-  private async handleDisconnection(connection: Connection, reason?: DisconnectReason): Promise<void> {
+  private async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
     if (connection.lobby) {
       const player = connection.lobby.findPlayerByConnection(connection);
 
@@ -140,7 +138,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
     newConnection.on("packet", async (packet: BaseRootPacket) => this.handlePacket(packet, newConnection));
     newConnection.once("disconnected").then((reason?: DisconnectReason) => {
       this.emit("connection.closed", new ConnectionClosedEvent(newConnection, reason));
-      this.handleDisconnection(newConnection, reason);
+      this.handleDisconnect(newConnection, reason);
     });
     newConnection.once("kicked").then(({ isBanned, kickingPlayer, reason }) => {
       if (!newConnection.lobby) {
