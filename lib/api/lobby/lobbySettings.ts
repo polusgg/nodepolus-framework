@@ -7,7 +7,7 @@ import { InternalLobby } from "../../lobby";
 import { PlayerInstance } from "../player";
 
 export class LobbySettings {
-  private readonly povCache: Map<number, LobbySettings> = new Map();
+  private static readonly povCache: Map<number, LobbySettings> = new Map();
 
   private isFromPov = false;
   private fromPovConnection: Connection | undefined;
@@ -33,8 +33,8 @@ export class LobbySettings {
     return this.lobby.getOptions().maxPlayers;
   }
 
-  getLanguages(): Language[] {
-    return (this.lobby.getOptions().languages as Mutable<Language[]>);
+  getLanguages(): readonly Language[] {
+    return this.lobby.getOptions().languages;
   }
 
   getLevel(): Level {
@@ -115,8 +115,7 @@ export class LobbySettings {
 
   setMaxPlayers(param: number): void {
     if (this.isFromPov) {
-      // TODO: Better Error
-      throw new Error("Can not set MaxPlayers on a POV");
+      throw new Error("Cannot modify the MaxPlayers setting on a per-player basis");
     }
 
     (this.lobby as InternalLobby).getMutableOptions().maxPlayers = param;
@@ -126,8 +125,7 @@ export class LobbySettings {
 
   setLanguages(param: Language[]): void {
     if (this.isFromPov) {
-      // TODO: Better Error
-      throw new Error("Can not set Languages on a POV");
+      throw new Error("Cannot modify the Languages setting on a per-player basis");
     }
 
     (this.lobby as InternalLobby).getMutableOptions().languages = param;
@@ -137,8 +135,7 @@ export class LobbySettings {
 
   setLevel(param: Level): void {
     if (this.isFromPov) {
-      // TODO: Better Error
-      throw new Error("Can not set Level on a POV");
+      throw new Error("Cannot modify the Level setting on a per-player basis");
     }
 
     (this.lobby as InternalLobby).getMutableOptions().levels = [param];
@@ -188,8 +185,7 @@ export class LobbySettings {
 
   setCommonTaskCount(param: number): void {
     if (this.isFromPov) {
-      // TODO: Better Error
-      throw new Error("Can not set CommonTaskCount on a POV");
+      throw new Error("Cannot modify the CommonTaskCount setting on a per-player basis");
     }
 
     (this.lobby as InternalLobby).getMutableOptions().commonTaskCount = param;
@@ -199,8 +195,7 @@ export class LobbySettings {
 
   setLongTaskCount(param: number): void {
     if (this.isFromPov) {
-      // TODO: Better Error
-      throw new Error("Can not set LongTaskCount on a POV");
+      throw new Error("Cannot modify the LongTaskCount setting on a per-player basis");
     }
 
     (this.lobby as InternalLobby).getMutableOptions().longTaskCount = param;
@@ -210,8 +205,7 @@ export class LobbySettings {
 
   setShortTaskCount(param: number): void {
     if (this.isFromPov) {
-      // TODO: Better Error
-      throw new Error("Can not set ShortTaskCount on a POV");
+      throw new Error("Cannot modify the ShortTaskCount setting on a per-player basis");
     }
 
     (this.lobby as InternalLobby).getMutableOptions().shortTaskCount = param;
@@ -231,8 +225,7 @@ export class LobbySettings {
 
   setImpostorCount(param: number): void {
     if (this.isFromPov) {
-      // TODO: Better Error
-      throw new Error("Can not set ImpostorCount on a POV");
+      throw new Error("Cannot modify the ImpostorCount setting on a per-player basis");
     }
 
     (this.lobby as InternalLobby).getMutableOptions().impostorCount = param;
@@ -272,8 +265,7 @@ export class LobbySettings {
 
   setIsDefault(param: boolean): void {
     if (this.isFromPov) {
-      // TODO: Better Error
-      throw new Error("Can not set IsDefault on a POV");
+      throw new Error("Cannot modify the IsDefault setting on a per-player basis");
     }
 
     (this.lobby as InternalLobby).getMutableOptions().isDefault = param;
@@ -331,20 +323,26 @@ export class LobbySettings {
   }
 
   fromPov(player: PlayerInstance): LobbySettings {
-    const connection = this.lobby.findConnectionByPlayer(player);
-
-    if (connection && this.povCache.has(connection.id)) {
-      return this.povCache.get(connection.id)!;
+    if (this.isFromPov) {
+      throw new Error("Cannot call fromPov on a LobbySettings instance that is already used as a POV instance");
     }
 
-    return LobbySettings.fromPov(this, connection);
-  }
+    const connection = this.lobby.findConnectionByPlayer(player);
 
-  private static fromPov(baseSettings: LobbySettings, connection?: Connection): LobbySettings {
-    const povSettings = new LobbySettings(baseSettings.lobby);
+    if (!connection) {
+      throw new Error(`Player ${player.getId()} does not have a connection on the lobby instance`);
+    }
+
+    if (LobbySettings.povCache.has(connection.id)) {
+      return LobbySettings.povCache.get(connection.id)!;
+    }
+
+    const povSettings = new LobbySettings(this.lobby);
 
     povSettings.isFromPov = true;
     povSettings.fromPovConnection = connection;
+
+    LobbySettings.povCache.set(connection.id, povSettings);
 
     return povSettings;
   }
@@ -354,7 +352,7 @@ export class LobbySettings {
       const customOptions = new GameOptionsData(
         4,
         this.getMaxPlayers(),
-        this.getLanguages(),
+        this.getLanguages() as Mutable<Language[]>,
         [this.getLevel()],
         this.getSpeed(),
         this.getCrewVision(),

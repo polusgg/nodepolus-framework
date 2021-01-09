@@ -1,6 +1,7 @@
 import { BaseInnerShipStatus } from "../../protocol/entities/baseShipStatus";
 import { DecontaminationDoorState, SystemType } from "../../types/enums";
 import { GameDataPacket } from "../../protocol/packets/root";
+import { notUndefined } from "../../util/functions";
 import { InternalPlayer } from "../../player";
 import { InternalHost } from "..";
 import {
@@ -35,8 +36,14 @@ import {
   SecurityCameraSystem,
   SwitchSystem,
 } from "../../protocol/entities/baseShipStatus/systems";
-import { notUndefined } from "../../util/functions";
-import { GameScannerQueuedEvent, GameScannerStartedEvent, GameScannerDequeuedEvent, GameScannerStoppedEvent, GameCamerasOpenedEvent, GameCamerasClosedEvent } from "../../api/events/game";
+import {
+  GameScannerQueuedEvent,
+  GameScannerStartedEvent,
+  GameScannerDequeuedEvent,
+  GameScannerStoppedEvent,
+  GameCamerasOpenedEvent,
+  GameCamerasClosedEvent,
+} from "../../api/events/game";
 
 export class SystemsHandler {
   private oldShipStatus: BaseInnerShipStatus = this.host.lobby.getShipStatus()!.getShipStatus();
@@ -129,49 +136,41 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  async repairMedbay<T extends MedScanSystem>(repairer: InternalPlayer, system: T, amount: MedbayAmount): Promise<void> {
+  async repairMedbay<T extends MedScanSystem>(_repairer: InternalPlayer, system: T, amount: MedbayAmount): Promise<void> {
     this.setOldShipStatus();
 
     const game = this.host.lobby.getGame()!;
-    const requester = this.host.lobby.findPlayerByPlayerId(amount.playerId)!;
+    const player = this.host.lobby.findPlayerByPlayerId(amount.playerId)!;
 
     if (amount.action == MedbayAction.EnteredQueue) {
       if (system.playersInQueue.size > 0) {
-        const event = new GameScannerQueuedEvent(
+        await this.host.lobby.getServer().emit("game.scanner.queued", new GameScannerQueuedEvent(
           game,
-          requester,
-          new Set([...system.playersInQueue.values()]
+          player,
+          new Set([...system.playersInQueue]
             .map(id => this.host.lobby.findPlayerByPlayerId(id))
             .filter(notUndefined),
           ),
-        );
-
-        await this.host.lobby.getServer().emit("game.scanner.queued", event);
+        ));
       } else {
-        const event = new GameScannerStartedEvent(game, requester);
-
-        await this.host.lobby.getServer().emit("game.scanner.started", event);
+        await this.host.lobby.getServer().emit("game.scanner.started", new GameScannerStartedEvent(game, player));
       }
 
-      system.playersInQueue.add(requester.getId());
+      system.playersInQueue.add(player.getId());
     } else {
       system.playersInQueue.delete(amount.playerId);
 
       if (system.playersInQueue.size > 0) {
-        const event = new GameScannerDequeuedEvent(
+        await this.host.lobby.getServer().emit("game.scanner.dequeued", new GameScannerDequeuedEvent(
           game,
-          requester,
-          new Set([...system.playersInQueue.values()]
+          player,
+          new Set([...system.playersInQueue]
             .map(id => this.host.lobby.findPlayerByPlayerId(id))
             .filter(notUndefined),
           ),
-        );
-
-        await this.host.lobby.getServer().emit("game.scanner.dequeued", event);
+        ));
       } else {
-        const event = new GameScannerStoppedEvent(game, requester);
-
-        await this.host.lobby.getServer().emit("game.scanner.stopped", event);
+        await this.host.lobby.getServer().emit("game.scanner.stopped", new GameScannerStoppedEvent(game, player));
       }
     }
 
