@@ -33,7 +33,7 @@ const VENTS_MIRA_HQ: readonly LevelVent[] = [
 ];
 
 const VENTS_POLUS: readonly LevelVent[] = [
-  { id: 0, name: "By Security", system: SystemType.Outside, position: new Vector2(0, 0) },
+  { id: 0, name: "By Security", system: SystemType.Security, position: new Vector2(1.9281311, -9.195087) },
   { id: 1, name: "Outside Electrical", system: SystemType.Outside, position: new Vector2(0, 0) },
   { id: 2, name: "In O2", system: SystemType.Oxygen, position: new Vector2(0, 0) },
   { id: 3, name: "Outside Communications", system: SystemType.Outside, position: new Vector2(0, 0) },

@@ -9,7 +9,6 @@ export class GameScannerStoppedEvent extends CancellableEvent {
   constructor(
     private readonly game: Game,
     private readonly player: PlayerInstance,
-    private readonly finishedScanning: boolean,
   ) {
     super();
   }
@@ -20,9 +19,5 @@ export class GameScannerStoppedEvent extends CancellableEvent {
 
   getPlayer(): PlayerInstance {
     return this.player;
-  }
-
-  didFinishScanning(): boolean {
-    return this.finishedScanning;
   }
 }

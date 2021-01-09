@@ -710,6 +710,9 @@ export class InternalHost implements HostInstance {
     }
 
     const players = this.lobby.getPlayers();
+
+    infectedCount = Math.min(infectedCount, Math.max(0, Math.floor(players.length / 2) - 1));
+
     let impostors = shuffleArrayClone(players)
       .slice(0, infectedCount)
       .map(player => player);

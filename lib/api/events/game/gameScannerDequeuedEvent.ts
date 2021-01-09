@@ -9,7 +9,6 @@ export class GameScannerDequeuedEvent extends CancellableEvent {
   constructor(
     private readonly game: Game,
     private readonly player: PlayerInstance,
-    private readonly startedScanning: boolean,
     private queue: Set<PlayerInstance>,
   ) {
     super();
@@ -21,10 +20,6 @@ export class GameScannerDequeuedEvent extends CancellableEvent {
 
   getPlayer(): PlayerInstance {
     return this.player;
-  }
-
-  didStartScanning(): boolean {
-    return this.startedScanning;
   }
 
   getQueue(): Set<PlayerInstance> {

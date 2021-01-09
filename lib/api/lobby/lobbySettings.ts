@@ -11,22 +11,14 @@ export class LobbySettings {
 
   private isFromPov = false;
   private fromPovConnection: Connection | undefined;
-  private povModifiedMaxPlayers: number | undefined;
-  private povModifiedLanguages: Language[] | undefined;
-  private povModifiedLevel: Level | undefined;
   private povModifiedSpeed: number | undefined;
   private povModifiedCrewVision: number | undefined;
   private povModifiedImpostorVision: number | undefined;
   private povModifiedKillCooldown: number | undefined;
-  private povModifiedCommonTaskCount: number | undefined;
-  private povModifiedLongTaskCount: number | undefined;
-  private povModifiedShortTaskCount: number | undefined;
   private povModifiedEmergencyMeetingCount: number | undefined;
-  private povModifiedImpostorCount: number | undefined;
   private povModifiedKillDistance: KillDistance | undefined;
   private povModifiedDiscussionTime: number | undefined;
   private povModifiedVotingTime: number | undefined;
-  private povModifiedIsDefault: boolean | undefined;
   private povModifiedEmergencyCooldown: number | undefined;
   private povModifiedConfirmEjects: boolean | undefined;
   private povModifiedVisualTasks: boolean | undefined;
@@ -38,15 +30,15 @@ export class LobbySettings {
   ) {}
 
   getMaxPlayers(): number {
-    return this.povModifiedMaxPlayers ?? this.lobby.getOptions().maxPlayers;
+    return this.lobby.getOptions().maxPlayers;
   }
 
   getLanguages(): Language[] {
-    return this.povModifiedLanguages ?? (this.lobby.getOptions().languages as Mutable<Language[]>);
+    return (this.lobby.getOptions().languages as Mutable<Language[]>);
   }
 
   getLevel(): Level {
-    return this.povModifiedLevel ?? this.lobby.getOptions().levels[0];
+    return this.lobby.getOptions().levels[0];
   }
 
   getSpeed(): number {
@@ -66,15 +58,15 @@ export class LobbySettings {
   }
 
   getCommonTaskCount(): number {
-    return this.povModifiedCommonTaskCount ?? this.lobby.getOptions().commonTaskCount;
+    return this.lobby.getOptions().commonTaskCount;
   }
 
   getLongTaskCount(): number {
-    return this.povModifiedLongTaskCount ?? this.lobby.getOptions().longTaskCount;
+    return this.lobby.getOptions().longTaskCount;
   }
 
   getShortTaskCount(): number {
-    return this.povModifiedShortTaskCount ?? this.lobby.getOptions().shortTaskCount;
+    return this.lobby.getOptions().shortTaskCount;
   }
 
   getEmergencyMeetingCount(): number {
@@ -82,7 +74,7 @@ export class LobbySettings {
   }
 
   getImpostorCount(): number {
-    return this.povModifiedImpostorCount ?? this.lobby.getOptions().impostorCount;
+    return this.lobby.getOptions().impostorCount;
   }
 
   getKillDistance(): KillDistance {
@@ -98,7 +90,7 @@ export class LobbySettings {
   }
 
   getIsDefault(): boolean {
-    return this.povModifiedIsDefault ?? this.lobby.getOptions().isDefault;
+    return this.lobby.getOptions().isDefault;
   }
 
   getEmergencyCooldown(): number {
@@ -123,30 +115,33 @@ export class LobbySettings {
 
   setMaxPlayers(param: number): void {
     if (this.isFromPov) {
-      this.povModifiedMaxPlayers = param;
-    } else {
-      (this.lobby as InternalLobby).getMutableOptions().maxPlayers = param;
+      // TODO: Better Error
+      throw new Error("Can not set MaxPlayers on a POV");
     }
+
+    (this.lobby as InternalLobby).getMutableOptions().maxPlayers = param;
 
     this.syncSettingsOnLobby();
   }
 
   setLanguages(param: Language[]): void {
     if (this.isFromPov) {
-      this.povModifiedLanguages = param;
-    } else {
-      (this.lobby as InternalLobby).getMutableOptions().languages = param;
+      // TODO: Better Error
+      throw new Error("Can not set Languages on a POV");
     }
+
+    (this.lobby as InternalLobby).getMutableOptions().languages = param;
 
     this.syncSettingsOnLobby();
   }
 
   setLevel(param: Level): void {
     if (this.isFromPov) {
-      this.povModifiedLevel = param;
-    } else {
-      (this.lobby as InternalLobby).getMutableOptions().levels = [param];
+      // TODO: Better Error
+      throw new Error("Can not set Level on a POV");
     }
+
+    (this.lobby as InternalLobby).getMutableOptions().levels = [param];
 
     this.syncSettingsOnLobby();
   }
@@ -154,9 +149,9 @@ export class LobbySettings {
   setSpeed(param: number): void {
     if (this.isFromPov) {
       this.povModifiedSpeed = param;
-    } else {
-      (this.lobby as InternalLobby).getMutableOptions().playerSpeedModifier = param;
     }
+
+    (this.lobby as InternalLobby).getMutableOptions().playerSpeedModifier = param;
 
     this.syncSettingsOnLobby();
   }
@@ -164,9 +159,9 @@ export class LobbySettings {
   setCrewVision(param: number): void {
     if (this.isFromPov) {
       this.povModifiedCrewVision = param;
-    } else {
-      (this.lobby as InternalLobby).getMutableOptions().crewmateLightModifier = param;
     }
+
+    (this.lobby as InternalLobby).getMutableOptions().crewmateLightModifier = param;
 
     this.syncSettingsOnLobby();
   }
@@ -193,30 +188,33 @@ export class LobbySettings {
 
   setCommonTaskCount(param: number): void {
     if (this.isFromPov) {
-      this.povModifiedCommonTaskCount = param;
-    } else {
-      (this.lobby as InternalLobby).getMutableOptions().commonTaskCount = param;
+      // TODO: Better Error
+      throw new Error("Can not set CommonTaskCount on a POV");
     }
+
+    (this.lobby as InternalLobby).getMutableOptions().commonTaskCount = param;
 
     this.syncSettingsOnLobby();
   }
 
   setLongTaskCount(param: number): void {
     if (this.isFromPov) {
-      this.povModifiedLongTaskCount = param;
-    } else {
-      (this.lobby as InternalLobby).getMutableOptions().longTaskCount = param;
+      // TODO: Better Error
+      throw new Error("Can not set LongTaskCount on a POV");
     }
+
+    (this.lobby as InternalLobby).getMutableOptions().longTaskCount = param;
 
     this.syncSettingsOnLobby();
   }
 
   setShortTaskCount(param: number): void {
     if (this.isFromPov) {
-      this.povModifiedShortTaskCount = param;
-    } else {
-      (this.lobby as InternalLobby).getMutableOptions().shortTaskCount = param;
+      // TODO: Better Error
+      throw new Error("Can not set ShortTaskCount on a POV");
     }
+
+    (this.lobby as InternalLobby).getMutableOptions().shortTaskCount = param;
 
     this.syncSettingsOnLobby();
   }
@@ -233,10 +231,11 @@ export class LobbySettings {
 
   setImpostorCount(param: number): void {
     if (this.isFromPov) {
-      this.povModifiedImpostorCount = param;
-    } else {
-      (this.lobby as InternalLobby).getMutableOptions().impostorCount = param;
+      // TODO: Better Error
+      throw new Error("Can not set ImpostorCount on a POV");
     }
+
+    (this.lobby as InternalLobby).getMutableOptions().impostorCount = param;
 
     this.syncSettingsOnLobby();
   }
@@ -273,10 +272,11 @@ export class LobbySettings {
 
   setIsDefault(param: boolean): void {
     if (this.isFromPov) {
-      this.povModifiedIsDefault = param;
-    } else {
-      (this.lobby as InternalLobby).getMutableOptions().isDefault = param;
+      // TODO: Better Error
+      throw new Error("Can not set IsDefault on a POV");
     }
+
+    (this.lobby as InternalLobby).getMutableOptions().isDefault = param;
 
     this.syncSettingsOnLobby();
   }

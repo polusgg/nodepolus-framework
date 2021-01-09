@@ -35,6 +35,8 @@ import {
   SecurityCameraSystem,
   SwitchSystem,
 } from "../../protocol/entities/baseShipStatus/systems";
+import { notUndefined } from "../../util/functions";
+import { GameScannerQueuedEvent, GameScannerStartedEvent, GameScannerDequeuedEvent, GameScannerStoppedEvent, GameCamerasOpenedEvent, GameCamerasClosedEvent } from "../../api/events/game";
 
 export class SystemsHandler {
   private oldShipStatus: BaseInnerShipStatus = this.host.lobby.getShipStatus()!.getShipStatus();
@@ -127,13 +129,50 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairMedbay<T extends MedScanSystem>(_repairer: InternalPlayer, system: T, amount: MedbayAmount): void {
+  async repairMedbay<T extends MedScanSystem>(repairer: InternalPlayer, system: T, amount: MedbayAmount): Promise<void> {
     this.setOldShipStatus();
 
+    const game = this.host.lobby.getGame()!;
+    const requester = this.host.lobby.findPlayerByPlayerId(amount.playerId)!;
+
     if (amount.action == MedbayAction.EnteredQueue) {
-      system.playersInQueue.add(amount.playerId);
+      if (system.playersInQueue.size > 0) {
+        const event = new GameScannerQueuedEvent(
+          game,
+          requester,
+          new Set([...system.playersInQueue.values()]
+            .map(id => this.host.lobby.findPlayerByPlayerId(id))
+            .filter(notUndefined),
+          ),
+        );
+
+        await this.host.lobby.getServer().emit("game.scanner.queued", event);
+      } else {
+        const event = new GameScannerStartedEvent(game, requester);
+
+        await this.host.lobby.getServer().emit("game.scanner.started", event);
+      }
+
+      system.playersInQueue.add(requester.getId());
     } else {
       system.playersInQueue.delete(amount.playerId);
+
+      if (system.playersInQueue.size > 0) {
+        const event = new GameScannerDequeuedEvent(
+          game,
+          requester,
+          new Set([...system.playersInQueue.values()]
+            .map(id => this.host.lobby.findPlayerByPlayerId(id))
+            .filter(notUndefined),
+          ),
+        );
+
+        await this.host.lobby.getServer().emit("game.scanner.dequeued", event);
+      } else {
+        const event = new GameScannerStoppedEvent(game, requester);
+
+        await this.host.lobby.getServer().emit("game.scanner.stopped", event);
+      }
     }
 
     this.sendDataUpdate();
@@ -220,12 +259,16 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairSecurity<T extends SecurityCameraSystem>(repairer: InternalPlayer, system: T, amount: SecurityAmount): void {
+  async repairSecurity<T extends SecurityCameraSystem>(repairer: InternalPlayer, system: T, amount: SecurityAmount): Promise<void> {
     this.setOldShipStatus();
 
     if (amount.isViewingCameras) {
+      await this.host.lobby.getServer().emit("game.cameras.opened", new GameCamerasOpenedEvent(this.host.lobby.getGame()!, repairer));
+
       system.playersViewingCameras.add(repairer.id);
     } else {
+      await this.host.lobby.getServer().emit("game.cameras.closed", new GameCamerasClosedEvent(this.host.lobby.getGame()!, repairer));
+
       system.playersViewingCameras.delete(repairer.id);
     }
 

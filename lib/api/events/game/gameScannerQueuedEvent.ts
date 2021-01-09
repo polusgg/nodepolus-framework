@@ -1,18 +1,15 @@
 import { PlayerInstance } from "../../player";
-import { CancellableEvent } from "../types";
 import { Game } from "../../game";
 
 /**
  * Fired when a player has entered the queue for a Medbay scanner.
  */
-export class GameScannerQueuedEvent extends CancellableEvent {
+export class GameScannerQueuedEvent {
   constructor(
     private readonly game: Game,
     private readonly player: PlayerInstance,
-    private queue: Set<PlayerInstance>,
-  ) {
-    super();
-  }
+    private readonly queue: Readonly<Set<PlayerInstance>>,
+  ) {}
 
   getGame(): Game {
     return this.game;
@@ -22,11 +19,7 @@ export class GameScannerQueuedEvent extends CancellableEvent {
     return this.player;
   }
 
-  getQueue(): Set<PlayerInstance> {
+  getQueue(): Readonly<Set<PlayerInstance>> {
     return this.queue;
-  }
-
-  setQueue(queue: Set<PlayerInstance>): void {
-    this.queue = queue;
   }
 }

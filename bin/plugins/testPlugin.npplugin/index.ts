@@ -4,7 +4,6 @@ import { PlayerJoinedEvent } from "../../../lib/api/events/player";
 import { shuffleArrayClone } from "../../../lib/util/shuffle";
 import { Logger } from "../../../lib/logger";
 import { Server } from "../../../lib/server";
-import repl from "repl";
 
 declare const server: Server;
 
@@ -24,5 +23,3 @@ server.on("server.lobby.join", (event: ServerLobbyJoinEvent) => {
   event.getConnection().sendReliable([new HostGameResponsePacket(lobby.getCode())]);
   event.setLobby(lobby);
 });
-
-repl.start();
