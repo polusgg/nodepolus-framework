@@ -30,8 +30,9 @@ export class EntityPlayer extends BaseInnerNetEntity {
     sequenceId: number,
     position: Vector2,
     velocity: Vector2,
+    flags: SpawnFlag = SpawnFlag.IsClientCharacter,
   ) {
-    super(SpawnType.PlayerControl, lobby, owner, SpawnFlag.IsClientCharacter);
+    super(SpawnType.PlayerControl, lobby, owner, flags);
 
     this.innerNetObjects = [
       new InnerPlayerControl(playerControlNetId, this, true, playerId),

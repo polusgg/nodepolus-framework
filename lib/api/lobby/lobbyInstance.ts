@@ -9,6 +9,7 @@ import { GameOptionsData, Immutable } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { LobbySettings } from "./lobbySettings";
 import { PlayerInstance } from "../player";
+import { TextComponent } from "../text";
 import { HostInstance } from "../host";
 import { Server } from "../../server";
 import { Game } from "../game";
@@ -93,6 +94,8 @@ export interface LobbyInstance {
   getCode(): string;
 
   setCode(code: string): void;
+
+  sendMessage(message: TextComponent | string): void;
 
   sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void;
 }
