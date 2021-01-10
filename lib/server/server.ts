@@ -25,9 +25,8 @@ import {
 
 export class Server extends Emittery.Typed<ServerEvents> {
   public readonly startedAt = Date.now();
-  public readonly serverSocket: dgram.Socket;
+  public readonly serverSocket = dgram.createSocket("udp4");
   public readonly connections: Map<string, Connection> = new Map();
-  public readonly connectionLobbyMap: Map<string, InternalLobby> = new Map();
 
   public lobbies: InternalLobby[] = [];
   public lobbyMap: Map<string, InternalLobby> = new Map();
@@ -39,8 +38,6 @@ export class Server extends Emittery.Typed<ServerEvents> {
     public config: ServerConfig = {},
   ) {
     super();
-
-    this.serverSocket = dgram.createSocket("udp4");
 
     this.serverSocket.on("message", (buf, remoteInfo) => {
       this.getConnection(ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`)).emit("message", buf);
@@ -111,7 +108,6 @@ export class Server extends Emittery.Typed<ServerEvents> {
       }
 
       connection.lobby.handleDisconnect(connection, reason);
-      this.connectionLobbyMap.delete(connection.getConnectionInfo().toString());
 
       if (connection.lobby.getConnections().length == 0) {
         const event = new ServerLobbyDestroyedEvent(connection.lobby);
@@ -187,7 +183,6 @@ export class Server extends Emittery.Typed<ServerEvents> {
           (packet as HostGameRequestPacket).options,
           lobbyCode,
         );
-
         const event = new ServerLobbyCreatedEvent(sender, newLobby);
 
         await this.emit("server.lobby.created", event);
@@ -204,17 +199,13 @@ export class Server extends Emittery.Typed<ServerEvents> {
       }
       case RootPacketType.JoinGame: {
         const lobbyCode = (packet as JoinGameRequestPacket).lobbyCode;
-        let lobby = this.lobbyMap.get(lobbyCode);
-        const event = new ServerLobbyJoinEvent(sender, lobbyCode, lobby);
+        const event = new ServerLobbyJoinEvent(sender, lobbyCode, this.lobbyMap.get(lobbyCode));
 
         await this.emit("server.lobby.join", event);
 
         if (!event.isCancelled()) {
           if (event.getLobby()) {
-            lobby = event.getLobby() as InternalLobby;
-
-            this.connectionLobbyMap.set(sender.getConnectionInfo().toString(), lobby);
-            lobby.handleJoin(sender);
+            (event.getLobby() as InternalLobby).handleJoin(sender);
           } else {
             sender.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameNotFound)]);
           }
@@ -260,9 +251,7 @@ export class Server extends Emittery.Typed<ServerEvents> {
         break;
       }
       default: {
-        const lobby = this.connectionLobbyMap.get(sender.getConnectionInfo().toString());
-
-        if (!lobby) {
+        if (!sender.lobby) {
           throw new Error(`Client ${sender.id} sent root game packet type ${packet.type} (${RootPacketType[packet.type]}) while not in a lobby`);
         }
       }
