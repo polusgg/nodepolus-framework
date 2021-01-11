@@ -214,7 +214,7 @@ export class InternalHost implements HostInstance {
       return;
     }
 
-    if (this.playersInScene.get(sender.id)) {
+    if (this.playersInScene.has(sender.id)) {
       throw new Error("Sender has already changed scene");
     }
 
@@ -301,7 +301,7 @@ export class InternalHost implements HostInstance {
       checkName = `${name} ${index++}`;
     }
 
-    sender.setName(checkName, this.lobby.getConnections());
+    player.setName(checkName);
 
     this.lobby.finishedSpawningPlayer(owner);
 
@@ -320,7 +320,13 @@ export class InternalHost implements HostInstance {
       throw new Error("Received CheckColor from an InnerPlayerControl without an owner");
     }
 
-    this.confirmPlayerData(new InternalPlayer(this.lobby, sender.parent));
+    const player = this.lobby.findPlayerByInnerNetObject(sender);
+
+    if (player) {
+      this.confirmPlayerData(player);
+    } else {
+      throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+    }
 
     if (this.lobby.getPlayers().length <= 12) {
       while (takenColors.indexOf(setColor) > -1) {
@@ -334,7 +340,7 @@ export class InternalHost implements HostInstance {
       setColor = PlayerColor.ForteGreen;
     }
 
-    sender.setColor(setColor, this.lobby.getConnections());
+    player.setColor(setColor);
   }
 
   handleCompleteTask(sender: InnerPlayerControl, taskIndex: number): void {

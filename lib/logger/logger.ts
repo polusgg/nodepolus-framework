@@ -1,184 +1,224 @@
-import { ElementType } from "../api/text/types/enums";
+import { Connection } from "../protocol/connection";
 import { TextComponent } from "../api/text";
 import { InternalPlayer } from "../player";
+import { InternalLobby } from "../lobby";
 import { Vector2 } from "../types";
-import style from "ansi-styles";
+import winston from "winston";
+
+const levelNames = ["fatal", "error", "warn", "info", "verbose", "debug", "trace"];
+
+export type LogLevel = typeof levelNames[number];
+
+const levelIndices: Readonly<{
+  [key in LogLevel]: number;
+}> = {
+  fatal: 0,
+  error: 1,
+  warn: 2,
+  info: 3,
+  verbose: 4,
+  debug: 5,
+  trace: 6,
+};
+
+const levelColors: Readonly<{
+  [key in LogLevel]: string;
+}> = {
+  fatal: "black redBG",
+  error: "red",
+  warn: "yellow",
+  info: "cyan",
+  verbose: "white",
+  debug: "green",
+  trace: "magenta",
+};
+
+winston.addColors(levelColors);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const prettyPrint = winston.format((info: winston.Logform.TransformableInfo, _opts?: any): winston.Logform.TransformableInfo | boolean => {
+  const splat = info.splat ?? [];
+
+  for (let i = 0; i < splat.length; i++) {
+    const item = splat[i];
+
+    switch (typeof item) {
+      case "number":
+      case "bigint":
+      case "boolean":
+      case "symbol":
+      case "undefined":
+      case "string":
+        break;
+      case "function":
+        splat[i] = "Function";
+        break;
+      case "object":
+        if (item instanceof Connection) {
+          const c = item as Connection;
+
+          splat[i] = `${c.id} (${c.getConnectionInfo().toString()})`;
+        } else if (item instanceof InternalPlayer) {
+          const p = item as InternalPlayer;
+
+          splat[i] = `${p.getName().toString()} (${p.getId()})`;
+        } else if (item instanceof InternalLobby) {
+          splat[i] = (item as InternalLobby).getCode();
+        } else if (item instanceof Vector2) {
+          const v = item as Vector2;
+
+          splat[i] = `[x=${v.x}, y=${v.y}]`;
+        } else if (item instanceof TextComponent) {
+          splat[i] = (item as TextComponent).toString();
+        }
+        break;
+    }
+  }
+
+  info.splat = splat;
+
+  return info;
+});
 
 export class Logger {
+  private readonly winston: winston.Logger;
+
   constructor(
-    public readonly name: string,
-  ) {}
+    logger: string | winston.Logger,
+    private readonly displayLevel: LogLevel,
+    private readonly filename?: string,
+    private readonly maxFileSizeInBytes: number = 104857600,
+    private readonly maxFiles: number = 10,
+  ) {
+    if (typeof logger != "string") {
+      this.winston = logger;
+    } else {
+      const consoleFormatters = [
+        winston.format.errors({ stack: true }),
+        winston.format.timestamp({ format: "YYYY-MM-DD hh:mm:ss.SSS A" }),
+        winston.format.label({ label: logger, message: false }),
+        prettyPrint(),
+        winston.format.splat(),
+        winston.format.metadata({ fillExcept: ["timestamp", "name", "label", "level", "message", "stack", "splat", "meta"] }),
+        winston.format.printf(info => {
+          const extra = (Object.keys(info.metadata).length) ? ` ${JSON.stringify(info.metadata)}` : "";
+          const stack = info.stack ? `\n${info.stack}` : "";
+
+          return `${info.timestamp} [${info.name ?? info.label}] ${info.level}: ${info.message}${extra}${stack}`;
+        }),
+      ];
+
+      if (process.env.NP_DISABLE_COLORS == undefined) {
+        consoleFormatters.unshift(winston.format.colorize({ level: true, message: false }));
+      }
+
+      const transports: winston.transport[] = [
+        new winston.transports.Console({
+          consoleWarnLevels: ["warn"],
+          stderrLevels: ["error", "fatal"],
+          debugStdout: false,
+          format: winston.format.combine(...consoleFormatters),
+        }),
+      ];
+
+      if (filename) {
+        transports.push(new winston.transports.File({
+          filename: filename,
+          dirname: "logs",
+          zippedArchive: true,
+          maxFiles: maxFiles,
+          maxsize: maxFileSizeInBytes,
+          eol: "\n",
+          format: winston.format.combine(
+            winston.format.errors({ stack: true }),
+            winston.format.timestamp({ format: "YYYY-MM-DD hh:mm:ss.SSS A" }),
+            winston.format.label({ label: logger, message: false }),
+            prettyPrint(),
+            winston.format.splat(),
+            winston.format.json(),
+          ),
+        }));
+      }
+
+      this.winston = winston.createLogger({
+        level: displayLevel,
+        levels: levelIndices,
+        silent: false,
+        exitOnError: false,
+        handleExceptions: true,
+        transports,
+      });
+    }
+  }
+
+  static isValidLevel(level: string): level is LogLevel {
+    return levelNames.includes(level);
+  }
+
+  child(label: string): Logger {
+    const logger = new Logger(
+      this.winston.child({}),
+      this.displayLevel,
+      this.filename,
+      this.maxFileSizeInBytes,
+      this.maxFiles,
+    );
+
+    if (!logger.winston.defaultMeta) {
+      logger.winston.defaultMeta = {};
+    }
+
+    logger.winston.defaultMeta = {
+      name: label,
+    };
+
+    return logger;
+  }
+
+  fatal(message: string, ...splat: unknown[]): void {
+    this.log("fatal", message, {}, ...splat);
+  }
+
+  error(message: string, ...splat: unknown[]): void {
+    this.log("error", message, {}, ...splat);
+  }
+
+  warn(message: string, ...splat: unknown[]): void {
+    this.log("warn", message, {}, ...splat);
+  }
+
+  info(message: string, ...splat: unknown[]): void {
+    this.log("info", message, {}, ...splat);
+  }
+
+  verbose(message: string, ...splat: unknown[]): void {
+    this.log("verbose", message, {}, ...splat);
+  }
+
+  debug(message: string, ...splat: unknown[]): void {
+    this.log("debug", message, {}, ...splat);
+  }
+
+  trace(message: string, ...splat: unknown[]): void {
+    this.log("trace", message, { stack: new Error().stack!.split("\n").slice(2, -1).join("\n") }, ...splat);
+  }
+
+  catch(error: Error): void {
+    this.winston.log("error", { message: error });
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  log(...logElements: any[]): void {
-    for (let i = 0; i < logElements.length; i++) {
-      const element = logElements[i];
+  log(level: string, message: string, meta: Record<string, unknown>, ...splat: any[]): void {
+    const stack = meta.stack ?? undefined;
 
-      switch (typeof element) {
-        case "bigint":
-        case "number":
-          this.startColor("6aa84f");
-          this.print("[");
-          this.endColor();
-          this.startColor("d9ead3");
-          this.print(element.toString());
-          this.endColor();
-          this.startColor("6aa84f");
+    delete meta.stack;
 
-          if (typeof element == "bigint") {
-            this.print("n");
-          }
-
-          this.print("]");
-          this.endColor();
-          break;
-        case "string":
-          this.print(element);
-          break;
-        case "boolean":
-          this.startColor("e69138");
-          this.print("[");
-          this.endColor();
-          this.startColor("fff2cc");
-          this.print(element ? "True" : "False");
-          this.endColor();
-          this.startColor("e69138");
-          this.print("]");
-          this.endColor();
-          break;
-        case "function":
-          throw new Error("Cannot log Functions yet.");
-        case "object":
-          switch (true) {
-            case element instanceof TextComponent:
-              this.printRich(element);
-              break;
-            case element instanceof InternalPlayer:
-              this.printPlayer(element);
-              break;
-            case element instanceof Vector2:
-              this.printVector2(element);
-              break;
-            default:
-              this.print(element.toString());
-          }
-          break;
-        case "undefined":
-          this.startColor("666666");
-          this.print("[");
-          this.endColor();
-          this.startColor("b7b7b7");
-          this.print("undefined");
-          this.endColor();
-          this.startColor("666666");
-          this.print("]");
-          this.endColor();
-          break;
-        case "symbol":
-          throw new Error("Symbol logging not yet implemented");
-      }
-    }
-
-    this.print("\n");
-  }
-
-  private printVector2(vector2: Vector2): void {
-    this.startColor("6aa84f");
-    this.print("[X: ");
-    this.endColor();
-    this.startColor("d9ead3");
-
-    if (vector2.x >= 0) {
-      this.print("+");
-    }
-
-    this.print(vector2.x.toFixed(5));
-    this.endColor();
-    this.startColor("6aa84f");
-    this.print(", Y: ");
-    this.endColor();
-    this.startColor("d9ead3");
-
-    if (vector2.y >= 0) {
-      this.print("+");
-    }
-
-    this.print(vector2.y.toFixed(5));
-    this.endColor();
-    this.startColor("6aa84f");
-    this.print("]");
-    this.endColor();
-  }
-
-  private printPlayer(player: InternalPlayer): void {
-    this.startColor("7f7fff");
-    this.print("[");
-    this.endColor();
-    this.startColor("cacaff");
-    this.print((player.getId()).toString());
-    this.endColor();
-    this.startColor("7f7fff");
-    this.print("-");
-    this.endColor();
-    this.startColor("cacaff");
-    this.print(player.gameObject.owner.toString());
-    this.endColor();
-    this.startColor("7f7fff");
-    this.print(" (");
-    this.endColor();
-    this.printRich(player.getName());
-    this.startColor("7f7fff");
-    this.print(")]");
-    this.endColor();
-  }
-
-  private printRich(text: TextComponent): void {
-    text.elements.forEach(element => {
-      switch (element.type) {
-        case ElementType.Text:
-          // TODO: Fetch background color, and use it for simulated opacity
-          this.startColor(...element.color);
-          this.print(element.content);
-          this.endColor();
-          break;
-        case ElementType.Link:
-          this.startColor("cacaff");
-          this.print(`["`);
-          this.endColor();
-          this.startColor("7f7fff");
-          this.print(element.content);
-          this.endColor();
-          this.startColor("cacaff");
-          this.print(`" => `);
-          this.startColor("7f7fff");
-          this.print(element.link.toString());
-          this.endColor();
-          this.startColor("cacaff");
-          this.print(`]`);
-          this.endColor();
-          break;
-        case ElementType.Reset:
-          break;
-      }
+    this.winston.log({
+      level,
+      message,
+      meta,
+      splat,
+      stack,
     });
-  }
-
-  private endColor(): void {
-    this.print(style.color.close);
-  }
-
-  private startColor(hex: string): void
-  private startColor(r: number, b: number, g: number): void
-  private startColor(r: number | string, b?: number, g?: number): void {
-    if (typeof r == "string") {
-      this.print(style.color.ansi16m.hex(r));
-    } else {
-      this.print(style.color.ansi16m.rgb(r, b!, g!));
-    }
-  }
-
-  private print(text: string): void {
-    // TODO: Don't print if log level is not the current log level, passed in with --LogLevel= CLI option
-    process.stdout.write(text);
   }
 }

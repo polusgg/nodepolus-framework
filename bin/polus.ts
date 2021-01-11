@@ -1,13 +1,16 @@
 import { ServerConfig } from "../lib/api/config/serverConfig";
 import { Plugin } from "../lib/api/plugin";
+import { Logger } from "../lib/logger";
 import { Server } from "../lib/server";
 import path from "path";
 import fs from "fs";
 
+const logger = new Logger("NodePolus", "info");
+
 Error.stackTraceLimit = 25;
 
-console.log("Starting NodePolus");
-console.log("Loading config.json");
+logger.info("Starting NodePolus");
+logger.info("Loading config.json");
 
 const serverConfig: ServerConfig = JSON.parse(fs.readFileSync(path.join(__dirname, "config.json"), "utf-8"));
 
@@ -16,7 +19,7 @@ declare const server: Server;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).server = new Server(serverConfig);
 
-console.log("Loading plugins");
+logger.info("Loading plugins");
 
 const pathToPlugins = path.join(__dirname, "./plugins/");
 const pluginDirectories = fs.readdirSync(pathToPlugins);
@@ -26,12 +29,12 @@ for (let i = 0; i < pluginDirectories.length; i++) {
   const pathToPlugin = path.join(pathToPlugins, pluginDirectories[i]);
 
   if (path.extname(pathToPlugin).toLowerCase() !== ".npplugin") {
-    console.warn(`Skipping folder "${pluginDirectories[i]}" as it does not end with ".npplugin"`);
+    logger.warn(`Skipping folder "${pluginDirectories[i]}" as it does not end with ".npplugin"`);
 
     continue;
   }
 
-  console.log(`Loading ${path.basename(pathToPlugin)}`);
+  logger.info(`Loading ${path.basename(pathToPlugin)}`);
 
   const plugin: Plugin = {
     folder: pluginDirectories[i],
@@ -40,17 +43,19 @@ for (let i = 0; i < pluginDirectories.length; i++) {
   };
 
   plugins.push(plugin);
-  console.log(`Loaded plugin: ${plugin.metadata.name} v${plugin.metadata.version.join(".")}`);
+  logger.info(`Loaded plugin: ${plugin.metadata.name} v${plugin.metadata.version.join(".")}`);
 }
 
 server.listen().then(() => {
-  console.log(`Server listening on ${server.getAddress()}:${server.getPort()}`);
+  logger.info(`Server listening on ${server.getAddress()}:${server.getPort()}`);
+
+  server.emit("server.ready");
 });
 
 process.on("uncaughtException", err => {
-  console.log(err);
+  logger.catch(err);
 });
 
-process.on("unhandledRejection", err => {
-  console.log(err);
+process.on("unhandledRejection", (event: PromiseRejectionEvent) => {
+  logger.catch(event.reason instanceof Error ? event.reason : new Error(event.reason));
 });

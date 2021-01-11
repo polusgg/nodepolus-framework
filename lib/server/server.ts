@@ -11,6 +11,7 @@ import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
 import { ServerEvents } from "../api/events";
 import { InternalLobby } from "../lobby";
+import { Logger } from "../logger";
 import Emittery from "emittery";
 import dgram from "dgram";
 import {
@@ -23,13 +24,15 @@ import {
   JoinGameRequestPacket,
 } from "../protocol/packets/root";
 
-export class Server extends Emittery.Typed<ServerEvents> {
+export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
   public readonly startedAt = Date.now();
   public readonly serverSocket = dgram.createSocket("udp4");
   public readonly connections: Map<string, Connection> = new Map();
 
   public lobbies: InternalLobby[] = [];
   public lobbyMap: Map<string, InternalLobby> = new Map();
+
+  private readonly logger: Logger;
 
   // Reserve the fake client IDs
   private connectionIndex = Object.keys(FakeClientId).length / 2;
@@ -39,9 +42,23 @@ export class Server extends Emittery.Typed<ServerEvents> {
   ) {
     super();
 
+    const level = process.env.NP_LOG_LEVEL ?? "";
+
+    this.logger = new Logger(
+      "Server",
+      Logger.isValidLevel(level) ? level : (this.config.logging?.consoleLevel ?? "info"),
+      this.config.logging?.filename ?? "server.log",
+      this.config.logging?.maxFileSizeInBytes ?? 104857600,
+      this.config.logging?.maxFiles ?? 10,
+    );
+
     this.serverSocket.on("message", (buf, remoteInfo) => {
       this.getConnection(ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`)).emit("message", buf);
     });
+  }
+
+  getLogger(): Logger {
+    return this.logger;
   }
 
   getAddress(): string {

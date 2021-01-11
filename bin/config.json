@@ -2,5 +2,11 @@
   "serverAddress": "0.0.0.0",
   "serverPort": 22023,
   "defaultLobbyAddress": "0.0.0.0",
-  "defaultLobbyPort": 22023
+  "defaultLobbyPort": 22023,
+  "logging": {
+    "consoleLevel": "info",
+    "filename": "server.log",
+    "maxFileSizeInBytes": 104857600,
+    "maxFiles": 10
+  }
 }
