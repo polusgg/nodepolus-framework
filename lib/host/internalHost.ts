@@ -582,7 +582,7 @@ export class InternalHost implements HostInstance {
     const player = this.lobby.findPlayerByConnection(connection);
 
     if (!player) {
-      console.warn("Received disconnect from connection without a player");
+      this.lobby.getLogger().warn("Received disconnect from connection without a player");
 
       return;
     }

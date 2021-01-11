@@ -24,6 +24,7 @@ import { InternalPlayer } from "../player";
 import { RPCHandler } from "./rpcHandler";
 import { InternalHost } from "../host";
 import { Game } from "../api/game";
+import { Logger } from "../logger";
 import { Server } from "../server";
 import {
   AlterGameTagPacket,
@@ -81,6 +82,10 @@ export class InternalLobby implements LobbyInstance {
     private code: string = LobbyCode.generate(),
   ) {
     this.hostInstance = new InternalHost(this);
+  }
+
+  getLogger(): Logger {
+    return this.server.getLogger().child(`Lobby ${this.code}`);
   }
 
   getServer(): Server {

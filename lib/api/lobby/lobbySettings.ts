@@ -382,7 +382,7 @@ export class LobbySettings {
         } else {
           sendToConnections = [];
 
-          console.warn("Attempted to sync lobby settings on a POV without a connection");
+          (this.lobby as InternalLobby).getLogger().warn("Attempted to sync lobby settings on a POV without a connection");
         }
       } else {
         sendToConnections = this.lobby.getConnections();
@@ -390,7 +390,7 @@ export class LobbySettings {
 
       (this.lobby.getPlayers()[0] as InternalPlayer).gameObject.playerControl.syncSettings(customOptions, sendToConnections);
     } else {
-      console.warn("Attempted to sync lobby settings without a player");
+      (this.lobby as InternalLobby).getLogger().warn("Attempted to sync lobby settings without a player");
     }
   }
 }
