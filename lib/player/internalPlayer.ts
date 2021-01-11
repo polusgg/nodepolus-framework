@@ -127,8 +127,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   setCrewmate(): void {
-    // TODO: Is this possible
-    throw new Error("Not yet implemented");
+    throw new Error("TODO: Not yet implemented (is it even possible?)");
   }
 
   isDead(): boolean {

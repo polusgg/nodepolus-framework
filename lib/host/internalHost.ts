@@ -401,7 +401,7 @@ export class InternalHost implements HostInstance {
     await this.lobby.getServer().emit("meeting.started", event);
 
     if (event.isCancelled()) {
-      // TODO: Try to remove "Waiting for host" text on button window
+      // TODO: Try to remove "Waiting for host" text on emergency meeting button window
       return;
     }
 

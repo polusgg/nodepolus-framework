@@ -1,6 +1,5 @@
-import dgram from "dgram";
+import { ConnectionInfo } from "../../types";
 
-// TODO: Use ConnectionInfo if/when we start working on this again
 export type ProxyConfig = {
-  server: dgram.RemoteInfo;
+  server: ConnectionInfo;
 };

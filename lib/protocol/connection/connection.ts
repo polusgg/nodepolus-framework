@@ -342,8 +342,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
   private handleHello(helloPacket: HelloPacket): void {
     if (this.initialized) {
-      // TODO: Change to debug log
-      throw new Error(`Connection ${this.id} sent more than one Hello packet`);
+      return;
     }
 
     this.initialized = true;

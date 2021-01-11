@@ -55,7 +55,6 @@ export class BaseGameRoom {
 
     const data = shipStatus.getShipStatus().getData(this.shipStatusBackup);
 
-    // TODO: Don't cast to an internal class from within the API folder
     (this.game.lobby as InternalLobby).sendRootGamePacket(new GameDataPacket([data], this.game.lobby.getCode()));
   }
 }

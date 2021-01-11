@@ -30,7 +30,7 @@ export class InternalClient implements ClientInstance {
   }
 
   disconnect(): void {
-    // TODO
+    throw new Error("TODO: Not yet implemented");
   }
 
   getId(): number {
@@ -38,14 +38,14 @@ export class InternalClient implements ClientInstance {
   }
 
   sendKick(_banned: boolean, _reason: DisconnectReason): void {
-    throw new Error("Method not implemented.");
+    throw new Error("TODO: Not yet implemented");
   }
 
   sendLateRejection(_disconnectReason: DisconnectReason): void {
-    throw new Error("Method not implemented.");
+    throw new Error("TODO: Not yet implemented");
   }
 
   sendWaitingForHost(): void {
-    throw new Error("Method not implemented.");
+    throw new Error("TODO: Not yet implemented");
   }
 }
