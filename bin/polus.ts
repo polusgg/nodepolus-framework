@@ -56,6 +56,6 @@ process.on("uncaughtException", err => {
   logger.catch(err);
 });
 
-process.on("unhandledRejection", (event: PromiseRejectionEvent) => {
-  logger.catch(event.reason instanceof Error ? event.reason : new Error(event.reason));
-});
+// process.on("unhandledRejection", (event: PromiseRejectionEvent) => {
+//   logger.catch(event.reason instanceof Error ? event.reason : new Error(event.reason));
+// });

@@ -537,7 +537,7 @@ export class InternalLobby implements LobbyInstance {
     if (sendTo) {
       for (let i = 0; i < sendTo.length; i++) {
         if (sendTo[i] instanceof Connection) {
-          sendToConnections[i] = sendTo[i] as unknown as Connection;
+          sendToConnections[i] = sendTo[i];
         } else {
           const connection = this.connections.find(con => con.id == sendTo[i].id);
 
@@ -575,6 +575,8 @@ export class InternalLobby implements LobbyInstance {
   }
 
   handleJoin(connection: Connection): void {
+    this.getLogger().verbose("Connection %s joining", connection);
+
     this.removeActingHosts();
 
     if (!connection.lobby) {
@@ -733,6 +735,7 @@ export class InternalLobby implements LobbyInstance {
         if (!this.ignoredNetIds.includes((packet as RPCPacket).senderNetId)) {
           this.rpcHandler.handleBaseRPC(
             (packet as RPCPacket).packet.type,
+            sender,
             (packet as RPCPacket).senderNetId,
             (packet as RPCPacket).packet,
             sendTo,
@@ -772,13 +775,6 @@ export class InternalLobby implements LobbyInstance {
       netObject.data(data);
 
       if (netObject.type == InnerNetObjectType.CustomNetworkTransform) {
-        // this.emit("movement", {
-        //   clientId: netObject.parent.owner,
-        //   sequenceId: (netObject as InnerCustomNetworkTransform).sequenceId,
-        //   position: (netObject as InnerCustomNetworkTransform).position,
-        //   velocity: (netObject as InnerCustomNetworkTransform).velocity,
-        // });
-
         this.sendUnreliableRootGamePacket(new GameDataPacket([netObject.data(oldNetObject)], this.code), sendTo ?? []);
       } else {
         this.sendRootGamePacket(new GameDataPacket([netObject.data(oldNetObject)], this.code), sendTo ?? []);

@@ -118,6 +118,8 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
 
   private async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
     if (connection.lobby) {
+      this.getLogger().verbose("Connection %s disconnected from lobby %s", connection, connection.lobby);
+
       const player = connection.lobby.findPlayerByConnection(connection);
 
       if (player) {
@@ -135,9 +137,13 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
           return;
         }
 
+        this.getLogger().verbose("Destroyed lobby %s", connection.lobby);
+
         this.lobbies.splice(this.lobbies.indexOf(connection.lobby), 1);
         this.lobbyMap.delete(connection.lobby.getCode());
       }
+    } else {
+      this.getLogger().verbose("Connection %s disconnected", connection);
     }
 
     this.connections.delete(connection.getConnectionInfo().toString());
@@ -147,6 +153,8 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
     const newConnection = new Connection(connectionInfo, this.serverSocket, PacketDestination.Client);
 
     newConnection.id = this.getNextConnectionId();
+
+    this.getLogger().verbose("Initialized connection %s", newConnection);
 
     newConnection.on("packet", async (packet: BaseRootPacket) => this.handlePacket(packet, newConnection));
     newConnection.once("disconnected").then((reason?: DisconnectReason) => {
@@ -209,6 +217,8 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
           this.lobbyMap.set(newLobby.getCode(), newLobby);
 
           sender.sendReliable([new HostGameResponsePacket(newLobby.getCode())]);
+
+          this.getLogger().verbose("Connection %s hosting lobby %s", sender, newLobby);
         } else {
           sender.disconnect(event.getDisconnectReason());
         }
@@ -262,6 +272,8 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
 
         if (!event.isCancelled()) {
           sender.sendReliable([new GetGameListResponsePacket(event.getLobbies(), event.getLobbyCounts())]);
+
+          this.getLogger().verbose("Sending game list to connection %s", sender);
         } else {
           sender.disconnect(event.getDisconnectReason());
         }

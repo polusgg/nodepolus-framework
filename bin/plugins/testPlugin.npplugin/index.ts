@@ -9,25 +9,27 @@ import { Vector2 } from "../../../lib/types";
 
 declare const server: Server;
 
+const logger = server.getLogger().child("TestPlugin");
+
 server.on("server.ready", () => {
-  server.getLogger().fatal("Test message", { extra: "metadata" });
-  server.getLogger().child("test").error("Test message", { extra: "metadata" });
-  server.getLogger().warn("Test message", { extra: "metadata" });
-  server.getLogger().info("Test message", { extra: "metadata" });
-  server.getLogger().verbose("Test message", { extra: "metadata" });
-  server.getLogger().debug("Test message", { extra: "metadata" });
-  server.getLogger().debug("Number: %d", 69420);
-  server.getLogger().debug("BigInt: %d", 69420n);
-  server.getLogger().debug("Decimal: %d", 69.420);
-  server.getLogger().debug("String: %s", "69420");
-  server.getLogger().debug("Boolean as string: %s", true);
-  server.getLogger().debug("Boolean as number: %d", true);
-  server.getLogger().debug("undefined: %s", undefined);
-  server.getLogger().debug("Vector2: %s", new Vector2(69.101, 420.101));
+  logger.fatal("Test message", { extra: "metadata" });
+  logger.error("Test message", { extra: "metadata" });
+  logger.warn("Test message", { extra: "metadata" });
+  logger.info("Test message", { extra: "metadata" });
+  logger.verbose("Test message", { extra: "metadata" });
+  logger.debug("Test message", { extra: "metadata" });
+  logger.debug("Number: %d", 69420);
+  logger.debug("BigInt: %d", 69420n);
+  logger.debug("Decimal: %d", 69.420);
+  logger.debug("String: %s", "69420");
+  logger.debug("Boolean as string: %s", true);
+  logger.debug("Boolean as number: %d", true);
+  logger.debug("undefined: %s", undefined);
+  logger.debug("Vector2: %s", new Vector2(69.101, 420.101));
 });
 
 server.on("player.joined", (event: PlayerJoinedEvent) => {
-  server.getLogger().info(
+  logger.info(
     "%s connected to lobby %s from connection %s",
     event.getPlayer(),
     event.getLobby(),

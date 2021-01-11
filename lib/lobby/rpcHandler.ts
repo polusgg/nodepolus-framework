@@ -10,6 +10,7 @@ import { RPCPacketType } from "../protocol/packets/types/enums";
 import { Connection } from "../protocol/connection";
 import { GameOptionsData, Vector2 } from "../types";
 import { InternalLobby } from ".";
+import { Vents } from "../static";
 import {
   AddVotePacket,
   BaseRPCPacket,
@@ -35,14 +36,13 @@ import {
   SnapToPacket,
   SyncSettingsPacket,
 } from "../protocol/packets/rpc";
-import { Vents } from "../static";
 
 export class RPCHandler {
   constructor(
     public readonly lobby: InternalLobby,
   ) {}
 
-  handleBaseRPC(type: RPCPacketType, senderNetId: number, rawPacket: BaseRPCPacket, sendTo: Connection[]): void {
+  handleBaseRPC(type: RPCPacketType, connection: Connection, senderNetId: number, rawPacket: BaseRPCPacket, sendTo: Connection[]): void {
     const sender = this.lobby.findInnerNetObject(senderNetId);
     const typeString = InnerNetObjectType[type];
 
@@ -82,11 +82,11 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetInfected: {
-        // TODO: Log warning about receiving a SetInfected packet from a connection
+        this.lobby.getLogger().warn("Received SetInfected packet from connection %s in a server-as-host state", connection);
         break;
       }
       case RPCPacketType.Exiled: {
-        // TODO: Log warning about receiving an Exiled packet from a connection
+        this.lobby.getLogger().warn("Received Exiled packet from connection %s in a server-as-host state", connection);
         break;
       }
       case RPCPacketType.CheckName: {
@@ -100,7 +100,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetName: {
-        // TODO: Log warning about receiving a SetName packet from a connection
+        this.lobby.getLogger().warn("Received SetName packet from connection %s in a server-as-host state", connection);
         break;
       }
       case RPCPacketType.CheckColor: {
@@ -114,7 +114,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetColor: {
-        // TODO: Log warning about receiving a SetColor packet from a connection
+        this.lobby.getLogger().warn("Received SetColor packet from connection %s in a server-as-host state", connection);
         break;
       }
       case RPCPacketType.SetHat: {
@@ -168,7 +168,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.StartMeeting: {
-        // TODO: Log warning about receiving a StartMeeting packet from a connection
+        this.lobby.getLogger().warn("Received StartMeeting packet from connection %s in a server-as-host state", connection);
         break;
       }
       case RPCPacketType.SetScanner: {
@@ -242,11 +242,11 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.Close: {
-        // TODO: Log warning about receiving a Close packet from a connection
+        this.lobby.getLogger().warn("Received Close packet from connection %s in a server-as-host state", connection);
         break;
       }
       case RPCPacketType.VotingComplete: {
-        // TODO: Log warning about receiving a VotingComplete packet from a connection
+        this.lobby.getLogger().warn("Received VotingComplete packet from connection %s in a server-as-host state", connection);
         break;
       }
       case RPCPacketType.CastVote: {
@@ -260,7 +260,7 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.ClearVote: {
-        // TODO: Log warning about receiving a ClearVote packet from a connection
+        this.lobby.getLogger().warn("Received ClearVote packet from connection %s in a server-as-host state", connection);
         break;
       }
       case RPCPacketType.AddVote: {
@@ -294,11 +294,10 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetTasks: {
-        // TODO: Log warning about receiving a SetTasks packet from a connection
+        this.lobby.getLogger().warn("Received SetTasks packet from connection %s in a server-as-host state", connection);
         break;
       }
       case RPCPacketType.UpdateGameData: {
-        // TODO: Log warning about receiving an UpdateGameData packet from a connection
         break;
       }
       case RPCPacketType.ClimbLadder: {
@@ -351,20 +350,10 @@ export class RPCHandler {
   }
 
   handleSetHat(sender: InnerPlayerControl, hat: PlayerHat, sendTo: Connection[]): void {
-    // this.lobby.emit("hatChanged", {
-    //   clientId: sender.parent.owner,
-    //   newHat: hat,
-    // });
-
     sender.setHat(hat, sendTo);
   }
 
   handleSetSkin(sender: InnerPlayerControl, skin: PlayerSkin, sendTo: Connection[]): void {
-    // this.lobby.emit("skinChanged", {
-    //   clientId: sender.parent.owner,
-    //   newSkin: skin,
-    // });
-
     sender.setSkin(skin, sendTo);
   }
 
@@ -379,13 +368,7 @@ export class RPCHandler {
   }
 
   handleSendChat(sender: InnerPlayerControl, message: string, sendTo: Connection[]): void {
-    // const event = new ChatEvent(this.lobby.findPlayerByInnerNetObject(sender)!, TextComponent.from(message));
-
-    // this.lobby.emit("chat", event);
-
-    // if (!event.isCancelled()) {
     sender.sendChat(message, sendTo);
-    // }
   }
 
   handleSetScanner(sender: InnerPlayerControl, isScanning: boolean, sequenceId: number, sendTo: Connection[]): void {
@@ -397,11 +380,6 @@ export class RPCHandler {
   }
 
   handleSetPet(sender: InnerPlayerControl, pet: PlayerPet, sendTo: Connection[]): void {
-    // this.lobby.emit("petChanged", {
-    //   clientId: sender.parent.owner,
-    //   newPet: pet,
-    // });
-
     sender.setPet(pet, sendTo);
   }
 

@@ -36,6 +36,6 @@ export abstract class BaseInnerNetObject {
       return;
     }
 
-    this.parent.lobby.sendRPCPacket(this as unknown as BaseInnerNetObject, packet, to);
+    this.parent.lobby.sendRPCPacket(this, packet, to);
   }
 }

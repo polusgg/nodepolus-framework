@@ -170,13 +170,13 @@ export class InternalHost implements HostInstance {
           break;
         case Level.MiraHq:
           this.decontaminationHandlers = [
-            new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon] as unknown as DeconSystem),
+            new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon] as DeconSystem),
           ];
           break;
         case Level.Polus:
           this.decontaminationHandlers = [
-            new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon] as unknown as DeconSystem),
-            new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon2] as unknown as DeconTwoSystem),
+            new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon] as DeconSystem),
+            new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon2] as DeconTwoSystem),
           ];
           this.doorHandler = new DoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
           break;
@@ -186,7 +186,9 @@ export class InternalHost implements HostInstance {
           break;
       }
 
-      if (!this.lobby.getGameData()) {
+      const gameData = this.lobby.getGameData();
+
+      if (!gameData) {
         throw new Error("Attempted to start game without a GameData instance");
       }
 
@@ -198,10 +200,10 @@ export class InternalHost implements HostInstance {
 
       // TODO: Remove -- debug task list for medbay scan on all 3 maps
       for (let i = 0; i < this.lobby.getPlayers().length; i++) {
-        this.lobby.getGameData()!.gameData.setTasks(this.lobby.getPlayers()[i].id, [25, 4, 2], connections);
+        gameData.gameData.setTasks(this.lobby.getPlayers()[i].id, [25, 4, 2], connections);
       }
 
-      this.lobby.getGameData()!.gameData.updateGameData(this.lobby.getGameData()!.gameData.players, connections);
+      gameData.gameData.updateGameData(gameData.gameData.players, connections);
 
       this.lobby.setGameState(GameState.Started);
     }
@@ -493,45 +495,45 @@ export class InternalHost implements HostInstance {
 
     switch (system.type) {
       case SystemType.Electrical:
-        this.systemsHandler!.repairSwitch(player, system as unknown as SwitchSystem, amount as ElectricalAmount);
+        this.systemsHandler!.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
         break;
       case SystemType.Medbay:
-        this.systemsHandler!.repairMedbay(player, system as unknown as MedScanSystem, amount as MedbayAmount);
+        this.systemsHandler!.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
         break;
       case SystemType.Oxygen:
-        this.systemsHandler!.repairOxygen(player, system as unknown as LifeSuppSystem, amount as OxygenAmount);
+        this.systemsHandler!.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
         break;
       case SystemType.Reactor:
-        this.systemsHandler!.repairReactor(player, system as unknown as ReactorSystem, amount as ReactorAmount);
+        this.systemsHandler!.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
         break;
       case SystemType.Laboratory:
-        this.systemsHandler!.repairReactor(player, system as unknown as LaboratorySystem, amount as ReactorAmount);
+        this.systemsHandler!.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
         break;
       case SystemType.Security:
         this.systemsHandler!.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
         break;
       case SystemType.Doors:
         if (level == Level.Polus) {
-          this.systemsHandler!.repairPolusDoors(player, system as unknown as DoorsSystem, amount as PolusDoorsAmount);
+          this.systemsHandler!.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
         } else {
           throw new Error(`Received RepairSystem for Doors on an unimplemented level: ${level as Level} (${Level[level]})`);
         }
         break;
       case SystemType.Communications:
         if (level == Level.MiraHq) {
-          this.systemsHandler!.repairHqHud(player, system as unknown as HqHudSystem, amount as MiraCommunicationsAmount);
+          this.systemsHandler!.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
         } else {
-          this.systemsHandler!.repairHudOverride(player, system as unknown as HudOverrideSystem, amount as NormalCommunicationsAmount);
+          this.systemsHandler!.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
         }
         break;
       case SystemType.Decontamination:
-        this.systemsHandler!.repairDecon(player, system as unknown as DeconSystem, amount as DecontaminationAmount);
+        this.systemsHandler!.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
         break;
       case SystemType.Decontamination2:
-        this.systemsHandler!.repairDecon(player, system as unknown as DeconTwoSystem, amount as DecontaminationAmount);
+        this.systemsHandler!.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
         break;
       case SystemType.Sabotage:
-        this.systemsHandler!.repairSabotage(player, system as unknown as SabotageSystem, amount as SabotageAmount);
+        this.systemsHandler!.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
         break;
       default:
         throw new Error(`Received RepairSystem packet for an unimplemented SystemType: ${system.type} (${SystemType[system.type]})`);
@@ -582,7 +584,7 @@ export class InternalHost implements HostInstance {
     const player = this.lobby.findPlayerByConnection(connection);
 
     if (!player) {
-      this.lobby.getLogger().warn("Received disconnect from connection without a player");
+      this.lobby.getLogger().warn("Received Disconnect from connection without a player");
 
       return;
     }
@@ -624,7 +626,7 @@ export class InternalHost implements HostInstance {
     }
 
     const oldData = shipStatus.getShipStatus().clone();
-    const movingPlatform = shipStatus.getShipStatus().systems[InternalSystemType.MovingPlatform] as unknown as MovingPlatformSystem;
+    const movingPlatform = shipStatus.getShipStatus().systems[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
 
     movingPlatform.innerPlayerControlNetId = sender.parent.playerControl.netId;
     movingPlatform.side = (movingPlatform.side + 1) % 2;

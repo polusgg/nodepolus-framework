@@ -40,7 +40,7 @@ export class BaseDoorGameRoom extends BaseGameRoom {
       }
 
       for (let i = 0; i < doors.length; i++) {
-        (this.getInternalShipStatus().systems[InternalSystemType.Doors] as unknown as DoorsSystem).doorStates[doors[i]] = true;
+        (this.getInternalShipStatus().systems[InternalSystemType.Doors] as DoorsSystem).doorStates[doors[i]] = true;
       }
     }
   }

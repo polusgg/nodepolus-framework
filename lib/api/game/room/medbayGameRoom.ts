@@ -11,7 +11,7 @@ export class MedbayGameRoom extends BaseDoorGameRoom {
   }
 
   getInternalSystem(): MedScanSystem {
-    return this.getInternalShipStatus().systems[InternalSystemType.MedScan] as unknown as MedScanSystem;
+    return this.getInternalShipStatus().systems[InternalSystemType.MedScan] as MedScanSystem;
   }
 
   getPlayersScanning(): PlayerInstance | undefined {
