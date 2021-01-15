@@ -79,7 +79,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
       const oldSystem = old.systems[systemIndex];
 
       if (currentSystem.type != oldSystem.type) {
-        throw new Error(`Attempted comparison of two disperate SystemTypes: expected ${currentSystem.type} (${SystemType[currentSystem.type]}) but got ${oldSystem.type} (${SystemType[oldSystem.type]})`);
+        throw new Error(`Attempted comparison of two disparate SystemTypes: expected ${currentSystem.type} (${SystemType[currentSystem.type]}) but got ${oldSystem.type} (${SystemType[oldSystem.type]})`);
       }
 
       const isEqual = currentSystem.equals(oldSystem);
@@ -161,51 +161,51 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
       switch (type) {
         case SystemType.Doors:
           if (this.level == Level.TheSkeld) {
-            this.systems[InternalSystemType.AutoDoors] = new AutoDoorsSystem();
+            this.systems[InternalSystemType.AutoDoors] = new AutoDoorsSystem(this);
           } else {
-            this.systems[InternalSystemType.Doors] = new DoorsSystem();
+            this.systems[InternalSystemType.Doors] = new DoorsSystem(this);
           }
           break;
         case SystemType.Communications:
           if (this.level == Level.MiraHq) {
-            this.systems[InternalSystemType.HqHud] = new HqHudSystem();
+            this.systems[InternalSystemType.HqHud] = new HqHudSystem(this);
           } else {
-            this.systems[InternalSystemType.HudOverride] = new HudOverrideSystem();
+            this.systems[InternalSystemType.HudOverride] = new HudOverrideSystem(this);
           }
           break;
         case SystemType.Decontamination:
-          this.systems[InternalSystemType.Decon] = new DeconSystem();
+          this.systems[InternalSystemType.Decon] = new DeconSystem(this);
           break;
         case SystemType.Decontamination2:
-          this.systems[InternalSystemType.Decon2] = new DeconTwoSystem();
+          this.systems[InternalSystemType.Decon2] = new DeconTwoSystem(this);
           break;
         case SystemType.Electrical:
-          this.systems[InternalSystemType.Switch] = new SwitchSystem();
+          this.systems[InternalSystemType.Switch] = new SwitchSystem(this);
           break;
         case SystemType.Laboratory:
-          this.systems[InternalSystemType.Laboratory] = new LaboratorySystem();
+          this.systems[InternalSystemType.Laboratory] = new LaboratorySystem(this);
           break;
         case SystemType.Reactor:
           if (this.level == Level.Airship) {
-            this.systems[InternalSystemType.AirshipReactor] = new AirshipReactorSystem();
+            this.systems[InternalSystemType.AirshipReactor] = new AirshipReactorSystem(this);
           } else {
-            this.systems[InternalSystemType.Reactor] = new ReactorSystem();
+            this.systems[InternalSystemType.Reactor] = new ReactorSystem(this);
           }
           break;
         case SystemType.Sabotage:
-          this.systems[InternalSystemType.Sabotage] = new SabotageSystem();
+          this.systems[InternalSystemType.Sabotage] = new SabotageSystem(this);
           break;
         case SystemType.Security:
-          this.systems[InternalSystemType.SecurityCamera] = new SecurityCameraSystem();
+          this.systems[InternalSystemType.SecurityCamera] = new SecurityCameraSystem(this);
           break;
         case SystemType.Medbay:
-          this.systems[InternalSystemType.MedScan] = new MedScanSystem();
+          this.systems[InternalSystemType.MedScan] = new MedScanSystem(this);
           break;
         case SystemType.Oxygen:
-          this.systems[InternalSystemType.Oxygen] = new LifeSuppSystem();
+          this.systems[InternalSystemType.Oxygen] = new LifeSuppSystem(this);
           break;
         case SystemType.Weapons:
-          this.systems[InternalSystemType.MovingPlatform] = new MovingPlatformSystem();
+          this.systems[InternalSystemType.MovingPlatform] = new MovingPlatformSystem(this);
           break;
         default:
           throw new Error(`Tried to get unimplemented SystemType: ${type} (${SystemType[type]})`);

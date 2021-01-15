@@ -23,7 +23,7 @@ export class Switch {
   flip(): void {
     this.room.internalBackupShipStatus();
 
-    this.room.getInternalSystem().actualSwitches.bits[this.index] = !this.getState();
+    this.room.getInternalSystem().setSwitchState(this.index, !this.getState());
 
     this.room.internalUpdateShipStatus();
   }
@@ -68,13 +68,7 @@ export class Switch {
 }
 
 export class ElectricalGameRoom extends BaseDoorGameRoom {
-  private readonly internalSwitches = [
-    new Switch(this, 0),
-    new Switch(this, 1),
-    new Switch(this, 2),
-    new Switch(this, 3),
-    new Switch(this, 4),
-  ];
+  private readonly internalSwitches = new Array(5).fill(0).map((_el, index) => new Switch(this, index));
 
   constructor(game: Game) {
     super(game, SystemType.Electrical);

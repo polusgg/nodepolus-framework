@@ -76,32 +76,32 @@ Meeting Events
 - ✔️ "meeting.votekick.removed"
 
 Room (Map Rooms) Events
-- sabotaged
-- fixed
-- doorsClosed *emitted with a Doors[] of doors that closed, in case of an API call to only close one door*
-- doorsOpened *emitted with a Doors[] of doors that opened, in case of an API call to only open one door*
+- room.sabotaged
+- room.repaired
+- room.doors.closed *emitted with a Doors[] of doors that closed, in case of an API call to only close one door*
+- room.doors.opened *emitted with a Doors[] of doors that opened, in case of an API call to only open one door*
 
 Sabotage: Electrical
-- switchFlipped
+- room.electrical.interacted
 
 Sabotage: Mira Comms
-- consoleOpened
-- consoleClosed
-- consoleRepaired
-- consoleDamaged
+- room.communications.console.opened
+- room.communications.console.closed
+- room.communications.console.repaired
+- room.communications.console.cleared
 
 Sabotage: Oxygen
-- consoleRepaired
-- consoleDamaged
+- room.oxygen.console.repaired
+- room.oxygen.console.cleared
 
 Sabotage: Reactor
-- consoleRepaired
-- consoleDamaged
+- room.reactor.console.repaired
+- room.reactor.console.cleared
 
 Decontamination
-- entered
-- exited
-- gassed
+- room.decontamination.entered
+- room.decontamination.exited
+- room.decontamination.sprayed
 
 
 ----------

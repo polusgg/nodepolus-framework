@@ -1,8 +1,12 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
+import { BaseInnerShipStatus } from "../baseInnerShipStatus";
 
 export abstract class BaseSystem {
-  constructor(public readonly type: SystemType) {}
+  constructor(
+    public readonly shipStatus: BaseInnerShipStatus,
+    public readonly type: SystemType,
+  ) {}
 
   abstract getData(old: this): MessageWriter;
 

@@ -1,6 +1,8 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { RoomElectricalInteractedEvent } from "../../../../api/events/room";
 import { SystemType } from "../../../../types/enums";
 import { Bitfield } from "../../../../types";
+import { BaseInnerShipStatus } from "..";
 import { BaseSystem } from ".";
 
 export class SwitchSystem extends BaseSystem {
@@ -8,8 +10,16 @@ export class SwitchSystem extends BaseSystem {
   public actualSwitches: Bitfield = new Bitfield([...this.expectedSwitches.bits]);
   public visionModifier = 0xff;
 
-  constructor() {
-    super(SystemType.Electrical);
+  constructor(shipStatus: BaseInnerShipStatus) {
+    super(shipStatus, SystemType.Electrical);
+  }
+
+  async setSwitchState(switchIndex: number, switchState: boolean): Promise<void> {
+    const event = new RoomElectricalInteractedEvent(switchIndex, switchState);
+
+    await this.shipStatus.parent.lobby.getServer().emit("room.electrical.interacted", event);
+
+    this.actualSwitches.update(switchIndex, event.getState());
   }
 
   getData(): MessageWriter {
@@ -50,7 +60,7 @@ export class SwitchSystem extends BaseSystem {
   }
 
   clone(): SwitchSystem {
-    const clone = new SwitchSystem();
+    const clone = new SwitchSystem(this.shipStatus);
 
     clone.actualSwitches = new Bitfield([...this.actualSwitches.bits]);
     clone.expectedSwitches = new Bitfield([...this.expectedSwitches.bits]);

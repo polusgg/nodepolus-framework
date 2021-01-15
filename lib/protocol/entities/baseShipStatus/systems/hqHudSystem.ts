@@ -1,13 +1,14 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
+import { BaseInnerShipStatus } from "..";
 
 export class HqHudSystem extends BaseSystem {
   public activeConsoles: Map<number, number> = new Map();
   public completedConsoles: Set<number> = new Set([0, 1]);
 
-  constructor() {
-    super(SystemType.Communications);
+  constructor(shipStatus: BaseInnerShipStatus) {
+    super(shipStatus, SystemType.Communications);
   }
 
   getData(): MessageWriter {
@@ -69,7 +70,7 @@ export class HqHudSystem extends BaseSystem {
   }
 
   clone(): HqHudSystem {
-    const clone = new HqHudSystem();
+    const clone = new HqHudSystem(this.shipStatus);
 
     clone.activeConsoles = new Map(this.activeConsoles);
     clone.completedConsoles = new Set(this.completedConsoles);

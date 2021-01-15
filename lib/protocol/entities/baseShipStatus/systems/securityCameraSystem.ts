@@ -1,12 +1,13 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
+import { BaseInnerShipStatus } from "..";
 
 export class SecurityCameraSystem extends BaseSystem {
   public playersViewingCameras: Set<number> = new Set();
 
-  constructor() {
-    super(SystemType.Security);
+  constructor(shipStatus: BaseInnerShipStatus) {
+    super(shipStatus, SystemType.Security);
   }
 
   getData(): MessageWriter {
@@ -41,7 +42,7 @@ export class SecurityCameraSystem extends BaseSystem {
   }
 
   clone(): SecurityCameraSystem {
-    const clone = new SecurityCameraSystem();
+    const clone = new SecurityCameraSystem(this.shipStatus);
 
     clone.playersViewingCameras = new Set(this.playersViewingCameras);
 

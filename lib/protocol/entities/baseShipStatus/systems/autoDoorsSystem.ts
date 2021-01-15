@@ -2,12 +2,13 @@ import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemDoors } from "../../../../static/doors";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
+import { BaseInnerShipStatus } from "..";
 
 export class AutoDoorsSystem extends BaseSystem {
   public doors: boolean[] = new Array(SystemDoors.countForSkeld()).fill(true);
 
-  constructor() {
-    super(SystemType.Doors);
+  constructor(shipStatus: BaseInnerShipStatus) {
+    super(shipStatus, SystemType.Doors);
   }
 
   getData(old: AutoDoorsSystem): MessageWriter {
@@ -61,7 +62,7 @@ export class AutoDoorsSystem extends BaseSystem {
   }
 
   clone(): AutoDoorsSystem {
-    const clone = new AutoDoorsSystem();
+    const clone = new AutoDoorsSystem(this.shipStatus);
 
     clone.doors = [...this.doors];
 

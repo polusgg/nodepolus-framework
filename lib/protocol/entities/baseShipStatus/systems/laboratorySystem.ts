@@ -1,13 +1,14 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
+import { BaseInnerShipStatus } from "..";
 
 export class LaboratorySystem extends BaseSystem {
   public timer = 10000;
   public userConsoles: Map<number, number> = new Map();
 
-  constructor() {
-    super(SystemType.Laboratory);
+  constructor(shipStatus: BaseInnerShipStatus) {
+    super(shipStatus, SystemType.Laboratory);
   }
 
   getData(): MessageWriter {
@@ -55,7 +56,7 @@ export class LaboratorySystem extends BaseSystem {
   }
 
   clone(): LaboratorySystem {
-    const clone = new LaboratorySystem();
+    const clone = new LaboratorySystem(this.shipStatus);
 
     clone.timer = this.timer;
     clone.userConsoles = new Map(this.userConsoles);

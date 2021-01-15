@@ -1,13 +1,14 @@
 import { DecontaminationDoorState, SystemType } from "../../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { BaseSystem } from ".";
+import { BaseInnerShipStatus } from "../baseInnerShipStatus";
 
 export class DeconSystem extends BaseSystem {
   public timer = 0;
   public state: DecontaminationDoorState = DecontaminationDoorState.Idle;
 
-  constructor() {
-    super(SystemType.Decontamination);
+  constructor(shipStatus: BaseInnerShipStatus) {
+    super(shipStatus, SystemType.Decontamination);
   }
 
   getData(): MessageWriter {
@@ -38,7 +39,7 @@ export class DeconSystem extends BaseSystem {
   }
 
   clone(): DeconSystem {
-    const clone = new DeconSystem();
+    const clone = new DeconSystem(this.shipStatus);
 
     clone.state = this.state;
     clone.timer = this.timer;

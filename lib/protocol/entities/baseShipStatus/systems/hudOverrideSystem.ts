@@ -1,12 +1,13 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
+import { BaseInnerShipStatus } from "..";
 
 export class HudOverrideSystem extends BaseSystem {
   public sabotaged = false;
 
-  constructor() {
-    super(SystemType.Communications);
+  constructor(shipStatus: BaseInnerShipStatus) {
+    super(shipStatus, SystemType.Communications);
   }
 
   getData(): MessageWriter {
@@ -26,7 +27,7 @@ export class HudOverrideSystem extends BaseSystem {
   }
 
   clone(): HudOverrideSystem {
-    const clone = new HudOverrideSystem();
+    const clone = new HudOverrideSystem(this.shipStatus);
 
     clone.sabotaged = this.sabotaged;
 

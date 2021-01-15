@@ -2,13 +2,14 @@ import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemDoors } from "../../../../static/doors";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
+import { BaseInnerShipStatus } from "..";
 
 export class DoorsSystem extends BaseSystem {
   public timers: Map<SystemType, number> = new Map<SystemType, number>();
   public doorStates: boolean[] = new Array(SystemDoors.countForPolus()).fill(true);
 
-  constructor() {
-    super(SystemType.Doors);
+  constructor(shipStatus: BaseInnerShipStatus) {
+    super(shipStatus, SystemType.Doors);
   }
 
   getData(): MessageWriter {
@@ -64,7 +65,7 @@ export class DoorsSystem extends BaseSystem {
   }
 
   clone(): DoorsSystem {
-    const clone = new DoorsSystem();
+    const clone = new DoorsSystem(this.shipStatus);
 
     clone.doorStates = [...this.doorStates];
     clone.timers = new Map(this.timers);

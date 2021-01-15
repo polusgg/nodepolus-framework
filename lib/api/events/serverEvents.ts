@@ -57,6 +57,24 @@ import {
   PlayerVotekickRemovedEvent,
 } from "./player";
 import {
+  RoomCommunicationsConsoleClearedEvent,
+  RoomCommunicationsConsoleClosedEvent,
+  RoomCommunicationsConsoleOpenedEvent,
+  RoomCommunicationsConsoleRepairedEvent,
+  RoomDecontaminationEnteredEvent,
+  RoomDecontaminationExitedEvent,
+  RoomDecontaminationSprayedEvent,
+  RoomDoorsClosedEvent,
+  RoomDoorsOpenedEvent,
+  RoomElectricalInteractedEvent,
+  RoomOxygenConsoleClearedEvent,
+  RoomOxygenConsoleRepairedEvent,
+  RoomReactorConsoleClearedEvent,
+  RoomReactorConsoleRepairedEvent,
+  RoomRepairedEvent,
+  RoomSabotagedEvent,
+} from "./room";
+import {
   ServerLobbyCreatedEvent,
   ServerLobbyDestroyedEvent,
   ServerLobbyJoinEvent,
@@ -131,6 +149,26 @@ export type ServerEvents = {
   "player.task.uncompleted": PlayerTaskUncompletedEvent;
   "player.votekick.added": PlayerVotekickAddedEvent;
   "player.votekick.removed": PlayerVotekickRemovedEvent;
+
+  /**
+   * Room Events
+   */
+  "room.communications.console.cleared": RoomCommunicationsConsoleClearedEvent;
+  "room.communications.console.closed": RoomCommunicationsConsoleClosedEvent;
+  "room.communications.console.opened": RoomCommunicationsConsoleOpenedEvent;
+  "room.communications.console.repaired": RoomCommunicationsConsoleRepairedEvent;
+  "room.decontamination.entered": RoomDecontaminationEnteredEvent;
+  "room.decontamination.exited": RoomDecontaminationExitedEvent;
+  "room.decontamination.sprayed": RoomDecontaminationSprayedEvent;
+  "room.doors.closed": RoomDoorsClosedEvent;
+  "room.doors.opened": RoomDoorsOpenedEvent;
+  "room.electrical.interacted": RoomElectricalInteractedEvent;
+  "room.oxygen.console.cleared": RoomOxygenConsoleClearedEvent;
+  "room.oxygen.console.repaired": RoomOxygenConsoleRepairedEvent;
+  "room.reactor.console.cleared": RoomReactorConsoleClearedEvent;
+  "room.reactor.console.repaired": RoomReactorConsoleRepairedEvent;
+  "room.repaired": RoomRepairedEvent;
+  "room.sabotaged": RoomSabotagedEvent;
 
   /**
    * Server Events

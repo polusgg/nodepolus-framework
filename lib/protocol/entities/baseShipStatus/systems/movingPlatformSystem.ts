@@ -1,6 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
+import { BaseInnerShipStatus } from "..";
 
 enum MovingPlatformSide {
   Left = 0x00,
@@ -12,8 +13,8 @@ export class MovingPlatformSystem extends BaseSystem {
   public innerPlayerControlNetId?: number;
   public side: MovingPlatformSide = MovingPlatformSide.Left;
 
-  constructor() {
-    super(SystemType.Weapons);
+  constructor(shipStatus: BaseInnerShipStatus) {
+    super(shipStatus, SystemType.GapRoom);
   }
 
   getData(): MessageWriter {
@@ -56,7 +57,7 @@ export class MovingPlatformSystem extends BaseSystem {
   }
 
   clone(): MovingPlatformSystem {
-    const clone = new MovingPlatformSystem();
+    const clone = new MovingPlatformSystem(this.shipStatus);
 
     clone.sequenceId = this.sequenceId;
     clone.innerPlayerControlNetId = this.innerPlayerControlNetId;

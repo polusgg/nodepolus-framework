@@ -1,12 +1,13 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
+import { BaseInnerShipStatus } from "..";
 
 export class MedScanSystem extends BaseSystem {
   public playersInQueue: Set<number> = new Set();
 
-  constructor() {
-    super(SystemType.Medbay);
+  constructor(shipStatus: BaseInnerShipStatus) {
+    super(shipStatus, SystemType.Medbay);
   }
 
   getData(): MessageWriter {
@@ -41,7 +42,7 @@ export class MedScanSystem extends BaseSystem {
   }
 
   clone(): MedScanSystem {
-    const clone = new MedScanSystem();
+    const clone = new MedScanSystem(this.shipStatus);
 
     clone.playersInQueue = new Set(this.playersInQueue);
 

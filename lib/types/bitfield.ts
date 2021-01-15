@@ -51,4 +51,10 @@ export class Bitfield {
 
     return this;
   }
+
+  update(bit: number, state: boolean): this {
+    this.bits[bit] = state;
+
+    return this;
+  }
 }

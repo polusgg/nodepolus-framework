@@ -1,12 +1,13 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
+import { BaseInnerShipStatus } from "..";
 
 export class SabotageSystem extends BaseSystem {
   public cooldown = 0;
 
-  constructor() {
-    super(SystemType.Sabotage);
+  constructor(shipStatus: BaseInnerShipStatus) {
+    super(shipStatus, SystemType.Sabotage);
   }
 
   getData(): MessageWriter {
@@ -30,7 +31,7 @@ export class SabotageSystem extends BaseSystem {
   }
 
   clone(): SabotageSystem {
-    const clone = new SabotageSystem();
+    const clone = new SabotageSystem(this.shipStatus);
 
     clone.cooldown = this.cooldown;
 

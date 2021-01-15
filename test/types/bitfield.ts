@@ -82,6 +82,25 @@ test("toggles a bit", t => {
   ]);
 });
 
+test("updates a bit", t => {
+  const bits = new Bitfield(Array(8).fill(true));
+
+  bits.update(2, false);
+
+  t.is(bits.toNumber(), 251);
+  t.deepEqual(bits.bits, [
+    true, true, false, true, true, true, true, true,
+  ]);
+
+  bits.update(4, false);
+  bits.update(2, true);
+
+  t.is(bits.toNumber(), 239);
+  t.deepEqual(bits.bits, [
+    true, true, true, true, false, true, true, true,
+  ]);
+});
+
 test("checks if any bit is set", t => {
   const bits = new Bitfield(Array(8).fill(false));
 
