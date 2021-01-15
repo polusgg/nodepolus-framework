@@ -1,8 +1,8 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemDoors } from "../../../../static/doors";
 import { SystemType } from "../../../../types/enums";
-import { BaseSystem } from ".";
 import { BaseInnerShipStatus } from "..";
+import { BaseSystem } from ".";
 
 export class DoorsSystem extends BaseSystem {
   public timers: Map<SystemType, number> = new Map<SystemType, number>();

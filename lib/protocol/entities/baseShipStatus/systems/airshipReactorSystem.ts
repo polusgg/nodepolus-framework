@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { SystemType } from "../../../../types/enums";
-import { BaseSystem } from ".";
 import { BaseInnerShipStatus } from "..";
+import { BaseSystem } from ".";
 
 export class AirshipReactorSystem extends BaseSystem {
   public activeConsoles: Map<number, number> = new Map();

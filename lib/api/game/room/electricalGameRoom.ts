@@ -68,7 +68,7 @@ export class Switch {
 }
 
 export class ElectricalGameRoom extends BaseDoorGameRoom {
-  private readonly internalSwitches = new Array(5).fill(0).map((_el, index) => new Switch(this, index));
+  private readonly internalSwitches = new Array(5).fill(0).map((_, index) => new Switch(this, index));
 
   constructor(game: Game) {
     super(game, SystemType.Electrical);

@@ -1,6 +1,6 @@
-import { Door } from "../../game";
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
+import { Door } from "../../game";
 
 export class RoomDoorsClosedEvent extends CancellableEvent {
   constructor(

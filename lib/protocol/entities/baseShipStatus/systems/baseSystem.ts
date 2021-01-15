@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { SystemType } from "../../../../types/enums";
 import { BaseInnerShipStatus } from "../baseInnerShipStatus";
+import { SystemType } from "../../../../types/enums";
 
 export abstract class BaseSystem {
   constructor(

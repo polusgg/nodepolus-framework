@@ -1,11 +1,7 @@
-import { CancellableEvent } from "../types";
-
-export class RoomCommunicationsConsoleClosedEvent extends CancellableEvent {
+export class RoomCommunicationsConsoleClosedEvent {
   constructor(
     private readonly console: number,
-  ) {
-    super();
-  }
+  ) {}
 
   getConsole(): number {
     return this.console;
