@@ -5,8 +5,8 @@
   "defaultLobbyPort": 22023,
   "logging": {
     "consoleLevel": "info",
-    "filename": "server.log",
     "maxFileSizeInBytes": 104857600,
-    "maxFiles": 10
+    "maxFiles": 10,
+    "filename": "server.log"
   }
 }
