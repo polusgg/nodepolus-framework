@@ -114,7 +114,6 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetColor: {
-        this.lobby.getLogger().warn("Received SetColor packet from connection %s in a server-as-host state", connection);
         break;
       }
       case RPCPacketType.SetHat: {

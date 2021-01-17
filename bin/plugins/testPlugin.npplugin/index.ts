@@ -25,6 +25,7 @@ server.on("server.ready", () => {
   logger.debug("Boolean as string: %s", true);
   logger.debug("Boolean as number: %d", true);
   logger.debug("undefined: %s", undefined);
+  logger.debug("Symbol: %s", Symbol("test"));
   logger.debug("Vector2: %s", new Vector2(69.101, 420.101));
 });
 

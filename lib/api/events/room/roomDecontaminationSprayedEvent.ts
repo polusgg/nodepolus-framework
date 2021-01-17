@@ -1,5 +1,8 @@
 import { CancellableEvent } from "../types";
 
+/**
+ * Fired when a decontamination room has fired its sprayers to decontaminate all players inside.
+ */
 export class RoomDecontaminationSprayedEvent extends CancellableEvent {
   constructor(
     private readonly decontamination: number,

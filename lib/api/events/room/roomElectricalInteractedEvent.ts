@@ -1,5 +1,8 @@
 import { CancellableEvent } from "../types";
 
+/**
+ * Fired when a switch has been flipped during an electrical sabotage.
+ */
 export class RoomElectricalInteractedEvent extends CancellableEvent {
   constructor(
     private readonly index: number,
