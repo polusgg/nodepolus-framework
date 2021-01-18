@@ -8,9 +8,9 @@ import { Game } from "../../game";
 export class RoomElectricalInteractedEvent extends CancellableEvent {
   constructor(
     private readonly game: Game,
-    private readonly player: PlayerInstance,
     private readonly index: number,
     private state: boolean,
+    private readonly player?: PlayerInstance,
   ) {
     super();
   }
@@ -20,13 +20,6 @@ export class RoomElectricalInteractedEvent extends CancellableEvent {
    */
   getGame(): Game {
     return this.game;
-  }
-
-  /**
-   * Gets the player that flipped the switch.
-   */
-  getPlayer(): PlayerInstance {
-    return this.player;
   }
 
   /**
@@ -52,5 +45,12 @@ export class RoomElectricalInteractedEvent extends CancellableEvent {
    */
   setFlipped(state: boolean): void {
     this.state = state;
+  }
+
+  /**
+   * Gets the player that flipped the switch.
+   */
+  getPlayer(): PlayerInstance | undefined {
+    return this.player;
   }
 }
