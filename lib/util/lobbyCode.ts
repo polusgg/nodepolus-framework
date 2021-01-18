@@ -10,6 +10,14 @@ export const CHAR_MAP: number[] = [
 export const CHAR_SET = "QWXRTYLPESDFGHUJKZOCVBINMA";
 
 export class LobbyCode {
+  static getHiddenCode(): string {
+    return "A[][";
+  }
+
+  static getRemovedCode(): string {
+    return "9999";
+  }
+
   static generate(version: LobbyCodeVersion = LobbyCodeVersion.Two): string {
     return new Array(version)
       .fill(0)
