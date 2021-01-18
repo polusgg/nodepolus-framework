@@ -2,8 +2,10 @@ import { BaseEntityShipStatus } from "../../protocol/entities/baseShipStatus/bas
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../../protocol/entities/types";
 import { EntityLobbyBehaviour } from "../../protocol/entities/lobbyBehaviour";
 import { EntityMeetingHud } from "../../protocol/entities/meetingHud";
+import { PlayerData } from "../../protocol/entities/gameData/types";
 import { GameState, AlterGameTag, Level } from "../../types/enums";
 import { EntityGameData } from "../../protocol/entities/gameData";
+import { EntityPlayer } from "../../protocol/entities/player";
 import { BaseRPCPacket } from "../../protocol/packets/rpc";
 import { GameOptionsData, Immutable } from "../../types";
 import { Connection } from "../../protocol/connection";
@@ -98,6 +100,8 @@ export interface LobbyInstance {
   sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void;
 
   spawn(entity: BaseInnerNetEntity): void;
+
+  spawnPlayer(player: EntityPlayer, playerData: PlayerData): void;
 
   despawn(innerNetObject: BaseInnerNetObject): void;
 }

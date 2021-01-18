@@ -2,19 +2,19 @@ import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPla
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
+import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
 import { DisconnectReason, GameOptionsData, Immutable, Vector2 } from "../types";
+import { BaseRPCPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { PlayerData } from "../protocol/entities/gameData/types";
-import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
 import { LobbyListing } from "../protocol/packets/root/types";
 import { LobbyInstance, LobbySettings } from "../api/lobby";
 import { PlayerJoinedEvent } from "../api/events/player";
-import { BaseRPCPacket } from "../protocol/packets/rpc";
 import { Connection } from "../protocol/connection";
 import { notUndefined } from "../util/functions";
 import { LobbyCode } from "../util/lobbyCode";
@@ -575,13 +575,28 @@ export class InternalLobby implements LobbyInstance {
         this.lobbyBehaviour = entity as EntityLobbyBehaviour;
         break;
       case SpawnType.PlayerControl:
-        this.addPlayer(new InternalPlayer(this, entity as EntityPlayer));
-        break;
+        this.getLogger().warn("Use LobbyInstance#spawnPlayer() to spawn a player");
+
+        return;
       default:
         throw new Error(`Attempted to spawn an unsupported SpawnType: ${type as SpawnType} (${SpawnType[type]})`);
     }
 
     this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), this.getConnections());
+  }
+
+  spawnPlayer(player: EntityPlayer, playerData: PlayerData): void {
+    if (player.playerControl.playerId != playerData.id) {
+      throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.playerControl.playerId}) != PlayerData(${playerData.id})`);
+    }
+
+    this.addPlayer(new InternalPlayer(this, player));
+    this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
+
+    if (this.gameData) {
+      this.gameData.gameData.players.push(playerData);
+      this.sendRPCPacket(this.gameData.gameData, new UpdateGameDataPacket(this.gameData.gameData.players));
+    }
   }
 
   despawn(innerNetObject: BaseInnerNetObject): void {
