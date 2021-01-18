@@ -5,6 +5,5 @@
   "typescript.tsc.autoDetect": "off",
   "npm.autoDetect": "off",
   "debug.allowBreakpointsEverywhere": true,
-  "html.autoClosingTags": false,
-  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces": false
+  "html.autoClosingTags": false
 }

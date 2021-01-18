@@ -14,18 +14,32 @@ export class PlayerPetUpdatedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player whose pet was updated.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the player's old pet.
+   */
   getOldPet(): PlayerPet {
     return this.oldPet;
   }
 
+  /**
+   * Gets the player's new pet.
+   */
   getNewPet(): PlayerPet {
     return this.newPet;
   }
 
+  /**
+   * Sets the player's new pet.
+   *
+   * @param newPet The player's new pet
+   */
   setNewPet(newPet: PlayerPet): void {
     this.newPet = newPet;
   }

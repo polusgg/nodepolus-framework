@@ -6,14 +6,14 @@ import { InnerMiraShipStatus } from ".";
 
 export class EntityMiraShipStatus extends BaseEntityShipStatus {
   constructor(lobby: LobbyInstance, shipStatusNetId: number) {
-    super(SpawnType.Headquarters, lobby);
+    super(SpawnType.MiraShipStatus, lobby);
 
     this.shipStatus = new InnerMiraShipStatus(shipStatusNetId, this);
   }
 
   serializeSpawn(): SpawnPacket {
     return new SpawnPacket(
-      SpawnType.Headquarters,
+      SpawnType.MiraShipStatus,
       this.owner,
       this.flags,
       [

@@ -15,11 +15,11 @@ export class SwitchSystem extends BaseSystem {
   }
 
   async setSwitchState(switchIndex: number, switchState: boolean): Promise<void> {
-    const event = new RoomElectricalInteractedEvent(switchIndex, switchState);
+    const event = new RoomElectricalInteractedEvent(this.shipStatus.parent.lobby.getGame()!, switchIndex, switchState);
 
     await this.shipStatus.parent.lobby.getServer().emit("room.electrical.interacted", event);
 
-    this.actualSwitches.update(switchIndex, event.getState());
+    this.actualSwitches.update(switchIndex, event.isFlipped());
   }
 
   getData(): MessageWriter {

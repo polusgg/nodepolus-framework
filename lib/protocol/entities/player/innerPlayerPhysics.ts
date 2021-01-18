@@ -40,22 +40,19 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     await this.parent.lobby.getServer().emit("game.vent.entered", event);
 
     if (event.isCancelled()) {
-      const connection = this.parent.lobby.findConnectionByPlayer(player);
+      const connection = player.getConnection();
 
       if (connection) {
+        // TODO: Add delay
         this.sendRPCPacketTo([connection], new ExitVentPacket(vent.id));
       }
 
       return;
     }
 
-    if (vent.id != event.getVent().id) {
-      player.setPosition(event.getVent().position);
-    }
+    this.vent = vent;
 
-    this.vent = event.getVent();
-
-    this.sendRPCPacketTo(sendTo, new EnterVentPacket(event.getVent().id));
+    this.sendRPCPacketTo(sendTo, new EnterVentPacket(vent.id));
   }
 
   async exitVent(vent: LevelVent, sendTo: Connection[]): Promise<void> {
@@ -74,22 +71,19 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     await this.parent.lobby.getServer().emit("game.vent.exited", event);
 
     if (event.isCancelled()) {
-      const connection = this.parent.lobby.findConnectionByPlayer(player);
+      const connection = player.getConnection();
 
       if (connection) {
+        // TODO: Add delay
         this.sendRPCPacketTo([connection], new ExitVentPacket(vent.id));
       }
 
       return;
     }
 
-    if (vent.id != event.getVent().id) {
-      player.setPosition(event.getVent().position);
-    }
-
     this.vent = undefined;
 
-    this.sendRPCPacketTo(sendTo, new ExitVentPacket(event.getVent().id));
+    this.sendRPCPacketTo(sendTo, new ExitVentPacket(vent.id));
   }
 
   climbLadder(ladderSize: LadderSize, ladderDirection: LadderDirection, sendTo: Connection[]): void {

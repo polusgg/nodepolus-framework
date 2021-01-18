@@ -8,7 +8,7 @@ import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { PlayerData } from "../protocol/entities/gameData/types";
-import { BaseInnerNetObject } from "../protocol/entities/types";
+import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
 import { LobbyListing } from "../protocol/packets/root/types";
@@ -53,6 +53,7 @@ import {
   PlayerHat,
   PlayerPet,
   PlayerSkin,
+  SpawnType,
 } from "../types/enums";
 
 export class InternalLobby implements LobbyInstance {
@@ -118,10 +119,6 @@ export class InternalLobby implements LobbyInstance {
 
   addConnection(connection: Connection): void {
     this.connections.push(connection);
-  }
-
-  findConnectionByPlayer(player: InternalPlayer): Connection | undefined {
-    return this.findConnection(player.gameObject.owner);
   }
 
   removeConnection(connection: Connection): void {
@@ -405,6 +402,10 @@ export class InternalLobby implements LobbyInstance {
     return this.players.find(player => player.gameObject.owner == connection.id);
   }
 
+  findPlayerByEntity(entity: EntityPlayer): InternalPlayer | undefined {
+    return this.players.find(player => player.gameObject.owner == entity.owner);
+  }
+
   findPlayerByInnerNetObject(netObject: InnerPlayerControl | InnerPlayerPhysics | InnerCustomNetworkTransform): InternalPlayer | undefined {
     return this.players.find(player => player.gameObject == netObject.parent);
   }
@@ -553,6 +554,44 @@ export class InternalLobby implements LobbyInstance {
     this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.netId, packet)], this.code), sendToConnections);
   }
 
+  spawn(entity: BaseInnerNetEntity): void {
+    const type = entity.type;
+
+    switch (type) {
+      case SpawnType.SkeldShipStatus:
+      case SpawnType.SkeldAprilShipStatus:
+      case SpawnType.MiraShipStatus:
+      case SpawnType.PolusShipStatus:
+      case SpawnType.AirshipStatus:
+        this.shipStatus = entity as BaseEntityShipStatus;
+        break;
+      case SpawnType.GameData:
+        this.gameData = entity as EntityGameData;
+        break;
+      case SpawnType.MeetingHud:
+        this.meetingHud = entity as EntityMeetingHud;
+        break;
+      case SpawnType.LobbyBehaviour:
+        this.lobbyBehaviour = entity as EntityLobbyBehaviour;
+        break;
+      case SpawnType.PlayerControl:
+        this.addPlayer(new InternalPlayer(this, entity as EntityPlayer));
+        break;
+      default:
+        throw new Error(`Attempted to spawn an unsupported SpawnType: ${type as SpawnType} (${SpawnType[type]})`);
+    }
+
+    this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), this.getConnections());
+  }
+
+  despawn(innerNetObject: BaseInnerNetObject): void {
+    if (innerNetObject.parent.lobby.getCode() != this.code) {
+      throw new Error(`Attempted to despawn an InnerNetObject from a lobby other than its own`);
+    }
+
+    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.netId)], this.code));
+  }
+
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
     this.hostInstance.handleDisconnect(connection, reason);
 
@@ -600,12 +639,6 @@ export class InternalLobby implements LobbyInstance {
     }
   }
 
-  despawn(innerNetObject: BaseInnerNetObject): void {
-    // this.emit("despawn", innerNetObject);
-
-    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.netId)], this.code));
-  }
-
   sendChat(name: string, color: PlayerColor, message: string | TextComponent, _onLeft: boolean): void {
     if (this.players.length != 0) {
       const oldName = this.players[0].getName();
@@ -625,7 +658,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   sendMessage(message: TextComponent | string): void {
-    if (this.gameData == undefined) {
+    if (this.gameData === undefined) {
       throw new Error("sendMessage called without a GameData instance");
     }
 

@@ -14,6 +14,11 @@ export abstract class BaseEntityShipStatus extends BaseInnerNetEntity {
 
   abstract serializeSpawn(): SpawnPacket;
 
+  despawn(): void {
+    this.lobby.despawn(this.getShipStatus());
+    this.lobby.deleteShipStatus();
+  }
+
   getShipStatus(): BaseInnerShipStatus {
     if (this.shipStatus) {
       return this.shipStatus;

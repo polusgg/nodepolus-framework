@@ -13,10 +13,16 @@ export class GameScannerStoppedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the game from which this event was fired.
+   */
   getGame(): Game {
     return this.game;
   }
 
+  /**
+   * Gets the player that stopped scanning on the Medbay scanner.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }

@@ -14,18 +14,32 @@ export class PlayerHatUpdatedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player whose hat was updated.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the player's old hat.
+   */
   getOldHat(): PlayerHat {
     return this.oldHat;
   }
 
+  /**
+   * Gets the player's new hat.
+   */
   getNewHat(): PlayerHat {
     return this.newHat;
   }
 
+  /**
+   * Sets the player's new hat.
+   *
+   * @param newHat The player's new hat
+   */
   setNewHat(newHat: PlayerHat): void {
     this.newHat = newHat;
   }

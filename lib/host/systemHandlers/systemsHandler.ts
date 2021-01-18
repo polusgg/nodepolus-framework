@@ -82,10 +82,10 @@ export class SystemsHandler {
 
     switch (amount.action) {
       case MiraCommunicationsAction.OpenedConsole:
-        system.activeConsoles.set(repairer.id, amount.consoleId);
+        system.activeConsoles.set(repairer.getId(), amount.consoleId);
         break;
       case MiraCommunicationsAction.ClosedConsole:
-        system.activeConsoles.delete(repairer.id);
+        system.activeConsoles.delete(repairer.getId());
         break;
       case MiraCommunicationsAction.EnteredCode:
         system.completedConsoles.add(amount.consoleId);
@@ -188,7 +188,7 @@ export class SystemsHandler {
 
     switch (amount.action) {
       case ReactorAction.PlacedHand:
-        system.userConsoles.set(repairer.id, amount.consoleId);
+        system.userConsoles.set(repairer.getId(), amount.consoleId);
 
         if (system.userConsoles.size == 2) {
           system.timer = 10000;
@@ -199,7 +199,7 @@ export class SystemsHandler {
         }
         break;
       case ReactorAction.RemovedHand:
-        system.userConsoles.delete(repairer.id);
+        system.userConsoles.delete(repairer.getId());
         break;
       case ReactorAction.Repaired:
         system.timer = 10000;
@@ -264,11 +264,11 @@ export class SystemsHandler {
     if (amount.isViewingCameras) {
       await this.host.lobby.getServer().emit("game.cameras.opened", new GameCamerasOpenedEvent(this.host.lobby.getGame()!, repairer));
 
-      system.playersViewingCameras.add(repairer.id);
+      system.playersViewingCameras.add(repairer.getId());
     } else {
       await this.host.lobby.getServer().emit("game.cameras.closed", new GameCamerasClosedEvent(this.host.lobby.getGame()!, repairer));
 
-      system.playersViewingCameras.delete(repairer.id);
+      system.playersViewingCameras.delete(repairer.getId());
     }
 
     this.sendDataUpdate();

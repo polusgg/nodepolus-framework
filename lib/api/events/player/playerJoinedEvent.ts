@@ -11,14 +11,25 @@ export class PlayerJoinedEvent {
     private readonly rejoining: boolean = false,
   ) {}
 
+  /**
+   * Gets the lobby from which this event was fired.
+   */
   getLobby(): LobbyInstance {
     return this.lobby;
   }
 
+  /**
+   * Gets the player that joined the lobby.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets whether or not the player is rejoining the game.
+   *
+   * @returns `true` if rejoining after the end of a game, `false` if not
+   */
   isRejoining(): boolean {
     return this.rejoining;
   }

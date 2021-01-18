@@ -10,10 +10,16 @@ export class GameCamerasClosedEvent {
     private readonly player: PlayerInstance,
   ) {}
 
+  /**
+   * Gets the game from which this event was fired.
+   */
   getGame(): Game {
     return this.game;
   }
 
+  /**
+   * Gets the player that stopped viewing security cameras.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }

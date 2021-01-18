@@ -11,4 +11,6 @@ export abstract class BaseInnerNetEntity {
   ) {}
 
   abstract serializeSpawn(): SpawnPacket;
+
+  abstract despawn(): void;
 }

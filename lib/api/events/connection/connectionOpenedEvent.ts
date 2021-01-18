@@ -3,7 +3,8 @@ import { DisconnectReason } from "../../../types";
 import { DisconnectableEvent } from "../types";
 
 /**
- * Fired when a connection to the server has been initialized with a Hello packet.
+ * Fired when a connection to the server has been initialized with a Hello
+ * packet.
  */
 export class ConnectionOpenedEvent extends DisconnectableEvent {
   constructor(
@@ -12,6 +13,9 @@ export class ConnectionOpenedEvent extends DisconnectableEvent {
     super(DisconnectReason.custom("The server refused your connection"));
   }
 
+  /**
+   * Gets the connection that was opened.
+   */
   getConnection(): Connection {
     return this.connection;
   }

@@ -200,7 +200,7 @@ export class InternalHost implements HostInstance {
 
       // TODO: Remove -- debug task list for medbay scan on all 3 maps
       for (let i = 0; i < this.lobby.getPlayers().length; i++) {
-        gameData.gameData.setTasks(this.lobby.getPlayers()[i].id, [25, 4, 2], connections);
+        gameData.gameData.setTasks(this.lobby.getPlayers()[i].getId(), [25, 4, 2], connections);
       }
 
       gameData.gameData.updateGameData(gameData.gameData.players, connections);
@@ -260,7 +260,7 @@ export class InternalHost implements HostInstance {
       new Vector2(0, 0),
     );
 
-    const player = new InternalPlayer(this.lobby, entity);
+    const player = new InternalPlayer(this.lobby, entity, sender);
 
     for (let i = 0; i < this.lobby.getPlayers().length; i++) {
       sender.write(new GameDataPacket([this.lobby.getPlayers()[i].gameObject.serializeSpawn()], this.lobby.getCode()));
@@ -453,7 +453,7 @@ export class InternalHost implements HostInstance {
     await this.lobby.getServer().emit("meeting.vote.added", event);
 
     if (event.isCancelled()) {
-      const connection = this.lobby.findConnectionByPlayer(player);
+      const connection = player.getConnection();
 
       if (connection) {
         meetingHud.meetingHud.sendRPCPacketTo([connection], new ClearVotePacket());
@@ -589,7 +589,7 @@ export class InternalHost implements HostInstance {
       return;
     }
 
-    const playerIndex = gameData.gameData.players.findIndex(playerData => playerData.id == player.id);
+    const playerIndex = gameData.gameData.players.findIndex(playerData => playerData.id == player.getId());
     const playerData = gameData.gameData.players[playerIndex];
 
     if (gameState == GameState.Started) {
@@ -674,13 +674,13 @@ export class InternalHost implements HostInstance {
   async stopCountdown(): Promise<void> {
     const event = new LobbyCountdownStoppedEvent(this.lobby, this.secondsUntilStart);
 
-    this.secondsUntilStart = -1;
-
     await this.lobby.getServer().emit("lobby.countdown.stopped", event);
 
     if (event.isCancelled()) {
       return;
     }
+
+    this.secondsUntilStart = -1;
 
     if (this.lobby.getPlayers().length > 0) {
       this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
@@ -756,10 +756,10 @@ export class InternalHost implements HostInstance {
     impostors = event.getImpostors() as InternalPlayer[];
 
     for (let i = 0; i < impostors.length; i++) {
-      const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == impostors[i].id);
+      const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == impostors[i].getId());
 
       if (gameDataPlayerIndex == -1) {
-        throw new Error(`Player ${impostors[i].id} does not have a PlayerData instance o the GameData instance`);
+        throw new Error(`Player ${impostors[i].getId()} does not have a PlayerData instance o the GameData instance`);
       }
 
       gameData.gameData.players[gameDataPlayerIndex].isImpostor = true;
@@ -768,7 +768,7 @@ export class InternalHost implements HostInstance {
 
     this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
       this.lobby.getConnections(),
-      new SetInfectedPacket(impostors.map(player => player.id)),
+      new SetInfectedPacket(impostors.map(player => player.getId())),
     );
   }
 
@@ -839,7 +839,7 @@ export class InternalHost implements HostInstance {
       // Add short tasks
       this.addTasksFromList(shortIndex, numShort, tasks, used, allShort);
 
-      const player = this.lobby.getPlayers().find(pl => pl.id == pid);
+      const player = this.lobby.getPlayers().find(pl => pl.getId() == pid);
 
       if (player) {
         this.setPlayerTasks(player, tasks);
@@ -1067,7 +1067,7 @@ export class InternalHost implements HostInstance {
   }
 
   private getNextPlayerId(): number {
-    const taken = this.lobby.getPlayers().map(player => player.id);
+    const taken = this.lobby.getPlayers().map(player => player.getId());
 
     for (let i = 0; i < 125; i++) {
       if (taken.indexOf(i) == -1) {

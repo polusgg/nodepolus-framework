@@ -13,10 +13,16 @@ export class PlayerTaskRemovedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player whose task list was updated.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the player's task list.
+   */
   getTasks(): Set<LevelTask> {
     return this.tasks;
   }

@@ -14,14 +14,25 @@ export class PlayerDiedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player that died.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the reason for why the player died.
+   */
   getReason(): DeathReason {
     return this.reason;
   }
 
+  /**
+   * Gets the player that killed the victim.
+   *
+   * @returns The murderer, or `undefined` if the player was killed via the API or exiled after a meeting
+   */
   getKiller(): PlayerInstance | undefined {
     return this.killer;
   }

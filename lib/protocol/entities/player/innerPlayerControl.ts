@@ -302,9 +302,9 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
   private getConnection(): Connection {
     const playerInstance = this.getPlayerInstance();
-    const playerConnection = this.parent.lobby.findConnectionByPlayer(playerInstance);
+    const playerConnection = playerInstance.getConnection();
 
-    if (!playerConnection) {
+    if (playerConnection === undefined) {
       throw new Error(`Player ${playerInstance.getId()} does not have a connection on the lobby instance`);
     }
 

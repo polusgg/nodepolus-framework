@@ -17,24 +17,45 @@ export class MeetingConcludedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the game from which this event was fired.
+   */
   getGame(): Game {
     return this.game;
   }
 
+  /**
+   * Gets the votes from the meeting.
+   */
   getVotes(): VoteResult[] {
     return this.votes;
   }
 
+  /**
+   * Sets the votes from the meeting.
+   *
+   * @param votes The new votes from the meeting
+   */
   setVotes(votes: VoteResult[]): void {
     this.votes = votes;
   }
 
+  /**
+   * Gets whether or not the current votes will result in a tie.
+   *
+   * @returns `true` if tied, `false` if not
+   */
   isTied(): boolean {
     this.tallyVotes();
 
     return this.tied;
   }
 
+  /**
+   * Gets the player that will be exiled as a result of the current votes.
+   *
+   * @returns The player that will be exiled, or `undefined` if the meeting will end in a tie or if the current majority of votes are to skip
+   */
   getExiledPlayer(): PlayerInstance | undefined {
     this.tallyVotes();
 
@@ -47,6 +68,10 @@ export class MeetingConcludedEvent extends CancellableEvent {
     }
   }
 
+  /**
+   * Does a tally of the current votes to determine if they result in a tie, and
+   * which player will be exiled (if any) if the votes do not result in a tie.
+   */
   private tallyVotes(): void {
     const counts: Map<number, number> = new Map([[-1, 0]]);
     const entries = [...this.votes];

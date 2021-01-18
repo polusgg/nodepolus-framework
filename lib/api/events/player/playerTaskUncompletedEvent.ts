@@ -14,14 +14,23 @@ export class PlayerTaskUncompletedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player whose task was uncompleted.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the index of the task that was uncompleted from the player's task list.
+   */
   getTaskIndex(): number {
     return this.taskIndex;
   }
 
+  /**
+   * Gets the task that was uncompleted.
+   */
   getTaskInfo(): LevelTask {
     return this.taskInfo;
   }

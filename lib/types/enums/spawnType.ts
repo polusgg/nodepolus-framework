@@ -1,11 +1,11 @@
 export enum SpawnType {
-  ShipStatus = 0,
+  SkeldShipStatus = 0,
   MeetingHud = 1,
   LobbyBehaviour = 2,
   GameData = 3,
   PlayerControl = 4,
-  Headquarters = 5,
-  PlanetMap = 6,
-  AprilShipStatus = 7,
-  Airship = 8,
+  MiraShipStatus = 5,
+  PolusShipStatus = 6,
+  SkeldAprilShipStatus = 7,
+  AirshipStatus = 8,
 }

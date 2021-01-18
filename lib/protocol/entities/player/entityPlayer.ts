@@ -2,6 +2,7 @@ import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } f
 import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { SpawnPacket } from "../../packets/gameData";
 import { LobbyInstance } from "../../../api/lobby";
+import { InternalLobby } from "../../../lobby";
 import { BaseInnerNetEntity } from "../types";
 import { Vector2 } from "../../../types";
 
@@ -52,5 +53,17 @@ export class EntityPlayer extends BaseInnerNetEntity {
         this.customNetworkTransform.serializeSpawn(),
       ],
     );
+  }
+
+  despawn(): void {
+    for (let i = 0; i < this.innerNetObjects.length; i++) {
+      this.lobby.despawn(this.innerNetObjects[i]);
+    }
+
+    const player = (this.lobby as InternalLobby).findPlayerByEntity(this);
+
+    if (player) {
+      this.lobby.removePlayer(player);
+    }
   }
 }

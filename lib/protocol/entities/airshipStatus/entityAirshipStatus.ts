@@ -6,7 +6,7 @@ import { InnerAirshipStatus } from ".";
 
 export class EntityAirshipStatus extends BaseEntityShipStatus {
   constructor(lobby: LobbyInstance, shipStatusNetId: number) {
-    super(SpawnType.Airship, lobby);
+    super(SpawnType.AirshipStatus, lobby);
 
     this.shipStatus = new InnerAirshipStatus(shipStatusNetId, this);
   }

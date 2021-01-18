@@ -11,14 +11,23 @@ export class GameScannerQueuedEvent {
     private readonly queue: Readonly<Set<PlayerInstance>>,
   ) {}
 
+  /**
+   * Gets the game from which this event was fired.
+   */
   getGame(): Game {
     return this.game;
   }
 
+  /**
+   * Gets the player that entered the queue for the Medbay scanner.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the queue for the Medbay scanner, *excluding* the player that entered.
+   */
   getQueue(): Readonly<Set<PlayerInstance>> {
     return this.queue;
   }

@@ -12,10 +12,16 @@ export class LobbyCountdownStoppedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the lobby from which this event was fired.
+   */
   getLobby(): LobbyInstance {
     return this.lobby;
   }
 
+  /**
+   * Gets the number of seconds remaining until the game would have started.
+   */
   getSecondsLeft(): number {
     return this.secondsLeft;
   }

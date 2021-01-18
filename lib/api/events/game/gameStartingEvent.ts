@@ -11,6 +11,9 @@ export class GameStartingEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the game that is starting.
+   */
   getGame(): Game {
     return this.game;
   }

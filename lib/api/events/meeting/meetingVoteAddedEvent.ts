@@ -14,22 +14,43 @@ export class MeetingVoteAddedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the game from which this event was fired.
+   */
   getGame(): Game {
     return this.game;
   }
 
+  /**
+   * Gets the player that cast the vote.
+   */
   getVoter(): PlayerInstance {
     return this.voter;
   }
 
+  /**
+   * Sets the player that cast the vote.
+   *
+   * @param voter The new player that cast the vote
+   */
   setVoter(voter: PlayerInstance): void {
     this.voter = voter;
   }
 
+  /**
+   * Gets the player that was voted to be exiled by the voting player.
+   *
+   * @returns The player that was voted to be exiled, or `undefined` if the voting player voted to skip
+   */
   getSuspect(): PlayerInstance | undefined {
     return this.suspect;
   }
 
+  /**
+   * Sets the player that was voted to be exiled by the voting player.
+   *
+   * @param suspect The new player that was voted to be exiled
+   */
   setSuspect(suspect?: PlayerInstance): void {
     this.suspect = suspect;
   }

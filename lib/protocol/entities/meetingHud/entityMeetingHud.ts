@@ -30,4 +30,9 @@ export class EntityMeetingHud extends BaseInnerNetEntity {
       ],
     );
   }
+
+  despawn(): void {
+    this.lobby.despawn(this.meetingHud);
+    this.lobby.deleteMeetingHud();
+  }
 }

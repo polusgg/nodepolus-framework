@@ -30,4 +30,9 @@ export class EntityLobbyBehaviour extends BaseInnerNetEntity {
       ],
     );
   }
+
+  despawn(): void {
+    this.lobby.despawn(this.lobbyBehaviour);
+    this.lobby.deleteLobbyBehaviour();
+  }
 }

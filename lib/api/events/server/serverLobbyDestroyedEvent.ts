@@ -11,6 +11,9 @@ export class ServerLobbyDestroyedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the lobby that will be destroyed.
+   */
   getLobby(): LobbyInstance {
     return this.lobby;
   }

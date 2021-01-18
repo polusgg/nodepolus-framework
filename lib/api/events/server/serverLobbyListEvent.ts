@@ -16,26 +16,50 @@ export class ServerLobbyListEvent extends DisconnectableEvent {
     super(DisconnectReason.custom("The server refused to list its public games"));
   }
 
+  /**
+   * Gets the connection that is requesting a list of games.
+   */
   getConnection(): Connection {
     return this.connection;
   }
 
+  /**
+   * Gets whether or not the connection wants private games included in the results.
+   *
+   * @returns `true` if private games were requested, `false` if not
+   */
   wantsPrivateLobbies(): boolean {
     return this.includePrivateLobbies;
   }
 
+  /**
+   * Gets the lobbies that will be sent to the connection.
+   */
   getLobbies(): LobbyListing[] {
     return this.lobbies;
   }
 
+  /**
+   * Sets the lobbies that will be sent to the connection.
+   *
+   * @param lobbies The new lobbies that will be sent to the connection.
+   */
   setLobbies(lobbies: LobbyListing[]): void {
     this.lobbies = lobbies;
   }
 
+  /**
+   * Gets the lobby counts for each level that will be sent to the connection.
+   */
   getLobbyCounts(): LobbyCount {
     return this.lobbyCounts;
   }
 
+  /**
+   * Sets the lobby counts for each level that will be sent to the connection.
+   *
+   * @param lobbyCounts The new lobby counts that will be sent to the connection
+   */
   setLobbyCounts(lobbyCounts: LobbyCount): void {
     this.lobbyCounts = lobbyCounts;
   }

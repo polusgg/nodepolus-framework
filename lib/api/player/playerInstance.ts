@@ -1,9 +1,12 @@
 import { PlayerColor, PlayerHat, PlayerPet, PlayerRole, PlayerSkin } from "../../types/enums";
 import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../../types";
+import { Connection } from "../../protocol/connection";
 import { TextComponent } from "../text";
 
 export interface PlayerInstance {
   getId(): number;
+
+  getConnection(): Connection | undefined;
 
   getName(): TextComponent;
 

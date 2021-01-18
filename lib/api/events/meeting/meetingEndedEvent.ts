@@ -13,18 +13,34 @@ export class MeetingEndedEvent {
     private readonly exiledPlayer?: PlayerInstance,
   ) {}
 
+  /**
+   * Gets the game from which this event was fired.
+   */
   getGame(): Game {
     return this.game;
   }
 
+  /**
+   * Gets the final votes from the meeting.
+   */
   getVotes(): VoteResult[] {
     return this.votes;
   }
 
+  /**
+   * Gets whether or not the voting phase of the meeting ended in a tie.
+   *
+   * @returns `true` if tied, `false` if not
+   */
   isTie(): boolean {
     return this.tie;
   }
 
+  /**
+   * Gets the player that was exiled as a result of the final votes.
+   *
+   * @returns The player that was exiled, or `undefined` if the meeting ended in a tie or if the majority of votes were to skip
+   */
   getExiledPlayer(): PlayerInstance | undefined {
     return this.exiledPlayer;
   }

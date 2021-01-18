@@ -11,6 +11,9 @@ export class PlayerRevivedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player that was revived.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }

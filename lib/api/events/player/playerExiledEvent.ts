@@ -13,6 +13,9 @@ export class PlayerExiledEvent extends PlayerDiedEvent {
     super(player, DeathReason.Exile);
   }
 
+  /**
+   * Gets the players who voted to exile the player.
+   */
   getVoters(): PlayerInstance[] {
     return this.voters;
   }

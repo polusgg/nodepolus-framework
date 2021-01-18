@@ -14,18 +14,32 @@ export class PlayerSkinUpdatedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player whose skin was updated.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the player's old skin.
+   */
   getOldSkin(): PlayerSkin {
     return this.oldSkin;
   }
 
+  /**
+   * Gets the player's new skin.
+   */
   getNewSkin(): PlayerSkin {
     return this.newSkin;
   }
 
+  /**
+   * Sets the player's new skin.
+   *
+   * @param newSkin The player's new skin
+   */
   setNewSkin(newSkin: PlayerSkin): void {
     this.newSkin = newSkin;
   }

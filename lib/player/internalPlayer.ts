@@ -6,6 +6,7 @@ import { EntityGameData } from "../protocol/entities/gameData";
 import { DespawnPacket } from "../protocol/packets/gameData";
 import { SetInfectedPacket } from "../protocol/packets/rpc";
 import { EntityPlayer } from "../protocol/entities/player";
+import { Connection } from "../protocol/connection";
 import { PlayerInstance } from "../api/player";
 import { TextComponent } from "../api/text";
 import { InternalLobby } from "../lobby";
@@ -19,7 +20,7 @@ import {
 } from "../api/events/player";
 
 export class InternalPlayer implements PlayerInstance {
-  public readonly id: number;
+  private readonly id: number;
 
   private name: TextComponent;
   private role: PlayerRole = PlayerRole.Crewmate;
@@ -27,6 +28,7 @@ export class InternalPlayer implements PlayerInstance {
   constructor(
     public lobby: InternalLobby,
     public gameObject: EntityPlayer,
+    private readonly connection?: Connection,
   ) {
     this.id = gameObject.playerControl.playerId;
     this.name = TextComponent.from("");
@@ -34,6 +36,10 @@ export class InternalPlayer implements PlayerInstance {
 
   getId(): number {
     return this.id;
+  }
+
+  getConnection(): Connection | undefined {
+    return this.connection;
   }
 
   getName(): TextComponent {
@@ -317,9 +323,7 @@ export class InternalPlayer implements PlayerInstance {
 
     this.gameObject.customNetworkTransform.position = new Vector2(-39, -39);
 
-    const thisConnection = this.lobby.findConnectionByPlayer(this);
-
-    if (!thisConnection) {
+    if (this.connection === undefined) {
       throw new Error("Tried to respawn a player without a connection");
     }
 
@@ -333,12 +337,12 @@ export class InternalPlayer implements PlayerInstance {
 
     this.setName("");
 
-    if (thisConnection.isActingHost) {
-      thisConnection.write(new RemovePlayerPacket(this.lobby.getCode(), this.gameObject.owner, this.gameObject.owner, DisconnectReason.serverRequest()));
-      thisConnection.write(new JoinGameResponsePacket(this.lobby.getCode(), this.gameObject.owner, this.gameObject.owner));
+    if (this.connection.isActingHost) {
+      this.connection.write(new RemovePlayerPacket(this.lobby.getCode(), this.gameObject.owner, this.gameObject.owner, DisconnectReason.serverRequest()));
+      this.connection.write(new JoinGameResponsePacket(this.lobby.getCode(), this.gameObject.owner, this.gameObject.owner));
     } else {
-      thisConnection.write(new RemovePlayerPacket(this.lobby.getCode(), this.gameObject.owner, this.lobby.getHostInstance().getId(), DisconnectReason.serverRequest()));
-      thisConnection.write(new JoinGameResponsePacket(this.lobby.getCode(), this.gameObject.owner, this.lobby.getHostInstance().getId()));
+      this.connection.write(new RemovePlayerPacket(this.lobby.getCode(), this.gameObject.owner, this.lobby.getHostInstance().getId(), DisconnectReason.serverRequest()));
+      this.connection.write(new JoinGameResponsePacket(this.lobby.getCode(), this.gameObject.owner, this.lobby.getHostInstance().getId()));
     }
 
     this.setName(oldName);
@@ -424,25 +428,21 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   kick(reason?: DisconnectReason): this {
-    const connection = this.lobby.findConnectionByPlayer(this);
-
-    if (!connection) {
+    if (this.connection === undefined) {
       throw new Error(`Player ${this.id} does not have a connection on the lobby instance`);
     }
 
-    connection.sendKick(false, undefined, reason);
+    this.connection.sendKick(false, undefined, reason);
 
     return this;
   }
 
   ban(reason?: DisconnectReason): this {
-    const connection = this.lobby.findConnectionByPlayer(this);
-
-    if (!connection) {
+    if (this.connection === undefined) {
       throw new Error(`Player ${this.id} does not have a connection on the lobby instance`);
     }
 
-    connection.sendKick(true, undefined, reason);
+    this.connection.sendKick(true, undefined, reason);
 
     return this;
   }

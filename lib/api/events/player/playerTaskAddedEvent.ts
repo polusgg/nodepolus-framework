@@ -13,14 +13,25 @@ export class PlayerTaskAddedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player whose task list was updated.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the player's task list.
+   */
   getTasks(): Set<LevelTask> {
     return this.tasks;
   }
 
+  /**
+   * Sets the player's task list.
+   *
+   * @param tasks The player's new task list
+   */
   setTasks(tasks: Set<LevelTask>): void {
     this.tasks = tasks;
   }

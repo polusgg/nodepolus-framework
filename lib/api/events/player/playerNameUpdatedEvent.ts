@@ -14,18 +14,32 @@ export class PlayerNameUpdatedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player whose name was updated.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the player's old name.
+   */
   getOldName(): TextComponent {
     return this.oldName;
   }
 
+  /**
+   * Gets the player's new name.
+   */
   getNewName(): TextComponent {
     return this.newName;
   }
 
+  /**
+   * Sets the player's new name.
+   *
+   * @param newName The player's new name
+   */
   setNewName(newName: TextComponent): void {
     this.newName = newName;
   }

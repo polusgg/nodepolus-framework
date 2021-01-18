@@ -71,7 +71,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     await this.parent.lobby.getServer().emit("player.position.walked", event);
 
     if (event.isCancelled()) {
-      const connection = this.parent.lobby.findConnectionByPlayer(player);
+      const connection = player.getConnection();
 
       if (connection) {
         this.sendRPCPacketTo([connection], new SnapToPacket(this.position, this.sequenceId += 5));

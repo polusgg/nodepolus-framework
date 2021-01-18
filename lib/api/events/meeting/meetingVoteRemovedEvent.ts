@@ -13,14 +13,25 @@ export class MeetingVoteRemovedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the game from which this event was fired.
+   */
   getGame(): Game {
     return this.game;
   }
 
+  /**
+   * Gets the player whose vote is being cleared.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Sets the player whose vote is being cleared.
+   *
+   * @param player The new player whose vote is being cleared
+   */
   setPlayer(player: PlayerInstance): void {
     this.player = player;
   }

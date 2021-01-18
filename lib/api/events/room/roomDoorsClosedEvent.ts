@@ -1,27 +1,48 @@
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
-import { Door } from "../../game";
+import { Door, Game } from "../../game";
 
 /**
  * Fired when the doors of a room have closed.
  */
 export class RoomDoorsClosedEvent extends CancellableEvent {
   constructor(
+    private readonly game: Game,
     private doors: Door[],
-    private readonly closer: PlayerInstance,
+    private readonly player?: PlayerInstance,
   ) {
     super();
   }
 
+  /**
+   * Gets the game from which this event was fired.
+   */
+  getGame(): Game {
+    return this.game;
+  }
+
+  /**
+   * Gets the player that closed the doors.
+   *
+   * @returns The player that closed the doors, or `undefined` if they were closed via the API
+   */
+  getPlayer(): PlayerInstance | undefined {
+    return this.player;
+  }
+
+  /**
+   * Gets the doors that were closed.
+   */
   getDoors(): Door[] {
     return this.doors;
   }
 
+  /**
+   * Sets the doors that were closed.
+   *
+   * @param doors The new doors that were closed
+   */
   setDoors(doors: Door[]): void {
     this.doors = doors;
-  }
-
-  getCloser(): PlayerInstance {
-    return this.closer;
   }
 }

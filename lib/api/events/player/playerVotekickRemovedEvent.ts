@@ -12,10 +12,16 @@ export class PlayerVotekickRemovedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player whose vote is being cleared.
+   */
   getVoter(): PlayerInstance {
     return this.voter;
   }
 
+  /**
+   * Gets the player for which the voting player's vote is being cleared.
+   */
   getTarget(): PlayerInstance {
     return this.target;
   }

@@ -10,10 +10,16 @@ export class PlayerLeftEvent {
     private readonly player: PlayerInstance,
   ) {}
 
+  /**
+   * Gets the lobby that the player left.
+   */
   getLobby(): LobbyInstance {
     return this.lobby;
   }
 
+  /**
+   * Gets the player that left.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }

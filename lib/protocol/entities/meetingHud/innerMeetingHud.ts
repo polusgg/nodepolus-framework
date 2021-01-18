@@ -32,7 +32,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
 
       return event;
     }))).filter(event => !event.isCancelled()).map(event => {
-      const connection = this.parent.lobby.findConnectionByPlayer(event.getPlayer());
+      const connection = event.getPlayer().getConnection();
       const state = this.playerStates[event.getPlayer().getId()];
 
       state.didVote = false;

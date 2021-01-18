@@ -6,14 +6,14 @@ import { InnerPolusShipStatus } from ".";
 
 export class EntityPolusShipStatus extends BaseEntityShipStatus {
   constructor(lobby: LobbyInstance, shipStatusNetId: number) {
-    super(SpawnType.PlanetMap, lobby);
+    super(SpawnType.PolusShipStatus, lobby);
 
     this.shipStatus = new InnerPolusShipStatus(shipStatusNetId, this);
   }
 
   serializeSpawn(): SpawnPacket {
     return new SpawnPacket(
-      SpawnType.PlanetMap,
+      SpawnType.PolusShipStatus,
       this.owner,
       this.flags,
       [

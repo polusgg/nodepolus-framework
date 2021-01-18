@@ -6,7 +6,7 @@ import { InnerSkeldAprilShipStatus } from ".";
 
 export class EntitySkeldAprilShipStatus extends BaseEntityShipStatus {
   constructor(lobby: LobbyInstance, shipStatusNetId: number) {
-    super(SpawnType.AprilShipStatus, lobby);
+    super(SpawnType.SkeldAprilShipStatus, lobby);
 
     this.shipStatus = new InnerSkeldAprilShipStatus(shipStatusNetId, this);
   }

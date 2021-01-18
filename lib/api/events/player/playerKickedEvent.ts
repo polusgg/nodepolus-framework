@@ -16,18 +16,30 @@ export class PlayerKickedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the lobby that the player was kicked from.
+   */
   getLobby(): LobbyInstance {
     return this.lobby;
   }
 
+  /**
+   * Gets the player that was kicked.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the player that kicked the player.
+   */
   getKickingPlayer(): PlayerInstance | undefined {
     return this.kickingPlayer;
   }
 
+  /**
+   * Gets the disconnect reason to be sent to the player.
+   */
   getReason(): DisconnectReason | undefined {
     return this.reason;
   }

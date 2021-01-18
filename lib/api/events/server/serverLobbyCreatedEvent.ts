@@ -14,10 +14,16 @@ export class ServerLobbyCreatedEvent extends DisconnectableEvent {
     super(DisconnectReason.custom("The server refused to create your game"));
   }
 
+  /**
+   * Gets the connection that created the lobby.
+   */
   getConnection(): Connection {
     return this.connection;
   }
 
+  /**
+   * Gets the newly created lobby.
+   */
   getLobby(): LobbyInstance {
     return this.lobby;
   }

@@ -13,14 +13,25 @@ export class PlayerTaskAnimationEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player that is playing a task animation.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the type of task whose animation is being played.
+   */
   getTaskType(): TaskType {
     return this.taskType;
   }
 
+  /**
+   * Sets the type of task whose animation is being played.
+   *
+   * @param task The new type of task whose animation is being played
+   */
   setTaskType(task: TaskType): void {
     this.taskType = task;
   }

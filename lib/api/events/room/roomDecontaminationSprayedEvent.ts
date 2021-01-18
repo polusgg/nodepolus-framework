@@ -1,22 +1,28 @@
 import { CancellableEvent } from "../types";
+import { Game } from "../../game";
 
 /**
  * Fired when a decontamination room has fired its sprayers to decontaminate all players inside.
  */
 export class RoomDecontaminationSprayedEvent extends CancellableEvent {
   constructor(
+    private readonly game: Game,
     private readonly decontamination: number,
-    private readonly side: number,
-
   ) {
     super();
   }
 
-  getDcontamination(): number {
-    return this.decontamination;
+  /**
+   * Gets the game from which this event was fired.
+   */
+  getGame(): Game {
+    return this.game;
   }
 
-  getSide(): number {
-    return this.side;
+  /**
+   * Gets the decontamination room that activated its sprayers.
+   */
+  getDecontamination(): number {
+    return this.decontamination;
   }
 }

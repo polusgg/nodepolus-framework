@@ -14,18 +14,32 @@ export class GameScannerDequeuedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the game from which this event was fired.
+   */
   getGame(): Game {
     return this.game;
   }
 
+  /**
+   * Gets the player that left the queue for the Medbay scanner.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the queue for the Medbay scanner, *excluding* the player that left.
+   */
   getQueue(): Set<PlayerInstance> {
     return this.queue;
   }
 
+  /**
+   * Sets the queue for the Medbay scanner.
+   *
+   * @param queue The new queue for the Medbay scanner
+   */
   setQueue(queue: Set<PlayerInstance>): void {
     this.queue = queue;
   }

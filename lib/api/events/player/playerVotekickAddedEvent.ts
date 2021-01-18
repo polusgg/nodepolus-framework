@@ -12,14 +12,25 @@ export class PlayerVotekickAddedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player that cast the vote.
+   */
   getVoter(): PlayerInstance {
     return this.voter;
   }
 
+  /**
+   * Gets the player that was voted to be kicked by the voting player.
+   */
   getTarget(): PlayerInstance {
     return this.target;
   }
 
+  /**
+   * Sets the player that was voted to be kicked by the voting player.
+   *
+   * @param target The new player that voted to be kicked by the voting player
+   */
   setTarget(target: PlayerInstance): void {
     this.target = target;
   }

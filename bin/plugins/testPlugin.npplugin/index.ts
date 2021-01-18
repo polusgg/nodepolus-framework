@@ -2,8 +2,6 @@ import { HostGameResponsePacket } from "../../../lib/protocol/packets/root";
 import { ServerLobbyJoinEvent } from "../../../lib/api/events/server";
 import { PlayerJoinedEvent } from "../../../lib/api/events/player";
 import { shuffleArrayClone } from "../../../lib/util/shuffle";
-import { InternalPlayer } from "../../../lib/player";
-import { InternalLobby } from "../../../lib/lobby";
 import { Server } from "../../../lib/server";
 import { Vector2 } from "../../../lib/types";
 
@@ -34,7 +32,7 @@ server.on("player.joined", (event: PlayerJoinedEvent) => {
     "%s connected to lobby %s from connection %s",
     event.getPlayer(),
     event.getLobby(),
-    (event.getLobby() as InternalLobby).findConnectionByPlayer(event.getPlayer() as InternalPlayer),
+    event.getPlayer().getConnection(),
   );
 });
 

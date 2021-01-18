@@ -13,14 +13,25 @@ export class PlayerChatMessageEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player that sent the chat message.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
 
+  /**
+   * Gets the chat message.
+   */
   getMessage(): TextComponent {
     return this.message;
   }
 
+  /**
+   * Sets the chat message.
+   *
+   * @param message The new chat message
+   */
   setMessage(message: TextComponent): void {
     this.message = message;
   }

@@ -16,6 +16,9 @@ export class PlayerPositionUpdatedEvent extends CancellableEvent {
     super();
   }
 
+  /**
+   * Gets the player whose position was updated.
+   */
   getPlayer(): PlayerInstance {
     return this.player;
   }
