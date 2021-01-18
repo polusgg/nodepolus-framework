@@ -576,13 +576,13 @@ export class InternalLobby implements LobbyInstance {
     this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), this.getConnections());
   }
 
-  spawnPlayer(clientId: number, player: EntityPlayer, playerData: PlayerData): void {
+  spawnPlayer(player: EntityPlayer, playerData: PlayerData): void {
     if (player.playerControl.playerId != playerData.id) {
       throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.playerControl.playerId}) != PlayerData(${playerData.id})`);
     }
 
     this.addPlayer(new InternalPlayer(this, player));
-    this.sendRootGamePacket(new JoinGameResponsePacket(this.code, clientId, this.hostInstance.getId()));
+    this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.owner, this.hostInstance.getId()));
     this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
 
     if (this.gameData) {
