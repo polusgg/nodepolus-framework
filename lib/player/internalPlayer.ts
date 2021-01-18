@@ -43,6 +43,10 @@ export class InternalPlayer implements PlayerInstance {
     return this.connection;
   }
 
+  hasMeta(key: string): boolean {
+    return this.metadata.has(key);
+  }
+
   getMeta(key: string): unknown {
     return this.metadata.get(key);
   }

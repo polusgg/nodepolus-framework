@@ -25,6 +25,8 @@ export interface LobbyInstance {
 
   getAge(): number;
 
+  hasMeta(key: string): boolean;
+
   getMeta(key: string): unknown;
 
   setMeta(key: string, value: unknown): void;

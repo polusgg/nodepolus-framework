@@ -110,6 +110,10 @@ export class InternalLobby implements LobbyInstance {
     return (new Date().getTime() - this.createdAt) / 1000;
   }
 
+  hasMeta(key: string): boolean {
+    return this.metadata.has(key);
+  }
+
   getMeta(key: string): unknown {
     return this.metadata.get(key);
   }

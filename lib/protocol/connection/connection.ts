@@ -98,6 +98,10 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     // TODO: Timeout clients and remove dead connections
   }
 
+  hasMeta(key: string): boolean {
+    return this.metadata.has(key);
+  }
+
   getMeta(key: string): unknown {
     return this.metadata.get(key);
   }

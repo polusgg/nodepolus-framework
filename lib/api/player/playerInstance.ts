@@ -8,6 +8,8 @@ export interface PlayerInstance {
 
   getConnection(): Connection | undefined;
 
+  hasMeta(key: string): boolean;
+
   getMeta(key: string): unknown;
 
   setMeta(key: string, value: unknown): void;
