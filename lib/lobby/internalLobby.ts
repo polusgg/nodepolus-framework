@@ -305,13 +305,13 @@ export class InternalLobby implements LobbyInstance {
     return this.spawningPlayers.size > 0;
   }
 
-  finishedSpawningPlayer(connection: Connection): void {
+  async finishedSpawningPlayer(connection: Connection): Promise<void> {
     this.spawningPlayers.delete(connection);
 
     const player = this.findPlayerByConnection(connection);
 
     if (player) {
-      this.getServer().emit("player.joined", new PlayerJoinedEvent(this, player, !connection.firstJoin));
+      await this.getServer().emit("player.joined", new PlayerJoinedEvent(this, player, !connection.firstJoin));
 
       connection.firstJoin = false;
     }
@@ -725,8 +725,6 @@ export class InternalLobby implements LobbyInstance {
     this.startedSpawningPlayer(connection);
     this.sendJoinedMessage(connection);
     this.broadcastJoinMessage(connection);
-
-    // this.emit("connection", connection);
   }
 
   private handleRejoin(connection: Connection): void {
