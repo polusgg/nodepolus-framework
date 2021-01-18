@@ -83,7 +83,7 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
 
   getNextConnectionId(): number {
     if (++this.connectionIndex > MaxValue.UInt32) {
-      this.connectionIndex = 1;
+      this.connectionIndex = Object.keys(FakeClientId).length / 2;
     }
 
     return this.connectionIndex;
