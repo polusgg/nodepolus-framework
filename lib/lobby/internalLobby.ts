@@ -371,7 +371,7 @@ export class InternalLobby implements LobbyInstance {
 
   findInnerNetObject(netId: number): BaseInnerNetObject | undefined {
     switch (netId) {
-      case this.lobbyBehaviour!.lobbyBehaviour.netId:
+      case this.lobbyBehaviour?.lobbyBehaviour.netId:
         return this.lobbyBehaviour!.lobbyBehaviour;
       case this.gameData?.gameData.netId:
         return this.gameData!.gameData;
