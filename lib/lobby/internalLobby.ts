@@ -88,7 +88,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   getLogger(): Logger {
-    return this.server.getLogger().child(`Lobby ${this.code}`);
+    return this.server.getLogger(`Lobby ${this.code}`);
   }
 
   getServer(): Server {

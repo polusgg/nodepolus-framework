@@ -380,9 +380,9 @@ export class LobbySettings {
         if (this.fromPovConnection) {
           sendToConnections = [this.fromPovConnection];
         } else {
-          sendToConnections = [];
-
           (this.lobby as InternalLobby).getLogger().warn("Attempted to sync lobby settings on a POV without a connection");
+
+          sendToConnections = [];
         }
       } else {
         sendToConnections = this.lobby.getConnections();

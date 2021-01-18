@@ -61,8 +61,8 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
     });
   }
 
-  getLogger(): Logger {
-    return this.logger;
+  getLogger(childName?: string): Logger {
+    return childName === undefined ? this.logger : this.logger.child(childName);
   }
 
   getAddress(): string {
@@ -133,11 +133,15 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
       connection.lobby.handleDisconnect(connection, reason);
 
       if (connection.lobby.getConnections().length == 0) {
+        this.getLogger().verbose("Destroying lobby %s", connection.lobby);
+
         const event = new ServerLobbyDestroyedEvent(connection.lobby);
 
         await this.emit("server.lobby.destroyed", event);
 
         if (event.isCancelled()) {
+          this.getLogger().verbose("Cancelled destroying lobby %s", connection.lobby);
+
           return;
         }
 
@@ -199,6 +203,8 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
   private async handlePacket(packet: BaseRootPacket, sender: Connection): Promise<void> {
     switch (packet.type) {
       case RootPacketType.HostGame: {
+        this.getLogger().verbose("Connection %s trying to host lobby", sender);
+
         let lobbyCode = LobbyCode.generate();
 
         while (this.lobbyMap.has(lobbyCode)) {
@@ -217,13 +223,15 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
         await this.emit("server.lobby.created", event);
 
         if (!event.isCancelled()) {
+          this.getLogger().verbose("Connection %s hosting lobby %s", sender, newLobby);
+
           this.lobbies.push(newLobby);
           this.lobbyMap.set(newLobby.getCode(), newLobby);
 
           sender.sendReliable([new HostGameResponsePacket(newLobby.getCode())]);
-
-          this.getLogger().verbose("Connection %s hosting lobby %s", sender, newLobby);
         } else {
+          this.getLogger().verbose("Cancelled connection %s hosting lobby", sender);
+
           sender.disconnect(event.getDisconnectReason());
         }
         break;
@@ -274,9 +282,9 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
         await this.emit("server.lobby.list", event);
 
         if (!event.isCancelled()) {
-          sender.sendReliable([new GetGameListResponsePacket(event.getLobbies(), event.getLobbyCounts())]);
-
           this.getLogger().verbose("Sending game list to connection %s", sender);
+
+          sender.sendReliable([new GetGameListResponsePacket(event.getLobbies(), event.getLobbyCounts())]);
         } else {
           sender.disconnect(event.getDisconnectReason());
         }
