@@ -3,12 +3,12 @@ import { PlayerColor } from "../types/enums";
 type Color = readonly [red: number, green: number, blue: number, alpha: number];
 
 type ColorShades = Readonly<{
-  light: Color;
-  dark: Color;
+  light: Readonly<Color>;
+  dark: Readonly<Color>;
 }>;
 
 type PlayerColorValues = {
-  [key in PlayerColor]: ColorShades;
+  [key in PlayerColor]: Readonly<ColorShades>;
 };
 
 const disabledGrey: Color = [76, 76, 76, 255] as const;
@@ -43,63 +43,63 @@ const playerBody: Readonly<PlayerColorValues> = {
 } as const;
 
 export class Palette {
-  static disabledGrey(): Color {
+  static disabledGrey(): Readonly<Color> {
     return disabledGrey;
   }
 
-  static disabledColor(): Color {
+  static disabledColor(): Readonly<Color> {
     return disabledColor;
   }
 
-  static enabledColor(): Color {
+  static enabledColor(): Readonly<Color> {
     return enabledColor;
   }
 
-  static black(): Color {
+  static black(): Readonly<Color> {
     return black;
   }
 
-  static clearWhite(): Color {
+  static clearWhite(): Readonly<Color> {
     return clearWhite;
   }
 
-  static halfWhite(): Color {
+  static halfWhite(): Readonly<Color> {
     return halfWhite;
   }
 
-  static white(): Color {
+  static white(): Readonly<Color> {
     return white;
   }
 
-  static lightBlue(): Color {
+  static lightBlue(): Readonly<Color> {
     return lightBlue;
   }
 
-  static blue(): Color {
+  static blue(): Readonly<Color> {
     return blue;
   }
 
-  static orange(): Color {
+  static orange(): Readonly<Color> {
     return orange;
   }
 
-  static purple(): Color {
+  static purple(): Readonly<Color> {
     return purple;
   }
 
-  static brown(): Color {
+  static brown(): Readonly<Color> {
     return brown;
   }
 
-  static crewmateBlue(): Color {
+  static crewmateBlue(): Readonly<Color> {
     return crewmateBlue;
   }
 
-  static impostorRed(): Color {
+  static impostorRed(): Readonly<Color> {
     return impostorRed;
   }
 
-  static playerVisor(): Color {
+  static playerVisor(): Readonly<Color> {
     return playerVisor;
   }
 

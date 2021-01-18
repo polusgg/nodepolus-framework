@@ -1,7 +1,7 @@
 import { Level, SystemType } from "../types/enums";
 import { LevelVent, Vector2 } from "../types";
 
-const VENTS_THE_SKELD: readonly LevelVent[] = [
+const VENTS_THE_SKELD: readonly Readonly<LevelVent>[] = [
   { id: 0, name: "In Admin", system: SystemType.Admin, position: new Vector2(2.543373, -9.59182) },
   { id: 1, name: "In the right hallway", system: SystemType.Hallway, position: new Vector2(9.38308, -6.0749207) },
   { id: 2, name: "In the Cafeteria", system: SystemType.Cafeteria, position: new Vector2(4.2584915, 0.08728027) },
@@ -18,7 +18,7 @@ const VENTS_THE_SKELD: readonly LevelVent[] = [
   { id: 13, name: "In Lower Navigation", system: SystemType.Navigation, position: new Vector2(16.007935, -6.0212097) },
 ];
 
-const VENTS_MIRA_HQ: readonly LevelVent[] = [
+const VENTS_MIRA_HQ: readonly Readonly<LevelVent>[] = [
   { id: 1, name: "On the Balcony", system: SystemType.Balcony, position: new Vector2(23.769283, -1.576561) },
   { id: 2, name: "In the Cafeteria", system: SystemType.Cafeteria, position: new Vector2(23.899899, 7.5434494) },
   { id: 3, name: "In the Reactor", system: SystemType.Reactor, position: new Vector2(0.4791336, 11.0603485) },
@@ -32,7 +32,7 @@ const VENTS_MIRA_HQ: readonly LevelVent[] = [
   { id: 11, name: "At the Launchpad", system: SystemType.Launchpad, position: new Vector2(-6.1811256, 3.9227905) },
 ];
 
-const VENTS_POLUS: readonly LevelVent[] = [
+const VENTS_POLUS: readonly Readonly<LevelVent>[] = [
   { id: 0, name: "By Security", system: SystemType.Security, position: new Vector2(1.9281311, -9.195087) },
   { id: 1, name: "Outside Electrical", system: SystemType.Outside, position: new Vector2(6.8989105, -14.047455) },
   { id: 2, name: "In O2", system: SystemType.Oxygen, position: new Vector2(3.5089645, -16.216679) },
@@ -47,7 +47,7 @@ const VENTS_POLUS: readonly LevelVent[] = [
   { id: 11, name: "Outside Admin", system: SystemType.Outside, position: new Vector2(18.929123, -24.487068) },
 ];
 
-const VENTS_AIRSHIP: readonly LevelVent[] = [
+const VENTS_AIRSHIP: readonly Readonly<LevelVent>[] = [
   { id: 0, name: "", system: SystemType.VaultRoom, position: new Vector2(0, 0) },
   { id: 1, name: "", system: SystemType.Cockpit, position: new Vector2(0, 0) },
   { id: 2, name: "", system: SystemType.ViewingDeck, position: new Vector2(0, 0) },
@@ -63,23 +63,23 @@ const VENTS_AIRSHIP: readonly LevelVent[] = [
 ];
 
 export class Vents {
-  static forSkeld(): readonly LevelVent[] {
+  static forSkeld(): readonly Readonly<LevelVent>[] {
     return VENTS_THE_SKELD;
   }
 
-  static forMiraHq(): readonly LevelVent[] {
+  static forMiraHq(): readonly Readonly<LevelVent>[] {
     return VENTS_MIRA_HQ;
   }
 
-  static forPolus(): readonly LevelVent[] {
+  static forPolus(): readonly Readonly<LevelVent>[] {
     return VENTS_POLUS;
   }
 
-  static forAirship(): readonly LevelVent[] {
+  static forAirship(): readonly Readonly<LevelVent>[] {
     return VENTS_AIRSHIP;
   }
 
-  static forLevel(level: Level): readonly LevelVent[] {
+  static forLevel(level: Level): readonly Readonly<LevelVent>[] {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
@@ -93,23 +93,23 @@ export class Vents {
     }
   }
 
-  static forSkeldFromId(ids: number[]): LevelVent[] {
+  static forSkeldFromId(ids: number[]): readonly Readonly<LevelVent>[] {
     return this.forSkeld().filter(v => ids.includes(v.id));
   }
 
-  static forMiraHqFromId(ids: number[]): LevelVent[] {
+  static forMiraHqFromId(ids: number[]): readonly Readonly<LevelVent>[] {
     return this.forMiraHq().filter(v => ids.includes(v.id));
   }
 
-  static forPolusFromId(ids: number[]): LevelVent[] {
+  static forPolusFromId(ids: number[]): readonly Readonly<LevelVent>[] {
     return this.forPolus().filter(v => ids.includes(v.id));
   }
 
-  static forAirshipFromId(ids: number[]): LevelVent[] {
+  static forAirshipFromId(ids: number[]): readonly Readonly<LevelVent>[] {
     return this.forAirship().filter(v => ids.includes(v.id));
   }
 
-  static forLevelFromId(level: Level, ids: number[]): LevelVent[] {
+  static forLevelFromId(level: Level, ids: number[]): readonly Readonly<LevelVent>[] {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
@@ -123,23 +123,23 @@ export class Vents {
     }
   }
 
-  static forSkeldFromPosition(position: Vector2): LevelVent | undefined {
+  static forSkeldFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
     return this.forSkeld().find(v => v.position.equals(position));
   }
 
-  static forMiraHqFromPosition(position: Vector2): LevelVent | undefined {
+  static forMiraHqFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
     return this.forMiraHq().find(v => v.position.equals(position));
   }
 
-  static forPolusFromPosition(position: Vector2): LevelVent | undefined {
+  static forPolusFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
     return this.forPolus().find(v => v.position.equals(position));
   }
 
-  static forAirshipFromPosition(position: Vector2): LevelVent | undefined {
+  static forAirshipFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
     return this.forAirship().find(v => v.position.equals(position));
   }
 
-  static forLevelFromPosition(level: Level, position: Vector2): LevelVent | undefined {
+  static forLevelFromPosition(level: Level, position: Vector2): Readonly<LevelVent> | undefined {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:

@@ -1,7 +1,7 @@
 import { Level, TaskLength, TaskType } from "../types/enums";
 import { LevelTask } from "../types";
 
-const TASKS_THE_SKELD: readonly LevelTask[] = [
+const TASKS_THE_SKELD: readonly Readonly<LevelTask>[] = [
   { id: 0, name: "Admin: Swipe Card", isVisual: false, length: TaskLength.Common, type: TaskType.SwipeCard },
   { id: 1, name: "Electrical: Fix Wiring", isVisual: false, length: TaskLength.Common, type: TaskType.FixWiring },
   { id: 2, name: "Weapons: Clear Asteroids", isVisual: true, length: TaskLength.Long, type: TaskType.ClearAsteroids },
@@ -33,7 +33,7 @@ const TASKS_THE_SKELD: readonly LevelTask[] = [
   { id: 28, name: "Electrical: Divert Power to Security", isVisual: false, length: TaskLength.Short, type: TaskType.DivertPower },
 ];
 
-const TASKS_MIRA_HQ: readonly LevelTask[] = [
+const TASKS_MIRA_HQ: readonly Readonly<LevelTask>[] = [
   { id: 0, name: "Hallway: Fix Wiring", isVisual: false, length: TaskLength.Common, type: TaskType.FixWiring },
   { id: 1, name: "Admin: Enter ID Code", isVisual: false, length: TaskLength.Common, type: TaskType.EnterIdCode },
   { id: 2, name: "Medbay: Submit Scan", isVisual: true, length: TaskLength.Long, type: TaskType.SubmitScan },
@@ -62,7 +62,7 @@ const TASKS_MIRA_HQ: readonly LevelTask[] = [
   { id: 25, name: "Reactor: Unlock Manifolds", isVisual: false, length: TaskLength.Short, type: TaskType.UnlockManifolds },
 ];
 
-const TASKS_POLUS: readonly LevelTask[] = [
+const TASKS_POLUS: readonly Readonly<LevelTask>[] = [
   { id: 0, name: "Office: Swipe Card", isVisual: false, length: TaskLength.Common, type: TaskType.SwipeCard },
   { id: 1, name: "Dropship: Insert Keys", isVisual: false, length: TaskLength.Common, type: TaskType.InsertKeys },
   { id: 2, name: "Office: Scan Boarding Pass", isVisual: false, length: TaskLength.Common, type: TaskType.ScanBoardingPass },
@@ -98,28 +98,28 @@ const TASKS_POLUS: readonly LevelTask[] = [
   { id: 32, name: "Outside: Record Temperature", isVisual: false, length: TaskLength.Short, type: TaskType.RecordTemperature },
 ];
 
-const TASKS_AIRSHIP: readonly LevelTask[] = [
+const TASKS_AIRSHIP: readonly Readonly<LevelTask>[] = [
   // TODO
 ];
 
 export class Tasks {
-  static forSkeld(): readonly LevelTask[] {
+  static forSkeld(): readonly Readonly<LevelTask>[] {
     return TASKS_THE_SKELD;
   }
 
-  static forMiraHq(): readonly LevelTask[] {
+  static forMiraHq(): readonly Readonly<LevelTask>[] {
     return TASKS_MIRA_HQ;
   }
 
-  static forPolus(): readonly LevelTask[] {
+  static forPolus(): readonly Readonly<LevelTask>[] {
     return TASKS_POLUS;
   }
 
-  static forAirship(): readonly LevelTask[] {
+  static forAirship(): readonly Readonly<LevelTask>[] {
     return TASKS_AIRSHIP;
   }
 
-  static forLevel(level: Level): readonly LevelTask[] {
+  static forLevel(level: Level): readonly Readonly<LevelTask>[] {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
@@ -133,23 +133,23 @@ export class Tasks {
     }
   }
 
-  static forSkeldFromId(ids: number[]): LevelTask[] {
+  static forSkeldFromId(ids: number[]): readonly Readonly<LevelTask>[] {
     return this.forSkeld().filter(t => ids.includes(t.id));
   }
 
-  static forMiraHqFromId(ids: number[]): LevelTask[] {
+  static forMiraHqFromId(ids: number[]): readonly Readonly<LevelTask>[] {
     return this.forMiraHq().filter(t => ids.includes(t.id));
   }
 
-  static forPolusFromId(ids: number[]): LevelTask[] {
+  static forPolusFromId(ids: number[]): readonly Readonly<LevelTask>[] {
     return this.forPolus().filter(t => ids.includes(t.id));
   }
 
-  static forAirshipFromId(ids: number[]): LevelTask[] {
+  static forAirshipFromId(ids: number[]): readonly Readonly<LevelTask>[] {
     return this.forAirship().filter(t => ids.includes(t.id));
   }
 
-  static forLevelFromId(level: Level, ids: number[]): LevelTask[] {
+  static forLevelFromId(level: Level, ids: number[]): readonly Readonly<LevelTask>[] {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
