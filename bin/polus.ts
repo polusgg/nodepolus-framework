@@ -2,8 +2,8 @@ import { ServerConfig } from "../lib/api/config/serverConfig";
 import { Plugin } from "../lib/api/plugin";
 import { Logger } from "../lib/logger";
 import { Server } from "../lib/server";
-import path from "path";
 import fs from "fs/promises";
+import path from "path";
 
 declare const server: Server;
 
