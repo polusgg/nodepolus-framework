@@ -542,25 +542,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void {
-    const sendToConnections: Connection[] = new Array(sendTo?.length ?? 0);
-
-    if (sendTo) {
-      for (let i = 0; i < sendTo.length; i++) {
-        if (sendTo[i] instanceof Connection) {
-          sendToConnections[i] = sendTo[i];
-        } else {
-          const connection = this.connections.find(con => con.id == sendTo[i].id);
-
-          if (connection) {
-            sendToConnections[i] = connection;
-          } else {
-            throw new Error("Attempted to send a packet to a player with no connection");
-          }
-        }
-      }
-    }
-
-    this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.netId, packet)], this.code), sendToConnections);
+    this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.netId, packet)], this.code), sendTo);
   }
 
   spawn(entity: BaseInnerNetEntity): void {
