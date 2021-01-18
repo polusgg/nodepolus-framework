@@ -34,12 +34,11 @@ for (let i = 0; i < pluginDirectories.length; i++) {
     continue;
   }
 
-  logger.info(`Loading ${path.basename(pathToPlugin)}`);
+  logger.debug(`Loading ${path.basename(pathToPlugin)}`);
 
   const plugin: Plugin = {
     folder: pluginDirectories[i],
     metadata: JSON.parse(fs.readFileSync(path.join(pathToPlugin, "plugin.json"), "utf-8")),
-    entrypoint: import(path.join(pathToPlugin, "index")),
   };
 
   plugins.push(plugin);
