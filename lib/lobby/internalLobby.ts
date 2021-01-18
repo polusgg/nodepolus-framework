@@ -17,6 +17,7 @@ import { LobbyInstance, LobbySettings } from "../api/lobby";
 import { PlayerJoinedEvent } from "../api/events/player";
 import { Connection } from "../protocol/connection";
 import { notUndefined } from "../util/functions";
+import { PlayerInstance } from "../api/player";
 import { LobbyCode } from "../util/lobbyCode";
 import { TextComponent } from "../api/text";
 import { HostInstance } from "../api/host";
@@ -580,10 +581,12 @@ export class InternalLobby implements LobbyInstance {
     this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), this.getConnections());
   }
 
-  spawnPlayer(player: EntityPlayer, playerData: PlayerData): void {
+  spawnPlayer(player: EntityPlayer, playerData: PlayerData): PlayerInstance {
     if (player.playerControl.playerId != playerData.id) {
       throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.playerControl.playerId}) != PlayerData(${playerData.id})`);
     }
+
+    const playerInstance = new InternalPlayer(this, player);
 
     this.addPlayer(new InternalPlayer(this, player));
     this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.owner, this.hostInstance.getId()));
@@ -593,6 +596,8 @@ export class InternalLobby implements LobbyInstance {
       this.gameData.gameData.players.push(playerData);
       this.sendRPCPacket(this.gameData.gameData, new UpdateGameDataPacket(this.gameData.gameData.players));
     }
+
+    return playerInstance;
   }
 
   despawn(innerNetObject: BaseInnerNetObject): void {
