@@ -1066,7 +1066,7 @@ export class InternalHost implements HostInstance {
     return this.decontaminationHandlers;
   }
 
-  private getNextPlayerId(): number {
+  getNextPlayerId(): number {
     const taken = this.lobby.getPlayers().map(player => player.getId());
 
     for (let i = 0; i < 125; i++) {
