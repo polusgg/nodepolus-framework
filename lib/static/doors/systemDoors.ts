@@ -1,7 +1,7 @@
 import { Level, SystemType } from "../../types/enums";
 
 type SystemDoorList = {
-  [key in SystemType]?: number[];
+  [key in SystemType]?: readonly number[];
 };
 
 const SKELD_DOORS: Readonly<SystemDoorList> = {
