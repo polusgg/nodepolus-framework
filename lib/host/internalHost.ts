@@ -281,7 +281,7 @@ export class InternalHost implements HostInstance {
     gameData.gameData.updateGameData(gameData.gameData.players, this.lobby.getConnections());
   }
 
-  handleCheckName(sender: InnerPlayerControl, name: string): void {
+  async handleCheckName(sender: InnerPlayerControl, name: string): Promise<void> {
     let checkName: string = name;
     let index = 1;
 
@@ -305,7 +305,7 @@ export class InternalHost implements HostInstance {
 
     player.setName(checkName);
 
-    this.lobby.finishedSpawningPlayer(owner);
+    await this.lobby.finishedSpawningPlayer(owner);
 
     if (!this.lobby.isSpawningPlayers()) {
       this.lobby.reapplyActingHosts();
