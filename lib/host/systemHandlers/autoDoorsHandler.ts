@@ -46,7 +46,7 @@ export class AutoDoorsHandler {
       throw new Error(`SystemType ${systemId} (${SystemType[systemId]}) does not have any doors`);
     }
 
-    return doors;
+    return doors as number[];
   }
 
   setSystemTimeout(systemId: SystemType, time: number): void {
