@@ -44,12 +44,13 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
   }
 
   getData(): DataPacket {
-    const writer = new MessageWriter().writeUInt16(this.sequenceId);
-
-    this.position.serialize(writer);
-    this.velocity.serialize(writer);
-
-    return new DataPacket(this.netId, writer);
+    return new DataPacket(
+      this.netId,
+      new MessageWriter()
+        .writeUInt16(this.sequenceId)
+        .writeVector2(this.position)
+        .writeVector2(this.velocity),
+    );
   }
 
   async setData(packet: MessageReader | MessageWriter): Promise<void> {
@@ -63,8 +64,8 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
 
     this.sequenceId = reader.readUInt16();
 
-    const position = Vector2.deserialize(reader);
-    const velocity = Vector2.deserialize(reader);
+    const position = reader.readVector2();
+    const velocity = reader.readVector2();
     const event = new PlayerPositionWalkedEvent(player, this.position, this.velocity, position, velocity);
 
     await this.parent.lobby.getServer().emit("player.position.updated", event);
@@ -85,12 +86,13 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
   }
 
   serializeSpawn(): SpawnInnerNetObject {
-    const writer = new MessageWriter().writeUInt16(this.sequenceId);
-
-    this.position.serialize(writer);
-    this.velocity.serialize(writer);
-
-    return new SpawnInnerNetObject(this.netId, writer);
+    return new SpawnInnerNetObject(
+      this.netId,
+      new MessageWriter()
+        .writeUInt16(this.sequenceId)
+        .writeVector2(this.position)
+        .writeVector2(this.velocity),
+    );
   }
 
   clone(): InnerCustomNetworkTransform {

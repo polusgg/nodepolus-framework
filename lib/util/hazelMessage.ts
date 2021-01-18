@@ -1,4 +1,5 @@
 import { MaxValue, MinValue } from "./constants";
+import { Vector2 } from "../types";
 
 /**
  * Core buffer type for reading and writing messages
@@ -159,6 +160,11 @@ export class MessageWriter extends HazelMessage {
     this.cursor += 4;
 
     return this;
+  }
+
+  writeVector2(value: Vector2): this {
+    return this.writeUInt16(Vector2.unlerp(-40, 40, value.x) * 65535.0)
+      .writeUInt16(Vector2.unlerp(-40, 40, value.y) * 65535.0);
   }
 
   writeString(value: string): this {
@@ -363,6 +369,13 @@ export class MessageReader extends HazelMessage {
     this.cursor += 4;
 
     return val;
+  }
+
+  readVector2(): Vector2 {
+    return new Vector2(
+      Vector2.lerp(-40, 40, this.readUInt16() / 65535.0),
+      Vector2.lerp(-40, 40, this.readUInt16() / 65535.0),
+    );
   }
 
   readString(): string {

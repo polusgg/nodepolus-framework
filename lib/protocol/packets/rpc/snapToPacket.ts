@@ -12,16 +12,10 @@ export class SnapToPacket extends BaseRPCPacket {
   }
 
   static deserialize(reader: MessageReader): SnapToPacket {
-    const position = Vector2.deserialize(reader);
-
-    return new SnapToPacket(position, reader.readUInt16());
+    return new SnapToPacket(reader.readVector2(), reader.readUInt16());
   }
 
   serialize(): MessageWriter {
-    const writer = new MessageWriter();
-
-    this.position.serialize(writer);
-
-    return writer.writeUInt16(this.lastSequenceId);
+    return new MessageWriter().writeVector2(this.position).writeUInt16(this.lastSequenceId);
   }
 }

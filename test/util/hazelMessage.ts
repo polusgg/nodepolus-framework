@@ -1,5 +1,7 @@
 import { MessageReader, MessageWriter } from "../../lib/util/hazelMessage";
 import { MaxValue, MinValue } from "../../lib/util/constants";
+import { isFloatEqual } from "../../lib/util/functions";
+import { Vector2 } from "../../lib/types";
 import test from "ava";
 
 type Example = {
@@ -169,6 +171,27 @@ test("writes a float32", t => {
 
   t.is(buf.getBuffer().toString("hex"), "00401cc600401c460000803f");
   t.is(buf.getLength(), 12);
+});
+
+test("reads a Vector2", t => {
+  const buf = MessageReader.fromRawBytes("ff7fff7fffff0000");
+  const one = buf.readVector2();
+  const two = buf.readVector2();
+
+  t.false(buf.hasBytesLeft());
+  t.true(isFloatEqual(one.x, 0, 0.001));
+  t.true(isFloatEqual(one.y, 0, 0.001));
+  t.true(isFloatEqual(two.x, 40, 0.001));
+  t.true(isFloatEqual(two.y, -40, 0.001));
+});
+
+test("writes a vector2", t => {
+  const buf = new MessageWriter();
+
+  buf.writeVector2(new Vector2(0, 0));
+  buf.writeVector2(new Vector2(40, -40));
+
+  t.is(buf.getBuffer().toString("hex"), "ff7fff7fffff0000");
 });
 
 test("reads a packed int32", t => {
