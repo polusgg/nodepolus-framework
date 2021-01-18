@@ -107,7 +107,7 @@ export interface LobbyInstance {
 
   spawn(entity: BaseInnerNetEntity): void;
 
-  spawnPlayer(player: EntityPlayer, playerData: PlayerData): void;
+  spawnPlayer(player: EntityPlayer, playerData: PlayerData): PlayerInstance;
 
   despawn(innerNetObject: BaseInnerNetObject): void;
 }
