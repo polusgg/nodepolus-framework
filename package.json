@@ -30,13 +30,11 @@
     "ipaddr.js": "^2.0.0",
     "public-ip": "^4.0.2",
     "ts-node": "^9.1.0",
-    "victor": "^1.1.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {
     "@types/lodash.clonedeep": "^4.5.6",
     "@types/node": "^14.14.10",
-    "@types/victor": "^1.1.0",
     "@typescript-eslint/eslint-plugin": "^4.8.2",
     "@typescript-eslint/parser": "^4.8.2",
     "ava": "^3.14.0",
