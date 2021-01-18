@@ -131,82 +131,84 @@ export class InternalHost implements HostInstance {
 
     const connections = this.lobby.getConnections();
 
-    if (this.readyPlayerList.length == connections.length) {
-      const lobbyBehaviour = this.lobby.getLobbyBehaviour();
-
-      if (lobbyBehaviour) {
-        this.lobby.despawn(lobbyBehaviour.lobbyBehaviour);
-      }
-
-      switch (this.lobby.getLevel()) {
-        case Level.TheSkeld:
-          this.lobby.setShipStatus(new EntitySkeldShipStatus(this.lobby, this.getNextNetId()));
-          break;
-        case Level.AprilSkeld:
-          this.lobby.setShipStatus(new EntitySkeldAprilShipStatus(this.lobby, this.getNextNetId()));
-          break;
-        case Level.MiraHq:
-          this.lobby.setShipStatus(new EntityMiraShipStatus(this.lobby, this.getNextNetId()));
-          break;
-        case Level.Polus:
-          this.lobby.setShipStatus(new EntityPolusShipStatus(this.lobby, this.getNextNetId()));
-          break;
-        case Level.Airship:
-          this.lobby.setShipStatus(new EntityAirshipStatus(this.lobby, this.getNextNetId()));
-          break;
-      }
-
-      this.systemsHandler = new SystemsHandler(this);
-      this.sabotageHandler = new SabotageSystemHandler(this);
-
-      switch (this.lobby.getLevel()) {
-        case Level.TheSkeld:
-          this.decontaminationHandlers = [];
-          this.doorHandler = new AutoDoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
-          break;
-        case Level.AprilSkeld:
-          this.decontaminationHandlers = [];
-          this.doorHandler = new AutoDoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
-          break;
-        case Level.MiraHq:
-          this.decontaminationHandlers = [
-            new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon] as DeconSystem),
-          ];
-          break;
-        case Level.Polus:
-          this.decontaminationHandlers = [
-            new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon] as DeconSystem),
-            new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon2] as DeconTwoSystem),
-          ];
-          this.doorHandler = new DoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
-          break;
-        case Level.Airship:
-          this.decontaminationHandlers = [];
-          this.doorHandler = new DoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
-          break;
-      }
-
-      const gameData = this.lobby.getGameData();
-
-      if (!gameData) {
-        throw new Error("Attempted to start game without a GameData instance");
-      }
-
-      this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getShipStatus()!.serializeSpawn()], this.lobby.getCode()));
-      this.setInfected(this.lobby.getOptions().impostorCount);
-
-      // TODO: Uncomment when removing the for loop below
-      // this.setTasks();
-
-      // TODO: Remove -- debug task list for medbay scan on all 3 maps
-      for (let i = 0; i < this.lobby.getPlayers().length; i++) {
-        gameData.gameData.setTasks(this.lobby.getPlayers()[i].getId(), [25, 4, 2], connections);
-      }
-
-      gameData.gameData.updateGameData(gameData.gameData.players, connections);
-
-      this.lobby.setGameState(GameState.Started);
+    if (this.readyPlayerList.length != connections.length) {
+      return;
     }
+
+    const lobbyBehaviour = this.lobby.getLobbyBehaviour();
+
+    if (lobbyBehaviour) {
+      this.lobby.despawn(lobbyBehaviour.lobbyBehaviour);
+    }
+
+    switch (this.lobby.getLevel()) {
+      case Level.TheSkeld:
+        this.lobby.setShipStatus(new EntitySkeldShipStatus(this.lobby, this.getNextNetId()));
+        break;
+      case Level.AprilSkeld:
+        this.lobby.setShipStatus(new EntitySkeldAprilShipStatus(this.lobby, this.getNextNetId()));
+        break;
+      case Level.MiraHq:
+        this.lobby.setShipStatus(new EntityMiraShipStatus(this.lobby, this.getNextNetId()));
+        break;
+      case Level.Polus:
+        this.lobby.setShipStatus(new EntityPolusShipStatus(this.lobby, this.getNextNetId()));
+        break;
+      case Level.Airship:
+        this.lobby.setShipStatus(new EntityAirshipStatus(this.lobby, this.getNextNetId()));
+        break;
+    }
+
+    this.systemsHandler = new SystemsHandler(this);
+    this.sabotageHandler = new SabotageSystemHandler(this);
+
+    switch (this.lobby.getLevel()) {
+      case Level.TheSkeld:
+        this.decontaminationHandlers = [];
+        this.doorHandler = new AutoDoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
+        break;
+      case Level.AprilSkeld:
+        this.decontaminationHandlers = [];
+        this.doorHandler = new AutoDoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
+        break;
+      case Level.MiraHq:
+        this.decontaminationHandlers = [
+          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon] as DeconSystem),
+        ];
+        break;
+      case Level.Polus:
+        this.decontaminationHandlers = [
+          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon] as DeconSystem),
+          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon2] as DeconTwoSystem),
+        ];
+        this.doorHandler = new DoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
+        break;
+      case Level.Airship:
+        this.decontaminationHandlers = [];
+        this.doorHandler = new DoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
+        break;
+    }
+
+    const gameData = this.lobby.getGameData();
+
+    if (!gameData) {
+      throw new Error("Attempted to start game without a GameData instance");
+    }
+
+    this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getShipStatus()!.serializeSpawn()], this.lobby.getCode()));
+    this.setInfected(this.lobby.getOptions().impostorCount);
+
+    // TODO: Uncomment when removing the for loop below
+    // this.setTasks();
+
+    // TODO: Remove -- debug task list for medbay scan on all 3 maps
+    for (let i = 0; i < this.lobby.getPlayers().length; i++) {
+      gameData.gameData.setTasks(this.lobby.getPlayers()[i].getId(), [25, 4, 2], connections);
+    }
+
+    gameData.gameData.updateGameData(gameData.gameData.players, connections);
+
+    this.lobby.setGameState(GameState.Started);
   }
 
   async handleSceneChange(sender: Connection, sceneName: string): Promise<void> {
