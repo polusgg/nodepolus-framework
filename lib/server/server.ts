@@ -55,6 +55,10 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
     this.serverSocket.on("message", (buf, remoteInfo) => {
       this.getConnection(ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`)).emit("message", buf);
     });
+
+    this.serverSocket.on("error", error => {
+      this.logger.catch(error);
+    });
   }
 
   getLogger(): Logger {
