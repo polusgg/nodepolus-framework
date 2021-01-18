@@ -1,10 +1,10 @@
 import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
+import { BaseRPCPacket, SetColorPacket, SetNamePacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
 import { DisconnectReason, GameOptionsData, Immutable, Vector2 } from "../types";
-import { BaseRPCPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
@@ -604,6 +604,8 @@ export class InternalLobby implements LobbyInstance {
 
     if (this.gameData) {
       this.gameData.gameData.players.push(playerData);
+      this.sendRPCPacket(player.playerControl, new SetNamePacket(playerData.name));
+      this.sendRPCPacket(player.playerControl, new SetColorPacket(playerData.color));
       this.sendRPCPacket(this.gameData.gameData, new UpdateGameDataPacket(this.gameData.gameData.players));
     }
   }
