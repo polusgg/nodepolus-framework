@@ -588,7 +588,7 @@ export class InternalLobby implements LobbyInstance {
 
     const playerInstance = new InternalPlayer(this, player);
 
-    this.addPlayer(new InternalPlayer(this, player));
+    this.addPlayer(playerInstance);
     this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.owner, this.hostInstance.getId()));
     this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
 
