@@ -1,11 +1,14 @@
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { isFloatEqual } from "../util/functions";
+import Victor from "victor";
 
-export class Vector2 {
+export class Vector2 extends Victor {
   constructor(
     public readonly x: number,
     public readonly y: number,
-  ) {}
+  ) {
+    super(x, y);
+  }
 
   static deserialize(reader: MessageReader): Vector2 {
     return new Vector2(

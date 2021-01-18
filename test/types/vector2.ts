@@ -32,3 +32,12 @@ test("checks equality with another vector2", t => {
   t.true(one.equals(two));
   t.false(one.equals(two, 0.0001));
 });
+
+test("extends victor properly", t => {
+  const one = new Vector2(10, 10);
+  const two = new Vector2(2, 5);
+  const product = one.divide(two);
+
+  t.true(isFloatEqual(product.x, 5, 0.001));
+  t.true(isFloatEqual(product.y, 2, 0.001));
+});
