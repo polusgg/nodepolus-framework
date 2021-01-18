@@ -1,10 +1,10 @@
 import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
-import { BaseRPCPacket, SetColorPacket, SetNamePacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
 import { DisconnectReason, GameOptionsData, Immutable, Vector2 } from "../types";
+import { BaseRPCPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
@@ -576,18 +576,17 @@ export class InternalLobby implements LobbyInstance {
     this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), this.getConnections());
   }
 
-  spawnPlayer(player: EntityPlayer, playerData: PlayerData): void {
+  spawnPlayer(clientId: number, player: EntityPlayer, playerData: PlayerData): void {
     if (player.playerControl.playerId != playerData.id) {
       throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.playerControl.playerId}) != PlayerData(${playerData.id})`);
     }
 
     this.addPlayer(new InternalPlayer(this, player));
+    this.sendRootGamePacket(new JoinGameResponsePacket(this.code, clientId, this.hostInstance.getId()));
     this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
 
     if (this.gameData) {
       this.gameData.gameData.players.push(playerData);
-      this.sendRPCPacket(player.playerControl, new SetNamePacket(playerData.name));
-      this.sendRPCPacket(player.playerControl, new SetColorPacket(playerData.color));
       this.sendRPCPacket(this.gameData.gameData, new UpdateGameDataPacket(this.gameData.gameData.players));
     }
   }
