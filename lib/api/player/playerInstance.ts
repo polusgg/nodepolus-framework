@@ -1,12 +1,15 @@
 import { PlayerColor, PlayerHat, PlayerPet, PlayerRole, PlayerSkin } from "../../types/enums";
 import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../../types";
 import { Connection } from "../../protocol/connection";
+import { LobbyInstance } from "../lobby";
 import { TextComponent } from "../text";
 
 export interface PlayerInstance {
   getId(): number;
 
   getConnection(): Connection | undefined;
+
+  getLobby(): LobbyInstance;
 
   hasMeta(key: string): boolean;
 

@@ -8,6 +8,7 @@ import { SetInfectedPacket } from "../protocol/packets/rpc";
 import { EntityPlayer } from "../protocol/entities/player";
 import { Connection } from "../protocol/connection";
 import { PlayerInstance } from "../api/player";
+import { LobbyInstance } from "../api/lobby";
 import { TextComponent } from "../api/text";
 import { InternalLobby } from "../lobby";
 import { InternalHost } from "../host";
@@ -41,6 +42,10 @@ export class InternalPlayer implements PlayerInstance {
 
   getConnection(): Connection | undefined {
     return this.connection;
+  }
+
+  getLobby(): LobbyInstance {
+    return this.lobby;
   }
 
   hasMeta(key: string): boolean {
