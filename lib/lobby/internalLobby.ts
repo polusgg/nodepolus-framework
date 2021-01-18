@@ -66,6 +66,7 @@ export class InternalLobby implements LobbyInstance {
   private readonly connections: Connection[] = [];
   private readonly settings: LobbySettings = new LobbySettings(this);
   private readonly gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
+  private readonly metadata: Map<string, unknown> = new Map();
 
   private game?: Game;
   private players: InternalPlayer[] = [];
@@ -107,6 +108,14 @@ export class InternalLobby implements LobbyInstance {
 
   getAge(): number {
     return (new Date().getTime() - this.createdAt) / 1000;
+  }
+
+  getMeta(key: string): unknown {
+    return this.metadata.get(key);
+  }
+
+  setMeta(key: string, value: unknown): void {
+    this.metadata.set(key, value);
   }
 
   getHostInstance(): HostInstance {

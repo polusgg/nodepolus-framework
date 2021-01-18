@@ -21,6 +21,7 @@ import {
 
 export class InternalPlayer implements PlayerInstance {
   private readonly id: number;
+  private readonly metadata: Map<string, unknown> = new Map();
 
   private name: TextComponent;
   private role: PlayerRole = PlayerRole.Crewmate;
@@ -40,6 +41,14 @@ export class InternalPlayer implements PlayerInstance {
 
   getConnection(): Connection | undefined {
     return this.connection;
+  }
+
+  getMeta(key: string): unknown {
+    return this.metadata.get(key);
+  }
+
+  setMeta(key: string, value: unknown): void {
+    this.metadata.set(key, value);
   }
 
   getName(): TextComponent {

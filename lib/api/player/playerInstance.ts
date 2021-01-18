@@ -8,6 +8,10 @@ export interface PlayerInstance {
 
   getConnection(): Connection | undefined;
 
+  getMeta(key: string): unknown;
+
+  setMeta(key: string, value: unknown): void;
+
   getName(): TextComponent;
 
   setName(name: TextComponent | string): this;

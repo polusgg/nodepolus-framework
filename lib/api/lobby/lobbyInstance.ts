@@ -25,6 +25,10 @@ export interface LobbyInstance {
 
   getAge(): number;
 
+  getMeta(key: string): unknown;
+
+  setMeta(key: string, value: unknown): void;
+
   getHostInstance(): HostInstance;
 
   getConnections(): Connection[];

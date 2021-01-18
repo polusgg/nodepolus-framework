@@ -26,6 +26,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   public limboState = LimboState.PreSpawn;
   public firstJoin = true;
 
+  private readonly metadata: Map<string, unknown> = new Map();
   private readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
   private readonly unacknowledgedPackets: Map<number, number> = new Map();
   private readonly flushInterval: NodeJS.Timeout;
@@ -95,6 +96,14 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     }, 50);
 
     // TODO: Timeout clients and remove dead connections
+  }
+
+  getMeta(key: string): unknown {
+    return this.metadata.get(key);
+  }
+
+  setMeta(key: string, value: unknown): void {
+    this.metadata.set(key, value);
   }
 
   getConnectionInfo(): ConnectionInfo {
