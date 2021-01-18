@@ -2,7 +2,7 @@ import { CancellableEvent } from "../types";
 import { Game } from "../../game";
 
 /**
- * Fired when a reactor console has been reset.
+ * Fired when a reactor console has been reset to a sabotaged state.
  */
 export class RoomReactorConsoleClearedEvent extends CancellableEvent {
   constructor(

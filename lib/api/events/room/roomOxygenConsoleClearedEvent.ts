@@ -2,7 +2,7 @@ import { CancellableEvent } from "../types";
 import { Game } from "../../game";
 
 /**
- * Fired when an oxygen console has been reset.
+ * Fired when an oxygen console has been reset to a sabotaged state.
  */
 export class RoomOxygenConsoleClearedEvent extends CancellableEvent {
   constructor(

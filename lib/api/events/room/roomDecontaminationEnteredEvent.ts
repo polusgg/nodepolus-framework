@@ -1,3 +1,4 @@
+import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
 import { Game } from "../../game";
 
@@ -9,6 +10,7 @@ export class RoomDecontaminationEnteredEvent extends CancellableEvent {
     private readonly game: Game,
     private readonly decontamination: number,
     private readonly side: number,
+    private readonly player?: PlayerInstance,
   ) {
     super();
   }
@@ -32,5 +34,14 @@ export class RoomDecontaminationEnteredEvent extends CancellableEvent {
    */
   getSide(): number {
     return this.side;
+  }
+
+  /**
+   * Gets the player that opened the decontamination room.
+   *
+   * @returns The player that opened the decontamination room, or `undefined` if it was opened via the API
+   */
+  getPlayer(): PlayerInstance | undefined {
+    return this.player;
   }
 }

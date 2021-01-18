@@ -22,15 +22,6 @@ export class RoomDoorsOpenedEvent extends CancellableEvent {
   }
 
   /**
-   * Gets the player that opened the doors.
-   *
-   * @returns The player that opened the doors, or `undefined` if they were opened via the API
-   */
-  getPlayer(): PlayerInstance | undefined {
-    return this.player;
-  }
-
-  /**
    * Gets the doors that were opened.
    */
   getDoors(): Door[] {
@@ -44,5 +35,14 @@ export class RoomDoorsOpenedEvent extends CancellableEvent {
    */
   setDoors(doors: Door[]): void {
     this.doors = doors;
+  }
+
+  /**
+   * Gets the player that opened the doors.
+   *
+   * @returns The player that opened the doors, or `undefined` if they were opened via the API
+   */
+  getPlayer(): PlayerInstance | undefined {
+    return this.player;
   }
 }

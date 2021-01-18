@@ -2,7 +2,7 @@ import { CancellableEvent } from "../types";
 import { Game } from "../../game";
 
 /**
- * Fired when a communications console has been reset.
+ * Fired when a communications console has been reset to a sabotaged state.
  */
 export class RoomCommunicationsConsoleClearedEvent extends CancellableEvent {
   constructor(

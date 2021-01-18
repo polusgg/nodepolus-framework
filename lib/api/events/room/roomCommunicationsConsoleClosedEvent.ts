@@ -1,3 +1,4 @@
+import { PlayerInstance } from "../../player";
 import { Game } from "../../game";
 
 /**
@@ -6,6 +7,7 @@ import { Game } from "../../game";
 export class RoomCommunicationsConsoleClosedEvent {
   constructor(
     private readonly game: Game,
+    private readonly player: PlayerInstance,
     private readonly console: number,
   ) {}
 
@@ -14,6 +16,13 @@ export class RoomCommunicationsConsoleClosedEvent {
    */
   getGame(): Game {
     return this.game;
+  }
+
+  /**
+   * Gets the player that closed the communications console.
+   */
+  getPlayer(): PlayerInstance {
+    return this.player;
   }
 
   /**
