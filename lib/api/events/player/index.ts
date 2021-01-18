@@ -36,6 +36,8 @@ export { PlayerRoleUpdatedEvent } from "./playerRoleUpdatedEvent";
 
 export { PlayerSkinUpdatedEvent } from "./playerSkinUpdatedEvent";
 
+export { PlayerSpawnedEvent } from "./playerSpawnedEvent";
+
 export { PlayerTaskAddedEvent } from "./playerTaskAddedEvent";
 
 export { PlayerTaskAnimationEvent } from "./playerTaskAnimationEvent";

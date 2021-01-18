@@ -1,4 +1,4 @@
-import { PlayerExiledEvent, PlayerRoleUpdatedEvent, PlayerTaskAddedEvent } from "../api/events/player";
+import { PlayerExiledEvent, PlayerRoleUpdatedEvent, PlayerSpawnedEvent, PlayerTaskAddedEvent } from "../api/events/player";
 import { BaseInnerShipStatus, InternalSystemType } from "../protocol/entities/baseShipStatus";
 import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent } from "../api/events/lobby";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
@@ -250,6 +250,10 @@ export class InternalHost implements HostInstance {
 
     sender.write(new GameDataPacket([gameData.serializeSpawn()], this.lobby.getCode()));
 
+    const event = new PlayerSpawnedEvent(sender, this.lobby, newPlayerId, true, new Vector2(0, 0));
+
+    await this.lobby.getServer().emit("player.spawned", event);
+
     const entity = new EntityPlayer(
       this.lobby,
       sender.id,
@@ -258,9 +262,11 @@ export class InternalHost implements HostInstance {
       this.getNextNetId(),
       this.getNextNetId(),
       5,
-      new Vector2(0, 0),
+      event.getPosition(),
       new Vector2(0, 0),
     );
+
+    entity.playerControl.isNew = event.isNew();
 
     const player = new InternalPlayer(this.lobby, entity, sender);
 

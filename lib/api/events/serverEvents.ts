@@ -48,6 +48,7 @@ import {
   PlayerRevivedEvent,
   PlayerRoleUpdatedEvent,
   PlayerSkinUpdatedEvent,
+  PlayerSpawnedEvent,
   PlayerTaskAddedEvent,
   PlayerTaskAnimationEvent,
   PlayerTaskCompletedEvent,
@@ -142,6 +143,7 @@ export type ServerEvents = {
   "player.revived": PlayerRevivedEvent;
   "player.role.updated": PlayerRoleUpdatedEvent;
   "player.skin.updated": PlayerSkinUpdatedEvent;
+  "player.spawned": PlayerSpawnedEvent;
   "player.task.added": PlayerTaskAddedEvent;
   "player.task.animation": PlayerTaskAnimationEvent;
   "player.task.completed": PlayerTaskCompletedEvent;
