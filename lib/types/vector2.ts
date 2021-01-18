@@ -27,6 +27,14 @@ export class Vector2 {
     return new Vector2(this.x, this.y);
   }
 
+  copyX(value: Vector2): Vector2 {
+    return new Vector2(value.x, this.y);
+  }
+
+  copyY(value: Vector2): Vector2 {
+    return new Vector2(this.x, value.y);
+  }
+
   add(value: Vector2): Vector2;
   add(x: number, y: number): Vector2;
   add(x: number | Vector2, y?: number): Vector2 {

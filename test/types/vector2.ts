@@ -1,7 +1,7 @@
 import { Vector2 } from "../../lib/types";
 import test from "ava";
 
-test("checks equality with another vector2", t => {
+test("checks equality with another Vector2", t => {
   const one = new Vector2(0.1234, 5.6789);
   const two = new Vector2(0.1225, 5.6798);
 
@@ -15,6 +15,24 @@ test("it can clone itself", t => {
 
   t.is(clone.x, original.x);
   t.is(clone.y, original.y);
+});
+
+test("it can copy the X value from another Vector2", t => {
+  const original = new Vector2(1, 2);
+  const copySource = new Vector2(3, 4);
+  const copied = original.copyX(copySource);
+
+  t.is(copied.x, 3);
+  t.is(copied.y, 2);
+});
+
+test("it can copy the Y value from another Vector2", t => {
+  const original = new Vector2(1, 2);
+  const copySource = new Vector2(3, 4);
+  const copied = original.copyY(copySource);
+
+  t.is(copied.x, 1);
+  t.is(copied.y, 4);
 });
 
 test("it can add another Vector2", t => {
