@@ -7,12 +7,12 @@ export class ClientVersion {
   ) {}
 
   static decode(version: number): ClientVersion {
-    const year = Math.floor(version / 25000);
-    const month = Math.floor((version %= 25000) / 1800);
-    const day = Math.floor((version %= 1800) / 50);
-    const revision = version % 50;
-
-    return new this(year, month, day, revision);
+    return new this(
+      Math.floor(version / 25000),
+      Math.floor((version %= 25000) / 1800),
+      Math.floor((version %= 1800) / 50),
+      version % 50,
+    );
   }
 
   encode(): number {
