@@ -41,6 +41,54 @@ test("converts a bitfield to a number array with a custom starting index", t => 
   ]);
 });
 
+test("checks if a bit is set", t => {
+  const bits = new Bitfield([true, false, false, true, true]);
+
+  t.true(bits.has(0));
+  t.false(bits.has(1));
+  t.false(bits.has(2));
+  t.true(bits.has(3));
+  t.true(bits.has(4));
+});
+
+test("checks if any bit is set", t => {
+  const bits = new Bitfield(Array(8).fill(false));
+
+  t.false(bits.any([1, 2]));
+
+  bits.set(2);
+
+  t.true(bits.any([1, 2]));
+
+  bits.set(1);
+  bits.unset(2);
+
+  t.true(bits.any([1, 2]));
+
+  bits.unset(1);
+
+  t.false(bits.any([1, 2]));
+});
+
+test("checks if all bits are set", t => {
+  const bits = new Bitfield(Array(8).fill(false));
+
+  t.false(bits.all([1, 2]));
+
+  bits.set(2);
+
+  t.false(bits.all([1, 2]));
+
+  bits.set(1);
+  bits.unset(2);
+
+  t.false(bits.all([1, 2]));
+
+  bits.set(2);
+
+  t.true(bits.all([1, 2]));
+});
+
 test("sets a bit", t => {
   const bits = new Bitfield(Array(8).fill(false));
 
@@ -99,23 +147,4 @@ test("updates a bit", t => {
   t.deepEqual(bits.bits, [
     true, true, true, true, false, true, true, true,
   ]);
-});
-
-test("checks if any bit is set", t => {
-  const bits = new Bitfield(Array(8).fill(false));
-
-  t.false(bits.any([1, 2]));
-
-  bits.set(2);
-
-  t.true(bits.any([1, 2]));
-
-  bits.set(1);
-  bits.unset(2);
-
-  t.true(bits.any([1, 2]));
-
-  bits.unset(1);
-
-  t.false(bits.any([1, 2]));
 });
