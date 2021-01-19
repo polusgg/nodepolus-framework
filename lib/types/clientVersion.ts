@@ -8,14 +8,8 @@ export class ClientVersion {
 
   static decode(version: number): ClientVersion {
     const year = Math.floor(version / 25000);
-
-    version %= 25000;
-
-    const month = Math.floor(version / 1800);
-
-    version %= 1800;
-
-    const day = Math.floor(version / 50);
+    const month = Math.floor((version %= 25000) / 1800);
+    const day = Math.floor((version %= 1800) / 50);
     const revision = version % 50;
 
     return new this(year, month, day, revision);
