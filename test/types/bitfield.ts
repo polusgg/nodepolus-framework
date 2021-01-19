@@ -1,6 +1,17 @@
 import { Bitfield } from "../../lib/types";
 import test from "ava";
 
+enum Color {
+  Red = 0,
+  Blue = 1,
+  Green = 2,
+  Yellow = 3,
+  Purple = 4,
+  Orange = 5,
+  White = 6,
+  Black = 7,
+}
+
 test("parses a bitfield with an unknown size", t => {
   const num = 25;
   const bits = Bitfield.fromNumber(num);
@@ -30,6 +41,14 @@ test("converts a bitfield to a number array", t => {
 
   t.deepEqual(bits.asNumbers(), [
     0, 3, 4,
+  ]);
+});
+
+test("converts a bitfield to a typed number array", t => {
+  const bits = new Bitfield([true, false, false, true, true, false, false, true]);
+
+  t.deepEqual(bits.asNumbers<Color>(), [
+    Color.Red, Color.Yellow, Color.Purple, Color.Black,
   ]);
 });
 

@@ -62,15 +62,16 @@ export class Bitfield {
    * }
    *
    * bits.asNumbers() as Color[] === [Blue, Green, Purple, Black];
+   * bits.asNumbers<Color>() === [Blue, Green, Purple, Black];
    * ```
    *
    * @param startingIndex The index to start at for position `0` of the Bitfield
    * @returns An array of indices in place of set bits, and all unset bits removed
    */
-  asNumbers(startingIndex: number = 0): number[] {
+  asNumbers<T extends number>(startingIndex: number = 0): T[] {
     return this.bits
       .map((state, index) => state ? index + startingIndex : undefined)
-      .filter(notUndefined);
+      .filter(notUndefined) as T[];
   }
 
   /**
