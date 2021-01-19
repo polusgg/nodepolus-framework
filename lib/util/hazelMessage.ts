@@ -1,5 +1,14 @@
 import { MaxValue, MinValue } from "./constants";
+import { clamp } from "./functions";
 import { Vector2 } from "../types";
+
+function lerp(min: number, max: number, value: number): number {
+  return min + ((max - min) * clamp(value, 0.0, 1.0));
+}
+
+function unlerp(min: number, max: number, value: number): number {
+  return clamp((value - min) / (max - min), 0.0, 1.0);
+}
 
 /**
  * Core buffer type for reading and writing messages
@@ -163,8 +172,8 @@ export class MessageWriter extends HazelMessage {
   }
 
   writeVector2(value: Vector2): this {
-    return this.writeUInt16(Vector2.unlerp(-40, 40, value.x) * 65535.0)
-      .writeUInt16(Vector2.unlerp(-40, 40, value.y) * 65535.0);
+    return this.writeUInt16(unlerp(-40, 40, value.x) * 65535.0)
+      .writeUInt16(unlerp(-40, 40, value.y) * 65535.0);
   }
 
   writeString(value: string): this {
@@ -373,8 +382,8 @@ export class MessageReader extends HazelMessage {
 
   readVector2(): Vector2 {
     return new Vector2(
-      Vector2.lerp(-40, 40, this.readUInt16() / 65535.0),
-      Vector2.lerp(-40, 40, this.readUInt16() / 65535.0),
+      lerp(-40, 40, this.readUInt16() / 65535.0),
+      lerp(-40, 40, this.readUInt16() / 65535.0),
     );
   }
 

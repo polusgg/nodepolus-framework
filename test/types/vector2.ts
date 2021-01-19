@@ -1,3 +1,4 @@
+import { isFloatEqual } from "../../lib/util/functions";
 import { Vector2 } from "../../lib/types";
 import test from "ava";
 
@@ -9,15 +10,22 @@ test("checks equality with another Vector2", t => {
   t.false(one.equals(two, 0.0001));
 });
 
-test("it can clone itself", t => {
-  const original = new Vector2(69, 420);
+test("checks exact equality with another Vector2", t => {
+  const one = new Vector2(0.1234, 5.6789);
+  const two = new Vector2(0.1234, 5.6789);
+
+  t.true(one.is(two));
+});
+
+test("clones itself", t => {
+  const original = new Vector2(6.9, 4.20);
   const clone = original.clone();
 
   t.is(clone.x, original.x);
   t.is(clone.y, original.y);
 });
 
-test("it can copy the X value from another Vector2", t => {
+test("copies its X value from another Vector2", t => {
   const original = new Vector2(1, 2);
   const copySource = new Vector2(3, 4);
   const copied = original.copyX(copySource);
@@ -26,7 +34,7 @@ test("it can copy the X value from another Vector2", t => {
   t.is(copied.y, 2);
 });
 
-test("it can copy the Y value from another Vector2", t => {
+test("copies its Y value from another Vector2", t => {
   const original = new Vector2(1, 2);
   const copySource = new Vector2(3, 4);
   const copied = original.copyY(copySource);
@@ -35,19 +43,16 @@ test("it can copy the Y value from another Vector2", t => {
   t.is(copied.y, 4);
 });
 
-test("it can add another Vector2", t => {
+test("adds another Vector2", t => {
   const one = new Vector2(1, 2);
   const two = new Vector2(3, 4);
   const resultOne = one.add(two);
-  const resultTwo = one.add(3, 4);
 
   t.is(resultOne.x, 4);
   t.is(resultOne.y, 6);
-  t.is(resultTwo.x, 4);
-  t.is(resultTwo.y, 6);
 });
 
-test("it can add to the X value", t => {
+test("adds to its X value", t => {
   const one = new Vector2(1, 2);
   const two = new Vector2(3, 4);
   const resultOne = one.addX(two);
@@ -59,7 +64,7 @@ test("it can add to the X value", t => {
   t.is(resultTwo.y, 2);
 });
 
-test("it can add to the Y value", t => {
+test("adds to its Y value", t => {
   const one = new Vector2(1, 2);
   const two = new Vector2(3, 4);
   const resultOne = one.addY(two);
@@ -71,19 +76,16 @@ test("it can add to the Y value", t => {
   t.is(resultTwo.y, 6);
 });
 
-test("it can subtract another Vector2", t => {
+test("subtracts another Vector2", t => {
   const one = new Vector2(1, 2);
   const two = new Vector2(3, 4);
   const resultOne = one.subtract(two);
-  const resultTwo = one.subtract(3, 4);
 
   t.is(resultOne.x, -2);
   t.is(resultOne.y, -2);
-  t.is(resultTwo.x, -2);
-  t.is(resultTwo.y, -2);
 });
 
-test("it can subtract from the X value", t => {
+test("subtracts from its X value", t => {
   const one = new Vector2(1, 2);
   const two = new Vector2(3, 4);
   const resultOne = one.subtractX(two);
@@ -95,7 +97,7 @@ test("it can subtract from the X value", t => {
   t.is(resultTwo.y, 2);
 });
 
-test("it can subtract from the Y value", t => {
+test("subtracts from its Y value", t => {
   const one = new Vector2(1, 2);
   const two = new Vector2(3, 4);
   const resultOne = one.subtractY(two);
@@ -107,19 +109,16 @@ test("it can subtract from the Y value", t => {
   t.is(resultTwo.y, -2);
 });
 
-test("it can multiply with another Vector2", t => {
+test("multiplies with another Vector2", t => {
   const one = new Vector2(2, 3);
   const two = new Vector2(4, 5);
   const resultOne = one.multiply(two);
-  const resultTwo = one.multiply(4, 5);
 
   t.is(resultOne.x, 8);
   t.is(resultOne.y, 15);
-  t.is(resultTwo.x, 8);
-  t.is(resultTwo.y, 15);
 });
 
-test("it can multiply the X value", t => {
+test("multiplies its X value", t => {
   const one = new Vector2(2, 3);
   const two = new Vector2(4, 5);
   const resultOne = one.multiplyX(two);
@@ -131,7 +130,7 @@ test("it can multiply the X value", t => {
   t.is(resultTwo.y, 3);
 });
 
-test("it can multiply the Y value", t => {
+test("multiplies its Y value", t => {
   const one = new Vector2(2, 3);
   const two = new Vector2(4, 5);
   const resultOne = one.multiplyY(two);
@@ -143,19 +142,16 @@ test("it can multiply the Y value", t => {
   t.is(resultTwo.y, 15);
 });
 
-test("it can be divided by another Vector2", t => {
+test("divides by another Vector2", t => {
   const one = new Vector2(10, 8);
   const two = new Vector2(5, 2);
   const resultOne = one.divide(two);
-  const resultTwo = one.divide(5, 2);
 
   t.is(resultOne.x, 2);
   t.is(resultOne.y, 4);
-  t.is(resultTwo.x, 2);
-  t.is(resultTwo.y, 4);
 });
 
-test("it can divide the X value", t => {
+test("divides its X value", t => {
   const one = new Vector2(10, 8);
   const two = new Vector2(5, 2);
   const resultOne = one.divideX(two);
@@ -167,7 +163,7 @@ test("it can divide the X value", t => {
   t.is(resultTwo.y, 8);
 });
 
-test("it can divide the Y value", t => {
+test("divides its Y value", t => {
   const one = new Vector2(10, 8);
   const two = new Vector2(5, 2);
   const resultOne = one.divideY(two);
@@ -177,4 +173,106 @@ test("it can divide the Y value", t => {
   t.is(resultOne.y, 4);
   t.is(resultTwo.x, 10);
   t.is(resultTwo.y, 4);
+});
+
+test("inverts itself", t => {
+  const original = new Vector2(-6.9, 4.20);
+  const inverted = original.invert();
+
+  t.is(inverted.x, 6.9);
+  t.is(inverted.y, -4.20);
+});
+
+test("inverts its X value", t => {
+  const original = new Vector2(-6.9, 4.20);
+  const inverted = original.invertX();
+
+  t.is(inverted.x, 6.9);
+  t.is(inverted.y, 4.20);
+});
+
+test("inverts its Y value", t => {
+  const original = new Vector2(-6.9, 4.20);
+  const inverted = original.invertY();
+
+  t.is(inverted.x, -6.9);
+  t.is(inverted.y, -4.20);
+});
+
+test("calculates the dot product with another Vector2", t => {
+  const one = new Vector2(10, 20);
+  const two = new Vector2(30, 40);
+  const product = one.dot(two);
+
+  t.is(product, 1100);
+});
+
+test("calculates the cross product with another Vector2", t => {
+  const one = new Vector2(10, 20);
+  const two = new Vector2(30, 40);
+  const product = one.cross(two);
+
+  t.is(product, -200);
+});
+
+test("calculates its magnitude", t => {
+  const value = new Vector2(6.9, 4.20);
+  const magnitude = value.magnitude();
+
+  t.true(isFloatEqual(magnitude, 8.078, 0.001));
+});
+
+test("calculates its squared magnitude", t => {
+  const value = new Vector2(6.9, 4.20);
+  const magnitude = value.squaredMagnitude();
+
+  t.is(magnitude, 65.25);
+});
+
+test("calculates its distance from another Vector2", t => {
+  const one = new Vector2(20, 40);
+  const two = new Vector2(500, 600);
+  const distance = one.distance(two);
+
+  t.true(isFloatEqual(distance, 737.563557, 0.001));
+});
+
+test("calculates its squared distance from another Vector2", t => {
+  const one = new Vector2(20, 40);
+  const two = new Vector2(500, 600);
+  const distance = one.squaredDistance(two);
+
+  t.is(distance, 544000);
+});
+
+test("calculates the distance of its X value from that of another Vector2", t => {
+  const one = new Vector2(20, 40);
+  const two = new Vector2(500, 600);
+  const distance = one.distanceX(two);
+
+  t.is(distance, -480);
+});
+
+test("calculates the absolute distance of its X value from that of another Vector2", t => {
+  const one = new Vector2(20, 40);
+  const two = new Vector2(500, 600);
+  const distance = one.absoluteDistanceX(two);
+
+  t.is(distance, 480);
+});
+
+test("calculates the distance of its Y value from that of another Vector2", t => {
+  const one = new Vector2(20, 40);
+  const two = new Vector2(500, 600);
+  const distance = one.distanceY(two);
+
+  t.is(distance, -560);
+});
+
+test("calculates the absolute distance of its Y value from that of another Vector2", t => {
+  const one = new Vector2(20, 40);
+  const two = new Vector2(500, 600);
+  const distance = one.absoluteDistanceY(two);
+
+  t.is(distance, 560);
 });

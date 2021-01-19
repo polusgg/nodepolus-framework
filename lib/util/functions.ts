@@ -1,4 +1,16 @@
 /**
+ * Restricts the given value to be inside an inclusive range.
+ *
+ * @param value The value to be clamped
+ * @param min The minimum value
+ * @param max The maximum value
+ * @returns A number which falls within the range `{min..max}`
+ */
+export function clamp(value: number, min: number, max: number): number {
+  return Math.max(Math.min(value, max), min);
+}
+
+/**
  * Checks whether or not the given value is undefined.
  *
  * @param value The possibly-undefined value
