@@ -98,7 +98,7 @@ export class MessageWriter extends HazelMessage {
    *
    * @param tag The tag for the message
    */
-  startMessage(tag: number): this {
+  startMessage(tag: number = 0): this {
     this.writeUInt16(0).writeByte(tag % 256);
 
     this.messageStarts.push(this.cursor);
