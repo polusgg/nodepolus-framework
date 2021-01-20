@@ -4,15 +4,16 @@
  * @param value The value to be clamped
  * @param min The minimum value
  * @param max The maximum value
- * @returns A number which falls within the range `{min..max}`
+ * @returns A number which falls within the range of `min..max`
  */
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(Math.min(value, max), min);
 }
 
 /**
- * Checks whether or not the given value is undefined.
+ * Gets whether or not the given value is undefined.
  *
+ * @typeParam T The type of object being checked
  * @param value The possibly-undefined value
  * @returns `true` if `value` is not `undefined`
  */
@@ -21,8 +22,9 @@ export function notUndefined<T>(value: T | undefined): value is T {
 }
 
 /**
- * Checks whether or not the given objects are equal at their top level.
+ * Gets whether or not the given objects are equal at their top level.
  *
+ * @typeParam T The type of objects being compared
  * @param one The first object
  * @param two The second object
  * @returns `true` if the two objects have the same length and keys.
@@ -49,7 +51,7 @@ export function shallowEqual<T>(one: T, two: T): boolean {
  *
  * @param min The minimum integer value
  * @param max The maximum integer value
- * @returns An integer which falls within the range `{min..max}`
+ * @returns An integer which falls within the range of `min..max`
  */
 export function randomInRange(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;

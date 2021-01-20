@@ -1,10 +1,13 @@
 import { isFloatEqual } from "../util/functions";
 
 /**
- * A class to represent a 2-dimensional vector with various methods to perform
- * vector arithmetic.
+ * A class used to store and manipulate a 2-dimensional vector.
  */
 export class Vector2 {
+  /**
+   * @param x The x value
+   * @param y The y value
+   */
   constructor(
     public readonly x: number,
     public readonly y: number,
@@ -20,7 +23,7 @@ export class Vector2 {
   }
 
   /**
-   * Checkes whether or not the Vector2 is equal to the given Vector2 by
+   * Gets whether or not the Vector2 is equal to the given Vector2 by
    * comparing the difference between each of their `x` and `y` values against
    * the given `epsilon` value.
    *
@@ -33,7 +36,7 @@ export class Vector2 {
   }
 
   /**
-   * Checks whether or not the Vector2 is *exactly* equal to the given Vector2.
+   * Gets whether or not the Vector2 is *exactly* equal to the given Vector2.
    *
    * @param other The Vector2 to be checked against
    * @returns `true` if the Vector2 is *exactly* the same as `other`
@@ -88,7 +91,7 @@ export class Vector2 {
    * Gets a new Vector2 with the original `y` value, and original `x` value
    * added to that from the given Vector2.
    *
-   * @param other The Vector2 whose `x` value will used as the `x` addend
+   * @param other The number or Vector2 whose `x` value will used as the `x` addend
    * @returns A new Vector2 where `x += other.x` and `y = y`
    */
   addX(other: number | Vector2): Vector2 {
@@ -101,7 +104,7 @@ export class Vector2 {
    * Gets a new Vector2 with the original `x` value, and original `y` value
    * added to that from the given Vector2.
    *
-   * @param other The Vector2 whose `y` value will used as the `y` addend
+   * @param other The number or Vector2 whose `y` value will used as the `y` addend
    * @returns A new Vector2 where `x = x` and `y += other.y`
    */
   addY(other: number | Vector2): Vector2 {
@@ -125,7 +128,7 @@ export class Vector2 {
    * Gets a new Vector2 with the original `y` value, and original `x` value
    * subtracted by that from the given Vector2.
    *
-   * @param other The Vector2 whose `x` value will be used as the `x` minuend
+   * @param other The number or Vector2 whose `x` value will be used as the `x` minuend
    * @returns A new Vector2 where `x -= other.x` and `y = y`
    */
   subtractX(other: number | Vector2): Vector2 {
@@ -138,7 +141,7 @@ export class Vector2 {
    * Gets a new Vector2 with the original `x` value, and original `y` value
    * subtracted by that from the given Vector2.
    *
-   * @param other The Vector2 whose `y` value will be used as the `y` minuend
+   * @param other The number or Vector2 whose `y` value will be used as the `y` minuend
    * @returns A new Vector2 where `x = x` and `y -= other.y`
    */
   subtractY(other: number | Vector2): Vector2 {
@@ -162,7 +165,7 @@ export class Vector2 {
    * Gets a new Vector2 with the original `y` value, and original `x` value
    * multiplied by that from the given Vector2.
    *
-   * @param other The Vector2 whose `x` value will be used as the `x` multiplier
+   * @param other The number or Vector2 whose `x` value will be used as the `x` multiplier
    * @returns A new Vector2 where `x *= other.x` and `y = y`
    */
   multiplyX(other: number | Vector2): Vector2 {
@@ -175,7 +178,7 @@ export class Vector2 {
    * Gets a new Vector2 with the original `x` value, and original `y` value
    * multiplied by that from the given Vector2.
    *
-   * @param other The Vector2 whose `y` value will be used as the `y` multiplier
+   * @param other The number or Vector2 whose `y` value will be used as the `y` multiplier
    * @returns A new Vector2 where `x = x` and `y *= other.y`
    */
   multiplyY(other: number | Vector2): Vector2 {
@@ -199,7 +202,7 @@ export class Vector2 {
    * Gets a new Vector2 with the original `y` value, and original `x` value
    * divided by that from the given Vector2.
    *
-   * @param other The Vector2 whose `x` value will used as the `x` divisor
+   * @param other The number or Vector2 whose `x` value will used as the `x` divisor
    * @returns A new Vector2 where `x /= other.x` and `y = y`
    */
   divideX(other: number | Vector2): Vector2 {
@@ -212,7 +215,7 @@ export class Vector2 {
    * Gets a new Vector2 with the original `x` value, and original `y` value
    * divided by that from the given Vector2.
    *
-   * @param other The Vector2 whose `y` value will used as the `y` divisor
+   * @param other The number or Vector2 whose `y` value will used as the `y` divisor
    * @returns A new Vector2 where `x = x` and `y /= other.y`
    */
   divideY(other: number | Vector2): Vector2 {
@@ -255,7 +258,6 @@ export class Vector2 {
    * Gets the dot product of the original and given Vector2.
    *
    * @param other The second Vector2
-   * @returns The dot product of the original Vector2 and `other`
    */
   dot(other: Vector2): number {
     return (this.x * other.x) + (this.y * other.y);
@@ -265,7 +267,6 @@ export class Vector2 {
    * Gets the cross product of the original and given Vector2.
    *
    * @param other The second Vector2
-   * @returns The cross product of the original Vector2 and `other`
    */
   cross(other: Vector2): number {
     return (this.x * other.y) - (this.y * other.x);
@@ -273,8 +274,6 @@ export class Vector2 {
 
   /**
    * Gets the length of the Vector2.
-   *
-   * @returns The length of the Vector2
    */
   magnitude(): number {
     return Math.sqrt(this.squaredMagnitude());
@@ -282,8 +281,6 @@ export class Vector2 {
 
   /**
    * Gets the squared length of the Vector2.
-   *
-   * @returns The squared length of the Vector2
    */
   squaredMagnitude(): number {
     return (this.x * this.x) + (this.y * this.y);
@@ -293,7 +290,6 @@ export class Vector2 {
    * Gets the distance between the original and given Vector2.
    *
    * @param other The second Vector2
-   * @returns The distance between the original Vector2 and `other`
    */
   distance(other: Vector2): number {
     return Math.sqrt(this.squaredDistance(other));
@@ -303,7 +299,6 @@ export class Vector2 {
    * Gets the squared distance between the original and given Vector2.
    *
    * @param other The second Vector2
-   * @returns The squared distance between the original Vector2 and `other`
    */
   squaredDistance(other: Vector2): number {
     const x = this.distanceX(other);
@@ -317,7 +312,6 @@ export class Vector2 {
    * Vector2.
    *
    * @param other The second Vector2
-   * @returns The distance between `x` and `other.x`
    */
   distanceX(value: Vector2): number {
     return this.x - value.x;
@@ -328,7 +322,6 @@ export class Vector2 {
    * given Vector2.
    *
    * @param other The second Vector2
-   * @returns The absolute distance between `x` and `other.x`
    */
   absoluteDistanceX(value: Vector2): number {
     return Math.abs(this.distanceX(value));
@@ -339,7 +332,6 @@ export class Vector2 {
    * Vector2.
    *
    * @param other The second Vector2
-   * @returns The distance between `y` and `other.y`
    */
   distanceY(value: Vector2): number {
     return this.y - value.y;
@@ -350,7 +342,6 @@ export class Vector2 {
    * given Vector2.
    *
    * @param other The second Vector2
-   * @returns The absolute distance between `y` and `other.y`
    */
   absoluteDistanceY(value: Vector2): number {
     return Math.abs(this.distanceY(value));

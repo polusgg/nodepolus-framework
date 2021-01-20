@@ -99,8 +99,6 @@ export interface LobbyInstance {
 
   getCode(): string;
 
-  setCode(code: string): void;
-
   sendMessage(message: TextComponent | string): void;
 
   sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void;
@@ -110,4 +108,10 @@ export interface LobbyInstance {
   spawnPlayer(player: EntityPlayer, playerData: PlayerData): PlayerInstance;
 
   despawn(innerNetObject: BaseInnerNetObject): void;
+
+  getActingHosts(): Connection[];
+
+  setActingHost(connection: Connection, sendImmediately: boolean): void;
+
+  removeActingHost(connection: Connection, sendImmediately: boolean): void;
 }

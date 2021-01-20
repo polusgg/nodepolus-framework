@@ -9,298 +9,19 @@ type Example = {
   someNumber: number;
 };
 
-test("reads a boolean", t => {
-  const buf = MessageReader.fromMessage("0200010100");
-
-  t.true(buf.readBoolean());
-  t.false(buf.readBoolean());
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes a boolean", t => {
+test("writes a message", t => {
   const buf = new MessageWriter();
 
-  buf.writeBoolean(true);
-  buf.writeBoolean(false);
+  buf.startMessage(0x32);
+  buf.startMessage(0x01);
+  buf.writeString("some");
+  buf.endMessage();
+  buf.startMessage(0x02);
+  buf.writeString("string");
+  buf.endMessage();
+  buf.endMessage();
 
-  t.is(buf.getBuffer().toString("hex"), "0100");
-  t.is(buf.getLength(), 2);
-});
-
-test("reads an int8", t => {
-  const buf = MessageReader.fromMessage("0400017ff05680");
-
-  t.is(buf.readSByte(), 127);
-  t.is(buf.readSByte(), -16);
-  t.is(buf.readSByte(), 86);
-  t.is(buf.readSByte(), -128);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes an int8", t => {
-  const buf = new MessageWriter();
-
-  buf.writeSByte(127);
-  buf.writeSByte(-16);
-  buf.writeSByte(86);
-  buf.writeSByte(-128);
-
-  t.is(buf.getBuffer().toString("hex"), "7ff05680");
-  t.is(buf.getLength(), 4);
-});
-
-test("reads a uint8", t => {
-  const buf = MessageReader.fromMessage("030001fff056");
-
-  t.is(buf.readByte(), 255);
-  t.is(buf.readByte(), 240);
-  t.is(buf.readByte(), 86);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes a uint8", t => {
-  const buf = new MessageWriter();
-
-  buf.writeByte(255);
-  buf.writeByte(240);
-  buf.writeByte(86);
-
-  t.is(buf.getBuffer().toString("hex"), "fff056");
-  t.is(buf.getLength(), 3);
-});
-
-test("reads an int16", t => {
-  const buf = MessageReader.fromMessage("080001ff7ff0f056560080");
-
-  t.is(buf.readInt16(), 32767);
-  t.is(buf.readInt16(), -3856);
-  t.is(buf.readInt16(), 22102);
-  t.is(buf.readInt16(), -32768);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes an int16", t => {
-  const buf = new MessageWriter();
-
-  buf.writeInt16(32767);
-  buf.writeInt16(-3856);
-  buf.writeInt16(22102);
-  buf.writeInt16(-32768);
-
-  t.is(buf.getBuffer().toString("hex"), "ff7ff0f056560080");
-  t.is(buf.getLength(), 8);
-});
-
-test("reads a uint16", t => {
-  const buf = MessageReader.fromMessage("060001fffff0f05656");
-
-  t.is(buf.readUInt16(), 65535);
-  t.is(buf.readUInt16(), 61680);
-  t.is(buf.readUInt16(), 22102);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes a uint16", t => {
-  const buf = new MessageWriter();
-
-  buf.writeUInt16(65535);
-  buf.writeUInt16(61680);
-  buf.writeUInt16(22102);
-
-  t.is(buf.getBuffer().toString("hex"), "fffff0f05656");
-  t.is(buf.getLength(), 6);
-});
-
-test("reads an int32", t => {
-  const buf = MessageReader.fromMessage("100001ffffff7ff0f0f0f05656565600000080");
-
-  t.is(buf.readInt32(), 2147483647);
-  t.is(buf.readInt32(), -252645136);
-  t.is(buf.readInt32(), 1448498774);
-  t.is(buf.readInt32(), -2147483648);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes an int32", t => {
-  const buf = new MessageWriter();
-
-  buf.writeInt32(2147483647);
-  buf.writeInt32(-252645136);
-  buf.writeInt32(1448498774);
-  buf.writeInt32(-2147483648);
-
-  t.is(buf.getBuffer().toString("hex"), "ffffff7ff0f0f0f05656565600000080");
-  t.is(buf.getLength(), 16);
-});
-
-test("reads a uint32", t => {
-  const buf = MessageReader.fromMessage("0c0001fffffffff0f0f0f056565656");
-
-  t.is(buf.readUInt32(), 4294967295);
-  t.is(buf.readUInt32(), 4042322160);
-  t.is(buf.readUInt32(), 1448498774);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes a uint32", t => {
-  const buf = new MessageWriter();
-
-  buf.writeUInt32(4294967295);
-  buf.writeUInt32(4042322160);
-  buf.writeUInt32(1448498774);
-
-  t.is(buf.getBuffer().toString("hex"), "fffffffff0f0f0f056565656");
-  t.is(buf.getLength(), 12);
-});
-
-test("reads a float32", t => {
-  const buf = MessageReader.fromMessage("0c000100401cc600401c460000803f");
-
-  t.is(buf.readFloat32(), -10000);
-  t.is(buf.readFloat32(), 10000);
-  t.is(buf.readFloat32(), 1);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes a float32", t => {
-  const buf = new MessageWriter();
-
-  buf.writeFloat32(-10000);
-  buf.writeFloat32(10000);
-  buf.writeFloat32(1);
-
-  t.is(buf.getBuffer().toString("hex"), "00401cc600401c460000803f");
-  t.is(buf.getLength(), 12);
-});
-
-test("reads a Vector2", t => {
-  const buf = MessageReader.fromRawBytes("ff7fff7fffff0000");
-  const one = buf.readVector2();
-  const two = buf.readVector2();
-
-  t.false(buf.hasBytesLeft());
-  t.true(isFloatEqual(one.x, 0, 0.001));
-  t.true(isFloatEqual(one.y, 0, 0.001));
-  t.true(isFloatEqual(two.x, 40, 0.001));
-  t.true(isFloatEqual(two.y, -40, 0.001));
-});
-
-test("writes a vector2", t => {
-  const buf = new MessageWriter();
-
-  buf.writeVector2(new Vector2(0, 0));
-  buf.writeVector2(new Vector2(40, -40));
-
-  t.is(buf.getBuffer().toString("hex"), "ff7fff7fffff0000");
-});
-
-test("reads a packed int32", t => {
-  const buf = MessageReader.fromMessage("1a00010001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
-
-  t.is(buf.readPackedInt32(), 0);
-  t.is(buf.readPackedInt32(), 1);
-  t.is(buf.readPackedInt32(), 2);
-  t.is(buf.readPackedInt32(), 127);
-  t.is(buf.readPackedInt32(), 128);
-  t.is(buf.readPackedInt32(), 255);
-  t.is(buf.readPackedInt32(), 2097151);
-  t.is(buf.readPackedInt32(), 2147483647);
-  t.is(buf.readPackedInt32(), -1);
-  t.is(buf.readPackedInt32(), -2147483648);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes a packed int32", t => {
-  const buf = new MessageWriter();
-
-  buf.writePackedInt32(0);
-  buf.writePackedInt32(1);
-  buf.writePackedInt32(2);
-  buf.writePackedInt32(127);
-  buf.writePackedInt32(128);
-  buf.writePackedInt32(255);
-  buf.writePackedInt32(2097151);
-  buf.writePackedInt32(2147483647);
-  buf.writePackedInt32(-1);
-  buf.writePackedInt32(-2147483648);
-
-  t.is(buf.getBuffer().toString("hex"), "0001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
-  t.is(buf.getLength(), 26);
-});
-
-test("reads a packed uint32", t => {
-  const buf = MessageReader.fromMessage("1a00010001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
-
-  t.is(buf.readPackedUInt32(), 0);
-  t.is(buf.readPackedUInt32(), 1);
-  t.is(buf.readPackedUInt32(), 2);
-  t.is(buf.readPackedUInt32(), 127);
-  t.is(buf.readPackedUInt32(), 128);
-  t.is(buf.readPackedUInt32(), 255);
-  t.is(buf.readPackedUInt32(), 2097151);
-  t.is(buf.readPackedUInt32(), 2147483647);
-  t.is(buf.readPackedUInt32(), 4294967295);
-  t.is(buf.readPackedUInt32(), 2147483648);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes a packed uint32", t => {
-  const buf = new MessageWriter();
-
-  buf.writePackedUInt32(0);
-  buf.writePackedUInt32(1);
-  buf.writePackedUInt32(2);
-  buf.writePackedUInt32(127);
-  buf.writePackedUInt32(128);
-  buf.writePackedUInt32(255);
-  buf.writePackedUInt32(2097151);
-  buf.writePackedUInt32(2147483647);
-  buf.writePackedUInt32(4294967295);
-  buf.writePackedUInt32(2147483648);
-
-  t.is(buf.getBuffer().toString("hex"), "0001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
-  t.is(buf.getLength(), 26);
-});
-
-test("reads a string", t => {
-  const buf = MessageReader.fromMessage(
-    "3604010548656c6c6f8008202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202cd094d0bcd0b8d182d180d0b8d0b920d098d0b2d0b0d0bdd0bed0b2d0b8d18720d09fd0b5d182d180d0bed0b200",
-  );
-
-  t.is(buf.readString(), "Hello");
-  t.is(buf.readString(), " ".repeat(1024));
-  t.is(buf.readString(), "Дмитрий Иванович Петров");
-  t.is(buf.readString(), "");
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes a string", t => {
-  const buf = new MessageWriter();
-
-  buf.writeString("Hello");
-  buf.writeString(" ".repeat(1024));
-  buf.writeString("Дмитрий Иванович Петров");
-  buf.writeString("");
-
-  t.is(
-    buf.getBuffer().toString("hex"),
-    "0548656c6c6f8008202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202cd094d0bcd0b8d182d180d0b8d0b920d098d0b2d0b0d0bdd0bed0b2d0b8d18720d09fd0b5d182d180d0bed0b200",
-  );
-  t.is(buf.getLength(), 1078);
-});
-
-test("reads bytes", t => {
-  const buf = MessageReader.fromMessage("0200010a0b");
-
-  t.is(buf.readBytes(2).getBuffer().toString("hex"), "0a0b");
-});
-
-test("writes bytes", t => {
-  const buf = new MessageWriter();
-
-  buf.writeBytes([0, 1, 2, 3]);
-
-  t.is(buf.getBuffer().toString("hex"), "00010203");
+  t.is(buf.getBuffer().toString("hex"), "12003205000104736f6d6507000206737472696e67");
 });
 
 test("reads a message", t => {
@@ -327,33 +48,301 @@ test("reads a message", t => {
   t.false(buf.hasBytesLeft());
 });
 
-test("writes a message", t => {
+test("writes a boolean", t => {
   const buf = new MessageWriter();
 
-  buf.startMessage(0x32);
-  buf.startMessage(0x01);
-  buf.writeString("some");
-  buf.endMessage();
-  buf.startMessage(0x02);
-  buf.writeString("string");
-  buf.endMessage();
-  buf.endMessage();
+  buf.writeBoolean(true);
+  buf.writeBoolean(false);
 
-  t.is(buf.getBuffer().toString("hex"), "12003205000104736f6d6507000206737472696e67");
+  t.is(buf.getBuffer().toString("hex"), "0100");
+  t.is(buf.getLength(), 2);
 });
 
-test("reads a list of objects", t => {
-  const buf = MessageReader.fromMessage("0d000103010000000200000003000000");
-  const results = buf.readList(sub => sub.readInt32());
+test("reads a boolean", t => {
+  const buf = MessageReader.fromMessage("0200010100");
 
-  t.is(results.length, 3);
-  t.is(results[0], 1);
-  t.is(results[1], 2);
-  t.is(results[2], 3);
+  t.true(buf.readBoolean());
+  t.false(buf.readBoolean());
   t.false(buf.hasBytesLeft());
 });
 
-test("writes a list of objects", t => {
+test("writes an int8", t => {
+  const buf = new MessageWriter();
+
+  buf.writeSByte(127);
+  buf.writeSByte(-16);
+  buf.writeSByte(86);
+  buf.writeSByte(-128);
+
+  t.is(buf.getBuffer().toString("hex"), "7ff05680");
+  t.is(buf.getLength(), 4);
+});
+
+test("reads an int8", t => {
+  const buf = MessageReader.fromMessage("0400017ff05680");
+
+  t.is(buf.readSByte(), 127);
+  t.is(buf.readSByte(), -16);
+  t.is(buf.readSByte(), 86);
+  t.is(buf.readSByte(), -128);
+  t.false(buf.hasBytesLeft());
+});
+
+test("writes a uint8", t => {
+  const buf = new MessageWriter();
+
+  buf.writeByte(255);
+  buf.writeByte(240);
+  buf.writeByte(86);
+
+  t.is(buf.getBuffer().toString("hex"), "fff056");
+  t.is(buf.getLength(), 3);
+});
+
+test("reads a uint8", t => {
+  const buf = MessageReader.fromMessage("030001fff056");
+
+  t.is(buf.readByte(), 255);
+  t.is(buf.readByte(), 240);
+  t.is(buf.readByte(), 86);
+  t.false(buf.hasBytesLeft());
+});
+
+test("writes an int16", t => {
+  const buf = new MessageWriter();
+
+  buf.writeInt16(32767);
+  buf.writeInt16(-3856);
+  buf.writeInt16(22102);
+  buf.writeInt16(-32768);
+
+  t.is(buf.getBuffer().toString("hex"), "ff7ff0f056560080");
+  t.is(buf.getLength(), 8);
+});
+
+test("reads an int16", t => {
+  const buf = MessageReader.fromMessage("080001ff7ff0f056560080");
+
+  t.is(buf.readInt16(), 32767);
+  t.is(buf.readInt16(), -3856);
+  t.is(buf.readInt16(), 22102);
+  t.is(buf.readInt16(), -32768);
+  t.false(buf.hasBytesLeft());
+});
+
+test("writes a uint16", t => {
+  const buf = new MessageWriter();
+
+  buf.writeUInt16(65535);
+  buf.writeUInt16(61680);
+  buf.writeUInt16(22102);
+
+  t.is(buf.getBuffer().toString("hex"), "fffff0f05656");
+  t.is(buf.getLength(), 6);
+});
+
+test("reads a uint16", t => {
+  const buf = MessageReader.fromMessage("060001fffff0f05656");
+
+  t.is(buf.readUInt16(), 65535);
+  t.is(buf.readUInt16(), 61680);
+  t.is(buf.readUInt16(), 22102);
+  t.false(buf.hasBytesLeft());
+});
+
+test("writes an int32", t => {
+  const buf = new MessageWriter();
+
+  buf.writeInt32(2147483647);
+  buf.writeInt32(-252645136);
+  buf.writeInt32(1448498774);
+  buf.writeInt32(-2147483648);
+
+  t.is(buf.getBuffer().toString("hex"), "ffffff7ff0f0f0f05656565600000080");
+  t.is(buf.getLength(), 16);
+});
+
+test("reads an int32", t => {
+  const buf = MessageReader.fromMessage("100001ffffff7ff0f0f0f05656565600000080");
+
+  t.is(buf.readInt32(), 2147483647);
+  t.is(buf.readInt32(), -252645136);
+  t.is(buf.readInt32(), 1448498774);
+  t.is(buf.readInt32(), -2147483648);
+  t.false(buf.hasBytesLeft());
+});
+
+test("writes a uint32", t => {
+  const buf = new MessageWriter();
+
+  buf.writeUInt32(4294967295);
+  buf.writeUInt32(4042322160);
+  buf.writeUInt32(1448498774);
+
+  t.is(buf.getBuffer().toString("hex"), "fffffffff0f0f0f056565656");
+  t.is(buf.getLength(), 12);
+});
+
+test("reads a uint32", t => {
+  const buf = MessageReader.fromMessage("0c0001fffffffff0f0f0f056565656");
+
+  t.is(buf.readUInt32(), 4294967295);
+  t.is(buf.readUInt32(), 4042322160);
+  t.is(buf.readUInt32(), 1448498774);
+  t.false(buf.hasBytesLeft());
+});
+
+test("writes a float32", t => {
+  const buf = new MessageWriter();
+
+  buf.writeFloat32(-10000);
+  buf.writeFloat32(10000);
+  buf.writeFloat32(1);
+
+  t.is(buf.getBuffer().toString("hex"), "00401cc600401c460000803f");
+  t.is(buf.getLength(), 12);
+});
+
+test("reads a float32", t => {
+  const buf = MessageReader.fromMessage("0c000100401cc600401c460000803f");
+
+  t.is(buf.readFloat32(), -10000);
+  t.is(buf.readFloat32(), 10000);
+  t.is(buf.readFloat32(), 1);
+  t.false(buf.hasBytesLeft());
+});
+
+test("writes a vector2", t => {
+  const buf = new MessageWriter();
+
+  buf.writeVector2(new Vector2(0, 0));
+  buf.writeVector2(new Vector2(40, -40));
+
+  t.is(buf.getBuffer().toString("hex"), "ff7fff7fffff0000");
+});
+
+test("reads a Vector2", t => {
+  const buf = MessageReader.fromRawBytes("ff7fff7fffff0000");
+  const one = buf.readVector2();
+  const two = buf.readVector2();
+
+  t.false(buf.hasBytesLeft());
+  t.true(isFloatEqual(one.x, 0, 0.001));
+  t.true(isFloatEqual(one.y, 0, 0.001));
+  t.true(isFloatEqual(two.x, 40, 0.001));
+  t.true(isFloatEqual(two.y, -40, 0.001));
+});
+
+test("writes a string", t => {
+  const buf = new MessageWriter();
+
+  buf.writeString("Hello");
+  buf.writeString(" ".repeat(1024));
+  buf.writeString("Дмитрий Иванович Петров");
+  buf.writeString("");
+
+  t.is(
+    buf.getBuffer().toString("hex"),
+    "0548656c6c6f8008202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202cd094d0bcd0b8d182d180d0b8d0b920d098d0b2d0b0d0bdd0bed0b2d0b8d18720d09fd0b5d182d180d0bed0b200",
+  );
+  t.is(buf.getLength(), 1078);
+});
+
+test("reads a string", t => {
+  const buf = MessageReader.fromMessage(
+    "3604010548656c6c6f8008202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202cd094d0bcd0b8d182d180d0b8d0b920d098d0b2d0b0d0bdd0bed0b2d0b8d18720d09fd0b5d182d180d0bed0b200",
+  );
+
+  t.is(buf.readString(), "Hello");
+  t.is(buf.readString(), " ".repeat(1024));
+  t.is(buf.readString(), "Дмитрий Иванович Петров");
+  t.is(buf.readString(), "");
+  t.false(buf.hasBytesLeft());
+});
+
+test("writes a packed int32", t => {
+  const buf = new MessageWriter();
+
+  buf.writePackedInt32(0);
+  buf.writePackedInt32(1);
+  buf.writePackedInt32(2);
+  buf.writePackedInt32(127);
+  buf.writePackedInt32(128);
+  buf.writePackedInt32(255);
+  buf.writePackedInt32(2097151);
+  buf.writePackedInt32(2147483647);
+  buf.writePackedInt32(-1);
+  buf.writePackedInt32(-2147483648);
+
+  t.is(buf.getBuffer().toString("hex"), "0001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
+  t.is(buf.getLength(), 26);
+});
+
+test("reads a packed int32", t => {
+  const buf = MessageReader.fromMessage("1a00010001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
+
+  t.is(buf.readPackedInt32(), 0);
+  t.is(buf.readPackedInt32(), 1);
+  t.is(buf.readPackedInt32(), 2);
+  t.is(buf.readPackedInt32(), 127);
+  t.is(buf.readPackedInt32(), 128);
+  t.is(buf.readPackedInt32(), 255);
+  t.is(buf.readPackedInt32(), 2097151);
+  t.is(buf.readPackedInt32(), 2147483647);
+  t.is(buf.readPackedInt32(), -1);
+  t.is(buf.readPackedInt32(), -2147483648);
+  t.false(buf.hasBytesLeft());
+});
+
+test("writes a packed uint32", t => {
+  const buf = new MessageWriter();
+
+  buf.writePackedUInt32(0);
+  buf.writePackedUInt32(1);
+  buf.writePackedUInt32(2);
+  buf.writePackedUInt32(127);
+  buf.writePackedUInt32(128);
+  buf.writePackedUInt32(255);
+  buf.writePackedUInt32(2097151);
+  buf.writePackedUInt32(2147483647);
+  buf.writePackedUInt32(4294967295);
+  buf.writePackedUInt32(2147483648);
+
+  t.is(buf.getBuffer().toString("hex"), "0001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
+  t.is(buf.getLength(), 26);
+});
+
+test("reads a packed uint32", t => {
+  const buf = MessageReader.fromMessage("1a00010001027f8001ff01ffff7fffffffff07ffffffff0f8080808008");
+
+  t.is(buf.readPackedUInt32(), 0);
+  t.is(buf.readPackedUInt32(), 1);
+  t.is(buf.readPackedUInt32(), 2);
+  t.is(buf.readPackedUInt32(), 127);
+  t.is(buf.readPackedUInt32(), 128);
+  t.is(buf.readPackedUInt32(), 255);
+  t.is(buf.readPackedUInt32(), 2097151);
+  t.is(buf.readPackedUInt32(), 2147483647);
+  t.is(buf.readPackedUInt32(), 4294967295);
+  t.is(buf.readPackedUInt32(), 2147483648);
+  t.false(buf.hasBytesLeft());
+});
+
+test("writes bytes", t => {
+  const buf = new MessageWriter();
+
+  buf.writeBytes([0, 1, 2, 3]);
+
+  t.is(buf.getBuffer().toString("hex"), "00010203");
+});
+
+test("reads bytes", t => {
+  const buf = MessageReader.fromMessage("0200010a0b");
+
+  t.is(buf.readBytes(2).getBuffer().toString("hex"), "0a0b");
+});
+
+test("writes a list", t => {
   const buf = new MessageWriter();
   const list = [1, 2, 3];
 
@@ -364,34 +353,7 @@ test("writes a list of objects", t => {
   t.is(buf.getBuffer().toString("hex"), "0d000103010000000200000003000000");
 });
 
-test("reads a list of messages", t => {
-  const buf = MessageReader.fromMessage("1300010205000104736f6d6507000206737472696e67", true);
-  const results = buf.readMessageList(sub => sub.readString());
-
-  t.is(results.length, 2);
-  t.is(results[0], "some");
-  t.is(results[1], "string");
-  t.false(buf.hasBytesLeft());
-});
-
-test("reads a list of typed messages", t => {
-  const buf = MessageReader.fromMessage("1d0000020a0000054a656e6e79ed5f84000c0001074d696e7574657320050800", true);
-  const results = buf.readMessageList(
-    (sub): Example => ({
-      someString: sub.readString(),
-      someNumber: sub.readUInt32(),
-    }),
-  );
-
-  t.is(results.length, 2);
-  t.is(results[0].someString, "Jenny");
-  t.is(results[0].someNumber, 8675309);
-  t.is(results[1].someString, "Minutes");
-  t.is(results[1].someNumber, 525600);
-  t.false(buf.hasBytesLeft());
-});
-
-test("writes a list of messages with custom tags", t => {
+test("writes a list of custom messages", t => {
   const buf = new MessageWriter();
   const items: Example[] = [
     { someString: "Jenny",
@@ -412,7 +374,35 @@ test("writes a list of messages with custom tags", t => {
   t.is(buf.getBuffer().toString("hex"), "1d0000020a0000054a656e6e79ed5f84000c0001074d696e7574657320050800");
 });
 
-test("writes a list of messages with zeroed tags", t => {
+test("reads a list", t => {
+  const buf = MessageReader.fromMessage("0d000103010000000200000003000000");
+  const results = buf.readList(sub => sub.readInt32());
+
+  t.is(results.length, 3);
+  t.is(results[0], 1);
+  t.is(results[1], 2);
+  t.is(results[2], 3);
+  t.false(buf.hasBytesLeft());
+});
+
+test("reads a list of custom messages", t => {
+  const buf = MessageReader.fromMessage("1d0000020a0000054a656e6e79ed5f84000c0001074d696e7574657320050800");
+  const results = buf.readMessageList(
+    (sub): Example => ({
+      someString: sub.readString(),
+      someNumber: sub.readUInt32(),
+    }),
+  );
+
+  t.is(results.length, 2);
+  t.is(results[0].someString, "Jenny");
+  t.is(results[0].someNumber, 8675309);
+  t.is(results[1].someString, "Minutes");
+  t.is(results[1].someNumber, 525600);
+  t.false(buf.hasBytesLeft());
+});
+
+test("writes a message list", t => {
   const buf = new MessageWriter();
   const items: Example[] = [
     { someString: "Jenny",
@@ -429,6 +419,33 @@ test("writes a list of messages with zeroed tags", t => {
   buf.endMessage();
 
   t.is(buf.getBuffer().toString("hex"), "1d0000020a0000054a656e6e79ed5f84000c0000074d696e7574657320050800");
+});
+
+test("reads a message list", t => {
+  const buf = MessageReader.fromMessage("1300010205000104736f6d6507000206737472696e67", true);
+  const results = buf.readMessageList(sub => sub.readString());
+
+  t.is(results.length, 2);
+  t.is(results[0], "some");
+  t.is(results[1], "string");
+  t.false(buf.hasBytesLeft());
+});
+
+test("reads a message list of typed objects", t => {
+  const buf = MessageReader.fromMessage("1d0000020a0000054a656e6e79ed5f84000c0001074d696e7574657320050800", true);
+  const results = buf.readMessageList(
+    (sub): Example => ({
+      someString: sub.readString(),
+      someNumber: sub.readUInt32(),
+    }),
+  );
+
+  t.is(results.length, 2);
+  t.is(results[0].someString, "Jenny");
+  t.is(results[0].someNumber, 8675309);
+  t.is(results[1].someString, "Minutes");
+  t.is(results[1].someNumber, 525600);
+  t.false(buf.hasBytesLeft());
 });
 
 test("reads all child messages", t => {
@@ -448,6 +465,31 @@ test("reads all child messages", t => {
   t.is(results[1].someString, "Best year");
   t.is(results[1].someNumber, 1969);
   t.false(buf.hasBytesLeft());
+});
+
+test("writes bytes and size", t => {
+  const rawBytes = "69".repeat(128);
+  const rawParsed = new MessageWriter(rawBytes, true);
+  const buf = new MessageWriter();
+
+  buf.writeBytesAndSize(rawParsed);
+  buf.writeByte(3);
+  buf.writeByte(2);
+  buf.writeByte(1);
+  buf.writeByte(0);
+
+  t.is(buf.getBuffer().toString("hex"), `8001${rawBytes}03020100`);
+});
+
+test("reads bytes and size", t => {
+  const rawBytes = "69".repeat(128);
+  const buf = MessageReader.fromRawBytes(`8001${rawBytes}03020100`);
+  const bytes = buf.readBytesAndSize();
+
+  t.is(buf.getReadableBytesLength(), 4);
+  t.is(bytes.getLength(), 128);
+  t.is(buf.readRemainingBytes().getBuffer().toString("hex"), "03020100");
+  t.is(bytes.getBuffer().toString("hex"), rawBytes);
 });
 
 test("reads remaining bytes", t => {
@@ -516,15 +558,4 @@ test("throws an error when reading more bytes than are avaialble", t => {
   t.is(buf.getReadableBytesLength(), 4);
   t.is(buf.readBytes(4).getBuffer().toString("hex"), "02030405");
   t.false(buf.hasBytesLeft());
-});
-
-test("reads bytes and size", t => {
-  const rawBytes = "69".repeat(128);
-  const buf = MessageReader.fromRawBytes(`8001${rawBytes}03020100`);
-  const bytes = buf.readBytesAndSize();
-
-  t.is(buf.getReadableBytesLength(), 4);
-  t.is(bytes.getLength(), 128);
-  t.is(buf.readRemainingBytes().getBuffer().toString("hex"), "03020100");
-  t.is(bytes.getBuffer().toString("hex"), rawBytes);
 });

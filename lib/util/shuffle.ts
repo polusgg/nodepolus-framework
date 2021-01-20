@@ -1,6 +1,11 @@
 /**
- * Shuffles the given array using the Fisher-Yates algorithm
- * Via https://basarat.gitbook.io/algorithms/shuffling
+ * Shuffles the given array using the Fisher-Yates algorithm.
+ *
+ * This *does* modify the source array.
+ *
+ * @see Source: {@link https://basarat.gitbook.io/algorithms/shuffling}
+ * @typeParam T The type of items that `array` contains
+ * @param array The array whose items will be shuffled in place
  */
 const shuffleArray = <T>(array: T[]): void => {
   if (array.length <= 1) {
@@ -15,7 +20,13 @@ const shuffleArray = <T>(array: T[]): void => {
 };
 
 /**
- * Returns a shuffled array without modifying the original array
+ * Gets a new array, cloned from the given array, that is then shuffled using
+ * the Fisher-Yates algorithm.
+ *
+ * This *does not* modify the source array.
+ *
+ * @param array The source array
+ * @typeParam T The type of items that `array` contains
  */
 const shuffleArrayClone = <T>(array: T[]): T[] => {
   const clone = array.slice();

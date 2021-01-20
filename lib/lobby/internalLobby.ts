@@ -82,7 +82,7 @@ export class InternalLobby implements LobbyInstance {
     private readonly address: string,
     private readonly port: number,
     private options: GameOptionsData = new GameOptionsData(),
-    private code: string = LobbyCode.generate(),
+    private readonly code: string = LobbyCode.generate(),
   ) {
     this.hostInstance = new InternalHost(this);
   }
@@ -281,12 +281,6 @@ export class InternalLobby implements LobbyInstance {
 
   setOptions(options: GameOptionsData): void {
     this.options = options;
-  }
-
-  setCode(code: string): void {
-    // TODO: Send code update packet to connections
-
-    this.code = code;
   }
 
   getActingHosts(): Connection[] {

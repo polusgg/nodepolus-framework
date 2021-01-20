@@ -1,13 +1,26 @@
 import { AddressFamily } from "./enums";
 import ipaddr from "ipaddr.js";
 
+/**
+ * A class used to store, encode, and decode an IP address and port pair.
+ */
 export class ConnectionInfo {
+  /**
+   * @param address The IP address
+   * @param port The port
+   * @param family The family that the IP address belongs to
+   */
   constructor(
     private readonly address: string,
     private readonly port: number,
     private readonly family: AddressFamily,
   ) {}
 
+  /**
+   * Gets a ConnectionInfo from a stringified address-port pair.
+   *
+   * @param infoString The stringified address-port pair
+   */
   static fromString(infoString: string): ConnectionInfo {
     const parts = infoString.split(":");
 
@@ -34,18 +47,30 @@ export class ConnectionInfo {
     return new ConnectionInfo(address, port, family);
   }
 
+  /**
+   * Gets the IP address.
+   */
   getAddress(): string {
     return this.address;
   }
 
+  /**
+   * Gets the port.
+   */
   getPort(): number {
     return this.port;
   }
 
+  /**
+   * Gets the family that the IP address belongs to.
+   */
   getFamily(): AddressFamily {
     return this.family;
   }
 
+  /**
+   * Gets the ConnectionInfo in a stringified form of `address:port`.
+   */
   toString(): string {
     return `${this.address}:${this.port}`;
   }

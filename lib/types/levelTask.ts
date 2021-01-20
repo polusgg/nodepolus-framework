@@ -1,5 +1,8 @@
 import { TaskLength, TaskType } from "./enums";
 
+/**
+ * A type used to store static data for tasks in a level.
+ */
 export type LevelTask = Readonly<{
   id: Readonly<number>;
   name: Readonly<string>;
