@@ -16,6 +16,9 @@ import {
   SecurityAmount,
 } from "./repairSystem/amounts";
 
+/**
+ * RPC Packet ID: `1c` (`28`)
+ */
 export class RepairSystemPacket extends BaseRPCPacket {
   public readonly amount: RepairAmount;
 

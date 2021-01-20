@@ -3,6 +3,9 @@ import { GameOptionsData } from "../../../types";
 import { RPCPacketType } from "../types/enums";
 import { BaseRPCPacket } from ".";
 
+/**
+ * RPC Packet ID: `0x02` (`2`)
+ */
 export class SyncSettingsPacket extends BaseRPCPacket {
   constructor(
     public readonly options: GameOptionsData,

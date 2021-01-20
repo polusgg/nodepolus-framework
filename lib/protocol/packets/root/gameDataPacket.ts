@@ -5,6 +5,9 @@ import { LobbyCode } from "../../../util/lobbyCode";
 import { Level } from "../../../types/enums";
 import { BaseRootPacket } from "../root";
 
+/**
+ * Root Packet ID: `0x05` (`5`)
+ */
 export class GameDataPacket extends BaseRootPacket {
   constructor(
     public readonly packets: BaseGameDataPacket[],

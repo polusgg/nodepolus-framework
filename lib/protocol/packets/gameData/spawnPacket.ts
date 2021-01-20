@@ -4,6 +4,9 @@ import { GameDataPacketType } from "../types/enums";
 import { SpawnFlag } from "../../../types/enums";
 import { SpawnInnerNetObject } from "./types";
 
+/**
+ * Game Data Packet ID: `0x04` (`4`)
+ */
 export class SpawnPacket extends BaseGameDataPacket {
   constructor(
     public spawnType: number,

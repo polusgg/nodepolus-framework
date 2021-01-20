@@ -5,6 +5,9 @@ import { DisconnectReason } from "../../../types";
 import { RootPacketType } from "../types/enums";
 import { BaseRootPacket } from "../root";
 
+/**
+ * Root Packet ID: `0x0b` (`11`)
+ */
 export class KickPlayerPacket extends BaseRootPacket {
   constructor(
     public readonly lobbyCode: string,

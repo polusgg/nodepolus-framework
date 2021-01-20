@@ -3,6 +3,9 @@ import { LobbyCode } from "../../../util/lobbyCode";
 import { RootPacketType } from "../types/enums";
 import { BaseRootPacket } from "../root";
 
+/**
+ * Root Packet ID: `0x0c` (`12`)
+ */
 export class WaitForHostPacket extends BaseRootPacket {
   public clientBound: boolean | undefined;
 

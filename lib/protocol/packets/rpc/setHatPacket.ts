@@ -3,6 +3,9 @@ import { PlayerHat } from "../../../types/enums";
 import { RPCPacketType } from "../types/enums";
 import { BaseRPCPacket } from ".";
 
+/**
+ * RPC Packet ID: `0x09` (`9`)
+ */
 export class SetHatPacket extends BaseRPCPacket {
   constructor(
     public readonly hat: PlayerHat,

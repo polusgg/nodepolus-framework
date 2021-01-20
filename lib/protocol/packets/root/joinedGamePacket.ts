@@ -3,6 +3,9 @@ import { LobbyCode } from "../../../util/lobbyCode";
 import { RootPacketType } from "../types/enums";
 import { BaseRootPacket } from "../root";
 
+/**
+ * Root Packet ID: `0x07` (`7`)
+ */
 export class JoinedGamePacket extends BaseRootPacket {
   constructor(
     public readonly lobbyCode: string,

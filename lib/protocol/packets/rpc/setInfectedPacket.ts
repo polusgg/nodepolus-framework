@@ -2,6 +2,9 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { RPCPacketType } from "../types/enums";
 import { BaseRPCPacket } from ".";
 
+/**
+ * RPC Packet ID: `0x03` (`3`)
+ */
 export class SetInfectedPacket extends BaseRPCPacket {
   constructor(
     public readonly impostorPlayerIds: number[],

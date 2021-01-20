@@ -2,6 +2,9 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseGameDataPacket } from "./baseGameDataPacket";
 import { GameDataPacketType } from "../types/enums";
 
+/**
+ * Game Data Packet ID: `0x07` (`7`)
+ */
 export class ReadyPacket extends BaseGameDataPacket {
   constructor(
     public playerClientID: number,

@@ -4,6 +4,9 @@ import { GameOptionsData } from "../../../types";
 import { RootPacketType } from "../types/enums";
 import { BaseRootPacket } from "../root";
 
+/**
+ * Root Packet ID: `0x00` (`0`)
+ */
 export class HostGameRequestPacket extends BaseRootPacket {
   constructor(
     public readonly options: GameOptionsData,
@@ -24,6 +27,9 @@ export class HostGameRequestPacket extends BaseRootPacket {
   }
 }
 
+/**
+ * Root Packet ID: `0x00` (`0`)
+ */
 export class HostGameResponsePacket extends BaseRootPacket {
   constructor(
     public readonly lobbyCode: string,

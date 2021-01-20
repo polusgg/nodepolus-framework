@@ -3,6 +3,9 @@ import { RPCPacketType } from "../types/enums";
 import { Vector2 } from "../../../types";
 import { BaseRPCPacket } from ".";
 
+/**
+ * RPC Packet ID: `0x15` (`21`)
+ */
 export class SnapToPacket extends BaseRPCPacket {
   constructor(
     public readonly position: Vector2,

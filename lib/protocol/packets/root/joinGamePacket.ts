@@ -5,6 +5,9 @@ import { LobbyCode } from "../../../util/lobbyCode";
 import { RootPacketType } from "../types/enums";
 import { BaseRootPacket } from "../root";
 
+/**
+ * Root Packet ID: `0x01` (`1`)
+ */
 export class JoinGameRequestPacket extends BaseRootPacket {
   constructor(
     public readonly lobbyCode: string,
@@ -27,6 +30,9 @@ export class JoinGameRequestPacket extends BaseRootPacket {
   }
 }
 
+/**
+ * Root Packet ID: `0x01` (`1`)
+ */
 export class JoinGameResponsePacket extends BaseRootPacket {
   constructor(
     public readonly lobbyCode: string,
@@ -48,6 +54,9 @@ export class JoinGameResponsePacket extends BaseRootPacket {
   }
 }
 
+/**
+ * Root Packet ID: `0x01` (`1`)
+ */
 export class JoinGameErrorPacket extends BaseRootPacket {
   public readonly disconnectReason: DisconnectReason;
 

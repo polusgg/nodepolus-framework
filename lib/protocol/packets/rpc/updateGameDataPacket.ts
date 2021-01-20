@@ -4,6 +4,9 @@ import { RPCPacketType } from "../types/enums";
 import { Level } from "../../../types/enums";
 import { BaseRPCPacket } from ".";
 
+/**
+ * RPC Packet ID: `1e` (`30`)
+ */
 export class UpdateGameDataPacket extends BaseRPCPacket {
   constructor(
     public readonly players: PlayerData[],

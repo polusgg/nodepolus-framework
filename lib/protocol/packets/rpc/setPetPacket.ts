@@ -3,6 +3,9 @@ import { PlayerPet } from "../../../types/enums";
 import { RPCPacketType } from "../types/enums";
 import { BaseRPCPacket } from ".";
 
+/**
+ * RPC Packet ID: `0x11` (`17`)
+ */
 export class SetPetPacket extends BaseRPCPacket {
   constructor(
     public readonly pet: PlayerPet,

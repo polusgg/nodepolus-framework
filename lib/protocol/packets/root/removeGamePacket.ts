@@ -3,6 +3,9 @@ import { DisconnectReason } from "../../../types";
 import { RootPacketType } from "../types/enums";
 import { BaseRootPacket } from "../root";
 
+/**
+ * Root Packet ID: `0x03` (`3`)
+ */
 export class RemoveGamePacket extends BaseRootPacket {
   constructor(
     public readonly disconnectReason?: DisconnectReason,

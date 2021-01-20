@@ -2,6 +2,9 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { RPCPacketType } from "../types/enums";
 import { BaseRPCPacket } from ".";
 
+/**
+ * RPC Packet ID: `1d` (`29`)
+ */
 export class SetTasksPacket extends BaseRPCPacket {
   constructor(
     public readonly playerId: number,

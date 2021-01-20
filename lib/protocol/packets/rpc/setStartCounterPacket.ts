@@ -2,6 +2,9 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { RPCPacketType } from "../types/enums";
 import { BaseRPCPacket } from ".";
 
+/**
+ * RPC Packet ID: `0x12` (`18`)
+ */
 export class SetStartCounterPacket extends BaseRPCPacket {
   public readonly isReset: boolean;
 

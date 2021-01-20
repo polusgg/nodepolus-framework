@@ -2,6 +2,9 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseRPCPacket } from "./baseRPCPacket";
 import { RPCPacketType } from "../types/enums";
 
+/**
+ * RPC Packet ID: `0x1a` (`26`)
+ */
 export class AddVotePacket extends BaseRPCPacket {
   constructor(
     public readonly votingClientId: number,

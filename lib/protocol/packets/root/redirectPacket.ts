@@ -2,6 +2,9 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { RootPacketType } from "../types/enums";
 import { BaseRootPacket } from "../root";
 
+/**
+ * Root Packet ID: `0x0d` (`13`)
+ */
 export class RedirectPacket extends BaseRootPacket {
   constructor(
     public readonly ipAddress: string,

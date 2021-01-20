@@ -3,6 +3,9 @@ import { ChatNoteType } from "../../../types/enums";
 import { RPCPacketType } from "../types/enums";
 import { BaseRPCPacket } from ".";
 
+/**
+ * RPC Packet ID: `0x10` (`16`)
+ */
 export class SendChatNotePacket extends BaseRPCPacket {
   constructor(
     public readonly playerId: number,

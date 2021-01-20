@@ -3,6 +3,9 @@ import { TaskType } from "../../../types/enums";
 import { RPCPacketType } from "../types/enums";
 import { BaseRPCPacket } from ".";
 
+/**
+ * RPC Packet ID: `0x00` (`0`)
+ */
 export class PlayAnimationPacket extends BaseRPCPacket {
   constructor(
     public readonly taskType: TaskType,

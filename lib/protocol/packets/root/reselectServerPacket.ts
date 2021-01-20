@@ -28,6 +28,9 @@ export class MasterServer {
   }
 }
 
+/**
+ * Root Packet ID: `0x0e` (`14`)
+ */
 export class ReselectServerPacket extends BaseRootPacket {
   constructor(
     public readonly unknown: number,

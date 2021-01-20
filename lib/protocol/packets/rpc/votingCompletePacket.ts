@@ -3,6 +3,9 @@ import { VoteState } from "../../entities/meetingHud/types";
 import { RPCPacketType } from "../types/enums";
 import { BaseRPCPacket } from ".";
 
+/**
+ * RPC Packet ID: `0x17` (`23`)
+ */
 export class VotingCompletePacket extends BaseRPCPacket {
   public readonly didVotePlayerOff: boolean;
 

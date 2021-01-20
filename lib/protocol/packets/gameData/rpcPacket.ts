@@ -39,6 +39,9 @@ import {
   VotingCompletePacket,
 } from "../rpc";
 
+/**
+ * Game Data Packet ID: `0x02` (`2`)
+ */
 export class RPCPacket extends BaseGameDataPacket {
   constructor(
     public senderNetId: number,

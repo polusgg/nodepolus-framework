@@ -12,6 +12,9 @@ export enum LadderDirection {
   Up = 0x01,
 }
 
+/**
+ * RPC Packet ID: `0x1f` (`31`)
+ */
 export class ClimbLadderPacket extends BaseRPCPacket {
   constructor(
     public readonly ladderSize: LadderSize,
