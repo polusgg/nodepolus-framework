@@ -580,10 +580,15 @@ export class InternalLobby implements LobbyInstance {
       throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.playerControl.playerId}) != PlayerData(${playerData.id})`);
     }
 
+    const clientIdInUse = !!this.findPlayerByClientId(player.owner);
     const playerInstance = new InternalPlayer(this, player, this.findConnection(player.owner));
 
     this.addPlayer(playerInstance);
-    this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.owner, this.hostInstance.getId()));
+
+    if (!clientIdInUse) {
+      this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.owner, this.hostInstance.getId()));
+    }
+
     this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
 
     if (this.gameData) {
