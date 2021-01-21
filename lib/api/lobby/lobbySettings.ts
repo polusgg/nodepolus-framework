@@ -1,4 +1,4 @@
-import { KillDistance, Language, Level, TaskBarUpdate } from "../../types/enums";
+import { KillDistance, Language, Level, TaskBarMode } from "../../types/enums";
 import { Connection } from "../../protocol/connection";
 import { GameOptionsData, Mutable } from "../../types";
 import { LobbyInstance } from "./lobbyInstance";
@@ -23,7 +23,7 @@ export class LobbySettings {
   private povModifiedConfirmEjects: boolean | undefined;
   private povModifiedVisualTasks: boolean | undefined;
   private povModifiedAnonymousVoting: boolean | undefined;
-  private povModifiedTaskBarUpdates: TaskBarUpdate | undefined;
+  private povModifiedTaskBarUpdates: TaskBarMode | undefined;
 
   constructor(
     public lobby: LobbyInstance,
@@ -109,7 +109,7 @@ export class LobbySettings {
     return this.povModifiedAnonymousVoting ?? this.lobby.getOptions().anonymousVoting;
   }
 
-  getTaskBarUpdates(): TaskBarUpdate {
+  getTaskBarUpdates(): TaskBarMode {
     return this.povModifiedTaskBarUpdates ?? this.lobby.getOptions().taskBarUpdates;
   }
 
@@ -312,7 +312,7 @@ export class LobbySettings {
     this.syncSettingsOnLobby();
   }
 
-  setTaskBarUpdates(param: TaskBarUpdate): void {
+  setTaskBarUpdates(param: TaskBarMode): void {
     if (this.isFromPov) {
       this.povModifiedTaskBarUpdates = param;
     } else {

@@ -1,4 +1,4 @@
-import { KillDistance, Language, Level, TaskBarUpdate } from "../../lib/types/enums";
+import { KillDistance, Language, Level, TaskBarMode } from "../../lib/types/enums";
 import { MessageReader } from "../../lib/util/hazelMessage";
 import { isFloatEqual } from "../../lib/util/functions";
 import { GameOptionsData } from "../../lib/types";
@@ -32,7 +32,7 @@ test("deserializes a valid object", t => {
   t.true(options.confirmEjects);
   t.true(options.visualTasks);
   t.false(options.anonymousVoting);
-  t.is(options.taskBarUpdates, TaskBarUpdate.Always);
+  t.is(options.taskBarUpdates, TaskBarMode.Normal);
 });
 
 test("throws an error for an unexpected version", t => {

@@ -1,4 +1,4 @@
-import { KillDistance, Language, Level, TaskBarUpdate } from "./enums";
+import { KillDistance, Language, Level, TaskBarMode } from "./enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { Bitfield } from "./bitfield";
 
@@ -57,7 +57,7 @@ export class GameOptionsData {
     public confirmEjects: boolean = true,
     public visualTasks: boolean = true,
     public anonymousVoting: boolean = false,
-    public taskBarUpdates: TaskBarUpdate = TaskBarUpdate.Always,
+    public taskBarUpdates: TaskBarMode = TaskBarMode.Normal,
   ) {}
 
   /**
@@ -126,7 +126,7 @@ export class GameOptionsData {
       version > 2 ? bytes.readBoolean() : true,
       version > 2 ? bytes.readBoolean() : true,
       version > 3 ? bytes.readBoolean() : false,
-      version > 3 ? bytes.readByte() as TaskBarUpdate : TaskBarUpdate.Always,
+      version > 3 ? bytes.readByte() as TaskBarMode : TaskBarMode.Normal,
     );
   }
 

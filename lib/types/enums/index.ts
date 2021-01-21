@@ -46,7 +46,7 @@ export { SpawnType } from "./spawnType";
 
 export { SystemType } from "./systemType";
 
-export { TaskBarUpdate } from "./taskBarUpdate";
+export { TaskBarMode } from "./taskBarUpdate";
 
 export { TaskLength } from "./taskLength";
 
