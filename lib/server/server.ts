@@ -42,11 +42,9 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
   ) {
     super();
 
-    const level = process.env.NP_LOG_LEVEL ?? this.config.logging?.level ?? "";
-
     this.logger = new Logger(
       "Server",
-      Logger.isValidLevel(level) ? level : "info",
+      [process.env.NP_LOG_LEVEL, this.config.logging?.level].find(Logger.isValidLevel) ?? "info",
       this.config.logging?.filename ?? "server.log",
       this.config.logging?.maxFileSizeInBytes ?? 104857600,
       this.config.logging?.maxFiles ?? 10,

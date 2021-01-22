@@ -172,8 +172,8 @@ export class Logger {
    * @param level The level to check
    * @returns `true` if `level` is supported, `false` if not
    */
-  static isValidLevel(level: string): level is LogLevel {
-    return levelNames.includes(level);
+  static isValidLevel(level?: string): level is LogLevel {
+    return level === undefined ? false : levelNames.includes(level);
   }
 
   /**
