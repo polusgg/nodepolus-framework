@@ -46,7 +46,7 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
 
     this.logger = new Logger(
       "Server",
-      Logger.isValidLevel(level) ? level : (this.config.logging?.consoleLevel ?? "info"),
+      Logger.isValidLevel(level) ? level : (this.config.logging?.level ?? "info"),
       this.config.logging?.filename ?? "server.log",
       this.config.logging?.maxFileSizeInBytes ?? 104857600,
       this.config.logging?.maxFiles ?? 10,

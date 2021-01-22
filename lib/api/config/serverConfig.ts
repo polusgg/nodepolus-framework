@@ -39,13 +39,14 @@ export type ServerConfig = {
    */
   logging?: {
     /**
-     * The maximum level of log messages to be logged to the console and log file.
-     *
-     * @defaultValue `info`
+     * The maximum level of log messages to be displayed in the console and
+     * written to the log file.
      *
      * Options: `fatal`, `error`, `warn`, `info`, `verbose`, `debug`, `trace`
+     *
+     * @defaultValue `info`
      */
-    consoleLevel?: LogLevel;
+    level?: LogLevel;
     /**
      * The maximum size in bytes for the server log file before it is rotated.
      *
