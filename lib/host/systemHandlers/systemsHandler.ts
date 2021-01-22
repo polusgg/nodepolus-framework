@@ -279,11 +279,11 @@ export class SystemsHandler {
 
     system.actualSwitches.toggle(amount.switchIndex);
 
-    if (system.actualSwitches.bits.every((s, i) => s == system.expectedSwitches.bits[i])) {
+    if (system.actualSwitches.equals(system.expectedSwitches)) {
       // TODO: Count back up (like +85 every second)
       setTimeout(() => {
         // Don't fix the lights if they somehow get immediately sabotaged again
-        if (system.actualSwitches.bits.every((s, i) => s == system.expectedSwitches.bits[i])) {
+        if (system.actualSwitches.equals(system.expectedSwitches)) {
           this.setOldShipStatus();
 
           system.visionModifier = 0xff;

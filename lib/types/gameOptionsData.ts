@@ -10,6 +10,7 @@ const LENGTHS = [41, 42, 44, 46];
  * A class used to store, serialize, and deserialize the options when creating
  * or searching for a lobby.
  */
+// TODO: Private properties with getters/setters
 export class GameOptionsData {
   /**
    * @param version The version of the GameOptionsData (default `4`)
@@ -140,7 +141,7 @@ export class GameOptionsData {
     writer.writePackedUInt32(LENGTHS[this.version - 1]);
     writer.writeByte(this.version);
     writer.writeByte(this.maxPlayers);
-    writer.writeUInt32(this.languages.reduce((a, b) => a | b));
+    writer.writeUInt32(this.languages.reduce((a, b) => a | b, 0));
     writer.writeByte(isSearching ? this.levels.reduce((a, b) => a | b) : this.levels[0]);
     writer.writeFloat32(this.playerSpeedModifier);
     writer.writeFloat32(this.crewmateLightModifier);

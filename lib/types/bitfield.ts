@@ -9,7 +9,7 @@ export class Bitfield {
    * @param bits The underlying boolean array representing each bit's state
    */
   constructor(
-    public bits: boolean[],
+    private bits: boolean[],
   ) {}
 
   /**
@@ -29,6 +29,38 @@ export class Bitfield {
     return new Bitfield(
       [...new Array(size)].map((_, i) => !!((value >> i) & 1)),
     );
+  }
+
+  /**
+   * Gets the underlying boolean array representing each bit's state.
+   */
+  getBits(): boolean[] {
+    return this.bits;
+  }
+
+  /**
+   * Gets the number of bits in the bitfield.
+   */
+  getSize(): number {
+    return this.bits.length;
+  }
+
+  /**
+   * Gets whether or not the Bitfield is equal to the given Bitfield.
+   *
+   * @param other The Bitfield to be checked against
+   * @returns `true` if the Bitfield is the same as `other`, `false` if not
+   */
+  equals(other: Bitfield): boolean {
+    if (this.bits.length != other.bits.length) {
+      return false;
+    }
+
+    return this.bits.every((bit, index) => bit == other.has(index));
+  }
+
+  clone(): Bitfield {
+    return new Bitfield([...this.bits]);
   }
 
   /**

@@ -2,9 +2,12 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { AnnouncementPacketType } from "../types/enums";
 import { BaseAnnouncementPacket } from ".";
 
+/**
+ * Announcement Packet ID: `0x01` (`1`)
+ */
 export class AnnouncementDataPacket extends BaseAnnouncementPacket {
   constructor(
-    public uniqueId: number,
+    public announcementId: number,
     public text: string,
   ) {
     super(AnnouncementPacketType.AnnouncementData);
@@ -19,7 +22,7 @@ export class AnnouncementDataPacket extends BaseAnnouncementPacket {
 
   serialize(): MessageWriter {
     return new MessageWriter()
-      .writePackedUInt32(this.uniqueId)
+      .writePackedUInt32(this.announcementId)
       .writeString(this.text);
   }
 }

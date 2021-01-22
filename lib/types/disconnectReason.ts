@@ -10,8 +10,8 @@ export class DisconnectReason {
    * @param message The custom message to be displayed to the player when `type` is `DisconnectReasonType.Custom`
    */
   constructor(
-    public type: DisconnectReasonType,
-    public message: string = "",
+    private type: DisconnectReasonType,
+    private message: string = "",
   ) {}
 
   /**
@@ -164,6 +164,42 @@ export class DisconnectReason {
    */
   static newConnection(): DisconnectReason {
     return new DisconnectReason(DisconnectReasonType.NewConnection);
+  }
+
+  /**
+   * Gets the disconnect reason.
+   */
+  getType(): DisconnectReasonType {
+    return this.type;
+  }
+
+  /**
+   * Sets the disconnect reason.
+   *
+   * @param type The disconnect reason
+   */
+  setType(type: DisconnectReasonType): this {
+    this.type = type;
+
+    return this;
+  }
+
+  /**
+   * Gets the custom message to be displayed to the player when `type` is `DisconnectReasonType.Custom`.
+   */
+  getMessage(): string {
+    return this.message;
+  }
+
+  /**
+   * Sets the custom message to be displayed to the player when `type` is `DisconnectReasonType.Custom`.
+   *
+   * @param message The custom message
+   */
+  setMessage(message: string): this {
+    this.message = message;
+
+    return this;
   }
 
   /**

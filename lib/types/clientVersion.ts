@@ -9,10 +9,10 @@ export class ClientVersion {
    * @param revision The version's revision part
    */
   constructor(
-    public readonly year: number,
-    public readonly month: number,
-    public readonly day: number,
-    public readonly revision: number,
+    private readonly year: number,
+    private readonly month: number,
+    private readonly day: number,
+    private readonly revision: number,
   ) {}
 
   /**
@@ -27,6 +27,34 @@ export class ClientVersion {
       Math.floor((version %= 1800) / 50),
       version % 50,
     );
+  }
+
+  /**
+   * Gets the version's year part.
+   */
+  getYear(): number {
+    return this.year;
+  }
+
+  /**
+   * Gets the version's month part.
+   */
+  getMonth(): number {
+    return this.month;
+  }
+
+  /**
+   * Gets the version's day part.
+   */
+  getDay(): number {
+    return this.day;
+  }
+
+  /**
+   * Gets the version's revision part.
+   */
+  getRevision(): number {
+    return this.revision;
   }
 
   /**

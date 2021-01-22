@@ -5,7 +5,9 @@ import { Bindable } from "../types";
 export abstract class BaseRPCPacket implements Bindable<BaseRPCPacket> {
   public isClientBound?: boolean;
 
-  constructor(public type: RPCPacketType) {}
+  constructor(
+    public type: RPCPacketType,
+  ) {}
 
   abstract serialize(): MessageWriter;
 

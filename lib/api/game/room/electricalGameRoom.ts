@@ -13,11 +13,11 @@ export class Switch {
   ) {}
 
   getState(): boolean {
-    return this.room.getInternalSystem().actualSwitches.bits[this.index];
+    return this.room.getInternalSystem().actualSwitches.has(this.index);
   }
 
   getPreferredState(): boolean {
-    return this.room.getInternalSystem().expectedSwitches.bits[this.index];
+    return this.room.getInternalSystem().expectedSwitches.has(this.index);
   }
 
   flip(): void {
@@ -48,9 +48,7 @@ export class Switch {
 
   flipPreferred(): void {
     this.room.internalBackupShipStatus();
-
-    this.room.getInternalSystem().expectedSwitches.bits[this.index] = !this.getPreferredState();
-
+    this.room.getInternalSystem().expectedSwitches.update(this.index, !this.getPreferredState());
     this.room.internalUpdateShipStatus();
   }
 
@@ -117,7 +115,7 @@ export class ElectricalGameRoom extends BaseDoorGameRoom {
       this.internalBackupShipStatus();
 
       system.expectedSwitches = new Bitfield([false, false, false, false, false]);
-      system.actualSwitches = new Bitfield([false, false, false, false, false]);
+      system.actualSwitches = system.expectedSwitches.clone();
 
       this.internalUpdateShipStatus();
     }

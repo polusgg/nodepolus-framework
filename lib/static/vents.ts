@@ -62,23 +62,43 @@ const VENTS_AIRSHIP: readonly Readonly<LevelVent>[] = [
   { id: 11, name: "", system: SystemType.Storage, position: new Vector2(0, 0) },
 ];
 
+/**
+ * A helper class for retrieving static data for vents.
+ */
 export class Vents {
+  /**
+   * Gets all static vent data for The Skeld.
+   */
   static forSkeld(): readonly Readonly<LevelVent>[] {
     return VENTS_THE_SKELD;
   }
 
+  /**
+   * Gets all static vent data for Mira HQ.
+   */
   static forMiraHq(): readonly Readonly<LevelVent>[] {
     return VENTS_MIRA_HQ;
   }
 
+  /**
+   * Gets all static vent data for Polus.
+   */
   static forPolus(): readonly Readonly<LevelVent>[] {
     return VENTS_POLUS;
   }
 
+  /**
+   * Gets all static vent data for Airship.
+   */
   static forAirship(): readonly Readonly<LevelVent>[] {
     return VENTS_AIRSHIP;
   }
 
+  /**
+   * Gets all static vent data for the given level.
+   *
+   * @param level The level whose vents should be returned
+   */
   static forLevel(level: Level): readonly Readonly<LevelVent>[] {
     switch (level) {
       case Level.TheSkeld:
@@ -93,22 +113,53 @@ export class Vents {
     }
   }
 
+  /**
+   * Gets static vent data for the given IDs on The Skeld.
+   *
+   * @param ids The IDs of the vents that should be returned
+   * @returns An array of vents whose IDs were included in `ids`
+   */
   static forSkeldFromId(ids: number[]): readonly Readonly<LevelVent>[] {
     return this.forSkeld().filter(v => ids.includes(v.id));
   }
 
+  /**
+   * Gets static vent data for the given IDs on Mira HQ.
+   *
+   * @param ids The IDs of the vents that should be returned
+   * @returns An array of vents whose IDs were included in `ids`
+   */
   static forMiraHqFromId(ids: number[]): readonly Readonly<LevelVent>[] {
     return this.forMiraHq().filter(v => ids.includes(v.id));
   }
 
+  /**
+   * Gets static vent data for the given IDs on Polus.
+   *
+   * @param ids The IDs of the vents that should be returned
+   * @returns An array of vents whose IDs were included in `ids`
+   */
   static forPolusFromId(ids: number[]): readonly Readonly<LevelVent>[] {
     return this.forPolus().filter(v => ids.includes(v.id));
   }
 
+  /**
+   * Gets static vent data for the given IDs on Airship.
+   *
+   * @param ids The IDs of the vents that should be returned
+   * @returns An array of vents whose IDs were included in `ids`
+   */
   static forAirshipFromId(ids: number[]): readonly Readonly<LevelVent>[] {
     return this.forAirship().filter(v => ids.includes(v.id));
   }
 
+  /**
+   * Gets static vent data for the given IDs on the given level.
+   *
+   * @param level The level whose vents will be searched
+   * @param ids The IDs of the vents that should be returned
+   * @returns An array of vents whose IDs were included in `ids`
+   */
   static forLevelFromId(level: Level, ids: number[]): readonly Readonly<LevelVent>[] {
     switch (level) {
       case Level.TheSkeld:
@@ -123,22 +174,53 @@ export class Vents {
     }
   }
 
+  /**
+   * Gets static vent data for the vent at the given position on The Skeld.
+   *
+   * @param position The position of the vent that should be returned
+   * @returns The vent at `position`, or `undefined` if there is no vent at `position`
+   */
   static forSkeldFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
     return this.forSkeld().find(v => v.position.equals(position));
   }
 
+  /**
+   * Gets static vent data for the vent at the given position on Mira HQ.
+   *
+   * @param position The position of the vent that should be returned
+   * @returns The vent at `position`, or `undefined` if there is no vent at `position`
+   */
   static forMiraHqFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
     return this.forMiraHq().find(v => v.position.equals(position));
   }
 
+  /**
+   * Gets static vent data for the vent at the given position on Polus.
+   *
+   * @param position The position of the vent that should be returned
+   * @returns The vent at `position`, or `undefined` if there is no vent at `position`
+   */
   static forPolusFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
     return this.forPolus().find(v => v.position.equals(position));
   }
 
+  /**
+   * Gets static vent data for the vent at the given position on Airship.
+   *
+   * @param position The position of the vent that should be returned
+   * @returns The vent at `position`, or `undefined` if there is no vent at `position`
+   */
   static forAirshipFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
     return this.forAirship().find(v => v.position.equals(position));
   }
 
+  /**
+   * Gets static vent data for the vent at the given position on the given level.
+   *
+   * @param level The level whose vents will be searched
+   * @param position The position of the vent that should be returned
+   * @returns The vent at `position` on `level`, or `undefined` if there is no vent at `position`
+   */
   static forLevelFromPosition(level: Level, position: Vector2): Readonly<LevelVent> | undefined {
     switch (level) {
       case Level.TheSkeld:

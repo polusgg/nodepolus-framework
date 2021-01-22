@@ -48,12 +48,7 @@ export class GetGameListResponsePacket extends BaseRootPacket {
 
     reader.readAllChildMessages(child => {
       if (child.getTag() == 1) {
-        counts = new LobbyCount(
-          reader.readUInt32(),
-          reader.readUInt32(),
-          reader.readUInt32(),
-          reader.readUInt32(),
-        );
+        counts = LobbyCount.deserialize(child);
       } else if (child.getTag() == 0) {
         child.readAllChildMessages(lobbyMessage => {
           lobbies.push(LobbyListing.deserialize(lobbyMessage));
@@ -71,11 +66,9 @@ export class GetGameListResponsePacket extends BaseRootPacket {
     const writer = new MessageWriter();
 
     if (this.counts) {
-      writer.startMessage(1)
-        .writeUInt32(this.counts.skeld)
-        .writeUInt32(this.counts.mira)
-        .writeUInt32(this.counts.polus)
-        .endMessage();
+      writer.startMessage(1);
+      this.counts.serialize(writer);
+      writer.endMessage();
     }
 
     writer.startMessage(0);

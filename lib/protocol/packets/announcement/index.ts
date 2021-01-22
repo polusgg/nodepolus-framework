@@ -4,4 +4,4 @@ export { AnnouncementDataPacket } from "./announcementDataPacket";
 
 export { CacheDataPacket } from "./cacheDataPacket";
 
-export { FreeWeekendPacket } from "./freeWeekendPacket";
+export { SetLanguagesPacket } from "./setLanguagesPacket";

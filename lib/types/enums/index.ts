@@ -4,6 +4,8 @@ export { AlterGameTag } from "./alterGameTag";
 
 export { ChatNoteType } from "./chatNoteType";
 
+export { ClientLanguage } from "./clientLanguage";
+
 export { DeathReason } from "./deathReason";
 
 export { DecontaminationDoorState } from "./decontaminationDoorState";
@@ -11,8 +13,6 @@ export { DecontaminationDoorState } from "./decontaminationDoorState";
 export { DisconnectReasonType } from "./disconnectReasonType";
 
 export { FakeClientId } from "./fakeClientId";
-
-export { FreeWeekendState } from "./freeWeekendState";
 
 export { GameOverReason } from "./gameOverReason";
 
@@ -46,7 +46,7 @@ export { SpawnType } from "./spawnType";
 
 export { SystemType } from "./systemType";
 
-export { TaskBarMode } from "./taskBarUpdate";
+export { TaskBarMode } from "./taskBarMode";
 
 export { TaskLength } from "./taskLength";
 

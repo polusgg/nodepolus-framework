@@ -39,7 +39,7 @@ import {
 
 export class RPCHandler {
   constructor(
-    public readonly lobby: InternalLobby,
+    private readonly lobby: InternalLobby,
   ) {}
 
   handleBaseRPC(type: RPCPacketType, connection: Connection, senderNetId: number, rawPacket: BaseRPCPacket, sendTo: Connection[]): void {

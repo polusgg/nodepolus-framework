@@ -4,7 +4,9 @@ import { Bitfield } from "../../../types";
 import { BaseHazelPacket } from ".";
 
 export class AcknowledgementPacket extends BaseHazelPacket {
-  constructor(public missingPackets: Bitfield) {
+  constructor(
+    public missingPackets: Bitfield,
+  ) {
     super(HazelPacketType.Acknowledgement);
   }
 

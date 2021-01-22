@@ -7,7 +7,9 @@ import { BaseHazelPacket } from ".";
 export class DisconnectPacket extends BaseHazelPacket {
   public readonly disconnectReason?: DisconnectReason;
 
-  constructor(disconnectReason?: DisconnectReason | DisconnectReasonType) {
+  constructor(
+    disconnectReason?: DisconnectReason | DisconnectReasonType,
+  ) {
     super(HazelPacketType.Acknowledgement);
 
     if (disconnectReason instanceof DisconnectReason) {

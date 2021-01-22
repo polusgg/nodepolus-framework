@@ -16,6 +16,8 @@ const SKELD_DOOR_NAMES: readonly string[] = [
   "Storage",
 ];
 
+const MIRA_HQ_DOOR_NAMES: readonly string[] = [];
+
 const POLUS_DOOR_NAMES: readonly string[] = [
   "Outside to Electrical",
   "Inside Electrical",
@@ -35,23 +37,43 @@ const AIRSHIP_DOOR_NAMES: readonly string[] = [
   // TODO
 ];
 
+/**
+ * A helper class for retrieving door display names.
+ */
 export class DoorNames {
+  /**
+   * Gets the display names for the doors on The Skeld.
+   */
   static forSkeld(): readonly string[] {
     return SKELD_DOOR_NAMES;
   }
 
+  /**
+   * Gets the display names for the doors on Mira HQ.
+   */
   static forMiraHq(): readonly string[] {
-    return [];
+    return MIRA_HQ_DOOR_NAMES;
   }
 
+  /**
+   * Gets the display names for the doors on Polus.
+   */
   static forPolus(): readonly string[] {
     return POLUS_DOOR_NAMES;
   }
 
+  /**
+   * Gets the display names for the doors on Airship.
+   */
   static forAirship(): readonly string[] {
     return AIRSHIP_DOOR_NAMES;
   }
 
+  /**
+   * Gets the display names for the doors on the given level.
+   *
+   * @param level The level whose door display names should be returned
+   */
   static forLevel(level: Level): readonly string[] {
     switch (level) {
       case Level.TheSkeld:

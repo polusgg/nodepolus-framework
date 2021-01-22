@@ -1,5 +1,8 @@
 import { LogLevel } from "../../logger/logger";
 
+/**
+ * A type used to describe the structure of the NodePolus server configuration.
+ */
 export type ServerConfig = {
   /**
    * The address that NodePolus will bind to.
@@ -25,6 +28,12 @@ export type ServerConfig = {
    * @defaultValue `22023`
    */
   defaultLobbyPort?: number;
+  /**
+   * Whether or not to run the announcement server alongside the region server.
+   *
+   * @defaultValue `false`
+   */
+  enableAnnouncementServer?: boolean;
   /**
    * Logger configuration.
    */

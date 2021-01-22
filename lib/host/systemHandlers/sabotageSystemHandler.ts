@@ -58,12 +58,12 @@ export class SabotageSystemHandler {
 
   sabotageElectrical(system: SwitchSystem): void {
     system.expectedSwitches = new Bitfield(new Array(5).fill(false).map(() => Math.random() < 0.5));
-    system.actualSwitches = new Bitfield([...system.expectedSwitches.bits]);
+    system.actualSwitches = system.expectedSwitches.clone();
 
-    for (let i = 0; i < system.expectedSwitches.bits.length; i++) {
-      const pos = Math.floor(Math.random() * (system.expectedSwitches.bits.length - i)) * i;
+    for (let i = 0; i < system.expectedSwitches.getSize(); i++) {
+      const pos = Math.floor(Math.random() * (system.expectedSwitches.getSize() - i)) * i;
 
-      system.actualSwitches.bits[pos] = !system.expectedSwitches.bits[pos];
+      system.actualSwitches.update(pos, !system.expectedSwitches.has(pos));
     }
 
     // TODO: Actually count down like every other system (like -85 every second)

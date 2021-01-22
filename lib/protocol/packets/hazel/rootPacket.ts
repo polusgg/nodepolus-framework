@@ -25,7 +25,9 @@ import {
 } from "../root";
 
 export class RootPacket {
-  constructor(public readonly packets: BaseRootPacket[]) {}
+  constructor(
+    public readonly packets: BaseRootPacket[],
+  ) {}
 
   static deserialize(reader: MessageReader, clientBound: boolean, level?: Level): RootPacket {
     const packets: BaseRootPacket[] = [];

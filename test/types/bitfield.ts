@@ -12,11 +12,53 @@ enum Color {
   Black = 7,
 }
 
+test("gets the underlying boolean array", t => {
+  const bits = new Bitfield([true, false, false, true, true]);
+
+  t.deepEqual(bits.getBits(), [
+    true, false, false, true, true,
+  ]);
+});
+
+test("gets the number of bits in the Bitfield", t => {
+  const bits = new Bitfield([true, false, false, true, true]);
+
+  t.is(bits.getSize(), 5);
+});
+
+test("checks equality with another Bitfield", t => {
+  const one = new Bitfield([true, false, false, true, true]);
+  const two = new Bitfield([true, false, false, true, false]);
+
+  t.false(one.equals(two));
+
+  two.toggle(4);
+
+  t.true(one.equals(two));
+});
+
+test("clones itself", t => {
+  const original = new Bitfield([true, false, false, true, true]);
+  const clone = original.clone();
+
+  t.true(clone.equals(original));
+
+  clone.toggle(0);
+
+  t.false(clone.equals(original));
+  t.deepEqual(original.getBits(), [
+    true, false, false, true, true,
+  ]);
+  t.deepEqual(clone.getBits(), [
+    false, false, false, true, true,
+  ]);
+});
+
 test("parses a bitfield with an unknown size", t => {
   const num = 25;
   const bits = Bitfield.fromNumber(num);
 
-  t.deepEqual(bits.bits, [
+  t.deepEqual(bits.getBits(), [
     true, false, false, true, true,
   ]);
 });
@@ -25,7 +67,7 @@ test("parses a bitfield with a fixed size", t => {
   const num = 25;
   const bits = Bitfield.fromNumber(num, 8);
 
-  t.deepEqual(bits.bits, [
+  t.deepEqual(bits.getBits(), [
     true, false, false, true, true, false, false, false,
   ]);
 });
@@ -114,7 +156,7 @@ test("sets a bit", t => {
   bits.set(2);
 
   t.is(bits.toNumber(), 4);
-  t.deepEqual(bits.bits, [
+  t.deepEqual(bits.getBits(), [
     false, false, true, false, false, false, false, false,
   ]);
 });
@@ -125,7 +167,7 @@ test("unsets a bit", t => {
   bits.unset(2);
 
   t.is(bits.toNumber(), 251);
-  t.deepEqual(bits.bits, [
+  t.deepEqual(bits.getBits(), [
     true, true, false, true, true, true, true, true,
   ]);
 });
@@ -136,7 +178,7 @@ test("toggles a bit", t => {
   bits.toggle(2);
 
   t.is(bits.toNumber(), 251);
-  t.deepEqual(bits.bits, [
+  t.deepEqual(bits.getBits(), [
     true, true, false, true, true, true, true, true,
   ]);
 
@@ -144,7 +186,7 @@ test("toggles a bit", t => {
   bits.toggle(2);
 
   t.is(bits.toNumber(), 239);
-  t.deepEqual(bits.bits, [
+  t.deepEqual(bits.getBits(), [
     true, true, true, true, false, true, true, true,
   ]);
 });
@@ -155,7 +197,7 @@ test("updates a bit", t => {
   bits.update(2, false);
 
   t.is(bits.toNumber(), 251);
-  t.deepEqual(bits.bits, [
+  t.deepEqual(bits.getBits(), [
     true, true, false, true, true, true, true, true,
   ]);
 
@@ -163,7 +205,7 @@ test("updates a bit", t => {
   bits.update(2, true);
 
   t.is(bits.toNumber(), 239);
-  t.deepEqual(bits.bits, [
+  t.deepEqual(bits.getBits(), [
     true, true, true, true, false, true, true, true,
   ]);
 });

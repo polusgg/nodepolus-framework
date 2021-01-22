@@ -227,10 +227,10 @@ test("reads a Vector2", t => {
   const two = buf.readVector2();
 
   t.false(buf.hasBytesLeft());
-  t.true(isFloatEqual(one.x, 0, 0.001));
-  t.true(isFloatEqual(one.y, 0, 0.001));
-  t.true(isFloatEqual(two.x, 40, 0.001));
-  t.true(isFloatEqual(two.y, -40, 0.001));
+  t.true(isFloatEqual(one.getX(), 0, 0.001));
+  t.true(isFloatEqual(one.getY(), 0, 0.001));
+  t.true(isFloatEqual(two.getX(), 40, 0.001));
+  t.true(isFloatEqual(two.getY(), -40, 0.001));
 });
 
 test("writes a string", t => {

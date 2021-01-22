@@ -25,20 +25,20 @@ import {
 } from "../protocol/packets/root";
 
 export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
-  public readonly startedAt = Date.now();
-  public readonly serverSocket = dgram.createSocket("udp4");
   public readonly connections: Map<string, Connection> = new Map();
 
   public lobbies: InternalLobby[] = [];
   public lobbyMap: Map<string, InternalLobby> = new Map();
 
+  private readonly startedAt = Date.now();
+  private readonly serverSocket = dgram.createSocket("udp4");
   private readonly logger: Logger;
 
   // Reserve the fake client IDs
   private connectionIndex = Object.keys(FakeClientId).length / 2;
 
   constructor(
-    public config: ServerConfig = {},
+    private readonly config: ServerConfig = {},
   ) {
     super();
 
@@ -59,6 +59,18 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
     this.serverSocket.on("error", error => {
       this.logger.catch(error);
     });
+  }
+
+  getStartedAt(): number {
+    return this.startedAt;
+  }
+
+  getSocket(): dgram.Socket {
+    return this.serverSocket;
+  }
+
+  getConfig(): ServerConfig {
+    return this.config;
   }
 
   getLogger(childName?: string): Logger {
@@ -270,12 +282,12 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
           const listing = lobby.getLobbyListing();
 
           // TODO: Add config option for max player count and max results
-          if (listing.playerCount < 10 && results.length < 10) {
+          if (listing.getPlayerCount() < 10 && results.length < 10) {
             results[i] = listing;
           }
         }
 
-        results.sort((a, b) => b.playerCount - a.playerCount);
+        results.sort((a, b) => b.getPlayerCount() - a.getPlayerCount());
 
         const event = new ServerLobbyListEvent(sender, (packet as GetGameListRequestPacket).includePrivate, results, counts);
 

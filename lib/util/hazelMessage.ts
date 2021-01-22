@@ -276,8 +276,8 @@ export class MessageWriter extends HazelMessage {
    * @param value The Vector2 to write
    */
   writeVector2(value: Vector2): this {
-    return this.writeUInt16(unlerp(-40, 40, value.x) * 65535.0)
-      .writeUInt16(unlerp(-40, 40, value.y) * 65535.0);
+    return this.writeUInt16(unlerp(-40, 40, value.getX()) * 65535.0)
+      .writeUInt16(unlerp(-40, 40, value.getY()) * 65535.0);
   }
 
   /**

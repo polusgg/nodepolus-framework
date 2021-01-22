@@ -1,6 +1,8 @@
 import { LinkElement, Reader, ResetElement, TextElement } from "./types";
 import { ReaderState, ElementType } from "./types/enums";
 
+// TODO: (Cody) Rewrite
+
 function colorToString(color: [number, number, number, number]): string {
   return color.map(channel => channel.toString(16).padStart(2, "0"))
     .join("")

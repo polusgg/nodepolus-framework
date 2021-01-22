@@ -7,7 +7,7 @@ import { BaseSystem } from ".";
 
 export class SwitchSystem extends BaseSystem {
   public expectedSwitches: Bitfield = new Bitfield(new Array(5).fill(0).map(() => !!Math.round(Math.random() * 1)));
-  public actualSwitches: Bitfield = new Bitfield([...this.expectedSwitches.bits]);
+  public actualSwitches: Bitfield = this.expectedSwitches.clone();
   public visionModifier = 0xff;
 
   constructor(shipStatus: BaseInnerShipStatus) {
@@ -40,16 +40,12 @@ export class SwitchSystem extends BaseSystem {
   }
 
   equals(old: SwitchSystem): boolean {
-    for (let i = 0; i < this.actualSwitches.bits.length; i++) {
-      if (this.actualSwitches.bits[i] != old.actualSwitches.bits[i]) {
-        return false;
-      }
+    if (!this.actualSwitches.equals(old.actualSwitches)) {
+      return false;
     }
 
-    for (let i = 0; i < this.expectedSwitches.bits.length; i++) {
-      if (this.expectedSwitches.bits[i] != old.expectedSwitches.bits[i]) {
-        return false;
-      }
+    if (!this.expectedSwitches.equals(old.expectedSwitches)) {
+      return false;
     }
 
     if (this.visionModifier != old.visionModifier) {
@@ -62,8 +58,8 @@ export class SwitchSystem extends BaseSystem {
   clone(): SwitchSystem {
     const clone = new SwitchSystem(this.shipStatus);
 
-    clone.actualSwitches = new Bitfield([...this.actualSwitches.bits]);
-    clone.expectedSwitches = new Bitfield([...this.expectedSwitches.bits]);
+    clone.actualSwitches = this.actualSwitches.clone();
+    clone.expectedSwitches = this.expectedSwitches.clone();
     clone.visionModifier = this.visionModifier;
 
     return clone;

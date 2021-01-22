@@ -42,6 +42,9 @@ const playerBody: Readonly<PlayerColorValues> = {
   [PlayerColor.ForteGreen]: { light: [29, 152, 83, 255], dark: [18, 63, 27, 255] },
 } as const;
 
+/**
+ * A helper class for retrieving static data about various colors used in-game.
+ */
 export class Palette {
   static disabledGrey(): Readonly<Color> {
     return disabledGrey;
@@ -103,8 +106,18 @@ export class Palette {
     return playerVisor;
   }
 
+  /**
+   * Gets the RGB colors values for all PlayerColors.
+   */
   static playerBody(): Readonly<PlayerColorValues>;
+  /**
+   * Gets the RGB color values for the given PlayerColor.
+   */
   static playerBody(color: PlayerColor): Readonly<ColorShades>;
+  /**
+   * Gets the RGB color values for the given PlayerColor, or all PlayerColors if
+   * no PlayerColor was given.
+   */
   static playerBody(color?: PlayerColor): Readonly<PlayerColorValues> | Readonly<ColorShades> {
     if (color !== undefined) {
       return playerBody[color];

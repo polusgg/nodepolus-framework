@@ -14,6 +14,8 @@ const SKELD_DOORS: Readonly<SystemDoorList> = {
   [SystemType.Cafeteria]: [0, 3, 8],
 };
 
+const MIRA_HQ_DOORS: Readonly<SystemDoorList> = {};
+
 const POLUS_DOORS: Readonly<SystemDoorList> = {
   [SystemType.Electrical]: [0, 1, 2],
   [SystemType.Oxygen]: [3, 4],
@@ -30,27 +32,49 @@ const AIRSHIP_DOORS: Readonly<SystemDoorList> = {
 
 const SKELD_COUNT: Readonly<number> = Object.values(SKELD_DOORS).flat().length;
 
+const MIRA_HQ_COUNT: Readonly<number> = Object.values(MIRA_HQ_DOORS).flat().length;
+
 const POLUS_COUNT: Readonly<number> = Object.values(POLUS_DOORS).flat().length;
 
 const AIRSHIP_COUNT: Readonly<number> = Object.values(AIRSHIP_DOORS).flat().length;
 
+/**
+ * A helper class for retrieving door IDs for each system.
+ */
 export class SystemDoors {
+  /**
+   * Gets each system and their doors for The Skeld.
+   */
   static forSkeld(): Readonly<SystemDoorList> {
     return SKELD_DOORS;
   }
 
+  /**
+   * Gets each system and their doors for Mira HQ.
+   */
   static forMiraHq(): Readonly<SystemDoorList> {
-    return {};
+    return MIRA_HQ_DOORS;
   }
 
+  /**
+   * Gets each system and their doors for Polus.
+   */
   static forPolus(): Readonly<SystemDoorList> {
     return POLUS_DOORS;
   }
 
+  /**
+   * Gets each system and their doors for Airship.
+   */
   static forAirship(): Readonly<SystemDoorList> {
     return AIRSHIP_DOORS;
   }
 
+  /**
+   * Gets each system and their doors for the given level.
+   *
+   * @param level The level whose systems and doors should be returned
+   */
   static forLevel(level: Level): Readonly<SystemDoorList> {
     switch (level) {
       case Level.TheSkeld:
@@ -65,22 +89,39 @@ export class SystemDoors {
     }
   }
 
+  /**
+   * Gets the number of doors on The Skeld.
+   */
   static countForSkeld(): Readonly<number> {
     return SKELD_COUNT;
   }
 
+  /**
+   * Gets the number of doors on Mira HQ.
+   */
   static countForMiraHq(): Readonly<number> {
-    return 0;
+    return MIRA_HQ_COUNT;
   }
 
+  /**
+   * Gets the number of doors on Polus.
+   */
   static countForPolus(): Readonly<number> {
     return POLUS_COUNT;
   }
 
+  /**
+   * Gets the number of doors on Airship
+   */
   static countForAirship(): Readonly<number> {
     return AIRSHIP_COUNT;
   }
 
+  /**
+   * Gets the number of doors on the given level.
+   *
+   * @param level The level whose number of doors should be returned
+   */
   static countForLevel(level: Level): Readonly<number> {
     switch (level) {
       case Level.TheSkeld:

@@ -5,7 +5,9 @@ import { Bindable } from "../types";
 export abstract class BaseHazelPacket implements Bindable<BaseHazelPacket> {
   public isClientBound?: boolean;
 
-  constructor(public type: HazelPacketType) {}
+  constructor(
+    public type: HazelPacketType,
+  ) {}
 
   abstract serialize(): MessageWriter;
 

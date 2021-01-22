@@ -1,11 +1,20 @@
+import { FileAnnouncementDriver } from "../../../lib/announcementServer/drivers";
 import { HostGameResponsePacket } from "../../../lib/protocol/packets/root";
 import { ServerLobbyJoinEvent } from "../../../lib/api/events/server";
+import { AnnouncementServer } from "../../../lib/announcementServer";
 import { PlayerJoinedEvent } from "../../../lib/api/events/player";
 import { shuffleArrayClone } from "../../../lib/util/shuffle";
 import { Server } from "../../../lib/server";
 import { Vector2 } from "../../../lib/types";
+import path from "path";
 
 declare const server: Server;
+declare const announcementServer: AnnouncementServer;
+
+announcementServer.setDriver(
+  new FileAnnouncementDriver(path.join(__dirname, "announcement.json"))
+    .setForceShowAnnouncement(false),
+);
 
 const logger = server.getLogger().child("TestPlugin");
 

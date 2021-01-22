@@ -9,8 +9,8 @@ export class Vector2 {
    * @param y The y value
    */
   constructor(
-    public readonly x: number,
-    public readonly y: number,
+    private readonly x: number,
+    private readonly y: number,
   ) {}
 
   /**
@@ -23,13 +23,27 @@ export class Vector2 {
   }
 
   /**
+   * Gets the x value.
+   */
+  getX(): number {
+    return this.x;
+  }
+
+  /**
+   * Gets the y value.
+   */
+  getY(): number {
+    return this.y;
+  }
+
+  /**
    * Gets whether or not the Vector2 is equal to the given Vector2 by
    * comparing the difference between each of their `x` and `y` values against
    * the given `epsilon` value.
    *
    * @param other The Vector2 to be checked against
    * @param epsilon The margin of error for the comparison (default `0.001`)
-   * @returns `true` if the difference of `x` values and `y` values is smaller than the value of `epsilon`
+   * @returns `true` if the difference of `x` values and `y` values is smaller than the value of `epsilon`, `false` if not
    */
   equals(other: Vector2, epsilon: number = 0.001): boolean {
     return isFloatEqual(this.x, other.x, epsilon) && isFloatEqual(this.y, other.y, epsilon);
@@ -39,7 +53,7 @@ export class Vector2 {
    * Gets whether or not the Vector2 is *exactly* equal to the given Vector2.
    *
    * @param other The Vector2 to be checked against
-   * @returns `true` if the Vector2 is *exactly* the same as `other`
+   * @returns `true` if the Vector2 is *exactly* the same as `other`, `false` if not
    */
   is(other: Vector2): boolean {
     return this.x === other.x && this.y === other.y;

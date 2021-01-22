@@ -1,3 +1,4 @@
+import { AnnouncementServer } from "../lib/announcementServer";
 import { ServerConfig } from "../lib/api/config/serverConfig";
 import { Plugin } from "../lib/api/plugin";
 import { Logger } from "../lib/logger";
@@ -6,6 +7,7 @@ import fs from "fs/promises";
 import path from "path";
 
 declare const server: Server;
+declare const announcementServer: AnnouncementServer | undefined;
 
 (async (): Promise<void> => {
   const logger = new Logger("NodePolus", "info");
@@ -20,6 +22,11 @@ declare const server: Server;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global as any).server = new Server(serverConfig);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (global as any).announcementServer = (serverConfig.enableAnnouncementServer ?? false)
+      ? new AnnouncementServer(server.getAddress(), server.getLogger("Announcements"))
+      : undefined;
 
     logger.info("Loading plugins");
 
@@ -54,6 +61,14 @@ declare const server: Server;
 
       server.emit("server.ready");
     });
+
+    if (announcementServer) {
+      announcementServer.listen().then(() => {
+        logger.info(`Announcement server listening on ${announcementServer.getAddress()}:${announcementServer.getPort()}`);
+
+        announcementServer.emit("announcements.ready");
+      });
+    }
 
     process.on("uncaughtException", err => {
       logger.catch(err);

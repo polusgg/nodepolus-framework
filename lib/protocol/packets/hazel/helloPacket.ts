@@ -4,7 +4,11 @@ import { ClientVersion } from "../../../types";
 import { BaseHazelPacket } from ".";
 
 export class HelloPacket extends BaseHazelPacket {
-  constructor(public hazelVersion: number, public clientVersion: ClientVersion, public name: string) {
+  constructor(
+    public hazelVersion: number,
+    public clientVersion: ClientVersion,
+    public name: string,
+  ) {
     super(HazelPacketType.Hello);
   }
 

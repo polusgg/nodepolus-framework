@@ -660,10 +660,12 @@ export class InternalHost implements HostInstance {
     const countdownFunction = (): void => {
       const time = this.secondsUntilStart--;
 
-      this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
-        this.lobby.getConnections(),
-        new SetStartCounterPacket(this.counterSequenceId += 5, time),
-      );
+      if (this.lobby.getPlayers().length) {
+        this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
+          this.lobby.getConnections(),
+          new SetStartCounterPacket(this.counterSequenceId += 5, time),
+        );
+      }
 
       if (time <= 0) {
         if (this.countdownInterval) {

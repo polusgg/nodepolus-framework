@@ -5,7 +5,9 @@ import { Bindable } from "../types";
 export abstract class BaseGameDataPacket implements Bindable<BaseGameDataPacket> {
   public isClientBound?: boolean;
 
-  constructor(public type: GameDataPacketType) {}
+  constructor(
+    public type: GameDataPacketType,
+  ) {}
 
   abstract serialize(): MessageWriter;
 

@@ -7,6 +7,9 @@ import winston from "winston";
 
 const levelNames = ["fatal", "error", "warn", "info", "verbose", "debug", "trace"];
 
+/**
+ * All available log levels.
+ */
 export type LogLevel = typeof levelNames[number];
 
 const levelIndices: Readonly<{
@@ -67,7 +70,7 @@ const prettyPrint = winston.format((info: winston.Logform.TransformableInfo, _op
         } else if (item instanceof Vector2) {
           const v = item as Vector2;
 
-          splat[i] = `[x=${v.x}, y=${v.y}]`;
+          splat[i] = `[x=${v.getX()}, y=${v.getY()}]`;
         } else if (item instanceof TextComponent) {
           splat[i] = (item as TextComponent).toString();
         }
@@ -80,9 +83,21 @@ const prettyPrint = winston.format((info: winston.Logform.TransformableInfo, _op
   return info;
 });
 
+/**
+ * A class for logging to the console and an optional file.
+ *
+ * Logs will be saved in the `logs` folder within the server's root folder.
+ */
 export class Logger {
   private readonly winston: winston.Logger;
 
+  /**
+   * @param logger The name of the logger if it is a `string`, otherwise the parent logger when creating a child instance
+   * @param displayLevel The maximum log level to be logged
+   * @param filename The name of the log file
+   * @param maxFileSizeInBytes The maximum size of the log file in bytes before it is rotated
+   * @param maxFiles The maximum number of log files to keep before old logs are pruned
+   */
   constructor(
     logger: string | winston.Logger,
     private readonly displayLevel: LogLevel,
@@ -151,10 +166,21 @@ export class Logger {
     }
   }
 
+  /**
+   * Gets whether or not the given log level is suppoprted.
+   *
+   * @param level The level to check
+   * @returns `true` if `level` is supported, `false` if not
+   */
   static isValidLevel(level: string): level is LogLevel {
     return levelNames.includes(level);
   }
 
+  /**
+   * Creates child logger of a different name with the same configuration.
+   *
+   * @param label The name of the child logger
+   */
   child(label: string): Logger {
     const logger = new Logger(
       this.winston.child({}),
@@ -175,38 +201,135 @@ export class Logger {
     return logger;
   }
 
+  /**
+   * Logs a fatal error message.
+   *
+   * @example
+   * ```
+   * someVar = true;
+   * log.fatal("Unexpected value: %s", someVar); // => "Unexpected value: true"
+   * ```
+   *
+   * @param message The message to be logged
+   * @param splat The variables for string interpolation within `message`
+   */
   fatal(message: string, ...splat: unknown[]): void {
     this.log("fatal", message, {}, ...splat);
   }
 
+  /**
+   * Logs an error message.
+   *
+   * @example
+   * ```
+   * someVar = true;
+   * log.error("Unexpected value: %s", someVar); // => "Unexpected value: true"
+   * ```
+   *
+   * @param message The message to be logged
+   * @param splat The variables for string interpolation within `message`
+   */
   error(message: string, ...splat: unknown[]): void {
     this.log("error", message, {}, ...splat);
   }
 
+  /**
+   * Logs a warning message.
+   *
+   * @example
+   * ```
+   * someVar = true;
+   * log.warn("Unexpected value: %s", someVar); // => "Unexpected value: true"
+   * ```
+   *
+   * @param message The message to be logged
+   * @param splat The variables for string interpolation within `message`
+   */
   warn(message: string, ...splat: unknown[]): void {
     this.log("warn", message, {}, ...splat);
   }
 
+  /**
+   * Logs an info message.
+   *
+   * @example
+   * ```
+   * someVar = true;
+   * log.info("Some value: %s", someVar); // => "Some value: true"
+   * ```
+   *
+   * @param message The message to be logged
+   * @param splat The variables for string interpolation within `message`
+   */
   info(message: string, ...splat: unknown[]): void {
     this.log("info", message, {}, ...splat);
   }
 
+  /**
+   * Logs a verbose message.
+   *
+   * @example
+   * ```
+   * someVar = true;
+   * log.verbose("Some value: %s", someVar); // => "Some value: true"
+   * ```
+   *
+   * @param message The message to be logged
+   * @param splat The variables for string interpolation within `message`
+   */
   verbose(message: string, ...splat: unknown[]): void {
     this.log("verbose", message, {}, ...splat);
   }
 
+  /**
+   * Logs a debug message.
+   *
+   * @example
+   * ```
+   * someVar = true;
+   * log.debug("Some value: %s", someVar); // => "Some value: true"
+   * ```
+   *
+   * @param message The message to be logged
+   * @param splat The variables for string interpolation within `message`
+   */
   debug(message: string, ...splat: unknown[]): void {
     this.log("debug", message, {}, ...splat);
   }
 
+  /**
+   * Logs a message with a call trace for assistance in debugging.
+   *
+   * @example
+   * ```
+   * someVar = true;
+   * log.trace("Trace: %s", someVar); // => "Trace: true" + stack trace
+   * ```
+   *
+   * @param message The message to be logged
+   * @param splat The variables for string interpolation within `message`
+   */
   trace(message: string, ...splat: unknown[]): void {
     this.log("trace", message, { stack: new Error().stack!.split("\n").slice(2, -1).join("\n") }, ...splat);
   }
 
+  /**
+   * Logs an uncaught exception as an error with the stack trace.
+   *
+   * @param error The error to be logged
+   */
   catch(error: Error): void {
     this.winston.log("error", { message: error });
   }
 
+  /**
+   * Logs a message.
+   *
+   * @param level The log level for the message
+   * @param message The message to be logged
+   * @param meta The metadata for the message
+   * @param splat The variables for string interpolation within `message`
+   */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   log(level: string, message: string, meta: Record<string, unknown>, ...splat: any[]): void {
     const stack = meta.stack ?? undefined;
