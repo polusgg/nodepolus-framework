@@ -115,12 +115,22 @@ export class InternalLobby implements LobbyInstance {
     return this.metadata.has(key);
   }
 
-  getMeta(key: string): unknown {
-    return this.metadata.get(key);
+  getMeta(): Map<string, unknown>;
+  getMeta(key: string): unknown;
+  getMeta(key?: string): Map<string, unknown> | unknown {
+    return key === undefined ? this.metadata : this.metadata.get(key);
   }
 
   setMeta(key: string, value: unknown): void {
     this.metadata.set(key, value);
+  }
+
+  deleteMeta(key: string): void {
+    this.metadata.delete(key);
+  }
+
+  clearMeta(): void {
+    this.metadata.clear();
   }
 
   getHostInstance(): HostInstance {

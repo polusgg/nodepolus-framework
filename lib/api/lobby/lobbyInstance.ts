@@ -27,9 +27,17 @@ export interface LobbyInstance {
 
   hasMeta(key: string): boolean;
 
+  getMeta(): Map<string, unknown>;
+
   getMeta(key: string): unknown;
 
+  getMeta(key?: string): Map<string, unknown> | unknown;
+
   setMeta(key: string, value: unknown): void;
+
+  deleteMeta(key: string): void;
+
+  clearMeta(): void;
 
   getHostInstance(): HostInstance;
 

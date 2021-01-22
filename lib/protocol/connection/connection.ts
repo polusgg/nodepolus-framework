@@ -5,6 +5,7 @@ import { PacketDestination, HazelPacketType } from "../packets/types/enums";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
 import { ReadyPacket, SceneChangePacket } from "../packets/gameData";
 import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
+import { PlayerInstance } from "../../api/player";
 import { AwaitingPacket } from "../packets/types";
 import { LimboState } from "../../types/enums";
 import { InternalLobby } from "../../lobby";
@@ -12,7 +13,6 @@ import { ConnectionEvents } from ".";
 import { Packet } from "../packets";
 import Emittery from "emittery";
 import dgram from "dgram";
-import { PlayerInstance } from "../../api/player";
 
 export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implements NetworkAccessible {
   public hazelVersion?: number;
@@ -102,12 +102,22 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     return this.metadata.has(key);
   }
 
-  getMeta(key: string): unknown {
-    return this.metadata.get(key);
+  getMeta(): Map<string, unknown>;
+  getMeta(key: string): unknown;
+  getMeta(key?: string): Map<string, unknown> | unknown {
+    return key === undefined ? this.metadata : this.metadata.get(key);
   }
 
   setMeta(key: string, value: unknown): void {
     this.metadata.set(key, value);
+  }
+
+  deleteMeta(key: string): void {
+    this.metadata.delete(key);
+  }
+
+  clearMeta(): void {
+    this.metadata.clear();
   }
 
   getConnectionInfo(): ConnectionInfo {
