@@ -58,15 +58,11 @@ declare const announcementServer: AnnouncementServer | undefined;
 
     server.listen().then(() => {
       logger.info(`Server listening on ${server.getAddress()}:${server.getPort()}`);
-
-      server.emit("server.ready");
     });
 
     if (announcementServer) {
       announcementServer.listen().then(() => {
         logger.info(`Announcement server listening on ${announcementServer.getAddress()}:${announcementServer.getPort()}`);
-
-        announcementServer.emit("announcements.ready");
       });
     }
 

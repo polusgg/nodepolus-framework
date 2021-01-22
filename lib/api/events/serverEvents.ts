@@ -82,6 +82,21 @@ import {
   ServerLobbyListEvent,
 } from "./server";
 
+const basicServerEvents = [
+  /**
+   * Fired when the Server successfully binds to the network address and port.
+   */
+  "server.ready",
+];
+
+/**
+ * All Server events that have no associated data.
+ */
+export type BasicServerEvents = typeof basicServerEvents[number];
+
+/**
+ * All Server events that have associated data.
+ */
 export type ServerEvents = {
   /**
    * Connection Events
@@ -180,9 +195,3 @@ export type ServerEvents = {
   "server.lobby.join": ServerLobbyJoinEvent;
   "server.lobby.list": ServerLobbyListEvent;
 };
-
-// export type InternalEvents = {
-//   // Object Events
-//   "object.spawned": ObjectSpawnedEvent;
-//   "object.despawned": ObjectDespawnedEvent;
-// };

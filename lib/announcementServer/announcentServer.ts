@@ -1,5 +1,6 @@
 import { CacheDataPacket, AnnouncementDataPacket, BaseAnnouncementPacket, SetLanguagesPacket } from "../protocol/packets/announcement";
 import { AnnouncementHelloPacket, RootAnnouncementPacket } from "../protocol/packets/hazel";
+import { AnnouncementServerEvents, BasicAnnouncementServerEvents } from "../api/events";
 import { ANNOUNCEMENT_SERVER_PORT, DEFAULT_LANGUAGES } from "../util/constants";
 import { HazelPacketType } from "../protocol/packets/types/enums";
 import { AnnouncementPacket } from "../protocol/packets";
@@ -13,7 +14,7 @@ import { Logger } from "../logger";
 import Emittery from "emittery";
 import dgram from "dgram";
 
-export class AnnouncementServer extends Emittery.Typed<Record<string, unknown>, "announcements.ready"> {
+export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents, BasicAnnouncementServerEvents> {
   public readonly announcementServerSocket = dgram.createSocket("udp4");
 
   private driver?: BaseAnnouncementDriver;
@@ -106,7 +107,11 @@ export class AnnouncementServer extends Emittery.Typed<Record<string, unknown>, 
     await this.driver?.refresh(true);
 
     return new Promise((resolve, _reject) => {
-      this.announcementServerSocket.bind(this.getPort(), this.address, resolve);
+      this.announcementServerSocket.bind(this.getPort(), this.address, () => {
+        this.emit("announcements.ready");
+
+        resolve();
+      });
     });
   }
 

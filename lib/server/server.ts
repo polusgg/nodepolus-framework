@@ -5,11 +5,11 @@ import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/conn
 import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
 import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
 import { DisconnectReasonType, FakeClientId } from "../types/enums";
+import { BasicServerEvents, ServerEvents } from "../api/events";
 import { ConnectionInfo, DisconnectReason } from "../types";
 import { Connection } from "../protocol/connection";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
-import { ServerEvents } from "../api/events";
 import { InternalLobby } from "../lobby";
 import { Logger } from "../logger";
 import Emittery from "emittery";
@@ -24,7 +24,7 @@ import {
   JoinGameRequestPacket,
 } from "../protocol/packets/root";
 
-export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
+export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   public readonly connections: Map<string, Connection> = new Map();
 
   public lobbies: InternalLobby[] = [];
@@ -101,7 +101,11 @@ export class Server extends Emittery.Typed<ServerEvents, "server.ready"> {
 
   async listen(): Promise<void> {
     return new Promise((resolve, _reject) => {
-      this.serverSocket.bind(this.getPort(), this.getAddress(), resolve);
+      this.serverSocket.bind(this.getPort(), this.getAddress(), () => {
+        this.emit("server.ready");
+
+        resolve();
+      });
     });
   }
 
