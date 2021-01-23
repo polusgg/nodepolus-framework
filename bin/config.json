@@ -1,7 +1,7 @@
 {
   "serverAddress": "0.0.0.0",
   "serverPort": 22023,
-  "enableAnnouncementServer": true,
+  "enableAnnouncementServer": false,
   "maxLobbies": 100000,
   "maxConnectionsPerAddress": 10,
   "lobby": {

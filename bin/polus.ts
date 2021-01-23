@@ -8,7 +8,7 @@ import fs from "fs/promises";
 import path from "path";
 
 declare const server: Server;
-declare const announcementServer: AnnouncementServer | undefined;
+declare const announcementServer: AnnouncementServer;
 
 (async (): Promise<void> => {
   const logger = new Logger("NodePolus", "info");
@@ -25,9 +25,7 @@ declare const announcementServer: AnnouncementServer | undefined;
     (global as any).server = new Server(serverConfig);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (global as any).announcementServer = (serverConfig.enableAnnouncementServer ?? DEFAULT_CONFIG.enableAnnouncementServer)
-      ? new AnnouncementServer(server.getAddress(), server.getLogger("Announcements"))
-      : undefined;
+    (global as any).announcementServer = new AnnouncementServer(server.getAddress(), server.getLogger("Announcements"));
 
     logger.info("Loading plugins");
 
@@ -61,7 +59,7 @@ declare const announcementServer: AnnouncementServer | undefined;
       logger.info(`Server listening on ${server.getAddress()}:${server.getPort()}`);
     });
 
-    if (announcementServer) {
+    if (serverConfig.enableAnnouncementServer ?? DEFAULT_CONFIG.enableAnnouncementServer) {
       announcementServer.listen().then(() => {
         logger.info(`Announcement server listening on ${announcementServer.getAddress()}:${announcementServer.getPort()}`);
       });
