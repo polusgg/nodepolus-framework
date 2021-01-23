@@ -7,7 +7,7 @@ export abstract class CancellableEvent {
   /**
    * Marks the event as cancelled.
    *
-   * @param isCancelled `true` to cancel, `false` to uncancel
+   * @param isCancelled `true` to cancel, `false` to uncancel (default `true`)
    */
   cancel(isCancelled: boolean = true): this {
     this.cancelled = isCancelled;

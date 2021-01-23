@@ -369,7 +369,7 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes the given items inside the given `writer` function.
    *
-   * @typeParam T The type of items that will be returned
+   * @typeParam T The type of items that will be written
    * @param items The items to write
    * @param writer The function used to serialize each item
    * @param lengthIsPacked `true` if the length prefixing the list should be a packed uint32, `false` if it should be a byte
@@ -401,7 +401,7 @@ export class MessageWriter extends HazelMessage {
    * If each nested MessageWriter should have a unique or variable tag, then use
    * `writeList` instead and create a new message inside the writer function.
    *
-   * @typeParam T The type of items that will be returned
+   * @typeParam T The type of items that will be written
    * @param items The items to write
    * @param writer The function used to serialize each item
    * @param lengthIsPacked `true` if the length prefixing the list should be a packed uint32, `false` if it should be a byte

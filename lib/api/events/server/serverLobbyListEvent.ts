@@ -17,7 +17,7 @@ export class ServerLobbyListEvent extends DisconnectableEvent {
     private readonly connection: Connection,
     private readonly includePrivateLobbies: boolean,
     private lobbies: LobbyListing[],
-    private lobbyCounts: LobbyCount,
+    private lobbyCounts?: LobbyCount,
   ) {
     super(DisconnectReason.custom("The server refused to list its public games"));
   }
@@ -56,17 +56,19 @@ export class ServerLobbyListEvent extends DisconnectableEvent {
 
   /**
    * Gets the lobby counts for each level that will be sent to the connection.
+   *
+   * @returns The lobby counts for each level that will be sent to the connection, or `undefined` if no counts will be sent
    */
-  getLobbyCounts(): LobbyCount {
+  getLobbyCounts(): LobbyCount | undefined {
     return this.lobbyCounts;
   }
 
   /**
    * Sets the lobby counts for each level that will be sent to the connection.
    *
-   * @param lobbyCounts The new lobby counts that will be sent to the connection
+   * @param lobbyCounts The new lobby counts that will be sent to the connection, or `undefined` if no counts should be sent
    */
-  setLobbyCounts(lobbyCounts: LobbyCount): void {
+  setLobbyCounts(lobbyCounts?: LobbyCount): void {
     this.lobbyCounts = lobbyCounts;
   }
 }
