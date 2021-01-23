@@ -95,10 +95,47 @@ export class InternalLobby implements LobbyInstance {
     return this.server;
   }
 
+  getAddress(): string {
+    return this.address;
+  }
+
+  getPort(): number {
+    return this.port;
+  }
+
+  getCode(): string {
+    return this.code;
+  }
+
+  getHostName(): string {
+    return this.getActingHosts()[0]?.name ?? this.connections[0].name!;
+  }
+
+  isPublic(): boolean {
+    return !!(this.getGameTag(AlterGameTag.ChangePrivacy) ?? 0);
+  }
+
+  getLobbyListing(): LobbyListing {
+    return new LobbyListing(
+      this.address,
+      this.port,
+      this.code,
+      this.getHostName(),
+      this.players.length,
+      this.getAge(),
+      this.options.levels[0],
+      this.options.impostorCount,
+      this.options.maxPlayers,
+    );
+  }
+
   getGame(): Game | undefined {
     return this.game;
   }
 
+  /**
+   * @internal
+   */
   setGame(game?: Game): void {
     this.game = game;
   }
@@ -233,8 +270,18 @@ export class InternalLobby implements LobbyInstance {
     return this.options;
   }
 
+  /**
+   * @internal
+   */
   getMutableOptions(): GameOptionsData {
     return this.options;
+  }
+
+  /**
+   * @internal
+   */
+  setOptions(options: GameOptionsData): void {
+    this.options = options;
   }
 
   getLevel(): Level {
@@ -277,102 +324,117 @@ export class InternalLobby implements LobbyInstance {
     this.gameState = gameState;
   }
 
-  getAddress(): string {
-    return this.address;
+  sendMessage(message: TextComponent | string): void {
+    if (this.gameData === undefined) {
+      throw new Error("sendMessage called without a GameData instance");
+    }
+
+    const playerId = 127;
+    const playerData = new PlayerData(
+      playerId,
+      `[FFFFFFFF]${message.toString()}[FFFFFF00]`,
+      PlayerColor.Red,
+      PlayerHat.None,
+      PlayerPet.None,
+      PlayerSkin.None,
+      false,
+      false,
+      false,
+      [],
+    );
+
+    const entity = new EntityPlayer(
+      this,
+      FakeClientId.Message,
+      this.hostInstance.getNextNetId(),
+      playerId,
+      this.hostInstance.getNextNetId(),
+      this.hostInstance.getNextNetId(),
+      5,
+      new Vector2(39, 39),
+      new Vector2(0, 0),
+    );
+
+    this.sendRootGamePacket(new JoinGameResponsePacket(this.code, FakeClientId.Message, this.hostInstance.getId()));
+    this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code));
+
+    this.connections.forEach(con => {
+      con.flush();
+    });
+
+    this.gameData.gameData.updateGameData([playerData], this.connections);
+    this.sendRootGamePacket(new RemovePlayerPacket(this.code, FakeClientId.Message, this.hostInstance.getId()));
   }
 
-  getPort(): number {
-    return this.port;
+  sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void {
+    this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.netId, packet)], this.code), sendTo);
   }
 
-  getCode(): string {
-    return this.code;
+  spawn(entity: BaseInnerNetEntity): void {
+    const type = entity.type;
+
+    switch (type) {
+      case SpawnType.SkeldShipStatus:
+      case SpawnType.SkeldAprilShipStatus:
+      case SpawnType.MiraShipStatus:
+      case SpawnType.PolusShipStatus:
+      case SpawnType.AirshipStatus:
+        this.shipStatus = entity as BaseEntityShipStatus;
+        break;
+      case SpawnType.GameData:
+        this.gameData = entity as EntityGameData;
+        break;
+      case SpawnType.MeetingHud:
+        this.meetingHud = entity as EntityMeetingHud;
+        break;
+      case SpawnType.LobbyBehaviour:
+        this.lobbyBehaviour = entity as EntityLobbyBehaviour;
+        break;
+      case SpawnType.PlayerControl:
+        this.getLogger().warn("Use LobbyInstance#spawnPlayer() to spawn a player");
+
+        return;
+      default:
+        throw new Error(`Attempted to spawn an unsupported SpawnType: ${type as SpawnType} (${SpawnType[type]})`);
+    }
+
+    this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), this.getConnections());
   }
 
-  setOptions(options: GameOptionsData): void {
-    this.options = options;
+  spawnPlayer(player: EntityPlayer, playerData: PlayerData): PlayerInstance {
+    if (player.playerControl.playerId != playerData.id) {
+      throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.playerControl.playerId}) != PlayerData(${playerData.id})`);
+    }
+
+    const clientIdInUse = !!this.findPlayerByClientId(player.owner);
+    const playerInstance = new InternalPlayer(this, player, this.findConnection(player.owner));
+
+    this.addPlayer(playerInstance);
+
+    if (!clientIdInUse) {
+      this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.owner, this.hostInstance.getId()));
+    }
+
+    this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
+
+    if (this.gameData) {
+      this.gameData.gameData.players.push(playerData);
+      this.sendRPCPacket(this.gameData.gameData, new UpdateGameDataPacket(this.gameData.gameData.players));
+    }
+
+    return playerInstance;
+  }
+
+  despawn(innerNetObject: BaseInnerNetObject): void {
+    if (innerNetObject.parent.lobby.getCode() != this.code) {
+      throw new Error(`Attempted to despawn an InnerNetObject from a lobby other than its own`);
+    }
+
+    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.netId)], this.code));
   }
 
   getActingHosts(): Connection[] {
     return this.connections.filter(con => con.isActingHost);
-  }
-
-  getHostName(): string {
-    return this.getActingHosts()[0]?.name ?? this.connections[0].name!;
-  }
-
-  getLobbyListing(): LobbyListing {
-    return new LobbyListing(
-      this.address,
-      this.port,
-      this.code,
-      this.getHostName(),
-      this.players.length,
-      this.getAge(),
-      this.options.levels[0],
-      this.options.impostorCount,
-      this.options.maxPlayers,
-    );
-  }
-
-  isPublic(): boolean {
-    return !!(this.getGameTag(AlterGameTag.ChangePrivacy) ?? 0);
-  }
-
-  isSpawningPlayers(): boolean {
-    return this.spawningPlayers.size > 0;
-  }
-
-  async finishedSpawningPlayer(connection: Connection): Promise<void> {
-    this.spawningPlayers.delete(connection);
-
-    const player = this.findPlayerByConnection(connection);
-
-    if (player) {
-      await this.getServer().emit("player.joined", new PlayerJoinedEvent(this, player, !connection.firstJoin));
-
-      connection.firstJoin = false;
-    }
-  }
-
-  startedSpawningPlayer(connection: Connection): void {
-    this.spawningPlayers.add(connection);
-  }
-
-  removeActingHosts(sendImmediately: boolean = true): void {
-    const actingHosts = this.getActingHosts();
-
-    for (let i = 0; i < actingHosts.length; i++) {
-      if (actingHosts[i].limboState == LimboState.NotLimbo) {
-        this.sendRemoveHost(actingHosts[i], sendImmediately);
-      }
-    }
-  }
-
-  reapplyActingHosts(sendImmediately: boolean = true): void {
-    const actingHosts = this.getActingHosts();
-
-    for (let i = 0; i < actingHosts.length; i++) {
-      if (actingHosts[i].limboState == LimboState.NotLimbo) {
-        this.sendSetHost(actingHosts[i], sendImmediately);
-      }
-    }
-  }
-
-  sendSetHost(connection: Connection, sendImmediately: boolean = true): void {
-    if (sendImmediately) {
-      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, connection.id)]);
-    } else {
-      connection.write(new JoinGameResponsePacket(this.code, connection.id, connection.id));
-    }
-  }
-
-  sendRemoveHost(connection: Connection, sendImmediately: boolean = true): void {
-    if (sendImmediately) {
-      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId())]);
-    } else {
-      connection.write(new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId()));
-    }
   }
 
   setActingHost(connection: Connection, sendImmediately: boolean = true): void {
@@ -387,6 +449,86 @@ export class InternalLobby implements LobbyInstance {
     this.sendRemoveHost(connection, sendImmediately);
   }
 
+  /**
+   * @internal
+   */
+  isSpawningPlayers(): boolean {
+    return this.spawningPlayers.size > 0;
+  }
+
+  /**
+   * @internal
+   */
+  async finishedSpawningPlayer(connection: Connection): Promise<void> {
+    this.spawningPlayers.delete(connection);
+
+    const player = this.findPlayerByConnection(connection);
+
+    if (player) {
+      await this.getServer().emit("player.joined", new PlayerJoinedEvent(this, player, !connection.firstJoin));
+
+      connection.firstJoin = false;
+    }
+  }
+
+  /**
+   * @internal
+   */
+  startedSpawningPlayer(connection: Connection): void {
+    this.spawningPlayers.add(connection);
+  }
+
+  /**
+   * @internal
+   */
+  removeActingHosts(sendImmediately: boolean = true): void {
+    const actingHosts = this.getActingHosts();
+
+    for (let i = 0; i < actingHosts.length; i++) {
+      if (actingHosts[i].limboState == LimboState.NotLimbo) {
+        this.sendRemoveHost(actingHosts[i], sendImmediately);
+      }
+    }
+  }
+
+  /**
+   * @internal
+   */
+  reapplyActingHosts(sendImmediately: boolean = true): void {
+    const actingHosts = this.getActingHosts();
+
+    for (let i = 0; i < actingHosts.length; i++) {
+      if (actingHosts[i].limboState == LimboState.NotLimbo) {
+        this.sendSetHost(actingHosts[i], sendImmediately);
+      }
+    }
+  }
+
+  /**
+   * @internal
+   */
+  sendSetHost(connection: Connection, sendImmediately: boolean = true): void {
+    if (sendImmediately) {
+      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, connection.id)]);
+    } else {
+      connection.write(new JoinGameResponsePacket(this.code, connection.id, connection.id));
+    }
+  }
+
+  /**
+   * @internal
+   */
+  sendRemoveHost(connection: Connection, sendImmediately: boolean = true): void {
+    if (sendImmediately) {
+      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId())]);
+    } else {
+      connection.write(new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId()));
+    }
+  }
+
+  /**
+   * @internal
+   */
   findInnerNetObject(netId: number): BaseInnerNetObject | undefined {
     switch (netId) {
       case this.lobbyBehaviour?.lobbyBehaviour.netId:
@@ -416,27 +558,141 @@ export class InternalLobby implements LobbyInstance {
     throw new Error(`InnerNetObject #${netId} not found`);
   }
 
+  /**
+   * @internal
+   */
   findPlayerByConnection(connection: Connection): InternalPlayer | undefined {
     return this.players.find(player => player.gameObject.owner == connection.id);
   }
 
+  /**
+   * @internal
+   */
   findPlayerByEntity(entity: EntityPlayer): InternalPlayer | undefined {
     return this.players.find(player => player.gameObject.owner == entity.owner);
   }
 
+  /**
+   * @internal
+   */
   findPlayerByInnerNetObject(netObject: InnerPlayerControl | InnerPlayerPhysics | InnerCustomNetworkTransform): InternalPlayer | undefined {
     return this.players.find(player => player.gameObject == netObject.parent);
   }
 
+  /**
+   * @internal
+   */
   findPlayerIndexByConnection(connection: Connection): number {
     return this.players.findIndex(player => player.gameObject.owner == connection.id);
   }
 
+  /**
+   * @internal
+   */
   findConnection(id: number): Connection | undefined {
     return this.connections.find(con => con.id == id);
   }
 
-  handlePacket(packet: BaseRootPacket, sender: Connection): void {
+  /**
+   * @internal
+   */
+  async sendRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): Promise<PromiseSettledResult<void>[]> {
+    const promiseArray: Promise<void>[] = [];
+
+    for (let i = 0; i < sendTo.length; i++) {
+      promiseArray.push(sendTo[i].write(packet));
+    }
+
+    return Promise.allSettled(promiseArray);
+  }
+
+  /**
+   * @internal
+   */
+  sendUnreliableRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): void {
+    for (let i = 0; i < sendTo.length; i++) {
+      sendTo[i].writeUnreliable(packet);
+    }
+  }
+
+  /**
+   * @internal
+   */
+  handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
+    this.hostInstance.handleDisconnect(connection, reason);
+
+    const disconnectingConnectionIndex = this.connections.indexOf(connection);
+    const disconnectingPlayerIndex = this.findPlayerIndexByConnection(connection);
+
+    if (disconnectingConnectionIndex > -1) {
+      this.connections.splice(disconnectingConnectionIndex, 1);
+    }
+
+    if (disconnectingPlayerIndex) {
+      this.players.splice(disconnectingPlayerIndex, 1);
+    }
+
+    if (connection.isHost && this.connections.length > 0) {
+      this.migrateHost();
+    }
+
+    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, 0, reason));
+  }
+
+  /**
+   * @internal
+   */
+  handleJoin(connection: Connection): void {
+    this.getLogger().verbose("Connection %s joining", connection);
+
+    this.removeActingHosts();
+
+    if (!connection.lobby) {
+      connection.lobby = this;
+
+      connection.on("packet", (packet: BaseRootPacket) => {
+        this.handlePacket(packet, connection);
+      });
+    }
+
+    switch (this.gameState) {
+      case GameState.NotStarted:
+        this.handleNewJoin(connection);
+        break;
+      case GameState.Ended:
+        // TODO: Dead code, InternalHost#endGame sets gameState to NotStarted
+        this.handleRejoin(connection);
+        break;
+      default:
+        connection.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameStarted)]);
+    }
+  }
+
+  /**
+   * @internal
+   */
+  sendChat(name: string, color: PlayerColor, message: string | TextComponent, _onLeft: boolean): void {
+    if (this.players.length != 0) {
+      const oldName = this.players[0].getName();
+      const oldColor = this.players[0].getColor();
+
+      this.players[0]
+        .setName(name)
+        .setColor(color)
+        .sendChat(message.toString())
+        .setName(oldName)
+        .setColor(oldColor);
+    }
+  }
+
+  /**
+   * @internal
+   */
+  clearMessage(): void {
+    // TODO: this *is* possible, somehow
+  }
+
+  private handlePacket(packet: BaseRootPacket, sender: Connection): void {
     switch (packet.type) {
       case RootPacketType.AlterGameTag: {
         const data = packet as AlterGameTagPacket;
@@ -532,196 +788,6 @@ export class InternalLobby implements LobbyInstance {
       default:
         throw new Error(`Attempted to handle an unimplemented root game packet type: ${packet.type} (${RootPacketType[packet.type]})`);
     }
-  }
-
-  async sendRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): Promise<PromiseSettledResult<void>[]> {
-    const promiseArray: Promise<void>[] = [];
-
-    for (let i = 0; i < sendTo.length; i++) {
-      promiseArray.push(sendTo[i].write(packet));
-    }
-
-    return Promise.allSettled(promiseArray);
-  }
-
-  sendUnreliableRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): void {
-    for (let i = 0; i < sendTo.length; i++) {
-      sendTo[i].writeUnreliable(packet);
-    }
-  }
-
-  sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void {
-    this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.netId, packet)], this.code), sendTo);
-  }
-
-  spawn(entity: BaseInnerNetEntity): void {
-    const type = entity.type;
-
-    switch (type) {
-      case SpawnType.SkeldShipStatus:
-      case SpawnType.SkeldAprilShipStatus:
-      case SpawnType.MiraShipStatus:
-      case SpawnType.PolusShipStatus:
-      case SpawnType.AirshipStatus:
-        this.shipStatus = entity as BaseEntityShipStatus;
-        break;
-      case SpawnType.GameData:
-        this.gameData = entity as EntityGameData;
-        break;
-      case SpawnType.MeetingHud:
-        this.meetingHud = entity as EntityMeetingHud;
-        break;
-      case SpawnType.LobbyBehaviour:
-        this.lobbyBehaviour = entity as EntityLobbyBehaviour;
-        break;
-      case SpawnType.PlayerControl:
-        this.getLogger().warn("Use LobbyInstance#spawnPlayer() to spawn a player");
-
-        return;
-      default:
-        throw new Error(`Attempted to spawn an unsupported SpawnType: ${type as SpawnType} (${SpawnType[type]})`);
-    }
-
-    this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), this.getConnections());
-  }
-
-  spawnPlayer(player: EntityPlayer, playerData: PlayerData): PlayerInstance {
-    if (player.playerControl.playerId != playerData.id) {
-      throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.playerControl.playerId}) != PlayerData(${playerData.id})`);
-    }
-
-    const clientIdInUse = !!this.findPlayerByClientId(player.owner);
-    const playerInstance = new InternalPlayer(this, player, this.findConnection(player.owner));
-
-    this.addPlayer(playerInstance);
-
-    if (!clientIdInUse) {
-      this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.owner, this.hostInstance.getId()));
-    }
-
-    this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
-
-    if (this.gameData) {
-      this.gameData.gameData.players.push(playerData);
-      this.sendRPCPacket(this.gameData.gameData, new UpdateGameDataPacket(this.gameData.gameData.players));
-    }
-
-    return playerInstance;
-  }
-
-  despawn(innerNetObject: BaseInnerNetObject): void {
-    if (innerNetObject.parent.lobby.getCode() != this.code) {
-      throw new Error(`Attempted to despawn an InnerNetObject from a lobby other than its own`);
-    }
-
-    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.netId)], this.code));
-  }
-
-  handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
-    this.hostInstance.handleDisconnect(connection, reason);
-
-    const disconnectingConnectionIndex = this.connections.indexOf(connection);
-    const disconnectingPlayerIndex = this.findPlayerIndexByConnection(connection);
-
-    if (disconnectingConnectionIndex > -1) {
-      this.connections.splice(disconnectingConnectionIndex, 1);
-    }
-
-    if (disconnectingPlayerIndex) {
-      this.players.splice(disconnectingPlayerIndex, 1);
-    }
-
-    if (connection.isHost && this.connections.length > 0) {
-      this.migrateHost();
-    }
-
-    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, 0, reason));
-  }
-
-  handleJoin(connection: Connection): void {
-    this.getLogger().verbose("Connection %s joining", connection);
-
-    this.removeActingHosts();
-
-    if (!connection.lobby) {
-      connection.lobby = this;
-
-      connection.on("packet", (packet: BaseRootPacket) => {
-        this.handlePacket(packet, connection);
-      });
-    }
-
-    switch (this.gameState) {
-      case GameState.NotStarted:
-        this.handleNewJoin(connection);
-        break;
-      case GameState.Ended:
-        // TODO: Dead code, InternalHost#endGame sets gameState to NotStarted
-        this.handleRejoin(connection);
-        break;
-      default:
-        connection.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameStarted)]);
-    }
-  }
-
-  sendChat(name: string, color: PlayerColor, message: string | TextComponent, _onLeft: boolean): void {
-    if (this.players.length != 0) {
-      const oldName = this.players[0].getName();
-      const oldColor = this.players[0].getColor();
-
-      this.players[0]
-        .setName(name)
-        .setColor(color)
-        .sendChat(message.toString())
-        .setName(oldName)
-        .setColor(oldColor);
-    }
-  }
-
-  clearMessage(): void {
-    // TODO: this *is* possible, somehow
-  }
-
-  sendMessage(message: TextComponent | string): void {
-    if (this.gameData === undefined) {
-      throw new Error("sendMessage called without a GameData instance");
-    }
-
-    const playerId = 127;
-    const playerData = new PlayerData(
-      playerId,
-      `[FFFFFFFF]${message.toString()}[FFFFFF00]`,
-      PlayerColor.Red,
-      PlayerHat.None,
-      PlayerPet.None,
-      PlayerSkin.None,
-      false,
-      false,
-      false,
-      [],
-    );
-
-    const entity = new EntityPlayer(
-      this,
-      FakeClientId.Message,
-      this.hostInstance.getNextNetId(),
-      playerId,
-      this.hostInstance.getNextNetId(),
-      this.hostInstance.getNextNetId(),
-      5,
-      new Vector2(39, 39),
-      new Vector2(0, 0),
-    );
-
-    this.sendRootGamePacket(new JoinGameResponsePacket(this.code, FakeClientId.Message, this.hostInstance.getId()));
-    this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code));
-
-    this.connections.forEach(con => {
-      con.flush();
-    });
-
-    this.gameData.gameData.updateGameData([playerData], this.connections);
-    this.sendRootGamePacket(new RemovePlayerPacket(this.code, FakeClientId.Message, this.hostInstance.getId()));
   }
 
   private handleNewJoin(connection: Connection): void {

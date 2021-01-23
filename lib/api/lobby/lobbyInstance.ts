@@ -5,6 +5,7 @@ import { EntityMeetingHud } from "../../protocol/entities/meetingHud";
 import { PlayerData } from "../../protocol/entities/gameData/types";
 import { GameState, AlterGameTag, Level } from "../../types/enums";
 import { EntityGameData } from "../../protocol/entities/gameData";
+import { LobbyListing } from "../../protocol/packets/root/types";
 import { EntityPlayer } from "../../protocol/entities/player";
 import { BaseRPCPacket } from "../../protocol/packets/rpc";
 import { GameOptionsData, Immutable } from "../../types";
@@ -13,11 +14,26 @@ import { LobbySettings } from "./lobbySettings";
 import { PlayerInstance } from "../player";
 import { TextComponent } from "../text";
 import { HostInstance } from "../host";
+import { Logger } from "../../logger";
 import { Server } from "../../server";
 import { Game } from "../game";
 
 export interface LobbyInstance {
+  getLogger(): Logger;
+
   getServer(): Server;
+
+  getAddress(): string;
+
+  getPort(): number;
+
+  getCode(): string;
+
+  getHostName(): string;
+
+  isPublic(): boolean;
+
+  getLobbyListing(): LobbyListing;
 
   getGame(): Game | undefined;
 
@@ -100,12 +116,6 @@ export interface LobbyInstance {
   getGameState(): GameState;
 
   setGameState(gameState: GameState): void;
-
-  getAddress(): string;
-
-  getPort(): number;
-
-  getCode(): string;
 
   sendMessage(message: TextComponent | string): void;
 

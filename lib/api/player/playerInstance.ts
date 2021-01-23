@@ -47,6 +47,8 @@ export interface PlayerInstance {
 
   getRole(): PlayerRole;
 
+  setRole(role: PlayerRole): this;
+
   isImpostor(): boolean;
 
   setImpostor(): void;
