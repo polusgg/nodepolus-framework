@@ -10,6 +10,10 @@ export class MeetingConcludedEvent extends CancellableEvent {
   private tied = false;
   private exiledClientId = -1;
 
+  /**
+   * @param game The game from which this event was fired
+   * @param votes The votes from the meeting
+   */
   constructor(
     private readonly game: Game,
     private votes: VoteResult[],

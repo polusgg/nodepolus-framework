@@ -5,6 +5,10 @@ import { Game } from "../../game";
  * Fired when a game has started.
  */
 export class GameStartedEvent {
+  /**
+   * @param game The game that started
+   * @param impostors The players that were chosen to be an Impostor
+   */
   constructor(
     private readonly game: Game,
     private impostors: PlayerInstance[],

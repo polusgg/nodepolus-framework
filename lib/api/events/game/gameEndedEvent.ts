@@ -6,6 +6,10 @@ import { Game } from "../../game";
  * Fired when a game has ended.
  */
 export class GameEndedEvent extends CancellableEvent {
+  /**
+   * @param game The game that ended
+   * @param reason The reason for why the game ended
+   */
   constructor(
     private readonly game: Game,
     private reason: GameOverReason,

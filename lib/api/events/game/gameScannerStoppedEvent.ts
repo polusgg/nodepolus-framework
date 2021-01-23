@@ -6,6 +6,10 @@ import { Game } from "../../game";
  * Fired when a player has stopped scanning on a Medbay scanner.
  */
 export class GameScannerStoppedEvent extends CancellableEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param player The player that stopped scanning on the Medbay scanner
+   */
   constructor(
     private readonly game: Game,
     private readonly player: PlayerInstance,

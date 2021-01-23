@@ -6,6 +6,10 @@ import { PlayerInstance } from "../../player";
  * Fired when a player has been exiled at the end of a meeting.
  */
 export class PlayerExiledEvent extends PlayerDiedEvent {
+  /**
+   * @param player The player that died
+   * @param voters The players who voted to exile the player
+   */
   constructor(
     player: PlayerInstance,
     private readonly voters: PlayerInstance[],

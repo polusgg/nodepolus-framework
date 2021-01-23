@@ -5,6 +5,10 @@ import { CancellableEvent } from "../types";
  * Fired when a player has cast a vote to kick another player.
  */
 export class PlayerVotekickAddedEvent extends CancellableEvent {
+  /**
+   * @param voter The player that cast the vote
+   * @param target The player that was voted to be kicked by the voting player
+   */
   constructor(
     private readonly voter: PlayerInstance,
     private target: PlayerInstance,

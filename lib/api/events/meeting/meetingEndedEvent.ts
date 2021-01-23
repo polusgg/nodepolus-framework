@@ -6,6 +6,12 @@ import { VoteResult } from "../../../types";
  * Fired when the post-meeting exile animation has finished.
  */
 export class MeetingEndedEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param votes The final votes from the meeting
+   * @param tie Whether or not the voting phase of the meeting ended in a tie
+   * @param exiledPlayer The player that was exiled as a result of the final votes
+   */
   constructor(
     private readonly game: Game,
     private readonly votes: VoteResult[],

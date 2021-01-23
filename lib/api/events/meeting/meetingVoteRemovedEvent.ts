@@ -6,6 +6,10 @@ import { Game } from "../../game";
  * Fired when a player's vote has been rescinded in a meeting.
  */
 export class MeetingVoteRemovedEvent extends CancellableEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param player The player whose vote is being cleared
+   */
   constructor(
     private readonly game: Game,
     private player: PlayerInstance,

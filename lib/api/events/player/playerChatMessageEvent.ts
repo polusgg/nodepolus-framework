@@ -6,6 +6,10 @@ import { TextComponent } from "../../text";
  * Fired when a player has sent a chat message in a lobby.
  */
 export class PlayerChatMessageEvent extends CancellableEvent {
+  /**
+   * @param player The player that sent the chat message
+   * @param message The chat message
+   */
   constructor(
     private readonly player: PlayerInstance,
     private message: TextComponent,

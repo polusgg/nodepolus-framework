@@ -6,6 +6,11 @@ import { Game } from "../../game";
  * Fired when a player has left the queue for a Medbay scanner.
  */
 export class GameScannerDequeuedEvent extends CancellableEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param player The player that left the queue for the Medbay scanner
+   * @param queue The queue for the Medbay scanner, *excluding* the player that left
+   */
   constructor(
     private readonly game: Game,
     private readonly player: PlayerInstance,

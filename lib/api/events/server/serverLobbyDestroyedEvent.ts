@@ -5,6 +5,9 @@ import { CancellableEvent } from "../types";
  * Fired when a lobby has been destroyed.
  */
 export class ServerLobbyDestroyedEvent extends CancellableEvent {
+  /**
+   * @param lobby The lobby that will be destroyed
+   */
   constructor(
     private readonly lobby: LobbyInstance,
   ) {

@@ -7,6 +7,11 @@ import { Game } from "../../game";
  * Fired when a player has exited a vent.
  */
 export class GameVentExitedEvent extends CancellableEvent {
+  /**
+   * @param gam The game from which this event was fired
+   * @param playe The player that exited the vent
+   * @param ven The vent that the player exited
+   */
   constructor(
     private readonly game: Game,
     private readonly player: PlayerInstance,

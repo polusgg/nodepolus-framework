@@ -7,6 +7,12 @@ import { CancellableEvent } from "../types";
  * Fired when a player has been kicked from a lobby.
  */
 export class PlayerKickedEvent extends CancellableEvent {
+  /**
+   * @param lobby The lobby that the player was kicked from
+   * @param player The player that was kicked
+   * @param kickingPlayer The player that kicked the player
+   * @param reason The disconnect reason to be sent to the player
+   */
   constructor(
     private readonly lobby: LobbyInstance,
     private readonly player: PlayerInstance,

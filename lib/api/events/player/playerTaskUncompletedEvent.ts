@@ -6,6 +6,11 @@ import { LevelTask } from "../../../types";
  * Fired when a player has had one of their tasks updated to an incomplete state.
  */
 export class PlayerTaskUncompletedEvent extends CancellableEvent {
+  /**
+   * @param player The player whose task was uncompleted
+   * @param taskIndex The index of the task that was uncompleted from the player's task list
+   * @param taskInfo The task that was uncompleted
+   */
   constructor(
     private readonly player: PlayerInstance,
     private readonly taskIndex: number,

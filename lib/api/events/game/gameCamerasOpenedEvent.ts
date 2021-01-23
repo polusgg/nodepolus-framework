@@ -5,6 +5,10 @@ import { Game } from "../../game";
  * Fired when a player has started viewing security cameras.
  */
 export class GameCamerasOpenedEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param player The player that started viewing security cameras
+   */
   constructor(
     private readonly game: Game,
     private readonly player: PlayerInstance,

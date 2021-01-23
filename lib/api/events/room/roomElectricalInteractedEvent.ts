@@ -6,10 +6,16 @@ import { Game } from "../../game";
  * Fired when a switch has been flipped during an electrical sabotage.
  */
 export class RoomElectricalInteractedEvent extends CancellableEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param index The switch that was flipped
+   * @param flipped Whether or not the switch is flipped up
+   * @param player The player that flipped the switch
+   */
   constructor(
     private readonly game: Game,
     private readonly index: number,
-    private state: boolean,
+    private flipped: boolean,
     private readonly player?: PlayerInstance,
   ) {
     super();
@@ -30,21 +36,21 @@ export class RoomElectricalInteractedEvent extends CancellableEvent {
   }
 
   /**
-   * Gets the toggled state of the switch.
+   * Gets whether or not the switch is flipped up.
    *
    * @returns `true` if flipped up, `false` if down
    */
   isFlipped(): boolean {
-    return this.state;
+    return this.flipped;
   }
 
   /**
-   * Sets the toggles state of the switch.
+   * Sets whether or not the switch is flipped up.
    *
-   * @param state The new toggled state of the switch: `true` for flipped up, `false` for down
+   * @param flipped `true` for flipped up, `false` for down
    */
-  setFlipped(state: boolean): void {
-    this.state = state;
+  setFlipped(flipped: boolean): void {
+    this.flipped = flipped;
   }
 
   /**

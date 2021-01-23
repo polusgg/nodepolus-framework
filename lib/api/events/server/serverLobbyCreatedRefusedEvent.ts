@@ -6,6 +6,10 @@ import { CancellableEvent } from "../types";
  * Fired when a connection tries to create a lobby while the server is full.
  */
 export class ServerLobbyCreatedRefusedEvent extends CancellableEvent {
+  /**
+   * @param connection The connection for which the server refused to create a lobby
+   * @param disconnectReason The disconnect reason to be sent to the connection (default `ServerFull`)
+   */
   constructor(
     private readonly connection: Connection,
     private disconnectReason: DisconnectReason = DisconnectReason.serverFull(),

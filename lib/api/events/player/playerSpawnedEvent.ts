@@ -6,6 +6,13 @@ import { Vector2 } from "../../../types";
  * Fired when a player is being spawned in a lobby.
  */
 export class PlayerSpawnedEvent {
+  /**
+   * @param connection The connection that the player belongs to
+   * @param lobby The lobby in which the player is being spawned
+   * @param playerId The ID of the player being spawned
+   * @param newPlayer Whether or not the player is considered new and should hop out of a dropship chair
+   * @param position The player's spawn position
+   */
   constructor(
     private readonly connection: Connection | undefined,
     private readonly lobby: LobbyInstance,

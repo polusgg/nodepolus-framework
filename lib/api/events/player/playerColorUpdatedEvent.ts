@@ -6,6 +6,11 @@ import { CancellableEvent } from "../types";
  * Fired when a player's color has been updated.
  */
 export class PlayerColorUpdatedEvent extends CancellableEvent {
+  /**
+   * @param player The player whose color was updated
+   * @param oldColor The player's old color
+   * @param newColor The player's new color
+   */
   constructor(
     private readonly player: PlayerInstance,
     private readonly oldColor: PlayerColor,

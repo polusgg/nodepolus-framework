@@ -7,6 +7,9 @@ import { DisconnectableEvent } from "../types";
  * packet.
  */
 export class ConnectionOpenedEvent extends DisconnectableEvent {
+  /**
+   * @param connection The connection that was opened
+   */
   constructor(
     private readonly connection: Connection,
   ) {

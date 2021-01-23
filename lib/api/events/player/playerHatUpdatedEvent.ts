@@ -6,6 +6,11 @@ import { CancellableEvent } from "../types";
  * Fired when a player's hat has been updated.
  */
 export class PlayerHatUpdatedEvent extends CancellableEvent {
+  /**
+   * @param player The player whose hat was updated
+   * @param oldHat The player's old hat
+   * @param newHat The player's new hat
+   */
   constructor(
     private readonly player: PlayerInstance,
     private readonly oldHat: PlayerHat,

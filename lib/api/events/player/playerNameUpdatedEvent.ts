@@ -6,6 +6,11 @@ import { TextComponent } from "../../text";
  * Fired when a player's name has been updated.
  */
 export class PlayerNameUpdatedEvent extends CancellableEvent {
+  /**
+   * @param player The player whose name was updated
+   * @param oldName The player's old name
+   * @param newName The player's new name
+   */
   constructor(
     private readonly player: PlayerInstance,
     private readonly oldName: TextComponent,

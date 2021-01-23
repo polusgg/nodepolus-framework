@@ -7,6 +7,11 @@ import { LobbyInstance } from "../../lobby";
  * Fired when a connection tries to join a lobby that is full.
  */
 export class ServerLobbyJoinRefusedEvent extends CancellableEvent {
+  /**
+   * @param connection The connection that the lobby refused to allow to join
+   * @param lobby The lobby that refused the connection
+   * @param disconnectReason The disconnect reason to be sent to the connection (default `GameFull`)
+   */
   constructor(
     private readonly connection: Connection,
     private readonly lobby: LobbyInstance,

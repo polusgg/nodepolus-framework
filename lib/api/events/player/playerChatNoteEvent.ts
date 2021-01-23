@@ -6,6 +6,10 @@ import { CancellableEvent } from "../types";
  * Fired when a player has sent a chat note in a lobby.
  */
 export class PlayerChatNoteEvent extends CancellableEvent {
+  /**
+   * @param player The player that sent the chat note
+   * @param chatNoteType The type of chat note that was sent
+   */
   constructor(
     private readonly player: PlayerInstance,
     private chatNoteType: ChatNoteType,

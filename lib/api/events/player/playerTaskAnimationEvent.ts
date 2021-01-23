@@ -6,6 +6,10 @@ import { CancellableEvent } from "../types";
  * Fired when a player has completed one of their tasks.
  */
 export class PlayerTaskAnimationEvent extends CancellableEvent {
+  /**
+   * @param player The player that is playing a task animation
+   * @param taskType The type of task whose animation is being played
+   */
   constructor(
     private readonly player: PlayerInstance,
     private taskType: TaskType,

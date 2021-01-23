@@ -5,6 +5,11 @@ import { Game } from "../../game";
  * Fired when a communications console has been opened by a player.
  */
 export class RoomCommunicationsConsoleOpenedEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param player The player that opened the communications panel
+   * @param console The communications console that was opened
+   */
   constructor(
     private readonly game: Game,
     private readonly player: PlayerInstance,

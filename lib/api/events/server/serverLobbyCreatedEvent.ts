@@ -7,6 +7,10 @@ import { LobbyInstance } from "../../lobby";
  * Fired when a new lobby has been created.
  */
 export class ServerLobbyCreatedEvent extends DisconnectableEvent {
+  /**
+   * @param connection The connection that created the lobby
+   * @param lobby The newly created lobby
+   */
   constructor(
     private readonly connection: Connection,
     private readonly lobby: LobbyInstance,

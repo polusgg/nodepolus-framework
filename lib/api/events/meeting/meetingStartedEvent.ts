@@ -7,6 +7,11 @@ import { Game } from "../../game";
  * dead body.
  */
 export class MeetingStartedEvent extends CancellableEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param caller The player that called the meeting
+   * @param victim The player whose dead body was found
+   */
   constructor(
     private readonly game: Game,
     private caller: PlayerInstance,

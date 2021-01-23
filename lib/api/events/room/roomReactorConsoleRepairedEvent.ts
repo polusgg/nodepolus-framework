@@ -6,6 +6,11 @@ import { Game } from "../../game";
  * Fired when a reactor console has been repaired.
  */
 export class RoomReactorConsoleRepairedEvent extends CancellableEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param console The console that was repaired
+   * @param player The player that repaired the reactor console
+   */
   constructor(
     private readonly game: Game,
     private readonly console: number,

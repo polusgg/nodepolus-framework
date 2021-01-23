@@ -6,6 +6,11 @@ import { CancellableEvent } from "../types";
  * Fired when a player's role has been changed to either crewmate or impostor.
  */
 export class PlayerRoleUpdatedEvent extends CancellableEvent {
+  /**
+   * @param player The player whose role was updatd
+   * @param newRole The player's old role
+   * @param oldRole The player's new role
+   */
   constructor(
     private readonly player: PlayerInstance,
     private newRole: PlayerRole,

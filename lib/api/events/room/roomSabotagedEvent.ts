@@ -7,6 +7,11 @@ import { Game } from "../../game";
  * Fired when a room has been sabotaged.
  */
 export class RoomSabotagedEvent extends CancellableEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param room The room that was sabotaged
+   * @param player The player that sabotaged the room
+   */
   constructor(
     private readonly game: Game,
     private readonly room: BaseGameRoom,

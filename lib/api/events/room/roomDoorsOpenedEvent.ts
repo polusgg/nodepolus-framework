@@ -6,6 +6,11 @@ import { Door, Game } from "../../game";
  * Fired when the doors of a room have opened.
  */
 export class RoomDoorsOpenedEvent extends CancellableEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param doors The doors that were opened
+   * @param player The player that opened the doors
+   */
   constructor(
     private readonly game: Game,
     private doors: Door[],

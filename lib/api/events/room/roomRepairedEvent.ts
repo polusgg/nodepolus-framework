@@ -7,6 +7,11 @@ import { Game } from "../../game";
  * Fired when a sabotaged room has been repaired.
  */
 export class RoomRepairedEvent extends CancellableEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param room The room that was repaired
+   * @param player The player that repaired the room
+   */
   constructor(
     private readonly game: Game,
     private readonly room: BaseGameRoom,
@@ -23,7 +28,7 @@ export class RoomRepairedEvent extends CancellableEvent {
   }
 
   /**
-   * Gets the room that was repaired
+   * Gets the room that was repaired.
    */
   getRoom(): BaseGameRoom {
     return this.room;

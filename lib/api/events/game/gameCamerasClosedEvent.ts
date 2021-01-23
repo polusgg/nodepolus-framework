@@ -5,6 +5,10 @@ import { Game } from "../../game";
  * Fired when a player has stopped viewing security cameras.
  */
 export class GameCamerasClosedEvent {
+  /**
+   * @param game The game from which this event was fired
+   * @param player The player that stopped viewing security cameras
+   */
   constructor(
     private readonly game: Game,
     private readonly player: PlayerInstance,

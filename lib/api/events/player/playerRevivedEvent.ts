@@ -5,6 +5,9 @@ import { CancellableEvent } from "../types";
  * Fired when a player has been brought back to life.
  */
 export class PlayerRevivedEvent extends CancellableEvent {
+  /**
+   * @param player The player that was revived
+   */
   constructor(
     private readonly player: PlayerInstance,
   ) {

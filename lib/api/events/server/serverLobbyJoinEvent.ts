@@ -7,6 +7,11 @@ import { LobbyInstance } from "../../lobby";
  * Fired when a connection is attempting to join a lobby.
  */
 export class ServerLobbyJoinEvent extends DisconnectableEvent {
+  /**
+   * @param connection The connection that is joining the lobby
+   * @param lobbyCode The lobby code provided by the connection
+   * @param lobby The lobby that is being joined
+   */
   constructor(
     private readonly connection: Connection,
     private readonly lobbyCode: string,

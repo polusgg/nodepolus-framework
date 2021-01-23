@@ -6,6 +6,11 @@ import { CancellableEvent } from "../types";
  * Fired when the start-game countdown has begun.
  */
 export class LobbyCountdownStartedEvent extends CancellableEvent {
+  /**
+   * @param lobby The lobby from which this event was fired
+   * @param secondsUntilStart The number of seconds until the game will start
+   * @param starter The player that clicked the Start Game button
+   */
   constructor(
     private readonly lobby: LobbyInstance,
     private secondsUntilStart: number,
@@ -22,15 +27,6 @@ export class LobbyCountdownStartedEvent extends CancellableEvent {
   }
 
   /**
-   * Gets the player that clicked the Start Game button.
-   *
-   * @returns The player that is starting the game, or `undefined` if the game is being started via the API
-   */
-  getStarter(): PlayerInstance | undefined {
-    return this.starter;
-  }
-
-  /**
    * Gets the number of seconds until the game will start.
    */
   getSecondsUntilStart(): number {
@@ -44,5 +40,14 @@ export class LobbyCountdownStartedEvent extends CancellableEvent {
    */
   setSecondsUntilStart(secondsUntilStart: number): void {
     this.secondsUntilStart = secondsUntilStart;
+  }
+
+  /**
+   * Gets the player that clicked the Start Game button.
+   *
+   * @returns The player that is starting the game, or `undefined` if the game is being started via the API
+   */
+  getStarter(): PlayerInstance | undefined {
+    return this.starter;
   }
 }

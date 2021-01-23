@@ -6,6 +6,10 @@ import { DisconnectReason } from "../../../types";
  * connection or forcibly by the server.
  */
 export class ConnectionClosedEvent {
+  /**
+   * @param connection The connection that was closed
+   * @param reason The reason for why the connection was closed (default `ServerRequest`)
+   */
   constructor(
     private readonly connection: Connection,
     private readonly reason: DisconnectReason = DisconnectReason.serverRequest(),

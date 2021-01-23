@@ -6,6 +6,11 @@ import { CancellableEvent } from "../types";
  * Fired when a player has died, either by being exiled or by being murdered.
  */
 export class PlayerDiedEvent extends CancellableEvent {
+  /**
+   * @param player The player that died
+   * @param reason The reason for why the player died
+   * @param killer The player that killed the victim
+   */
   constructor(
     private readonly player: PlayerInstance,
     private readonly reason: DeathReason,

@@ -6,6 +6,11 @@ import { CancellableEvent } from "../types";
  * Fired when a player's pet has been updated.
  */
 export class PlayerPetUpdatedEvent extends CancellableEvent {
+  /**
+   * @param player The player whose pet was updated
+   * @param oldPet The player's old pet
+   * @param newPet The player's new pet
+   */
   constructor(
     private readonly player: PlayerInstance,
     private readonly oldPet: PlayerPet,
