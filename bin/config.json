@@ -2,10 +2,12 @@
   "serverAddress": "0.0.0.0",
   "serverPort": 22023,
   "enableAnnouncementServer": true,
+  "maxLobbies": 100000,
+  "maxConnectionsPerAddress": 10,
   "lobby": {
     "defaultAddress": "0.0.0.0",
     "defaultPort": 22023,
-    "maxPlayers": 1
+    "maxPlayers": 10
   },
   "logging": {
     "level": "info",

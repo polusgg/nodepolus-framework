@@ -23,6 +23,18 @@ export type ServerConfig = {
    */
   enableAnnouncementServer?: boolean;
   /**
+   * The maximum number of lobbies that the server will host at a time.
+   *
+   * @defaultValue `100000`
+   */
+  maxLobbies?: number;
+  /**
+   * The maximum number of connections allowed per IP address.
+   *
+   * @defaultValue `10`
+   */
+  maxConnectionsPerAddress?: number;
+  /**
    * Lobby configuration.
    */
   lobby?: {
@@ -61,7 +73,7 @@ export type ServerConfig = {
     /**
      * The maximum size in bytes for the server log file before it is rotated.
      *
-     * @defaultValue `104857600`
+     * @defaultValue `104857600` (100 MB)
      */
     maxFileSizeInBytes?: number;
     /**

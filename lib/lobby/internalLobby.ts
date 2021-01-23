@@ -650,19 +650,19 @@ export class InternalLobby implements LobbyInstance {
       const count = this.connections.length;
 
       if (count >= this.options.maxPlayers || count >= this.server.getMaxPlayersPerLobby()) {
-        this.getLogger().verbose("Kicking connection %s from full lobby", connection);
-
         const event = new ServerLobbyJoinRefusedEvent(connection, this);
 
         await this.server.emit("server.lobby.join.refused", event);
 
         if (!event.isCancelled()) {
-          connection.write(new JoinGameErrorPacket(DisconnectReason.gameFull()));
+          this.getLogger().verbose("Preventing connection %s from joining full lobby", connection);
+
+          connection.write(new JoinGameErrorPacket(event.getDisconnectReason()));
 
           return;
         }
 
-        this.getLogger().verbose("Cancelled kicking connection %s from full lobby", connection);
+        this.getLogger().verbose("Allowing connection %s to join full lobby", connection);
       }
     }
 

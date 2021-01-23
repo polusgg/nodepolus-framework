@@ -22,6 +22,8 @@ export enum MaxValue {
   UInt32 = 4294967295,
 }
 
+// TODO: Make a `Defaults` object to reduce number of imports for these values
+
 /**
  * The default address that NodePolus will bind to.
  */
@@ -36,6 +38,16 @@ export const DEFAULT_SERVER_PORT = 22023;
  * The port that the announcement server will listen on.
  */
 export const ANNOUNCEMENT_SERVER_PORT = 22024;
+
+/**
+ * The default maximum number of lobbies that the server will host at a time.
+ */
+export const DEFAULT_MAX_LOBBIES = 100000;
+
+/**
+ * The default maximum number of connections allowed per IP address.
+ */
+export const DEFAULT_MAX_CONNECTIONS_PER_ADDRESS = 10;
 
 /**
  * The default maximum number of players that the server will allow in a lobby.

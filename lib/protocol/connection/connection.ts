@@ -96,6 +96,13 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     }, 50);
 
     // TODO: Timeout clients and remove dead connections
+    /**
+     * TODO: Add max-connection-per-address logic
+     * Use the value from `server.getMaxConnectionsPerAddress()`
+     * We need to make sure we disconnect and remove references to all
+     * connections when they die (client disconnects, server disconnects, client
+     * loses connection/times out)
+     */
   }
 
   hasMeta(key: string): boolean {

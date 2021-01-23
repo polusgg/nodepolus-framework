@@ -77,6 +77,7 @@ import {
 } from "./room";
 import {
   ServerLobbyCreatedEvent,
+  ServerLobbyCreatedRefusedEvent,
   ServerLobbyDestroyedEvent,
   ServerLobbyJoinEvent,
   ServerLobbyJoinRefusedEvent,
@@ -192,6 +193,7 @@ export type ServerEvents = {
    * Server Events
    */
   "server.lobby.created": ServerLobbyCreatedEvent;
+  "server.lobby.created.refused": ServerLobbyCreatedRefusedEvent;
   "server.lobby.destroyed": ServerLobbyDestroyedEvent;
   "server.lobby.join": ServerLobbyJoinEvent;
   "server.lobby.join.refused": ServerLobbyJoinRefusedEvent;

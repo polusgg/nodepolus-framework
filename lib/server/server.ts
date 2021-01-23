@@ -1,5 +1,3 @@
-import { ServerLobbyCreatedEvent, ServerLobbyDestroyedEvent, ServerLobbyJoinEvent, ServerLobbyListEvent } from "../api/events/server";
-import { DEFAULT_MAX_PLAYERS, DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { PlayerBannedEvent, PlayerKickedEvent, PlayerLeftEvent } from "../api/events/player";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
 import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
@@ -24,6 +22,21 @@ import {
   JoinGameErrorPacket,
   JoinGameRequestPacket,
 } from "../protocol/packets/root";
+import {
+  ServerLobbyCreatedEvent,
+  ServerLobbyCreatedRefusedEvent,
+  ServerLobbyDestroyedEvent,
+  ServerLobbyJoinEvent,
+  ServerLobbyListEvent,
+} from "../api/events/server";
+import {
+  DEFAULT_MAX_CONNECTIONS_PER_ADDRESS,
+  DEFAULT_MAX_LOBBIES,
+  DEFAULT_MAX_PLAYERS,
+  DEFAULT_SERVER_ADDRESS,
+  DEFAULT_SERVER_PORT,
+  MaxValue,
+} from "../util/constants";
 
 export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   private readonly startedAt = Date.now();
@@ -68,6 +81,14 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
   getPort(): number {
     return this.config.serverPort ?? DEFAULT_SERVER_PORT;
+  }
+
+  getMaxLobbies(): number {
+    return this.config.maxLobbies ?? DEFAULT_MAX_LOBBIES;
+  }
+
+  getMaxConnectionsPerAddress(): number {
+    return this.config.maxConnectionsPerAddress ?? DEFAULT_MAX_CONNECTIONS_PER_ADDRESS;
   }
 
   getDefaultLobbyAddress(): string {
@@ -242,6 +263,22 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     switch (packet.type) {
       case RootPacketType.HostGame: {
         this.getLogger().verbose("Connection %s trying to host lobby", sender);
+
+        if (this.lobbies.length >= this.getMaxLobbies()) {
+          const event = new ServerLobbyCreatedRefusedEvent(sender);
+
+          await this.emit("server.lobby.created.refused", event);
+
+          if (!event.isCancelled()) {
+            this.getLogger().verbose("Preventing connection %s from hosting lobby on full server", sender);
+
+            sender.write(new JoinGameErrorPacket(event.getDisconnectReason()));
+
+            return;
+          }
+
+          this.getLogger().verbose("Allowing connection %s to host lobby on full server", sender);
+        }
 
         let lobbyCode = LobbyCode.generate();
 
