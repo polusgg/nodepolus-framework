@@ -1,5 +1,6 @@
 import { AnnouncementServer } from "../lib/announcementServer";
 import { ServerConfig } from "../lib/api/config/serverConfig";
+import { DEFAULT_CONFIG } from "../lib/util/constants";
 import { Plugin } from "../lib/api/plugin";
 import { Logger } from "../lib/logger";
 import { Server } from "../lib/server";
@@ -24,7 +25,7 @@ declare const announcementServer: AnnouncementServer | undefined;
     (global as any).server = new Server(serverConfig);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (global as any).announcementServer = (serverConfig.enableAnnouncementServer ?? false)
+    (global as any).announcementServer = (serverConfig.enableAnnouncementServer ?? DEFAULT_CONFIG.enableAnnouncementServer)
       ? new AnnouncementServer(server.getAddress(), server.getLogger("Announcements"))
       : undefined;
 

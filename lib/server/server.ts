@@ -4,6 +4,7 @@ import { PacketDestination, RootPacketType } from "../protocol/packets/types/enu
 import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
 import { DisconnectReasonType, FakeClientId } from "../types/enums";
 import { BasicServerEvents, ServerEvents } from "../api/events";
+import { DEFAULT_CONFIG, MaxValue } from "../util/constants";
 import { ConnectionInfo, DisconnectReason } from "../types";
 import { Connection } from "../protocol/connection";
 import { LobbyCode } from "../util/lobbyCode";
@@ -29,14 +30,6 @@ import {
   ServerLobbyJoinEvent,
   ServerLobbyListEvent,
 } from "../api/events/server";
-import {
-  DEFAULT_MAX_CONNECTIONS_PER_ADDRESS,
-  DEFAULT_MAX_LOBBIES,
-  DEFAULT_MAX_PLAYERS,
-  DEFAULT_SERVER_ADDRESS,
-  DEFAULT_SERVER_PORT,
-  MaxValue,
-} from "../util/constants";
 
 export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   private readonly startedAt = Date.now();
@@ -56,10 +49,10 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
     this.logger = new Logger(
       "Server",
-      [process.env.NP_LOG_LEVEL, this.config.logging?.level].find(Logger.isValidLevel) ?? "info",
-      this.config.logging?.filename ?? "server.log",
-      this.config.logging?.maxFileSizeInBytes ?? 104857600,
-      this.config.logging?.maxFiles ?? 10,
+      [process.env.NP_LOG_LEVEL, this.config.logging?.level].find(Logger.isValidLevel) ?? DEFAULT_CONFIG.logging.level,
+      this.config.logging?.filename ?? DEFAULT_CONFIG.logging.filename,
+      this.config.logging?.maxFileSizeInBytes ?? DEFAULT_CONFIG.logging.maxFileSizeInBytes,
+      this.config.logging?.maxFiles ?? DEFAULT_CONFIG.logging.maxFiles,
     );
 
     this.serverSocket.on("message", (buf, remoteInfo) => {
@@ -76,31 +69,31 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   }
 
   getAddress(): string {
-    return this.config.serverAddress ?? DEFAULT_SERVER_ADDRESS;
+    return this.config.serverAddress ?? DEFAULT_CONFIG.serverAddress;
   }
 
   getPort(): number {
-    return this.config.serverPort ?? DEFAULT_SERVER_PORT;
+    return this.config.serverPort ?? DEFAULT_CONFIG.serverPort;
   }
 
   getMaxLobbies(): number {
-    return this.config.maxLobbies ?? DEFAULT_MAX_LOBBIES;
+    return this.config.maxLobbies ?? DEFAULT_CONFIG.maxLobbies;
   }
 
   getMaxConnectionsPerAddress(): number {
-    return this.config.maxConnectionsPerAddress ?? DEFAULT_MAX_CONNECTIONS_PER_ADDRESS;
+    return this.config.maxConnectionsPerAddress ?? DEFAULT_CONFIG.maxConnectionsPerAddress;
   }
 
   getDefaultLobbyAddress(): string {
-    return this.config.lobby?.defaultAddress ?? this.getAddress();
+    return this.config.lobby?.defaultAddress ?? DEFAULT_CONFIG.lobby.defaultAddress;
   }
 
   getDefaultLobbyPort(): number {
-    return this.config.lobby?.defaultPort ?? this.getPort();
+    return this.config.lobby?.defaultPort ?? DEFAULT_CONFIG.lobby.defaultPort;
   }
 
   getMaxPlayersPerLobby(): number {
-    return this.config.lobby?.maxPlayers ?? DEFAULT_MAX_PLAYERS;
+    return this.config.lobby?.maxPlayers ?? DEFAULT_CONFIG.lobby.maxPlayers;
   }
 
   getStartedAt(): number {

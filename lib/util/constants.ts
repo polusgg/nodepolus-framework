@@ -1,3 +1,6 @@
+import { ServerConfig } from "../api/config";
+import { AllRequired } from "../types";
+
 /**
  * A mapping of integer types to their minimum values.
  */
@@ -22,37 +25,32 @@ export enum MaxValue {
   UInt32 = 4294967295,
 }
 
-// TODO: Make a `Defaults` object to reduce number of imports for these values
-
 /**
- * The default address that NodePolus will bind to.
+ * The default ServerConfig values.
  */
-export const DEFAULT_SERVER_ADDRESS = "0.0.0.0";
-
-/**
- * The default port that NodePolus will listen on.
- */
-export const DEFAULT_SERVER_PORT = 22023;
+export const DEFAULT_CONFIG: AllRequired<ServerConfig> = {
+  serverAddress: "0.0.0.0",
+  serverPort: 22023,
+  enableAnnouncementServer: false,
+  maxLobbies: 100000,
+  maxConnectionsPerAddress: 10,
+  lobby: {
+    defaultAddress: "0.0.0.0",
+    defaultPort: 22023,
+    maxPlayers: 10,
+  },
+  logging: {
+    level: "info",
+    filename: "server.log",
+    maxFileSizeInBytes: 104857600,
+    maxFiles: 10,
+  },
+};
 
 /**
  * The port that the announcement server will listen on.
  */
 export const ANNOUNCEMENT_SERVER_PORT = 22024;
-
-/**
- * The default maximum number of lobbies that the server will host at a time.
- */
-export const DEFAULT_MAX_LOBBIES = 100000;
-
-/**
- * The default maximum number of connections allowed per IP address.
- */
-export const DEFAULT_MAX_CONNECTIONS_PER_ADDRESS = 10;
-
-/**
- * The default maximum number of players that the server will allow in a lobby.
- */
-export const DEFAULT_MAX_PLAYERS = 10;
 
 /**
  * The maximum byte size of an outgoing packet.

@@ -71,6 +71,12 @@ export type ServerConfig = {
      */
     level?: LogLevel;
     /**
+     * The name of the server log file.
+     *
+     * @defaultValue `server.log`
+     */
+    filename?: string;
+    /**
      * The maximum size in bytes for the server log file before it is rotated.
      *
      * @defaultValue `104857600` (100 MB)
@@ -82,11 +88,5 @@ export type ServerConfig = {
      * @defaultValue `10`
      */
     maxFiles?: number;
-    /**
-     * The name of the server log file.
-     *
-     * @defaultValue `server.log`
-     */
-    filename?: string;
   };
 };
