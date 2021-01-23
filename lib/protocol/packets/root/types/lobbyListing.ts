@@ -112,6 +112,15 @@ export class LobbyListing {
   }
 
   /**
+   * Gets whether or not the lobby has reached its maximum number of players.
+   *
+   * @returns `true` if `getPlayerCount() >= getMaxPlayers()`, `false` if not
+   */
+  isFull(): boolean {
+    return this.playerCount >= this.maxPlayers;
+  }
+
+  /**
    * Writes the LobbyListing to the given MessageWriter
    *
    * @param reader The MessageWriter to write to

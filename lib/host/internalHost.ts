@@ -118,6 +118,426 @@ export class InternalHost implements HostInstance {
     return this.netIdIndex++;
   }
 
+  async startCountdown(count: number, starter?: PlayerInstance): Promise<void> {
+    const event = new LobbyCountdownStartedEvent(this.lobby, count, starter);
+
+    await this.lobby.getServer().emit("lobby.countdown.started", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
+    this.secondsUntilStart = event.getSecondsUntilStart();
+
+    const countdownFunction = (): void => {
+      const time = this.secondsUntilStart--;
+
+      if (this.lobby.getPlayers().length) {
+        this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
+          this.lobby.getConnections(),
+          new SetStartCounterPacket(this.counterSequenceId += 5, time),
+        );
+      }
+
+      if (time <= 0) {
+        if (this.countdownInterval) {
+          clearInterval(this.countdownInterval);
+        }
+
+        this.startGame();
+      }
+    };
+
+    countdownFunction();
+
+    this.countdownInterval = setInterval(countdownFunction, 1000);
+  }
+
+  async stopCountdown(): Promise<void> {
+    const event = new LobbyCountdownStoppedEvent(this.lobby, this.secondsUntilStart);
+
+    await this.lobby.getServer().emit("lobby.countdown.stopped", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
+    this.secondsUntilStart = -1;
+
+    if (this.lobby.getPlayers().length > 0) {
+      this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
+        this.lobby.getConnections(),
+        new SetStartCounterPacket(this.counterSequenceId += 5, -1),
+      );
+    }
+
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+  }
+
+  async startGame(): Promise<void> {
+    this.lobby.setGame(new Game(this.lobby));
+
+    const event = new GameStartingEvent(this.lobby.getGame()!);
+
+    await this.lobby.getServer().emit("game.starting", event);
+
+    if (event.isCancelled()) {
+      this.lobby.setGame();
+
+      return;
+    }
+
+    this.lobby.sendRootGamePacket(new StartGamePacket(this.lobby.getCode()));
+  }
+
+  async setInfected(infectedCount: number): Promise<void> {
+    const gameData = this.lobby.getGameData();
+
+    if (!gameData) {
+      throw new Error("GameData does not exist on the lobby instance");
+    }
+
+    const players = this.lobby.getPlayers();
+
+    infectedCount = Math.min(infectedCount, Math.max(0, Math.floor(players.length / 2) - 1));
+
+    let impostors = shuffleArrayClone(players)
+      .slice(0, infectedCount)
+      .map(player => player);
+    const selectedIds = impostors.map(player => player.getId());
+    const promises = (await Promise.all(players.map(async player => {
+      const event = new PlayerRoleUpdatedEvent(player, selectedIds.includes(player.getId()) ? PlayerRole.Impostor : PlayerRole.Crewmate);
+
+      await this.lobby.getServer().emit("player.role.updated", event);
+
+      return event;
+    })));
+
+    for (let i = 0; i < promises.length; i++) {
+      const event = promises[i];
+
+      if (event.isCancelled() || event.getNewRole() == PlayerRole.Crewmate) {
+        const index = impostors.findIndex(impostor => impostor.getId() == event.getPlayer().getId());
+
+        if (index > -1) {
+          impostors.splice(index, 1);
+        }
+      } else if (event.getNewRole() == PlayerRole.Impostor) {
+        if (impostors.findIndex(impostor => impostor.getId() == event.getPlayer().getId()) == -1) {
+          impostors.push(event.getPlayer() as InternalPlayer);
+        }
+      }
+    }
+
+    const event = new GameStartedEvent(this.lobby.getGame()!, impostors);
+
+    await this.lobby.getServer().emit("game.started", event);
+
+    impostors = event.getImpostors() as InternalPlayer[];
+
+    for (let i = 0; i < impostors.length; i++) {
+      const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == impostors[i].getId());
+
+      if (gameDataPlayerIndex == -1) {
+        throw new Error(`Player ${impostors[i].getId()} does not have a PlayerData instance o the GameData instance`);
+      }
+
+      gameData.gameData.players[gameDataPlayerIndex].isImpostor = true;
+      impostors[i].setRole(PlayerRole.Impostor);
+    }
+
+    this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
+      this.lobby.getConnections(),
+      new SetInfectedPacket(impostors.map(player => player.getId())),
+    );
+  }
+
+  setTasks(): void {
+    const options = this.lobby.getOptions();
+    const level = options.levels[0];
+    const numCommon = options.commonTaskCount;
+    const numLong = options.longTaskCount;
+    // Minimum of 1 short task
+    const numShort = numCommon + numLong + options.shortTaskCount > 0 ? options.shortTaskCount : 1;
+    const allTasks = Tasks.forLevel(level);
+    const allCommon: LevelTask[] = [];
+    const allShort: LevelTask[] = [];
+    const allLong: LevelTask[] = [];
+
+    for (let i = 0; i < allTasks.length; i++) {
+      const task = allTasks[i];
+
+      switch (task.length) {
+        case TaskLength.Common:
+          allCommon.push(task);
+          break;
+        case TaskLength.Short:
+          allShort.push(task);
+          break;
+        case TaskLength.Long:
+          allLong.push(task);
+          break;
+      }
+    }
+
+    // Used to store the currently assigned tasks to try to prevent
+    // players from having the exact same tasks
+    const used: Set<TaskType> = new Set();
+    // The array of tasks for the player
+    const tasks: LevelTask[] = [];
+
+    // Add common tasks
+    this.addTasksFromList({ val: 0 }, numCommon, tasks, used, allCommon);
+
+    for (let i = 0; i < numCommon; i++) {
+      if (allCommon.length == 0) {
+        // Not enough common tasks
+        break;
+      }
+
+      const index = Math.floor(Math.random() * allCommon.length);
+
+      tasks.push(allCommon[index]);
+      allCommon.splice(index, 1);
+    }
+
+    // Indices used to act as a read head for short and long tasks
+    // to try to prevent players from having the exact same tasks
+    const shortIndex = { val: 0 };
+    const longIndex = { val: 0 };
+
+    for (let pid = 0; pid < this.lobby.getPlayers().length; pid++) {
+      // Clear the used task array
+      used.clear();
+
+      // Remove every non-common task (effectively reusing the same array)
+      tasks.splice(numCommon, tasks.length - numCommon);
+
+      // Add long tasks
+      this.addTasksFromList(longIndex, numLong, tasks, used, allLong);
+
+      // Add short tasks
+      this.addTasksFromList(shortIndex, numShort, tasks, used, allShort);
+
+      const player = this.lobby.getPlayers().find(pl => pl.getId() == pid);
+
+      if (player) {
+        this.setPlayerTasks(player, tasks);
+      }
+    }
+  }
+
+  async setPlayerTasks(player: PlayerInstance, tasks: LevelTask[]): Promise<void> {
+    const event = new PlayerTaskAddedEvent(player, new Set(tasks));
+
+    await this.lobby.getServer().emit("player.task.added", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
+    this.updatePlayerTasks(player, tasks);
+  }
+
+  async endMeeting(): Promise<void> {
+    const gameData = this.lobby.getGameData();
+    const meetingHud = this.lobby.getMeetingHud();
+
+    if (!meetingHud) {
+      throw new Error("Attempted to end a meeting without a MeetingHud instance");
+    }
+
+    if (!gameData) {
+      throw new Error("Attempted to end a meeting without a GameData instance");
+    }
+
+    const oldData = meetingHud.meetingHud.clone();
+    const voteResults: Map<number, VoteResult> = new Map();
+    const playerInstanceCache: Map<number, PlayerInstance> = new Map();
+    const fetchPlayerById = (playerId: number): PlayerInstance | undefined => {
+      if (playerId == -1) {
+        return;
+      }
+
+      if (playerInstanceCache.has(playerId)) {
+        return playerInstanceCache.get(playerId);
+      }
+
+      const playerInstance = this.lobby.findPlayerByPlayerId(playerId);
+
+      if (!playerInstance) {
+        return;
+      }
+
+      playerInstanceCache.set(playerId, playerInstance);
+
+      return playerInstance;
+    };
+
+    const players = this.lobby.getPlayers();
+
+    for (let i = 0; i < players.length; i++) {
+      const player = players[i];
+      const state = meetingHud!.meetingHud.playerStates[player.getId()];
+
+      if (state.isDead) {
+        continue;
+      }
+
+      if (!voteResults.has(player.getId())) {
+        voteResults.set(player.getId(), new VoteResult(player));
+      }
+
+      const vote = voteResults.get(player.getId())!;
+
+      if (state.didVote) {
+        const votedFor = fetchPlayerById(state.votedFor);
+
+        if (!votedFor) {
+          if (state.votedFor == -1) {
+            vote.setSkipping();
+          } else {
+            voteResults.delete(player.getId());
+
+            continue;
+          }
+        } else {
+          vote.setVotedFor(votedFor);
+        }
+      }
+    }
+
+    const concludedEvent = new MeetingConcludedEvent(this.lobby.getGame()!, [...voteResults.values()]);
+
+    await this.lobby.getServer().emit("meeting.concluded", concludedEvent);
+
+    const isTied = concludedEvent.isTied();
+    let exiledPlayer = concludedEvent.getExiledPlayer();
+
+    if (concludedEvent.isCancelled()) {
+      return;
+    }
+
+    let exiledPlayerData: PlayerData | undefined;
+
+    if (!isTied && exiledPlayer) {
+      const voters = [...voteResults.values()]
+        .filter(vote => vote.getVotedFor()?.getId() == exiledPlayer?.getId())
+        .map(vote => vote.getPlayer());
+      const exiledEvent = new PlayerExiledEvent(exiledPlayer, voters);
+
+      await this.lobby.getServer().emit("player.died", exiledEvent);
+      await this.lobby.getServer().emit("player.exiled", exiledEvent);
+
+      if (!exiledEvent.isCancelled()) {
+        exiledPlayerData = gameData.gameData.players.find(playerData => playerData.id == exiledPlayer?.getId());
+
+        if (!exiledPlayerData) {
+          throw new Error("Exiled player does not have a PlayerData instance on the GameData instance");
+        }
+
+        exiledPlayer = exiledEvent.getPlayer();
+        exiledPlayerData.isDead = true;
+      }
+    }
+
+    meetingHud.meetingHud.sendRPCPacketTo(this.lobby.getConnections(), new VotingCompletePacket(
+      meetingHud.meetingHud.playerStates, isTied ? 0xff : (exiledPlayer?.getId() ?? 0xff), isTied),
+    );
+
+    this.lobby.sendRootGamePacket(new GameDataPacket([
+      meetingHud.meetingHud.data(oldData),
+    ], this.lobby.getCode()));
+
+    setTimeout(async () => {
+      const closedEvent = new MeetingClosedEvent(
+        this.lobby.getGame()!,
+        concludedEvent.getVotes(),
+        isTied,
+        exiledPlayer,
+      );
+
+      await this.lobby.getServer().emit("meeting.closed", closedEvent);
+
+      if (closedEvent.isCancelled()) {
+        return;
+      }
+
+      meetingHud.meetingHud.sendRPCPacketTo(this.lobby.getConnections(), new ClosePacket());
+
+      this.lobby.deleteMeetingHud();
+
+      setTimeout(() => {
+        this.lobby.getServer().emit("meeting.ended", new MeetingEndedEvent(
+          this.lobby.getGame()!,
+          concludedEvent.getVotes(),
+          isTied,
+          exiledPlayer,
+        ));
+
+        if (this.shouldEndGame()) {
+          if (exiledPlayerData!.isImpostor) {
+            this.endGame(GameOverReason.CrewmatesByVote);
+          } else {
+            this.endGame(GameOverReason.ImpostorsByVote);
+          }
+        }
+      // This timing of 8.5 seconds is based on in-game observations and may be
+      // slightly inaccurate due to network latency and fluctuating framerates
+      }, 8500);
+    }, 5000);
+  }
+
+  async endGame(reason: GameOverReason): Promise<void> {
+    const event = new GameEndedEvent(this.lobby.getGame()!, reason);
+
+    await this.lobby.getServer().emit("game.ended", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
+    this.lobby.setGameState(GameState.NotStarted);
+
+    this.decontaminationHandlers = [];
+    this.readyPlayerList = [];
+
+    this.lobby.clearPlayers();
+    this.playersInScene.clear();
+
+    for (let i = 0; i < this.lobby.getConnections().length; i++) {
+      this.lobby.getConnections()[i].limboState = LimboState.PreSpawn;
+    }
+
+    this.lobby.deleteLobbyBehaviour();
+    this.lobby.deleteShipStatus();
+    this.lobby.deleteMeetingHud();
+    delete this.doorHandler;
+    delete this.sabotageHandler;
+    delete this.systemsHandler;
+
+    this.lobby.setGameData(new EntityGameData(this.lobby, this.getNextNetId(), [], this.getNextNetId()));
+    this.lobby.sendRootGamePacket(new EndGamePacket(this.lobby.getCode(), event.getReason(), false));
+  }
+
+  getSystemsHandler(): SystemsHandler | undefined {
+    return this.systemsHandler;
+  }
+
+  getSabotageHandler(): SabotageSystemHandler | undefined {
+    return this.sabotageHandler;
+  }
+
+  getDoorHandler(): DoorsHandler | AutoDoorsHandler | undefined {
+    return this.doorHandler;
+  }
+
+  getDecontaminationHandlers(): DecontaminationHandler[] {
+    return this.decontaminationHandlers;
+  }
+
   handleReady(sender: Connection): void {
     this.readyPlayerList.push(sender.id);
 
@@ -646,229 +1066,9 @@ export class InternalHost implements HostInstance {
     this.lobby.sendRootGamePacket(new GameDataPacket([data], this.lobby.getCode()));
   }
 
-  async startCountdown(count: number, starter?: PlayerInstance): Promise<void> {
-    const event = new LobbyCountdownStartedEvent(this.lobby, count, starter);
-
-    await this.lobby.getServer().emit("lobby.countdown.started", event);
-
-    if (event.isCancelled()) {
-      return;
-    }
-
-    this.secondsUntilStart = event.getSecondsUntilStart();
-
-    const countdownFunction = (): void => {
-      const time = this.secondsUntilStart--;
-
-      if (this.lobby.getPlayers().length) {
-        this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
-          this.lobby.getConnections(),
-          new SetStartCounterPacket(this.counterSequenceId += 5, time),
-        );
-      }
-
-      if (time <= 0) {
-        if (this.countdownInterval) {
-          clearInterval(this.countdownInterval);
-        }
-
-        this.startGame();
-      }
-    };
-
-    countdownFunction();
-
-    this.countdownInterval = setInterval(countdownFunction, 1000);
-  }
-
-  async stopCountdown(): Promise<void> {
-    const event = new LobbyCountdownStoppedEvent(this.lobby, this.secondsUntilStart);
-
-    await this.lobby.getServer().emit("lobby.countdown.stopped", event);
-
-    if (event.isCancelled()) {
-      return;
-    }
-
-    this.secondsUntilStart = -1;
-
-    if (this.lobby.getPlayers().length > 0) {
-      this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
-        this.lobby.getConnections(),
-        new SetStartCounterPacket(this.counterSequenceId += 5, -1),
-      );
-    }
-
-    if (this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-    }
-  }
-
-  async startGame(): Promise<void> {
-    this.lobby.setGame(new Game(this.lobby));
-
-    const event = new GameStartingEvent(this.lobby.getGame()!);
-
-    await this.lobby.getServer().emit("game.starting", event);
-
-    if (event.isCancelled()) {
-      this.lobby.setGame();
-
-      return;
-    }
-
-    this.lobby.sendRootGamePacket(new StartGamePacket(this.lobby.getCode()));
-  }
-
-  async setInfected(infectedCount: number): Promise<void> {
-    const gameData = this.lobby.getGameData();
-
-    if (!gameData) {
-      throw new Error("GameData does not exist on the lobby instance");
-    }
-
-    const players = this.lobby.getPlayers();
-
-    infectedCount = Math.min(infectedCount, Math.max(0, Math.floor(players.length / 2) - 1));
-
-    let impostors = shuffleArrayClone(players)
-      .slice(0, infectedCount)
-      .map(player => player);
-    const selectedIds = impostors.map(player => player.getId());
-    const promises = (await Promise.all(players.map(async player => {
-      const event = new PlayerRoleUpdatedEvent(player, selectedIds.includes(player.getId()) ? PlayerRole.Impostor : PlayerRole.Crewmate);
-
-      await this.lobby.getServer().emit("player.role.updated", event);
-
-      return event;
-    })));
-
-    for (let i = 0; i < promises.length; i++) {
-      const event = promises[i];
-
-      if (event.isCancelled() || event.getNewRole() == PlayerRole.Crewmate) {
-        const index = impostors.findIndex(impostor => impostor.getId() == event.getPlayer().getId());
-
-        if (index > -1) {
-          impostors.splice(index, 1);
-        }
-      } else if (event.getNewRole() == PlayerRole.Impostor) {
-        if (impostors.findIndex(impostor => impostor.getId() == event.getPlayer().getId()) == -1) {
-          impostors.push(event.getPlayer() as InternalPlayer);
-        }
-      }
-    }
-
-    const event = new GameStartedEvent(this.lobby.getGame()!, impostors);
-
-    await this.lobby.getServer().emit("game.started", event);
-
-    impostors = event.getImpostors() as InternalPlayer[];
-
-    for (let i = 0; i < impostors.length; i++) {
-      const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == impostors[i].getId());
-
-      if (gameDataPlayerIndex == -1) {
-        throw new Error(`Player ${impostors[i].getId()} does not have a PlayerData instance o the GameData instance`);
-      }
-
-      gameData.gameData.players[gameDataPlayerIndex].isImpostor = true;
-      impostors[i].setRole(PlayerRole.Impostor);
-    }
-
-    this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
-      this.lobby.getConnections(),
-      new SetInfectedPacket(impostors.map(player => player.getId())),
-    );
-  }
-
-  setTasks(): void {
-    const options = this.lobby.getOptions();
-    const level = options.levels[0];
-    const numCommon = options.commonTaskCount;
-    const numLong = options.longTaskCount;
-    // Minimum of 1 short task
-    const numShort = numCommon + numLong + options.shortTaskCount > 0 ? options.shortTaskCount : 1;
-    const allTasks = Tasks.forLevel(level);
-    const allCommon: LevelTask[] = [];
-    const allShort: LevelTask[] = [];
-    const allLong: LevelTask[] = [];
-
-    for (let i = 0; i < allTasks.length; i++) {
-      const task = allTasks[i];
-
-      switch (task.length) {
-        case TaskLength.Common:
-          allCommon.push(task);
-          break;
-        case TaskLength.Short:
-          allShort.push(task);
-          break;
-        case TaskLength.Long:
-          allLong.push(task);
-          break;
-      }
-    }
-
-    // Used to store the currently assigned tasks to try to prevent
-    // players from having the exact same tasks
-    const used: Set<TaskType> = new Set();
-    // The array of tasks for the player
-    const tasks: LevelTask[] = [];
-
-    // Add common tasks
-    this.addTasksFromList({ val: 0 }, numCommon, tasks, used, allCommon);
-
-    for (let i = 0; i < numCommon; i++) {
-      if (allCommon.length == 0) {
-        // Not enough common tasks
-        break;
-      }
-
-      const index = Math.floor(Math.random() * allCommon.length);
-
-      tasks.push(allCommon[index]);
-      allCommon.splice(index, 1);
-    }
-
-    // Indices used to act as a read head for short and long tasks
-    // to try to prevent players from having the exact same tasks
-    const shortIndex = { val: 0 };
-    const longIndex = { val: 0 };
-
-    for (let pid = 0; pid < this.lobby.getPlayers().length; pid++) {
-      // Clear the used task array
-      used.clear();
-
-      // Remove every non-common task (effectively reusing the same array)
-      tasks.splice(numCommon, tasks.length - numCommon);
-
-      // Add long tasks
-      this.addTasksFromList(longIndex, numLong, tasks, used, allLong);
-
-      // Add short tasks
-      this.addTasksFromList(shortIndex, numShort, tasks, used, allShort);
-
-      const player = this.lobby.getPlayers().find(pl => pl.getId() == pid);
-
-      if (player) {
-        this.setPlayerTasks(player, tasks);
-      }
-    }
-  }
-
-  async setPlayerTasks(player: PlayerInstance, tasks: LevelTask[]): Promise<void> {
-    const event = new PlayerTaskAddedEvent(player, new Set(tasks));
-
-    await this.lobby.getServer().emit("player.task.added", event);
-
-    if (event.isCancelled()) {
-      return;
-    }
-
-    this.updatePlayerTasks(player, tasks);
-  }
-
+  /**
+   * @internal
+   */
   updatePlayerTasks(player: PlayerInstance, tasks: LevelTask[]): void {
     const gameData = this.lobby.getGameData();
 
@@ -879,203 +1079,9 @@ export class InternalHost implements HostInstance {
     gameData.gameData.setTasks(player.getId(), tasks.map(task => task.id), this.lobby.getConnections());
   }
 
-  async endMeeting(): Promise<void> {
-    const gameData = this.lobby.getGameData();
-    const meetingHud = this.lobby.getMeetingHud();
-
-    if (!meetingHud) {
-      throw new Error("Attempted to end a meeting without a MeetingHud instance");
-    }
-
-    if (!gameData) {
-      throw new Error("Attempted to end a meeting without a GameData instance");
-    }
-
-    const oldData = meetingHud.meetingHud.clone();
-    const voteResults: Map<number, VoteResult> = new Map();
-    const playerInstanceCache: Map<number, PlayerInstance> = new Map();
-    const fetchPlayerById = (playerId: number): PlayerInstance | undefined => {
-      if (playerId == -1) {
-        return;
-      }
-
-      if (playerInstanceCache.has(playerId)) {
-        return playerInstanceCache.get(playerId);
-      }
-
-      const playerInstance = this.lobby.findPlayerByPlayerId(playerId);
-
-      if (!playerInstance) {
-        return;
-      }
-
-      playerInstanceCache.set(playerId, playerInstance);
-
-      return playerInstance;
-    };
-
-    const players = this.lobby.getPlayers();
-
-    for (let i = 0; i < players.length; i++) {
-      const player = players[i];
-      const state = meetingHud!.meetingHud.playerStates[player.getId()];
-
-      if (state.isDead) {
-        continue;
-      }
-
-      if (!voteResults.has(player.getId())) {
-        voteResults.set(player.getId(), new VoteResult(player));
-      }
-
-      const vote = voteResults.get(player.getId())!;
-
-      if (state.didVote) {
-        const votedFor = fetchPlayerById(state.votedFor);
-
-        if (!votedFor) {
-          if (state.votedFor == -1) {
-            vote.setSkipping();
-          } else {
-            voteResults.delete(player.getId());
-
-            continue;
-          }
-        } else {
-          vote.setVotedFor(votedFor);
-        }
-      }
-    }
-
-    const concludedEvent = new MeetingConcludedEvent(this.lobby.getGame()!, [...voteResults.values()]);
-
-    await this.lobby.getServer().emit("meeting.concluded", concludedEvent);
-
-    const isTied = concludedEvent.isTied();
-    let exiledPlayer = concludedEvent.getExiledPlayer();
-
-    if (concludedEvent.isCancelled()) {
-      return;
-    }
-
-    let exiledPlayerData: PlayerData | undefined;
-
-    if (!isTied && exiledPlayer) {
-      const voters = [...voteResults.values()]
-        .filter(vote => vote.getVotedFor()?.getId() == exiledPlayer?.getId())
-        .map(vote => vote.getPlayer());
-      const exiledEvent = new PlayerExiledEvent(exiledPlayer, voters);
-
-      await this.lobby.getServer().emit("player.died", exiledEvent);
-      await this.lobby.getServer().emit("player.exiled", exiledEvent);
-
-      if (!exiledEvent.isCancelled()) {
-        exiledPlayerData = gameData.gameData.players.find(playerData => playerData.id == exiledPlayer?.getId());
-
-        if (!exiledPlayerData) {
-          throw new Error("Exiled player does not have a PlayerData instance on the GameData instance");
-        }
-
-        exiledPlayer = exiledEvent.getPlayer();
-        exiledPlayerData.isDead = true;
-      }
-    }
-
-    meetingHud.meetingHud.sendRPCPacketTo(this.lobby.getConnections(), new VotingCompletePacket(
-      meetingHud.meetingHud.playerStates, isTied ? 0xff : (exiledPlayer?.getId() ?? 0xff), isTied),
-    );
-
-    this.lobby.sendRootGamePacket(new GameDataPacket([
-      meetingHud.meetingHud.data(oldData),
-    ], this.lobby.getCode()));
-
-    setTimeout(async () => {
-      const closedEvent = new MeetingClosedEvent(
-        this.lobby.getGame()!,
-        concludedEvent.getVotes(),
-        isTied,
-        exiledPlayer,
-      );
-
-      await this.lobby.getServer().emit("meeting.closed", closedEvent);
-
-      if (closedEvent.isCancelled()) {
-        return;
-      }
-
-      meetingHud.meetingHud.sendRPCPacketTo(this.lobby.getConnections(), new ClosePacket());
-
-      this.lobby.deleteMeetingHud();
-
-      setTimeout(() => {
-        this.lobby.getServer().emit("meeting.ended", new MeetingEndedEvent(
-          this.lobby.getGame()!,
-          concludedEvent.getVotes(),
-          isTied,
-          exiledPlayer,
-        ));
-
-        if (this.shouldEndGame()) {
-          if (exiledPlayerData!.isImpostor) {
-            this.endGame(GameOverReason.CrewmatesByVote);
-          } else {
-            this.endGame(GameOverReason.ImpostorsByVote);
-          }
-        }
-      // This timing of 8.5 seconds is based on in-game observations and may be
-      // slightly inaccurate due to network latency and fluctuating framerates
-      }, 8500);
-    }, 5000);
-  }
-
-  async endGame(reason: GameOverReason): Promise<void> {
-    const event = new GameEndedEvent(this.lobby.getGame()!, reason);
-
-    await this.lobby.getServer().emit("game.ended", event);
-
-    if (event.isCancelled()) {
-      return;
-    }
-
-    this.lobby.setGameState(GameState.NotStarted);
-
-    this.decontaminationHandlers = [];
-    this.readyPlayerList = [];
-
-    this.lobby.clearPlayers();
-    this.playersInScene.clear();
-
-    for (let i = 0; i < this.lobby.getConnections().length; i++) {
-      this.lobby.getConnections()[i].limboState = LimboState.PreSpawn;
-    }
-
-    this.lobby.deleteLobbyBehaviour();
-    this.lobby.deleteShipStatus();
-    this.lobby.deleteMeetingHud();
-    delete this.doorHandler;
-    delete this.sabotageHandler;
-    delete this.systemsHandler;
-
-    this.lobby.setGameData(new EntityGameData(this.lobby, this.getNextNetId(), [], this.getNextNetId()));
-    this.lobby.sendRootGamePacket(new EndGamePacket(this.lobby.getCode(), event.getReason(), false));
-  }
-
-  getSystemsHandler(): SystemsHandler | undefined {
-    return this.systemsHandler;
-  }
-
-  getSabotageHandler(): SabotageSystemHandler | undefined {
-    return this.sabotageHandler;
-  }
-
-  getDoorHandler(): DoorsHandler | AutoDoorsHandler | undefined {
-    return this.doorHandler;
-  }
-
-  getDecontaminationHandlers(): DecontaminationHandler[] {
-    return this.decontaminationHandlers;
-  }
-
+  /**
+   * @internal
+   */
   getNextPlayerId(): number {
     const taken = this.lobby.getPlayers().map(player => player.getId());
 

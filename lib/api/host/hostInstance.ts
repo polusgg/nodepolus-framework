@@ -18,6 +18,30 @@ export interface HostInstance {
 
   getNextNetId(): number;
 
+  startCountdown(count: number, starter?: PlayerInstance): void;
+
+  stopCountdown(): void;
+
+  startGame(): void;
+
+  setInfected(infectedCount: number): void;
+
+  setTasks(): void;
+
+  setPlayerTasks(player: PlayerInstance, tasks: LevelTask[]): void;
+
+  endMeeting(): void;
+
+  endGame(reason: GameOverReason): void;
+
+  getSystemsHandler(): SystemsHandler | undefined;
+
+  getSabotageHandler(): SabotageSystemHandler | undefined;
+
+  getDoorHandler(): DoorsHandler | AutoDoorsHandler | undefined;
+
+  getDecontaminationHandlers(): DecontaminationHandler[];
+
   handleReady(sender: Connection): void;
 
   handleSceneChange(sender: Connection, sceneName: string): Promise<void>;
@@ -45,28 +69,4 @@ export interface HostInstance {
   handleDisconnect(connection: Connection, reason: DisconnectReason | undefined): void;
 
   handleUsePlatform(sender: InnerPlayerControl): void;
-
-  startCountdown(count: number, starter?: PlayerInstance): void;
-
-  stopCountdown(): void;
-
-  startGame(): void;
-
-  setInfected(infectedCount: number): void;
-
-  setTasks(): void;
-
-  setPlayerTasks(player: PlayerInstance, tasks: LevelTask[]): void;
-
-  endMeeting(): void;
-
-  endGame(reason: GameOverReason): void;
-
-  getSystemsHandler(): SystemsHandler | undefined;
-
-  getSabotageHandler(): SabotageSystemHandler | undefined;
-
-  getDoorHandler(): DoorsHandler | AutoDoorsHandler | undefined;
-
-  getDecontaminationHandlers(): DecontaminationHandler[];
 }

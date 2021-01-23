@@ -17,23 +17,34 @@ export type ServerConfig = {
    */
   serverPort?: number;
   /**
-   * The default address that a lobby will bind to.
-   *
-   * @defaultValue `0.0.0.0`
-   */
-  defaultLobbyAddress?: string;
-  /**
-   * The default port that a lobby will listen on.
-   *
-   * @defaultValue `22023`
-   */
-  defaultLobbyPort?: number;
-  /**
    * Whether or not to run the announcement server alongside the region server.
    *
    * @defaultValue `false`
    */
   enableAnnouncementServer?: boolean;
+  /**
+   * Lobby configuration.
+   */
+  lobby?: {
+    /**
+     * The default address that a lobby will bind to.
+     *
+     * @defaultValue `0.0.0.0`
+     */
+    defaultAddress?: string;
+    /**
+     * The default port that a lobby will listen on.
+     *
+     * @defaultValue `22023`
+     */
+    defaultPort?: number;
+    /**
+     * The maximum number of players that the server will allow in a lobby.
+     *
+     * @defaultValue `10`
+     */
+    maxPlayers?: number;
+  };
   /**
    * Logger configuration.
    */

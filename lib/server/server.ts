@@ -1,6 +1,6 @@
 import { ServerLobbyCreatedEvent, ServerLobbyDestroyedEvent, ServerLobbyJoinEvent, ServerLobbyListEvent } from "../api/events/server";
+import { DEFAULT_MAX_PLAYERS, DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { PlayerBannedEvent, PlayerKickedEvent, PlayerLeftEvent } from "../api/events/player";
-import { DEFAULT_SERVER_ADDRESS, DEFAULT_SERVER_PORT, MaxValue } from "../util/constants";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
 import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
 import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
@@ -10,6 +10,7 @@ import { ConnectionInfo, DisconnectReason } from "../types";
 import { Connection } from "../protocol/connection";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
+import { LobbyInstance } from "../api/lobby";
 import { InternalLobby } from "../lobby";
 import { Logger } from "../logger";
 import Emittery from "emittery";
@@ -25,14 +26,12 @@ import {
 } from "../protocol/packets/root";
 
 export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
-  public readonly connections: Map<string, Connection> = new Map();
-
-  public lobbies: InternalLobby[] = [];
-  public lobbyMap: Map<string, InternalLobby> = new Map();
-
   private readonly startedAt = Date.now();
   private readonly serverSocket = dgram.createSocket("udp4");
   private readonly logger: Logger;
+  private readonly connections: Map<string, Connection> = new Map();
+  private readonly lobbies: LobbyInstance[] = [];
+  private readonly lobbyMap: Map<string, LobbyInstance> = new Map();
 
   // Reserve the fake client IDs
   private connectionIndex = Object.keys(FakeClientId).length / 2;
@@ -59,20 +58,8 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     });
   }
 
-  getStartedAt(): number {
-    return this.startedAt;
-  }
-
-  getSocket(): dgram.Socket {
-    return this.serverSocket;
-  }
-
   getConfig(): ServerConfig {
     return this.config;
-  }
-
-  getLogger(childName?: string): Logger {
-    return childName === undefined ? this.logger : this.logger.child(childName);
   }
 
   getAddress(): string {
@@ -84,29 +71,31 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   }
 
   getDefaultLobbyAddress(): string {
-    return this.config.defaultLobbyAddress ?? this.getAddress();
+    return this.config.lobby?.defaultAddress ?? this.getAddress();
   }
 
   getDefaultLobbyPort(): number {
-    return this.config.defaultLobbyPort ?? this.getPort();
+    return this.config.lobby?.defaultPort ?? this.getPort();
   }
 
-  getNextConnectionId(): number {
-    if (++this.connectionIndex > MaxValue.UInt32) {
-      this.connectionIndex = Object.keys(FakeClientId).length / 2;
-    }
-
-    return this.connectionIndex;
+  getMaxPlayersPerLobby(): number {
+    return this.config.lobby?.maxPlayers ?? DEFAULT_MAX_PLAYERS;
   }
 
-  async listen(): Promise<void> {
-    return new Promise((resolve, _reject) => {
-      this.serverSocket.bind(this.getPort(), this.getAddress(), () => {
-        this.emit("server.ready");
+  getStartedAt(): number {
+    return this.startedAt;
+  }
 
-        resolve();
-      });
-    });
+  getSocket(): dgram.Socket {
+    return this.serverSocket;
+  }
+
+  getLogger(childName?: string): Logger {
+    return childName === undefined ? this.logger : this.logger.child(childName);
+  }
+
+  getConnections(): ReadonlyMap<string, Connection> {
+    return this.connections;
   }
 
   getConnection(connectionInfo: string | ConnectionInfo): Connection {
@@ -132,6 +121,42 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     this.connections.set(identifier, connection);
 
     return connection;
+  }
+
+  getLobbies(): readonly LobbyInstance[] {
+    return this.lobbies;
+  }
+
+  getLobby(code: string): LobbyInstance | undefined {
+    return this.lobbyMap.get(code);
+  }
+
+  addLobby(lobby: LobbyInstance): void {
+    this.lobbies.push(lobby);
+    this.lobbyMap.set(lobby.getCode(), lobby);
+  }
+
+  deleteLobby(lobby: LobbyInstance): void {
+    this.lobbies.splice(this.lobbies.indexOf(lobby), 1);
+    this.lobbyMap.delete(lobby.getCode());
+  }
+
+  getNextConnectionId(): number {
+    if (++this.connectionIndex > MaxValue.UInt32) {
+      this.connectionIndex = Object.keys(FakeClientId).length / 2;
+    }
+
+    return this.connectionIndex;
+  }
+
+  async listen(): Promise<void> {
+    return new Promise((resolve, _reject) => {
+      this.serverSocket.bind(this.getPort(), this.getAddress(), () => {
+        this.emit("server.ready");
+
+        resolve();
+      });
+    });
   }
 
   private async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
@@ -161,8 +186,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
         this.getLogger().verbose("Destroyed lobby %s", connection.lobby);
 
-        this.lobbies.splice(this.lobbies.indexOf(connection.lobby), 1);
-        this.lobbyMap.delete(connection.lobby.getCode());
+        this.deleteLobby(connection.lobby);
       }
     } else {
       this.getLogger().verbose("Connection %s disconnected", connection);
@@ -239,8 +263,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         if (!event.isCancelled()) {
           this.getLogger().verbose("Connection %s hosting lobby %s", sender, newLobby);
 
-          this.lobbies.push(newLobby);
-          this.lobbyMap.set(newLobby.getCode(), newLobby);
+          this.addLobby(newLobby);
 
           sender.sendReliable([new HostGameResponsePacket(newLobby.getCode())]);
         } else {
@@ -271,6 +294,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         const results: LobbyListing[] = [];
         const counts = new LobbyCount();
 
+        // TODO: Sort by playerCount in descending order
         for (let i = 0; i < this.lobbies.length; i++) {
           const lobby = this.lobbies[i];
           const level: number = lobby.getLevel();
@@ -283,8 +307,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
           const listing = lobby.getLobbyListing();
 
-          // TODO: Add config option for max player count and max results
-          if (listing.getPlayerCount() < 10 && results.length < 10) {
+          if (!listing.isFull() && results.length < 10) {
             results[i] = listing;
           }
         }

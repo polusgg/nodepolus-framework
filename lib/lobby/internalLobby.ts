@@ -9,6 +9,7 @@ import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
+import { ServerLobbyJoinRefusedEvent } from "../api/events/server";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
@@ -120,8 +121,8 @@ export class InternalLobby implements LobbyInstance {
       this.address,
       this.port,
       this.code,
-      this.getHostName(),
-      this.players.length,
+      this.getHostName().substring(0, 12),
+      this.connections.length,
       this.getAge(),
       this.options.levels[0],
       this.options.impostorCount,
@@ -642,8 +643,28 @@ export class InternalLobby implements LobbyInstance {
   /**
    * @internal
    */
-  handleJoin(connection: Connection): void {
+  async handleJoin(connection: Connection): Promise<void> {
     this.getLogger().verbose("Connection %s joining", connection);
+
+    if (this.connections.indexOf(connection) == -1) {
+      const count = this.connections.length;
+
+      if (count >= this.options.maxPlayers || count >= this.server.getMaxPlayersPerLobby()) {
+        this.getLogger().verbose("Kicking connection %s from full lobby", connection);
+
+        const event = new ServerLobbyJoinRefusedEvent(connection, this);
+
+        await this.server.emit("server.lobby.join.refused", event);
+
+        if (!event.isCancelled()) {
+          connection.sendLateRejection(event.getDisconnectReason());
+
+          return;
+        }
+
+        this.getLogger().verbose("Cancelled kicking connection %s from full lobby", connection);
+      }
+    }
 
     this.removeActingHosts();
 

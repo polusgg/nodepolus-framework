@@ -79,6 +79,7 @@ import {
   ServerLobbyCreatedEvent,
   ServerLobbyDestroyedEvent,
   ServerLobbyJoinEvent,
+  ServerLobbyJoinRefusedEvent,
   ServerLobbyListEvent,
 } from "./server";
 
@@ -193,5 +194,6 @@ export type ServerEvents = {
   "server.lobby.created": ServerLobbyCreatedEvent;
   "server.lobby.destroyed": ServerLobbyDestroyedEvent;
   "server.lobby.join": ServerLobbyJoinEvent;
+  "server.lobby.join.refused": ServerLobbyJoinRefusedEvent;
   "server.lobby.list": ServerLobbyListEvent;
 };

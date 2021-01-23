@@ -50,7 +50,7 @@ server.on("server.lobby.join", (event: ServerLobbyJoinEvent) => {
     return;
   }
 
-  const lobby = shuffleArrayClone(server.lobbies.filter(lob => lob.getConnections().length < 10 && lob.isPublic()))[0];
+  const lobby = shuffleArrayClone(server.getLobbies().filter(lob => lob.getConnections().length < 10 && lob.isPublic()))[0];
 
   event.getConnection().sendReliable([new HostGameResponsePacket(lobby.getCode())]);
   event.setLobby(lobby);

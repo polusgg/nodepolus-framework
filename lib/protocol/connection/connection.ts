@@ -75,7 +75,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
           this.handlePing();
           break;
         case HazelPacketType.Disconnect:
-          this.handleDisconnection((parsed.data as DisconnectPacket).disconnectReason);
+          this.handleDisconnect((parsed.data as DisconnectPacket).disconnectReason);
           break;
         case HazelPacketType.Acknowledgement:
           this.handleAcknowledgement(parsed.nonce!);
@@ -376,7 +376,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     this.emit("hello");
   }
 
-  private handleDisconnection(reason?: DisconnectReason): void {
+  private handleDisconnect(reason?: DisconnectReason): void {
     if (!this.requestedDisconnect) {
       this.socket.send(Buffer.from([HazelPacketType.Disconnect]), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
     }

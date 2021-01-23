@@ -1,9 +1,12 @@
 {
   "serverAddress": "0.0.0.0",
   "serverPort": 22023,
-  "defaultLobbyAddress": "0.0.0.0",
-  "defaultLobbyPort": 22023,
   "enableAnnouncementServer": true,
+  "lobby": {
+    "defaultAddress": "0.0.0.0",
+    "defaultPort": 22023,
+    "maxPlayers": 10
+  },
   "logging": {
     "level": "info",
     "maxFileSizeInBytes": 104857600,

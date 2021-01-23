@@ -23,7 +23,7 @@ export enum MaxValue {
 }
 
 /**
- * The default IPv4 address that NodePolus will bind to.
+ * The default address that NodePolus will bind to.
  */
 export const DEFAULT_SERVER_ADDRESS = "0.0.0.0";
 
@@ -33,9 +33,14 @@ export const DEFAULT_SERVER_ADDRESS = "0.0.0.0";
 export const DEFAULT_SERVER_PORT = 22023;
 
 /**
- * The default port that the announcement server will listen on.
+ * The port that the announcement server will listen on.
  */
 export const ANNOUNCEMENT_SERVER_PORT = 22024;
+
+/**
+ * The default maximum number of players that the server will allow in a lobby.
+ */
+export const DEFAULT_MAX_PLAYERS = 10;
 
 /**
  * The maximum byte size of an outgoing packet.
