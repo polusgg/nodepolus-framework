@@ -467,6 +467,29 @@ test("reads all child messages", t => {
   t.false(buf.hasBytesLeft());
 });
 
+test("reads all child messages even if they are empty", t => {
+  const buf = MessageReader.fromMessage("2600010f00030a576f7273742079656172e40700000e000509426573742079656172b1070000000000");
+  const results: Example[] = [];
+
+  buf.readAllChildMessages(child => {
+    if (child.getLength() <= 0) {
+      return;
+    }
+
+    results.push({
+      someString: child.readString(),
+      someNumber: child.readUInt32(),
+    });
+  });
+
+  t.is(results.length, 2);
+  t.is(results[0].someString, "Worst year");
+  t.is(results[0].someNumber, 2020);
+  t.is(results[1].someString, "Best year");
+  t.is(results[1].someNumber, 1969);
+  t.false(buf.hasBytesLeft());
+});
+
 test("writes bytes and size", t => {
   const rawBytes = "69".repeat(128);
   const rawParsed = new MessageWriter(rawBytes, true);

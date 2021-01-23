@@ -514,7 +514,7 @@ export class MessageReader extends HazelMessage {
    * @returns A nested MessageReader, or `undefined` if there is no nested MessageReader at the cursor's current position
    */
   readMessage(): MessageReader | undefined {
-    if (this.getReadableBytesLength() - 3 <= 0) {
+    if (this.getReadableBytesLength() - 3 < 0) {
       return;
     }
 
