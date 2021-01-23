@@ -8,6 +8,9 @@ import { DisconnectReason } from "../../../types";
 export abstract class DisconnectableEvent extends CancellableEvent {
   private disconnectReason?: DisconnectReason;
 
+  /**
+   * @param defaultDisconnectReason The default disconnect reason to be sent to the connection.
+   */
   constructor(
     private readonly defaultDisconnectReason: DisconnectReason,
   ) {

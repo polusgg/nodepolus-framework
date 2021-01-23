@@ -1,5 +1,5 @@
+import { AllRequired, Immutable } from "../types";
 import { ServerConfig } from "../api/config";
-import { AllRequired } from "../types";
 
 /**
  * A mapping of integer types to their minimum values.
@@ -28,7 +28,7 @@ export enum MaxValue {
 /**
  * The default ServerConfig values.
  */
-export const DEFAULT_CONFIG: AllRequired<ServerConfig> = {
+export const DEFAULT_CONFIG: Immutable<AllRequired<ServerConfig>> = {
   serverAddress: "0.0.0.0",
   serverPort: 22023,
   enableAnnouncementServer: false,
