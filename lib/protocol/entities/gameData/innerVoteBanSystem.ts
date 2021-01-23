@@ -31,12 +31,12 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
       return;
     }
 
-    const votes = this.votes.get(target.gameObject.owner) ?? [0, 0, 0];
+    const votes = this.votes.get(target.entity.owner) ?? [0, 0, 0];
     let shouldKick = false;
 
     for (let i = 0; i < 3; i++) {
       if (votes[i] == 0) {
-        votes[i] = voter.gameObject.owner;
+        votes[i] = voter.entity.owner;
 
         if (i == 2) {
           shouldKick = true;
@@ -46,16 +46,16 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     }
 
     if (shouldKick) {
-      const player = this.parent.lobby.findPlayerByClientId(target.gameObject.owner);
+      const player = this.parent.lobby.findPlayerByClientId(target.entity.owner);
 
       if (player) {
         player.kick(DisconnectReason.kicked());
         (this.parent.lobby as InternalLobby).sendRootGamePacket(new GameDataPacket([this.getData()], this.parent.lobby.getCode()), sendTo);
       }
     } else {
-      this.votes.set(target.gameObject.owner, votes);
+      this.votes.set(target.entity.owner, votes);
 
-      this.sendRPCPacketTo(sendTo, new AddVotePacket(voter.gameObject.owner, target.gameObject.owner));
+      this.sendRPCPacketTo(sendTo, new AddVotePacket(voter.entity.owner, target.entity.owner));
     }
   }
 
@@ -68,11 +68,11 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
       return;
     }
 
-    this.removeVote(voter.gameObject.owner, target.gameObject.owner, sendTo);
+    this.removeVote(voter.entity.owner, target.entity.owner, sendTo);
   }
 
   clearVotesForPlayer(player: InternalPlayer, sendTo: Connection[]): void {
-    const votes = this.votes.get(player.gameObject.owner) ?? [];
+    const votes = this.votes.get(player.entity.owner) ?? [];
 
     for (let i = 0; votes.length; i++) {
       if (votes[i] == 0) {
@@ -84,13 +84,13 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
       if (voter) {
         this.clearVote(voter as InternalPlayer, player, sendTo);
       } else {
-        this.removeVote(votes[i], player.gameObject.owner, sendTo);
+        this.removeVote(votes[i], player.entity.owner, sendTo);
       }
     }
   }
 
   clearVotesFromPlayer(player: InternalPlayer, sendTo: Connection[]): void {
-    const voterClientId = player.gameObject.owner;
+    const voterClientId = player.entity.owner;
     const votes = [...this.votes.entries()]
       .filter(entry => entry[0] != voterClientId && entry[1].includes(voterClientId))
       .map(entry => entry[0]);

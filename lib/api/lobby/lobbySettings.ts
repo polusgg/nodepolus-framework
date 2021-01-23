@@ -26,8 +26,12 @@ export class LobbySettings {
   private povModifiedTaskBarUpdates: TaskBarMode | undefined;
 
   constructor(
-    public lobby: LobbyInstance,
+    private readonly lobby: LobbyInstance,
   ) {}
+
+  getLobby(): LobbyInstance {
+    return this.lobby;
+  }
 
   getMaxPlayers(): number {
     return this.lobby.getOptions().maxPlayers;
@@ -45,7 +49,7 @@ export class LobbySettings {
     return this.povModifiedSpeed ?? this.lobby.getOptions().playerSpeedModifier;
   }
 
-  getCrewVision(): number {
+  getCrewateVision(): number {
     return this.povModifiedCrewVision ?? this.lobby.getOptions().crewmateLightModifier;
   }
 
@@ -153,7 +157,7 @@ export class LobbySettings {
     this.syncSettingsOnLobby();
   }
 
-  setCrewVision(param: number): void {
+  setCrewmateVision(param: number): void {
     if (this.isFromPov) {
       this.povModifiedCrewVision = param;
     }
@@ -355,7 +359,7 @@ export class LobbySettings {
         this.getLanguages() as Mutable<Language[]>,
         [this.getLevel()],
         this.getSpeed(),
-        this.getCrewVision(),
+        this.getCrewateVision(),
         this.getImpostorVision(),
         this.getKillCooldown(),
         this.getCommonTaskCount(),
@@ -388,7 +392,7 @@ export class LobbySettings {
         sendToConnections = this.lobby.getConnections();
       }
 
-      (this.lobby.getPlayers()[0] as InternalPlayer).gameObject.playerControl.syncSettings(customOptions, sendToConnections);
+      (this.lobby.getPlayers()[0] as InternalPlayer).entity.playerControl.syncSettings(customOptions, sendToConnections);
     } else {
       (this.lobby as InternalLobby).getLogger().warn("Attempted to sync lobby settings without a player");
     }

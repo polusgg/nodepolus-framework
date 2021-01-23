@@ -64,38 +64,6 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     });
   }
 
-  getConfig(): ServerConfig {
-    return this.config;
-  }
-
-  getAddress(): string {
-    return this.config.serverAddress ?? DEFAULT_CONFIG.serverAddress;
-  }
-
-  getPort(): number {
-    return this.config.serverPort ?? DEFAULT_CONFIG.serverPort;
-  }
-
-  getMaxLobbies(): number {
-    return this.config.maxLobbies ?? DEFAULT_CONFIG.maxLobbies;
-  }
-
-  getMaxConnectionsPerAddress(): number {
-    return this.config.maxConnectionsPerAddress ?? DEFAULT_CONFIG.maxConnectionsPerAddress;
-  }
-
-  getDefaultLobbyAddress(): string {
-    return this.config.lobby?.defaultAddress ?? DEFAULT_CONFIG.lobby.defaultAddress;
-  }
-
-  getDefaultLobbyPort(): number {
-    return this.config.lobby?.defaultPort ?? DEFAULT_CONFIG.lobby.defaultPort;
-  }
-
-  getMaxPlayersPerLobby(): number {
-    return this.config.lobby?.maxPlayers ?? DEFAULT_CONFIG.lobby.maxPlayers;
-  }
-
   getStartedAt(): number {
     return this.startedAt;
   }
@@ -153,6 +121,38 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   deleteLobby(lobby: LobbyInstance): void {
     this.lobbies.splice(this.lobbies.indexOf(lobby), 1);
     this.lobbyMap.delete(lobby.getCode());
+  }
+
+  getConfig(): ServerConfig {
+    return this.config;
+  }
+
+  getAddress(): string {
+    return this.config.serverAddress ?? DEFAULT_CONFIG.serverAddress;
+  }
+
+  getPort(): number {
+    return this.config.serverPort ?? DEFAULT_CONFIG.serverPort;
+  }
+
+  getMaxLobbies(): number {
+    return this.config.maxLobbies ?? DEFAULT_CONFIG.maxLobbies;
+  }
+
+  getMaxConnectionsPerAddress(): number {
+    return this.config.maxConnectionsPerAddress ?? DEFAULT_CONFIG.maxConnectionsPerAddress;
+  }
+
+  getDefaultLobbyAddress(): string {
+    return this.config.lobby?.defaultAddress ?? DEFAULT_CONFIG.lobby.defaultAddress;
+  }
+
+  getDefaultLobbyPort(): number {
+    return this.config.lobby?.defaultPort ?? DEFAULT_CONFIG.lobby.defaultPort;
+  }
+
+  getMaxPlayersPerLobby(): number {
+    return this.config.lobby?.maxPlayers ?? DEFAULT_CONFIG.lobby.maxPlayers;
   }
 
   getNextConnectionId(): number {

@@ -91,11 +91,10 @@ import {
 } from "../types/enums";
 
 export class InternalHost implements HostInstance {
-  public readyPlayerList: number[] = [];
-  public playersInScene: Map<number, string> = new Map();
-
   private readonly id: number = FakeClientId.ServerAsHost;
+  private readonly playersInScene: Map<number, string> = new Map();
 
+  private readyPlayerList: number[] = [];
   private netIdIndex = 1;
   private counterSequenceId = 0;
   private secondsUntilStart = -1;
@@ -107,8 +106,12 @@ export class InternalHost implements HostInstance {
   private decontaminationHandlers: DecontaminationHandler[] = [];
 
   constructor(
-    public lobby: InternalLobby,
+    private readonly lobby: InternalLobby,
   ) {}
+
+  getLobby(): InternalLobby {
+    return this.lobby;
+  }
 
   getId(): number {
     return this.id;
@@ -133,7 +136,7 @@ export class InternalHost implements HostInstance {
       const time = this.secondsUntilStart--;
 
       if (this.lobby.getPlayers().length) {
-        this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
+        this.lobby.getPlayers()[0].entity.playerControl.sendRPCPacketTo(
           this.lobby.getConnections(),
           new SetStartCounterPacket(this.counterSequenceId += 5, time),
         );
@@ -165,7 +168,7 @@ export class InternalHost implements HostInstance {
     this.secondsUntilStart = -1;
 
     if (this.lobby.getPlayers().length > 0) {
-      this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
+      this.lobby.getPlayers()[0].entity.playerControl.sendRPCPacketTo(
         this.lobby.getConnections(),
         new SetStartCounterPacket(this.counterSequenceId += 5, -1),
       );
@@ -248,7 +251,7 @@ export class InternalHost implements HostInstance {
       impostors[i].setRole(PlayerRole.Impostor);
     }
 
-    this.lobby.getPlayers()[0].gameObject.playerControl.sendRPCPacketTo(
+    this.lobby.getPlayers()[0].entity.playerControl.sendRPCPacketTo(
       this.lobby.getConnections(),
       new SetInfectedPacket(impostors.map(player => player.getId())),
     );
@@ -691,18 +694,18 @@ export class InternalHost implements HostInstance {
     const player = new InternalPlayer(this.lobby, entity, sender);
 
     for (let i = 0; i < this.lobby.getPlayers().length; i++) {
-      sender.write(new GameDataPacket([this.lobby.getPlayers()[i].gameObject.serializeSpawn()], this.lobby.getCode()));
+      sender.write(new GameDataPacket([this.lobby.getPlayers()[i].entity.serializeSpawn()], this.lobby.getCode()));
     }
 
     this.lobby.addPlayer(player);
 
-    await this.lobby.sendRootGamePacket(new GameDataPacket([player.gameObject.serializeSpawn()], this.lobby.getCode()));
+    await this.lobby.sendRootGamePacket(new GameDataPacket([player.entity.serializeSpawn()], this.lobby.getCode()));
 
-    player.gameObject.playerControl.syncSettings(this.lobby.getMutableOptions(), [sender]);
+    player.entity.playerControl.syncSettings(this.lobby.getMutableOptions(), [sender]);
 
     this.confirmPlayerData(player);
 
-    player.gameObject.playerControl.isNew = false;
+    player.entity.playerControl.isNew = false;
 
     sender.flush(true);
 
@@ -914,7 +917,7 @@ export class InternalHost implements HostInstance {
     }
 
     const system = shipStatus.getShipStatus().getSystemFromType(systemId);
-    const player = this.lobby.getPlayers().find(thePlayer => thePlayer.gameObject.playerControl.netId == playerControlNetId);
+    const player = this.lobby.getPlayers().find(thePlayer => thePlayer.entity.playerControl.netId == playerControlNetId);
     const level = this.lobby.getLevel();
 
     if (!player) {
@@ -1203,9 +1206,9 @@ export class InternalHost implements HostInstance {
       throw new Error("confirmPlayerData called without a GameData instance");
     }
 
-    if (!gameData.gameData.players.some(p => p.id == player.gameObject.playerControl.playerId)) {
+    if (!gameData.gameData.players.some(p => p.id == player.entity.playerControl.playerId)) {
       const playerData = new PlayerData(
-        player.gameObject.playerControl.playerId,
+        player.entity.playerControl.playerId,
         "",
         PlayerColor.Red,
         0,

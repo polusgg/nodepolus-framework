@@ -33,7 +33,7 @@ export class DoorsHandler {
   }
 
   getDoorsForSystem(systemId: SystemType): number[] {
-    const doors = SystemDoors.forLevel(this.host.lobby.getLevel())[systemId];
+    const doors = SystemDoors.forLevel(this.host.getLobby().getLevel())[systemId];
 
     if (!doors) {
       throw new Error(`SystemType ${systemId} (${SystemType[systemId]}) does not have any doors`);
@@ -67,8 +67,8 @@ export class DoorsHandler {
   }
 
   sendDataUpdate(): void {
-    this.host.lobby.sendRootGamePacket(new GameDataPacket([
+    this.host.getLobby().sendRootGamePacket(new GameDataPacket([
       this.shipStatus.data(this.oldShipStatus),
-    ], this.host.lobby.getCode()));
+    ], this.host.getLobby().getCode()));
   }
 }

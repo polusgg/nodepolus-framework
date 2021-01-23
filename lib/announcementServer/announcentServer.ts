@@ -15,7 +15,7 @@ import Emittery from "emittery";
 import dgram from "dgram";
 
 export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents, BasicAnnouncementServerEvents> {
-  public readonly announcementServerSocket = dgram.createSocket("udp4");
+  private readonly announcementServerSocket = dgram.createSocket("udp4");
 
   private driver?: BaseAnnouncementDriver;
   private sendLanguages = false;
@@ -47,6 +47,10 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
     this.announcementServerSocket.on("error", error => {
       this.logger.catch(error);
     });
+  }
+
+  getSocket(): dgram.Socket {
+    return this.announcementServerSocket;
   }
 
   getAddress(): string {

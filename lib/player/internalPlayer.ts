@@ -29,11 +29,11 @@ export class InternalPlayer implements PlayerInstance {
 
   constructor(
     public lobby: InternalLobby,
-    public gameObject: EntityPlayer,
+    public entity: EntityPlayer,
     private readonly connection?: Connection,
   ) {
-    this.id = gameObject.playerControl.playerId;
-    this.name = TextComponent.from("");
+    this.id = entity.playerControl.playerId;
+    this.name = TextComponent.from(connection?.getName() ?? "");
   }
 
   getId(): number {
@@ -81,7 +81,7 @@ export class InternalPlayer implements PlayerInstance {
       this.name = TextComponent.from(name);
     }
 
-    this.gameObject.playerControl.setName(name.toString(), this.lobby.getConnections());
+    this.entity.playerControl.setName(name.toString(), this.lobby.getConnections());
 
     return this;
   }
@@ -91,7 +91,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   setColor(color: PlayerColor): this {
-    this.gameObject.playerControl.setColor(color, this.lobby.getConnections());
+    this.entity.playerControl.setColor(color, this.lobby.getConnections());
 
     return this;
   }
@@ -101,7 +101,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   setHat(hat: PlayerHat): this {
-    this.gameObject.playerControl.setHat(hat, this.lobby.getConnections());
+    this.entity.playerControl.setHat(hat, this.lobby.getConnections());
 
     return this;
   }
@@ -111,7 +111,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   setPet(pet: PlayerPet): this {
-    this.gameObject.playerControl.setPet(pet, this.lobby.getConnections());
+    this.entity.playerControl.setPet(pet, this.lobby.getConnections());
 
     return this;
   }
@@ -121,7 +121,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   setSkin(skin: PlayerSkin): this {
-    this.gameObject.playerControl.setSkin(skin, this.lobby.getConnections());
+    this.entity.playerControl.setSkin(skin, this.lobby.getConnections());
 
     return this;
   }
@@ -157,7 +157,7 @@ export class InternalPlayer implements PlayerInstance {
     // TODO: Check end state
     // TODO: Send UpdateGameData packet
 
-    this.gameObject.playerControl.sendRPCPacketTo(
+    this.entity.playerControl.sendRPCPacketTo(
       this.lobby.getConnections(),
       new SetInfectedPacket([this.id]),
     );
@@ -234,13 +234,13 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   completeTaskAtIndex(taskIndex: number): this {
-    this.lobby.getHostInstance().handleCompleteTask(this.gameObject.playerControl, taskIndex);
+    this.lobby.getHostInstance().handleCompleteTask(this.entity.playerControl, taskIndex);
 
     return this;
   }
 
   completeTask(task: LevelTask): this {
-    this.lobby.getHostInstance().handleCompleteTask(this.gameObject.playerControl, this.getTasks().findIndex(t => t[0] == task));
+    this.lobby.getHostInstance().handleCompleteTask(this.entity.playerControl, this.getTasks().findIndex(t => t[0] == task));
 
     return this;
   }
@@ -268,31 +268,31 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getPosition(): Vector2 {
-    return this.gameObject.customNetworkTransform.position;
+    return this.entity.customNetworkTransform.position;
   }
 
   setPosition(position: Vector2): this {
-    this.gameObject.customNetworkTransform.snapTo(position, this.lobby.getConnections());
+    this.entity.customNetworkTransform.snapTo(position, this.lobby.getConnections());
 
     return this;
   }
 
   getVelocity(): Vector2 {
-    return this.gameObject.customNetworkTransform.velocity;
+    return this.entity.customNetworkTransform.velocity;
   }
 
   getVent(): LevelVent | undefined {
-    return this.gameObject.playerPhysics.getVent();
+    return this.entity.playerPhysics.getVent();
   }
 
   enterVent(vent: LevelVent): this {
-    this.gameObject.playerPhysics.enterVent(vent, this.lobby.getConnections());
+    this.entity.playerPhysics.enterVent(vent, this.lobby.getConnections());
 
     return this;
   }
 
   exitVent(vent: LevelVent): this {
-    this.gameObject.playerPhysics.exitVent(vent, this.lobby.getConnections());
+    this.entity.playerPhysics.exitVent(vent, this.lobby.getConnections());
 
     return this;
   }
@@ -305,7 +305,7 @@ export class InternalPlayer implements PlayerInstance {
   kill(): this {
     const gameData = this.getGameData();
 
-    this.gameObject.playerControl.exile();
+    this.entity.playerControl.exile();
 
     gameData.gameData.updateGameData([
       this.getGameDataEntry(),
@@ -314,16 +314,16 @@ export class InternalPlayer implements PlayerInstance {
     if (this.isImpostor()) {
       this.lobby.getHostInstance().handleImpostorDeath();
     } else {
-      this.lobby.getHostInstance().handleMurderPlayer(this.gameObject.playerControl, 0);
+      this.lobby.getHostInstance().handleMurderPlayer(this.entity.playerControl, 0);
     }
 
     return this;
   }
 
   murder(player: PlayerInstance): this {
-    const playerControl = this.gameObject.playerControl;
+    const playerControl = this.entity.playerControl;
 
-    playerControl.murderPlayer((player as InternalPlayer).gameObject.playerControl.netId, this.lobby.getConnections());
+    playerControl.murderPlayer((player as InternalPlayer).entity.playerControl.netId, this.lobby.getConnections());
     this.lobby.getHostInstance().handleMurderPlayer(playerControl, 0);
 
     return this;
@@ -342,17 +342,17 @@ export class InternalPlayer implements PlayerInstance {
 
     const entity = new EntityPlayer(
       this.lobby,
-      this.gameObject.owner,
+      this.entity.owner,
       this.lobby.getHostInstance().getNextNetId(),
       this.getId()!,
       this.lobby.getHostInstance().getNextNetId(),
       this.lobby.getHostInstance().getNextNetId(),
       0,
-      this.gameObject.customNetworkTransform.position,
-      this.gameObject.customNetworkTransform.velocity,
+      this.entity.customNetworkTransform.position,
+      this.entity.customNetworkTransform.velocity,
     );
 
-    this.gameObject.customNetworkTransform.position = new Vector2(-39, -39);
+    this.entity.customNetworkTransform.position = new Vector2(-39, -39);
 
     if (this.connection === undefined) {
       throw new Error("Tried to respawn a player without a connection");
@@ -361,19 +361,19 @@ export class InternalPlayer implements PlayerInstance {
     const oldName = this.getName();
 
     this.lobby.ignoredNetIds.push(
-      this.gameObject.playerControl.netId,
-      this.gameObject.playerPhysics.netId,
-      this.gameObject.customNetworkTransform.netId,
+      this.entity.playerControl.netId,
+      this.entity.playerPhysics.netId,
+      this.entity.customNetworkTransform.netId,
     );
 
     this.setName("");
 
     if (this.connection.isActingHost) {
-      this.connection.write(new RemovePlayerPacket(this.lobby.getCode(), this.gameObject.owner, this.gameObject.owner, DisconnectReason.serverRequest()));
-      this.connection.write(new JoinGameResponsePacket(this.lobby.getCode(), this.gameObject.owner, this.gameObject.owner));
+      this.connection.write(new RemovePlayerPacket(this.lobby.getCode(), this.entity.owner, this.entity.owner, DisconnectReason.serverRequest()));
+      this.connection.write(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.owner, this.entity.owner));
     } else {
-      this.connection.write(new RemovePlayerPacket(this.lobby.getCode(), this.gameObject.owner, this.lobby.getHostInstance().getId(), DisconnectReason.serverRequest()));
-      this.connection.write(new JoinGameResponsePacket(this.lobby.getCode(), this.gameObject.owner, this.lobby.getHostInstance().getId()));
+      this.connection.write(new RemovePlayerPacket(this.lobby.getCode(), this.entity.owner, this.lobby.getHostInstance().getId(), DisconnectReason.serverRequest()));
+      this.connection.write(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.owner, this.lobby.getHostInstance().getId()));
     }
 
     this.setName(oldName);
@@ -383,17 +383,17 @@ export class InternalPlayer implements PlayerInstance {
     for (let i = 0; i < connections.length; i++) {
       const connection = connections[i];
 
-      if (connection.id != this.gameObject.owner) {
+      if (connection.id != this.entity.owner) {
         connection.write(new GameDataPacket([
-          new DespawnPacket(this.gameObject.playerControl.netId),
-          new DespawnPacket(this.gameObject.playerPhysics.netId),
-          new DespawnPacket(this.gameObject.customNetworkTransform.netId),
+          new DespawnPacket(this.entity.playerControl.netId),
+          new DespawnPacket(this.entity.playerPhysics.netId),
+          new DespawnPacket(this.entity.customNetworkTransform.netId),
         ], this.lobby.getCode()));
       }
     }
 
     this.getGameDataEntry().isDead = false;
-    this.gameObject = entity;
+    this.entity = entity;
 
     gameData.gameData.updateGameData([this.getGameDataEntry()], connections);
 
@@ -403,13 +403,13 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   sendChat(message: string): this {
-    this.gameObject.playerControl.sendChat(message, this.lobby.getConnections());
+    this.entity.playerControl.sendChat(message, this.lobby.getConnections());
 
     return this;
   }
 
   startMeeting(victim?: PlayerInstance): this {
-    this.lobby.getHostInstance().handleReportDeadBody(this.gameObject.playerControl, victim?.getId());
+    this.lobby.getHostInstance().handleReportDeadBody(this.entity.playerControl, victim?.getId());
 
     return this;
   }

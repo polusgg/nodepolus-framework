@@ -62,7 +62,7 @@ export class InternalLobby implements LobbyInstance {
   public ignoredNetIds: number[] = [];
 
   private readonly createdAt: number = Date.now();
-  private readonly hostInstance: HostInstance;
+  private readonly hostInstance: HostInstance = new InternalHost(this);
   private readonly rpcHandler: RPCHandler = new RPCHandler(this);
   private readonly spawningPlayers: Set<Connection> = new Set();
   private readonly connections: Connection[] = [];
@@ -84,9 +84,7 @@ export class InternalLobby implements LobbyInstance {
     private readonly port: number,
     private options: GameOptionsData = new GameOptionsData(),
     private readonly code: string = LobbyCode.generate(),
-  ) {
-    this.hostInstance = new InternalHost(this);
-  }
+  ) {}
 
   getLogger(): Logger {
     return this.server.getLogger(`Lobby ${this.code}`);
@@ -109,7 +107,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   getHostName(): string {
-    return this.getActingHosts()[0]?.name ?? this.connections[0].name!;
+    return this.getActingHosts()[0]?.getName() ?? this.connections[0].getName()!;
   }
 
   isPublic(): boolean {
@@ -196,7 +194,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   findPlayerByClientId(clientId: number): InternalPlayer | undefined {
-    return this.players.find(player => player.gameObject.owner == clientId);
+    return this.players.find(player => player.entity.owner == clientId);
   }
 
   findPlayerByPlayerId(playerId: number): InternalPlayer | undefined {
@@ -204,7 +202,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   findPlayerByNetId(netId: number): InternalPlayer | undefined {
-    return this.players.find(player => player.gameObject.innerNetObjects.some(object => object.netId == netId));
+    return this.players.find(player => player.entity.innerNetObjects.some(object => object.netId == netId));
   }
 
   clearPlayers(): void {
@@ -547,8 +545,8 @@ export class InternalLobby implements LobbyInstance {
     for (let i = 0; i < this.players.length; i++) {
       const player = this.players[i];
 
-      for (let j = 0; j < player.gameObject.innerNetObjects.length; j++) {
-        const object = player.gameObject.innerNetObjects[j];
+      for (let j = 0; j < player.entity.innerNetObjects.length; j++) {
+        const object = player.entity.innerNetObjects[j];
 
         if (notUndefined(object) && object.netId == netId) {
           return object;
@@ -563,28 +561,28 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    */
   findPlayerByConnection(connection: Connection): InternalPlayer | undefined {
-    return this.players.find(player => player.gameObject.owner == connection.id);
+    return this.players.find(player => player.entity.owner == connection.id);
   }
 
   /**
    * @internal
    */
   findPlayerByEntity(entity: EntityPlayer): InternalPlayer | undefined {
-    return this.players.find(player => player.gameObject.owner == entity.owner);
+    return this.players.find(player => player.entity.owner == entity.owner);
   }
 
   /**
    * @internal
    */
   findPlayerByInnerNetObject(netObject: InnerPlayerControl | InnerPlayerPhysics | InnerCustomNetworkTransform): InternalPlayer | undefined {
-    return this.players.find(player => player.gameObject == netObject.parent);
+    return this.players.find(player => player.entity == netObject.parent);
   }
 
   /**
    * @internal
    */
   findPlayerIndexByConnection(connection: Connection): number {
-    return this.players.findIndex(player => player.gameObject.owner == connection.id);
+    return this.players.findIndex(player => player.entity.owner == connection.id);
   }
 
   /**

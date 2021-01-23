@@ -46,11 +46,11 @@ import {
 } from "../../api/events/game";
 
 export class SystemsHandler {
-  private oldShipStatus: BaseInnerShipStatus = this.host.lobby.getShipStatus()!.getShipStatus();
+  private oldShipStatus: BaseInnerShipStatus = this.host.getLobby().getShipStatus()!.getShipStatus();
   private sabotageCountdownInterval: NodeJS.Timeout | undefined;
 
   constructor(
-    public readonly host: InternalHost,
+    private readonly host: InternalHost,
   ) {}
 
   repairDecon<T extends DeconSystem | DeconTwoSystem>(_repairer: InternalPlayer, system: T, amount: DecontaminationAmount): void {
@@ -139,21 +139,21 @@ export class SystemsHandler {
   async repairMedbay<T extends MedScanSystem>(_repairer: InternalPlayer, system: T, amount: MedbayAmount): Promise<void> {
     this.setOldShipStatus();
 
-    const game = this.host.lobby.getGame()!;
-    const player = this.host.lobby.findPlayerByPlayerId(amount.playerId)!;
+    const game = this.host.getLobby().getGame()!;
+    const player = this.host.getLobby().findPlayerByPlayerId(amount.playerId)!;
 
     if (amount.action == MedbayAction.EnteredQueue) {
       if (system.playersInQueue.size > 0) {
-        await this.host.lobby.getServer().emit("game.scanner.queued", new GameScannerQueuedEvent(
+        await this.host.getLobby().getServer().emit("game.scanner.queued", new GameScannerQueuedEvent(
           game,
           player,
           new Set([...system.playersInQueue]
-            .map(id => this.host.lobby.findPlayerByPlayerId(id))
+            .map(id => this.host.getLobby().findPlayerByPlayerId(id))
             .filter(notUndefined),
           ),
         ));
       } else {
-        await this.host.lobby.getServer().emit("game.scanner.started", new GameScannerStartedEvent(game, player));
+        await this.host.getLobby().getServer().emit("game.scanner.started", new GameScannerStartedEvent(game, player));
       }
 
       system.playersInQueue.add(player.getId());
@@ -161,16 +161,16 @@ export class SystemsHandler {
       system.playersInQueue.delete(amount.playerId);
 
       if (system.playersInQueue.size > 0) {
-        await this.host.lobby.getServer().emit("game.scanner.dequeued", new GameScannerDequeuedEvent(
+        await this.host.getLobby().getServer().emit("game.scanner.dequeued", new GameScannerDequeuedEvent(
           game,
           player,
           new Set([...system.playersInQueue]
-            .map(id => this.host.lobby.findPlayerByPlayerId(id))
+            .map(id => this.host.getLobby().findPlayerByPlayerId(id))
             .filter(notUndefined),
           ),
         ));
       } else {
-        await this.host.lobby.getServer().emit("game.scanner.stopped", new GameScannerStoppedEvent(game, player));
+        await this.host.getLobby().getServer().emit("game.scanner.stopped", new GameScannerStoppedEvent(game, player));
       }
     }
 
@@ -262,11 +262,11 @@ export class SystemsHandler {
     this.setOldShipStatus();
 
     if (amount.isViewingCameras) {
-      await this.host.lobby.getServer().emit("game.cameras.opened", new GameCamerasOpenedEvent(this.host.lobby.getGame()!, repairer));
+      await this.host.getLobby().getServer().emit("game.cameras.opened", new GameCamerasOpenedEvent(this.host.getLobby().getGame()!, repairer));
 
       system.playersViewingCameras.add(repairer.getId());
     } else {
-      await this.host.lobby.getServer().emit("game.cameras.closed", new GameCamerasClosedEvent(this.host.lobby.getGame()!, repairer));
+      await this.host.getLobby().getServer().emit("game.cameras.closed", new GameCamerasClosedEvent(this.host.getLobby().getGame()!, repairer));
 
       system.playersViewingCameras.delete(repairer.getId());
     }
@@ -301,12 +301,12 @@ export class SystemsHandler {
   }
 
   sendDataUpdate(): void {
-    this.host.lobby.sendRootGamePacket(new GameDataPacket([
+    this.host.getLobby().sendRootGamePacket(new GameDataPacket([
       this.getShipStatus().data(this.oldShipStatus),
-    ], this.host.lobby.getCode()));
+    ], this.host.getLobby().getCode()));
   }
 
   private getShipStatus(): BaseInnerShipStatus {
-    return this.host.lobby.getShipStatus()!.getShipStatus();
+    return this.host.getLobby().getShipStatus()!.getShipStatus();
   }
 }

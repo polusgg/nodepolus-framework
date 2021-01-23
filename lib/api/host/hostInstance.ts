@@ -5,6 +5,7 @@ import { InnerPlayerControl } from "../../protocol/entities/player";
 import { DisconnectReason, LevelTask } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { PlayerInstance } from "../player";
+import { LobbyInstance } from "../lobby";
 import {
   AutoDoorsHandler,
   DecontaminationHandler,
@@ -14,6 +15,8 @@ import {
 } from "../../host/systemHandlers";
 
 export interface HostInstance {
+  getLobby(): LobbyInstance;
+
   getId(): number;
 
   getNextNetId(): number;

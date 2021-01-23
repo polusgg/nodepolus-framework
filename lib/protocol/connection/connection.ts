@@ -15,9 +15,6 @@ import Emittery from "emittery";
 import dgram from "dgram";
 
 export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implements NetworkAccessible {
-  public hazelVersion?: number;
-  public clientVersion?: ClientVersion;
-  public name?: string;
   public timeoutLength = 6000;
   public isHost = false;
   public isActingHost = false;
@@ -33,6 +30,9 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   // private readonly timeoutInterval: NodeJS.Timeout;
 
   private initialized = false;
+  private hazelVersion?: number;
+  private clientVersion?: ClientVersion;
+  private name?: string;
   private packetBuffer: AwaitingPacket[] = [];
   private unreliablePacketBuffer: BaseRootPacket[] = [];
   private nonceIndex = 1;
@@ -103,6 +103,18 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
      * connections when they die (client disconnects, server disconnects, client
      * loses connection/times out)
      */
+  }
+
+  getHazelVersion(): number | undefined {
+    return this.hazelVersion;
+  }
+
+  getClientVersion(): ClientVersion | undefined {
+    return this.clientVersion;
+  }
+
+  getName(): string | undefined {
+    return this.name;
   }
 
   hasMeta(key: string): boolean {
@@ -376,9 +388,9 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     }
 
     this.initialized = true;
-    this.name = helloPacket.name;
     this.hazelVersion = helloPacket.hazelVersion;
     this.clientVersion = helloPacket.clientVersion;
+    this.name = helloPacket.name;
 
     this.emit("hello");
   }
