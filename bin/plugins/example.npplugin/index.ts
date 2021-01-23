@@ -45,6 +45,11 @@ server.on("player.joined", (event: PlayerJoinedEvent) => {
   );
 });
 
+server.on("server.lobby.join.refused", evt => {
+  logger.info("Server Lobby Join Refused");
+  evt.cancel(Math.random() > 0.5);
+});
+
 server.on("server.lobby.join", (event: ServerLobbyJoinEvent) => {
   if (event.getLobbyCode() !== "RANDOM") {
     return;

@@ -657,7 +657,7 @@ export class InternalLobby implements LobbyInstance {
         await this.server.emit("server.lobby.join.refused", event);
 
         if (!event.isCancelled()) {
-          connection.sendLateRejection(event.getDisconnectReason());
+          connection.write(new JoinGameErrorPacket(DisconnectReason.gameFull()));
 
           return;
         }
