@@ -78,6 +78,7 @@ export class InternalLobby implements LobbyInstance {
   private shipStatus?: BaseEntityShipStatus;
   private meetingHud?: EntityMeetingHud;
 
+  // TODO: Add check to destroy the room when created by a player if nobody joins in a certain amount of time
   constructor(
     private readonly server: Server,
     private readonly address: string,
