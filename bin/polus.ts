@@ -80,7 +80,6 @@ async function loadPluginsFolder(pluginsPath: string = path.join(__dirname, "plu
   logger.verbose(`Loading plugins from "./plugins" folder`);
 
   const pluginFiles = await fs.readdir(pluginsPath);
-  const plugins: BasePlugin[] = [];
 
   for (let i = 0; i < pluginFiles.length; i++) {
     const pathToPlugin = path.join(pluginsPath, pluginFiles[i]);
@@ -113,8 +112,6 @@ async function loadPluginsFolder(pluginsPath: string = path.join(__dirname, "plu
 
     // eslint-disable-next-line new-cap
     const plugin: BasePlugin = new exported.default();
-
-    plugins.push(plugin);
 
     logger.info(`Loaded plugin: ${plugin.getPluginName()} v${plugin.getPluginVersionString()}`);
   }
