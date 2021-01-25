@@ -1,4 +1,4 @@
-export { Plugin } from "./plugin";
+export { BasePlugin } from "./basePlugin";
 
 export { PluginAuthor } from "./pluginAuthor";
 

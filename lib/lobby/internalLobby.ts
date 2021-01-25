@@ -115,6 +115,10 @@ export class InternalLobby implements LobbyInstance {
     return !!(this.getGameTag(AlterGameTag.ChangePrivacy) ?? 0);
   }
 
+  isFull(): boolean {
+    return this.connections.length >= this.options.maxPlayers;
+  }
+
   getLobbyListing(): LobbyListing {
     return new LobbyListing(
       this.address,

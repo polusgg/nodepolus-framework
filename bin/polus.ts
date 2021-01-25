@@ -1,77 +1,181 @@
+/**
+ * This file is the main entrypoint for the NodePolus server.
+ *
+ * You should not need to make any changes to this file. If you do need to
+ * modify it, and you feel that your changes would be useful to everyone else,
+ * then please submit a pull request on GitHub with your changes along with an
+ * explanation for why they were necessary. There is no guarantee that it will
+ * be merged, but all contributions are welcome.
+ */
+
+Error.stackTraceLimit = 25;
+
 import { AnnouncementServer } from "../lib/announcementServer";
 import { ServerConfig } from "../lib/api/config/serverConfig";
 import { DEFAULT_CONFIG } from "../lib/util/constants";
-import { Plugin } from "../lib/api/plugin";
+import { BasePlugin } from "../lib/api/plugin";
 import { Logger } from "../lib/logger";
 import { Server } from "../lib/server";
+import meta from "../package.json";
 import fs from "fs/promises";
 import path from "path";
+
+const logger = new Logger("NodePolus", [process.env.NP_LOG_LEVEL].find(Logger.isValidLevel) ?? DEFAULT_CONFIG.logging.level);
+
+process.on("uncaughtException", err => {
+  logger.catch(err);
+});
+
+/**
+ * Gets the contents of the config file at the given path.
+ *
+ * @param configPath The path to the config file (default `__dirname/config.json`)
+ */
+async function loadConfig(configPath: string = path.join(__dirname, "config.json")): Promise<ServerConfig> {
+  logger.info("Loading config.json");
+
+  return JSON.parse(await fs.readFile(configPath, "utf-8"));
+}
 
 declare const server: Server;
 declare const announcementServer: AnnouncementServer;
 
-(async (): Promise<void> => {
-  const logger = new Logger("NodePolus", "info");
+/**
+ * Sets the server and announcement server as properties on the global object
+ * so that they may be used in plugins.
+ *
+ * @param serverConfig The server configuration
+ */
+function createServers(serverConfig: ServerConfig): void {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  (global as any).server = new Server(serverConfig);
+  (global as any).announcementServer = new AnnouncementServer(server.getAddress(), server.getLogger("Announcements"));
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+}
 
-  Error.stackTraceLimit = 25;
-
-  logger.info("Starting NodePolus");
-  logger.info("Loading config.json");
-
+/**
+ * Loads all top-level plugin files and folders within the given folder.
+ *
+ * * Files must end with either `.npplugin.ts` or `.npplugin.js`
+ * * Folders must end with `.npplugin`
+ *   * Folders must contain either an `index.ts` or `index.js` file
+ *
+ * @param pluginsPath The path to the plugins folder (default `__dirname/plugins`)
+ */
+async function loadPluginsFolder(pluginsPath: string = path.join(__dirname, "plugins")): Promise<void> {
   try {
-    const serverConfig: ServerConfig = JSON.parse(await fs.readFile(path.join(__dirname, "config.json"), "utf-8"));
+    await fs.access(pluginsPath);
+  } catch (error) {
+    logger.verbose(`Skipping non-existent "./plugins" folder`);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (global as any).server = new Server(serverConfig);
+    return;
+  }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (global as any).announcementServer = new AnnouncementServer(server.getAddress(), server.getLogger("Announcements"));
+  if (!(await fs.stat(pluginsPath)).isDirectory()) {
+    logger.verbose(`Skipping "./plugins" as it should be a folder instead of a file`);
 
-    logger.info("Loading plugins");
+    return;
+  }
 
-    const pathToPlugins = path.join(__dirname, "./plugins/");
-    const pluginDirectories = await fs.readdir(pathToPlugins);
-    const plugins: Plugin[] = [];
+  logger.verbose(`Loading plugins from "./plugins" folder`);
 
-    for (let i = 0; i < pluginDirectories.length; i++) {
-      const pathToPlugin = path.join(pathToPlugins, pluginDirectories[i]);
+  const pluginFiles = await fs.readdir(pluginsPath);
+  const plugins: BasePlugin[] = [];
 
-      if (path.extname(pathToPlugin).toLowerCase() !== ".npplugin") {
-        logger.warn(`Skipping folder "${pluginDirectories[i]}" as it does not end with ".npplugin"`);
+  for (let i = 0; i < pluginFiles.length; i++) {
+    const pathToPlugin = path.join(pluginsPath, pluginFiles[i]);
+    const stat = await fs.stat(pathToPlugin);
+    const fileName = path.basename(pathToPlugin);
+    const extname = path.extname(fileName);
+    const basename = path.basename(fileName, extname);
+
+    if (stat.isDirectory()) {
+      if (extname.toLowerCase() !== ".npplugin") {
+        logger.verbose(`Skipping folder "${pluginFiles[i]}" as it does not end with ".npplugin"`);
 
         continue;
       }
+    } else if (![".ts", ".js"].includes(extname.toLowerCase()) || !basename.toLowerCase().endsWith(".npplugin")) {
+      logger.verbose(`Skipping file "${pluginFiles[i]}" as it does not end with ".npplugin.ts" or ".npplugin.js"`);
 
-      logger.debug(`Loading ${path.basename(pathToPlugin)}`);
-
-      const plugin: Plugin = {
-        folder: pluginDirectories[i],
-        metadata: JSON.parse(await fs.readFile(path.join(pathToPlugin, "plugin.json"), "utf-8")),
-      };
-
-      await import(path.join(pathToPlugin, "index"));
-
-      plugins.push(plugin);
-      logger.info(`Loaded plugin: ${plugin.metadata.name} v${plugin.metadata.version.join(".")}`);
+      continue;
     }
 
-    server.listen().then(() => {
-      logger.info(`Server listening on ${server.getAddress()}:${server.getPort()}`);
-    });
+    logger.verbose(`Loading "./plugins/${fileName}"`);
 
-    if (serverConfig.enableAnnouncementServer ?? DEFAULT_CONFIG.enableAnnouncementServer) {
-      announcementServer.listen().then(() => {
-        logger.info(`Announcement server listening on ${announcementServer.getAddress()}:${announcementServer.getPort()}`);
-      });
+    const exported = await import(pathToPlugin);
+
+    if (exported.default === undefined || !(exported.default.prototype instanceof BasePlugin)) {
+      logger.warn(`The plugin "./plugins/${fileName}" does not export a default class which extends BasePlugin (this is allowed but discouraged)`);
+
+      continue;
     }
 
-    process.on("uncaughtException", err => {
-      logger.catch(err);
-    });
+    // eslint-disable-next-line new-cap
+    const plugin: BasePlugin = new exported.default();
 
-    // process.on("unhandledRejection", (event: PromiseRejectionEvent) => {
-    //   logger.catch(event.reason instanceof Error ? event.reason : new Error(event.reason));
-    // });
+    plugins.push(plugin);
+
+    logger.info(`Loaded plugin: ${plugin.getPluginName()} v${plugin.getPluginVersionString()}`);
+  }
+}
+
+/**
+ * Loads all plugins installed via npm by iterating through the dependencies in
+ * the `package.json` file.
+ */
+async function loadPluginPackages(): Promise<void> {
+  const dependencies = Object.keys(meta.dependencies);
+
+  for (let i = 0; i < dependencies.length; i++) {
+    const pluginMeta = await import(`${dependencies[i]}/package.json`);
+
+    if (pluginMeta["np-plugin"] ?? false) {
+      logger.verbose(`Loading "${dependencies[i]}" v${pluginMeta.version}`);
+
+      await import(dependencies[i]);
+
+      logger.info(`Loaded plugin: ${dependencies[i]} v${pluginMeta.version}`);
+    }
+  }
+}
+
+async function loadPlugins(): Promise<void> {
+  logger.info("Loading plugins");
+
+  await loadPluginsFolder();
+  await loadPluginPackages();
+}
+
+/**
+ * Starts the server and announcement server.
+ *
+ * @param enableAnnouncementServer `true` if the announcement server should be started, `false` if not
+ */
+async function start(enableAnnouncementServer: boolean = server.getConfig().enableAnnouncementServer ?? DEFAULT_CONFIG.enableAnnouncementServer): Promise<void> {
+  if (enableAnnouncementServer) {
+    await announcementServer.listen();
+
+    logger.info(`Announcement server listening on ${announcementServer.getAddress()}:${announcementServer.getPort()}`);
+  }
+
+  await server.listen();
+
+  logger.info(`Server listening on ${server.getAddress()}:${server.getPort()}`);
+}
+
+/**
+ * Let the magic happen.
+ */
+(async (): Promise<void> => {
+  logger.info("Starting NodePolus");
+
+  try {
+    const serverConfig: ServerConfig = await loadConfig();
+
+    createServers(serverConfig);
+    await loadPlugins();
+    await start();
   } catch (error) {
     logger.catch(error);
 

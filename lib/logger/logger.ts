@@ -38,8 +38,7 @@ const levelColors: Readonly<{
 
 winston.addColors(levelColors);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const prettyPrint = winston.format((info: winston.Logform.TransformableInfo, _opts?: any): winston.Logform.TransformableInfo | boolean => {
+const prettyPrint = winston.format((info: winston.Logform.TransformableInfo, _opts?: unknown): winston.Logform.TransformableInfo | boolean => {
   const splat = info.splat ?? [];
 
   for (let i = 0; i < splat.length; i++) {
@@ -123,7 +122,7 @@ export class Logger {
         }),
       ];
 
-      if (process.env.NP_DISABLE_COLORS == undefined) {
+      if (process.env.NP_DISABLE_COLORS === undefined) {
         consoleFormatters.unshift(winston.format.colorize({ level: true, message: false }));
       }
 
@@ -330,8 +329,7 @@ export class Logger {
    * @param meta The metadata for the message
    * @param splat The variables for string interpolation within `message`
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  log(level: string, message: string, meta: Record<string, unknown>, ...splat: any[]): void {
+  log(level: string, message: string, meta: Record<string, unknown>, ...splat: unknown[]): void {
     const stack = meta.stack ?? undefined;
 
     delete meta.stack;

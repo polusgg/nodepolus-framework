@@ -33,6 +33,8 @@ export interface LobbyInstance {
 
   isPublic(): boolean;
 
+  isFull(): boolean;
+
   getLobbyListing(): LobbyListing;
 
   getGame(): Game | undefined;

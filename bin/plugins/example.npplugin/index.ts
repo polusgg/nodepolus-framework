@@ -1,57 +1,105 @@
 import { FileAnnouncementDriver } from "../../../lib/announcementServer/drivers";
-import { HostGameResponsePacket } from "../../../lib/protocol/packets/root";
 import { ServerLobbyJoinEvent } from "../../../lib/api/events/server";
 import { AnnouncementServer } from "../../../lib/announcementServer";
+import { BasePlugin, PluginMetadata } from "../../../lib/api/plugin";
 import { PlayerJoinedEvent } from "../../../lib/api/events/player";
 import { shuffleArrayClone } from "../../../lib/util/shuffle";
 import { Server } from "../../../lib/server";
 import { Vector2 } from "../../../lib/types";
 import path from "path";
 
+/**
+ * Grab the server and announcement server from the global object.
+ */
 declare const server: Server;
 declare const announcementServer: AnnouncementServer;
 
-announcementServer.setDriver(
-  new FileAnnouncementDriver(path.join(__dirname, "announcement.json"))
-    .setForceShowAnnouncement(false),
-);
+/**
+ * Define the plugin's metadata.
+ */
+const pluginMeta: PluginMetadata = {
+  name: "Test Plugin",
+  version: [1, 2, 3],
+};
 
-const logger = server.getLogger().child("TestPlugin");
+/**
+ * Export the plugin as the default export.
+ */
+export default class extends BasePlugin {
+  constructor() {
+    super(server, pluginMeta);
 
-server.on("server.ready", () => {
-  logger.fatal("Test message", { extra: "metadata" });
-  logger.error("Test message", { extra: "metadata" });
-  logger.warn("Test message", { extra: "metadata" });
-  logger.info("Test message", { extra: "metadata" });
-  logger.verbose("Test message", { extra: "metadata" });
-  logger.debug("Test message", { extra: "metadata" });
-  logger.debug("Number: %d", 69420);
-  logger.debug("BigInt: %d", 69420n);
-  logger.debug("Decimal: %d", 69.420);
-  logger.debug("String: %s", "69420");
-  logger.debug("Boolean as string: %s", true);
-  logger.debug("Boolean as number: %d", true);
-  logger.debug("undefined: %s", undefined);
-  logger.debug("Symbol: %s", Symbol("test"));
-  logger.debug("Vector2: %s", new Vector2(69.101, 420.101));
-});
+    /**
+     * Register some event handlers.
+     */
+    server.on("server.ready", this.demoLogger.bind(this));
+    server.on("player.joined", this.logPlayerJoins.bind(this));
+    server.on("server.lobby.join", this.joinRandomLobby.bind(this));
 
-server.on("player.joined", (event: PlayerJoinedEvent) => {
-  logger.info(
-    "%s connected to lobby %s from connection %s",
-    event.getPlayer(),
-    event.getLobby(),
-    event.getPlayer().getConnection(),
-  );
-});
-
-server.on("server.lobby.join", (event: ServerLobbyJoinEvent) => {
-  if (event.getLobbyCode() !== "RANDOM") {
-    return;
+    /**
+     * Set the announcement server's driver.
+     */
+    announcementServer.setDriver(new FileAnnouncementDriver(path.join(__dirname, "announcement.json")));
   }
 
-  const lobby = shuffleArrayClone(server.getLobbies().filter(lob => lob.getConnections().length < 10 && lob.isPublic()))[0];
+  /**
+   * Demonstrates log levels and object printing.
+   */
+  private demoLogger(): void {
+    const meta = {
+      some: "property",
+    };
 
-  event.getConnection().sendReliable([new HostGameResponsePacket(lobby.getCode())]);
-  event.setLobby(lobby);
-});
+    /**
+     * Use `%s` to print a value as a string, or `%d` to print a value as a
+     * number. Extra arguments that don't have a corresponding `%s` or `%d` will
+     * be logged as metadata at the end of the message.
+     */
+    this.getLogger().fatal("Test message 1", meta);
+    this.getLogger().error("Test message 2", meta);
+    this.getLogger().warn("Test message 3", meta);
+    this.getLogger().info("Test message 4", meta);
+    this.getLogger().info("Test message %d", 5, meta);
+    this.getLogger().verbose("Test message 6", meta);
+    this.getLogger().debug("Test message 7", meta);
+    this.getLogger().debug("Number: %d", 42);
+    this.getLogger().debug("BigInt: %d", 42n);
+    this.getLogger().debug("Decimal: %d", 4.2);
+    this.getLogger().debug("String: %s", "42");
+    this.getLogger().debug("Boolean as string: %s", true);
+    this.getLogger().debug("Boolean as number: %d", true);
+    this.getLogger().debug("undefined: %s", undefined);
+    this.getLogger().debug("Symbol: %s", Symbol("test"));
+    this.getLogger().debug("Vector2: %s", new Vector2(1.234, 5.678));
+  }
+
+  /**
+   * Logs when a player joins a lobby.
+   */
+  private logPlayerJoins(event: PlayerJoinedEvent): void {
+    this.getLogger().info(
+      "%s connected to lobby %s from connection %s",
+      event.getPlayer(),
+      event.getLobby(),
+      event.getPlayer().getConnection(),
+    );
+  }
+
+  /**
+   * Lets players join a random public lobby by joining with the code "RANDOM".
+   */
+  private joinRandomLobby(event: ServerLobbyJoinEvent): void {
+    if (event.getLobbyCode() !== "RANDOM") {
+      return;
+    }
+
+    /**
+     * Grab a random non-full public lobby.
+     */
+    const lobby = shuffleArrayClone(
+      server.getLobbies().filter(lob => !lob.isFull() && lob.isPublic()),
+    )[0];
+
+    event.setLobby(lobby);
+  }
+}
