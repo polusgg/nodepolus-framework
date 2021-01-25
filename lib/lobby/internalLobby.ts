@@ -419,7 +419,7 @@ export class InternalLobby implements LobbyInstance {
 
     if (this.gameData) {
       this.gameData.gameData.players.push(playerData);
-      this.sendRPCPacket(this.gameData.gameData, new UpdateGameDataPacket(this.gameData.gameData.players));
+      this.sendRPCPacket(this.gameData.gameData, new UpdateGameDataPacket([playerData]));
     }
 
     return playerInstance;
