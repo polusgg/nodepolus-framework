@@ -132,7 +132,7 @@ export class Vector2 {
    * from the given Vector2.
    *
    * @param other The Vector2 whose `x` and `y` values will be used as their respective minuends
-   * @returns A new Vector2 where `x += other.x` and `y += other.y`
+   * @returns A new Vector2 where `x -= other.x` and `y -= other.y`
    */
   subtract(other: Vector2): Vector2 {
     return new Vector2(this.x - other.x, this.y - other.y);
@@ -169,7 +169,7 @@ export class Vector2 {
    * from the given Vector2.
    *
    * @param other The Vector2 whose `x` and `y` values will be used as their respective multipliers
-   * @returns A new Vector2 where `x += other.x` and `y += other.y`
+   * @returns A new Vector2 where `x *= other.x` and `y *= other.y`
    */
   multiply(other: Vector2): Vector2 {
     return new Vector2(this.x * other.x, this.y * other.y);
@@ -206,7 +206,7 @@ export class Vector2 {
    * from the given Vector2.
    *
    * @param value The Vector2 whose `x` and `y` values will be used as their respective divisors
-   * @returns A new Vector2 where `x += other.x` and `y += other.y`
+   * @returns A new Vector2 where `x /= other.x` and `y /= other.y`
    */
   divide(other: Vector2): Vector2 {
     return new Vector2(this.x / other.x, this.y / other.y);
