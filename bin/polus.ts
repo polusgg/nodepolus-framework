@@ -130,9 +130,21 @@ async function loadPluginPackages(): Promise<void> {
     if (pluginMeta["np-plugin"] ?? false) {
       logger.verbose(`Loading "${dependencies[i]}" v${pluginMeta.version}`);
 
-      await import(dependencies[i]);
+      const exported = await import(dependencies[i]);
+      let name = dependencies[i];
+      let version = pluginMeta.version;
 
-      logger.info(`Loaded plugin: ${dependencies[i]} v${pluginMeta.version}`);
+      if (exported.default !== undefined) {
+        try {
+          // eslint-disable-next-line new-cap
+          const plugin: BasePlugin = new exported.default();
+
+          name = plugin.getPluginName();
+          version = plugin.getPluginVersionString();
+        } catch (error) {}
+      }
+
+      logger.info(`Loaded plugin: ${name} v${version}`);
     }
   }
 }
