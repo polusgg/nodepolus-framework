@@ -859,7 +859,7 @@ export class InternalHost implements HostInstance {
       meetingHud.serializeSpawn(),
     ], this.lobby.getCode()));
 
-    this.meetingHudTimeout = setTimeout(this.endMeeting, (this.lobby.getOptions().votingTime + this.lobby.getOptions().discussionTime) * 1000);
+    this.meetingHudTimeout = setTimeout(this.endMeeting.bind(this), (this.lobby.getOptions().votingTime + this.lobby.getOptions().discussionTime) * 1000);
   }
 
   async handleCastVote(votingPlayerId: number, suspectPlayerId: number): Promise<void> {
