@@ -7,7 +7,7 @@
   "lobby": {
     "defaultAddress": "0.0.0.0",
     "defaultPort": 22023,
-    "maxPlayers": 10
+    "maxPlayers": 100
   },
   "logging": {
     "level": "info",
