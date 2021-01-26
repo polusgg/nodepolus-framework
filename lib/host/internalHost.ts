@@ -744,7 +744,7 @@ export class InternalHost implements HostInstance {
   }
 
   handleCheckColor(sender: InnerPlayerControl, color: PlayerColor): void {
-    const takenColors = this.getTakenColors();
+    const takenColors = this.getTakenColors(sender.playerId);
     let setColor: PlayerColor = color;
 
     const owner = this.lobby.findConnection(sender.parent.owner);
@@ -1088,7 +1088,7 @@ export class InternalHost implements HostInstance {
   getNextPlayerId(): number {
     const taken = this.lobby.getPlayers().map(player => player.getId());
 
-    for (let i = 0; i < 125; i++) {
+    for (let i = 0; i < 127; i++) {
       if (taken.indexOf(i) == -1) {
         return i;
       }
@@ -1189,14 +1189,14 @@ export class InternalHost implements HostInstance {
     return !!gameData.gameData.players.find(player => player.name == name);
   }
 
-  private getTakenColors(): PlayerColor[] {
+  private getTakenColors(excludePlayerId: number): PlayerColor[] {
     const gameData = this.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("getTakenColors called without a GameData instance");
     }
 
-    return gameData.gameData.players.map(player => player.color);
+    return gameData.gameData.players.filter(player => player.id !== excludePlayerId).map(player => player.color);
   }
 
   private confirmPlayerData(player: InternalPlayer): void {
