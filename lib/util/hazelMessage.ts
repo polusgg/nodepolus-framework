@@ -48,7 +48,7 @@ export abstract class HazelMessage {
   constructor(source: BuildFrom = 0, isHex: boolean = true) {
     if (source instanceof HazelMessage) {
       this.buffer = Buffer.from(source.buffer);
-    } else if (typeof source != "number") {
+    } else if (typeof source !== "number") {
       if (typeof source === "string" && isHex) {
         this.buffer = Buffer.from(source, "hex");
       } else {
@@ -85,8 +85,8 @@ export class MessageWriter extends HazelMessage {
    * @param writers The MessageWriters to combine
    * @returns A new MessageWriter containing the data from all `writers`
    */
-  static concat(...writers: MessageWriter[]): MessageWriter {
-    return new MessageWriter(Buffer.concat(writers.map(writer => writer.buffer)));
+  static concat(...writers: HazelMessage[]): MessageWriter {
+    return new MessageWriter(Buffer.concat(writers.map(writer => writer.getBuffer())));
   }
 
   getLength(): number {
@@ -288,9 +288,7 @@ export class MessageWriter extends HazelMessage {
    * @param value The string to write
    */
   writeString(value: string): this {
-    const bytes = Buffer.from(value);
-
-    return this.writePackedUInt32(bytes.length).writeBytes(bytes);
+    return this.writeBytesAndSize(value);
   }
 
   /**
@@ -342,10 +340,9 @@ export class MessageWriter extends HazelMessage {
       bytes = bytes.getBuffer();
     }
 
-    this.resizeBuffer(bytes.length);
+    const buf = bytes instanceof Buffer ? bytes : Buffer.from(bytes);
 
-    const buf = Buffer.from(bytes);
-
+    this.resizeBuffer(buf.length);
     buf.copy(this.buffer, this.cursor);
 
     this.cursor += buf.length;
@@ -353,12 +350,18 @@ export class MessageWriter extends HazelMessage {
     return this;
   }
 
+  /**
+   * Writes the given data as raw bytes, prefixed with the byte length of the
+   * data as a packed uint32.
+   *
+   * @param bytes The data to write
+   */
   writeBytesAndSize(bytes: Buffer | number[] | string | HazelMessage): this {
     if (bytes instanceof HazelMessage) {
       bytes = bytes.getBuffer();
     }
 
-    const buf = Buffer.from(bytes);
+    const buf = bytes instanceof Buffer ? bytes : Buffer.from(bytes);
 
     this.writePackedUInt32(buf.length);
     this.writeBytes(buf);
@@ -428,16 +431,16 @@ export class MessageWriter extends HazelMessage {
    * @param addend The number of octects to add to the end of the buffer
    */
   private resizeBuffer(addend: number): void {
-    let newlen = this.cursor + addend;
+    let newLength = this.cursor + addend;
 
     if (this.buffer.length < this.cursor + addend) {
-      newlen = newlen - this.buffer.length + this.cursor;
+      newLength = newLength - this.buffer.length + this.cursor;
     }
 
-    const newb = Buffer.alloc(newlen);
+    const newBuffer = Buffer.alloc(newLength);
 
-    this.buffer.copy(newb);
-    this.buffer = newb;
+    this.buffer.copy(newBuffer);
+    this.buffer = newBuffer;
   }
 }
 
@@ -628,7 +631,7 @@ export class MessageReader extends HazelMessage {
    * This will first read a packed uint32 describing the string's byte length.
    */
   readString(): string {
-    return this.readBytes(this.readPackedUInt32()).buffer.toString("utf8");
+    return this.readBytesAndSize().buffer.toString("utf8");
   }
 
   /**
