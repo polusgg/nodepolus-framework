@@ -1,9 +1,9 @@
 import { BaseEntityShipStatus } from "../../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../../protocol/entities/types";
+import { GameState, AlterGameTag, Level, PlayerColor } from "../../types/enums";
 import { EntityLobbyBehaviour } from "../../protocol/entities/lobbyBehaviour";
 import { EntityMeetingHud } from "../../protocol/entities/meetingHud";
 import { PlayerData } from "../../protocol/entities/gameData/types";
-import { GameState, AlterGameTag, Level, PlayerColor } from "../../types/enums";
 import { EntityGameData } from "../../protocol/entities/gameData";
 import { LobbyListing } from "../../protocol/packets/root/types";
 import { EntityPlayer } from "../../protocol/entities/player";
@@ -12,11 +12,11 @@ import { GameOptionsData, Immutable } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { LobbySettings } from "./lobbySettings";
 import { PlayerInstance } from "../player";
+import { TextComponent } from "../text";
 import { HostInstance } from "../host";
 import { Logger } from "../../logger";
 import { Server } from "../../server";
 import { Game } from "../game";
-import { TextComponent } from "../text";
 
 export interface LobbyInstance {
   getLogger(): Logger;

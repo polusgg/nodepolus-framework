@@ -1,10 +1,10 @@
 import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
+import { BaseRPCPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
 import { DisconnectReason, GameOptionsData, Immutable, Vector2 } from "../types";
-import { BaseRPCPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
@@ -412,6 +412,75 @@ export class InternalLobby implements LobbyInstance {
     this.sendRemoveHost(connection, sendImmediately);
   }
 
+  sendChat(name: string, color: PlayerColor, message: string | TextComponent, onLeft: boolean): void {
+    if (!this.gameData) {
+      throw new Error("sendChat called without a GameData instance");
+    }
+
+    if (onLeft) {
+      const playerId = this.hostInstance.getNextPlayerId();
+
+      const fakePlayer = new EntityPlayer(
+        this,
+        FakeClientId.ServerChat,
+        this.hostInstance.getNextNetId(),
+        playerId,
+        this.hostInstance.getNextNetId(),
+        this.hostInstance.getNextNetId(),
+        5,
+        new Vector2(0, 0),
+        new Vector2(0, 0),
+        SpawnFlag.None,
+      );
+
+      this.spawnPlayer(fakePlayer, new PlayerData(
+        playerId,
+        name,
+        color,
+        PlayerHat.None,
+        PlayerPet.None,
+        PlayerSkin.None,
+        false,
+        false,
+        false,
+        [],
+      ));
+
+      this.sendRPCPacket(fakePlayer.playerControl, new SendChatPacket(message.toString()));
+      fakePlayer.despawn();
+    } else {
+      for (let i = 0; i < this.players.length; i++) {
+        const player = this.players[i];
+        const connection = player.getConnection();
+
+        if (connection) {
+          const playerData = this.gameData.gameData.players.find(p => p.id == player.getId());
+
+          if (!playerData) {
+            throw new Error(`Player ${player.getId()} does not have a PlayerData instance in GameData`);
+          }
+
+          const { color: oldColor, name: oldName } = playerData;
+
+          playerData.color = color;
+          playerData.name = name;
+
+          connection.write(new GameDataPacket([
+            new RPCPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([playerData])),
+            new RPCPacket(player.entity.playerControl.netId, new SendChatPacket(message.toString())),
+          ], this.code));
+
+          playerData.color = oldColor;
+          playerData.name = oldName;
+
+          connection.write(new GameDataPacket([
+            new RPCPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([playerData])),
+          ], this.code));
+        }
+      }
+    }
+  }
+
   /**
    * @internal
    */
@@ -648,79 +717,6 @@ export class InternalLobby implements LobbyInstance {
         break;
       default:
         connection.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameStarted)]);
-    }
-  }
-
-  /**
-   * @internal
-   */
-  sendChat(name: string, color: PlayerColor, message: string | TextComponent, onLeft: boolean): void {
-    if (!this.gameData) {
-      throw new Error("No gameData instance.");
-    }
-
-    if (onLeft) {
-      const playerId = this.hostInstance.getNextPlayerId();
-
-      const fakePlayer = new EntityPlayer(
-        this,
-        FakeClientId.ServerChat,
-        this.hostInstance.getNextNetId(),
-        playerId,
-        this.hostInstance.getNextNetId(),
-        this.hostInstance.getNextNetId(),
-        5,
-        new Vector2(0, 0),
-        new Vector2(0, 0),
-        SpawnFlag.None,
-      );
-
-      this.spawnPlayer(fakePlayer, new PlayerData(
-        playerId,
-        name,
-        color,
-        PlayerHat.None,
-        PlayerPet.None,
-        PlayerSkin.None,
-        false,
-        false,
-        false,
-        [],
-      ));
-
-      this.sendRPCPacket(fakePlayer.playerControl, new SendChatPacket(message.toString()));
-      fakePlayer.despawn();
-    } else {
-      for (let i = 0; i < this.players.length; i++) {
-        const player = this.players[i];
-        const connection = player.getConnection();
-
-        if (connection) {
-          const originalPlayerData = this.gameData.gameData.players.find(p => p.id == player.getId());
-
-          if (!originalPlayerData) {
-            throw new Error(`Player ${player.getName().toString()} does not have a gameData instance`);
-          }
-
-          const oldColor = originalPlayerData.color;
-          const oldName = originalPlayerData.name;
-
-          originalPlayerData.color = color;
-          originalPlayerData.name = name;
-
-          connection.write(new GameDataPacket([
-            new RPCPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([originalPlayerData])),
-            new RPCPacket(player.entity.playerControl.netId, new SendChatPacket(message.toString())),
-          ], this.code));
-
-          originalPlayerData.color = oldColor;
-          originalPlayerData.name = oldName;
-
-          connection.write(new GameDataPacket([
-            new RPCPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([originalPlayerData])),
-          ], this.code));
-        }
-      }
     }
   }
 
