@@ -12,7 +12,6 @@ import { GameOptionsData, Immutable } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { LobbySettings } from "./lobbySettings";
 import { PlayerInstance } from "../player";
-import { TextComponent } from "../text";
 import { HostInstance } from "../host";
 import { Logger } from "../../logger";
 import { Server } from "../../server";
@@ -118,8 +117,6 @@ export interface LobbyInstance {
   getGameState(): GameState;
 
   setGameState(gameState: GameState): void;
-
-  sendMessage(message: TextComponent | string): void;
 
   sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void;
 

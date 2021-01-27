@@ -328,48 +328,6 @@ export class InternalLobby implements LobbyInstance {
     this.gameState = gameState;
   }
 
-  sendMessage(message: TextComponent | string): void {
-    if (this.gameData === undefined) {
-      throw new Error("sendMessage called without a GameData instance");
-    }
-
-    const playerId = 127;
-    const playerData = new PlayerData(
-      playerId,
-      `[FFFFFFFF]${message.toString()}[FFFFFF00]`,
-      PlayerColor.Red,
-      PlayerHat.None,
-      PlayerPet.None,
-      PlayerSkin.None,
-      false,
-      false,
-      false,
-      [],
-    );
-
-    const entity = new EntityPlayer(
-      this,
-      FakeClientId.Message,
-      this.hostInstance.getNextNetId(),
-      playerId,
-      this.hostInstance.getNextNetId(),
-      this.hostInstance.getNextNetId(),
-      5,
-      new Vector2(39, 39),
-      new Vector2(0, 0),
-    );
-
-    this.sendRootGamePacket(new JoinGameResponsePacket(this.code, FakeClientId.Message, this.hostInstance.getId()));
-    this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code));
-
-    this.connections.forEach(con => {
-      con.flush();
-    });
-
-    this.gameData.gameData.updateGameData([playerData], this.connections);
-    this.sendRootGamePacket(new RemovePlayerPacket(this.code, FakeClientId.Message, this.hostInstance.getId()));
-  }
-
   sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void {
     this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.netId, packet)], this.code), sendTo);
   }
