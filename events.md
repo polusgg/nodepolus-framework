@@ -19,10 +19,6 @@ Connection Events
 - ✔️ "connection.close" (after a connection disconnects itself)
   - ✔️ wasDisconnectedByServer: boolean
 
-Object Events
-- "object.spawn"
-- "object.despawn"
-
 Player Events
 - ✔️ "player.joined" (after receiving a JoinGame packet)
   - ✔️ isRejoining: boolean
@@ -82,7 +78,7 @@ Room (Map Rooms) Events
 - room.doors.opened *emitted with a Doors[] of doors that opened, in case of an API call to only open one door*
 
 Sabotage: Electrical
-- room.electrical.interacted
+- ✔️ room.electrical.interacted
 
 Sabotage: Mira Comms
 - room.communications.console.opened
@@ -102,16 +98,3 @@ Decontamination
 - room.decontamination.entered
 - room.decontamination.exited
 - room.decontamination.sprayed
-
-
-----------
-
-Internal Events
-
-
-- "packet" (when receiving any packet)
-- "packet.{name}" (when receiving a root packet)
-- "packet.gamedata.{name}" (when receiving a gamedata packet)
-- "packet.gamedata.rpc.{name}" (when receiving an rpc packet)
-- "packet.gamedata.data.{innernetobject name}" (when receiving a data packet)
-

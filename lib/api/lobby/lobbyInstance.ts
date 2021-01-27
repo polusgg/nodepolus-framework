@@ -3,7 +3,7 @@ import { BaseInnerNetEntity, BaseInnerNetObject } from "../../protocol/entities/
 import { EntityLobbyBehaviour } from "../../protocol/entities/lobbyBehaviour";
 import { EntityMeetingHud } from "../../protocol/entities/meetingHud";
 import { PlayerData } from "../../protocol/entities/gameData/types";
-import { GameState, AlterGameTag, Level } from "../../types/enums";
+import { GameState, AlterGameTag, Level, PlayerColor } from "../../types/enums";
 import { EntityGameData } from "../../protocol/entities/gameData";
 import { LobbyListing } from "../../protocol/packets/root/types";
 import { EntityPlayer } from "../../protocol/entities/player";
@@ -16,6 +16,7 @@ import { HostInstance } from "../host";
 import { Logger } from "../../logger";
 import { Server } from "../../server";
 import { Game } from "../game";
+import { TextComponent } from "../text";
 
 export interface LobbyInstance {
   getLogger(): Logger;
@@ -131,4 +132,6 @@ export interface LobbyInstance {
   setActingHost(connection: Connection, sendImmediately: boolean): void;
 
   removeActingHost(connection: Connection, sendImmediately: boolean): void;
+
+  sendChat(name: string, color: PlayerColor, message: string | TextComponent, onLeft: boolean): void;
 }

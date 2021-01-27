@@ -4,7 +4,7 @@ import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEn
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
 import { DisconnectReason, GameOptionsData, Immutable, Vector2 } from "../types";
-import { BaseRPCPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
+import { BaseRPCPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
@@ -55,6 +55,7 @@ import {
   PlayerHat,
   PlayerPet,
   PlayerSkin,
+  SpawnFlag,
   SpawnType,
 } from "../types/enums";
 
@@ -653,17 +654,73 @@ export class InternalLobby implements LobbyInstance {
   /**
    * @internal
    */
-  sendChat(name: string, color: PlayerColor, message: string | TextComponent, _onLeft: boolean): void {
-    if (this.players.length != 0) {
-      const oldName = this.players[0].getName();
-      const oldColor = this.players[0].getColor();
+  sendChat(name: string, color: PlayerColor, message: string | TextComponent, onLeft: boolean): void {
+    if (!this.gameData) {
+      throw new Error("No gameData instance.");
+    }
 
-      this.players[0]
-        .setName(name)
-        .setColor(color)
-        .sendChat(message.toString())
-        .setName(oldName)
-        .setColor(oldColor);
+    if (onLeft) {
+      const playerId = this.hostInstance.getNextPlayerId();
+
+      const fakePlayer = new EntityPlayer(
+        this,
+        FakeClientId.ServerChat,
+        this.hostInstance.getNextNetId(),
+        playerId,
+        this.hostInstance.getNextNetId(),
+        this.hostInstance.getNextNetId(),
+        5,
+        new Vector2(0, 0),
+        new Vector2(0, 0),
+        SpawnFlag.None,
+      );
+
+      this.spawnPlayer(fakePlayer, new PlayerData(
+        playerId,
+        name,
+        color,
+        PlayerHat.None,
+        PlayerPet.None,
+        PlayerSkin.None,
+        false,
+        false,
+        false,
+        [],
+      ));
+
+      this.sendRPCPacket(fakePlayer.playerControl, new SendChatPacket(message.toString()));
+      fakePlayer.despawn();
+    } else {
+      for (let i = 0; i < this.players.length; i++) {
+        const player = this.players[i];
+        const connection = player.getConnection();
+
+        if (connection) {
+          const originalPlayerData = this.gameData.gameData.players.find(p => p.id == player.getId());
+
+          if (!originalPlayerData) {
+            throw new Error(`Player ${player.getName().toString()} does not have a gameData instance`);
+          }
+
+          const oldColor = originalPlayerData.color;
+          const oldName = originalPlayerData.name;
+
+          originalPlayerData.color = color;
+          originalPlayerData.name = name;
+
+          connection.write(new GameDataPacket([
+            new RPCPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([originalPlayerData])),
+            new RPCPacket(player.entity.playerControl.netId, new SendChatPacket(message.toString())),
+          ], this.code));
+
+          originalPlayerData.color = oldColor;
+          originalPlayerData.name = oldName;
+
+          connection.write(new GameDataPacket([
+            new RPCPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([originalPlayerData])),
+          ], this.code));
+        }
+      }
     }
   }
 

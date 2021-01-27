@@ -7,6 +7,7 @@ import { shuffleArrayClone } from "../../../lib/util/shuffle";
 import { Server } from "../../../lib/server";
 import { Vector2 } from "../../../lib/types";
 import path from "path";
+import { PlayerColor } from "../../../lib/types/enums";
 
 /**
  * Grab the server and announcement server from the global object.
@@ -40,6 +41,10 @@ export default class extends BasePlugin {
      * Set the announcement server's driver.
      */
     announcementServer.setDriver(new FileAnnouncementDriver(path.join(__dirname, "announcement.json")));
+
+    server.on("player.joined", evt => {
+      evt.getLobby().sendChat(Math.random().toString(), PlayerColor[PlayerColor[Math.random() * 11]], Math.random().toString(), Math.random() > 0.5);
+    });
   }
 
   /**

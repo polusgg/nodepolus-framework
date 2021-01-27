@@ -21,6 +21,8 @@ export interface HostInstance {
 
   getNextNetId(): number;
 
+  getNextPlayerId(): number;
+
   startCountdown(count: number, starter?: PlayerInstance): void;
 
   stopCountdown(): void;
