@@ -7,7 +7,7 @@ import { CancellableEvent } from "../types";
 export class LobbyPrivacyUpdatedEvent extends CancellableEvent {
   /**
    * @param lobby The lobby from which this event was fired
-   * @param publicity Whether or not the lobby is public
+   * @param publicity `true` if the lobby is public, `false` if not
    */
   constructor(
     private readonly lobby: LobbyInstance,

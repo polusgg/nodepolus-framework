@@ -9,7 +9,7 @@ import { DisconnectableEvent } from "../types";
 export class ServerLobbyListEvent extends DisconnectableEvent {
   /**
    * @param connection The connection that is requesting a list of games
-   * @param includePrivateLobbies Whether or not the connection wants private games included in the results
+   * @param includePrivateLobbies `true` if the connection wants private games included in the results, `false` if not
    * @param lobbies The lobbies that will be sent to the connection
    * @param lobbyCounts The lobby counts for each level that will be sent to the connection
    */

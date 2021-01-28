@@ -1,9 +1,8 @@
-import { BaseRootPacket, GameDataPacket, KickPlayerPacket, LateRejectionPacket, WaitForHostPacket } from "../packets/root";
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, NetworkAccessible } from "../../types";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
+import { BaseRootPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { PacketDestination, HazelPacketType } from "../packets/types/enums";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
-import { ReadyPacket, SceneChangePacket } from "../packets/gameData";
 import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
 import { PlayerInstance } from "../../api/player";
 import { AwaitingPacket } from "../packets/types";
@@ -40,6 +39,11 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   private lastPingReceivedTime: number = Date.now();
   private requestedDisconnect = false;
 
+  /**
+   * @param connectionInfo The ConnectionInfo describing the connection
+   * @param socket The underlying socket for the connection
+   * @param bound The destination type
+   */
   constructor(
     private readonly connectionInfo: ConnectionInfo,
     public socket: dgram.Socket,
@@ -105,49 +109,104 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
      */
   }
 
+  /**
+   * Gets the version of Hazel that the connection is using.
+   */
   getHazelVersion(): number | undefined {
     return this.hazelVersion;
   }
 
+  /**
+   * Gets the version of the Among Us client that the connection is using.
+   */
   getClientVersion(): ClientVersion | undefined {
     return this.clientVersion;
   }
 
+  /**
+   * Gets the name that the connection requested for their player.
+   */
   getName(): string | undefined {
     return this.name;
   }
 
+  /**
+   * Gets whether or not the connection has metadata for the given key.
+   *
+   * @param key The metadata key
+   */
   hasMeta(key: string): boolean {
     return this.metadata.has(key);
   }
 
+  /**
+   * Gets all of the metadata associated with the connection.
+   */
   getMeta(): Map<string, unknown>;
+  /**
+   * Gets the metadata for the given key.
+   *
+   * @param key The key whose associated metadata will be returned
+   * @returns The metadata, or `undefined` if no metadata is associated with `key`
+   */
   getMeta(key: string): unknown;
+  /**
+   * Gets the metadata for the given key, or all of the metadata associated
+   * with the connection.
+   *
+   * @param key The key whose associated data will be returned, or `undefined` to return all metadata
+   * @returns The metadata, or `undefined` if no metadata is associated with `key`
+   */
   getMeta(key?: string): Map<string, unknown> | unknown {
     return key === undefined ? this.metadata : this.metadata.get(key);
   }
 
+  /**
+   * Sets the metadata for the given key.
+   *
+   * @param key The key whose metadata will be set
+   * @param value The metadata to be set
+   */
   setMeta(key: string, value: unknown): void {
     this.metadata.set(key, value);
   }
 
+  /**
+   * Deletes the metadata for the given key.
+   *
+   * @param key The key whose metatada will be deleted
+   */
   deleteMeta(key: string): void {
     this.metadata.delete(key);
   }
 
+  /**
+   * Deletes all metadata associated with the connection.
+   */
   clearMeta(): void {
     this.metadata.clear();
   }
 
+  /**
+   * Gets the ConnectionInfo describing the connection.
+   */
   getConnectionInfo(): ConnectionInfo {
     return this.connectionInfo;
   }
 
+  /**
+   * Gets the elapsed time in seconds since the connection sent their last ping.
+   */
   getTimeSinceLastPing(): number {
     return Date.now() - this.lastPingReceivedTime;
   }
 
-  async write(packet: BaseRootPacket): Promise<void> {
+  /**
+   * Sends the given packet in the next reliable packet group.
+   *
+   * @param packet The packet to be sent
+   */
+  async writeReliable(packet: BaseRootPacket): Promise<void> {
     return new Promise(resolve => {
       this.packetBuffer.push({ packet, resolve });
 
@@ -177,10 +236,20 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     });
   }
 
+  /**
+   * Sends the given packet in the next unreliable packet group.
+   *
+   * @param packet The packet to be sent
+   */
   writeUnreliable(packet: BaseRootPacket): void {
     this.unreliablePacketBuffer.push(packet);
   }
 
+  /**
+   * Sends the given packet immediately as a reliable packet.
+   *
+   * @param packet The packet to be sent
+   */
   async sendReliable(packets: BaseRootPacket[]): Promise<void> {
     return new Promise(resolve => {
       const temp: AwaitingPacket[] = [...this.packetBuffer];
@@ -193,6 +262,11 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     });
   }
 
+  /**
+   * Sends the given packet immediately as an unreliable packet.
+   *
+   * @param packet The packet to be sent
+   */
   sendUnreliable(packets: BaseRootPacket[]): void {
     const temp: BaseRootPacket[] = [...this.unreliablePacketBuffer];
 
@@ -203,6 +277,11 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     this.unreliablePacketBuffer = temp;
   }
 
+  /**
+   * Sends the current packet group to the connection.
+   *
+   * @param reliable `true` to send the packet group as a reliable packet, `false` to send it as an unreliable packet
+   */
   flush(reliable: boolean = true): void {
     if (this.unreliablePacketBuffer.length == 0 && this.packetBuffer.length == 0) {
       return;
@@ -265,6 +344,11 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     }
   }
 
+  /**
+   * Disconnects the connection from the server.
+   *
+   * @param reason The reason for why the connection was disconnected
+   */
   disconnect(reason?: DisconnectReason): void {
     this.requestedDisconnect = true;
 
@@ -275,12 +359,19 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     this.disconnectTimeout = setTimeout(() => this.cleanup(reason), 6000);
   }
 
+  /**
+   * Kicks the connection from their lobby.
+   *
+   * @param isBanned `true` if the connection is banned from the lobby, `false` if not
+   * @param kickingPlayer The player who kicked the connection, or `undefined` if the connection was kicked via the API
+   * @param reason The reason for why the connection was kicked
+   */
   sendKick(isBanned: boolean, kickingPlayer?: PlayerInstance, reason?: DisconnectReason): void {
     if (!this.lobby) {
       throw new Error("Cannot kick a connection that is not in a lobby");
     }
 
-    this.write(new KickPlayerPacket(
+    this.writeReliable(new KickPlayerPacket(
       this.lobby.getCode(),
       this.id,
       isBanned,
@@ -294,53 +385,39 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     });
   }
 
+  /**
+   * Kicks the connection from the full lobby that it is trying to join for
+   * being too slow to join.
+   *
+   * @param reason The reason for why the connection was kicked
+   */
   sendLateRejection(reason: DisconnectReason): void {
     if (!this.lobby) {
       throw new Error("Cannot send a LateRejection packet to a connection that is not in a lobby");
     }
 
-    this.write(new LateRejectionPacket(
+    this.writeReliable(new LateRejectionPacket(
       this.lobby.getCode(),
       this.id,
       reason,
     ));
   }
 
-  sendWaitingForHost(): void {
-    if (!this.lobby) {
-      throw new Error("Cannot send a WaitForHost packet to a connection that is not in a lobby");
-    }
-
-    this.write(new WaitForHostPacket(
-      this.lobby.getCode(),
-      this.id,
-    ));
-  }
-
-  async handleSceneChange(sender: Connection, sceneName: string): Promise<void> {
-    if (!this.lobby) {
-      throw new Error("Cannot send a SceneChange packet to a connection that is not in a lobby");
-    }
-
-    return this.write(new GameDataPacket([
-      new SceneChangePacket(sender.id, sceneName),
-    ], this.lobby.getCode()));
-  }
-
-  handleReady(sender: Connection): void {
-    if (!this.lobby) {
-      throw new Error("Cannon send a Ready packet to a connection that is not in a lobby");
-    }
-
-    this.write(new GameDataPacket([
-      new ReadyPacket(sender.id),
-    ], this.lobby.getCode()));
-  }
-
+  /**
+   * Updates the time at which the connection sent their last ping.
+   *
+   * @internal
+   */
   private handlePing(): void {
     this.lastPingReceivedTime = Date.now();
   }
 
+  /**
+   * Gets an array of booleans representing the acknowledged status of the last
+   * eight packets sent to the connection.
+   *
+   * @returns An array of booleans for the acknowledged status of the last eight packets
+   */
   private getUnacknowledgedPacketArray(): boolean[] {
     let index = this.nonceIndex;
     const packets = new Array(8).fill(true);
@@ -360,6 +437,11 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     return packets;
   }
 
+  /**
+   * Sends an acknowledgement packet for the packet with the given ID.
+   *
+   * @param nonce The ID of the packet being acknowledged
+   */
   private acknowledgePacket(nonce: number): void {
     this.socket.send(
       new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))).serialize().getBuffer(),
@@ -378,10 +460,21 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     this.acknowledgementResolveMap.delete(nonce);
   }
 
+  /**
+   * Removes the packet with the given ID from the map of packets sent to the
+   * connection that haven't been acknowledged.
+   *
+   * @param nonce The ID of the packet that has been acknowledged
+   */
   private handleAcknowledgement(nonce: number): void {
     this.unacknowledgedPackets.delete(nonce);
   }
 
+  /**
+   * Finishes initializing the connection after receiving a Hello packet.
+   *
+   * @param helloPacket The connection's Hello packet
+   */
   private handleHello(helloPacket: HelloPacket): void {
     if (this.initialized) {
       return;
@@ -395,6 +488,11 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     this.emit("hello");
   }
 
+  /**
+   * Sends a Disconnect packet to the connection.
+   *
+   * @param reason The reason for why the connection was disconnected
+   */
   private handleDisconnect(reason?: DisconnectReason): void {
     if (!this.requestedDisconnect) {
       this.socket.send(Buffer.from([HazelPacketType.Disconnect]), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
@@ -403,9 +501,16 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     this.cleanup(reason);
   }
 
+  /**
+   * Stops sending packets at regular intervals to the connection.
+   *
+   * @param reason The reason for why the connection was disconnected
+   */
   private cleanup(reason?: DisconnectReason): void {
     clearInterval(this.flushInterval);
     // clearInterval(this.timeoutInterval);
+
+    // TODO: socket.close() or socket.disconnect()
 
     if (this.disconnectTimeout) {
       clearTimeout(this.disconnectTimeout);

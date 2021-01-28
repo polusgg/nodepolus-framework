@@ -7,7 +7,7 @@ export class VoteResult {
   /**
    * @param player The player that the VoteResult belongs to
    * @param votedFor The player that was voted for
-   * @param skipped Whether or not the vote was to skip
+   * @param skipped `true` if the vote was to skip, `false` if not
    */
   constructor(
     private readonly player: PlayerInstance,

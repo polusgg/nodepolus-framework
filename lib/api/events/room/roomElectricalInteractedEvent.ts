@@ -9,7 +9,7 @@ export class RoomElectricalInteractedEvent extends CancellableEvent {
   /**
    * @param game The game from which this event was fired
    * @param index The switch that was flipped
-   * @param flipped Whether or not the switch is flipped up
+   * @param flipped `true` if the switch is flipped up, `false` if the switch is flipped down
    * @param player The player that flipped the switch
    */
   constructor(

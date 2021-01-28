@@ -27,6 +27,11 @@ export class InternalPlayer implements PlayerInstance {
   private name: TextComponent;
   private role: PlayerRole = PlayerRole.Crewmate;
 
+  /**
+   * @param lobby The lobby in which the player exists
+   * @param entity The entity that belongs to the player
+   * @param connection The connection to which the player belongs
+   */
   constructor(
     public lobby: InternalLobby,
     public entity: EntityPlayer,
@@ -369,11 +374,11 @@ export class InternalPlayer implements PlayerInstance {
     this.setName("");
 
     if (this.connection.isActingHost) {
-      this.connection.write(new RemovePlayerPacket(this.lobby.getCode(), this.entity.owner, this.entity.owner, DisconnectReason.serverRequest()));
-      this.connection.write(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.owner, this.entity.owner));
+      this.connection.writeReliable(new RemovePlayerPacket(this.lobby.getCode(), this.entity.owner, this.entity.owner, DisconnectReason.serverRequest()));
+      this.connection.writeReliable(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.owner, this.entity.owner));
     } else {
-      this.connection.write(new RemovePlayerPacket(this.lobby.getCode(), this.entity.owner, this.lobby.getHostInstance().getId(), DisconnectReason.serverRequest()));
-      this.connection.write(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.owner, this.lobby.getHostInstance().getId()));
+      this.connection.writeReliable(new RemovePlayerPacket(this.lobby.getCode(), this.entity.owner, this.lobby.getHostInstance().getId(), DisconnectReason.serverRequest()));
+      this.connection.writeReliable(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.owner, this.lobby.getHostInstance().getId()));
     }
 
     this.setName(oldName);
@@ -384,7 +389,7 @@ export class InternalPlayer implements PlayerInstance {
       const connection = connections[i];
 
       if (connection.id != this.entity.owner) {
-        connection.write(new GameDataPacket([
+        connection.writeReliable(new GameDataPacket([
           new DespawnPacket(this.entity.playerControl.netId),
           new DespawnPacket(this.entity.playerPhysics.netId),
           new DespawnPacket(this.entity.customNetworkTransform.netId),
@@ -478,6 +483,11 @@ export class InternalPlayer implements PlayerInstance {
     return this;
   }
 
+  /**
+   * Gets the GameData instance from the player's lobby.
+   *
+   * @internal
+   */
   private getGameData(): EntityGameData {
     const gameData = this.lobby.getGameData();
 
@@ -488,6 +498,11 @@ export class InternalPlayer implements PlayerInstance {
     return gameData;
   }
 
+  /**
+   * Gets the player's PlayerData object from the GameData instance.
+   *
+   * @internal
+   */
   private getGameDataEntry(): PlayerData {
     const gameData = this.getGameData();
 

@@ -7,14 +7,14 @@ import { Level } from "../../../../types/enums";
  */
 export class LobbyListing {
   /**
-   * @param ipAddress The IP address of which the server hosting the lobby is bound to
-   * @param port The port on which the server hosting the lobby is listening on
+   * @param ipAddress The IP address to which the server hosting the lobby is bound
+   * @param port The port on which the server hosting the lobby listens for packets
    * @param lobbyCode The code for the lobby
    * @param hostName The display name of the lobby
    * @param playerCount The number of players in the lobby
    * @param age The age, in seconds, of the lobby
    * @param level The level that the lobby is set to play on
-   * @param impostorCount The max number of impostors in the lobby
+   * @param impostorCount The max number of Impostors in the lobby
    * @param maxPlayers The max number of players allowed in the lobby
    */
   constructor(
@@ -49,14 +49,14 @@ export class LobbyListing {
   }
 
   /**
-   * Gets the IP address of which the server hosting the lobby is bound to.
+   * Gets the IP address to which the server hosting the lobby is bound.
    */
   getIpAddress(): string {
     return this.ipAddress;
   }
 
   /**
-   * Gets the port on which the server hosting the lobby is listening on.
+   * Gets the port on which the server hosting the lobby listens for packets.
    */
   getPort(): number {
     return this.port;
@@ -98,7 +98,7 @@ export class LobbyListing {
   }
 
   /**
-   * Gets the max number of impostors in the lobby.
+   * Gets the max number of Impostors in the lobby.
    */
   getImpostorCount(): number {
     return this.impostorCount;

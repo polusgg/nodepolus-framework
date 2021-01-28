@@ -49,22 +49,39 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
     });
   }
 
+  /**
+   * Gets the underlying socket for the announcement server.
+   */
   getSocket(): dgram.Socket {
     return this.announcementServerSocket;
   }
 
+  /**
+   * Gets the IP address to which the announcement server is bound.
+   */
   getAddress(): string {
     return this.address;
   }
 
+  /**
+   * Gets the port on which the announcement server listens for packets.
+   */
   getPort(): number {
     return ANNOUNCEMENT_SERVER_PORT;
   }
 
+  /**
+   * Gets the driver used to fetch announcements.
+   */
   getDriver(): BaseAnnouncementDriver | undefined {
     return this.driver;
   }
 
+  /**
+   * Sets the driver used to fetch announcements.
+   *
+   * @param driver The new announcement driver
+   */
   setDriver(driver?: BaseAnnouncementDriver): this {
     this.logger.debug("Driver set to %s", driver?.constructor.name);
 
@@ -73,40 +90,80 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
     return this;
   }
 
+  /**
+   * Sets whether or not the announcement server should send custom language
+   * names to all connections.
+   *
+   * @experimental
+   * @param sendLanguages `true` to send custom language names, `false` to only send announcements
+   */
   sendLanguagesOnHello(sendLanguages: boolean = true): this {
     this.sendLanguages = sendLanguages;
 
     return this;
   }
 
+  /**
+   * Sets the custom language names.
+   *
+   * @experimental
+   * @param languages The custom language names
+   */
   setLanguages(languages: Map<number, string>): this {
     this.languages = languages;
 
     return this;
   }
 
+  /**
+   * Sets a custom language name.
+   *
+   * @experimental
+   * @param id The ID of the language name
+   * @param text The language name
+   */
   setLanguage(id: number, text: string): this {
     this.languages.set(id, text);
 
     return this;
   }
 
+  /**
+   * Removes the language name with the given ID.
+   *
+   * @experimental
+   * @param id The ID of the language name to be removed
+   */
   deleteLanguage(id: number): this {
     this.languages.delete(id);
 
     return this;
   }
 
+  /**
+   * Adds a custom language name.
+   *
+   * @experimental
+   * @param text The custom language name
+   */
   addLanguage(text: string): this {
     const id = this.languages.entries()[this.languages.size - 1].id + 1;
 
     return this.setLanguage(id, text);
   }
 
+  /**
+   * Removes all custom language names.
+   *
+   * @experimental
+   */
   clearLanguages(): this {
     return this.setLanguages(new Map());
   }
 
+  /**
+   * Starts listening for packets on the server socket.
+   */
   async listen(): Promise<void> {
     await this.driver?.refresh(true);
 

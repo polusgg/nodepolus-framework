@@ -3,7 +3,7 @@ import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
 
 /**
- * Fired when a player's role has been changed to either crewmate or impostor.
+ * Fired when a player's role has been changed to either Crewmate or Impostor.
  */
 export class PlayerRoleUpdatedEvent extends CancellableEvent {
   /**

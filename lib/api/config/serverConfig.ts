@@ -5,7 +5,7 @@ import { LogLevel } from "../../logger/logger";
  */
 export type ServerConfig = {
   /**
-   * The address that NodePolus will bind to.
+   * The IP address that NodePolus will bind to.
    *
    * @defaultValue `0.0.0.0`
    */

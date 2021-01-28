@@ -42,6 +42,9 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   // Reserve the fake client IDs
   private connectionIndex = Object.keys(FakeClientId).length / 2;
 
+  /**
+   * @param config The server configuration
+   */
   constructor(
     private readonly config: ServerConfig = {},
   ) {
@@ -64,22 +67,44 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     });
   }
 
+  /**
+   * Gets the elapsed time, in milliseconds, since the Unix epoch at which the
+   * server was started.
+   */
   getStartedAt(): number {
     return this.startedAt;
   }
 
+  /**
+   * Gets the underlying socket for the server.
+   */
   getSocket(): dgram.Socket {
     return this.serverSocket;
   }
 
+  /**
+   * Gets the server's logger, or a child logger with the given name.
+   *
+   * @param childName The name of the child logger
+   * @returns The server's logger, or a child logger using `childName` for the name
+   */
   getLogger(childName?: string): Logger {
     return childName === undefined ? this.logger : this.logger.child(childName);
   }
 
+  /**
+   * Gets all of the connections connected to the server.
+   */
   getConnections(): ReadonlyMap<string, Connection> {
     return this.connections;
   }
 
+  /**
+   * Gets or creates a connection from the given ConnectionInfo.
+   *
+   * @param connectionInfo The ConnectionInfo describing the connection that will be returned
+   * @returns A connection described by `connectionInfo`
+   */
   getConnection(connectionInfo: string | ConnectionInfo): Connection {
     let info: ConnectionInfo;
     let identifier: string;
@@ -105,56 +130,103 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     return connection;
   }
 
+  /**
+   * Gets all lobbies hosted on the server.
+   */
   getLobbies(): readonly LobbyInstance[] {
     return this.lobbies;
   }
 
+  /**
+   * Gets the lobby with the given code.
+   *
+   * @param code The code for the lobby that will be returned
+   * @returns The lobby, or `undefined` if no lobbies on the server have the code `code`
+   */
   getLobby(code: string): LobbyInstance | undefined {
     return this.lobbyMap.get(code);
   }
 
+  /**
+   * Adds the given lobby to the server.
+   *
+   * @param lobby The lobby to be added
+   */
   addLobby(lobby: LobbyInstance): void {
     this.lobbies.push(lobby);
     this.lobbyMap.set(lobby.getCode(), lobby);
   }
 
+  /**
+   * Removes the given lobby from the server.
+   *
+   * @param lobby The lobby to be removed
+   */
   deleteLobby(lobby: LobbyInstance): void {
     this.lobbies.splice(this.lobbies.indexOf(lobby), 1);
     this.lobbyMap.delete(lobby.getCode());
   }
 
+  /**
+   * Gets the server configuration.
+   */
   getConfig(): ServerConfig {
     return this.config;
   }
 
+  /**
+   * Gets the IP address to which the server is bound.
+   */
   getAddress(): string {
     return this.config.serverAddress ?? DEFAULT_CONFIG.serverAddress;
   }
 
+  /**
+   * Gets the port on which the server listens for packets.
+   */
   getPort(): number {
     return this.config.serverPort ?? DEFAULT_CONFIG.serverPort;
   }
 
+  /**
+   * Gets the maximum number of lobbies that the server will host at a time.
+   */
   getMaxLobbies(): number {
     return this.config.maxLobbies ?? DEFAULT_CONFIG.maxLobbies;
   }
 
+  /**
+   * Gets the maximum number of connections allowed per IP address.
+   */
   getMaxConnectionsPerAddress(): number {
     return this.config.maxConnectionsPerAddress ?? DEFAULT_CONFIG.maxConnectionsPerAddress;
   }
 
+  /**
+   * Gets the default IP address to which a lobby hosted by the server is bound.
+   */
   getDefaultLobbyAddress(): string {
     return this.config.lobby?.defaultAddress ?? DEFAULT_CONFIG.lobby.defaultAddress;
   }
 
+  /**
+   * Gets the default port on which a lobby hosted by the server listens for
+   * packets.
+   */
   getDefaultLobbyPort(): number {
     return this.config.lobby?.defaultPort ?? DEFAULT_CONFIG.lobby.defaultPort;
   }
 
+  /**
+   * Gets the maximum number of players that the server will allow in a lobby.
+   */
   getMaxPlayersPerLobby(): number {
     return this.config.lobby?.maxPlayers ?? DEFAULT_CONFIG.lobby.maxPlayers;
   }
 
+  /**
+   * Gets the next available client ID.
+   */
   getNextConnectionId(): number {
     if (++this.connectionIndex > MaxValue.UInt32) {
       this.connectionIndex = Object.keys(FakeClientId).length / 2;
@@ -163,6 +235,9 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     return this.connectionIndex;
   }
 
+  /**
+   * Starts listening for packets on the server socket.
+   */
   async listen(): Promise<void> {
     return new Promise((resolve, _reject) => {
       this.serverSocket.bind(this.getPort(), this.getAddress(), () => {
@@ -173,6 +248,12 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     });
   }
 
+  /**
+   * Cleans up the given disconnecting connection and removes empty lobbies.
+   *
+   * @param connection The connection that was disconnected
+   * @param reason The reason for why the connection was disconnected
+   */
   private async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
     if (connection.lobby) {
       this.getLogger().verbose("Connection %s disconnected from lobby %s", connection, connection.lobby);
@@ -209,6 +290,12 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     this.connections.delete(connection.getConnectionInfo().toString());
   }
 
+  /**
+   * Creates a new connection from the given ConnectionInfo.
+   *
+   * @param connectionInfo The ConnectionInfo describing the connection
+   * @returns A new connection described by `connectionInfo`
+   */
   private initializeConnection(connectionInfo: ConnectionInfo): Connection {
     const newConnection = new Connection(connectionInfo, this.serverSocket, PacketDestination.Client);
 
@@ -254,6 +341,12 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     return newConnection;
   }
 
+  /**
+   * Called when the server receives a packet from a connection.
+   *
+   * @param packet The packet that was sent to the server
+   * @param sender The connection that sent the packet
+   */
   private async handlePacket(packet: BaseRootPacket, sender: Connection): Promise<void> {
     switch (packet.type) {
       case RootPacketType.HostGame: {
@@ -267,7 +360,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
           if (!event.isCancelled()) {
             this.getLogger().verbose("Preventing connection %s from hosting lobby on full server", sender);
 
-            sender.write(new JoinGameErrorPacket(event.getDisconnectReason()));
+            sender.writeReliable(new JoinGameErrorPacket(event.getDisconnectReason()));
 
             return;
           }

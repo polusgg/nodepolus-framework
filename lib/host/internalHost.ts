@@ -1,4 +1,3 @@
-import { PlayerExiledEvent, PlayerRoleUpdatedEvent, PlayerSpawnedEvent, PlayerTaskAddedEvent } from "../api/events/player";
 import { BaseInnerShipStatus, InternalSystemType } from "../protocol/entities/baseShipStatus";
 import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent } from "../api/events/lobby";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
@@ -66,6 +65,12 @@ import {
   MeetingVoteAddedEvent,
 } from "../api/events/meeting";
 import {
+  PlayerExiledEvent,
+  PlayerRoleUpdatedEvent,
+  PlayerSpawnedEvent,
+  PlayerTaskAddedEvent,
+} from "../api/events/player";
+import {
   GameEndedEvent,
   GameStartedEvent,
   GameStartingEvent,
@@ -105,6 +110,9 @@ export class InternalHost implements HostInstance {
   private doorHandler?: DoorsHandler | AutoDoorsHandler;
   private decontaminationHandlers: DecontaminationHandler[] = [];
 
+  /**
+   * @param lobby The lobby being controlled by the host
+   */
   constructor(
     private readonly lobby: InternalLobby,
   ) {}
@@ -119,6 +127,18 @@ export class InternalHost implements HostInstance {
 
   getNextNetId(): number {
     return this.netIdIndex++;
+  }
+
+  getNextPlayerId(): number {
+    const taken = this.lobby.getPlayers().map(player => player.getId());
+
+    for (let i = 0; i < 127; i++) {
+      if (taken.indexOf(i) == -1) {
+        return i;
+      }
+    }
+
+    return -1;
   }
 
   async startCountdown(count: number, starter?: PlayerInstance): Promise<void> {
@@ -258,6 +278,10 @@ export class InternalHost implements HostInstance {
   }
 
   setTasks(): void {
+    /**
+     * This implementation is ported directly from Among Us to be as close to
+     * the original as possible.
+     */
     const options = this.lobby.getOptions();
     const level = options.levels[0];
     const numCommon = options.commonTaskCount;
@@ -341,7 +365,7 @@ export class InternalHost implements HostInstance {
       return;
     }
 
-    this.updatePlayerTasks(player, tasks);
+    this.updatePlayerTasks(player, [...event.getTasks()]);
   }
 
   async endMeeting(): Promise<void> {
@@ -435,13 +459,13 @@ export class InternalHost implements HostInstance {
       await this.lobby.getServer().emit("player.exiled", exiledEvent);
 
       if (!exiledEvent.isCancelled()) {
+        exiledPlayer = exiledEvent.getPlayer();
         exiledPlayerData = gameData.gameData.players.find(playerData => playerData.id == exiledPlayer?.getId());
 
         if (!exiledPlayerData) {
           throw new Error("Exiled player does not have a PlayerData instance on the GameData instance");
         }
 
-        exiledPlayer = exiledEvent.getPlayer();
         exiledPlayerData.isDead = true;
       }
     }
@@ -488,7 +512,7 @@ export class InternalHost implements HostInstance {
           }
         }
       // This timing of 8.5 seconds is based on in-game observations and may be
-      // slightly inaccurate due to network latency and fluctuating framerates
+      // slightly inaccurate due to network latency and fluctuating framerates.
       }, 8500);
     }, 5000);
   }
@@ -620,17 +644,8 @@ export class InternalHost implements HostInstance {
 
     this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getShipStatus()!.serializeSpawn()], this.lobby.getCode()));
     this.setInfected(this.lobby.getOptions().impostorCount);
-
-    // TODO: Uncomment when removing the for loop below
-    // this.setTasks();
-
-    // TODO: Remove -- debug task list for medbay scan on all 3 maps
-    for (let i = 0; i < this.lobby.getPlayers().length; i++) {
-      gameData.gameData.setTasks(this.lobby.getPlayers()[i].getId(), [25, 4, 2], connections);
-    }
-
+    this.setTasks();
     gameData.gameData.updateGameData(gameData.gameData.players, connections);
-
     this.lobby.setGameState(GameState.Started);
   }
 
@@ -661,7 +676,7 @@ export class InternalHost implements HostInstance {
       this.lobby.setLobbyBehaviour(lobbyBehaviour);
     }
 
-    sender.write(new GameDataPacket([lobbyBehaviour.serializeSpawn()], this.lobby.getCode()));
+    sender.writeReliable(new GameDataPacket([lobbyBehaviour.serializeSpawn()], this.lobby.getCode()));
 
     let gameData = this.lobby.getGameData();
 
@@ -671,7 +686,7 @@ export class InternalHost implements HostInstance {
       this.lobby.setGameData(gameData);
     }
 
-    sender.write(new GameDataPacket([gameData.serializeSpawn()], this.lobby.getCode()));
+    sender.writeReliable(new GameDataPacket([gameData.serializeSpawn()], this.lobby.getCode()));
 
     const event = new PlayerSpawnedEvent(sender, this.lobby, newPlayerId, true, new Vector2(0, 0));
 
@@ -694,7 +709,7 @@ export class InternalHost implements HostInstance {
     const player = new InternalPlayer(this.lobby, entity, sender);
 
     for (let i = 0; i < this.lobby.getPlayers().length; i++) {
-      sender.write(new GameDataPacket([this.lobby.getPlayers()[i].entity.serializeSpawn()], this.lobby.getCode()));
+      sender.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].entity.serializeSpawn()], this.lobby.getCode()));
     }
 
     this.lobby.addPlayer(player);
@@ -722,7 +737,7 @@ export class InternalHost implements HostInstance {
       throw new Error("Received CheckName from an InnerPlayerControl without an owner");
     }
 
-    const player = this.lobby.findPlayerByInnerNetObject(sender);
+    const player = this.lobby.findPlayerByConnection(owner);
 
     if (player) {
       this.confirmPlayerData(player);
@@ -753,7 +768,7 @@ export class InternalHost implements HostInstance {
       throw new Error("Received CheckColor from an InnerPlayerControl without an owner");
     }
 
-    const player = this.lobby.findPlayerByInnerNetObject(sender);
+    const player = this.lobby.findPlayerByConnection(owner);
 
     if (player) {
       this.confirmPlayerData(player);
@@ -817,7 +832,13 @@ export class InternalHost implements HostInstance {
       throw new Error("Received ReportDeadBody without a GameData instance");
     }
 
-    const player = this.lobby.findPlayerByInnerNetObject(sender);
+    const owner = this.lobby.findConnection(sender.parent.owner);
+
+    if (!owner) {
+      throw new Error("Received ReportDeadBody from an InnerPlayerControl without an owner");
+    }
+
+    const player = this.lobby.findPlayerByConnection(owner);
 
     if (!player) {
       throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
@@ -1070,7 +1091,11 @@ export class InternalHost implements HostInstance {
   }
 
   /**
+   * Sets the give players task list.
+   *
    * @internal
+   * @param player The player whose task list will be updates
+   * @param tasks The player's new tasks
    */
   updatePlayerTasks(player: PlayerInstance, tasks: LevelTask[]): void {
     const gameData = this.lobby.getGameData();
@@ -1083,20 +1108,15 @@ export class InternalHost implements HostInstance {
   }
 
   /**
+   * Adds random tasks to the given list.
+   *
    * @internal
+   * @param start The position in the source array to prevent an out-of-bounds array access
+   * @param count The number of tasks to add
+   * @param tasks The output array containing the random tasks
+   * @param usedTaskTypes The types of tasks that are already in the output array
+   * @param unusedTasks The source array of tasks
    */
-  getNextPlayerId(): number {
-    const taken = this.lobby.getPlayers().map(player => player.getId());
-
-    for (let i = 0; i < 127; i++) {
-      if (taken.indexOf(i) == -1) {
-        return i;
-      }
-    }
-
-    return -1;
-  }
-
   private addTasksFromList(
     start: { val: number },
     count: number,
@@ -1148,6 +1168,13 @@ export class InternalHost implements HostInstance {
     }
   }
 
+  /**
+   * Gets whether or not the game should end based on the number of Impostors
+   * and Crewmates that are still alive.
+   *
+   * @internal
+   * @returns `true` if `impostors.length >= crewmates.length`, `false` if not
+   */
   private shouldEndGame(): boolean {
     const gameData = this.lobby.getGameData();
 
@@ -1179,6 +1206,13 @@ export class InternalHost implements HostInstance {
     return (aliveImpostors.length >= aliveCrewmates.length) || aliveImpostors.length == 0;
   }
 
+  /**
+   * Checks if the given name is already in use by another player.
+   *
+   * @internal
+   * @param name The name to be checked
+   * @returns `true` if the name is already in use, `false` if not
+   */
   private isNameTaken(name: string): boolean {
     const gameData = this.lobby.getGameData();
 
@@ -1189,6 +1223,13 @@ export class InternalHost implements HostInstance {
     return !!gameData.gameData.players.find(player => player.name == name);
   }
 
+  /**
+   * Gets all colors that are already in use by other players.
+   *
+   * @internal
+   * @param excludePlayerId The ID of a player whose color will be excluded from the results
+   * @returns The colors that are already in use
+   */
   private getTakenColors(excludePlayerId: number): PlayerColor[] {
     const gameData = this.lobby.getGameData();
 
@@ -1199,6 +1240,13 @@ export class InternalHost implements HostInstance {
     return gameData.gameData.players.filter(player => player.id !== excludePlayerId).map(player => player.color);
   }
 
+  /**
+   * Creates a PlayerData instance for the given player if one does not already
+   * exist on the GameData instance.
+   *
+   * @internal
+   * @param player The player whose PlayerData will be checked
+   */
   private confirmPlayerData(player: InternalPlayer): void {
     const gameData = this.lobby.getGameData();
 

@@ -1,4 +1,3 @@
-import { EntityPlayer, InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { BaseRPCPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
@@ -15,6 +14,7 @@ import { EntityGameData } from "../protocol/entities/gameData";
 import { LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
 import { LobbyListing } from "../protocol/packets/root/types";
 import { LobbyInstance, LobbySettings } from "../api/lobby";
+import { EntityPlayer } from "../protocol/entities/player";
 import { PlayerJoinedEvent } from "../api/events/player";
 import { Connection } from "../protocol/connection";
 import { notUndefined } from "../util/functions";
@@ -31,23 +31,18 @@ import { Server } from "../server";
 import {
   AlterGameTagPacket,
   BaseRootPacket,
-  EndGamePacket,
   GameDataPacket,
   JoinGameErrorPacket,
   JoinGameResponsePacket,
   JoinedGamePacket,
   KickPlayerPacket,
-  LateRejectionPacket,
-  RemoveGamePacket,
   RemovePlayerPacket,
   StartGamePacket,
-  WaitForHostPacket,
 } from "../protocol/packets/root";
 import {
   AlterGameTag,
   DisconnectReasonType,
   FakeClientId,
-  GameOverReason,
   GameState,
   Level,
   LimboState,
@@ -199,6 +194,43 @@ export class InternalLobby implements LobbyInstance {
     this.players.push(player);
   }
 
+  clearPlayers(): void {
+    this.players = [];
+  }
+
+  removePlayer(player: InternalPlayer): void {
+    this.players.splice(this.players.indexOf(player), 1);
+  }
+
+  findInnerNetObject(netId: number): BaseInnerNetObject | undefined {
+    switch (netId) {
+      case this.lobbyBehaviour?.lobbyBehaviour.netId:
+        return this.lobbyBehaviour!.lobbyBehaviour;
+      case this.gameData?.gameData.netId:
+        return this.gameData!.gameData;
+      case this.gameData?.voteBanSystem.netId:
+        return this.gameData!.voteBanSystem;
+      case this.shipStatus?.getShipStatus().netId:
+        return this.shipStatus!.getShipStatus();
+      case this.meetingHud?.meetingHud.netId:
+        return this.meetingHud!.meetingHud;
+    }
+
+    for (let i = 0; i < this.players.length; i++) {
+      const player = this.players[i];
+
+      for (let j = 0; j < player.entity.innerNetObjects.length; j++) {
+        const object = player.entity.innerNetObjects[j];
+
+        if (notUndefined(object) && object.netId == netId) {
+          return object;
+        }
+      }
+    }
+
+    throw new Error(`InnerNetObject #${netId} not found`);
+  }
+
   findPlayerByClientId(clientId: number): InternalPlayer | undefined {
     return this.players.find(player => player.entity.owner == clientId);
   }
@@ -211,12 +243,20 @@ export class InternalLobby implements LobbyInstance {
     return this.players.find(player => player.entity.innerNetObjects.some(object => object.netId == netId));
   }
 
-  clearPlayers(): void {
-    this.players = [];
+  findPlayerByConnection(connection: Connection): InternalPlayer | undefined {
+    return this.players.find(player => player.entity.owner == connection.id);
   }
 
-  removePlayer(player: InternalPlayer): void {
-    this.players.splice(this.players.indexOf(player), 1);
+  findPlayerByEntity(entity: EntityPlayer): InternalPlayer | undefined {
+    return this.players.find(player => player.entity.owner == entity.owner);
+  }
+
+  findPlayerIndexByConnection(connection: Connection): number {
+    return this.players.findIndex(player => player.entity.owner == connection.id);
+  }
+
+  findConnection(id: number): Connection | undefined {
+    return this.connections.find(con => con.id == id);
   }
 
   getGameData(): EntityGameData | undefined {
@@ -276,6 +316,8 @@ export class InternalLobby implements LobbyInstance {
   }
 
   /**
+   * Gets the lobby's raw editable settings.
+   *
    * @internal
    */
   getMutableOptions(): GameOptionsData {
@@ -283,7 +325,10 @@ export class InternalLobby implements LobbyInstance {
   }
 
   /**
+   * Sets the lobby's raw settings.
+   *
    * @internal
+   * @param options The lobby's new raw settings
    */
   setOptions(options: GameOptionsData): void {
     this.options = options;
@@ -318,7 +363,7 @@ export class InternalLobby implements LobbyInstance {
     }
 
     this.gameTags.set(gameTag, value);
-    this.handleAlterGameTag(gameTag, value);
+    this.sendRootGamePacket(new AlterGameTagPacket(this.code, gameTag, value));
   }
 
   getGameState(): GameState {
@@ -465,7 +510,7 @@ export class InternalLobby implements LobbyInstance {
           playerData.color = color;
           playerData.name = name;
 
-          connection.write(new GameDataPacket([
+          connection.writeReliable(new GameDataPacket([
             new RPCPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([playerData])),
             new RPCPacket(player.entity.playerControl.netId, new SendChatPacket(message.toString())),
           ], this.code));
@@ -473,7 +518,7 @@ export class InternalLobby implements LobbyInstance {
           playerData.color = oldColor;
           playerData.name = oldName;
 
-          connection.write(new GameDataPacket([
+          connection.writeReliable(new GameDataPacket([
             new RPCPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([playerData])),
           ], this.code));
         }
@@ -482,14 +527,21 @@ export class InternalLobby implements LobbyInstance {
   }
 
   /**
+   * Gets whether or not the lobby is currently spawning player characters.
+   *
    * @internal
+   * @returns `true` if players are still being spawned, `false` if not
    */
   isSpawningPlayers(): boolean {
     return this.spawningPlayers.size > 0;
   }
 
   /**
+   * Marks a connection as having had their player character successfully
+   * spawned.
+   *
    * @internal
+   * @param connection The connection to be marked as spawned
    */
   async finishedSpawningPlayer(connection: Connection): Promise<void> {
     this.spawningPlayers.delete(connection);
@@ -504,14 +556,21 @@ export class InternalLobby implements LobbyInstance {
   }
 
   /**
+   * Adds the given connection to the list of connections whose player
+   * characters are currently being spawned.
+   *
    * @internal
+   * @param connection The connection to be marked as spawning
    */
   startedSpawningPlayer(connection: Connection): void {
     this.spawningPlayers.add(connection);
   }
 
   /**
+   * Temporarily removes the acting host status from all acting hosts.
+   *
    * @internal
+   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   removeActingHosts(sendImmediately: boolean = true): void {
     const actingHosts = this.getActingHosts();
@@ -524,7 +583,10 @@ export class InternalLobby implements LobbyInstance {
   }
 
   /**
+   * Reapplies the acting host status to all acting hosts.
+   *
    * @internal
+   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   reapplyActingHosts(sendImmediately: boolean = true): void {
     const actingHosts = this.getActingHosts();
@@ -537,109 +599,58 @@ export class InternalLobby implements LobbyInstance {
   }
 
   /**
+   * Updates the client for the given connection to enable host abilities.
+   *
    * @internal
+   * @param connection The connection whose host abilities will be enabled
+   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   sendSetHost(connection: Connection, sendImmediately: boolean = true): void {
     if (sendImmediately) {
       connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, connection.id)]);
     } else {
-      connection.write(new JoinGameResponsePacket(this.code, connection.id, connection.id));
+      connection.writeReliable(new JoinGameResponsePacket(this.code, connection.id, connection.id));
     }
   }
 
   /**
+   * Updates the client for the given connection to disable host abilities.
+   *
    * @internal
+   * @param connection The connection whose host abilities will be disabled
+   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   sendRemoveHost(connection: Connection, sendImmediately: boolean = true): void {
     if (sendImmediately) {
       connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId())]);
     } else {
-      connection.write(new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId()));
+      connection.writeReliable(new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId()));
     }
   }
 
   /**
+   * Sends the given packet as a reliable packet to the given connections.
+   *
    * @internal
-   */
-  findInnerNetObject(netId: number): BaseInnerNetObject | undefined {
-    switch (netId) {
-      case this.lobbyBehaviour?.lobbyBehaviour.netId:
-        return this.lobbyBehaviour!.lobbyBehaviour;
-      case this.gameData?.gameData.netId:
-        return this.gameData!.gameData;
-      case this.gameData?.voteBanSystem.netId:
-        return this.gameData!.voteBanSystem;
-      case this.shipStatus?.getShipStatus().netId:
-        return this.shipStatus!.getShipStatus();
-      case this.meetingHud?.meetingHud.netId:
-        return this.meetingHud!.meetingHud;
-    }
-
-    for (let i = 0; i < this.players.length; i++) {
-      const player = this.players[i];
-
-      for (let j = 0; j < player.entity.innerNetObjects.length; j++) {
-        const object = player.entity.innerNetObjects[j];
-
-        if (notUndefined(object) && object.netId == netId) {
-          return object;
-        }
-      }
-    }
-
-    throw new Error(`InnerNetObject #${netId} not found`);
-  }
-
-  /**
-   * @internal
-   */
-  findPlayerByConnection(connection: Connection): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.owner == connection.id);
-  }
-
-  /**
-   * @internal
-   */
-  findPlayerByEntity(entity: EntityPlayer): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.owner == entity.owner);
-  }
-
-  /**
-   * @internal
-   */
-  findPlayerByInnerNetObject(netObject: InnerPlayerControl | InnerPlayerPhysics | InnerCustomNetworkTransform): InternalPlayer | undefined {
-    return this.players.find(player => player.entity == netObject.parent);
-  }
-
-  /**
-   * @internal
-   */
-  findPlayerIndexByConnection(connection: Connection): number {
-    return this.players.findIndex(player => player.entity.owner == connection.id);
-  }
-
-  /**
-   * @internal
-   */
-  findConnection(id: number): Connection | undefined {
-    return this.connections.find(con => con.id == id);
-  }
-
-  /**
-   * @internal
+   * @param packet The packet to be sent
+   * @param sendTo The connections to which the packet will be send (default `this.connections`)
    */
   async sendRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): Promise<PromiseSettledResult<void>[]> {
     const promiseArray: Promise<void>[] = [];
 
     for (let i = 0; i < sendTo.length; i++) {
-      promiseArray.push(sendTo[i].write(packet));
+      promiseArray.push(sendTo[i].writeReliable(packet));
     }
 
     return Promise.allSettled(promiseArray);
   }
 
   /**
+   * Sends the given packet as an unreliable packet to the given connections.
+   *
    * @internal
+   * @param packet The packet to be sent
+   * @param sendTo The connections to which the packet will be send (default `this.connections`)
    */
   sendUnreliableRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): void {
     for (let i = 0; i < sendTo.length; i++) {
@@ -648,7 +659,11 @@ export class InternalLobby implements LobbyInstance {
   }
 
   /**
+   * Removes the given connection from the lobby and migrates hosts.
+   *
    * @internal
+   * @param connection The connection that was disconnected
+   * @param reason The reason for why the connection was disconnected
    */
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
     this.hostInstance.handleDisconnect(connection, reason);
@@ -672,7 +687,10 @@ export class InternalLobby implements LobbyInstance {
   }
 
   /**
+   * Adds the given connection to the lobby.
+   *
    * @internal
+   * @param connection The connection that is joining the lobby
    */
   async handleJoin(connection: Connection): Promise<void> {
     this.getLogger().verbose("Connection %s joining", connection);
@@ -688,7 +706,7 @@ export class InternalLobby implements LobbyInstance {
         if (!event.isCancelled()) {
           this.getLogger().verbose("Preventing connection %s from joining full lobby", connection);
 
-          connection.write(new JoinGameErrorPacket(event.getDisconnectReason()));
+          connection.writeReliable(new JoinGameErrorPacket(event.getDisconnectReason()));
 
           return;
         }
@@ -724,9 +742,16 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    */
   clearMessage(): void {
-    // TODO: this *is* possible, somehow
+    // TODO: Find out how, or bug Forte some more about those custom RPC messages
   }
 
+  /**
+   * Called when the lobby receives a packet from a connection.
+   *
+   * @internal
+   * @param packet The packet that was sent to the lobby
+   * @param sender The connection that sent the packet
+   */
   private handlePacket(packet: BaseRootPacket, sender: Connection): void {
     switch (packet.type) {
       case RootPacketType.AlterGameTag: {
@@ -735,19 +760,10 @@ export class InternalLobby implements LobbyInstance {
         this.setGameTag(data.tag, data.value);
         break;
       }
-      case RootPacketType.EndGame: {
-        const data = packet as EndGamePacket;
-
-        this.gameState = GameState.Ended;
-
-        this.handleEndGame(data.reason, data.showAd);
-
-        for (let i = 0; i < this.connections.length; i++) {
-          this.connections[i].limboState = LimboState.PreSpawn;
-        }
+      case RootPacketType.EndGame:
         break;
-      }
       case RootPacketType.GameData:
+        // fallthrough
       case RootPacketType.GameDataTo: {
         if (sender.limboState == LimboState.PreSpawn) {
           return;
@@ -779,45 +795,18 @@ export class InternalLobby implements LobbyInstance {
         }
         break;
       }
-      case RootPacketType.RemoveGame: {
-        this.handleRemoveGame((packet as RemoveGamePacket).disconnectReason);
+      case RootPacketType.RemoveGame:
         break;
-      }
-      case RootPacketType.RemovePlayer: {
-        if (!packet.isClientBound) {
-          const data = packet as LateRejectionPacket;
-          const id = data.removedClientId;
-          const con = this.findConnection(id);
-
-          if (!con) {
-            throw new Error(`SendLateRejection sent for unknown client: ${id}`);
-          }
-
-          con.sendLateRejection(data.disconnectReason);
-        } else {
-          const data = packet as RemovePlayerPacket;
-
-          this.handleRemovePlayer(data.removedClientId, data.hostClientId, data.disconnectReason);
-        }
+      case RootPacketType.RemovePlayer:
         break;
-      }
       case RootPacketType.StartGame: {
-        this.handleStartGame();
+        this.sendRootGamePacket(new StartGamePacket(this.code));
 
         this.gameState = GameState.Started;
         break;
       }
-      case RootPacketType.WaitForHost: {
-        const id = (packet as WaitForHostPacket).waitingClientId;
-        const con = this.findConnection(id);
-
-        if (!con) {
-          throw new Error(`WaitForHost sent for unknown client: ${id}`);
-        }
-
-        con.sendWaitingForHost();
+      case RootPacketType.WaitForHost:
         break;
-      }
       case RootPacketType.JoinGame:
         break;
       default:
@@ -825,58 +814,14 @@ export class InternalLobby implements LobbyInstance {
     }
   }
 
-  private handleNewJoin(connection: Connection): void {
-    if (this.connections.indexOf(connection) == -1) {
-      this.connections.push(connection);
-    }
-
-    connection.isActingHost = true;
-    connection.limboState = LimboState.NotLimbo;
-
-    this.startedSpawningPlayer(connection);
-    this.sendJoinedMessage(connection);
-    this.broadcastJoinMessage(connection);
-  }
-
-  private handleRejoin(connection: Connection): void {
-    if (connection.lobby?.code != this.code) {
-      connection.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameStarted)]);
-    }
-  }
-
-  private migrateHost(): void {
-    // TODO: Assign new acting host if there are none
-  }
-
-  private broadcastJoinMessage(connection: Connection): void {
-    this.sendRootGamePacket(
-      new JoinGameResponsePacket(
-        this.code,
-        connection.id,
-        this.hostInstance.getId(),
-      ),
-      this.connections
-        .filter(con => con.id != connection.id)
-        .filter(con => con.limboState == LimboState.NotLimbo),
-    );
-  }
-
-  private sendJoinedMessage(connection: Connection): void {
-    connection.sendReliable([
-      new JoinedGamePacket(
-        this.code,
-        connection.id,
-        this.hostInstance.getId(),
-        this.connections
-          .filter(con => con.id != connection.id && con.limboState == LimboState.NotLimbo)
-          .map(con => con.id)),
-      new AlterGameTagPacket(
-        this.code,
-        AlterGameTag.ChangePrivacy,
-        this.getGameTag(AlterGameTag.ChangePrivacy) ?? 0),
-    ]);
-  }
-
+  /**
+   * Called when the lobby receives a GameData packet from a connection.
+   *
+   * @internal
+   * @param packet The packet that was sent to the lobby
+   * @param sender The connection that sent the packet
+   * @param sendTo The connections to which the packet was intended to be sent
+   */
   private handleGameDataPacket(packet: BaseGameDataPacket, sender: Connection, sendTo?: Connection[]): void {
     sendTo = ((sendTo && sendTo.length > 0) ? sendTo : this.connections).filter(c => c.id != sender.id);
 
@@ -923,6 +868,13 @@ export class InternalLobby implements LobbyInstance {
     }
   }
 
+  /**
+   * Called when the lobby receives a Data packet from a connection.
+   *
+   * @param netId The net ID of the InnerNetObject that sent the packet
+   * @param data The packet's data
+   * @param sendTo The connections to which the packet was intended to be sent
+   */
   private handleData(netId: number, data: MessageReader | MessageWriter, sendTo?: Connection[]): void {
     const netObject = this.findInnerNetObject(netId);
 
@@ -941,26 +893,85 @@ export class InternalLobby implements LobbyInstance {
     }
   }
 
-  private handleAlterGameTag(tag: AlterGameTag, value: number, sendTo?: Connection[]): void {
-    this.sendRootGamePacket(new AlterGameTagPacket(this.code, tag, value), sendTo);
+  /**
+   * Spawns a player for the given connection.
+   *
+   * @internal
+   * @param connection The connection that joined the lobby
+   */
+  private handleNewJoin(connection: Connection): void {
+    if (this.connections.indexOf(connection) == -1) {
+      this.connections.push(connection);
+    }
+
+    connection.isActingHost = true;
+    connection.limboState = LimboState.NotLimbo;
+
+    this.startedSpawningPlayer(connection);
+    this.sendJoinedMessage(connection);
+    this.broadcastJoinMessage(connection);
   }
 
-  private handleEndGame(reason: GameOverReason, showAd: boolean, sendTo?: Connection[]): void {
-    this.sendRootGamePacket(new EndGamePacket(this.code, reason, showAd), sendTo);
+  /**
+   * Disconnects players from the lobby if they took to long to rejoin.
+   *
+   * @internal
+   * @param connection The connection that rejoined the lobby
+   */
+  private handleRejoin(connection: Connection): void {
+    if (connection.lobby?.code != this.code) {
+      connection.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameStarted)]);
+    }
   }
 
-  private handleRemoveGame(reason?: DisconnectReason, sendTo?: Connection[]): void {
-    this.sendRootGamePacket(new RemoveGamePacket(reason), sendTo);
+  /**
+   * Assigns a new host when the old host leaves the lobby.
+   *
+   * @internal
+   */
+  private migrateHost(): void {
+    // TODO: Assign new acting host if there are none
   }
 
-  private handleStartGame(sendTo?: Connection[]): void {
-    this.sendRootGamePacket(new StartGamePacket(this.code), sendTo);
-  }
-
-  private handleRemovePlayer(removedClientId: number, hostClientId: number, disconnectReason?: DisconnectReason, sendTo?: Connection[]): void {
+  /**
+   * Sends a JoinGameResponse packet to all connections in the lobby when
+   * another connection joins the lobby.
+   *
+   * @internal
+   * @param connection The connection that joined the lobby
+   */
+  private broadcastJoinMessage(connection: Connection): void {
     this.sendRootGamePacket(
-      new RemovePlayerPacket(this.code, removedClientId, hostClientId, disconnectReason),
-      sendTo,
+      new JoinGameResponsePacket(
+        this.code,
+        connection.id,
+        this.hostInstance.getId(),
+      ),
+      this.connections
+        .filter(con => con.id != connection.id)
+        .filter(con => con.limboState == LimboState.NotLimbo),
     );
+  }
+
+  /**
+   * Sends a JoinedGame packet to the given connection.
+   *
+   * @internal
+   * @param connection The connection that joined the lobby
+   */
+  private sendJoinedMessage(connection: Connection): void {
+    connection.sendReliable([
+      new JoinedGamePacket(
+        this.code,
+        connection.id,
+        this.hostInstance.getId(),
+        this.connections
+          .filter(con => con.id != connection.id && con.limboState == LimboState.NotLimbo)
+          .map(con => con.id)),
+      new AlterGameTagPacket(
+        this.code,
+        AlterGameTag.ChangePrivacy,
+        this.getGameTag(AlterGameTag.ChangePrivacy) ?? 0),
+    ]);
   }
 }
