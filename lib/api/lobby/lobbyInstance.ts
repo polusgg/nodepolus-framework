@@ -237,7 +237,6 @@ export interface LobbyInstance {
    * Gets the index of the first player belonging to the given connection.
    *
    * @param connection The connection to which the player belongs
-   * @returns The index, or `undefined` if no players in the lobby belong to `connection`
    */
   findPlayerIndexByConnection(connection: Connection): number;
 
