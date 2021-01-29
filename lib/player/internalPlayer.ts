@@ -42,14 +42,6 @@ export class InternalPlayer implements PlayerInstance {
     this.name = TextComponent.from(connection?.getName() ?? "");
   }
 
-  hasBeenInitialized(): boolean {
-    return this.initialized;
-  }
-
-  setInitialized(initialized: boolean): void {
-    this.initialized = initialized;
-  }
-
   getId(): number {
     return this.id;
   }
@@ -488,6 +480,27 @@ export class InternalPlayer implements PlayerInstance {
     this.connection.sendKick(true, undefined, reason);
 
     return this;
+  }
+
+  /**
+   * Gets whether or not the player has been successfully initialized by the
+   * connection and server.
+   *
+   * @internal
+   */
+  hasBeenInitialized(): boolean {
+    return this.initialized;
+  }
+
+  /**
+   * Sets whether or not the player has been successfully initialized by the
+   * connection and server.
+   *
+   * @internal
+   * @param initialized `true` if the player has been initialized, `false` if not
+   */
+  setInitialized(initialized: boolean): void {
+    this.initialized = initialized;
   }
 
   /**

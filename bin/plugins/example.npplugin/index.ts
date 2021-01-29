@@ -4,7 +4,6 @@ import { AnnouncementServer } from "../../../lib/announcementServer";
 import { BasePlugin, PluginMetadata } from "../../../lib/api/plugin";
 import { PlayerJoinedEvent } from "../../../lib/api/events/player";
 import { shuffleArrayClone } from "../../../lib/util/shuffle";
-import { randomInRange } from "../../../lib/util/functions";
 import { Server } from "../../../lib/server";
 import { Vector2 } from "../../../lib/types";
 import path from "path";

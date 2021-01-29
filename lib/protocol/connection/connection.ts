@@ -330,7 +330,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
               clearInterval(resendInterval);
 
-              reject(new Error("Timeout. No Response from client."));
+              reject(new Error(`Connection timed out: did not acknowledge packet ${nonce} after 10 attempts`));
             } else {
               this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
             }
