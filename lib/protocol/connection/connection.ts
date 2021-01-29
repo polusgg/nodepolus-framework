@@ -24,6 +24,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
   private readonly metadata: Map<string, unknown> = new Map();
   private readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
+  private readonly flushResolveMap: Map<number, (value: void | PromiseLike<void>) => void> = new Map();
   private readonly unacknowledgedPackets: Map<number, number> = new Map();
   private readonly flushInterval: NodeJS.Timeout;
   // private readonly timeoutInterval: NodeJS.Timeout;
@@ -282,66 +283,71 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @param reliable `true` to send the packet group as a reliable packet, `false` to send it as an unreliable packet
    */
-  flush(reliable: boolean = true): void {
-    if (this.unreliablePacketBuffer.length == 0 && this.packetBuffer.length == 0) {
-      return;
-    }
-
-    let nonce: number | undefined;
-    let packet: Packet;
-    let packetBuffer: BaseRootPacket[] = [];
-
-    if (reliable) {
-      nonce = this.nonceIndex++ % 65536;
-
-      const packetArr = new Array(this.packetBuffer.length);
-      const resolveFuncs = new Array(this.packetBuffer.length);
-
-      for (let i = 0; i < this.packetBuffer.length; i++) {
-        const awaitingPacket = this.packetBuffer[i];
-
-        packetArr[i] = awaitingPacket.packet;
-        resolveFuncs[i] = awaitingPacket.resolve;
+  async flush(reliable: boolean = true): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (this.unreliablePacketBuffer.length == 0 && this.packetBuffer.length == 0) {
+        return;
       }
 
-      packetBuffer = packetArr;
-      packet = new Packet(nonce, new RootPacket(packetBuffer));
+      let nonce: number | undefined;
+      let packet: Packet;
+      let packetBuffer: BaseRootPacket[] = [];
 
-      this.acknowledgementResolveMap.set(nonce!, resolveFuncs);
-    } else {
-      packet = new Packet(nonce, new RootPacket(this.unreliablePacketBuffer));
-      packetBuffer = this.unreliablePacketBuffer;
-    }
+      if (reliable) {
+        nonce = this.nonceIndex++ % 65536;
 
-    packet.setClientBound(true);
+        const packetArr = new Array(this.packetBuffer.length);
+        const resolveFuncs = new Array(this.packetBuffer.length);
 
-    const packetToSend: MessageWriter = packet.serialize();
+        for (let i = 0; i < this.packetBuffer.length; i++) {
+          const awaitingPacket = this.packetBuffer[i];
 
-    if (nonce !== undefined) {
-      this.unacknowledgedPackets.set(nonce, 0);
-
-      const resendInterval = setInterval(() => {
-        if (this.unacknowledgedPackets.has(nonce!)) {
-          if (this.unacknowledgedPackets.get(nonce!)! > 10) {
-            this.disconnect(DisconnectReason.custom(`Failed to acknowledge packet ${nonce} after 10 attempts`));
-
-            clearInterval(resendInterval);
-          } else {
-            this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
-          }
-        } else {
-          clearInterval(resendInterval);
+          packetArr[i] = awaitingPacket.packet;
+          resolveFuncs[i] = awaitingPacket.resolve;
         }
-      }, 1000);
-    }
 
-    this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
+        packetBuffer = packetArr;
+        packet = new Packet(nonce, new RootPacket(packetBuffer));
 
-    if (reliable) {
-      this.packetBuffer = [];
-    } else {
-      this.unreliablePacketBuffer = [];
-    }
+        this.acknowledgementResolveMap.set(nonce!, resolveFuncs);
+      } else {
+        packet = new Packet(nonce, new RootPacket(this.unreliablePacketBuffer));
+        packetBuffer = this.unreliablePacketBuffer;
+      }
+
+      packet.setClientBound(true);
+
+      const packetToSend: MessageWriter = packet.serialize();
+
+      if (nonce !== undefined) {
+        this.unacknowledgedPackets.set(nonce, 0);
+        this.flushResolveMap.set(nonce, resolve);
+
+        const resendInterval = setInterval(() => {
+          if (this.unacknowledgedPackets.has(nonce!)) {
+            if (this.unacknowledgedPackets.get(nonce!)! > 10) {
+              this.disconnect(DisconnectReason.custom(`Failed to acknowledge packet ${nonce} after 10 attempts`));
+
+              clearInterval(resendInterval);
+
+              reject(new Error("Timeout. No Response from client."));
+            } else {
+              this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
+            }
+          } else {
+            clearInterval(resendInterval);
+          }
+        }, 1000);
+      }
+
+      this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
+
+      if (reliable) {
+        this.packetBuffer = [];
+      } else {
+        this.unreliablePacketBuffer = [];
+      }
+    });
   }
 
   /**
@@ -458,6 +464,14 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     }
 
     this.acknowledgementResolveMap.delete(nonce);
+
+    const resolve = this.flushResolveMap.get(nonce);
+
+    this.flushResolveMap.delete(nonce);
+
+    if (resolve) {
+      resolve();
+    }
   }
 
   /**

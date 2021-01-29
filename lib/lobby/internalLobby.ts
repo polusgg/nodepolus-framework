@@ -548,7 +548,9 @@ export class InternalLobby implements LobbyInstance {
 
     const player = this.findPlayerByConnection(connection);
 
-    if (player) {
+    if (player && !player.hasBeenInitialized()) {
+      player.setInitialized(true);
+
       await this.getServer().emit("player.joined", new PlayerJoinedEvent(this, player, !connection.firstJoin));
 
       connection.firstJoin = false;

@@ -26,6 +26,7 @@ export class InternalPlayer implements PlayerInstance {
 
   private name: TextComponent;
   private role: PlayerRole = PlayerRole.Crewmate;
+  private initialized = false;
 
   /**
    * @param lobby The lobby in which the player exists
@@ -39,6 +40,14 @@ export class InternalPlayer implements PlayerInstance {
   ) {
     this.id = entity.playerControl.playerId;
     this.name = TextComponent.from(connection?.getName() ?? "");
+  }
+
+  hasBeenInitialized(): boolean {
+    return this.initialized;
+  }
+
+  setInitialized(initialized: boolean): void {
+    this.initialized = initialized;
   }
 
   getId(): number {
@@ -356,8 +365,6 @@ export class InternalPlayer implements PlayerInstance {
       this.entity.customNetworkTransform.position,
       this.entity.customNetworkTransform.velocity,
     );
-
-    this.entity.customNetworkTransform.position = new Vector2(-39, -39);
 
     if (this.connection === undefined) {
       throw new Error("Tried to respawn a player without a connection");

@@ -41,15 +41,6 @@ export default class extends BasePlugin {
      * Set the announcement server's driver.
      */
     announcementServer.setDriver(new FileAnnouncementDriver(path.join(__dirname, "announcement.json")));
-
-    server.on("player.joined", event => {
-      event.getLobby().sendChat(
-        Math.random().toString(),
-        randomInRange(0, 11),
-        Math.random().toString(),
-        Math.random() > 0.5,
-      );
-    });
   }
 
   /**
