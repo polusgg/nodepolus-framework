@@ -138,6 +138,7 @@ export class InternalPlayer implements PlayerInstance {
 
   setRole(role: PlayerRole): this {
     this.role = role;
+    this.getGameDataEntry().isImpostor = role == PlayerRole.Impostor;
 
     return this;
   }
@@ -493,7 +494,7 @@ export class InternalPlayer implements PlayerInstance {
       }
     }
 
-    throw new Error("Player was not found in the lobby's GameData instance");
+    throw new Error(`Player ${this.id} does not have a PlayerData instance in GameData`);
   }
 
   updateGameData(): void {

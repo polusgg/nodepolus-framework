@@ -499,12 +499,7 @@ export class InternalLobby implements LobbyInstance {
         const connection = player.getConnection();
 
         if (connection) {
-          const playerData = this.gameData.gameData.players.find(p => p.id == player.getId());
-
-          if (!playerData) {
-            throw new Error(`Player ${player.getId()} does not have a PlayerData instance in GameData`);
-          }
-
+          const playerData = player.getGameDataEntry();
           const { color: oldColor, name: oldName } = playerData;
 
           playerData.color = color;

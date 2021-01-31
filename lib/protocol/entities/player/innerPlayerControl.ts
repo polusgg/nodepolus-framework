@@ -305,7 +305,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     const playerConnection = playerInstance.getConnection();
 
     if (playerConnection === undefined) {
-      throw new Error(`Player ${playerInstance.getId()} does not have a connection on the lobby instance`);
+      throw new Error(`Player ${playerInstance.getId()} does not have a connection`);
     }
 
     return playerConnection;
@@ -315,7 +315,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     const gameData = this.parent.lobby.getGameData();
 
     if (!gameData) {
-      throw new Error("GameData does not exist on the lobby instance");
+      throw new Error("Lobby does not have a GameData instance");
     }
 
     return gameData;

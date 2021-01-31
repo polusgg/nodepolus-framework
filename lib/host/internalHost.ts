@@ -261,13 +261,6 @@ export class InternalHost implements HostInstance {
     impostors = event.getImpostors() as InternalPlayer[];
 
     for (let i = 0; i < impostors.length; i++) {
-      const gameDataPlayerIndex: number = gameData.gameData.players.findIndex(p => p.id == impostors[i].getId());
-
-      if (gameDataPlayerIndex == -1) {
-        throw new Error(`Player ${impostors[i].getId()} does not have a PlayerData instance o the GameData instance`);
-      }
-
-      gameData.gameData.players[gameDataPlayerIndex].isImpostor = true;
       impostors[i].setRole(PlayerRole.Impostor);
     }
 
