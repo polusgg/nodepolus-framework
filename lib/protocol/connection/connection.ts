@@ -409,6 +409,33 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     ));
   }
 
+  async recievedPacket(cb: (packet: BaseRootPacket) => boolean, timeoutTime?: number): Promise<BaseRootPacket> {
+    return new Promise((resolve, reject) => {
+      let timeout;
+
+      const packetHandler = (pkt: BaseRootPacket): void => {
+        if (cb(pkt)) {
+          this.off("packet", packetHandler);
+
+          if (timeout) {
+            clearTimeout(timeout);
+          }
+
+          resolve(pkt);
+        }
+      };
+
+      if (timeoutTime === undefined) {
+        timeout = setTimeout(() => {
+          this.off("packet", packetHandler);
+          reject(new Error("Timeout awaiting packet."));
+        }, timeoutTime);
+      }
+
+      this.on("packet", packetHandler);
+    });
+  }
+
   /**
    * Updates the time at which the connection sent their last ping.
    *

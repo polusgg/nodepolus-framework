@@ -3,6 +3,7 @@ import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { LobbyInstance } from "../lobby";
 import { TextComponent } from "../text";
+import { PlayerData } from "../../protocol/entities/gameData/types";
 
 /**
  * An interface describing the public API of players inside a LobbyInstance.
@@ -368,4 +369,16 @@ export interface PlayerInstance {
    * @param reason The reason for why the player was banned
    */
   ban(reason?: DisconnectReason): this;
+
+  /**
+   * Gets the player's PlayerData object from the GameData instance.
+   */
+  getGameDataEntry(): PlayerData;
+
+  /**
+   * TODO: @codyphobe rewrite.
+   *
+   * Update's the players' PlayerData entry over the network.
+   */
+  updateGameData(): void;
 }

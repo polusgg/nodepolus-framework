@@ -1237,7 +1237,7 @@ export class InternalHost implements HostInstance {
       throw new Error("getTakenColors called without a GameData instance");
     }
 
-    return gameData.gameData.players.filter(player => player.id !== excludePlayerId).map(player => player.color);
+    return gameData.gameData.players.filter(player => player.id !== excludePlayerId && this.lobby.getPlayers().find(p => p.getId() == player.id)?.getConnection()).map(player => player.color);
   }
 
   /**

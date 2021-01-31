@@ -43,6 +43,11 @@ export class RPCHandler {
   ) {}
 
   handleBaseRPC(type: RPCPacketType, connection: Connection, senderNetId: number, rawPacket: BaseRPCPacket, sendTo: Connection[]): void {
+    if (senderNetId === 4294967295) {
+      //TODO: Cody, pls fix
+      this.lobby.getLogger().warn("Client sent a RPC for INO -1, This is rare behaviour.");
+    }
+
     const sender = this.lobby.findInnerNetObject(senderNetId);
     const typeString = InnerNetObjectType[type];
 

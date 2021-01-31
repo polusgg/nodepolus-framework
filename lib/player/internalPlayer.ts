@@ -482,6 +482,24 @@ export class InternalPlayer implements PlayerInstance {
     return this;
   }
 
+  getGameDataEntry(): PlayerData {
+    const gameData = this.getGameData();
+
+    for (let i = 0; i < gameData.gameData.players.length; i++) {
+      const player = gameData!.gameData.players[i];
+
+      if (player.id == this.id) {
+        return player;
+      }
+    }
+
+    throw new Error("Player was not found in the lobby's GameData instance");
+  }
+
+  updateGameData(): void {
+    this.lobby.getGameData()!.gameData.updateGameData([this.getGameDataEntry()], this.lobby.getConnections());
+  }
+
   /**
    * Gets whether or not the player has been successfully initialized by the
    * connection and server.
@@ -516,24 +534,5 @@ export class InternalPlayer implements PlayerInstance {
     }
 
     return gameData;
-  }
-
-  /**
-   * Gets the player's PlayerData object from the GameData instance.
-   *
-   * @internal
-   */
-  private getGameDataEntry(): PlayerData {
-    const gameData = this.getGameData();
-
-    for (let i = 0; i < gameData.gameData.players.length; i++) {
-      const player = gameData!.gameData.players[i];
-
-      if (player.id == this.id) {
-        return player;
-      }
-    }
-
-    throw new Error("Player was not found in the lobby's GameData instance");
   }
 }
