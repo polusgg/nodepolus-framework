@@ -83,7 +83,7 @@ export class MeetingConcludedEvent extends CancellableEvent {
     for (let i = 0; i < entries.length; i++) {
       const id = entries[i].getVotedFor()?.getId() ?? -1;
 
-      counts.set(id, (counts.get(entries[i].getVotedFor()?.getId() ?? -1) ?? 0) + 1);
+      counts.set(id, (counts.get(id) ?? 0) + 1);
     }
 
     const largestVoteCount = Math.max(...counts.values());
