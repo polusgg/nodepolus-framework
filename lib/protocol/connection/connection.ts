@@ -409,7 +409,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     ));
   }
 
-  async recievedPacket(cb: (packet: BaseRootPacket) => boolean, timeoutTime?: number): Promise<BaseRootPacket> {
+  async receivedPacket(cb: (packet: BaseRootPacket) => boolean, timeoutTime?: number): Promise<BaseRootPacket> {
     return new Promise((resolve, reject) => {
       let timeout;
 
