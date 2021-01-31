@@ -4,6 +4,7 @@ import { Bindable } from "../types";
 
 export abstract class BaseRootPacket implements Bindable<BaseRootPacket> {
   public isClientBound?: boolean;
+  public isCanceled = false;
 
   constructor(
     public type: RootPacketType,
@@ -15,5 +16,9 @@ export abstract class BaseRootPacket implements Bindable<BaseRootPacket> {
     this.isClientBound = isClientBound;
 
     return this;
+  }
+
+  cancel(canceled: boolean = true): void {
+    this.isCanceled = canceled;
   }
 }

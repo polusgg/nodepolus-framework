@@ -303,7 +303,11 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
     this.getLogger().verbose("Initialized connection %s", newConnection);
 
-    newConnection.on("packet", async (packet: BaseRootPacket) => this.handlePacket(packet, newConnection));
+    newConnection.on("packet", async (packet: BaseRootPacket) => {
+      if (!packet.isCanceled) {
+        await this.handlePacket(packet, newConnection);
+      }
+    });
 
     newConnection.once("disconnected").then((reason?: DisconnectReason) => {
       this.emit("connection.closed", new ConnectionClosedEvent(newConnection, reason));
