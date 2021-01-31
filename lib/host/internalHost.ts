@@ -450,22 +450,19 @@ export class InternalHost implements HostInstance {
     let exiledPlayerData: PlayerData | undefined;
 
     if (!isTied && exiledPlayer) {
-      const voters = [...voteResults.values()]
-        .filter(vote => vote.getVotedFor()?.getId() == exiledPlayer?.getId())
-        .map(vote => vote.getPlayer());
-      const exiledEvent = new PlayerExiledEvent(exiledPlayer, voters);
+      const exiledEvent = new PlayerExiledEvent(
+        exiledPlayer,
+        [...voteResults.values()]
+          .filter(vote => vote.getVotedFor()?.getId() == exiledPlayer?.getId())
+          .map(vote => vote.getPlayer()),
+      );
 
       await this.lobby.getServer().emit("player.died", exiledEvent);
       await this.lobby.getServer().emit("player.exiled", exiledEvent);
 
       if (!exiledEvent.isCancelled()) {
         exiledPlayer = exiledEvent.getPlayer();
-        exiledPlayerData = gameData.gameData.players.find(playerData => playerData.id == exiledPlayer?.getId());
-
-        if (!exiledPlayerData) {
-          throw new Error("Exiled player does not have a PlayerData instance on the GameData instance");
-        }
-
+        exiledPlayerData = exiledPlayer.getGameDataEntry();
         exiledPlayerData.isDead = true;
       }
     }
@@ -1237,7 +1234,17 @@ export class InternalHost implements HostInstance {
       throw new Error("getTakenColors called without a GameData instance");
     }
 
-    return gameData.gameData.players.filter(player => player.id !== excludePlayerId && this.lobby.getPlayers().find(p => p.getId() == player.id)?.getConnection()).map(player => player.color);
+    return gameData.gameData.players.filter(player => {
+      if (player.id === excludePlayerId) {
+        return false;
+      }
+
+      if (this.lobby.getPlayers().find(p => p.getId() == player.id)?.getConnection() === undefined) {
+        return false;
+      }
+
+      return true;
+    }).map(player => player.color);
   }
 
   /**

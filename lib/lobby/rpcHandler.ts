@@ -9,6 +9,7 @@ import { InnerMeetingHud } from "../protocol/entities/meetingHud";
 import { RPCPacketType } from "../protocol/packets/types/enums";
 import { Connection } from "../protocol/connection";
 import { GameOptionsData, Vector2 } from "../types";
+import { MaxValue } from "../util/constants";
 import { InternalLobby } from ".";
 import { Vents } from "../static";
 import {
@@ -43,9 +44,10 @@ export class RPCHandler {
   ) {}
 
   handleBaseRPC(type: RPCPacketType, connection: Connection, senderNetId: number, rawPacket: BaseRPCPacket, sendTo: Connection[]): void {
-    if (senderNetId === 4294967295) {
-      //TODO: Cody, pls fix
-      this.lobby.getLogger().warn("Client sent a RPC for INO -1, This is rare behaviour.");
+    if (senderNetId === MaxValue.UInt32) {
+      this.lobby.getLogger().warn("RPC packet sent from unexpected InnerNetObject: -1");
+
+      return;
     }
 
     const sender = this.lobby.findInnerNetObject(senderNetId);

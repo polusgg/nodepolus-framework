@@ -497,7 +497,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   updateGameData(): void {
-    this.lobby.getGameData()!.gameData.updateGameData([this.getGameDataEntry()], this.lobby.getConnections());
+    this.getGameData().gameData.updateGameData([this.getGameDataEntry()], this.lobby.getConnections());
   }
 
   /**

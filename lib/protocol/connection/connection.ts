@@ -330,7 +330,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
               clearInterval(resendInterval);
 
-              reject(new Error(`Connection timed out: did not acknowledge packet ${nonce} after 10 attempts`));
+              reject(new Error(`Connection ${this.id} did not acknowledge packet ${nonce} after 10 attempts`));
             } else {
               this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
             }
@@ -409,28 +409,38 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     ));
   }
 
-  async receivedPacket(cb: (packet: BaseRootPacket) => boolean, timeoutTime?: number): Promise<BaseRootPacket> {
+  /**
+   * Waits for the connection to send a packet that satisfies the condition in
+   * the given callback.
+   *
+   * @param packetValidator The callback used to check that a packet sent by the connection meets the expected conditions
+   * @param timeoutTime The time, in milliseconds, that the connection has to send the expected packet (default `6000`)
+   * @returns A promise that resolves with the expected packet or rejects if the connection did not send the expected packet after `timeoutTime` milliseconds
+   */
+  async awaitPacket(packetValidator: (packet: BaseRootPacket) => boolean, timeoutTime: number = 6000): Promise<BaseRootPacket> {
     return new Promise((resolve, reject) => {
-      let timeout;
+      // eslint-disable-next-line prefer-const
+      let timeout: NodeJS.Timeout;
 
-      const packetHandler = (pkt: BaseRootPacket): void => {
-        if (cb(pkt)) {
+      if (timeoutTime < 0) {
+        timeoutTime = 6000;
+      }
+
+      const packetHandler = (packet: BaseRootPacket): void => {
+        if (packetValidator(packet)) {
           this.off("packet", packetHandler);
 
-          if (timeout) {
-            clearTimeout(timeout);
-          }
+          clearTimeout(timeout);
 
-          resolve(pkt);
+          resolve(packet);
         }
       };
 
-      if (timeoutTime !== undefined) {
-        timeout = setTimeout(() => {
-          this.off("packet", packetHandler);
-          reject(new Error("Timeout awaiting packet."));
-        }, timeoutTime);
-      }
+      timeout = setTimeout(() => {
+        this.off("packet", packetHandler);
+
+        reject(new Error(`Connection ${this.id} did not reply with the expected packet within ${timeoutTime}ms`));
+      }, timeoutTime);
 
       this.on("packet", packetHandler);
     });
