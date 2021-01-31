@@ -425,7 +425,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
         }
       };
 
-      if (timeoutTime === undefined) {
+      if (timeoutTime !== undefined) {
         timeout = setTimeout(() => {
           this.off("packet", packetHandler);
           reject(new Error("Timeout awaiting packet."));
