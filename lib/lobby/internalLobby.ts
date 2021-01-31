@@ -718,7 +718,7 @@ export class InternalLobby implements LobbyInstance {
       connection.lobby = this;
 
       connection.on("packet", (packet: BaseRootPacket) => {
-        if (!packet.isCanceled) {
+        if (!packet.isCancelled) {
           this.handlePacket(packet, connection);
         }
       });
