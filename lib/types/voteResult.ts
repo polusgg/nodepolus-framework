@@ -12,7 +12,7 @@ export class VoteResult {
   constructor(
     private readonly player: PlayerInstance,
     private votedFor?: PlayerInstance,
-    private skipped: boolean = true,
+    private skipped: boolean = false,
   ) {}
 
   /**

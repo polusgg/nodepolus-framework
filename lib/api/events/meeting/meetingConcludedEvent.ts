@@ -8,7 +8,7 @@ import { VoteResult } from "../../../types";
  */
 export class MeetingConcludedEvent extends CancellableEvent {
   private tied = false;
-  private exiledClientId = -1;
+  private exiledPlayerId = -1;
 
   /**
    * @param game The game from which this event was fired
@@ -67,8 +67,8 @@ export class MeetingConcludedEvent extends CancellableEvent {
       return;
     }
 
-    if (this.exiledClientId > -1) {
-      return this.game.lobby.findPlayerByClientId(this.exiledClientId);
+    if (this.exiledPlayerId > -1) {
+      return this.game.lobby.findPlayerByPlayerId(this.exiledPlayerId);
     }
   }
 
@@ -81,6 +81,10 @@ export class MeetingConcludedEvent extends CancellableEvent {
     const entries = [...this.votes];
 
     for (let i = 0; i < entries.length; i++) {
+      if (!entries[i].didVote()) {
+        continue;
+      }
+
       const id = entries[i].getVotedFor()?.getId() ?? -1;
 
       counts.set(id, (counts.get(id) ?? 0) + 1);
@@ -90,6 +94,6 @@ export class MeetingConcludedEvent extends CancellableEvent {
     const allLargestVotes = [...counts.entries()].filter(voteResult => voteResult[1] == largestVoteCount);
 
     this.tied = allLargestVotes.length > 1;
-    this.exiledClientId = allLargestVotes.length == 1 ? allLargestVotes[0][0] : -1;
+    this.exiledPlayerId = allLargestVotes.length == 1 ? allLargestVotes[0][0] : -1;
   }
 }

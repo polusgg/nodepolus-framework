@@ -420,8 +420,6 @@ export class InternalHost implements HostInstance {
             vote.setSkipping();
           } else {
             voteResults.delete(player.getId());
-
-            continue;
           }
         } else {
           vote.setVotedFor(votedFor);
@@ -445,7 +443,7 @@ export class InternalHost implements HostInstance {
     if (!isTied && exiledPlayer) {
       const exiledEvent = new PlayerExiledEvent(
         exiledPlayer,
-        [...voteResults.values()]
+        [...concludedEvent.getVotes()]
           .filter(vote => vote.getVotedFor()?.getId() == exiledPlayer?.getId())
           .map(vote => vote.getPlayer()),
       );
@@ -908,7 +906,7 @@ export class InternalHost implements HostInstance {
     const states = meetingHud.meetingHud.playerStates;
 
     states[event.getVoter().getId()].votedFor = event.getSuspect()?.getId() ?? -1;
-    states[event.getVoter().getId()].didVote = true;
+    states[event.getVoter().getId()].didVote = states[event.getVoter().getId()].votedFor > -1;
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.meetingHud.data(oldMeetingHud),
