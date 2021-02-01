@@ -157,6 +157,10 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @param lobby The lobby to be added
    */
   addLobby(lobby: LobbyInstance): void {
+    if (this.lobbyMap.has(lobby.getCode())) {
+      throw new Error(`A lobby with the code ${lobby.getCode()} already exists`);
+    }
+
     this.lobbies.push(lobby);
     this.lobbyMap.set(lobby.getCode(), lobby);
   }
