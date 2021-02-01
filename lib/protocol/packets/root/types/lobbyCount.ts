@@ -8,7 +8,7 @@ import { Level } from "../../../../types/enums";
 export class LobbyCount {
   /**
    * @param skeld The number of lobbies playing on The Skeld
-   * @param mira The number of lobbies playing on Mira HQ
+   * @param mira The number of lobbies playing on MIRA HQ
    * @param polus The number of lobbies playing on Polus
    * @param airship The number of lobbies playing on Airship
    */
@@ -41,7 +41,7 @@ export class LobbyCount {
   }
 
   /**
-   * Gets the number of lobbies playing on Mira HQ.
+   * Gets the number of lobbies playing on MIRA HQ.
    */
   getMira(): number {
     return this.mira;

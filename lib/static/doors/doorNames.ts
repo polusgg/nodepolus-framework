@@ -1,6 +1,6 @@
 import { Level } from "../../types/enums";
 
-const SKELD_DOOR_NAMES: readonly string[] = [
+const DOOR_NAMES_SKELD: readonly string[] = [
   "Cafeteria",
   "Storage",
   "Upper Engine",
@@ -16,9 +16,9 @@ const SKELD_DOOR_NAMES: readonly string[] = [
   "Storage",
 ];
 
-const MIRA_HQ_DOOR_NAMES: readonly string[] = [];
+const DOOR_NAMES_MIRA_HQ: readonly string[] = [];
 
-const POLUS_DOOR_NAMES: readonly string[] = [
+const DOOR_NAMES_POLUS: readonly string[] = [
   "Outside to Electrical",
   "Inside Electrical",
   "O2-to-Electrical Hallway (Top)",
@@ -33,7 +33,7 @@ const POLUS_DOOR_NAMES: readonly string[] = [
   "Storage",
 ];
 
-const AIRSHIP_DOOR_NAMES: readonly string[] = [
+const DOOR_NAMES_AIRSHIP: readonly string[] = [
   // TODO
 ];
 
@@ -45,28 +45,28 @@ export class DoorNames {
    * Gets the display names for the doors on The Skeld.
    */
   static forSkeld(): readonly string[] {
-    return SKELD_DOOR_NAMES;
+    return DOOR_NAMES_SKELD;
   }
 
   /**
-   * Gets the display names for the doors on Mira HQ.
+   * Gets the display names for the doors on MIRA HQ.
    */
   static forMiraHq(): readonly string[] {
-    return MIRA_HQ_DOOR_NAMES;
+    return DOOR_NAMES_MIRA_HQ;
   }
 
   /**
    * Gets the display names for the doors on Polus.
    */
   static forPolus(): readonly string[] {
-    return POLUS_DOOR_NAMES;
+    return DOOR_NAMES_POLUS;
   }
 
   /**
    * Gets the display names for the doors on Airship.
    */
   static forAirship(): readonly string[] {
-    return AIRSHIP_DOOR_NAMES;
+    return DOOR_NAMES_AIRSHIP;
   }
 
   /**
@@ -78,13 +78,13 @@ export class DoorNames {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.forSkeld();
+        return DoorNames.forSkeld();
       case Level.MiraHq:
-        return this.forMiraHq();
+        return DoorNames.forMiraHq();
       case Level.Polus:
-        return this.forPolus();
+        return DoorNames.forPolus();
       case Level.Airship:
-        return this.forAirship();
+        return DoorNames.forAirship();
     }
   }
 }

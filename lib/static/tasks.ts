@@ -114,7 +114,7 @@ export class Tasks {
   }
 
   /**
-   * Gets all static task data for Mira HQ.
+   * Gets all static task data for MIRA HQ.
    */
   static forMiraHq(): readonly Readonly<LevelTask>[] {
     return TASKS_MIRA_HQ;
@@ -143,13 +143,13 @@ export class Tasks {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.forSkeld();
+        return Tasks.forSkeld();
       case Level.MiraHq:
-        return this.forMiraHq();
+        return Tasks.forMiraHq();
       case Level.Polus:
-        return this.forPolus();
+        return Tasks.forPolus();
       case Level.Airship:
-        return this.forAirship();
+        return Tasks.forAirship();
     }
   }
 
@@ -160,17 +160,17 @@ export class Tasks {
    * @returns An array of tasks whose IDs were included in `ids`
    */
   static forSkeldFromId(ids: number[]): readonly Readonly<LevelTask>[] {
-    return this.forSkeld().filter(t => ids.includes(t.id));
+    return Tasks.forSkeld().filter(t => ids.includes(t.id));
   }
 
   /**
-   * Gets static task data for the given IDs on Mira HQ.
+   * Gets static task data for the given IDs on MIRA HQ.
    *
    * @param ids The IDs of the tasks that should be returned
    * @returns An array of tasks whose IDs were included in `ids`
    */
   static forMiraHqFromId(ids: number[]): readonly Readonly<LevelTask>[] {
-    return this.forMiraHq().filter(t => ids.includes(t.id));
+    return Tasks.forMiraHq().filter(t => ids.includes(t.id));
   }
 
   /**
@@ -180,7 +180,7 @@ export class Tasks {
    * @returns An array of tasks whose IDs were included in `ids`
    */
   static forPolusFromId(ids: number[]): readonly Readonly<LevelTask>[] {
-    return this.forPolus().filter(t => ids.includes(t.id));
+    return Tasks.forPolus().filter(t => ids.includes(t.id));
   }
 
   /**
@@ -190,7 +190,7 @@ export class Tasks {
    * @returns An array of tasks whose IDs were included in `ids`
    */
   static forAirshipFromId(ids: number[]): readonly Readonly<LevelTask>[] {
-    return this.forAirship().filter(t => ids.includes(t.id));
+    return Tasks.forAirship().filter(t => ids.includes(t.id));
   }
 
   /**
@@ -204,13 +204,13 @@ export class Tasks {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.forSkeldFromId(ids);
+        return Tasks.forSkeldFromId(ids);
       case Level.MiraHq:
-        return this.forMiraHqFromId(ids);
+        return Tasks.forMiraHqFromId(ids);
       case Level.Polus:
-        return this.forPolusFromId(ids);
+        return Tasks.forPolusFromId(ids);
       case Level.Airship:
-        return this.forAirshipFromId(ids);
+        return Tasks.forAirshipFromId(ids);
     }
   }
 }

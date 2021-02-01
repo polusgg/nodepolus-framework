@@ -4,7 +4,7 @@ type SystemDoorList = {
   [key in SystemType]?: readonly number[];
 };
 
-const SKELD_DOORS: Readonly<SystemDoorList> = {
+const DOORS_SKELD: Readonly<SystemDoorList> = {
   [SystemType.Electrical]: [9],
   [SystemType.LowerEngine]: [4, 11],
   [SystemType.UpperEngine]: [2, 5],
@@ -14,9 +14,9 @@ const SKELD_DOORS: Readonly<SystemDoorList> = {
   [SystemType.Cafeteria]: [0, 3, 8],
 };
 
-const MIRA_HQ_DOORS: Readonly<SystemDoorList> = {};
+const DOORS_MIRA_HQ: Readonly<SystemDoorList> = {};
 
-const POLUS_DOORS: Readonly<SystemDoorList> = {
+const DOORS_POLUS: Readonly<SystemDoorList> = {
   [SystemType.Electrical]: [0, 1, 2],
   [SystemType.Oxygen]: [3, 4],
   [SystemType.Weapons]: [5],
@@ -26,17 +26,17 @@ const POLUS_DOORS: Readonly<SystemDoorList> = {
   [SystemType.Storage]: [11],
 };
 
-const AIRSHIP_DOORS: Readonly<SystemDoorList> = {
+const DOORS_AIRSHIP: Readonly<SystemDoorList> = {
   // TODO
 };
 
-const SKELD_COUNT: Readonly<number> = Object.values(SKELD_DOORS).flat().length;
+const DOOR_COUNT_SKELD: number = Object.values(DOORS_SKELD).flat().length;
 
-const MIRA_HQ_COUNT: Readonly<number> = Object.values(MIRA_HQ_DOORS).flat().length;
+const DOOR_COUNT_MIRA_HQ: number = Object.values(DOORS_MIRA_HQ).flat().length;
 
-const POLUS_COUNT: Readonly<number> = Object.values(POLUS_DOORS).flat().length;
+const DOOR_COUNT_POLUS: number = Object.values(DOORS_POLUS).flat().length;
 
-const AIRSHIP_COUNT: Readonly<number> = Object.values(AIRSHIP_DOORS).flat().length;
+const DOOR_COUNT_AIRSHIP: number = Object.values(DOORS_AIRSHIP).flat().length;
 
 /**
  * A helper class for retrieving door IDs for each system.
@@ -46,28 +46,28 @@ export class SystemDoors {
    * Gets each system and their doors for The Skeld.
    */
   static forSkeld(): Readonly<SystemDoorList> {
-    return SKELD_DOORS;
+    return DOORS_SKELD;
   }
 
   /**
-   * Gets each system and their doors for Mira HQ.
+   * Gets each system and their doors for MIRA HQ.
    */
   static forMiraHq(): Readonly<SystemDoorList> {
-    return MIRA_HQ_DOORS;
+    return DOORS_MIRA_HQ;
   }
 
   /**
    * Gets each system and their doors for Polus.
    */
   static forPolus(): Readonly<SystemDoorList> {
-    return POLUS_DOORS;
+    return DOORS_POLUS;
   }
 
   /**
    * Gets each system and their doors for Airship.
    */
   static forAirship(): Readonly<SystemDoorList> {
-    return AIRSHIP_DOORS;
+    return DOORS_AIRSHIP;
   }
 
   /**
@@ -79,42 +79,42 @@ export class SystemDoors {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.forSkeld();
+        return SystemDoors.forSkeld();
       case Level.MiraHq:
-        return this.forMiraHq();
+        return SystemDoors.forMiraHq();
       case Level.Polus:
-        return this.forPolus();
+        return SystemDoors.forPolus();
       case Level.Airship:
-        return this.forAirship();
+        return SystemDoors.forAirship();
     }
   }
 
   /**
    * Gets the number of doors on The Skeld.
    */
-  static countForSkeld(): Readonly<number> {
-    return SKELD_COUNT;
+  static countForSkeld(): number {
+    return DOOR_COUNT_SKELD;
   }
 
   /**
-   * Gets the number of doors on Mira HQ.
+   * Gets the number of doors on MIRA HQ.
    */
-  static countForMiraHq(): Readonly<number> {
-    return MIRA_HQ_COUNT;
+  static countForMiraHq(): number {
+    return DOOR_COUNT_MIRA_HQ;
   }
 
   /**
    * Gets the number of doors on Polus.
    */
-  static countForPolus(): Readonly<number> {
-    return POLUS_COUNT;
+  static countForPolus(): number {
+    return DOOR_COUNT_POLUS;
   }
 
   /**
    * Gets the number of doors on Airship
    */
-  static countForAirship(): Readonly<number> {
-    return AIRSHIP_COUNT;
+  static countForAirship(): number {
+    return DOOR_COUNT_AIRSHIP;
   }
 
   /**
@@ -122,17 +122,17 @@ export class SystemDoors {
    *
    * @param level The level whose number of doors should be returned
    */
-  static countForLevel(level: Level): Readonly<number> {
+  static countForLevel(level: Level): number {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.countForSkeld();
+        return SystemDoors.countForSkeld();
       case Level.MiraHq:
-        return this.countForMiraHq();
+        return SystemDoors.countForMiraHq();
       case Level.Polus:
-        return this.countForPolus();
+        return SystemDoors.countForPolus();
       case Level.Airship:
-        return this.countForAirship();
+        return SystemDoors.countForAirship();
     }
   }
 }

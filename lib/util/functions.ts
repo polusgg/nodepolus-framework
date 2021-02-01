@@ -1,4 +1,22 @@
 /**
+ * Converts the given angle from degrees to radians.
+ *
+ * @param degrees The angle in degrees which will be converted to radians
+ */
+export function degreesToRadians(degrees: number): number {
+  return degrees * (Math.PI / 180);
+}
+
+/**
+ * Converts the given angle from radians to degrees.
+ *
+ * @param radians The angle in radians which will be converted to degrees
+ */
+export function radiansToDegrees(radians: number): number {
+  return radians * (180 / Math.PI);
+}
+
+/**
  * Restricts the given value to be inside an inclusive range.
  *
  * @param value The value to be clamped

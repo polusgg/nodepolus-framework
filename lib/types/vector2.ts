@@ -1,4 +1,4 @@
-import { isFloatEqual } from "../util/functions";
+import { degreesToRadians, isFloatEqual, radiansToDegrees } from "../util/functions";
 
 /**
  * A class used to store and manipulate a 2-dimensional vector.
@@ -20,6 +20,51 @@ export class Vector2 {
    */
   static zero(): Vector2 {
     return new Vector2(0, 0);
+  }
+
+  /**
+   * Gets a new Vector2 where `x = 1` and `y = 1`.
+   *
+   * @returns A new Vector2 where `x = 1` and `y = 1`
+   */
+  static one(): Vector2 {
+    return new Vector2(1, 1);
+  }
+
+  /**
+   * Gets a new Vector2 where `x = 0` and `y = 1`.
+   *
+   * @returns A new Vector2 where `x = 0` and `y = 1`
+   */
+  static up(): Vector2 {
+    return new Vector2(0, 1);
+  }
+
+  /**
+   * Gets a new Vector2 where `x = 0` and `y = -1`.
+   *
+   * @returns A new Vector2 where `x = 0` and `y = -1`
+   */
+  static down(): Vector2 {
+    return new Vector2(0, -1);
+  }
+
+  /**
+   * Gets a new Vector2 where `x = -1` and `y = 0`.
+   *
+   * @returns A new Vector2 where `x = -1` and `y = 0`
+   */
+  static left(): Vector2 {
+    return new Vector2(-1, 0);
+  }
+
+  /**
+   * Gets a new Vector2 where `x = 1` and `y = 0`.
+   *
+   * @returns A new Vector2 where `x = 1` and `y = 0`
+   */
+  static right(): Vector2 {
+    return new Vector2(1, 0);
   }
 
   /**
@@ -94,10 +139,12 @@ export class Vector2 {
    * Gets a new Vector2 with the original `x` and `y` values added to those from
    * the given Vector2.
    *
-   * @param other The Vector2 whose `x` and `y` values will be used as their respective addends
+   * @param other The number or Vector2 whose `x` and `y` values will be used as their respective addends
    * @returns A new Vector2 where `x += other.x` and `y += other.y`
    */
-  add(other: Vector2): Vector2 {
+  add(other: number | Vector2): Vector2 {
+    other = other instanceof Vector2 ? other : new Vector2(other, other);
+
     return new Vector2(this.x + other.x, this.y + other.y);
   }
 
@@ -131,10 +178,12 @@ export class Vector2 {
    * Gets a new Vector2 with the original `x` and `y` values subtracted by those
    * from the given Vector2.
    *
-   * @param other The Vector2 whose `x` and `y` values will be used as their respective minuends
+   * @param other The number or Vector2 whose `x` and `y` values will be used as their respective minuends
    * @returns A new Vector2 where `x -= other.x` and `y -= other.y`
    */
-  subtract(other: Vector2): Vector2 {
+  subtract(other: number | Vector2): Vector2 {
+    other = other instanceof Vector2 ? other : new Vector2(other, other);
+
     return new Vector2(this.x - other.x, this.y - other.y);
   }
 
@@ -168,10 +217,12 @@ export class Vector2 {
    * Gets a new Vector2 with the original `x` and `y` values multiplied by those
    * from the given Vector2.
    *
-   * @param other The Vector2 whose `x` and `y` values will be used as their respective multipliers
+   * @param other The number or Vector2 whose `x` and `y` values will be used as their respective multipliers
    * @returns A new Vector2 where `x *= other.x` and `y *= other.y`
    */
-  multiply(other: Vector2): Vector2 {
+  multiply(other: number | Vector2): Vector2 {
+    other = other instanceof Vector2 ? other : new Vector2(other, other);
+
     return new Vector2(this.x * other.x, this.y * other.y);
   }
 
@@ -205,10 +256,12 @@ export class Vector2 {
    * Gets a new Vector2 with the original `x` and `y` values divided by those
    * from the given Vector2.
    *
-   * @param value The Vector2 whose `x` and `y` values will be used as their respective divisors
+   * @param value The number or Vector2 whose `x` and `y` values will be used as their respective divisors
    * @returns A new Vector2 where `x /= other.x` and `y /= other.y`
    */
-  divide(other: Vector2): Vector2 {
+  divide(other: number | Vector2): Vector2 {
+    other = other instanceof Vector2 ? other : new Vector2(other, other);
+
     return new Vector2(this.x / other.x, this.y / other.y);
   }
 
@@ -266,6 +319,32 @@ export class Vector2 {
    */
   invertY(): Vector2 {
     return new Vector2(this.x, -this.y);
+  }
+
+  /**
+   * Gets a new Vector2 after rotating the original `x` and `y` values
+   * counter-clockwise by the given angle in radians.
+   *
+   * @param radians The angle in radians by which the Vector2 will be rotated
+   */
+  rotate(radians: number): Vector2 {
+    const cos = Math.cos(radians);
+    const sin = Math.sin(radians);
+
+    return new Vector2(
+      (this.x * cos) - (this.y * sin),
+      (this.x * sin) + (this.y * cos),
+    );
+  }
+
+  /**
+   * Gets a new Vector2 after rotating the original `x` and `y` values
+   * counter-clockwise by the given angle in degrees.
+   *
+   * @param degrees The angle in degrees by which the Vector2 will be rotated
+   */
+  rotateDegrees(degrees: number): Vector2 {
+    return this.rotate(degreesToRadians(degrees));
   }
 
   /**
@@ -359,5 +438,33 @@ export class Vector2 {
    */
   absoluteDistanceY(value: Vector2): number {
     return Math.abs(this.distanceY(value));
+  }
+
+  /**
+   * Gets the angle towards the X axis in radians.
+   */
+  horizontalAngle(): number {
+    return Math.atan2(this.y, this.x);
+  }
+
+  /**
+   * Gets the angle towards the X axis in degrees.
+   */
+  horizontalAngleDegrees(): number {
+    return radiansToDegrees(this.horizontalAngle());
+  }
+
+  /**
+   * Gets the angle towards the Y axis in radians.
+   */
+  verticalAngle(): number {
+    return Math.atan2(this.x, this.y);
+  }
+
+  /**
+   * Gets the angle towards the Y axis in degrees.
+   */
+  verticalAngleDegrees(): number {
+    return radiansToDegrees(this.verticalAngle());
   }
 }

@@ -74,7 +74,7 @@ export class Vents {
   }
 
   /**
-   * Gets all static vent data for Mira HQ.
+   * Gets all static vent data for MIRA HQ.
    */
   static forMiraHq(): readonly Readonly<LevelVent>[] {
     return VENTS_MIRA_HQ;
@@ -103,13 +103,13 @@ export class Vents {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.forSkeld();
+        return Vents.forSkeld();
       case Level.MiraHq:
-        return this.forMiraHq();
+        return Vents.forMiraHq();
       case Level.Polus:
-        return this.forPolus();
+        return Vents.forPolus();
       case Level.Airship:
-        return this.forAirship();
+        return Vents.forAirship();
     }
   }
 
@@ -120,17 +120,17 @@ export class Vents {
    * @returns An array of vents whose IDs were included in `ids`
    */
   static forSkeldFromId(ids: number[]): readonly Readonly<LevelVent>[] {
-    return this.forSkeld().filter(v => ids.includes(v.id));
+    return Vents.forSkeld().filter(v => ids.includes(v.id));
   }
 
   /**
-   * Gets static vent data for the given IDs on Mira HQ.
+   * Gets static vent data for the given IDs on MIRA HQ.
    *
    * @param ids The IDs of the vents that should be returned
    * @returns An array of vents whose IDs were included in `ids`
    */
   static forMiraHqFromId(ids: number[]): readonly Readonly<LevelVent>[] {
-    return this.forMiraHq().filter(v => ids.includes(v.id));
+    return Vents.forMiraHq().filter(v => ids.includes(v.id));
   }
 
   /**
@@ -140,7 +140,7 @@ export class Vents {
    * @returns An array of vents whose IDs were included in `ids`
    */
   static forPolusFromId(ids: number[]): readonly Readonly<LevelVent>[] {
-    return this.forPolus().filter(v => ids.includes(v.id));
+    return Vents.forPolus().filter(v => ids.includes(v.id));
   }
 
   /**
@@ -150,7 +150,7 @@ export class Vents {
    * @returns An array of vents whose IDs were included in `ids`
    */
   static forAirshipFromId(ids: number[]): readonly Readonly<LevelVent>[] {
-    return this.forAirship().filter(v => ids.includes(v.id));
+    return Vents.forAirship().filter(v => ids.includes(v.id));
   }
 
   /**
@@ -164,13 +164,13 @@ export class Vents {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.forSkeldFromId(ids);
+        return Vents.forSkeldFromId(ids);
       case Level.MiraHq:
-        return this.forMiraHqFromId(ids);
+        return Vents.forMiraHqFromId(ids);
       case Level.Polus:
-        return this.forPolusFromId(ids);
+        return Vents.forPolusFromId(ids);
       case Level.Airship:
-        return this.forAirshipFromId(ids);
+        return Vents.forAirshipFromId(ids);
     }
   }
 
@@ -181,17 +181,17 @@ export class Vents {
    * @returns The vent at `position`, or `undefined` if there is no vent at `position`
    */
   static forSkeldFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
-    return this.forSkeld().find(v => v.position.equals(position));
+    return Vents.forSkeld().find(v => v.position.equals(position));
   }
 
   /**
-   * Gets static vent data for the vent at the given position on Mira HQ.
+   * Gets static vent data for the vent at the given position on MIRA HQ.
    *
    * @param position The position of the vent that should be returned
    * @returns The vent at `position`, or `undefined` if there is no vent at `position`
    */
   static forMiraHqFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
-    return this.forMiraHq().find(v => v.position.equals(position));
+    return Vents.forMiraHq().find(v => v.position.equals(position));
   }
 
   /**
@@ -201,7 +201,7 @@ export class Vents {
    * @returns The vent at `position`, or `undefined` if there is no vent at `position`
    */
   static forPolusFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
-    return this.forPolus().find(v => v.position.equals(position));
+    return Vents.forPolus().find(v => v.position.equals(position));
   }
 
   /**
@@ -211,7 +211,7 @@ export class Vents {
    * @returns The vent at `position`, or `undefined` if there is no vent at `position`
    */
   static forAirshipFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
-    return this.forAirship().find(v => v.position.equals(position));
+    return Vents.forAirship().find(v => v.position.equals(position));
   }
 
   /**
@@ -225,13 +225,13 @@ export class Vents {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return this.forSkeldFromPosition(position);
+        return Vents.forSkeldFromPosition(position);
       case Level.MiraHq:
-        return this.forMiraHqFromPosition(position);
+        return Vents.forMiraHqFromPosition(position);
       case Level.Polus:
-        return this.forPolusFromPosition(position);
+        return Vents.forPolusFromPosition(position);
       case Level.Airship:
-        return this.forAirshipFromPosition(position);
+        return Vents.forAirshipFromPosition(position);
     }
   }
 }

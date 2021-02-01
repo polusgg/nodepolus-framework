@@ -14,11 +14,46 @@ test("gets the y value", t => {
   t.is(vector.getY(), 5.6789);
 });
 
-test("gets a Vector2 with x and y set to zero", t => {
+test("gets a `Zero` Vector2", t => {
   const zero = Vector2.zero();
 
   t.is(zero.getX(), 0);
   t.is(zero.getY(), 0);
+});
+
+test("gets a `One` Vector2", t => {
+  const one = Vector2.one();
+
+  t.is(one.getX(), 1);
+  t.is(one.getY(), 1);
+});
+
+test("gets a `Up` Vector2", t => {
+  const up = Vector2.up();
+
+  t.is(up.getX(), 0);
+  t.is(up.getY(), 1);
+});
+
+test("gets a `Down` Vector2", t => {
+  const down = Vector2.down();
+
+  t.is(down.getX(), 0);
+  t.is(down.getY(), -1);
+});
+
+test("gets a `Left` Vector2", t => {
+  const left = Vector2.left();
+
+  t.is(left.getX(), -1);
+  t.is(left.getY(), 0);
+});
+
+test("gets a `Right` Vector2", t => {
+  const right = Vector2.right();
+
+  t.is(right.getX(), 1);
+  t.is(right.getY(), 0);
 });
 
 test("checks equality with another Vector2", t => {
@@ -217,6 +252,25 @@ test("inverts its Y value", t => {
   t.is(inverted.getY(), -4.20);
 });
 
+test("rotates by an angle in radians", t => {
+  const original = new Vector2(1, 2);
+  const rotatedByPi = original.rotate(Math.PI);
+
+  t.true(isFloatEqual(rotatedByPi.getX(), -1));
+  t.true(isFloatEqual(rotatedByPi.getY(), -2));
+});
+
+test("rotates by an angle in degrees", t => {
+  const original = new Vector2(1, 2);
+  const rotatedByNinety = original.rotateDegrees(90);
+  const rotatedByNegativeNinety = original.rotateDegrees(-90);
+
+  t.true(isFloatEqual(rotatedByNinety.getX(), -2));
+  t.true(isFloatEqual(rotatedByNinety.getY(), 1));
+  t.true(isFloatEqual(rotatedByNegativeNinety.getX(), 2));
+  t.true(isFloatEqual(rotatedByNegativeNinety.getY(), -1));
+});
+
 test("calculates the dot product with another Vector2", t => {
   const one = new Vector2(10, 20);
   const two = new Vector2(30, 40);
@@ -293,4 +347,44 @@ test("calculates the absolute distance of its Y value from that of another Vecto
   const distance = one.absoluteDistanceY(two);
 
   t.is(distance, 560);
+});
+
+test("calculates the angle towards the X axis in radians", t => {
+  const one = new Vector2(100, 0);
+  const two = new Vector2(0, 100);
+  const three = new Vector2(-100, 0);
+
+  t.true(isFloatEqual(one.horizontalAngle(), 0));
+  t.true(isFloatEqual(two.horizontalAngle(), Math.PI / 2));
+  t.true(isFloatEqual(three.horizontalAngle(), Math.PI));
+});
+
+test("calculates the angle towards the X axis in degrees", t => {
+  const one = new Vector2(100, 0);
+  const two = new Vector2(0, 100);
+  const three = new Vector2(-100, 0);
+
+  t.true(isFloatEqual(one.horizontalAngleDegrees(), 0));
+  t.true(isFloatEqual(two.horizontalAngleDegrees(), 90));
+  t.true(isFloatEqual(three.horizontalAngleDegrees(), 180));
+});
+
+test("calculates the angle towards the Y axis in radians", t => {
+  const one = new Vector2(100, 0);
+  const two = new Vector2(0, 100);
+  const three = new Vector2(-100, 0);
+
+  t.true(isFloatEqual(one.verticalAngle(), Math.PI / 2));
+  t.true(isFloatEqual(two.verticalAngle(), 0));
+  t.true(isFloatEqual(three.verticalAngle(), -(Math.PI / 2)));
+});
+
+test("calculates the angle towards the Y axis in degrees", t => {
+  const one = new Vector2(100, 0);
+  const two = new Vector2(0, 100);
+  const three = new Vector2(-100, 0);
+
+  t.true(isFloatEqual(one.verticalAngleDegrees(), 90));
+  t.true(isFloatEqual(two.verticalAngleDegrees(), 0));
+  t.true(isFloatEqual(three.verticalAngleDegrees(), -90));
 });
