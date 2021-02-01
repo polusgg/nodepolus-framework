@@ -672,6 +672,36 @@ export class InternalLobby implements LobbyInstance {
       this.connections.splice(disconnectingConnectionIndex, 1);
     }
 
+    if (this.meetingHud && disconnectingPlayerIndex) {
+      const oldMeetingHud = this.meetingHud.meetingHud.clone();
+      const disconnectedId = this.players[disconnectingPlayerIndex].getId();
+      const votesToClear: InternalPlayer[] = [];
+
+      for (let i = 0; i < this.meetingHud.meetingHud.playerStates.length; i++) {
+        const state = this.meetingHud.meetingHud.playerStates[i];
+
+        if (i == disconnectedId) {
+          state.isDead = true;
+          state.votedFor = -1;
+          state.didVote = false;
+        } else if (state.votedFor == disconnectedId) {
+          const votingPlayer = this.findPlayerByPlayerId(i);
+
+          if (votingPlayer) {
+            votesToClear.push(votingPlayer);
+          }
+
+          state.votedFor = -1;
+          state.didVote = false;
+        }
+      }
+
+      this.sendRootGamePacket(new GameDataPacket([
+        this.meetingHud.meetingHud.getData(oldMeetingHud),
+      ], this.code));
+      this.meetingHud.meetingHud.clearVote(votesToClear);
+    }
+
     if (disconnectingPlayerIndex) {
       this.players.splice(disconnectingPlayerIndex, 1);
     }
