@@ -65,6 +65,10 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     this.serverSocket.on("error", error => {
       this.logger.catch(error);
     });
+
+    if (this.getMaxPlayersPerLobby() > 10) {
+      this.logger.warn("Lobbies with more than 10 players is experimental");
+    }
   }
 
   /**
