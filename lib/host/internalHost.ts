@@ -5,11 +5,11 @@ import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipS
 import { EntityPlayer, InnerPlayerControl } from "../protocol/entities/player";
 import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
 import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
-import { DisconnectReason, LevelTask, Vector2, VoteResult } from "../types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityMiraShipStatus } from "../protocol/entities/miraShipStatus";
 import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
+import { DisconnectReason, LevelTask, VoteResult } from "../types";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
 import { VoteState } from "../protocol/entities/meetingHud/types";
 import { PlayerData } from "../protocol/entities/gameData/types";
@@ -685,7 +685,8 @@ export class InternalHost implements HostInstance {
 
     sender.writeReliable(new GameDataPacket([gameData.serializeSpawn()], this.lobby.getCode()));
 
-    const event = new PlayerSpawnedEvent(sender, this.lobby, newPlayerId, true, new Vector2(0, 0));
+    const position = SpawnPositions.forPlayerInDropship(newPlayerId);
+    const event = new PlayerSpawnedEvent(sender, this.lobby, newPlayerId, true, position);
 
     await this.lobby.getServer().emit("player.spawned", event);
 
@@ -698,7 +699,7 @@ export class InternalHost implements HostInstance {
       this.getNextNetId(),
       5,
       event.getPosition(),
-      new Vector2(0, 0),
+      position,
     );
 
     entity.playerControl.isNew = event.isNew();

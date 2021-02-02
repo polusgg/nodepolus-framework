@@ -9,6 +9,19 @@ type LevelSpawnPositions = Readonly<{
 
 const SPAWN_RADIUS = 1.55 as const;
 
+const SPAWN_POSITIONS_DROPSHIP: readonly Vector2[] = [
+  new Vector2(-2.1, 2.75),
+  new Vector2(-1.8, 2.9),
+  new Vector2(-1.47, 3),
+  new Vector2(-1.15, 3.12),
+  new Vector2(-0.82, 3.25),
+  new Vector2(0.94, 3.25),
+  new Vector2(1.25, 3.12),
+  new Vector2(1.57, 3),
+  new Vector2(1.9, 2.9),
+  new Vector2(2.2, 2.75),
+];
+
 const SPAWN_POSITIONS_SKELD: LevelSpawnPositions = {
   initial: new Vector2(-0.72, 0.62),
   meetingOne: new Vector2(-0.72, 0.62),
@@ -45,6 +58,13 @@ export class SpawnPositions {
    */
   static spawnRadius(): number {
     return SPAWN_RADIUS;
+  }
+
+  /**
+   * Gets the spawn positions for the Dropship.
+   */
+  static forDropship(): readonly Vector2[] {
+    return SPAWN_POSITIONS_DROPSHIP;
   }
 
   /**
@@ -92,6 +112,15 @@ export class SpawnPositions {
       case Level.Airship:
         return SpawnPositions.forAirship();
     }
+  }
+
+  /**
+   * Gets a spawn position in the Dropship for a player with the given ID.
+   *
+   * @param playerId The ID of the player used as a chair index
+   */
+  static forPlayerInDropship(playerId: number): Vector2 {
+    return SPAWN_POSITIONS_DROPSHIP[playerId % SPAWN_POSITIONS_DROPSHIP.length];
   }
 
   /**
