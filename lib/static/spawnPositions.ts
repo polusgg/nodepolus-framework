@@ -7,7 +7,7 @@ type LevelSpawnPositions = Readonly<{
   meetingTwo: Vector2;
 }>;
 
-const SPAWN_RADIUS = 1.55;
+const SPAWN_RADIUS = 1.55 as const;
 
 const SPAWN_POSITIONS_SKELD: LevelSpawnPositions = {
   initial: new Vector2(-0.72, 0.62),
@@ -28,13 +28,17 @@ const SPAWN_POSITIONS_POLUS: LevelSpawnPositions = {
 };
 
 const SPAWN_POSITIONS_AIRSHIP: LevelSpawnPositions = {
+  // TODO
   initial: new Vector2(0, 0),
   meetingOne: new Vector2(0, 0),
   meetingTwo: new Vector2(0, 0),
 };
 
-const UNKNOWN: Vector2 = new Vector2(0, 0.3636);
+const OFFSET: Vector2 = new Vector2(0, 0.3636);
 
+/**
+ * A helper class for retrieving static data for level spawn positions.
+ */
 export class SpawnPositions {
   /**
    * Gets the spawn radius.
@@ -157,6 +161,6 @@ export class SpawnPositions {
       .rotate((playerId - 1) * (360 / playerCount))
       .multiply(SpawnPositions.spawnRadius());
 
-    return center.add(spawnPosition).add(UNKNOWN);
+    return center.add(spawnPosition).add(OFFSET);
   }
 }
