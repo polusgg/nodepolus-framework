@@ -15,12 +15,12 @@ import { VoteState } from "../protocol/entities/meetingHud/types";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { Connection } from "../protocol/connection";
+import { SpawnPositions, Tasks } from "../static";
 import { PlayerInstance } from "../api/player";
 import { HostInstance } from "../api/host";
 import { InternalPlayer } from "../player";
 import { InternalLobby } from "../lobby";
 import { Game } from "../api/game";
-import { Tasks } from "../static";
 import {
   NormalCommunicationsAmount,
   MiraCommunicationsAmount,
@@ -635,6 +635,12 @@ export class InternalHost implements HostInstance {
     this.setTasks();
     gameData.gameData.updateGameData(gameData.gameData.players, connections);
     this.lobby.setGameState(GameState.Started);
+
+    const players = this.lobby.getPlayers();
+
+    for (let i = 0; i < players.length; i++) {
+      players[i].setPosition(SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), players[i].getId(), players.length, true));
+    }
   }
 
   async handleSceneChange(sender: Connection, sceneName: string): Promise<void> {
@@ -867,6 +873,12 @@ export class InternalHost implements HostInstance {
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.serializeSpawn(),
     ], this.lobby.getCode()));
+
+    const players = this.lobby.getPlayers();
+
+    for (let i = 0; i < players.length; i++) {
+      players[i].setPosition(SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), players[i].getId(), players.length, false));
+    }
 
     this.meetingHudTimeout = setTimeout(this.endMeeting.bind(this), (this.lobby.getOptions().votingTime + this.lobby.getOptions().discussionTime) * 1000);
   }
