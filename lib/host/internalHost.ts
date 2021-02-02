@@ -14,6 +14,7 @@ import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
 import { VoteState } from "../protocol/entities/meetingHud/types";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
+import { RPCPacket } from "../protocol/packets/gameData";
 import { Connection } from "../protocol/connection";
 import { SpawnPositions, Tasks } from "../static";
 import { PlayerInstance } from "../api/player";
@@ -52,6 +53,7 @@ import {
 import {
   ClearVotePacket,
   ClosePacket,
+  SendChatNotePacket,
   SetInfectedPacket,
   SetStartCounterPacket,
   StartMeetingPacket,
@@ -83,6 +85,7 @@ import {
   SystemsHandler,
 } from "./systemHandlers";
 import {
+  ChatNoteType,
   FakeClientId,
   GameOverReason,
   GameState,
@@ -922,6 +925,7 @@ export class InternalHost implements HostInstance {
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.meetingHud.data(oldMeetingHud),
+      new RPCPacket(player.entity.playerControl.netId, new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
     ], this.lobby.getCode()));
 
     if (this.meetingHudTimeout && states.every(p => p.didVote || p.isDead)) {
