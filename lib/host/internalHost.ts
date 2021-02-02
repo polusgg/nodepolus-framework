@@ -5,11 +5,11 @@ import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipS
 import { EntityPlayer, InnerPlayerControl } from "../protocol/entities/player";
 import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
 import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
+import { DisconnectReason, LevelTask, Vector2, VoteResult } from "../types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityMiraShipStatus } from "../protocol/entities/miraShipStatus";
 import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
-import { DisconnectReason, LevelTask, VoteResult } from "../types";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
 import { VoteState } from "../protocol/entities/meetingHud/types";
 import { PlayerData } from "../protocol/entities/gameData/types";
@@ -699,7 +699,7 @@ export class InternalHost implements HostInstance {
       this.getNextNetId(),
       5,
       event.getPosition(),
-      position,
+      Vector2.zero(),
     );
 
     entity.playerControl.isNew = event.isNew();
