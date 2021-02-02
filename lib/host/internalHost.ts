@@ -685,8 +685,7 @@ export class InternalHost implements HostInstance {
 
     sender.writeReliable(new GameDataPacket([gameData.serializeSpawn()], this.lobby.getCode()));
 
-    const position = SpawnPositions.forPlayerInDropship(newPlayerId);
-    const event = new PlayerSpawnedEvent(sender, this.lobby, newPlayerId, true, position);
+    const event = new PlayerSpawnedEvent(sender, this.lobby, newPlayerId, true, SpawnPositions.forPlayerInDropship(newPlayerId));
 
     await this.lobby.getServer().emit("player.spawned", event);
 
