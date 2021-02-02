@@ -918,7 +918,7 @@ export class InternalHost implements HostInstance {
     const states = meetingHud.meetingHud.playerStates;
 
     states[event.getVoter().getId()].votedFor = event.getSuspect()?.getId() ?? -1;
-    states[event.getVoter().getId()].didVote = states[event.getVoter().getId()].votedFor > -1;
+    states[event.getVoter().getId()].didVote = true;
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.meetingHud.data(oldMeetingHud),
