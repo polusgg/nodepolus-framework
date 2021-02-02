@@ -10,16 +10,16 @@ type LevelSpawnPositions = Readonly<{
 const SPAWN_RADIUS = 1.55 as const;
 
 const SPAWN_POSITIONS_DROPSHIP: readonly Vector2[] = [
-  new Vector2(-2.1, 2.75),
-  new Vector2(-1.8, 2.9),
-  new Vector2(-1.47, 3),
-  new Vector2(-1.15, 3.12),
-  new Vector2(-0.82, 3.25),
-  new Vector2(0.94, 3.25),
-  new Vector2(1.25, 3.12),
-  new Vector2(1.57, 3),
-  new Vector2(1.9, 2.9),
-  new Vector2(2.2, 2.75),
+  new Vector2(-1.6, 2.4),
+  new Vector2(-1.3, 2.5),
+  new Vector2(-1.1, 2.5),
+  new Vector2(-0.8, 2.6),
+  new Vector2(-0.6, 2.7),
+  new Vector2(0.7, 2.8),
+  new Vector2(0.9, 2.6),
+  new Vector2(1.1, 2.6),
+  new Vector2(1.4, 2.5),
+  new Vector2(1.7, 2.4),
 ];
 
 const SPAWN_POSITIONS_SKELD: LevelSpawnPositions = {
