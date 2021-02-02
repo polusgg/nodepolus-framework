@@ -27,7 +27,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
       throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
     }
 
-    const event = new PlayerPositionTeleportedEvent(player, this.position, this.velocity, position, new Vector2(0, 0));
+    const event = new PlayerPositionTeleportedEvent(player, this.position, this.velocity, position, Vector2.zero());
 
     await this.parent.lobby.getServer().emit("player.position.updated", event);
     await this.parent.lobby.getServer().emit("player.position.teleported", event);

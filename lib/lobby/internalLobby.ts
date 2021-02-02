@@ -473,8 +473,8 @@ export class InternalLobby implements LobbyInstance {
         this.hostInstance.getNextNetId(),
         this.hostInstance.getNextNetId(),
         5,
-        new Vector2(0, 0),
-        new Vector2(0, 0),
+        Vector2.zero(),
+        Vector2.zero(),
         SpawnFlag.None,
       );
 
