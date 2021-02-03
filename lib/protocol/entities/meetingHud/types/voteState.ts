@@ -16,7 +16,7 @@ export class VoteState {
       (state & VoteStateMask.DidReport) == VoteStateMask.DidReport,
       (state & VoteStateMask.DidVote) == VoteStateMask.DidVote,
       (state & VoteStateMask.IsDead) == VoteStateMask.IsDead,
-      (state & VoteStateMask.VotedFor) - 1,
+      (state & VoteStateMask.DidVote) == VoteStateMask.DidVote ? (state & VoteStateMask.VotedFor) - 1 : 14,
     );
   }
 
@@ -25,7 +25,7 @@ export class VoteState {
       (this.didReport ? VoteStateMask.DidReport : 0) |
       (this.didVote ? VoteStateMask.DidVote : 0) |
       (this.isDead ? VoteStateMask.IsDead : 0) |
-      ((this.votedFor + 1) & VoteStateMask.VotedFor),
+      (this.didVote ? ((this.votedFor + 1) & VoteStateMask.VotedFor) : 15),
     );
   }
 
