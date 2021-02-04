@@ -902,7 +902,7 @@ export class InternalHost implements HostInstance {
     const event = new MeetingVoteAddedEvent(
       this.lobby.getGame()!,
       player,
-      suspectPlayerId ? this.lobby.findPlayerByPlayerId(suspectPlayerId) : undefined,
+      suspectPlayerId !== -1 ? this.lobby.findPlayerByPlayerId(suspectPlayerId) : undefined,
     );
 
     await this.lobby.getServer().emit("meeting.vote.added", event);
@@ -920,7 +920,14 @@ export class InternalHost implements HostInstance {
     const oldMeetingHud = meetingHud.meetingHud.clone();
     const states = meetingHud.meetingHud.playerStates;
 
-    states[event.getVoter().getId()].votedFor = event.getSuspect()?.getId() ?? -1;
+    const id = event.getSuspect()?.getId();
+    let votedFor = -1;
+
+    if (id !== undefined) {
+      votedFor = id;
+    }
+
+    states[event.getVoter().getId()].votedFor = votedFor;
     states[event.getVoter().getId()].didVote = true;
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
