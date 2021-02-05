@@ -127,6 +127,7 @@ export type ServerEvents = {
   "lobby.countdown.started": LobbyCountdownStartedEvent;
   "lobby.countdown.stopped": LobbyCountdownStoppedEvent;
   "lobby.privacy.updated": LobbyPrivacyUpdatedEvent;
+  "lobby.host.updated": LobbyHostUpdatedEvent;
 
   /**
    * Meeting Events

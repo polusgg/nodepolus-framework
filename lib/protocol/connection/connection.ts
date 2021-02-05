@@ -15,7 +15,6 @@ import dgram from "dgram";
 
 export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implements NetworkAccessible {
   public timeoutLength = 6000;
-  public isHost = false;
   public isActingHost = false;
   public id = -1;
   public lobby?: InternalLobby;

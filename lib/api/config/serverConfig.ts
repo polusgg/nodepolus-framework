@@ -56,6 +56,14 @@ export type ServerConfig = {
      * @defaultValue `10`
      */
     maxPlayers?: number;
+    /**
+     * Whether all players in a lobby will be given acting host.
+     *
+     * TODO: Find a better name for this
+     *
+     * @defaultValue `false`
+     */
+    allHosts?: boolean;
   };
   /**
    * Logger configuration.

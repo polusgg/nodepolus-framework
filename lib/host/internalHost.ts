@@ -751,7 +751,7 @@ export class InternalHost implements HostInstance {
     await this.lobby.finishedSpawningPlayer(owner);
 
     if (!this.lobby.isSpawningPlayers()) {
-      this.lobby.reapplyActingHosts();
+      // this.lobby.reapplyActingHosts();
     }
   }
 
@@ -1022,7 +1022,7 @@ export class InternalHost implements HostInstance {
     }
 
     if (timeRemaining == 5 && this.counterSequenceId != sequenceId) {
-      this.lobby.removeActingHosts(true);
+      // this.lobby.removeActingHosts(true);
       // TODO: Config option
       this.startCountdown(5, player);
     }

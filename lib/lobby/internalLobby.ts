@@ -53,6 +53,7 @@ import {
   SpawnFlag,
   SpawnType,
 } from "../types/enums";
+import { LobbyHostUpdatedEvent } from "../api/events/lobby/lobbyHostUpdatedEvent";
 
 export class InternalLobby implements LobbyInstance {
   public ignoredNetIds: number[] = [];
@@ -706,7 +707,7 @@ export class InternalLobby implements LobbyInstance {
       this.players.splice(disconnectingPlayerIndex, 1);
     }
 
-    if (connection.isHost && this.connections.length > 0) {
+    if (this.getActingHosts().length == 0 && this.connections.length > 0) {
       this.migrateHost();
     }
 
@@ -742,7 +743,7 @@ export class InternalLobby implements LobbyInstance {
       }
     }
 
-    this.removeActingHosts();
+    // this.removeActingHosts();
 
     if (!connection.lobby) {
       connection.lobby = this;
@@ -819,7 +820,7 @@ export class InternalLobby implements LobbyInstance {
           throw new Error(`KickPlayer sent for unknown client: ${id}`);
         }
 
-        if (sender.isHost) {
+        if (sender.isActingHost) {
           con.sendKick(data.banned, this.findPlayerByConnection(sender), data.disconnectReason);
         }
         break;
@@ -933,7 +934,10 @@ export class InternalLobby implements LobbyInstance {
       this.connections.push(connection);
     }
 
-    connection.isActingHost = true;
+    if (this.getActingHosts().length == 0) {
+      connection.isActingHost = true;
+    }
+
     connection.limboState = LimboState.NotLimbo;
 
     this.startedSpawningPlayer(connection);
@@ -960,6 +964,11 @@ export class InternalLobby implements LobbyInstance {
    */
   private migrateHost(): void {
     // TODO: Assign new acting host if there are none
+    const newHost = this.connections[0];
+
+    const event = new LobbyHostUpdatedEvent(this, newHost);
+
+    if ()
   }
 
   /**
