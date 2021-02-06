@@ -37,6 +37,7 @@ export const DEFAULT_CONFIG: Immutable<AllRequired<ServerConfig>> = {
   lobby: {
     defaultAddress: "0.0.0.0",
     defaultPort: 22023,
+    defaultStartTimerDuration: 5,
     maxPlayers: 10,
   },
   logging: {

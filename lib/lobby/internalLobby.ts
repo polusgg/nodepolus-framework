@@ -1,6 +1,7 @@
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { BaseRPCPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
+import { LobbyHostMigratedEvent, LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
 import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
 import { DisconnectReason, GameOptionsData, Immutable, Vector2 } from "../types";
@@ -11,7 +12,6 @@ import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { ServerLobbyJoinRefusedEvent } from "../api/events/server";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
-import { LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
 import { LobbyListing } from "../protocol/packets/root/types";
 import { LobbyInstance, LobbySettings } from "../api/lobby";
 import { EntityPlayer } from "../protocol/entities/player";
@@ -53,7 +53,6 @@ import {
   SpawnFlag,
   SpawnType,
 } from "../types/enums";
-import { LobbyHostUpdatedEvent } from "../api/events/lobby/lobbyHostUpdatedEvent";
 
 export class InternalLobby implements LobbyInstance {
   public ignoredNetIds: number[] = [];
@@ -80,6 +79,7 @@ export class InternalLobby implements LobbyInstance {
     private readonly server: Server,
     private readonly address: string,
     private readonly port: number,
+    private readonly startTimerDuration: number = 5,
     private options: GameOptionsData = new GameOptionsData(),
     private readonly code: string = LobbyCode.generate(),
   ) {}
@@ -100,12 +100,18 @@ export class InternalLobby implements LobbyInstance {
     return this.port;
   }
 
+  getStartTimerDuration(): number {
+    return this.startTimerDuration;
+  }
+
   getCode(): string {
     return this.code;
   }
 
   getHostName(): string {
-    return this.getActingHosts()[0]?.getName() ?? this.connections[0].getName()!;
+    return this.getActingHosts().find(host => host.getName())?.getName()
+      ?? this.connections.find(connection => connection.getName())?.getName()
+      ?? this.code;
   }
 
   isPublic(): boolean {
@@ -443,19 +449,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   getActingHosts(): Connection[] {
-    return this.connections.filter(con => con.isActingHost);
-  }
-
-  setActingHost(connection: Connection, sendImmediately: boolean = true): void {
-    connection.isActingHost = true;
-
-    this.sendSetHost(connection, sendImmediately);
-  }
-
-  removeActingHost(connection: Connection, sendImmediately: boolean = true): void {
-    connection.isActingHost = false;
-
-    this.sendRemoveHost(connection, sendImmediately);
+    return this.connections.filter(con => con.isActingHost());
   }
 
   sendChat(name: string, color: PlayerColor, message: string | TextComponent, onLeft: boolean): void {
@@ -570,12 +564,12 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  removeActingHosts(sendImmediately: boolean = true): void {
+  disableActingHosts(sendImmediately: boolean = true): void {
     const actingHosts = this.getActingHosts();
 
     for (let i = 0; i < actingHosts.length; i++) {
       if (actingHosts[i].limboState == LimboState.NotLimbo) {
-        this.sendRemoveHost(actingHosts[i], sendImmediately);
+        this.sendDisableHost(actingHosts[i], sendImmediately);
       }
     }
   }
@@ -586,12 +580,12 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  reapplyActingHosts(sendImmediately: boolean = true): void {
+  enableActingHosts(sendImmediately: boolean = true): void {
     const actingHosts = this.getActingHosts();
 
     for (let i = 0; i < actingHosts.length; i++) {
       if (actingHosts[i].limboState == LimboState.NotLimbo) {
-        this.sendSetHost(actingHosts[i], sendImmediately);
+        this.sendEnableHost(actingHosts[i], sendImmediately);
       }
     }
   }
@@ -603,7 +597,7 @@ export class InternalLobby implements LobbyInstance {
    * @param connection The connection whose host abilities will be enabled
    * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  sendSetHost(connection: Connection, sendImmediately: boolean = true): void {
+  sendEnableHost(connection: Connection, sendImmediately: boolean = true): void {
     if (sendImmediately) {
       connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, connection.id)]);
     } else {
@@ -618,7 +612,7 @@ export class InternalLobby implements LobbyInstance {
    * @param connection The connection whose host abilities will be disabled
    * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  sendRemoveHost(connection: Connection, sendImmediately: boolean = true): void {
+  sendDisableHost(connection: Connection, sendImmediately: boolean = true): void {
     if (sendImmediately) {
       connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId())]);
     } else {
@@ -707,8 +701,8 @@ export class InternalLobby implements LobbyInstance {
       this.players.splice(disconnectingPlayerIndex, 1);
     }
 
-    if (this.getActingHosts().length == 0 && this.connections.length > 0) {
-      this.migrateHost();
+    if (connection.isActingHost() && this.connections.length > 0) {
+      this.migrateHost(connection);
     }
 
     this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, 0, reason));
@@ -743,7 +737,7 @@ export class InternalLobby implements LobbyInstance {
       }
     }
 
-    // this.removeActingHosts();
+    this.disableActingHosts();
 
     if (!connection.lobby) {
       connection.lobby = this;
@@ -820,7 +814,7 @@ export class InternalLobby implements LobbyInstance {
           throw new Error(`KickPlayer sent for unknown client: ${id}`);
         }
 
-        if (sender.isActingHost) {
+        if (sender.isActingHost()) {
           con.sendKick(data.banned, this.findPlayerByConnection(sender), data.disconnectReason);
         }
         break;
@@ -934,8 +928,8 @@ export class InternalLobby implements LobbyInstance {
       this.connections.push(connection);
     }
 
-    if (this.getActingHosts().length == 0) {
-      connection.isActingHost = true;
+    if (this.connections.length == 0) {
+      connection.setActingHost(true);
     }
 
     connection.limboState = LimboState.NotLimbo;
@@ -958,17 +952,21 @@ export class InternalLobby implements LobbyInstance {
   }
 
   /**
-   * Assigns a new host when the old host leaves the lobby.
+   * Assigns a new acting host when an acting host leaves the lobby.
    *
    * @internal
+   * @param oldHost The connection that is no longer an acting host
    */
-  private migrateHost(): void {
-    // TODO: Assign new acting host if there are none
-    const newHost = this.connections[0];
+  private async migrateHost(oldHost: Connection): Promise<void> {
+    const event = new LobbyHostMigratedEvent(this, oldHost, this.connections[0]);
 
-    const event = new LobbyHostUpdatedEvent(this, newHost);
+    await this.server.emit("lobby.host.migrated", event);
 
-    if ()
+    if (event.isCancelled()) {
+      return;
+    }
+
+    event.getNewHost().setActingHost(true);
   }
 
   /**

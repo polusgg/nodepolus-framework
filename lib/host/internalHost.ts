@@ -158,7 +158,7 @@ export class InternalHost implements HostInstance {
     const countdownFunction = (): void => {
       const time = this.secondsUntilStart--;
 
-      if (this.lobby.getPlayers().length) {
+      if (this.lobby.getPlayers().length > 0) {
         this.lobby.getPlayers()[0].entity.playerControl.sendRPCPacketTo(
           this.lobby.getConnections(),
           new SetStartCounterPacket(this.counterSequenceId += 5, time),
@@ -751,7 +751,7 @@ export class InternalHost implements HostInstance {
     await this.lobby.finishedSpawningPlayer(owner);
 
     if (!this.lobby.isSpawningPlayers()) {
-      // this.lobby.reapplyActingHosts();
+      this.lobby.enableActingHosts();
     }
   }
 
@@ -919,15 +919,9 @@ export class InternalHost implements HostInstance {
 
     const oldMeetingHud = meetingHud.meetingHud.clone();
     const states = meetingHud.meetingHud.playerStates;
-
     const id = event.getSuspect()?.getId();
-    let votedFor = -1;
 
-    if (id !== undefined) {
-      votedFor = id;
-    }
-
-    states[event.getVoter().getId()].votedFor = votedFor;
+    states[event.getVoter().getId()].votedFor = id !== undefined ? id : -1;
     states[event.getVoter().getId()].didVote = true;
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
@@ -1022,9 +1016,8 @@ export class InternalHost implements HostInstance {
     }
 
     if (timeRemaining == 5 && this.counterSequenceId != sequenceId) {
-      // this.lobby.removeActingHosts(true);
-      // TODO: Config option
-      this.startCountdown(5, player);
+      this.lobby.disableActingHosts(true);
+      this.startCountdown(this.lobby.getStartTimerDuration(), player);
     }
   }
 

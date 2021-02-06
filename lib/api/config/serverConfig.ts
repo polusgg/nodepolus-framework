@@ -51,19 +51,18 @@ export type ServerConfig = {
      */
     defaultPort?: number;
     /**
+     * The default time, in seconds, until the game starts after a host clicks
+     * the Play button.
+     *
+     * @defaultValue `5`
+     */
+    defaultStartTimerDuration?: number;
+    /**
      * The maximum number of players that the server will allow in a lobby.
      *
      * @defaultValue `10`
      */
     maxPlayers?: number;
-    /**
-     * Whether all players in a lobby will be given acting host.
-     *
-     * TODO: Find a better name for this
-     *
-     * @defaultValue `false`
-     */
-    allHosts?: boolean;
   };
   /**
    * Logger configuration.

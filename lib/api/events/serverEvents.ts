@@ -18,6 +18,9 @@ import {
 import {
   LobbyCountdownStartedEvent,
   LobbyCountdownStoppedEvent,
+  LobbyHostAddedEvent,
+  LobbyHostMigratedEvent,
+  LobbyHostRemovedEvent,
   LobbyPrivacyUpdatedEvent,
 } from "./lobby";
 import {
@@ -126,8 +129,10 @@ export type ServerEvents = {
    */
   "lobby.countdown.started": LobbyCountdownStartedEvent;
   "lobby.countdown.stopped": LobbyCountdownStoppedEvent;
+  "lobby.host.added": LobbyHostAddedEvent;
+  "lobby.host.removed": LobbyHostRemovedEvent;
+  "lobby.host.migrated": LobbyHostMigratedEvent;
   "lobby.privacy.updated": LobbyPrivacyUpdatedEvent;
-  "lobby.host.updated": LobbyHostUpdatedEvent;
 
   /**
    * Meeting Events

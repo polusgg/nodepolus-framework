@@ -226,6 +226,14 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   }
 
   /**
+   * Gets the default time, in seconds, until the game starts after a host
+   * clicks the Play button in a lobby.
+   */
+  getDefaultLobbyStartTimerDuration(): number {
+    return this.config.lobby?.defaultStartTimerDuration ?? DEFAULT_CONFIG.lobby.defaultStartTimerDuration;
+  }
+
+  /**
    * Gets the maximum number of players that the server will allow in a lobby.
    */
   getMaxPlayersPerLobby(): number {
@@ -390,6 +398,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
           this,
           this.getDefaultLobbyAddress(),
           this.getDefaultLobbyPort(),
+          this.getDefaultLobbyStartTimerDuration(),
           (packet as HostGameRequestPacket).options,
           lobbyCode,
         );

@@ -373,7 +373,7 @@ export class InternalPlayer implements PlayerInstance {
 
     this.setName("");
 
-    if (this.connection.isActingHost) {
+    if (this.connection.isActingHost()) {
       this.connection.writeReliable(new RemovePlayerPacket(this.lobby.getCode(), this.entity.owner, this.entity.owner, DisconnectReason.serverRequest()));
       this.connection.writeReliable(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.owner, this.entity.owner));
     } else {

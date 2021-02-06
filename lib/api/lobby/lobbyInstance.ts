@@ -43,6 +43,12 @@ export interface LobbyInstance {
   getPort(): number;
 
   /**
+   * Gets the default time, in seconds, until the game starts after a host clicks
+   * the Play button.
+   */
+  getStartTimerDuration(): number;
+
+  /**
    * Gets the lobby code.
    */
   getCode(): string;
@@ -399,22 +405,6 @@ export interface LobbyInstance {
    * Gets all players that are acting hosts of the lobby.
    */
   getActingHosts(): Connection[];
-
-  /**
-   * Adds the acting host status to the given connection.
-   *
-   * @param connection The connection to which the acting host status will be added
-   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets
-   */
-  setActingHost(connection: Connection, sendImmediately: boolean): void;
-
-  /**
-   * Removes the acting host status from the given connection.
-   *
-   * @param connection The connection from which the acting host status will be removed
-   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets
-   */
-  removeActingHost(connection: Connection, sendImmediately: boolean): void;
 
   /**
    * Sends a server message in the lobby chat window.

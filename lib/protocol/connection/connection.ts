@@ -1,6 +1,7 @@
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, NetworkAccessible } from "../../types";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { BaseRootPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
+import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
 import { PacketDestination, HazelPacketType } from "../packets/types/enums";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
 import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
@@ -15,7 +16,6 @@ import dgram from "dgram";
 
 export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implements NetworkAccessible {
   public timeoutLength = 6000;
-  public isActingHost = false;
   public id = -1;
   public lobby?: InternalLobby;
   public limboState = LimboState.PreSpawn;
@@ -32,6 +32,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   private hazelVersion?: number;
   private clientVersion?: ClientVersion;
   private name?: string;
+  private actingHost = false;
   private packetBuffer: AwaitingPacket[] = [];
   private unreliablePacketBuffer: BaseRootPacket[] = [];
   private nonceIndex = 1;
@@ -199,6 +200,50 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    */
   getTimeSinceLastPing(): number {
     return Date.now() - this.lastPingReceivedTime;
+  }
+
+  /**
+   * Gets whether or not the connection is an acting host in their current
+   * lobby.
+   */
+  isActingHost(): boolean {
+    return this.actingHost;
+  }
+
+  /**
+   * Sets whether or not the connection is an acting host in their lobby.
+   *
+   * @param actingHost `true` to add the acting host host status to the connection, `false` to remove it
+   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets
+   */
+  async setActingHost(actingHost: boolean, sendImmediately: boolean = true): Promise<void> {
+    if (!this.lobby) {
+      return;
+    }
+
+    this.actingHost = actingHost;
+
+    if (actingHost) {
+      const event = new LobbyHostAddedEvent(this.lobby, this);
+
+      await this.lobby.getServer().emit("lobby.host.added", event);
+
+      if (event.isCancelled()) {
+        return;
+      }
+
+      this.lobby.sendEnableHost(this, sendImmediately);
+    } else {
+      const event = new LobbyHostRemovedEvent(this.lobby, this);
+
+      await this.lobby.getServer().emit("lobby.host.removed", event);
+
+      if (event.isCancelled()) {
+        return;
+      }
+
+      this.lobby.sendDisableHost(this, sendImmediately);
+    }
   }
 
   /**

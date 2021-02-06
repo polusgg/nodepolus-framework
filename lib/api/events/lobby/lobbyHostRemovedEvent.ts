@@ -3,18 +3,16 @@ import { LobbyInstance } from "../../lobby";
 import { CancellableEvent } from "../types";
 
 /**
- * Fired when a lobby's host has been changed.
- *
- * TODO: document this better
+ * Fired when the acting host status is removed from a connection in a lobby.
  */
-export class LobbyHostUpdatedEvent extends CancellableEvent {
+export class LobbyHostRemovedEvent extends CancellableEvent {
   /**
    * @param lobby The lobby from which this event was fired
-   * @param host The host of the lobby
+   * @param host The connection that is no longer an acting host
    */
   constructor(
     private readonly lobby: LobbyInstance,
-    private host: Connection,
+    private readonly host: Connection,
   ) {
     super();
   }
@@ -27,18 +25,9 @@ export class LobbyHostUpdatedEvent extends CancellableEvent {
   }
 
   /**
-   * Gets the host of the lobby.
+   * Gets the connection that is no longer an acting host.
    */
   getHost(): Connection {
     return this.host;
-  }
-
-  /**
-   * Sets the host of the lobby.
-   *
-   * @param host The host to set for the lobby
-   */
-  setHost(host: Connection): void {
-    this.host = host;
   }
 }
