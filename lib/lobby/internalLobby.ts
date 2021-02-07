@@ -947,12 +947,12 @@ export class InternalLobby implements LobbyInstance {
    * @param connection The connection that joined the lobby
    */
   private handleNewJoin(connection: Connection): void {
-    if (this.connections.length == 0) {
-      connection.setActingHost(true);
-    }
-
     if (this.connections.indexOf(connection) == -1) {
       this.connections.push(connection);
+    }
+
+    if (this.connections.length == 1) {
+      connection.updateActingHost(true);
     }
 
     connection.limboState = LimboState.NotLimbo;

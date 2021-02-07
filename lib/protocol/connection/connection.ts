@@ -211,6 +211,16 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   }
 
   /**
+   * Sets whether or not the connection is an acting host in their lobby without
+   * sending the packet.
+   *
+   * @param actingHost `true` to add the acting host host status to the connection, `false` to remove it
+   */
+  updateActingHost(actingHost: boolean): void {
+    this.actingHost = actingHost;
+  }
+
+  /**
    * Sets whether or not the connection is an acting host in their lobby.
    *
    * @param actingHost `true` to add the acting host host status to the connection, `false` to remove it
