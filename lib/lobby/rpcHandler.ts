@@ -29,6 +29,7 @@ import {
   ReportDeadBodyPacket,
   SendChatNotePacket,
   SendChatPacket,
+  SetColorPacket,
   SetHatPacket,
   SetPetPacket,
   SetScannerPacket,
@@ -121,6 +122,13 @@ export class RPCHandler {
         break;
       }
       case RPCPacketType.SetColor: {
+        const packet: SetColorPacket = rawPacket as SetColorPacket;
+
+        if (!(sender instanceof InnerPlayerControl)) {
+          throw new Error(`Received SetColor packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
+        }
+
+        this.handleSetColor(sender as InnerPlayerControl, packet.color);
         break;
       }
       case RPCPacketType.SetHat: {
@@ -353,6 +361,10 @@ export class RPCHandler {
 
   handleCheckColor(sender: InnerPlayerControl, color: PlayerColor): void {
     this.lobby.getHostInstance().handleCheckColor(sender, color);
+  }
+
+  handleSetColor(sender: InnerPlayerControl, color: PlayerColor): void {
+    this.lobby.getHostInstance().handleSetColor(sender, color);
   }
 
   handleSetHat(sender: InnerPlayerControl, hat: PlayerHat, sendTo: Connection[]): void {

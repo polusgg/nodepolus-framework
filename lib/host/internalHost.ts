@@ -788,6 +788,29 @@ export class InternalHost implements HostInstance {
     player.setColor(setColor);
   }
 
+  handleSetColor(sender: InnerPlayerControl, color: PlayerColor): void {
+    const owner = this.lobby.findConnection(sender.parent.owner);
+
+    if (!owner) {
+      throw new Error("Received SetColor from an InnerPlayerControl without an owner");
+    }
+
+    const player = this.lobby.findPlayerByConnection(owner);
+
+    if (player) {
+      this.confirmPlayerData(player);
+    } else {
+      throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    if (owner.isActingHost()) {
+      player.setColor(color);
+    } else {
+      // Fix desync
+      player.setColor(player.getColor());
+    }
+  }
+
   handleCompleteTask(sender: InnerPlayerControl, taskIndex: number): void {
     const gameData = this.lobby.getGameData();
 

@@ -146,6 +146,14 @@ export interface HostInstance {
   handleCheckColor(sender: InnerPlayerControl, color: PlayerColor): void;
 
   /**
+   * Called when a connection sends a SetColor RPC packet.
+   *
+   * @param sender The PlayerControl that sent the packet
+   * @param color The color that the player is requesting to use
+   */
+  handleSetColor(sender: InnerPlayerControl, color: PlayerColor): void;
+
+  /**
    * Called when a connection sends a CompleteTask RPC packet.
    *
    * @param sender The PlayerControl that sent the packet
