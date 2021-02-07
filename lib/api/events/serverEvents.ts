@@ -85,6 +85,8 @@ import {
   ServerLobbyJoinEvent,
   ServerLobbyJoinRefusedEvent,
   ServerLobbyListEvent,
+  ServerPacketCustomEvent,
+  ServerPacketRpcCustomEvent,
 } from "./server";
 
 const basicServerEvents = [
@@ -204,4 +206,6 @@ export type ServerEvents = {
   "server.lobby.join": ServerLobbyJoinEvent;
   "server.lobby.join.refused": ServerLobbyJoinRefusedEvent;
   "server.lobby.list": ServerLobbyListEvent;
+  "server.packet.custom": ServerPacketCustomEvent;
+  "server.packet.rpc.custom": ServerPacketRpcCustomEvent;
 };

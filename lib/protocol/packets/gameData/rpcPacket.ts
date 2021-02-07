@@ -43,11 +43,29 @@ import {
  * Game Data Packet ID: `0x02` (`2`)
  */
 export class RPCPacket extends BaseGameDataPacket {
+  private static readonly customPackets: Map<number, (reader: MessageReader) => BaseRPCPacket> = new Map();
+
   constructor(
     public senderNetId: number,
     public packet: BaseRPCPacket,
   ) {
     super(GameDataPacketType.RPC);
+  }
+
+  static registerPacket(id: number, deserializer: (reader: MessageReader) => BaseRPCPacket): void {
+    if (id in RPCPacketType || RPCPacket.customPackets.has(id)) {
+      throw new Error(`Attempted to register a custom RPC packet using an ID that is already in use: ${id}`);
+    }
+
+    RPCPacket.customPackets.set(id, deserializer);
+  }
+
+  static hasPacket(id: number): boolean {
+    return RPCPacket.customPackets.has(id);
+  }
+
+  static getPacket(id: number): ((reader: MessageReader) => BaseRPCPacket) | undefined {
+    return RPCPacket.customPackets.get(id);
   }
 
   static deserialize(reader: MessageReader, level?: Level): RPCPacket {
@@ -122,6 +140,10 @@ export class RPCPacket extends BaseGameDataPacket {
       case RPCPacketType.UsePlatform:
         return new RPCPacket(senderNetId, UsePlatformPacket.deserialize(reader));
       default:
+        if (RPCPacket.hasPacket(type)) {
+          return new RPCPacket(senderNetId, RPCPacket.getPacket(type)!(reader));
+        }
+
         throw new Error(`Attempted to deserialize an unimplemented RPC packet type ${type} (${RPCPacketType[type]}) from InnerNetObject ${senderNetId}`);
     }
   }

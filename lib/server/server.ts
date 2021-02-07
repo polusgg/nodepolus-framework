@@ -6,6 +6,7 @@ import { DisconnectReasonType, FakeClientId } from "../types/enums";
 import { BasicServerEvents, ServerEvents } from "../api/events";
 import { DEFAULT_CONFIG, MaxValue } from "../util/constants";
 import { ConnectionInfo, DisconnectReason } from "../types";
+import { RootPacket } from "../protocol/packets/hazel";
 import { Connection } from "../protocol/connection";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
@@ -29,6 +30,7 @@ import {
   ServerLobbyDestroyedEvent,
   ServerLobbyJoinEvent,
   ServerLobbyListEvent,
+  ServerPacketCustomEvent,
 } from "../api/events/server";
 
 export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
@@ -482,6 +484,14 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         break;
       }
       default: {
+        if (RootPacket.hasPacket(packet.type)) {
+          if (!sender.lobby) {
+            this.emit("server.packet.custom", new ServerPacketCustomEvent(sender, packet));
+          }
+
+          break;
+        }
+
         if (!sender.lobby) {
           throw new Error(`Client ${sender.id} sent root game packet type ${packet.type} (${RootPacketType[packet.type]}) while not in a lobby`);
         }

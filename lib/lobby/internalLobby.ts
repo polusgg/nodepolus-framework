@@ -1,21 +1,22 @@
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
+import { ServerLobbyJoinRefusedEvent, ServerPacketCustomEvent, ServerPacketRpcCustomEvent } from "../api/events/server";
+import { GameDataPacketType, RootPacketType, RPCPacketType } from "../protocol/packets/types/enums";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { BaseRPCPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { LobbyHostMigratedEvent, LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
-import { GameDataPacketType, RootPacketType } from "../protocol/packets/types/enums";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
 import { DisconnectReason, GameOptionsData, Immutable, Vector2 } from "../types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
-import { ServerLobbyJoinRefusedEvent } from "../api/events/server";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { LobbyListing } from "../protocol/packets/root/types";
 import { LobbyInstance, LobbySettings } from "../api/lobby";
 import { EntityPlayer } from "../protocol/entities/player";
 import { PlayerJoinedEvent } from "../api/events/player";
+import { RootPacket } from "../protocol/packets/hazel";
 import { Connection } from "../protocol/connection";
 import { notUndefined } from "../util/functions";
 import { PlayerInstance } from "../api/player";
@@ -75,6 +76,7 @@ export class InternalLobby implements LobbyInstance {
   private meetingHud?: EntityMeetingHud;
 
   // TODO: Add check to destroy the room when created by a player if nobody joins in a certain amount of time
+  // TODO: Add timeout to close a lobby if it does not start within X minutes (config)
   constructor(
     private readonly server: Server,
     private readonly address: string,
@@ -833,8 +835,15 @@ export class InternalLobby implements LobbyInstance {
         break;
       case RootPacketType.JoinGame:
         break;
-      default:
+      default: {
+        if (RootPacket.hasPacket(packet.type)) {
+          this.server.emit("server.packet.custom", new ServerPacketCustomEvent(sender, packet));
+
+          break;
+        }
+
         throw new Error(`Attempted to handle an unimplemented root game packet type: ${packet.type} (${RootPacketType[packet.type]})`);
+      }
     }
   }
 
@@ -857,17 +866,31 @@ export class InternalLobby implements LobbyInstance {
         break;
       case GameDataPacketType.Despawn:
         break;
-      case GameDataPacketType.RPC:
-        if (!this.ignoredNetIds.includes((packet as RPCPacket).senderNetId)) {
+      case GameDataPacketType.RPC: {
+        const rpc = packet as RPCPacket;
+
+        if (this.ignoredNetIds.includes(rpc.senderNetId)) {
+          break;
+        }
+
+        if (rpc.packet.type in RPCPacketType) {
           this.rpcHandler.handleBaseRPC(
-            (packet as RPCPacket).packet.type,
+            rpc.packet.type,
             sender,
-            (packet as RPCPacket).senderNetId,
-            (packet as RPCPacket).packet,
+            rpc.senderNetId,
+            rpc.packet,
             sendTo,
           );
+        } else if (RPCPacket.hasPacket(rpc.packet.type)) {
+          this.server.emit("server.packet.rpc.custom", new ServerPacketRpcCustomEvent(
+            sender,
+            rpc.senderNetId,
+            this.findInnerNetObject(rpc.senderNetId),
+            rpc.packet,
+          ));
         }
         break;
+      }
       case GameDataPacketType.Ready:
         this.hostInstance.handleReady(sender);
         break;

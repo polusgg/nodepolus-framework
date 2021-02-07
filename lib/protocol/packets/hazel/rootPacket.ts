@@ -25,9 +25,27 @@ import {
 } from "../root";
 
 export class RootPacket {
+  private static readonly customPackets: Map<number, (reader: MessageReader) => BaseRootPacket> = new Map();
+
   constructor(
     public readonly packets: BaseRootPacket[],
   ) {}
+
+  static registerPacket(id: number, deserializer: (reader: MessageReader) => BaseRootPacket): void {
+    if (id in RootPacketType || RootPacket.customPackets.has(id)) {
+      throw new Error(`Attempted to register a custom packet using an ID that is already in use: ${id}`);
+    }
+
+    RootPacket.customPackets.set(id, deserializer);
+  }
+
+  static hasPacket(id: number): boolean {
+    return RootPacket.customPackets.has(id);
+  }
+
+  static getPacket(id: number): ((reader: MessageReader) => BaseRootPacket) | undefined {
+    return RootPacket.customPackets.get(id);
+  }
 
   static deserialize(reader: MessageReader, clientBound: boolean, level?: Level): RootPacket {
     const packets: BaseRootPacket[] = [];
@@ -98,6 +116,12 @@ export class RootPacket {
           }
           break;
         default:
+          if (RootPacket.hasPacket(child.getTag())) {
+            packets.push(RootPacket.getPacket(child.getTag())!(child));
+
+            break;
+          }
+
           throw new Error(`Attempted to deserialize an unimplemented root game packet type: ${child.getTag()} (${RootPacketType[child.getTag()]})`);
       }
     });

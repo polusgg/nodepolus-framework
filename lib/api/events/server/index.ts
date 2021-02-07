@@ -9,3 +9,7 @@ export { ServerLobbyJoinEvent } from "./serverLobbyJoinEvent";
 export { ServerLobbyJoinRefusedEvent } from "./serverLobbyJoinRefusedEvent";
 
 export { ServerLobbyListEvent } from "./serverLobbyListEvent";
+
+export { ServerPacketCustomEvent } from "./serverPacketCustomEvent";
+
+export { ServerPacketRpcCustomEvent } from "./serverPacketRpcCustomEvent";
