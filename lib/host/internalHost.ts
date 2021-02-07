@@ -135,7 +135,7 @@ export class InternalHost implements HostInstance {
   getNextPlayerId(): number {
     const taken = this.lobby.getPlayers().map(player => player.getId());
 
-    for (let i = 0; i < 127; i++) {
+    for (let i = 0; i < (this.lobby.getPlayers().length > 10 ? 127 : 10); i++) {
       if (taken.indexOf(i) == -1) {
         return i;
       }
