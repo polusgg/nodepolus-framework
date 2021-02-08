@@ -739,9 +739,7 @@ export class MessageReader extends HazelMessage {
       const child = sub.readMessage();
 
       if (!child) {
-        throw new Error(
-          `Read length is longer than message length: ${sub.cursor + 3} > ${sub.length}`,
-        );
+        throw new Error(`Read length is longer than message length: ${sub.cursor + 3} > ${sub.length}`);
       }
 
       return reader(child);

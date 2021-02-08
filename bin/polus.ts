@@ -13,7 +13,9 @@ Error.stackTraceLimit = 25;
 import { AnnouncementServer } from "../lib/announcementServer";
 import { ServerConfig } from "../lib/api/config/serverConfig";
 import { DEFAULT_CONFIG } from "../lib/util/constants";
+import { DisconnectReason } from "../lib/types";
 import { BasePlugin } from "../lib/api/plugin";
+import { wait } from "../lib/util/functions";
 import { Logger } from "../lib/logger";
 import { Server } from "../lib/server";
 import meta from "../package.json";
@@ -51,6 +53,50 @@ function createServers(serverConfig: ServerConfig): void {
   (global as any).server = new Server(serverConfig);
   (global as any).announcementServer = new AnnouncementServer(server.getAddress(), server.getLogger("Announcements"));
   /* eslint-enable @typescript-eslint/no-explicit-any */
+}
+
+let calls = 0;
+
+async function cleanupHandler(code: number): Promise<void> {
+  calls++;
+
+  if (calls > 1) {
+    if (calls > 2 && code > 0) {
+      process.exit(code);
+    }
+
+    return;
+  }
+
+  console.log();
+  logger.info("Shutting down. Press Ctrl+C to quit immediately.");
+  server.getConnections().forEach(connection => connection.disconnect(DisconnectReason.custom("The server is shutting down")));
+
+  await Promise.race([wait(10000), new Promise<void>(resolve => {
+    const tick = (): void => {
+      setImmediate(() => {
+        if (server.getConnections().size == 0) {
+          resolve();
+        } else {
+          tick();
+        }
+      });
+    };
+
+    tick();
+  })]);
+
+  await server.emit("server.close");
+
+  if (code > 0) {
+    process.exit(code);
+  }
+}
+
+function listenForShutdown(): void {
+  process.on("exit", cleanupHandler.bind(null, 0));
+  process.on("SIGINT", cleanupHandler.bind(null, 2));
+  process.on("SIGTERM", cleanupHandler.bind(null, 15));
 }
 
 /**
@@ -183,6 +229,7 @@ async function start(enableAnnouncementServer: boolean = server.getConfig().enab
     const serverConfig: ServerConfig = await loadConfig();
 
     createServers(serverConfig);
+    listenForShutdown();
     await loadPlugins();
     await start();
   } catch (error) {

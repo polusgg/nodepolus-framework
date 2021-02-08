@@ -94,6 +94,10 @@ const basicServerEvents = [
    * Fired when the Server successfully binds to the network address and port.
    */
   "server.ready",
+  /**
+   * Fired when the Server shuts down.
+   */
+  "server.close",
 ];
 
 /**
