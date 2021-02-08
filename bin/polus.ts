@@ -15,7 +15,6 @@ import { ServerConfig } from "../lib/api/config/serverConfig";
 import { DEFAULT_CONFIG } from "../lib/util/constants";
 import { DisconnectReason } from "../lib/types";
 import { BasePlugin } from "../lib/api/plugin";
-import { wait } from "../lib/util/functions";
 import { Logger } from "../lib/logger";
 import { Server } from "../lib/server";
 import meta from "../package.json";
@@ -71,21 +70,6 @@ async function cleanupHandler(code: number): Promise<void> {
   console.log();
   logger.info("Shutting down. Press Ctrl+C to quit immediately.");
   server.getConnections().forEach(connection => connection.disconnect(DisconnectReason.custom("The server is shutting down")));
-
-  await Promise.race([wait(10000), new Promise<void>(resolve => {
-    const tick = (): void => {
-      setImmediate(() => {
-        if (server.getConnections().size == 0) {
-          resolve();
-        } else {
-          tick();
-        }
-      });
-    };
-
-    tick();
-  })]);
-
   await server.emit("server.close");
 
   if (code > 0) {
@@ -93,6 +77,9 @@ async function cleanupHandler(code: number): Promise<void> {
   }
 }
 
+/**
+ * Registers shutdown handlers to gracefully stop the server and all plugins.
+ */
 function listenForShutdown(): void {
   process.on("exit", cleanupHandler.bind(null, 0));
   process.on("SIGINT", cleanupHandler.bind(null, 2));
