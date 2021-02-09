@@ -18,6 +18,7 @@ import { EntityPlayer } from "../protocol/entities/player";
 import { PlayerJoinedEvent } from "../api/events/player";
 import { RootPacket } from "../protocol/packets/hazel";
 import { Connection } from "../protocol/connection";
+import { DEFAULT_CONFIG } from "../util/constants";
 import { notUndefined } from "../util/functions";
 import { PlayerInstance } from "../api/player";
 import { LobbyCode } from "../util/lobbyCode";
@@ -67,6 +68,8 @@ export class InternalLobby implements LobbyInstance {
   private readonly gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
   private readonly metadata: Map<string, unknown> = new Map();
 
+  private joinTimer?: NodeJS.Timeout;
+  private startTimer?: NodeJS.Timeout;
   private game?: Game;
   private players: InternalPlayer[] = [];
   private gameState = GameState.NotStarted;
@@ -75,16 +78,20 @@ export class InternalLobby implements LobbyInstance {
   private shipStatus?: BaseEntityShipStatus;
   private meetingHud?: EntityMeetingHud;
 
-  // TODO: Add check to destroy the room when created by a player if nobody joins in a certain amount of time
-  // TODO: Add timeout to close a lobby if it does not start within X minutes (config)
   constructor(
     private readonly server: Server,
     private readonly address: string,
     private readonly port: number,
-    private readonly startTimerDuration: number = 5,
+    private readonly startTimerDuration: number = DEFAULT_CONFIG.lobby.defaultStartTimerDuration,
+    private readonly timeToJoinUntilClosed: number = DEFAULT_CONFIG.lobby.defaultTimeToJoinUntilClosed,
+    private readonly timeToStartUntilClosed: number = DEFAULT_CONFIG.lobby.defaultTimeToStartUntilClosed,
     private options: GameOptionsData = new GameOptionsData(),
     private readonly code: string = LobbyCode.generate(),
-  ) {}
+  ) {
+    this.joinTimer = setTimeout(() => {
+      this.server.deleteLobby(this);
+    }, this.timeToJoinUntilClosed * 1000);
+  }
 
   getLogger(): Logger {
     return this.server.getLogger(`Lobby ${this.code}`);
@@ -711,6 +718,56 @@ export class InternalLobby implements LobbyInstance {
   }
 
   /**
+   * Stops the timer for automatically closing the lobby if the first player
+   * takes too long to join.
+   *
+   * @internal
+   */
+  cancelJoinTimer(): void {
+    if (!this.joinTimer) {
+      return;
+    }
+
+    clearTimeout(this.joinTimer);
+
+    delete this.joinTimer;
+  }
+
+  /**
+   * Starts the timer for automatically closing the lobby if the hosts take
+   * too long to start a game.
+   *
+   * @internal
+   */
+  beginStartTimer(): void {
+    if (this.startTimer) {
+      return;
+    }
+
+    this.startTimer = setTimeout(() => {
+      this.server.deleteLobby(this);
+
+      this.connections.forEach(connection => connection.disconnect(DisconnectReason.serverRequest()));
+    }, this.timeToStartUntilClosed * 1000);
+  }
+
+  /**
+   * Stops the timer for automatically closing the lobby if the hosts take
+   * too long to start a game.
+   *
+   * @internal
+   */
+  cancelStartTimer(): void {
+    if (!this.startTimer) {
+      return;
+    }
+
+    clearTimeout(this.startTimer);
+
+    delete this.startTimer;
+  }
+
+  /**
    * Adds the given connection to the lobby.
    *
    * @internal
@@ -952,6 +1009,9 @@ export class InternalLobby implements LobbyInstance {
     }
 
     if (this.connections.length == 1) {
+      this.cancelJoinTimer();
+      this.beginStartTimer();
+
       connection.updateActingHost(true);
     }
 

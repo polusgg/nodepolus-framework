@@ -58,6 +58,20 @@ export type ServerConfig = {
      */
     defaultStartTimerDuration?: number;
     /**
+     * The default time, in seconds, before a lobby is automatically closed if
+     * no players have joined.
+     *
+     * @defaultValue `5`
+     */
+    defaultTimeToJoinUntilClosed?: number;
+    /**
+     * The default time, in seconds, before a lobby is automatically closed if
+     * a game has not been started.
+     *
+     * @defaultValue `600` (10 minutes)
+     */
+    defaultTimeToStartUntilClosed?: number;
+    /**
      * The maximum number of players that the server will allow in a lobby.
      *
      * @defaultValue `10`

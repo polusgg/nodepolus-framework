@@ -215,6 +215,7 @@ export class InternalHost implements HostInstance {
       return;
     }
 
+    this.lobby.cancelStartTimer();
     this.lobby.sendRootGamePacket(new StartGamePacket(this.lobby.getCode()));
   }
 

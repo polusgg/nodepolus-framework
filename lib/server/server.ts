@@ -236,6 +236,22 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   }
 
   /**
+   * Gets the default time, in seconds, before a lobby is automatically closed
+   * if no players have joined.
+   */
+  getDefaultLobbyTimeToJoinUntilClosed(): number {
+    return this.config.lobby?.defaultTimeToJoinUntilClosed ?? DEFAULT_CONFIG.lobby.defaultTimeToJoinUntilClosed;
+  }
+
+  /**
+   * Gets the default time, in seconds, before a lobby is automatically closed
+   * if a game has not been started.
+   */
+  getDefaultLobbyTimeToStartUntilClosed(): number {
+    return this.config.lobby?.defaultTimeToStartUntilClosed ?? DEFAULT_CONFIG.lobby.defaultTimeToStartUntilClosed;
+  }
+
+  /**
    * Gets the maximum number of players that the server will allow in a lobby.
    */
   getMaxPlayersPerLobby(): number {
@@ -401,6 +417,8 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
           this.getDefaultLobbyAddress(),
           this.getDefaultLobbyPort(),
           this.getDefaultLobbyStartTimerDuration(),
+          this.getDefaultLobbyTimeToJoinUntilClosed(),
+          this.getDefaultLobbyTimeToStartUntilClosed(),
           (packet as HostGameRequestPacket).options,
           lobbyCode,
         );
@@ -415,7 +433,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
           sender.sendReliable([new HostGameResponsePacket(newLobby.getCode())]);
         } else {
-          this.getLogger().verbose("Cancelled connection %s hosting lobby", sender);
+          this.getLogger().verbose("Prevented connection %s from hosting lobby", sender);
 
           sender.disconnect(event.getDisconnectReason());
         }
@@ -450,7 +468,6 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         const results: LobbyListing[] = [];
         const counts = new LobbyCount();
 
-        // TODO: Sort by playerCount in descending order
         for (let i = 0; i < this.lobbies.length; i++) {
           const lobby = this.lobbies[i];
           const level: number = lobby.getLevel();
