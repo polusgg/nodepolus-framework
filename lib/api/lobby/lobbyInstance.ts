@@ -95,6 +95,12 @@ export interface LobbyInstance {
   getAge(): number;
 
   /**
+   * Disconnects all connections from the lobby and removes the lobby from the
+   * server.
+   */
+  close(): void;
+
+  /**
    * Gets whether or not the lobby has metadata for the given key.
    *
    * @param key The metadata key

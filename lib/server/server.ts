@@ -300,7 +300,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   async close(): Promise<void> {
     this.listening = false;
 
-    this.connections.forEach(connection => connection.disconnect(DisconnectReason.custom("The server is shutting down")));
+    this.connections.forEach(async connection => connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("The server is shutting down"))]));
     this.lobbies.splice(0, this.lobbies.length);
     this.lobbyMap.clear();
 

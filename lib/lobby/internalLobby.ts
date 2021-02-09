@@ -39,6 +39,7 @@ import {
   KickPlayerPacket,
   RemovePlayerPacket,
   StartGamePacket,
+  RemoveGamePacket,
 } from "../protocol/packets/root";
 import {
   AlterGameTag,
@@ -163,6 +164,13 @@ export class InternalLobby implements LobbyInstance {
 
   getAge(): number {
     return (new Date().getTime() - this.createdAt) / 1000;
+  }
+
+  close(): void {
+    this.cancelJoinTimer();
+    this.cancelStartTimer();
+    this.server.deleteLobby(this);
+    this.connections.forEach(async connection => connection.sendReliable([new RemoveGamePacket()]));
   }
 
   hasMeta(key: string): boolean {
@@ -746,9 +754,7 @@ export class InternalLobby implements LobbyInstance {
     }
 
     this.startTimer = setTimeout(() => {
-      this.server.deleteLobby(this);
-
-      this.connections.forEach(connection => connection.disconnect(DisconnectReason.serverRequest()));
+      this.close();
     }, this.timeToStartUntilClosed * 1000);
   }
 
