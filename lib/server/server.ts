@@ -43,6 +43,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
   // Reserve the fake client IDs
   private connectionIndex = Object.keys(FakeClientId).length / 2;
+  private listening = false;
 
   /**
    * @param config The server configuration
@@ -61,6 +62,10 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     );
 
     this.serverSocket.on("message", (buf, remoteInfo) => {
+      if (!this.listening) {
+        return;
+      }
+
       this.getConnection(ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`)).emit("message", buf);
     });
 
@@ -280,11 +285,26 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   async listen(): Promise<void> {
     return new Promise((resolve, _reject) => {
       this.serverSocket.bind(this.getPort(), this.getAddress(), () => {
+        this.listening = true;
         this.emit("server.ready");
 
         resolve();
       });
     });
+  }
+
+  /**
+   * Stops listening for packets on the server socket, disconnects all
+   * connections, and removes all lobbies.
+   */
+  async close(): Promise<void> {
+    this.listening = false;
+
+    this.connections.forEach(connection => connection.disconnect(DisconnectReason.custom("The server is shutting down")));
+    this.lobbies.splice(0, this.lobbies.length);
+    this.lobbyMap.clear();
+
+    await this.emit("server.close");
   }
 
   /**

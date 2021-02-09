@@ -13,7 +13,6 @@ Error.stackTraceLimit = 25;
 import { AnnouncementServer } from "../lib/announcementServer";
 import { ServerConfig } from "../lib/api/config/serverConfig";
 import { DEFAULT_CONFIG } from "../lib/util/constants";
-import { DisconnectReason } from "../lib/types";
 import { BasePlugin } from "../lib/api/plugin";
 import { Logger } from "../lib/logger";
 import { Server } from "../lib/server";
@@ -69,8 +68,7 @@ async function cleanupHandler(code: number): Promise<void> {
 
   console.log();
   logger.info("Shutting down. Press Ctrl+C to quit immediately.");
-  server.getConnections().forEach(connection => connection.disconnect(DisconnectReason.custom("The server is shutting down")));
-  await server.emit("server.close");
+  await server.close();
 
   if (code > 0) {
     process.exit(code);
