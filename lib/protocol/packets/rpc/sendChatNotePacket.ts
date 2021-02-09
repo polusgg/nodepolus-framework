@@ -1,17 +1,17 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { ChatNoteType } from "../../../types/enums";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x10` (`16`)
  */
-export class SendChatNotePacket extends BaseRPCPacket {
+export class SendChatNotePacket extends BaseRpcPacket {
   constructor(
     public readonly playerId: number,
     public readonly noteType: ChatNoteType,
   ) {
-    super(RPCPacketType.SendChatNote);
+    super(RpcPacketType.SendChatNote);
   }
 
   static deserialize(reader: MessageReader): SendChatNotePacket {

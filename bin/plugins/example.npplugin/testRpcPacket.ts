@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../lib/util/hazelMessage";
-import { BaseRPCPacket } from "../../../lib/protocol/packets/rpc";
+import { BaseRpcPacket } from "../../../lib/protocol/packets/rpc";
 
-export class TestRpcPacket extends BaseRPCPacket {
+export class TestRpcPacket extends BaseRpcPacket {
   constructor(
     public readonly message: string,
   ) {

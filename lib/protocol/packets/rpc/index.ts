@@ -1,4 +1,4 @@
-export { BaseRPCPacket } from "./baseRPCPacket";
+export { BaseRpcPacket } from "./baseRpcPacket";
 
 export { AddVotePacket } from "./addVotePacket";
 

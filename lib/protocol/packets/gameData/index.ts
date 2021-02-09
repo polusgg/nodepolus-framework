@@ -6,7 +6,7 @@ export { DespawnPacket } from "./despawnPacket";
 
 export { ReadyPacket } from "./readyPacket";
 
-export { RPCPacket } from "./rpcPacket";
+export { RpcPacket } from "./rpcPacket";
 
 export { SceneChangePacket } from "./sceneChangePacket";
 

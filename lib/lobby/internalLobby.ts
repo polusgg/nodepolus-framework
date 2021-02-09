@@ -1,8 +1,8 @@
-import { BaseGameDataPacket, DataPacket, DespawnPacket, RPCPacket, SceneChangePacket } from "../protocol/packets/gameData";
+import { BaseGameDataPacket, DataPacket, DespawnPacket, RpcPacket, SceneChangePacket } from "../protocol/packets/gameData";
 import { ServerLobbyJoinRefusedEvent, ServerPacketCustomEvent, ServerPacketRpcCustomEvent } from "../api/events/server";
-import { GameDataPacketType, RootPacketType, RPCPacketType } from "../protocol/packets/types/enums";
+import { GameDataPacketType, RootPacketType, RpcPacketType } from "../protocol/packets/types/enums";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
-import { BaseRPCPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
+import { BaseRpcPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { LobbyHostMigratedEvent, LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
 import { DisconnectReason, GameOptionsData, Immutable, Vector2 } from "../types";
@@ -24,7 +24,7 @@ import { LobbyCode } from "../util/lobbyCode";
 import { TextComponent } from "../api/text";
 import { HostInstance } from "../api/host";
 import { InternalPlayer } from "../player";
-import { RPCHandler } from "./rpcHandler";
+import { RpcHandler } from "./rpcHandler";
 import { InternalHost } from "../host";
 import { Game } from "../api/game";
 import { Logger } from "../logger";
@@ -60,7 +60,7 @@ export class InternalLobby implements LobbyInstance {
 
   private readonly createdAt: number = Date.now();
   private readonly hostInstance: HostInstance = new InternalHost(this);
-  private readonly rpcHandler: RPCHandler = new RPCHandler(this);
+  private readonly rpcHandler: RpcHandler = new RpcHandler(this);
   private readonly spawningPlayers: Set<Connection> = new Set();
   private readonly connections: Connection[] = [];
   private readonly settings: LobbySettings = new LobbySettings(this);
@@ -391,8 +391,8 @@ export class InternalLobby implements LobbyInstance {
     this.gameState = gameState;
   }
 
-  sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void {
-    this.sendRootGamePacket(new GameDataPacket([new RPCPacket(from.netId, packet)], this.code), sendTo);
+  sendRpcPacket(from: BaseInnerNetObject, packet: BaseRpcPacket, sendTo?: Connection[]): void {
+    this.sendRootGamePacket(new GameDataPacket([new RpcPacket(from.netId, packet)], this.code), sendTo);
   }
 
   spawn(entity: BaseInnerNetEntity): void {
@@ -444,7 +444,7 @@ export class InternalLobby implements LobbyInstance {
 
     if (this.gameData) {
       this.gameData.gameData.players.push(playerData);
-      this.sendRPCPacket(this.gameData.gameData, new UpdateGameDataPacket([playerData]));
+      this.sendRpcPacket(this.gameData.gameData, new UpdateGameDataPacket([playerData]));
     }
 
     return playerInstance;
@@ -496,7 +496,7 @@ export class InternalLobby implements LobbyInstance {
         [],
       ));
 
-      this.sendRPCPacket(fakePlayer.playerControl, new SendChatPacket(message.toString()));
+      this.sendRpcPacket(fakePlayer.playerControl, new SendChatPacket(message.toString()));
       fakePlayer.despawn();
     } else {
       for (let i = 0; i < this.players.length; i++) {
@@ -511,15 +511,15 @@ export class InternalLobby implements LobbyInstance {
           playerData.name = name;
 
           connection.writeReliable(new GameDataPacket([
-            new RPCPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([playerData])),
-            new RPCPacket(player.entity.playerControl.netId, new SendChatPacket(message.toString())),
+            new RpcPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([playerData])),
+            new RpcPacket(player.entity.playerControl.netId, new SendChatPacket(message.toString())),
           ], this.code));
 
           playerData.color = oldColor;
           playerData.name = oldName;
 
           connection.writeReliable(new GameDataPacket([
-            new RPCPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([playerData])),
+            new RpcPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([playerData])),
           ], this.code));
         }
       }
@@ -925,21 +925,21 @@ export class InternalLobby implements LobbyInstance {
       case GameDataPacketType.Despawn:
         break;
       case GameDataPacketType.RPC: {
-        const rpc = packet as RPCPacket;
+        const rpc = packet as RpcPacket;
 
         if (this.ignoredNetIds.includes(rpc.senderNetId)) {
           break;
         }
 
-        if (rpc.packet.type in RPCPacketType) {
-          this.rpcHandler.handleBaseRPC(
+        if (rpc.packet.type in RpcPacketType) {
+          this.rpcHandler.handleBaseRpc(
             rpc.packet.type,
             sender,
             rpc.senderNetId,
             rpc.packet,
             sendTo,
           );
-        } else if (RPCPacket.hasPacket(rpc.packet.type)) {
+        } else if (RpcPacket.hasPacket(rpc.packet.type)) {
           this.server.emit("server.packet.rpc.custom", new ServerPacketRpcCustomEvent(
             sender,
             rpc.senderNetId,

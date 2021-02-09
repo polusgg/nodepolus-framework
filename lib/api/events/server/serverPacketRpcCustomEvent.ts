@@ -1,5 +1,5 @@
 import { BaseInnerNetObject } from "../../../protocol/entities/types";
-import { BaseRPCPacket } from "../../../protocol/packets/rpc";
+import { BaseRpcPacket } from "../../../protocol/packets/rpc";
 import { Connection } from "../../../protocol/connection";
 
 /**
@@ -16,7 +16,7 @@ export class ServerPacketRpcCustomEvent {
     private readonly connection: Connection,
     private readonly netId: number,
     private readonly sender: BaseInnerNetObject | undefined,
-    private readonly packet: BaseRPCPacket,
+    private readonly packet: BaseRpcPacket,
   ) {}
 
   /**
@@ -45,7 +45,7 @@ export class ServerPacketRpcCustomEvent {
   /**
    * Gets the RPC packet that was sent.
    */
-  getPacket(): BaseRPCPacket {
+  getPacket(): BaseRpcPacket {
     return this.packet;
   }
 }

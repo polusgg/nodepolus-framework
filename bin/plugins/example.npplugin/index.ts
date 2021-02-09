@@ -3,7 +3,7 @@ import { FileAnnouncementDriver } from "../../../lib/announcementServer/drivers"
 import { InnerNetObjectType } from "../../../lib/protocol/entities/types/enums";
 import { AnnouncementServer } from "../../../lib/announcementServer";
 import { BasePlugin, PluginMetadata } from "../../../lib/api/plugin";
-import { RPCPacket } from "../../../lib/protocol/packets/gameData";
+import { RpcPacket } from "../../../lib/protocol/packets/gameData";
 import { PlayerJoinedEvent } from "../../../lib/api/events/player";
 import { RootPacket } from "../../../lib/protocol/packets/hazel";
 import { shuffleArrayClone } from "../../../lib/util/shuffle";
@@ -22,7 +22,7 @@ RootPacket.registerPacket(0x40, TestPacket.deserialize);
 /**
  * Registers a custom RPC packet with the ID 0x50 (80).
  */
-RPCPacket.registerPacket(0x50, TestRpcPacket.deserialize);
+RpcPacket.registerPacket(0x50, TestRpcPacket.deserialize);
 
 /**
  * Grab the server and announcement server from the global object.

@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 export enum LadderSize {
   Short = 0x00,
@@ -15,12 +15,12 @@ export enum LadderDirection {
 /**
  * RPC Packet ID: `0x1f` (`31`)
  */
-export class ClimbLadderPacket extends BaseRPCPacket {
+export class ClimbLadderPacket extends BaseRpcPacket {
   constructor(
     public readonly ladderSize: LadderSize,
     public readonly ladderDirection: LadderDirection,
   ) {
-    super(RPCPacketType.ExitVent);
+    super(RpcPacketType.ExitVent);
   }
 
   static deserialize(reader: MessageReader): ClimbLadderPacket {

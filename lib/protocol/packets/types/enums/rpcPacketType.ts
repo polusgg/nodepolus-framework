@@ -1,4 +1,4 @@
-export enum RPCPacketType {
+export enum RpcPacketType {
   PlayAnimation = 0x00,
   CompleteTask = 0x01,
   SyncSettings = 0x02,

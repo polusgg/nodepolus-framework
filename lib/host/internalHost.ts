@@ -14,7 +14,7 @@ import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
 import { VoteState } from "../protocol/entities/meetingHud/types";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
-import { RPCPacket } from "../protocol/packets/gameData";
+import { RpcPacket } from "../protocol/packets/gameData";
 import { Connection } from "../protocol/connection";
 import { SpawnPositions, Tasks } from "../static";
 import { PlayerInstance } from "../api/player";
@@ -159,7 +159,7 @@ export class InternalHost implements HostInstance {
       const time = this.secondsUntilStart--;
 
       if (this.lobby.getPlayers().length > 0) {
-        this.lobby.getPlayers()[0].entity.playerControl.sendRPCPacketTo(
+        this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacketTo(
           this.lobby.getConnections(),
           new SetStartCounterPacket(this.counterSequenceId += 5, time),
         );
@@ -191,7 +191,7 @@ export class InternalHost implements HostInstance {
     this.secondsUntilStart = -1;
 
     if (this.lobby.getPlayers().length > 0) {
-      this.lobby.getPlayers()[0].entity.playerControl.sendRPCPacketTo(
+      this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacketTo(
         this.lobby.getConnections(),
         new SetStartCounterPacket(this.counterSequenceId += 5, -1),
       );
@@ -268,7 +268,7 @@ export class InternalHost implements HostInstance {
       impostors[i].setRole(PlayerRole.Impostor);
     }
 
-    this.lobby.getPlayers()[0].entity.playerControl.sendRPCPacketTo(
+    this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacketTo(
       this.lobby.getConnections(),
       new SetInfectedPacket(impostors.map(player => player.getId())),
     );
@@ -462,7 +462,7 @@ export class InternalHost implements HostInstance {
       }
     }
 
-    meetingHud.meetingHud.sendRPCPacketTo(this.lobby.getConnections(), new VotingCompletePacket(
+    meetingHud.meetingHud.sendRpcPacketTo(this.lobby.getConnections(), new VotingCompletePacket(
       meetingHud.meetingHud.playerStates, isTied ? 0xff : (exiledPlayer?.getId() ?? 0xff), isTied),
     );
 
@@ -484,7 +484,7 @@ export class InternalHost implements HostInstance {
         return;
       }
 
-      meetingHud.meetingHud.sendRPCPacketTo(this.lobby.getConnections(), new ClosePacket());
+      meetingHud.meetingHud.sendRpcPacketTo(this.lobby.getConnections(), new ClosePacket());
 
       this.lobby.deleteMeetingHud();
 
@@ -878,7 +878,7 @@ export class InternalHost implements HostInstance {
       return;
     }
 
-    sender.sendRPCPacketTo(this.lobby.getConnections(), new StartMeetingPacket(event.getVictim()?.getId() ?? 0xff));
+    sender.sendRpcPacketTo(this.lobby.getConnections(), new StartMeetingPacket(event.getVictim()?.getId() ?? 0xff));
 
     const meetingHud = new EntityMeetingHud(this.lobby, this.getNextNetId());
 
@@ -935,7 +935,7 @@ export class InternalHost implements HostInstance {
       const connection = player.getConnection();
 
       if (connection) {
-        meetingHud.meetingHud.sendRPCPacketTo([connection], new ClearVotePacket());
+        meetingHud.meetingHud.sendRpcPacketTo([connection], new ClearVotePacket());
       }
 
       return;
@@ -950,7 +950,7 @@ export class InternalHost implements HostInstance {
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.meetingHud.data(oldMeetingHud),
-      new RPCPacket(player.entity.playerControl.netId, new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
+      new RpcPacket(player.entity.playerControl.netId, new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
     ], this.lobby.getCode()));
 
     if (this.meetingHudTimeout && states.every(p => p.didVote || p.isDead)) {

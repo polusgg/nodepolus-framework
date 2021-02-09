@@ -1,15 +1,15 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x0c` (`12`)
  */
-export class MurderPlayerPacket extends BaseRPCPacket {
+export class MurderPlayerPacket extends BaseRpcPacket {
   constructor(
     public readonly victimPlayerControlNetId: number,
   ) {
-    super(RPCPacketType.MurderPlayer);
+    super(RpcPacketType.MurderPlayer);
   }
 
   static deserialize(reader: MessageReader): MurderPlayerPacket {

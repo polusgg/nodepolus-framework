@@ -6,7 +6,7 @@ import { BaseInnerShipStatus } from "../protocol/entities/baseShipStatus";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { InnerVoteBanSystem } from "../protocol/entities/gameData";
 import { InnerMeetingHud } from "../protocol/entities/meetingHud";
-import { RPCPacketType } from "../protocol/packets/types/enums";
+import { RpcPacketType } from "../protocol/packets/types/enums";
 import { Connection } from "../protocol/connection";
 import { GameOptionsData, Vector2 } from "../types";
 import { MaxValue } from "../util/constants";
@@ -14,7 +14,7 @@ import { InternalLobby } from ".";
 import { Vents } from "../static";
 import {
   AddVotePacket,
-  BaseRPCPacket,
+  BaseRpcPacket,
   CastVotePacket,
   CheckColorPacket,
   CheckNamePacket,
@@ -39,12 +39,12 @@ import {
   SyncSettingsPacket,
 } from "../protocol/packets/rpc";
 
-export class RPCHandler {
+export class RpcHandler {
   constructor(
     private readonly lobby: InternalLobby,
   ) {}
 
-  handleBaseRPC(type: RPCPacketType, connection: Connection, senderNetId: number, rawPacket: BaseRPCPacket, sendTo: Connection[]): void {
+  handleBaseRpc(type: RpcPacketType, connection: Connection, senderNetId: number, rawPacket: BaseRpcPacket, sendTo: Connection[]): void {
     if (senderNetId === MaxValue.UInt32) {
       this.lobby.getLogger().warn("RPC packet sent from unexpected InnerNetObject: -1");
 
@@ -59,7 +59,7 @@ export class RPCHandler {
     }
 
     switch (type) {
-      case RPCPacketType.PlayAnimation: {
+      case RpcPacketType.PlayAnimation: {
         const packet: PlayAnimationPacket = rawPacket as PlayAnimationPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
@@ -69,7 +69,7 @@ export class RPCHandler {
         this.handlePlayAnimation(sender as InnerPlayerControl, packet.taskType, sendTo);
         break;
       }
-      case RPCPacketType.CompleteTask: {
+      case RpcPacketType.CompleteTask: {
         const packet: CompleteTaskPacket = rawPacket as CompleteTaskPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
@@ -79,7 +79,7 @@ export class RPCHandler {
         this.handleCompleteTask(sender as InnerPlayerControl, packet.taskIndex, sendTo);
         break;
       }
-      case RPCPacketType.SyncSettings: {
+      case RpcPacketType.SyncSettings: {
         const packet: SyncSettingsPacket = rawPacket as SyncSettingsPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
@@ -89,15 +89,15 @@ export class RPCHandler {
         this.handleSyncSettings(sender as InnerPlayerControl, packet.options, sendTo);
         break;
       }
-      case RPCPacketType.SetInfected: {
+      case RpcPacketType.SetInfected: {
         this.lobby.getLogger().warn("Received SetInfected packet from connection %s in a server-as-host state", connection);
         break;
       }
-      case RPCPacketType.Exiled: {
+      case RpcPacketType.Exiled: {
         this.lobby.getLogger().warn("Received Exiled packet from connection %s in a server-as-host state", connection);
         break;
       }
-      case RPCPacketType.CheckName: {
+      case RpcPacketType.CheckName: {
         const packet: CheckNamePacket = rawPacket as CheckNamePacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
@@ -107,11 +107,11 @@ export class RPCHandler {
         this.handleCheckName(sender as InnerPlayerControl, packet.name);
         break;
       }
-      case RPCPacketType.SetName: {
+      case RpcPacketType.SetName: {
         this.lobby.getLogger().warn("Received SetName packet from connection %s in a server-as-host state", connection);
         break;
       }
-      case RPCPacketType.CheckColor: {
+      case RpcPacketType.CheckColor: {
         const packet: CheckColorPacket = rawPacket as CheckColorPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
@@ -121,7 +121,7 @@ export class RPCHandler {
         this.handleCheckColor(sender as InnerPlayerControl, packet.color);
         break;
       }
-      case RPCPacketType.SetColor: {
+      case RpcPacketType.SetColor: {
         const packet: SetColorPacket = rawPacket as SetColorPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
@@ -131,7 +131,7 @@ export class RPCHandler {
         this.handleSetColor(sender as InnerPlayerControl, packet.color);
         break;
       }
-      case RPCPacketType.SetHat: {
+      case RpcPacketType.SetHat: {
         const packet: SetHatPacket = rawPacket as SetHatPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
@@ -141,7 +141,7 @@ export class RPCHandler {
         this.handleSetHat(sender as InnerPlayerControl, packet.hat, sendTo);
         break;
       }
-      case RPCPacketType.SetSkin: {
+      case RpcPacketType.SetSkin: {
         const packet: SetSkinPacket = rawPacket as SetSkinPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
@@ -151,7 +151,7 @@ export class RPCHandler {
         this.handleSetSkin(sender as InnerPlayerControl, packet.skin, sendTo);
         break;
       }
-      case RPCPacketType.ReportDeadBody: {
+      case RpcPacketType.ReportDeadBody: {
         const packet: ReportDeadBodyPacket = rawPacket as ReportDeadBodyPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
@@ -161,7 +161,7 @@ export class RPCHandler {
         this.handleReportDeadBody(sender as InnerPlayerControl, packet.victimPlayerId);
         break;
       }
-      case RPCPacketType.MurderPlayer: {
+      case RpcPacketType.MurderPlayer: {
         const packet: MurderPlayerPacket = rawPacket as MurderPlayerPacket;
 
         if (!(sender instanceof InnerPlayerControl)) {
@@ -171,7 +171,7 @@ export class RPCHandler {
         this.handleMurderPlayer(sender as InnerPlayerControl, packet.victimPlayerControlNetId, sendTo);
         break;
       }
-      case RPCPacketType.SendChat: {
+      case RpcPacketType.SendChat: {
         const packet: SendChatPacket = rawPacket as SendChatPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl) {
@@ -181,11 +181,11 @@ export class RPCHandler {
         this.handleSendChat(sender as InnerPlayerControl, packet.message, sendTo);
         break;
       }
-      case RPCPacketType.StartMeeting: {
+      case RpcPacketType.StartMeeting: {
         this.lobby.getLogger().warn("Received StartMeeting packet from connection %s in a server-as-host state", connection);
         break;
       }
-      case RPCPacketType.SetScanner: {
+      case RpcPacketType.SetScanner: {
         const packet: SetScannerPacket = rawPacket as SetScannerPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl) {
@@ -195,7 +195,7 @@ export class RPCHandler {
         this.handleSetScanner(sender as InnerPlayerControl, packet.isScanning, packet.sequenceId, sendTo);
         break;
       }
-      case RPCPacketType.SendChatNote: {
+      case RpcPacketType.SendChatNote: {
         const packet: SendChatNotePacket = rawPacket as SendChatNotePacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl) {
@@ -205,7 +205,7 @@ export class RPCHandler {
         this.handleSendChatNote(sender as InnerPlayerControl, packet.playerId, packet.noteType, sendTo);
         break;
       }
-      case RPCPacketType.SetPet: {
+      case RpcPacketType.SetPet: {
         const packet: SetPetPacket = rawPacket as SetPetPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl) {
@@ -215,7 +215,7 @@ export class RPCHandler {
         this.handleSetPet(sender as InnerPlayerControl, packet.pet, sendTo);
         break;
       }
-      case RPCPacketType.SetStartCounter: {
+      case RpcPacketType.SetStartCounter: {
         const packet: SetStartCounterPacket = rawPacket as SetStartCounterPacket;
 
         if (sender.type != InnerNetObjectType.PlayerControl) {
@@ -225,7 +225,7 @@ export class RPCHandler {
         this.handleSetStartCounter(sender as InnerPlayerControl, packet.sequenceId, packet.timeRemaining);
         break;
       }
-      case RPCPacketType.EnterVent: {
+      case RpcPacketType.EnterVent: {
         const packet: EnterVentPacket = rawPacket as EnterVentPacket;
 
         if (sender.type != InnerNetObjectType.PlayerPhysics) {
@@ -235,7 +235,7 @@ export class RPCHandler {
         this.handleEnterVent(sender as InnerPlayerPhysics, packet.ventId, sendTo);
         break;
       }
-      case RPCPacketType.ExitVent: {
+      case RpcPacketType.ExitVent: {
         const packet: ExitVentPacket = rawPacket as ExitVentPacket;
 
         if (sender.type != InnerNetObjectType.PlayerPhysics) {
@@ -245,7 +245,7 @@ export class RPCHandler {
         this.handleExitVent(sender as InnerPlayerPhysics, packet.ventId, sendTo);
         break;
       }
-      case RPCPacketType.SnapTo: {
+      case RpcPacketType.SnapTo: {
         const packet: SnapToPacket = rawPacket as SnapToPacket;
 
         if (sender.type != InnerNetObjectType.CustomNetworkTransform) {
@@ -255,15 +255,15 @@ export class RPCHandler {
         this.handleSnapTo(sender as InnerCustomNetworkTransform, packet.position, packet.lastSequenceId, sendTo);
         break;
       }
-      case RPCPacketType.Close: {
+      case RpcPacketType.Close: {
         this.lobby.getLogger().warn("Received Close packet from connection %s in a server-as-host state", connection);
         break;
       }
-      case RPCPacketType.VotingComplete: {
+      case RpcPacketType.VotingComplete: {
         this.lobby.getLogger().warn("Received VotingComplete packet from connection %s in a server-as-host state", connection);
         break;
       }
-      case RPCPacketType.CastVote: {
+      case RpcPacketType.CastVote: {
         const packet: CastVotePacket = rawPacket as CastVotePacket;
 
         if (sender.type != InnerNetObjectType.MeetingHud) {
@@ -273,11 +273,11 @@ export class RPCHandler {
         this.handleCastVote(sender as InnerMeetingHud, packet.votingPlayerId, packet.suspectPlayerId);
         break;
       }
-      case RPCPacketType.ClearVote: {
+      case RpcPacketType.ClearVote: {
         this.lobby.getLogger().warn("Received ClearVote packet from connection %s in a server-as-host state", connection);
         break;
       }
-      case RPCPacketType.AddVote: {
+      case RpcPacketType.AddVote: {
         const packet: AddVotePacket = rawPacket as AddVotePacket;
 
         if (sender.type != InnerNetObjectType.VoteBanSystem) {
@@ -287,7 +287,7 @@ export class RPCHandler {
         this.handleAddVote(sender as InnerVoteBanSystem, packet.votingClientId, packet.targetClientId, sendTo);
         break;
       }
-      case RPCPacketType.CloseDoorsOfType: {
+      case RpcPacketType.CloseDoorsOfType: {
         const packet: CloseDoorsOfTypePacket = rawPacket as CloseDoorsOfTypePacket;
 
         if (!(sender instanceof BaseInnerShipStatus)) {
@@ -297,7 +297,7 @@ export class RPCHandler {
         this.handleCloseDoorsOfType(sender as BaseInnerShipStatus, packet.system);
         break;
       }
-      case RPCPacketType.RepairSystem: {
+      case RpcPacketType.RepairSystem: {
         const packet: RepairSystemPacket = rawPacket as RepairSystemPacket;
 
         if (!(sender instanceof BaseInnerShipStatus)) {
@@ -307,14 +307,14 @@ export class RPCHandler {
         this.handleRepairSystem(sender as BaseInnerShipStatus, packet.system, packet.playerControlNetId, packet.amount);
         break;
       }
-      case RPCPacketType.SetTasks: {
+      case RpcPacketType.SetTasks: {
         this.lobby.getLogger().warn("Received SetTasks packet from connection %s in a server-as-host state", connection);
         break;
       }
-      case RPCPacketType.UpdateGameData: {
+      case RpcPacketType.UpdateGameData: {
         break;
       }
-      case RPCPacketType.ClimbLadder: {
+      case RpcPacketType.ClimbLadder: {
         const packet: ClimbLadderPacket = rawPacket as ClimbLadderPacket;
 
         if (sender.type != InnerNetObjectType.PlayerPhysics) {
@@ -324,7 +324,7 @@ export class RPCHandler {
         this.handleClimbLadder(sender as InnerPlayerPhysics, packet.ladderSize, packet.ladderDirection);
         break;
       }
-      case RPCPacketType.UsePlatform: {
+      case RpcPacketType.UsePlatform: {
         if (sender.type != InnerNetObjectType.PlayerControl) {
           throw new Error(`Received UsePlatform packet from invalid InnerNetObject: expected PlayerPhysics but got ${type as number} (${typeString})`);
         }
@@ -335,7 +335,7 @@ export class RPCHandler {
         break;
       }
       default:
-        throw new Error(`Attempted to handle an unimplemented RPC packet type: ${type as number} (${RPCPacketType[type]})`);
+        throw new Error(`Attempted to handle an unimplemented RPC packet type: ${type as number} (${RpcPacketType[type]})`);
     }
   }
 

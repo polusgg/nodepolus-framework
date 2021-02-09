@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { DataPacket } from "../../packets/gameData";
-import { BaseRPCPacket } from "../../packets/rpc";
+import { BaseRpcPacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
 import { InnerNetObjectType } from "./enums";
 import { BaseInnerNetEntity } from ".";
@@ -31,11 +31,11 @@ export abstract class BaseInnerNetObject {
     }
   }
 
-  sendRPCPacketTo(to: Connection[], packet: BaseRPCPacket): void {
+  sendRpcPacketTo(to: Connection[], packet: BaseRpcPacket): void {
     if (to.length == 0) {
       return;
     }
 
-    this.parent.lobby.sendRPCPacket(this, packet, to);
+    this.parent.lobby.sendRpcPacket(this, packet, to);
   }
 }

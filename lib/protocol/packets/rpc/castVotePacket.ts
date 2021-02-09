@@ -1,18 +1,18 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x18` (`24`)
  */
-export class CastVotePacket extends BaseRPCPacket {
+export class CastVotePacket extends BaseRpcPacket {
   public readonly didSkip: boolean;
 
   constructor(
     public readonly votingPlayerId: number,
     public readonly suspectPlayerId: number,
   ) {
-    super(RPCPacketType.CastVote);
+    super(RpcPacketType.CastVote);
 
     this.didSkip = this.suspectPlayerId == 0xff;
   }

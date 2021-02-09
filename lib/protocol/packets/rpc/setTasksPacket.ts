@@ -1,16 +1,16 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `1d` (`29`)
  */
-export class SetTasksPacket extends BaseRPCPacket {
+export class SetTasksPacket extends BaseRpcPacket {
   constructor(
     public readonly playerId: number,
     public readonly tasks: number[],
   ) {
-    super(RPCPacketType.SetTasks);
+    super(RpcPacketType.SetTasks);
   }
 
   static deserialize(reader: MessageReader): SetTasksPacket {

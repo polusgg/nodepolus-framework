@@ -8,4 +8,4 @@ export { PacketDestination } from "./packetDestination";
 
 export { RootPacketType } from "./rootPacketType";
 
-export { RPCPacketType } from "./rpcPacketType";
+export { RpcPacketType } from "./rpcPacketType";

@@ -1,16 +1,16 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { PlayerColor } from "../../../types/enums";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x08` (`8`)
  */
-export class SetColorPacket extends BaseRPCPacket {
+export class SetColorPacket extends BaseRpcPacket {
   constructor(
     public readonly color: PlayerColor,
   ) {
-    super(RPCPacketType.SetColor);
+    super(RpcPacketType.SetColor);
   }
 
   static deserialize(reader: MessageReader): SetColorPacket {

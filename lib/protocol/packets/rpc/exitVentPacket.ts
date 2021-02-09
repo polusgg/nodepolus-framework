@@ -1,15 +1,15 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x14` (`20`)
  */
-export class ExitVentPacket extends BaseRPCPacket {
+export class ExitVentPacket extends BaseRpcPacket {
   constructor(
     public readonly ventId: number,
   ) {
-    super(RPCPacketType.ExitVent);
+    super(RpcPacketType.ExitVent);
   }
 
   static deserialize(reader: MessageReader): ExitVentPacket {

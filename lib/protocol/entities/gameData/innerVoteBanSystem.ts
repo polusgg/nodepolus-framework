@@ -55,7 +55,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     } else {
       this.votes.set(target.entity.owner, votes);
 
-      this.sendRPCPacketTo(sendTo, new AddVotePacket(voter.entity.owner, target.entity.owner));
+      this.sendRpcPacketTo(sendTo, new AddVotePacket(voter.entity.owner, target.entity.owner));
     }
   }
 

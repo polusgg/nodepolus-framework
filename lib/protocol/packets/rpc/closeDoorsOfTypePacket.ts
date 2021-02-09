@@ -1,16 +1,16 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SystemType } from "../../../types/enums";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `1b` (`27`)
  */
-export class CloseDoorsOfTypePacket extends BaseRPCPacket {
+export class CloseDoorsOfTypePacket extends BaseRpcPacket {
   constructor(
     public readonly system: SystemType,
   ) {
-    super(RPCPacketType.CloseDoorsOfType);
+    super(RpcPacketType.CloseDoorsOfType);
   }
 
   static deserialize(reader: MessageReader): CloseDoorsOfTypePacket {

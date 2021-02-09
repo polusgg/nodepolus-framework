@@ -1,13 +1,13 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x19` (`25`)
  */
-export class ClearVotePacket extends BaseRPCPacket {
+export class ClearVotePacket extends BaseRpcPacket {
   constructor() {
-    super(RPCPacketType.ClearVote);
+    super(RpcPacketType.ClearVote);
   }
 
   static deserialize(_reader: MessageReader): ClearVotePacket {

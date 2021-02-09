@@ -164,7 +164,7 @@ export class InternalPlayer implements PlayerInstance {
     // TODO: Check end state
     // TODO: Send UpdateGameData packet
 
-    this.entity.playerControl.sendRPCPacketTo(
+    this.entity.playerControl.sendRpcPacketTo(
       this.lobby.getConnections(),
       new SetInfectedPacket([this.id]),
     );

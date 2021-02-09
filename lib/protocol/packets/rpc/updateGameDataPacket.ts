@@ -1,17 +1,17 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { PlayerData } from "../../entities/gameData/types";
-import { RPCPacketType } from "../types/enums";
+import { RpcPacketType } from "../types/enums";
 import { Level } from "../../../types/enums";
-import { BaseRPCPacket } from ".";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `1e` (`30`)
  */
-export class UpdateGameDataPacket extends BaseRPCPacket {
+export class UpdateGameDataPacket extends BaseRpcPacket {
   constructor(
     public readonly players: PlayerData[],
   ) {
-    super(RPCPacketType.UpdateGameData);
+    super(RpcPacketType.UpdateGameData);
   }
 
   static deserialize(reader: MessageReader, level?: Level): UpdateGameDataPacket {

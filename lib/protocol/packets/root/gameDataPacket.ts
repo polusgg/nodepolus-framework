@@ -1,4 +1,4 @@
-import { BaseGameDataPacket, DataPacket, DespawnPacket, ReadyPacket, RPCPacket, SceneChangePacket, SpawnPacket } from "../gameData";
+import { BaseGameDataPacket, DataPacket, DespawnPacket, ReadyPacket, RpcPacket, SceneChangePacket, SpawnPacket } from "../gameData";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { GameDataPacketType, RootPacketType } from "../types/enums";
 import { LobbyCode } from "../../../util/lobbyCode";
@@ -39,7 +39,7 @@ export class GameDataPacket extends BaseRootPacket {
         case GameDataPacketType.Data:
           return packets.push(DataPacket.deserialize(child));
         case GameDataPacketType.RPC:
-          return packets.push(RPCPacket.deserialize(child, level));
+          return packets.push(RpcPacket.deserialize(child, level));
         case GameDataPacketType.Spawn:
           return packets.push(SpawnPacket.deserialize(child));
         case GameDataPacketType.Despawn:

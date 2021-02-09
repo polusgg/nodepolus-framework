@@ -1,16 +1,16 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { PlayerPet } from "../../../types/enums";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x11` (`17`)
  */
-export class SetPetPacket extends BaseRPCPacket {
+export class SetPetPacket extends BaseRpcPacket {
   constructor(
     public readonly pet: PlayerPet,
   ) {
-    super(RPCPacketType.SetPet);
+    super(RpcPacketType.SetPet);
   }
 
   static deserialize(reader: MessageReader): SetPetPacket {

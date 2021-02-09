@@ -1,12 +1,12 @@
 import { MessageWriter } from "../../../util/hazelMessage";
-import { RPCPacketType } from "../types/enums";
+import { RpcPacketType } from "../types/enums";
 import { Bindable } from "../types";
 
-export abstract class BaseRPCPacket implements Bindable<BaseRPCPacket> {
+export abstract class BaseRpcPacket implements Bindable<BaseRpcPacket> {
   public isClientBound?: boolean;
 
   constructor(
-    public type: RPCPacketType,
+    public type: RpcPacketType,
   ) {}
 
   abstract serialize(): MessageWriter;

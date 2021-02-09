@@ -7,7 +7,7 @@ import { PlayerData } from "../../protocol/entities/gameData/types";
 import { EntityGameData } from "../../protocol/entities/gameData";
 import { LobbyListing } from "../../protocol/packets/root/types";
 import { EntityPlayer } from "../../protocol/entities/player";
-import { BaseRPCPacket } from "../../protocol/packets/rpc";
+import { BaseRpcPacket } from "../../protocol/packets/rpc";
 import { GameOptionsData, Immutable } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { LobbySettings } from "./lobbySettings";
@@ -376,7 +376,7 @@ export interface LobbyInstance {
    * @param packet The packet to be sent
    * @param sendTo The connections to which the packet will be sent
    */
-  sendRPCPacket(from: BaseInnerNetObject, packet: BaseRPCPacket, sendTo?: Connection[]): void;
+  sendRpcPacket(from: BaseInnerNetObject, packet: BaseRpcPacket, sendTo?: Connection[]): void;
 
   /**
    * Spawns an entity in the lobby.

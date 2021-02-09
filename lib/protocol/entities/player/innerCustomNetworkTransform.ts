@@ -40,7 +40,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     this.velocity = event.getNewVelocity();
     this.sequenceId += 5;
 
-    this.sendRPCPacketTo(sendTo, new SnapToPacket(this.position, this.sequenceId));
+    this.sendRpcPacketTo(sendTo, new SnapToPacket(this.position, this.sequenceId));
   }
 
   getData(): DataPacket {
@@ -75,7 +75,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
       const connection = player.getConnection();
 
       if (connection) {
-        this.sendRPCPacketTo([connection], new SnapToPacket(this.position, this.sequenceId += 5));
+        this.sendRpcPacketTo([connection], new SnapToPacket(this.position, this.sequenceId += 5));
       }
 
       return;

@@ -1,12 +1,12 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { VoteState } from "../../entities/meetingHud/types";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x17` (`23`)
  */
-export class VotingCompletePacket extends BaseRPCPacket {
+export class VotingCompletePacket extends BaseRpcPacket {
   public readonly didVotePlayerOff: boolean;
 
   constructor(
@@ -14,7 +14,7 @@ export class VotingCompletePacket extends BaseRPCPacket {
     public readonly exiledPlayerId: number,
     public readonly isTie: boolean,
   ) {
-    super(RPCPacketType.VotingComplete);
+    super(RpcPacketType.VotingComplete);
 
     this.didVotePlayerOff = this.exiledPlayerId != 0xff;
   }

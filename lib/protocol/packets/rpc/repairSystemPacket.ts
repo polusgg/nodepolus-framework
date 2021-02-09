@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { Level, SystemType } from "../../../types/enums";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 import {
   DecontaminationAmount,
   ElectricalAmount,
@@ -19,7 +19,7 @@ import {
 /**
  * RPC Packet ID: `1c` (`28`)
  */
-export class RepairSystemPacket extends BaseRPCPacket {
+export class RepairSystemPacket extends BaseRpcPacket {
   public readonly amount: RepairAmount;
 
   constructor(
@@ -28,7 +28,7 @@ export class RepairSystemPacket extends BaseRPCPacket {
     public readonly amountByte: number,
     public readonly level: Level,
   ) {
-    super(RPCPacketType.RepairSystem);
+    super(RpcPacketType.RepairSystem);
 
     this.amount = this.parseAmount();
   }

@@ -1,15 +1,15 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x0d` (`13`)
  */
-export class SendChatPacket extends BaseRPCPacket {
+export class SendChatPacket extends BaseRpcPacket {
   constructor(
     public readonly message: string,
   ) {
-    super(RPCPacketType.SendChat);
+    super(RpcPacketType.SendChat);
   }
 
   static deserialize(reader: MessageReader): SendChatPacket {

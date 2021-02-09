@@ -1,17 +1,17 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { RPCPacketType } from "../types/enums";
+import { RpcPacketType } from "../types/enums";
 import { Vector2 } from "../../../types";
-import { BaseRPCPacket } from ".";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x15` (`21`)
  */
-export class SnapToPacket extends BaseRPCPacket {
+export class SnapToPacket extends BaseRpcPacket {
   constructor(
     public readonly position: Vector2,
     public readonly lastSequenceId: number,
   ) {
-    super(RPCPacketType.SnapTo);
+    super(RpcPacketType.SnapTo);
   }
 
   static deserialize(reader: MessageReader): SnapToPacket {

@@ -1,16 +1,16 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { TaskType } from "../../../types/enums";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x00` (`0`)
  */
-export class PlayAnimationPacket extends BaseRPCPacket {
+export class PlayAnimationPacket extends BaseRpcPacket {
   constructor(
     public readonly taskType: TaskType,
   ) {
-    super(RPCPacketType.PlayAnimation);
+    super(RpcPacketType.PlayAnimation);
   }
 
   static deserialize(reader: MessageReader): PlayAnimationPacket {

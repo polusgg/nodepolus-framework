@@ -1,15 +1,15 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { RPCPacketType } from "../types/enums";
-import { BaseRPCPacket } from ".";
+import { RpcPacketType } from "../types/enums";
+import { BaseRpcPacket } from ".";
 
 /**
  * RPC Packet ID: `0x03` (`3`)
  */
-export class SetInfectedPacket extends BaseRPCPacket {
+export class SetInfectedPacket extends BaseRpcPacket {
   constructor(
     public readonly impostorPlayerIds: number[],
   ) {
-    super(RPCPacketType.SetInfected);
+    super(RpcPacketType.SetInfected);
   }
 
   static deserialize(reader: MessageReader): SetInfectedPacket {
