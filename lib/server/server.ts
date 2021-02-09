@@ -173,6 +173,11 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @param lobby The lobby to be removed
    */
   deleteLobby(lobby: LobbyInstance): void {
+    if (lobby instanceof InternalLobby) {
+      (lobby as InternalLobby).cancelJoinTimer();
+      (lobby as InternalLobby).cancelStartTimer();
+    }
+
     this.lobbies.splice(this.lobbies.indexOf(lobby), 1);
     this.lobbyMap.delete(lobby.getCode());
   }

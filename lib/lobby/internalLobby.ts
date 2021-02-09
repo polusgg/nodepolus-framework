@@ -18,7 +18,6 @@ import { EntityPlayer } from "../protocol/entities/player";
 import { PlayerJoinedEvent } from "../api/events/player";
 import { RootPacket } from "../protocol/packets/hazel";
 import { Connection } from "../protocol/connection";
-import { DEFAULT_CONFIG } from "../util/constants";
 import { notUndefined } from "../util/functions";
 import { PlayerInstance } from "../api/player";
 import { LobbyCode } from "../util/lobbyCode";
@@ -82,15 +81,17 @@ export class InternalLobby implements LobbyInstance {
     private readonly server: Server,
     private readonly address: string,
     private readonly port: number,
-    private readonly startTimerDuration: number = DEFAULT_CONFIG.lobby.defaultStartTimerDuration,
-    private readonly timeToJoinUntilClosed: number = DEFAULT_CONFIG.lobby.defaultTimeToJoinUntilClosed,
-    private readonly timeToStartUntilClosed: number = DEFAULT_CONFIG.lobby.defaultTimeToStartUntilClosed,
+    private readonly startTimerDuration: number = server.getDefaultLobbyStartTimerDuration(),
+    private readonly timeToJoinUntilClosed: number = server.getDefaultLobbyTimeToJoinUntilClosed(),
+    private readonly timeToStartUntilClosed: number = server.getDefaultLobbyTimeToStartUntilClosed(),
     private options: GameOptionsData = new GameOptionsData(),
     private readonly code: string = LobbyCode.generate(),
   ) {
-    this.joinTimer = setTimeout(() => {
-      this.server.deleteLobby(this);
-    }, this.timeToJoinUntilClosed * 1000);
+    if (this.timeToJoinUntilClosed > 0) {
+      this.joinTimer = setTimeout(() => {
+        this.server.deleteLobby(this);
+      }, this.timeToJoinUntilClosed * 1000);
+    }
   }
 
   getLogger(): Logger {
@@ -714,7 +715,7 @@ export class InternalLobby implements LobbyInstance {
       this.migrateHost(connection);
     }
 
-    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, 0, reason));
+    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, 0, reason ?? DisconnectReason.exitGame()));
   }
 
   /**
@@ -740,7 +741,7 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    */
   beginStartTimer(): void {
-    if (this.startTimer) {
+    if (this.startTimer || this.timeToStartUntilClosed < 1) {
       return;
     }
 

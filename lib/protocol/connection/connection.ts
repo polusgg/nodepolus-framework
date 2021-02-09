@@ -412,7 +412,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   disconnect(reason?: DisconnectReason): void {
     this.requestedDisconnect = true;
 
-    const packetToSend: MessageWriter = new Packet(undefined, new DisconnectPacket(reason)).serialize();
+    const packetToSend: MessageWriter = new Packet(undefined, new DisconnectPacket(true, reason)).serialize();
 
     this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
 
@@ -435,7 +435,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
       this.lobby.getCode(),
       this.id,
       isBanned,
-      reason,
+      reason ?? (isBanned ? DisconnectReason.banned() : DisconnectReason.kicked()),
     ));
 
     this.emit("kicked", {

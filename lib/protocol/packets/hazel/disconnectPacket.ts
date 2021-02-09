@@ -8,6 +8,7 @@ export class DisconnectPacket extends BaseHazelPacket {
   public readonly disconnectReason?: DisconnectReason;
 
   constructor(
+    public isForced?: boolean,
     disconnectReason?: DisconnectReason | DisconnectReasonType,
   ) {
     super(HazelPacketType.Acknowledgement);
@@ -20,24 +21,28 @@ export class DisconnectPacket extends BaseHazelPacket {
   }
 
   static deserialize(reader: MessageReader): DisconnectPacket {
-    if (reader.getReadableBytesLength() > 0) {
-      reader.readBoolean();
+    if (reader.hasBytesLeft()) {
+      const isForced = reader.readBoolean();
 
-      const reason = reader.readMessage();
-
-      if (reason) {
-        return new DisconnectPacket(DisconnectReason.deserialize(reason));
+      if (isForced) {
+        return new DisconnectPacket(isForced, DisconnectReason.deserialize(reader.readMessage() ?? new MessageReader()));
       }
+
+      return new DisconnectPacket(isForced);
     }
 
     return new DisconnectPacket();
   }
 
   serialize(): MessageWriter {
-    const writer = new MessageWriter().writeBoolean(true);
+    const writer = new MessageWriter();
 
-    if (this.disconnectReason) {
-      this.disconnectReason.serialize(writer);
+    if (this.isForced !== undefined) {
+      writer.writeBoolean(this.isForced);
+
+      if (this.isForced) {
+        (this.disconnectReason ?? DisconnectReason.custom("")).serialize(writer);
+      }
     }
 
     return writer;

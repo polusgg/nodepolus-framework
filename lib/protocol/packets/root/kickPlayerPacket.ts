@@ -13,17 +13,23 @@ export class KickPlayerPacket extends BaseRootPacket {
     public readonly lobbyCode: string,
     public readonly kickedClientId: AlterGameTag,
     public readonly banned: boolean,
-    public readonly disconnectReason?: DisconnectReason,
+    public readonly disconnectReason: DisconnectReason,
   ) {
     super(RootPacketType.KickPlayer);
   }
 
   static deserialize(reader: MessageReader): KickPlayerPacket {
+    const lobbyCode = LobbyCode.decode(reader.readInt32());
+    const kickedClientId = reader.readPackedUInt32();
+    const banned = reader.readBoolean();
+
     return new KickPlayerPacket(
-      LobbyCode.decode(reader.readInt32()),
-      reader.readPackedUInt32(),
-      reader.readBoolean(),
-      reader.hasBytesLeft() ? new DisconnectReason(reader.readByte()) : undefined,
+      lobbyCode,
+      kickedClientId,
+      banned,
+      reader.hasBytesLeft()
+        ? new DisconnectReason(reader.readByte())
+        : (banned ? DisconnectReason.banned() : DisconnectReason.kicked()),
     );
   }
 
@@ -33,9 +39,7 @@ export class KickPlayerPacket extends BaseRootPacket {
       .writePackedUInt32(this.kickedClientId)
       .writeBoolean(this.banned);
 
-    if (this.disconnectReason) {
-      this.disconnectReason.serialize(writer);
-    }
+    this.disconnectReason.serialize(writer);
 
     return writer;
   }

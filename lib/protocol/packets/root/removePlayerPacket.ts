@@ -43,7 +43,7 @@ export class RemovePlayerPacket extends BaseRootPacket {
     public readonly lobbyCode: string,
     public readonly removedClientId: number,
     public readonly hostClientId: number,
-    public readonly disconnectReason?: DisconnectReason,
+    public readonly disconnectReason: DisconnectReason,
   ) {
     super(RootPacketType.RemovePlayer);
   }
@@ -53,7 +53,7 @@ export class RemovePlayerPacket extends BaseRootPacket {
       LobbyCode.decode(reader.readInt32()),
       reader.readUInt32(),
       reader.readUInt32(),
-      reader.hasBytesLeft() ? new DisconnectReason(reader.readByte()) : undefined,
+      reader.hasBytesLeft() ? new DisconnectReason(reader.readByte()) : DisconnectReason.destroy(),
     );
   }
 
@@ -63,9 +63,7 @@ export class RemovePlayerPacket extends BaseRootPacket {
       .writeUInt32(this.removedClientId)
       .writeUInt32(this.hostClientId);
 
-    if (this.disconnectReason) {
-      this.disconnectReason.serialize(writer);
-    }
+    this.disconnectReason.serialize(writer);
 
     return writer;
   }
