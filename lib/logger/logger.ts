@@ -63,7 +63,7 @@ const prettyPrint = winston.format((info: winston.Logform.TransformableInfo, _op
           const position = (cursor * 2) + (cursor < 2 ? 0 : (cursor - (reader.hasBytesLeft() ? 0 : 1)));
           const bytes = reader.getBuffer().toString("hex").replace(/(.{2}(?!$))/g, "$1 ");
 
-          splat[i] = `[MessageReader (${cursor} / ${position}) ${bytes.substring(0, position)}~${bytes.substring(position)}]`;
+          splat[i] = `[MessageReader ${bytes.substring(0, position)}~${bytes.substring(position)}]`;
         } else if (item instanceof MessageWriter) {
           const writer = item as MessageWriter;
 
