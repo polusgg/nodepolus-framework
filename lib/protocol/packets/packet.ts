@@ -42,7 +42,7 @@ export class Packet {
 
   static deserialize(reader: MessageReader, clientBound: boolean, level?: Level): Packet {
     if (!reader.hasBytesLeft()) {
-      return new Packet(undefined, new RootPacket([]));
+      throw new Error("Attempted to deserialize a packet with no data");
     }
 
     const type = reader.readByte();

@@ -55,6 +55,10 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     super();
 
     this.on("message", reader => {
+      if (!reader.hasBytesLeft()) {
+        return;
+      }
+
       const parsed = Packet.deserialize(reader, packetDestination == PacketDestination.Server, this.lobby?.getLevel());
 
       if (parsed.isReliable()) {
