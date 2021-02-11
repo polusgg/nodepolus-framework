@@ -64,8 +64,16 @@ export class InternalPlayer implements PlayerInstance {
     return key === undefined ? this.metadata : this.metadata.get(key);
   }
 
-  setMeta(key: string, value: unknown): void {
-    this.metadata.set(key, value);
+  setMeta(pair: Record<string, unknown>): void;
+  setMeta(key: string, value: unknown): void;
+  setMeta(key: string | Record<string, unknown>, value?: unknown): void {
+    if (typeof key === "string") {
+      this.metadata.set(key, value);
+    } else {
+      for (const [k, v] of Object.entries(key)) {
+        this.metadata.set(k, v);
+      }
+    }
   }
 
   deleteMeta(key: string): void {

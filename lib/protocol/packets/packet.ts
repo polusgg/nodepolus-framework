@@ -41,6 +41,10 @@ export class Packet {
   }
 
   static deserialize(reader: MessageReader, clientBound: boolean, level?: Level): Packet {
+    if (!reader.hasBytesLeft()) {
+      return new Packet(undefined, new RootPacket([]));
+    }
+
     const type = reader.readByte();
     let data: PacketDataType;
     let nonce: number | undefined;

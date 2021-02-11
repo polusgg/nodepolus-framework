@@ -1,3 +1,4 @@
+import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { Connection } from "../protocol/connection";
 import { TextComponent } from "../api/text";
 import { InternalPlayer } from "../player";
@@ -56,20 +57,31 @@ const prettyPrint = winston.format((info: winston.Logform.TransformableInfo, _op
         splat[i] = "Function";
         break;
       case "object":
-        if (item instanceof Connection) {
-          const c = item as Connection;
+        if (item instanceof MessageReader) {
+          const reader = item as MessageReader;
+          const cursor = reader.getCursor();
+          const position = (cursor * 2) + (cursor < 2 ? 0 : (cursor - (reader.hasBytesLeft() ? 0 : 1)));
+          const bytes = reader.getBuffer().toString("hex").replace(/(.{2}(?!$))/g, "$1 ");
 
-          splat[i] = `${c.id} (${c.getConnectionInfo().toString()})`;
+          splat[i] = `[MessageReader (${cursor} / ${position}) ${bytes.substring(0, position)}~${bytes.substring(position)}]`;
+        } else if (item instanceof MessageWriter) {
+          const writer = item as MessageWriter;
+
+          splat[i] = `[MessageWriter ${writer.getBuffer().toString("hex").replace(/(.{2}(?!$))/g, "$1 ")}]`;
+        } else if (item instanceof Connection) {
+          const connection = item as Connection;
+
+          splat[i] = `${connection.id} (${connection.getConnectionInfo().toString()})`;
         } else if (item instanceof InternalPlayer) {
-          const p = item as InternalPlayer;
+          const player = item as InternalPlayer;
 
-          splat[i] = `${p.getName().toString()} (${p.getId()})`;
+          splat[i] = `${player.getName().toString()} (${player.getId()})`;
         } else if (item instanceof InternalLobby) {
           splat[i] = (item as InternalLobby).getCode();
         } else if (item instanceof Vector2) {
-          const v = item as Vector2;
+          const vector = item as Vector2;
 
-          splat[i] = `[x=${v.getX()}, y=${v.getY()}]`;
+          splat[i] = `[x=${vector.getX()}, y=${vector.getY()}]`;
         } else if (item instanceof TextComponent) {
           splat[i] = (item as TextComponent).toString();
         }

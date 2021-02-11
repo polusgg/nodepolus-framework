@@ -130,12 +130,25 @@ export interface LobbyInstance {
   getMeta(key?: string): Map<string, unknown> | unknown;
 
   /**
+   * Sets the metadata for the given key-value pairs.
+   *
+   * @param pair The key-value metadata pairs to be set
+   */
+  setMeta(pair: Record<string, unknown>): void;
+  /**
    * Sets the metadata for the given key.
    *
    * @param key The key whose metadata will be set
    * @param value The metadata to be set
    */
   setMeta(key: string, value: unknown): void;
+  /**
+   * Sets the metadata for the given key or key-value pairs.
+   *
+   * @param key The key whose metadata will be set, or the key-value metadata pairs to be set
+   * @param value The metadata to be set if `key` is a `string`
+   */
+  setMeta(key: string | Record<string, unknown>, value?: unknown): void;
 
   /**
    * Deletes the metadata for the given key.

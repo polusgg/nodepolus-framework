@@ -70,6 +70,13 @@ export abstract class HazelMessage {
   getBuffer(): Buffer {
     return this.buffer;
   }
+
+  /**
+   * Gets the position of the cursor.
+   */
+  getCursor(): number {
+    return this.cursor;
+  }
 }
 
 /**
@@ -776,5 +783,45 @@ export class MessageReader extends HazelMessage {
     }
 
     return items;
+  }
+
+  /**
+   * Gets the numeric value of the byte at the given position without advancing
+   * the cursor.
+   *
+   * @param position The position of the byte to peek at
+   */
+  peek(position: number): number;
+  /**
+   * Gets the numeric value of the given amount of bytes at the given position
+   * without advancing the cursor.
+   *
+   * @param position The starting position of the sbyte to peek at
+   * @param length The amount of bytes to peek at
+   */
+  peek(position: number, length: number): number[];
+  /**
+   * Gets the numeric value of the given amount of bytes at the given position,
+   * or the numeric value of the byte at the given position, without advancing
+   * the cursor.
+   *
+   * @param position The starting position of the sbyte to peek at
+   * @param length The amount of bytes to peek at, or `undefined` to only peet at one byte
+   * @returns The byte, or bytes if `length` is not `undefined`, being peeked at
+   */
+  peek(position: number, length?: number): number | number[] {
+    if (position >= this.length) {
+      throw new Error(`Peek position is longer than message length: ${position} > ${this.length}`);
+    }
+
+    if (length === undefined) {
+      return [...this.getBuffer()][position];
+    }
+
+    if (position + length >= this.length) {
+      throw new Error(`Peek length is longer than message length: ${position + length} > ${this.length}`);
+    }
+
+    return [...this.getBuffer()].slice(position, position + length);
   }
 }

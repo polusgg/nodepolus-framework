@@ -1,3 +1,4 @@
+import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, OutboundPacketTransformer } from "../types";
 import { PlayerBannedEvent, PlayerKickedEvent, PlayerLeftEvent } from "../api/events/player";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
 import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
@@ -5,8 +6,8 @@ import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
 import { DisconnectReasonType, FakeClientId } from "../types/enums";
 import { BasicServerEvents, ServerEvents } from "../api/events";
 import { DEFAULT_CONFIG, MaxValue } from "../util/constants";
-import { ConnectionInfo, DisconnectReason } from "../types";
 import { RootPacket } from "../protocol/packets/hazel";
+import { MessageReader } from "../util/hazelMessage";
 import { Connection } from "../protocol/connection";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
@@ -44,6 +45,8 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   // Reserve the fake client IDs
   private connectionIndex = Object.keys(FakeClientId).length / 2;
   private listening = false;
+  private inboundPacketTransformer?: InboundPacketTransformer;
+  private outboundPacketTransformer?: OutboundPacketTransformer;
 
   /**
    * @param config The server configuration
@@ -61,12 +64,18 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
       this.config.logging?.maxFiles ?? DEFAULT_CONFIG.logging.maxFiles,
     );
 
-    this.serverSocket.on("message", (buf, remoteInfo) => {
+    this.serverSocket.on("message", (buffer, remoteInfo) => {
       if (!this.listening) {
         return;
       }
 
-      this.getConnection(ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`)).emit("message", buf);
+      const connection = this.getConnection(ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`));
+      const reader = MessageReader.fromRawBytes(buffer);
+
+      connection.emit(
+        "message",
+        this.inboundPacketTransformer !== undefined ? this.inboundPacketTransformer(connection, reader) : reader,
+      );
     });
 
     this.serverSocket.on("error", error => {
@@ -76,6 +85,38 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     if (this.getMaxPlayersPerLobby() > 10) {
       this.logger.warn("Lobbies with more than 10 players is experimental");
     }
+  }
+
+  /**
+   * Gets the function used to transform incoming packets.
+   */
+  getInboundPacketTransformer(): InboundPacketTransformer | undefined {
+    return this.inboundPacketTransformer;
+  }
+
+  /**
+   * Sets the function used to transform incoming packets.
+   *
+   * @param inboundPacketTransformer The function used to transform incoming packets
+   */
+  setInboundPacketTransformer(inboundPacketTransformer: InboundPacketTransformer): void {
+    this.inboundPacketTransformer = inboundPacketTransformer;
+  }
+
+  /**
+   * Gets the function used to transform outgoing packets.
+   */
+  getOutboundPacketTransformer(): OutboundPacketTransformer | undefined {
+    return this.outboundPacketTransformer;
+  }
+
+  /**
+   * Sets the function used to transform outgoing packets.
+   *
+   * @param inboundPacketTransformer The function used to transform outgoing packets
+   */
+  setOutboundPacketTransformer(outboundPacketTransformer: OutboundPacketTransformer): void {
+    this.outboundPacketTransformer = outboundPacketTransformer;
   }
 
   /**
@@ -356,7 +397,12 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @returns A new connection described by `connectionInfo`
    */
   private initializeConnection(connectionInfo: ConnectionInfo): Connection {
-    const newConnection = new Connection(connectionInfo, this.serverSocket, PacketDestination.Client);
+    const newConnection = new Connection(
+      connectionInfo,
+      this.serverSocket,
+      PacketDestination.Client,
+      (): OutboundPacketTransformer | undefined => this.getOutboundPacketTransformer(),
+    );
 
     newConnection.id = this.getNextConnectionId();
 

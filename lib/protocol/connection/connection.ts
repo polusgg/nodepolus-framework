@@ -1,10 +1,10 @@
-import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, NetworkAccessible } from "../../types";
+import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, NetworkAccessible, OutboundPacketTransformer } from "../../types";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { BaseRootPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
 import { PacketDestination, HazelPacketType } from "../packets/types/enums";
-import { MessageReader, MessageWriter } from "../../util/hazelMessage";
 import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
+import { MessageWriter } from "../../util/hazelMessage";
 import { PlayerInstance } from "../../api/player";
 import { AwaitingPacket } from "../packets/types";
 import { LimboState } from "../../types/enums";
@@ -43,17 +43,19 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * @param connectionInfo The ConnectionInfo describing the connection
    * @param socket The underlying socket for the connection
-   * @param bound The destination type
+   * @param packetDestination The destination type for packets sent from the connection
+   * @param outboundPacketTransformerSupplier The supplier for the function used to transform outgoing packets
    */
   constructor(
     private readonly connectionInfo: ConnectionInfo,
-    public socket: dgram.Socket,
-    public bound: PacketDestination,
+    private readonly socket: dgram.Socket,
+    private readonly packetDestination: PacketDestination,
+    private readonly outboundPacketTransformerSupplier?: () => OutboundPacketTransformer | undefined,
   ) {
     super();
 
-    this.on("message", buf => {
-      const parsed = Packet.deserialize(MessageReader.fromRawBytes(buf), bound == PacketDestination.Server, this.lobby?.getLevel());
+    this.on("message", reader => {
+      const parsed = Packet.deserialize(reader, packetDestination == PacketDestination.Server, this.lobby?.getLevel());
 
       if (parsed.isReliable()) {
         this.acknowledgePacket(parsed.nonce!);
@@ -111,6 +113,13 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   }
 
   /**
+   * Gets the destination type for packets sent from the connection.
+   */
+  getPacketDestination(): PacketDestination {
+    return this.packetDestination;
+  }
+
+  /**
    * Gets the version of Hazel that the connection is using.
    */
   getHazelVersion(): number | undefined {
@@ -163,13 +172,32 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   }
 
   /**
+   * Sets the metadata for the given key-value pairs.
+   *
+   * @param pair The key-value metadata pairs to be set
+   */
+  setMeta(pair: Record<string, unknown>): void;
+  /**
    * Sets the metadata for the given key.
    *
    * @param key The key whose metadata will be set
    * @param value The metadata to be set
    */
-  setMeta(key: string, value: unknown): void {
-    this.metadata.set(key, value);
+  setMeta(key: string, value: unknown): void;
+  /**
+   * Sets the metadata for the given key or key-value pairs.
+   *
+   * @param key The key whose metadata will be set, or the key-value metadata pairs to be set
+   * @param value The metadata to be set if `key` is a `string`
+   */
+  setMeta(key: string | Record<string, unknown>, value?: unknown): void {
+    if (typeof key === "string") {
+      this.metadata.set(key, value);
+    } else {
+      for (const [k, v] of Object.entries(key)) {
+        this.metadata.set(k, v);
+      }
+    }
   }
 
   /**
@@ -386,7 +414,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
               reject(new Error(`Connection ${this.id} did not acknowledge packet ${nonce} after 10 attempts`));
             } else {
-              this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
+              this.send(packetToSend.getBuffer());
             }
           } else {
             clearInterval(resendInterval);
@@ -394,7 +422,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
         }, 1000);
       }
 
-      this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
+      this.send(packetToSend.getBuffer());
 
       if (reliable) {
         this.packetBuffer = [];
@@ -414,7 +442,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
     const packetToSend: MessageWriter = new Packet(undefined, new DisconnectPacket(true, reason)).serialize();
 
-    this.socket.send(packetToSend.getBuffer(), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
+    this.send(packetToSend.getBuffer());
 
     this.disconnectTimeout = setTimeout(() => this.cleanup(reason), 6000);
   }
@@ -540,11 +568,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * @param nonce The ID of the packet being acknowledged
    */
   private acknowledgePacket(nonce: number): void {
-    this.socket.send(
-      new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))).serialize().getBuffer(),
-      this.connectionInfo.getPort(),
-      this.connectionInfo.getAddress(),
-    );
+    this.send(new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))).serialize().getBuffer());
 
     const resolveFunArr = this.acknowledgementResolveMap.get(nonce);
 
@@ -600,7 +624,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    */
   private handleDisconnect(reason?: DisconnectReason): void {
     if (!this.requestedDisconnect) {
-      this.socket.send(Buffer.from([HazelPacketType.Disconnect]), this.connectionInfo.getPort(), this.connectionInfo.getAddress());
+      this.send(Buffer.from([HazelPacketType.Disconnect]));
     }
 
     this.cleanup(reason);
@@ -622,5 +646,22 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     }
 
     this.emit("disconnected", reason);
+  }
+
+  /**
+   * Sends the given byte buffer over the socket.
+   *
+   * @param buffer The byte buffer to send over the socket
+   */
+  private send(buffer: Buffer): void {
+    const outboundPacketTransformer = this.outboundPacketTransformerSupplier !== undefined
+      ? this.outboundPacketTransformerSupplier()
+      : undefined;
+
+    if (outboundPacketTransformer !== undefined) {
+      buffer = outboundPacketTransformer(this, new MessageWriter(buffer)).getBuffer();
+    }
+
+    this.socket.send(buffer, this.connectionInfo.getPort(), this.connectionInfo.getAddress());
   }
 }

@@ -582,3 +582,17 @@ test("throws an error when reading more bytes than are avaialble", t => {
   t.is(buf.readBytes(4).getBuffer().toString("hex"), "02030405");
   t.false(buf.hasBytesLeft());
 });
+
+test("peeks at a single byte", t => {
+  const buf = MessageReader.fromRawBytes("0102030405");
+
+  t.is(buf.peek(1), 2);
+  t.is(buf.getCursor(), 0);
+});
+
+test("peeks at multiple bytes", t => {
+  const buf = MessageReader.fromRawBytes("0102030405");
+
+  t.deepEqual(buf.peek(1, 3), [2, 3, 4]);
+  t.is(buf.getCursor(), 0);
+});
