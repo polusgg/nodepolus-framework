@@ -49,7 +49,11 @@ type User = {
 };
 
 // DEBUG
-const usersDatabase: Map<string, User> = new Map([
+const AUTHENTICATION_BYTE = 0x69;
+const CLIENT_ID_BYTE_LENGTH = 16;
+const HASH_BYTE_LENGTH = 20;
+const AUTHENTICATION_HEADER_LENGTH = 1 + CLIENT_ID_BYTE_LENGTH + HASH_BYTE_LENGTH;
+const USERS: Map<string, User> = new Map([
   [
     "ec4435dfe404482b8e8a0946e12a9f9a",
     {
@@ -82,19 +86,30 @@ export default class extends BasePlugin {
 
     /**
      * Sets the inbound packet transformer to one that authenticates packets
-     * prefixed with a marker byte (0x69), client ID, and packet HMAC.
+     * prefixed with a marker byte, client ID, and packet HMAC.
      */
     server.setInboundPacketTransformer((connection: Connection, reader: MessageReader): MessageReader => {
-      if (reader.peek(0) != 0x69) {
+      if (reader.peek(0) != AUTHENTICATION_BYTE) {
         connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("This server does not supported unauthenticated packets"))]);
 
         return new MessageReader();
       }
 
+      if (reader.getLength() < AUTHENTICATION_HEADER_LENGTH) {
+        connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("Invalid packet length"))]);
+
+        return new MessageReader();
+      }
+
+      if (reader.getLength() == AUTHENTICATION_HEADER_LENGTH) {
+        // Short circuit since the packet has no body
+        return new MessageReader();
+      }
+
       reader.readByte();
 
-      const clientId = reader.readBytes(16).getBuffer().toString("hex");
-      const user = usersDatabase.get(clientId);
+      const clientId = reader.readBytes(CLIENT_ID_BYTE_LENGTH).getBuffer().toString("hex");
+      const user = USERS.get(clientId);
 
       if (user === undefined) {
         connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("Unknown user"))]);
@@ -102,7 +117,7 @@ export default class extends BasePlugin {
         return new MessageReader();
       }
 
-      const hash = reader.readBytes(20).getBuffer().toString("hex");
+      const hash = reader.readBytes(HASH_BYTE_LENGTH).getBuffer().toString("hex");
       const message = reader.readRemainingBytes();
 
       if (!Hmac.verify(message.getBuffer().toString("hex"), hash, user.token)) {
@@ -121,7 +136,11 @@ export default class extends BasePlugin {
         connection.setMeta({ clientId });
       }
 
-      // Set other meta like purchases, display name, friends, etc
+      // Set other meta like purchases, display name, friends, etc:
+      // connection.setMeta({
+      //   friends: db.getFriends(clientId),
+      //   purchases: db.getPurchases(clientId),
+      // });
 
       this.getLogger().info("Authenticated packet from %s on connection %s: %s", user.name, connection, message);
 
@@ -234,7 +253,7 @@ export default class extends BasePlugin {
       0x01, 0x00, 0x07, 0x06, 0x00, 0x40, 0x05, 0x68, 0x65, 0x6c, 0x6c, 0x6f,
     ]));
 
-    const user = [...usersDatabase.entries()][0];
+    const user = [...USERS.entries()][0];
     const message = MessageReader.fromRawBytes([
       0x01, 0x00, 0x07, 0x06, 0x00, 0x40, 0x05, 0x68, 0x65, 0x6c, 0x6c, 0x6f,
     ]);
