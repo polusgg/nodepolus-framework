@@ -6,8 +6,8 @@ import { Connection } from "../../../protocol/connection";
  */
 export class ServerPacketCustomEvent {
   /**
-   * @param connection The connection that sent the packet
-   * @param packet The packet that was sent
+   * @param connection - The connection that sent the packet
+   * @param packet - The packet that was sent
    */
   constructor(
     private readonly connection: Connection,

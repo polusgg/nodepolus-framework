@@ -7,8 +7,8 @@ import { DisconnectReason } from "../../../types";
  */
 export class ConnectionClosedEvent {
   /**
-   * @param connection The connection that was closed
-   * @param reason The reason for why the connection was closed (default `ExitGame`)
+   * @param connection - The connection that was closed
+   * @param reason - The reason for why the connection was closed (default `ExitGame`)
    */
   constructor(
     private readonly connection: Connection,

@@ -8,10 +8,10 @@ import { Game } from "../../game";
  */
 export class MeetingClosedEvent extends CancellableEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param votes The final votes from the meeting
-   * @param tie `true` if the voting phase of the meeting ended in a tie, `false` if not
-   * @param exiledPlayer The player that was exiled as a result of the final votes
+   * @param game - The game from which this event was fired
+   * @param votes - The final votes from the meeting
+   * @param tie - `true` if the voting phase of the meeting ended in a tie, `false` if not
+   * @param exiledPlayer - The player that was exiled as a result of the final votes
    */
   constructor(
     private readonly game: Game,

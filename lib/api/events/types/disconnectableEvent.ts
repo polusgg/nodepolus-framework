@@ -9,7 +9,7 @@ export abstract class DisconnectableEvent extends CancellableEvent {
   private disconnectReason?: DisconnectReason;
 
   /**
-   * @param defaultDisconnectReason The default disconnect reason to be sent to the connection.
+   * @param defaultDisconnectReason - The default disconnect reason to be sent to the connection.
    */
   constructor(
     private readonly defaultDisconnectReason: DisconnectReason,
@@ -36,7 +36,7 @@ export abstract class DisconnectableEvent extends CancellableEvent {
   /**
    * Sets the disconnect reason to be sent to the connection.
    *
-   * @param disconnectReason The new disconnect reason to be sent to the conection
+   * @param disconnectReason - The new disconnect reason to be sent to the conection
    */
   setDisconnectReason(disconnectReason: DisconnectReason): this {
     this.disconnectReason = disconnectReason;

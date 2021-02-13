@@ -7,10 +7,10 @@ import { Game } from "../../game";
  */
 export class RoomElectricalInteractedEvent extends CancellableEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param index The switch that was flipped
-   * @param flipped `true` if the switch is flipped up, `false` if the switch is flipped down
-   * @param player The player that flipped the switch
+   * @param game - The game from which this event was fired
+   * @param index - The switch that was flipped
+   * @param flipped - `true` if the switch is flipped up, `false` if the switch is flipped down
+   * @param player - The player that flipped the switch
    */
   constructor(
     private readonly game: Game,
@@ -47,7 +47,7 @@ export class RoomElectricalInteractedEvent extends CancellableEvent {
   /**
    * Sets whether or not the switch is flipped up.
    *
-   * @param flipped `true` for flipped up, `false` for down
+   * @param flipped - `true` for flipped up, `false` for down
    */
   setFlipped(flipped: boolean): void {
     this.flipped = flipped;

@@ -6,7 +6,7 @@ import { bitsInNumber, notUndefined } from "../util/functions";
  */
 export class Bitfield {
   /**
-   * @param bits The underlying boolean array representing each bit's state
+   * @param bits - The underlying boolean array representing each bit's state
    */
   constructor(
     private bits: boolean[],
@@ -17,8 +17,8 @@ export class Bitfield {
    * `size` will be inferred if omitted, though it may be faster to provide it
    * if it's value is known.
    *
-   * @param value The number to be converted into a Bitfield
-   * @param size The number of bits to be stored in the Bitfield
+   * @param value - The number to be converted into a Bitfield
+   * @param size - The number of bits to be stored in the Bitfield
    * @returns A new bitfield from `value` with all bits set accordingly
    */
   static fromNumber(value: number, size?: number): Bitfield {
@@ -48,7 +48,7 @@ export class Bitfield {
   /**
    * Gets whether or not the Bitfield is equal to the given Bitfield.
    *
-   * @param other The Bitfield to be checked against
+   * @param other - The Bitfield to be checked against
    * @returns `true` if the Bitfield is the same as `other`, `false` if not
    */
   equals(other: Bitfield): boolean {
@@ -99,8 +99,8 @@ export class Bitfield {
    * bits.asNumbers<Color>() === [Red, Blue, Green, Purple, Black];
    * ```
    *
-   * @typeParam T The type of numbers that will be returned
-   * @param modifier The value that will be added to each item in the resulting array (default `0`)
+   * @typeParam T - The type of numbers that will be returned
+   * @param modifier - The value that will be added to each item in the resulting array (default `0`)
    * @returns An array of all indices whose bit is set in the Bitfield, with `modifier` added to each index
    */
   asNumbers<T extends number>(modifier: number = 0): T[] {
@@ -112,7 +112,7 @@ export class Bitfield {
   /**
    * Gets whether or not the given bit is set.
    *
-   * @param bit The bit to check
+   * @param bit - The bit to check
    * @returns `true` if the bit at position `bit` is `true`, `false` if not
    */
   has(bit: number): boolean {
@@ -122,7 +122,7 @@ export class Bitfield {
   /**
    * Gets whether or not any of the given bits are set.
    *
-   * @param bits The bits to check
+   * @param bits - The bits to check
    * @returns `true` if at least one bit from `bits` is set, `false` if not
    */
   any(bits: number[]): boolean {
@@ -132,7 +132,7 @@ export class Bitfield {
   /**
    * Gets whether or not all of the given bits are set.
    *
-   * @param bits The bits to check
+   * @param bits - The bits to check
    * @returns `true` if every bit from `bits` is set, `false` if not
    */
   all(bits: number[]): boolean {
@@ -142,7 +142,7 @@ export class Bitfield {
   /**
    * Sets the given bit.
    *
-   * @param bit The bit whose state will be set to `true`
+   * @param bit - The bit whose state will be set to `true`
    */
   set(bit: number): this {
     this.bits[bit] = true;
@@ -153,7 +153,7 @@ export class Bitfield {
   /**
    * Unsets the given bit.
    *
-   * @param bit The bit whose state will be set to `false`
+   * @param bit - The bit whose state will be set to `false`
    */
   unset(bit: number): this {
     this.bits[bit] = false;
@@ -164,7 +164,7 @@ export class Bitfield {
   /**
    * Toggles the given bit.
    *
-   * @param bit The bit whose state will be inverted
+   * @param bit - The bit whose state will be inverted
    */
   toggle(bit: number): this {
     this.bits[bit] = !this.bits[bit];
@@ -175,8 +175,8 @@ export class Bitfield {
   /**
    * Sets the given bit to the given state.
    *
-   * @param bit The bit whose state will be updated
-   * @param state The new state of the bit
+   * @param bit - The bit whose state will be updated
+   * @param state - The new state of the bit
    */
   update(bit: number, state: boolean): this {
     this.bits[bit] = state;

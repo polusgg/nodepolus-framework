@@ -6,7 +6,7 @@ import { Game } from "../../game";
  */
 export class GameStartingEvent extends CancellableEvent {
   /**
-   * @param game The game that is starting
+   * @param game - The game that is starting
    */
   constructor(
     private readonly game: Game,

@@ -6,8 +6,8 @@ import { Game } from "../../game";
  */
 export class RoomOxygenConsoleClearedEvent extends CancellableEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param console The oxygen console that was reset
+   * @param game - The game from which this event was fired
+   * @param console - The oxygen console that was reset
    */
   constructor(
     private readonly game: Game,

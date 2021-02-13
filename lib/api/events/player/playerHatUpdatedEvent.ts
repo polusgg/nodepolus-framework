@@ -7,9 +7,9 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerHatUpdatedEvent extends CancellableEvent {
   /**
-   * @param player The player whose hat was updated
-   * @param oldHat The player's old hat
-   * @param newHat The player's new hat
+   * @param player - The player whose hat was updated
+   * @param oldHat - The player's old hat
+   * @param newHat - The player's new hat
    */
   constructor(
     private readonly player: PlayerInstance,
@@ -43,7 +43,7 @@ export class PlayerHatUpdatedEvent extends CancellableEvent {
   /**
    * Sets the player's new hat.
    *
-   * @param newHat The player's new hat
+   * @param newHat - The player's new hat
    */
   setNewHat(newHat: PlayerHat): void {
     this.newHat = newHat;

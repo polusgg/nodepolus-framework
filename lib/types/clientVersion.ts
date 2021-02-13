@@ -3,10 +3,10 @@
  */
 export class ClientVersion {
   /**
-   * @param year The version's year part
-   * @param month The version's month part
-   * @param day The version's day part
-   * @param revision The version's revision part
+   * @param year - The version's year part
+   * @param month - The version's month part
+   * @param day - The version's day part
+   * @param revision - The version's revision part
    */
   constructor(
     private readonly year: number,
@@ -18,7 +18,7 @@ export class ClientVersion {
   /**
    * Gets a new ClientVersion by decoding the given encoded integer value.
    *
-   * @param version The encoded integer value
+   * @param version - The encoded integer value
    */
   static decode(version: number): ClientVersion {
     return new ClientVersion(
@@ -68,7 +68,7 @@ export class ClientVersion {
    * Gets whether or not the ClientVersion is equal to the given ClientVersion
    * by comparing each property.
    *
-   * @param other The ClientVersion to be checked against
+   * @param other - The ClientVersion to be checked against
    * @returns `true` if the two are equal, `false` if not
    */
   equals(other: ClientVersion): boolean {

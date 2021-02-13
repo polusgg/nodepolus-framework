@@ -72,7 +72,7 @@ export class DoorNames {
   /**
    * Gets the display names for the doors on the given level.
    *
-   * @param level The level whose door display names should be returned
+   * @param level - The level whose door display names should be returned
    */
   static forLevel(level: Level): readonly string[] {
     switch (level) {

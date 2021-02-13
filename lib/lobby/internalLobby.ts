@@ -352,7 +352,7 @@ export class InternalLobby implements LobbyInstance {
    * Sets the lobby's raw settings.
    *
    * @internal
-   * @param options The lobby's new raw settings
+   * @param options - The lobby's new raw settings
    */
   setOptions(options: GameOptionsData): void {
     this.options = options;
@@ -548,7 +548,7 @@ export class InternalLobby implements LobbyInstance {
    * spawned.
    *
    * @internal
-   * @param connection The connection to be marked as spawned
+   * @param connection - The connection to be marked as spawned
    */
   async finishedSpawningPlayer(connection: Connection): Promise<void> {
     this.spawningPlayers.delete(connection);
@@ -569,7 +569,7 @@ export class InternalLobby implements LobbyInstance {
    * characters are currently being spawned.
    *
    * @internal
-   * @param connection The connection to be marked as spawning
+   * @param connection - The connection to be marked as spawning
    */
   startedSpawningPlayer(connection: Connection): void {
     this.spawningPlayers.add(connection);
@@ -579,7 +579,7 @@ export class InternalLobby implements LobbyInstance {
    * Temporarily removes the acting host status from all acting hosts.
    *
    * @internal
-   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
+   * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   disableActingHosts(sendImmediately: boolean = true): void {
     const actingHosts = this.getActingHosts();
@@ -595,7 +595,7 @@ export class InternalLobby implements LobbyInstance {
    * Reapplies the acting host status to all acting hosts.
    *
    * @internal
-   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
+   * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   enableActingHosts(sendImmediately: boolean = true): void {
     const actingHosts = this.getActingHosts();
@@ -611,8 +611,8 @@ export class InternalLobby implements LobbyInstance {
    * Updates the client for the given connection to enable host abilities.
    *
    * @internal
-   * @param connection The connection whose host abilities will be enabled
-   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
+   * @param connection - The connection whose host abilities will be enabled
+   * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   sendEnableHost(connection: Connection, sendImmediately: boolean = true): void {
     if (sendImmediately) {
@@ -626,8 +626,8 @@ export class InternalLobby implements LobbyInstance {
    * Updates the client for the given connection to disable host abilities.
    *
    * @internal
-   * @param connection The connection whose host abilities will be disabled
-   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
+   * @param connection - The connection whose host abilities will be disabled
+   * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   sendDisableHost(connection: Connection, sendImmediately: boolean = true): void {
     if (sendImmediately) {
@@ -641,8 +641,8 @@ export class InternalLobby implements LobbyInstance {
    * Sends the given packet as a reliable packet to the given connections.
    *
    * @internal
-   * @param packet The packet to be sent
-   * @param sendTo The connections to which the packet will be send (default `this.connections`)
+   * @param packet - The packet to be sent
+   * @param sendTo - The connections to which the packet will be send (default `this.connections`)
    */
   async sendRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): Promise<PromiseSettledResult<void>[]> {
     const promiseArray: Promise<void>[] = [];
@@ -658,8 +658,8 @@ export class InternalLobby implements LobbyInstance {
    * Sends the given packet as an unreliable packet to the given connections.
    *
    * @internal
-   * @param packet The packet to be sent
-   * @param sendTo The connections to which the packet will be send (default `this.connections`)
+   * @param packet - The packet to be sent
+   * @param sendTo - The connections to which the packet will be send (default `this.connections`)
    */
   sendUnreliableRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): void {
     for (let i = 0; i < sendTo.length; i++) {
@@ -671,8 +671,8 @@ export class InternalLobby implements LobbyInstance {
    * Removes the given connection from the lobby and migrates hosts.
    *
    * @internal
-   * @param connection The connection that was disconnected
-   * @param reason The reason for why the connection was disconnected
+   * @param connection - The connection that was disconnected
+   * @param reason - The reason for why the connection was disconnected
    */
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
     this.hostInstance.handleDisconnect(connection, reason);
@@ -777,7 +777,7 @@ export class InternalLobby implements LobbyInstance {
    * Adds the given connection to the lobby.
    *
    * @internal
-   * @param connection The connection that is joining the lobby
+   * @param connection - The connection that is joining the lobby
    */
   async handleJoin(connection: Connection): Promise<void> {
     this.getLogger().verbose("Connection %s joining", connection);
@@ -838,8 +838,8 @@ export class InternalLobby implements LobbyInstance {
    * Called when the lobby receives a packet from a connection.
    *
    * @internal
-   * @param packet The packet that was sent to the lobby
-   * @param sender The connection that sent the packet
+   * @param packet - The packet that was sent to the lobby
+   * @param sender - The connection that sent the packet
    */
   private handlePacket(packet: BaseRootPacket, sender: Connection): void {
     switch (packet.type) {
@@ -914,9 +914,9 @@ export class InternalLobby implements LobbyInstance {
    * Called when the lobby receives a GameData packet from a connection.
    *
    * @internal
-   * @param packet The packet that was sent to the lobby
-   * @param sender The connection that sent the packet
-   * @param sendTo The connections to which the packet was intended to be sent
+   * @param packet - The packet that was sent to the lobby
+   * @param sender - The connection that sent the packet
+   * @param sendTo - The connections to which the packet was intended to be sent
    */
   private handleGameDataPacket(packet: BaseGameDataPacket, sender: Connection, sendTo?: Connection[]): void {
     sendTo = ((sendTo && sendTo.length > 0) ? sendTo : this.connections).filter(c => c.id != sender.id);
@@ -981,9 +981,9 @@ export class InternalLobby implements LobbyInstance {
   /**
    * Called when the lobby receives a Data packet from a connection.
    *
-   * @param netId The net ID of the InnerNetObject that sent the packet
-   * @param data The packet's data
-   * @param sendTo The connections to which the packet was intended to be sent
+   * @param netId - The net ID of the InnerNetObject that sent the packet
+   * @param data - The packet's data
+   * @param sendTo - The connections to which the packet was intended to be sent
    */
   private handleData(netId: number, data: MessageReader | MessageWriter, sendTo?: Connection[]): void {
     const netObject = this.findInnerNetObject(netId);
@@ -1007,7 +1007,7 @@ export class InternalLobby implements LobbyInstance {
    * Spawns a player for the given connection.
    *
    * @internal
-   * @param connection The connection that joined the lobby
+   * @param connection - The connection that joined the lobby
    */
   private handleNewJoin(connection: Connection): void {
     if (this.connections.indexOf(connection) == -1) {
@@ -1032,7 +1032,7 @@ export class InternalLobby implements LobbyInstance {
    * Disconnects players from the lobby if they took to long to rejoin.
    *
    * @internal
-   * @param connection The connection that rejoined the lobby
+   * @param connection - The connection that rejoined the lobby
    */
   private handleRejoin(connection: Connection): void {
     if (connection.lobby?.code != this.code) {
@@ -1044,7 +1044,7 @@ export class InternalLobby implements LobbyInstance {
    * Assigns a new acting host when an acting host leaves the lobby.
    *
    * @internal
-   * @param oldHost The connection that is no longer an acting host
+   * @param oldHost - The connection that is no longer an acting host
    */
   private async migrateHost(oldHost: Connection): Promise<void> {
     const event = new LobbyHostMigratedEvent(this, oldHost, this.connections[0]);
@@ -1063,7 +1063,7 @@ export class InternalLobby implements LobbyInstance {
    * another connection joins the lobby.
    *
    * @internal
-   * @param connection The connection that joined the lobby
+   * @param connection - The connection that joined the lobby
    */
   private broadcastJoinMessage(connection: Connection): void {
     this.sendRootGamePacket(
@@ -1082,7 +1082,7 @@ export class InternalLobby implements LobbyInstance {
    * Sends a JoinedGame packet to the given connection.
    *
    * @internal
-   * @param connection The connection that joined the lobby
+   * @param connection - The connection that joined the lobby
    */
   private sendJoinedMessage(connection: Connection): void {
     connection.sendReliable([

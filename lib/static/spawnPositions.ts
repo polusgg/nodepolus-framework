@@ -98,7 +98,7 @@ export class SpawnPositions {
   /**
    * Gets the spawn center positions for the given level.
    *
-   * @param level The level whose spawn center positions should be returned
+   * @param level - The level whose spawn center positions should be returned
    */
   static forLevel(level: Level): Readonly<LevelSpawnPositions> {
     switch (level) {
@@ -117,7 +117,7 @@ export class SpawnPositions {
   /**
    * Gets a spawn position in the Dropship for a player with the given ID.
    *
-   * @param playerId The ID of the player used as a chair index
+   * @param playerId - The ID of the player used as a chair index
    */
   static forPlayerInDropship(playerId: number): Vector2 {
     return SPAWN_POSITIONS_DROPSHIP[playerId % SPAWN_POSITIONS_DROPSHIP.length];
@@ -126,9 +126,9 @@ export class SpawnPositions {
   /**
    * Gets a spawn position on The Skeld for a player with the given ID.
    *
-   * @param playerId The ID of the player used as a rotation index
-   * @param playerCount The number of players in the game
-   * @param isSpawn `true` if the position is for the initial spawn position, `false` if it is for a meeting position
+   * @param playerId - The ID of the player used as a rotation index
+   * @param playerCount - The number of players in the game
+   * @param isSpawn - `true` if the position is for the initial spawn position, `false` if it is for a meeting position
    */
   static forPlayerOnSkeld(playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
     return SpawnPositions.forPlayerOnLevel(Level.TheSkeld, playerId, playerCount, isSpawn);
@@ -137,9 +137,9 @@ export class SpawnPositions {
   /**
    * Gets a spawn position on MIRA HQ for a player with the given ID.
    *
-   * @param playerId The ID of the player used as a rotation index
-   * @param playerCount The number of players in the game
-   * @param isSpawn `true` if the position is for the initial spawn position, `false` if it is for a meeting position
+   * @param playerId - The ID of the player used as a rotation index
+   * @param playerCount - The number of players in the game
+   * @param isSpawn - `true` if the position is for the initial spawn position, `false` if it is for a meeting position
    */
   static forPlayerOnMiraHq(playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
     return SpawnPositions.forPlayerOnLevel(Level.MiraHq, playerId, playerCount, isSpawn);
@@ -148,9 +148,9 @@ export class SpawnPositions {
   /**
    * Gets a spawn position on Polus for a player with the given ID.
    *
-   * @param playerId The ID of the player used as a rotation index
-   * @param playerCount The number of players in the game
-   * @param isSpawn `true` if the position is for the initial spawn position, `false` if it is for a meeting position
+   * @param playerId - The ID of the player used as a rotation index
+   * @param playerCount - The number of players in the game
+   * @param isSpawn - `true` if the position is for the initial spawn position, `false` if it is for a meeting position
    */
   static forPlayerOnPolus(playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
     return SpawnPositions.forPlayerOnLevel(Level.Polus, playerId, playerCount, isSpawn);
@@ -159,9 +159,9 @@ export class SpawnPositions {
   /**
    * Gets a spawn position on Airship for a player with the given ID.
    *
-   * @param playerId The ID of the player used as a rotation index
-   * @param playerCount The number of players in the game
-   * @param isSpawn `true` if the position is for the initial spawn position, `false` if it is for a meeting position
+   * @param playerId - The ID of the player used as a rotation index
+   * @param playerCount - The number of players in the game
+   * @param isSpawn - `true` if the position is for the initial spawn position, `false` if it is for a meeting position
    */
   static forPlayerOnAirship(playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
     return SpawnPositions.forPlayerOnLevel(Level.Airship, playerId, playerCount, isSpawn);
@@ -170,10 +170,10 @@ export class SpawnPositions {
   /**
    * Gets a spawn position on the given level for a player with the given ID.
    *
-   * @param level The level whose spawn center positions will be used
-   * @param playerId The ID of the player used as a rotation index
-   * @param playerCount The number of players in the game
-   * @param isSpawn `true` if the position is for the initial spawn position, `false` if it is for a meeting position
+   * @param level - The level whose spawn center positions will be used
+   * @param playerId - The ID of the player used as a rotation index
+   * @param playerCount - The number of players in the game
+   * @param isSpawn - `true` if the position is for the initial spawn position, `false` if it is for a meeting position
    */
   static forPlayerOnLevel(level: Level, playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
     if (level == Level.Polus && !isSpawn) {

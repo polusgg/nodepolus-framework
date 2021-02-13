@@ -13,28 +13,28 @@ const LENGTHS = [41, 42, 44, 46];
 // TODO: Private properties with getters/setters
 export class GameOptionsData {
   /**
-   * @param version The version of the GameOptionsData (default `4`)
-   * @param maxPlayers The maximum number of players (default `10`)
-   * @param languages An array of languages (default `[Language.Other]`)
-   * @param levels An array of levels (default `[Level.TheSkeld]`)
-   * @param playerSpeedModifier A multiplicative number for the speed at which players will move (default `1.0`)
-   * @param crewmateLightModifier A multiplicative number for the size of the fog-of-war ring encircling Crewmates (default `1.0`)
-   * @param impostorLightModifier A multiplicative number for the size of the fog-of-war ring encircling Impostors (default `1.5`)
-   * @param killCooldown The number of seconds after the game starts, between kills, and after a meeting ends, that an Impostor must wait before being able to kill (default `45.0`)
-   * @param commonTaskCount The number of common tasks each Crewmate will have (default `1`)
-   * @param longTaskCount The number of long tasks each Crewmate will have (default `1`)
-   * @param shortTaskCount The number of short tasks each Crewmate will have (default `2`)
-   * @param emergencyMeetingCount The number of emergency meetings each player will be able to call (default `1`)
-   * @param impostorCount The maximum number of Impostors (default `1`)
-   * @param killDistance How far of a reach an Impostor has when killing Crewmates (default `KillDistance.Medium`)
-   * @param discussionTime How many seconds before voting starts during a meeting (default `15`)
-   * @param votingTime How many seconds players will have to cast a vote during a meeting (default `120`)
-   * @param isDefault `true` if the GameOptionsData is using the default options, `false` if not (default `true`)
-   * @param emergencyCooldown How many seconds Crewmates must wait between emergency meetings (default `15`)
-   * @param confirmEjects `true` if the game will say if the ejected player was or wasn't an Impostor, `false` if not (default `true`)
-   * @param visualTasks `true` if tasks which play animations (e.g. Clear Asteroids) will play those animations to other players, `false` if not (default `true`)
-   * @param anonymousVoting `true` if the votes on the meeting HUD will show the color of the players who voted, `false` if not (default `false`)
-   * @param taskBarUpdates When, if at all, the task bar will update to show how many tasks have been completed (default `TaskBarUpdate.Always`)
+   * @param version - The version of the GameOptionsData (default `4`)
+   * @param maxPlayers - The maximum number of players (default `10`)
+   * @param languages - An array of languages (default `[Language.Other]`)
+   * @param levels - An array of levels (default `[Level.TheSkeld]`)
+   * @param playerSpeedModifier - A multiplicative number for the speed at which players will move (default `1.0`)
+   * @param crewmateLightModifier - A multiplicative number for the size of the fog-of-war ring encircling Crewmates (default `1.0`)
+   * @param impostorLightModifier - A multiplicative number for the size of the fog-of-war ring encircling Impostors (default `1.5`)
+   * @param killCooldown - The number of seconds after the game starts, between kills, and after a meeting ends, that an Impostor must wait before being able to kill (default `45.0`)
+   * @param commonTaskCount - The number of common tasks each Crewmate will have (default `1`)
+   * @param longTaskCount - The number of long tasks each Crewmate will have (default `1`)
+   * @param shortTaskCount - The number of short tasks each Crewmate will have (default `2`)
+   * @param emergencyMeetingCount - The number of emergency meetings each player will be able to call (default `1`)
+   * @param impostorCount - The maximum number of Impostors (default `1`)
+   * @param killDistance - How far of a reach an Impostor has when killing Crewmates (default `KillDistance.Medium`)
+   * @param discussionTime - How many seconds before voting starts during a meeting (default `15`)
+   * @param votingTime - How many seconds players will have to cast a vote during a meeting (default `120`)
+   * @param isDefault - `true` if the GameOptionsData is using the default options, `false` if not (default `true`)
+   * @param emergencyCooldown - How many seconds Crewmates must wait between emergency meetings (default `15`)
+   * @param confirmEjects - `true` if the game will say if the ejected player was or wasn't an Impostor, `false` if not (default `true`)
+   * @param visualTasks - `true` if tasks which play animations (e.g. Clear Asteroids) will play those animations to other players, `false` if not (default `true`)
+   * @param anonymousVoting - `true` if the votes on the meeting HUD will show the color of the players who voted, `false` if not (default `false`)
+   * @param taskBarUpdates - When, if at all, the task bar will update to show how many tasks have been completed (default `TaskBarUpdate.Always`)
    */
   constructor(
     private version: number = 4,
@@ -64,7 +64,7 @@ export class GameOptionsData {
   /**
    * Gets whether or not the given version is supported.
    *
-   * @param version The version to check
+   * @param version - The version to check
    * @returns `true` if `version` is supported, `false` if not
    */
   static isVersionSupported(version: number): boolean {
@@ -75,8 +75,8 @@ export class GameOptionsData {
    * Gets whether or not the given length matches the expected value for the
    * given version.
    *
-   * @param version The version to check against
-   * @param length The length to check
+   * @param version - The version to check against
+   * @param length - The length to check
    * @returns `true` if `length` matches the expected length of `version`, `false` if not
    */
   static isExpectedLength(version: number, length: number): boolean {
@@ -86,8 +86,8 @@ export class GameOptionsData {
   /**
    * Gets a new GameOptionsGata by reading from the given MessageReader.
    *
-   * @param reader The MessageReader to read from
-   * @param isSearching `true` if the data is from a lobby search, `false` if it is from creating a lobby (default `false`)
+   * @param reader - The MessageReader to read from
+   * @param isSearching - `true` if the data is from a lobby search, `false` if it is from creating a lobby (default `false`)
    */
   static deserialize(reader: MessageReader, isSearching: boolean = false): GameOptionsData {
     const bytes = reader.readBytesAndSize();
@@ -134,8 +134,8 @@ export class GameOptionsData {
   /**
    * Writes the GameOptionsData to the given MessageWriter
    *
-   * @param reader The MessageWriter to write to
-   * @param isSearching `true` if the data is from a lobby search, `false` if it is from creating a lobby (default `false`)
+   * @param reader - The MessageWriter to write to
+   * @param isSearching - `true` if the data is from a lobby search, `false` if it is from creating a lobby (default `false`)
    */
   serialize(writer: MessageWriter, isSearching: boolean = false): void {
     writer.writePackedUInt32(LENGTHS[this.version - 1]);
@@ -182,7 +182,7 @@ export class GameOptionsData {
   /**
    * Sets the version of the GameOptionsData.
    *
-   * @param version The version of the GameOptionsData
+   * @param version - The version of the GameOptionsData
    */
   setVersion(version: number): void {
     this.version = version;
@@ -198,7 +198,7 @@ export class GameOptionsData {
   /**
    * Sets the maximum number of players.
    *
-   * @param maxPlayers The maximum number of players
+   * @param maxPlayers - The maximum number of players
    */
   setMaxPlayers(maxPlayers: number): void {
     this.maxPlayers = maxPlayers;
@@ -214,7 +214,7 @@ export class GameOptionsData {
   /**
    * Sets the array of languages.
    *
-   * @param languages The array of languages
+   * @param languages - The array of languages
    */
   setLanguages(languages: Language[]): void {
     this.languages = languages;
@@ -230,7 +230,7 @@ export class GameOptionsData {
   /**
    * Sets the array of levels.
    *
-   * @param levels The array of levels
+   * @param levels - The array of levels
    */
   setLevels(levels: Level[]): void {
     this.levels = levels;
@@ -246,7 +246,7 @@ export class GameOptionsData {
   /**
    * Sets the multiplicative number for the speed at which players will move.
    *
-   * @param playerSpeedModifier The multiplicative number for the speed at which players will move
+   * @param playerSpeedModifier - The multiplicative number for the speed at which players will move
    */
   setPlayerSpeedModifier(playerSpeedModifier: number): void {
     this.playerSpeedModifier = playerSpeedModifier;
@@ -264,7 +264,7 @@ export class GameOptionsData {
    * Sets the multiplicative number for the size of the fog-of-war ring
    * encircling Crewmates
    *
-   * @param crewmateLightModifier The multiplicative number for the size of the fog-of-war ring encircling Crewmates
+   * @param crewmateLightModifier - The multiplicative number for the size of the fog-of-war ring encircling Crewmates
    */
   setCrewmateLightModifier(crewmateLightModifier: number): void {
     this.crewmateLightModifier = crewmateLightModifier;
@@ -282,7 +282,7 @@ export class GameOptionsData {
    * Sets the multiplicative number for the size of the fog-of-war ring
    * encircling Impostors.
    *
-   * @param impostorLightModifier The multiplicative number for the size of the fog-of-war ring encircling Impostors
+   * @param impostorLightModifier - The multiplicative number for the size of the fog-of-war ring encircling Impostors
    */
   setImpostorLightModifier(impostorLightModifier: number): void {
     this.impostorLightModifier = impostorLightModifier;
@@ -300,7 +300,7 @@ export class GameOptionsData {
    * Sets the number of seconds after the game starts, between kills, and after
    * a meeting ends, that an Impostor must wait before being able to kill
    *
-   * @param killCooldown The number of seconds after the game starts, between kills, and after a meeting ends, that an Impostor must wait before being able to kill
+   * @param killCooldown - The number of seconds after the game starts, between kills, and after a meeting ends, that an Impostor must wait before being able to kill
    */
   setKillCooldown(killCooldown: number): void {
     this.killCooldown = killCooldown;
@@ -316,7 +316,7 @@ export class GameOptionsData {
   /**
    * Sets the number of common tasks each Crewmate will have.
    *
-   * @param commonTaskCount The number of common tasks each Crewmate will have
+   * @param commonTaskCount - The number of common tasks each Crewmate will have
    */
   setCommonTaskCount(commonTaskCount: number): void {
     this.commonTaskCount = commonTaskCount;
@@ -332,7 +332,7 @@ export class GameOptionsData {
   /**
    * Sets the number of long tasks each Crewmate will have.
    *
-   * @param longTaskCount The number of long tasks each Crewmate will have
+   * @param longTaskCount - The number of long tasks each Crewmate will have
    */
   setLongTaskCount(longTaskCount: number): void {
     this.longTaskCount = longTaskCount;
@@ -348,7 +348,7 @@ export class GameOptionsData {
   /**
    * Sets the number of short tasks each Crewmate will have.
    *
-   * @param shortTaskCount The number of short tasks each Crewmate will have
+   * @param shortTaskCount - The number of short tasks each Crewmate will have
    */
   setShortTaskCount(shortTaskCount: number): void {
     this.shortTaskCount = shortTaskCount;
@@ -364,7 +364,7 @@ export class GameOptionsData {
   /**
    * Sets the number of emergency meetings each player will be able to call.
    *
-   * @param emergencyMeetingCount The number of emergency meetings each player will be able to call
+   * @param emergencyMeetingCount - The number of emergency meetings each player will be able to call
    */
   setEmergencyMeetingCount(emergencyMeetingCount: number): void {
     this.emergencyMeetingCount = emergencyMeetingCount;
@@ -380,7 +380,7 @@ export class GameOptionsData {
   /**
    * Sets the maximum number of Impostors.
    *
-   * @param impostorCount The maximum number of Impostors
+   * @param impostorCount - The maximum number of Impostors
    */
   setImpostorCount(impostorCount: number): void {
     this.impostorCount = impostorCount;
@@ -396,7 +396,7 @@ export class GameOptionsData {
   /**
    * Sets how far of a reach an Impostor has when killing Crewmates.
    *
-   * @param killDistance How far of a reach an Impostor has when killing Crewmates
+   * @param killDistance - How far of a reach an Impostor has when killing Crewmates
    */
   setKillDistance(killDistance: KillDistance): void {
     this.killDistance = killDistance;
@@ -412,7 +412,7 @@ export class GameOptionsData {
   /**
    * Sets how many seconds before voting starts during a meeting.
    *
-   * @param discussionTime How many seconds before voting starts during a meeting
+   * @param discussionTime - How many seconds before voting starts during a meeting
    */
   setDiscussionTime(discussionTime: number): void {
     this.discussionTime = discussionTime;
@@ -428,7 +428,7 @@ export class GameOptionsData {
   /**
    * Sets how many seconds players will have to cast a vote during a meeting.
    *
-   * @param votingTime How many seconds players will have to cast a vote during a meeting
+   * @param votingTime - How many seconds players will have to cast a vote during a meeting
    */
   setVotingTime(votingTime: number): void {
     this.votingTime = votingTime;
@@ -446,7 +446,7 @@ export class GameOptionsData {
   /**
    * Sets whether or not the GameOptionsData is using the default options.
    *
-   * @param isDefault `true` if the GameOptionsData is using the default options, `false` if not
+   * @param isDefault - `true` if the GameOptionsData is using the default options, `false` if not
    */
   setIsDefault(isDefault: boolean): void {
     this.isDefault = isDefault;
@@ -462,7 +462,7 @@ export class GameOptionsData {
   /**
    * Sets how many seconds Crewmates must wait between emergency meetings.
    *
-   * @param emergencyCooldown How many seconds Crewmates must wait between emergency meetings
+   * @param emergencyCooldown - How many seconds Crewmates must wait between emergency meetings
    */
   setEmergencyCooldown(emergencyCooldown: number): void {
     this.emergencyCooldown = emergencyCooldown;
@@ -482,7 +482,7 @@ export class GameOptionsData {
    * Sets whether or not the game will say if the ejected player was or wasn't
    * an Impostor.
    *
-   * @param confirmEjects `true` if the game will say if the ejected player was or wasn't an Impostor, `false` if not
+   * @param confirmEjects - `true` if the game will say if the ejected player was or wasn't an Impostor, `false` if not
    */
   setConfirmEjects(confirmEjects: boolean): void {
     this.confirmEjects = confirmEjects;
@@ -502,7 +502,7 @@ export class GameOptionsData {
    * Sets whether or not tasks which play animations (e.g. Clear Asteroids) will
    * play those animations to other players.
    *
-   * @param visualTasks `true` if tasks which play animations will play those animations to other players, `false` if not
+   * @param visualTasks - `true` if tasks which play animations will play those animations to other players, `false` if not
    */
   setVisualTasks(visualTasks: boolean): void {
     this.visualTasks = visualTasks;
@@ -522,7 +522,7 @@ export class GameOptionsData {
    * Sets whether or not the votes on the meeting HUD will show the color of the
    * players who voted.
    *
-   * @param anonymousVoting `true` if the votes on the meeting HUD will show the color of the players who voted, `false` if not
+   * @param anonymousVoting - `true` if the votes on the meeting HUD will show the color of the players who voted, `false` if not
    */
   setAnonymousVoting(anonymousVoting: boolean): void {
     this.anonymousVoting = anonymousVoting;
@@ -540,7 +540,7 @@ export class GameOptionsData {
    * Sets when, if at all, the task bar will update to show how many tasks have
    * been completed.
    *
-   * @param taskBarUpdates When, if at all, the task bar will update to show how many tasks have been completed
+   * @param taskBarUpdates - When, if at all, the task bar will update to show how many tasks have been completed
    */
   setTaskBarUpdates(taskBarUpdates: TaskBarMode): void {
     this.taskBarUpdates = taskBarUpdates;

@@ -7,9 +7,9 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerSkinUpdatedEvent extends CancellableEvent {
   /**
-   * @param player The player whose skin was updated
-   * @param oldSkin The player's old skin
-   * @param newSkin The player's new skin
+   * @param player - The player whose skin was updated
+   * @param oldSkin - The player's old skin
+   * @param newSkin - The player's new skin
    */
   constructor(
     private readonly player: PlayerInstance,
@@ -43,7 +43,7 @@ export class PlayerSkinUpdatedEvent extends CancellableEvent {
   /**
    * Sets the player's new skin.
    *
-   * @param newSkin The player's new skin
+   * @param newSkin - The player's new skin
    */
   setNewSkin(newSkin: PlayerSkin): void {
     this.newSkin = newSkin;

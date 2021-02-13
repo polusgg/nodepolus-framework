@@ -7,11 +7,11 @@ import { Vector2 } from "../../../types";
  */
 export class PlayerPositionUpdatedEvent extends CancellableEvent {
   /**
-   * @param player The player whose position was updated
-   * @param oldPosition The player's old position
-   * @param oldVelocity The player's old velocity
-   * @param newPosition The player's new position
-   * @param newVelocity The player's new velocity
+   * @param player - The player whose position was updated
+   * @param oldPosition - The player's old position
+   * @param oldVelocity - The player's old velocity
+   * @param newPosition - The player's new position
+   * @param newVelocity - The player's new velocity
    */
   constructor(
     private readonly player: PlayerInstance,
@@ -54,7 +54,7 @@ export class PlayerPositionUpdatedEvent extends CancellableEvent {
   /**
    * Sets the player's new position.
    *
-   * @param newPosition The player's new position
+   * @param newPosition - The player's new position
    */
   setNewPosition(newPosition: Vector2): void {
     this.newPosition = newPosition;
@@ -70,7 +70,7 @@ export class PlayerPositionUpdatedEvent extends CancellableEvent {
   /**
    * Sets the player's new velocity.
    *
-   * @param newVelocity The player's new velocity
+   * @param newVelocity - The player's new velocity
    */
   setNewVelocity(newVelocity: Vector2): void {
     this.newVelocity = newVelocity;

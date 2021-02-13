@@ -8,9 +8,9 @@ import { Game } from "../../game";
  */
 export class GameVentEnteredEvent extends CancellableEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param player The player that entered the vent
-   * @param vent The vent that the player entered
+   * @param game - The game from which this event was fired
+   * @param player - The player that entered the vent
+   * @param vent - The vent that the player entered
    */
   constructor(
     private readonly game: Game,

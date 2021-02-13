@@ -6,8 +6,8 @@ import { CancellableEvent } from "../types";
  */
 export class LobbyCountdownStoppedEvent extends CancellableEvent {
   /**
-   * @param lobby The lobby from which this event was fired
-   * @param secondsLeft The number of seconds remaining until the game would have started
+   * @param lobby - The lobby from which this event was fired
+   * @param secondsLeft - The number of seconds remaining until the game would have started
    */
   constructor(
     private readonly lobby: LobbyInstance,

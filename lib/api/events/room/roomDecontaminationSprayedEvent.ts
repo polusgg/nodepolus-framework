@@ -6,8 +6,8 @@ import { Game } from "../../game";
  */
 export class RoomDecontaminationSprayedEvent extends CancellableEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param decontamination The decontamination room that activated its sprayers
+   * @param game - The game from which this event was fired
+   * @param decontamination - The decontamination room that activated its sprayers
    */
   constructor(
     private readonly game: Game,

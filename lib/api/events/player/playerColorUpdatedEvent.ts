@@ -7,9 +7,9 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerColorUpdatedEvent extends CancellableEvent {
   /**
-   * @param player The player whose color was updated
-   * @param oldColor The player's old color
-   * @param newColor The player's new color
+   * @param player - The player whose color was updated
+   * @param oldColor - The player's old color
+   * @param newColor - The player's new color
    */
   constructor(
     private readonly player: PlayerInstance,
@@ -43,7 +43,7 @@ export class PlayerColorUpdatedEvent extends CancellableEvent {
   /**
    * Sets the player's new color.
    *
-   * @param newColor The player's new color
+   * @param newColor - The player's new color
    */
   setNewColor(newColor: PlayerColor): void {
     this.newColor = newColor;

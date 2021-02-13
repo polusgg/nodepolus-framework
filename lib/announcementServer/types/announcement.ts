@@ -6,8 +6,8 @@ import { TextComponent } from "../../api/text";
  */
 export class Announcement {
   /**
-   * @param id The ID of the announcement
-   * @param translations The announcement text in various languages
+   * @param id - The ID of the announcement
+   * @param translations - The announcement text in various languages
    */
   constructor(
     private readonly id: number,
@@ -31,7 +31,7 @@ export class Announcement {
   /**
    * Gets the announcement text for the given language.
    *
-   * @param language The language in which the announcement text should be returned
+   * @param language - The language in which the announcement text should be returned
    * @returns The announcement text in `language` if the translation exists, or `undefined` if it doesn't exist
    */
   getTranslation(language: ClientLanguage): TextComponent | undefined {
@@ -42,7 +42,7 @@ export class Announcement {
    * Gets the announcement text for the given language if it exists, or the
    * first translation available if none exists for the given language.
    *
-   * @param language The language in which the announcement text should be returned
+   * @param language - The language in which the announcement text should be returned
    * @returns The announcement text in `language` if the translation exists, or the first translation available, or `undefined` if there are no translatons
    */
   translate(language: ClientLanguage): TextComponent | undefined {

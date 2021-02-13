@@ -7,9 +7,9 @@ import { TextComponent } from "../../text";
  */
 export class PlayerNameUpdatedEvent extends CancellableEvent {
   /**
-   * @param player The player whose name was updated
-   * @param oldName The player's old name
-   * @param newName The player's new name
+   * @param player - The player whose name was updated
+   * @param oldName - The player's old name
+   * @param newName - The player's new name
    */
   constructor(
     private readonly player: PlayerInstance,
@@ -43,7 +43,7 @@ export class PlayerNameUpdatedEvent extends CancellableEvent {
   /**
    * Sets the player's new name.
    *
-   * @param newName The player's new name
+   * @param newName - The player's new name
    */
   setNewName(newName: TextComponent): void {
     this.newName = newName;

@@ -7,9 +7,9 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerDiedEvent extends CancellableEvent {
   /**
-   * @param player The player that died
-   * @param reason The reason for why the player died
-   * @param killer The player that killed the victim
+   * @param player - The player that died
+   * @param reason - The reason for why the player died
+   * @param killer - The player that killed the victim
    */
   constructor(
     private readonly player: PlayerInstance,

@@ -7,8 +7,8 @@ import { TextComponent } from "../../text";
  */
 export class PlayerChatMessageEvent extends CancellableEvent {
   /**
-   * @param player The player that sent the chat message
-   * @param message The chat message
+   * @param player - The player that sent the chat message
+   * @param message - The chat message
    */
   constructor(
     private readonly player: PlayerInstance,
@@ -34,7 +34,7 @@ export class PlayerChatMessageEvent extends CancellableEvent {
   /**
    * Sets the chat message.
    *
-   * @param message The new chat message
+   * @param message - The new chat message
    */
   setMessage(message: TextComponent): void {
     this.message = message;

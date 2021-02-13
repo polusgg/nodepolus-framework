@@ -6,8 +6,8 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerVotekickRemovedEvent extends CancellableEvent {
   /**
-   * @param voter The player whose vote is being cleared
-   * @param target The player for which the voting player's vote is being cleared
+   * @param voter - The player whose vote is being cleared
+   * @param target - The player for which the voting player's vote is being cleared
    */
   constructor(
     private readonly voter: PlayerInstance,

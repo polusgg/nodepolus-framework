@@ -49,7 +49,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   private outboundPacketTransformer?: OutboundPacketTransformer;
 
   /**
-   * @param config The server configuration
+   * @param config - The server configuration
    */
   constructor(
     private readonly config: ServerConfig = {},
@@ -97,7 +97,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   /**
    * Sets the function used to transform incoming packets.
    *
-   * @param inboundPacketTransformer The function used to transform incoming packets
+   * @param inboundPacketTransformer - The function used to transform incoming packets
    */
   setInboundPacketTransformer(inboundPacketTransformer: InboundPacketTransformer): void {
     this.inboundPacketTransformer = inboundPacketTransformer;
@@ -113,7 +113,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   /**
    * Sets the function used to transform outgoing packets.
    *
-   * @param inboundPacketTransformer The function used to transform outgoing packets
+   * @param inboundPacketTransformer - The function used to transform outgoing packets
    */
   setOutboundPacketTransformer(outboundPacketTransformer: OutboundPacketTransformer): void {
     this.outboundPacketTransformer = outboundPacketTransformer;
@@ -137,7 +137,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   /**
    * Gets the server's logger, or a child logger with the given name.
    *
-   * @param childName The name of the child logger
+   * @param childName - The name of the child logger
    * @returns The server's logger, or a child logger using `childName` for the name
    */
   getLogger(childName?: string): Logger {
@@ -154,7 +154,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   /**
    * Gets or creates a connection from the given ConnectionInfo.
    *
-   * @param connectionInfo The ConnectionInfo describing the connection that will be returned
+   * @param connectionInfo - The ConnectionInfo describing the connection that will be returned
    * @returns A connection described by `connectionInfo`
    */
   getConnection(connectionInfo: string | ConnectionInfo): Connection {
@@ -192,7 +192,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   /**
    * Gets the lobby with the given code.
    *
-   * @param code The code for the lobby that will be returned
+   * @param code - The code for the lobby that will be returned
    * @returns The lobby, or `undefined` if no lobbies on the server have the code `code`
    */
   getLobby(code: string): LobbyInstance | undefined {
@@ -202,7 +202,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   /**
    * Adds the given lobby to the server.
    *
-   * @param lobby The lobby to be added
+   * @param lobby - The lobby to be added
    */
   addLobby(lobby: LobbyInstance): void {
     if (this.lobbyMap.has(lobby.getCode())) {
@@ -216,7 +216,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   /**
    * Removes the given lobby from the server.
    *
-   * @param lobby The lobby to be removed
+   * @param lobby - The lobby to be removed
    */
   deleteLobby(lobby: LobbyInstance): void {
     if (lobby instanceof InternalLobby) {
@@ -351,8 +351,8 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   /**
    * Cleans up the given disconnecting connection and removes empty lobbies.
    *
-   * @param connection The connection that was disconnected
-   * @param reason The reason for why the connection was disconnected
+   * @param connection - The connection that was disconnected
+   * @param reason - The reason for why the connection was disconnected
    */
   private async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
     if (connection.lobby) {
@@ -393,7 +393,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   /**
    * Creates a new connection from the given ConnectionInfo.
    *
-   * @param connectionInfo The ConnectionInfo describing the connection
+   * @param connectionInfo - The ConnectionInfo describing the connection
    * @returns A new connection described by `connectionInfo`
    */
   private initializeConnection(connectionInfo: ConnectionInfo): Connection {
@@ -453,8 +453,8 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   /**
    * Called when the server receives a packet from a connection.
    *
-   * @param packet The packet that was sent to the server
-   * @param sender The connection that sent the packet
+   * @param packet - The packet that was sent to the server
+   * @param sender - The connection that sent the packet
    */
   private async handlePacket(packet: BaseRootPacket, sender: Connection): Promise<void> {
     switch (packet.type) {

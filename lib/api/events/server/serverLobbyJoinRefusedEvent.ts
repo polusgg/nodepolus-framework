@@ -8,9 +8,9 @@ import { LobbyInstance } from "../../lobby";
  */
 export class ServerLobbyJoinRefusedEvent extends CancellableEvent {
   /**
-   * @param connection The connection that the lobby refused to allow to join
-   * @param lobby The lobby that refused the connection
-   * @param disconnectReason The disconnect reason to be sent to the connection (default `GameFull`)
+   * @param connection - The connection that the lobby refused to allow to join
+   * @param lobby - The lobby that refused the connection
+   * @param disconnectReason - The disconnect reason to be sent to the connection (default `GameFull`)
    */
   constructor(
     private readonly connection: Connection,
@@ -44,7 +44,7 @@ export class ServerLobbyJoinRefusedEvent extends CancellableEvent {
   /**
    * Sets the disconnect reason to be sent to the connection.
    *
-   * @param disconnectReason The new disconnect reason to be sent to the conection
+   * @param disconnectReason - The new disconnect reason to be sent to the conection
    */
   setDisconnectReason(disconnectReason: DisconnectReason): this {
     this.disconnectReason = disconnectReason;

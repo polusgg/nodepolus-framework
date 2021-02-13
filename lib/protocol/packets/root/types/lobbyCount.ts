@@ -7,10 +7,10 @@ import { Level } from "../../../../types/enums";
  */
 export class LobbyCount {
   /**
-   * @param skeld The number of lobbies playing on The Skeld
-   * @param mira The number of lobbies playing on MIRA HQ
-   * @param polus The number of lobbies playing on Polus
-   * @param airship The number of lobbies playing on Airship
+   * @param skeld - The number of lobbies playing on The Skeld
+   * @param mira - The number of lobbies playing on MIRA HQ
+   * @param polus - The number of lobbies playing on Polus
+   * @param airship - The number of lobbies playing on Airship
    */
   constructor(
     public skeld: number = 0,
@@ -22,7 +22,7 @@ export class LobbyCount {
   /**
    * Gets a new LobbyCount by reading from the given MessageReader.
    *
-   * @param reader The MessageReader to read from
+   * @param reader - The MessageReader to read from
    */
   static deserialize(reader: MessageReader): LobbyCount {
     return new LobbyCount(
@@ -64,7 +64,7 @@ export class LobbyCount {
   /**
    * Increments the count for the given level.
    *
-   * @param level The level whose count will be incremented
+   * @param level - The level whose count will be incremented
    */
   increment(level: Level): void {
     this.add(level, 1);
@@ -73,7 +73,7 @@ export class LobbyCount {
   /**
    * Decrements the count for the given level.
    *
-   * @param level The level whose count will be decremented
+   * @param level - The level whose count will be decremented
    */
   decrement(level: Level): void {
     this.add(level, -1);
@@ -82,8 +82,8 @@ export class LobbyCount {
   /**
    * Adds the given amount to the count for the given level.
    *
-   * @param level The level whose count will be modified
-   * @param amount The amount to add to the count for `level`
+   * @param level - The level whose count will be modified
+   * @param amount - The amount to add to the count for `level`
    */
   add(level: Level, amount: number): void {
     switch (level) {
@@ -106,8 +106,8 @@ export class LobbyCount {
   /**
    * Sets the count for the given level to the given amount.
    *
-   * @param level The level whose count will be set
-   * @param amount The amount that the count will be set to
+   * @param level - The level whose count will be set
+   * @param amount - The amount that the count will be set to
    */
   set(level: Level, amount: number): void {
     switch (level) {
@@ -130,7 +130,7 @@ export class LobbyCount {
   /**
    * Writes the LobbyCount to the given MessageWriter
    *
-   * @param reader The MessageWriter to write to
+   * @param reader - The MessageWriter to write to
    */
   serialize(writer: MessageWriter): void {
     writer.writeUInt32(this.skeld)

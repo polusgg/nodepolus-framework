@@ -7,8 +7,8 @@ import { LevelTask } from "../../../types";
  */
 export class PlayerTaskAddedEvent extends CancellableEvent {
   /**
-   * @param player The player whose task list was updated
-   * @param tasks The player's task list
+   * @param player - The player whose task list was updated
+   * @param tasks - The player's task list
    */
   constructor(
     private readonly player: PlayerInstance,
@@ -34,7 +34,7 @@ export class PlayerTaskAddedEvent extends CancellableEvent {
   /**
    * Sets the player's task list.
    *
-   * @param tasks The player's new task list
+   * @param tasks - The player's new task list
    */
   setTasks(tasks: Set<LevelTask>): void {
     this.tasks = tasks;

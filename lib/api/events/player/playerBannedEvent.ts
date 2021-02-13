@@ -8,10 +8,10 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerBannedEvent extends CancellableEvent {
   /**
-   * @param lobby The lobby that the player was banned from
-   * @param player The player that was banned
-   * @param banningPlayer The player that banned the player
-   * @param reason The disconnect reason to be sent to the player
+   * @param lobby - The lobby that the player was banned from
+   * @param player - The player that was banned
+   * @param banningPlayer - The player that banned the player
+   * @param reason - The disconnect reason to be sent to the player
    */
   constructor(
     private readonly lobby: LobbyInstance,

@@ -8,10 +8,10 @@ import { DisconnectableEvent } from "../types";
  */
 export class ServerLobbyListEvent extends DisconnectableEvent {
   /**
-   * @param connection The connection that is requesting a list of games
-   * @param includePrivateLobbies `true` if the connection wants private games included in the results, `false` if not
-   * @param lobbies The lobbies that will be sent to the connection
-   * @param lobbyCounts The lobby counts for each level that will be sent to the connection
+   * @param connection - The connection that is requesting a list of games
+   * @param includePrivateLobbies - `true` if the connection wants private games included in the results, `false` if not
+   * @param lobbies - The lobbies that will be sent to the connection
+   * @param lobbyCounts - The lobby counts for each level that will be sent to the connection
    */
   constructor(
     private readonly connection: Connection,
@@ -48,7 +48,7 @@ export class ServerLobbyListEvent extends DisconnectableEvent {
   /**
    * Sets the lobbies that will be sent to the connection.
    *
-   * @param lobbies The new lobbies that will be sent to the connection.
+   * @param lobbies - The new lobbies that will be sent to the connection.
    */
   setLobbies(lobbies: LobbyListing[]): void {
     this.lobbies = lobbies;
@@ -66,7 +66,7 @@ export class ServerLobbyListEvent extends DisconnectableEvent {
   /**
    * Sets the lobby counts for each level that will be sent to the connection.
    *
-   * @param lobbyCounts The new lobby counts that will be sent to the connection, or `undefined` if no counts should be sent
+   * @param lobbyCounts - The new lobby counts that will be sent to the connection, or `undefined` if no counts should be sent
    */
   setLobbyCounts(lobbyCounts?: LobbyCount): void {
     this.lobbyCounts = lobbyCounts;

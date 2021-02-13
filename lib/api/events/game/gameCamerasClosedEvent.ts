@@ -6,8 +6,8 @@ import { Game } from "../../game";
  */
 export class GameCamerasClosedEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param player The player that stopped viewing security cameras
+   * @param game - The game from which this event was fired
+   * @param player - The player that stopped viewing security cameras
    */
   constructor(
     private readonly game: Game,

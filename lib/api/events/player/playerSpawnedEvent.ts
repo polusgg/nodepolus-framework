@@ -7,11 +7,11 @@ import { Vector2 } from "../../../types";
  */
 export class PlayerSpawnedEvent {
   /**
-   * @param connection The connection that the player belongs to
-   * @param lobby The lobby in which the player is being spawned
-   * @param playerId The ID of the player being spawned
-   * @param newPlayer `true` if the player is considered new and should hop out of a dropship chair, `false` if not
-   * @param position The player's spawn position
+   * @param connection - The connection that the player belongs to
+   * @param lobby - The lobby in which the player is being spawned
+   * @param playerId - The ID of the player being spawned
+   * @param newPlayer - `true` if the player is considered new and should hop out of a dropship chair, `false` if not
+   * @param position - The player's spawn position
    */
   constructor(
     private readonly connection: Connection | undefined,
@@ -56,7 +56,7 @@ export class PlayerSpawnedEvent {
   /**
    * Sets whether or not the player is considered new and should hop out of a dropship chair.
    *
-   * @param isNew `true` if the player is new, `false` if now
+   * @param isNew - `true` if the player is new, `false` if now
    */
   setNew(isNew: boolean = true): void {
     this.newPlayer = isNew;
@@ -72,7 +72,7 @@ export class PlayerSpawnedEvent {
   /**
    * Sets the player's spawn position.
    *
-   * @param position The player's new spawn position
+   * @param position - The player's new spawn position
    */
   setPosition(position: Vector2): void {
     this.position = position;

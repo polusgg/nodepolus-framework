@@ -7,9 +7,9 @@ import { CancellableEvent } from "../types";
  */
 export class LobbyHostMigratedEvent extends CancellableEvent {
   /**
-   * @param lobby The lobby from which this event was fired
-   * @param oldHost The connection that is no longer an acting host
-   * @param newHost The connection that is now an acting host
+   * @param lobby - The lobby from which this event was fired
+   * @param oldHost - The connection that is no longer an acting host
+   * @param newHost - The connection that is now an acting host
    */
   constructor(
     private readonly lobby: LobbyInstance,
@@ -43,7 +43,7 @@ export class LobbyHostMigratedEvent extends CancellableEvent {
   /**
    * Sets the connection that is now an acting host.
    *
-   * @param host The new connection that is now an acting host
+   * @param host - The new connection that is now an acting host
    */
   setNewHost(host: Connection): void {
     this.newHost = host;

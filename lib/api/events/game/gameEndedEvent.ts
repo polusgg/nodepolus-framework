@@ -7,8 +7,8 @@ import { Game } from "../../game";
  */
 export class GameEndedEvent extends CancellableEvent {
   /**
-   * @param game The game that ended
-   * @param reason The reason for why the game ended
+   * @param game - The game that ended
+   * @param reason - The reason for why the game ended
    */
   constructor(
     private readonly game: Game,
@@ -34,7 +34,7 @@ export class GameEndedEvent extends CancellableEvent {
   /**
    * Sets the reason for why the game ended.
    *
-   * @param reason The new reason for why the game ended
+   * @param reason - The new reason for why the game ended
    */
   setReason(reason: GameOverReason): void {
     this.reason = reason;

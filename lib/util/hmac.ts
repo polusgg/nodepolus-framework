@@ -7,8 +7,8 @@ export class Hmac {
   /**
    * Gets the hash for the given message using the given secret.
    *
-   * @param message The message to be hashed
-   * @param secret The secret used when hashing
+   * @param message - The message to be hashed
+   * @param secret - The secret used when hashing
    * @returns The HMAC of `message`
    */
   static sign(message: string, secret: string): string {
@@ -19,9 +19,9 @@ export class Hmac {
    * Gets whether or not the given hash is valid using the given secret and
    * source message.
    *
-   * @param message The source message being verified
-   * @param hash The hash of the message
-   * @param secret The secret used to verify the message
+   * @param message - The source message being verified
+   * @param hash - The hash of the message
+   * @param secret - The secret used to verify the message
    */
   static verify(message: string, hash: string, secret: string): boolean {
     return crypto.timingSafeEqual(

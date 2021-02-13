@@ -41,10 +41,10 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   private requestedDisconnect = false;
 
   /**
-   * @param connectionInfo The ConnectionInfo describing the connection
-   * @param socket The underlying socket for the connection
-   * @param packetDestination The destination type for packets sent from the connection
-   * @param outboundPacketTransformerSupplier The supplier for the function used to transform outgoing packets
+   * @param connectionInfo - The ConnectionInfo describing the connection
+   * @param socket - The underlying socket for the connection
+   * @param packetDestination - The destination type for packets sent from the connection
+   * @param outboundPacketTransformerSupplier - The supplier for the function used to transform outgoing packets
    */
   constructor(
     private readonly connectionInfo: ConnectionInfo,
@@ -200,7 +200,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * Sets whether or not the connection is an acting host in their lobby without
    * sending the packet.
    *
-   * @param actingHost `true` to add the acting host host status to the connection, `false` to remove it
+   * @param actingHost - `true` to add the acting host host status to the connection, `false` to remove it
    */
   updateActingHost(actingHost: boolean): void {
     this.actingHost = actingHost;
@@ -209,8 +209,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Sets whether or not the connection is an acting host in their lobby.
    *
-   * @param actingHost `true` to add the acting host host status to the connection, `false` to remove it
-   * @param sendImmediately `true` to send the packet immediately, `false` to send it with the next batch of packets
+   * @param actingHost - `true` to add the acting host host status to the connection, `false` to remove it
+   * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets
    */
   async setActingHost(actingHost: boolean, sendImmediately: boolean = true): Promise<void> {
     if (!this.lobby) {
@@ -245,7 +245,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Sends the given packet in the next reliable packet group.
    *
-   * @param packet The packet to be sent
+   * @param packet - The packet to be sent
    */
   async writeReliable(packet: BaseRootPacket): Promise<void> {
     return new Promise(resolve => {
@@ -280,7 +280,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Sends the given packet in the next unreliable packet group.
    *
-   * @param packet The packet to be sent
+   * @param packet - The packet to be sent
    */
   writeUnreliable(packet: BaseRootPacket): void {
     this.unreliablePacketBuffer.push(packet);
@@ -289,7 +289,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Sends the given packet immediately as a reliable packet.
    *
-   * @param packet The packet to be sent
+   * @param packet - The packet to be sent
    */
   async sendReliable(packets: BaseRootPacket[]): Promise<void> {
     return new Promise(resolve => {
@@ -306,7 +306,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Sends the given packet immediately as an unreliable packet.
    *
-   * @param packet The packet to be sent
+   * @param packet - The packet to be sent
    */
   sendUnreliable(packets: BaseRootPacket[]): void {
     const temp: BaseRootPacket[] = [...this.unreliablePacketBuffer];
@@ -321,7 +321,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Sends the current packet group to the connection.
    *
-   * @param reliable `true` to send the packet group as a reliable packet, `false` to send it as an unreliable packet
+   * @param reliable - `true` to send the packet group as a reliable packet, `false` to send it as an unreliable packet
    */
   async flush(reliable: boolean = true): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -393,7 +393,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Disconnects the connection from the server.
    *
-   * @param reason The reason for why the connection was disconnected
+   * @param reason - The reason for why the connection was disconnected
    */
   disconnect(reason?: DisconnectReason): void {
     this.requestedDisconnect = true;
@@ -408,9 +408,9 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Kicks the connection from their lobby.
    *
-   * @param isBanned `true` if the connection is banned from the lobby, `false` if not
-   * @param kickingPlayer The player who kicked the connection, or `undefined` if the connection was kicked via the API
-   * @param reason The reason for why the connection was kicked
+   * @param isBanned - `true` if the connection is banned from the lobby, `false` if not
+   * @param kickingPlayer - The player who kicked the connection, or `undefined` if the connection was kicked via the API
+   * @param reason - The reason for why the connection was kicked
    */
   sendKick(isBanned: boolean, kickingPlayer?: PlayerInstance, reason?: DisconnectReason): void {
     if (!this.lobby) {
@@ -435,7 +435,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * Kicks the connection from the full lobby that it is trying to join for
    * being too slow to join.
    *
-   * @param reason The reason for why the connection was kicked
+   * @param reason - The reason for why the connection was kicked
    */
   sendLateRejection(reason: DisconnectReason): void {
     if (!this.lobby) {
@@ -453,8 +453,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * Waits for the connection to send a packet that satisfies the condition in
    * the given callback.
    *
-   * @param packetValidator The callback used to check that a packet sent by the connection meets the expected conditions
-   * @param timeoutTime The time, in milliseconds, that the connection has to send the expected packet (default `6000`)
+   * @param packetValidator - The callback used to check that a packet sent by the connection meets the expected conditions
+   * @param timeoutTime - The time, in milliseconds, that the connection has to send the expected packet (default `6000`)
    * @returns A promise that resolves with the expected packet or rejects if the connection did not send the expected packet after `timeoutTime` milliseconds
    */
   async awaitPacket(packetValidator: (packet: BaseRootPacket) => boolean, timeoutTime: number = 6000): Promise<BaseRootPacket> {
@@ -523,7 +523,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Sends an acknowledgement packet for the packet with the given ID.
    *
-   * @param nonce The ID of the packet being acknowledged
+   * @param nonce - The ID of the packet being acknowledged
    */
   private acknowledgePacket(nonce: number): void {
     this.send(new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))).serialize().getBuffer());
@@ -551,7 +551,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * Removes the packet with the given ID from the map of packets sent to the
    * connection that haven't been acknowledged.
    *
-   * @param nonce The ID of the packet that has been acknowledged
+   * @param nonce - The ID of the packet that has been acknowledged
    */
   private handleAcknowledgement(nonce: number): void {
     this.unacknowledgedPackets.delete(nonce);
@@ -560,7 +560,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Finishes initializing the connection after receiving a Hello packet.
    *
-   * @param helloPacket The connection's Hello packet
+   * @param helloPacket - The connection's Hello packet
    */
   private handleHello(helloPacket: HelloPacket): void {
     if (this.initialized) {
@@ -578,7 +578,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Sends a Disconnect packet to the connection.
    *
-   * @param reason The reason for why the connection was disconnected
+   * @param reason - The reason for why the connection was disconnected
    */
   private handleDisconnect(reason?: DisconnectReason): void {
     if (!this.requestedDisconnect) {
@@ -591,7 +591,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Stops sending packets at regular intervals to the connection.
    *
-   * @param reason The reason for why the connection was disconnected
+   * @param reason - The reason for why the connection was disconnected
    */
   private cleanup(reason?: DisconnectReason): void {
     clearInterval(this.flushInterval);
@@ -609,7 +609,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Sends the given byte buffer over the socket.
    *
-   * @param buffer The byte buffer to send over the socket
+   * @param buffer - The byte buffer to send over the socket
    */
   private send(buffer: Buffer): void {
     const outboundPacketTransformer = this.outboundPacketTransformerSupplier !== undefined

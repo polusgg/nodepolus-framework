@@ -7,8 +7,8 @@ import { PlayerInstance } from "../../player";
  */
 export class PlayerMurderedEvent extends PlayerDiedEvent {
   /**
-   * @param player The player that died
-   * @param killer The player that killed the victim
+   * @param player - The player that died
+   * @param killer - The player that killed the victim
    */
   constructor(
     player: PlayerInstance,

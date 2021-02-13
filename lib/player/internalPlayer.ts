@@ -29,9 +29,9 @@ export class InternalPlayer implements PlayerInstance {
   private initialized = false;
 
   /**
-   * @param lobby The lobby in which the player exists
-   * @param entity The entity that belongs to the player
-   * @param connection The connection to which the player belongs
+   * @param lobby - The lobby in which the player exists
+   * @param entity - The entity that belongs to the player
+   * @param connection - The connection to which the player belongs
    */
   constructor(
     public lobby: InternalLobby,
@@ -524,7 +524,7 @@ export class InternalPlayer implements PlayerInstance {
    * connection and server.
    *
    * @internal
-   * @param initialized `true` if the player has been initialized, `false` if not
+   * @param initialized - `true` if the player has been initialized, `false` if not
    */
   setInitialized(initialized: boolean): void {
     this.initialized = initialized;

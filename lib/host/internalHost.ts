@@ -114,7 +114,7 @@ export class InternalHost implements HostInstance {
   private decontaminationHandlers: DecontaminationHandler[] = [];
 
   /**
-   * @param lobby The lobby being controlled by the host
+   * @param lobby - The lobby being controlled by the host
    */
   constructor(
     private readonly lobby: InternalLobby,
@@ -1122,8 +1122,8 @@ export class InternalHost implements HostInstance {
    * Sets the give players task list.
    *
    * @internal
-   * @param player The player whose task list will be updates
-   * @param tasks The player's new tasks
+   * @param player - The player whose task list will be updates
+   * @param tasks - The player's new tasks
    */
   updatePlayerTasks(player: PlayerInstance, tasks: LevelTask[]): void {
     const gameData = this.lobby.getGameData();
@@ -1139,11 +1139,11 @@ export class InternalHost implements HostInstance {
    * Adds random tasks to the given list.
    *
    * @internal
-   * @param start The position in the source array to prevent an out-of-bounds array access
-   * @param count The number of tasks to add
-   * @param tasks The output array containing the random tasks
-   * @param usedTaskTypes The types of tasks that are already in the output array
-   * @param unusedTasks The source array of tasks
+   * @param start - The position in the source array to prevent an out-of-bounds array access
+   * @param count - The number of tasks to add
+   * @param tasks - The output array containing the random tasks
+   * @param usedTaskTypes - The types of tasks that are already in the output array
+   * @param unusedTasks - The source array of tasks
    */
   private addTasksFromList(
     start: { val: number },
@@ -1238,7 +1238,7 @@ export class InternalHost implements HostInstance {
    * Checks if the given name is already in use by another player.
    *
    * @internal
-   * @param name The name to be checked
+   * @param name - The name to be checked
    * @returns `true` if the name is already in use, `false` if not
    */
   private isNameTaken(name: string): boolean {
@@ -1255,7 +1255,7 @@ export class InternalHost implements HostInstance {
    * Gets all colors that are already in use by other players.
    *
    * @internal
-   * @param excludePlayerId The ID of a player whose color will be excluded from the results
+   * @param excludePlayerId - The ID of a player whose color will be excluded from the results
    * @returns The colors that are already in use
    */
   private getTakenColors(excludePlayerId: number): PlayerColor[] {
@@ -1283,7 +1283,7 @@ export class InternalHost implements HostInstance {
    * exist on the GameData instance.
    *
    * @internal
-   * @param player The player whose PlayerData will be checked
+   * @param player - The player whose PlayerData will be checked
    */
   private confirmPlayerData(player: InternalPlayer): void {
     const gameData = this.lobby.getGameData();

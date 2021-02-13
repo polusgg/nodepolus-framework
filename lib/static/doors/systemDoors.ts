@@ -73,7 +73,7 @@ export class SystemDoors {
   /**
    * Gets each system and their doors for the given level.
    *
-   * @param level The level whose systems and doors should be returned
+   * @param level - The level whose systems and doors should be returned
    */
   static forLevel(level: Level): Readonly<SystemDoorList> {
     switch (level) {
@@ -120,7 +120,7 @@ export class SystemDoors {
   /**
    * Gets the number of doors on the given level.
    *
-   * @param level The level whose number of doors should be returned
+   * @param level - The level whose number of doors should be returned
    */
   static countForLevel(level: Level): number {
     switch (level) {

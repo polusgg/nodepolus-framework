@@ -97,7 +97,7 @@ export class Vents {
   /**
    * Gets all static vent data for the given level.
    *
-   * @param level The level whose vents should be returned
+   * @param level - The level whose vents should be returned
    */
   static forLevel(level: Level): readonly Readonly<LevelVent>[] {
     switch (level) {
@@ -116,7 +116,7 @@ export class Vents {
   /**
    * Gets static vent data for the given IDs on The Skeld.
    *
-   * @param ids The IDs of the vents that should be returned
+   * @param ids - The IDs of the vents that should be returned
    * @returns An array of vents whose IDs were included in `ids`
    */
   static forSkeldFromId(ids: number[]): readonly Readonly<LevelVent>[] {
@@ -126,7 +126,7 @@ export class Vents {
   /**
    * Gets static vent data for the given IDs on MIRA HQ.
    *
-   * @param ids The IDs of the vents that should be returned
+   * @param ids - The IDs of the vents that should be returned
    * @returns An array of vents whose IDs were included in `ids`
    */
   static forMiraHqFromId(ids: number[]): readonly Readonly<LevelVent>[] {
@@ -136,7 +136,7 @@ export class Vents {
   /**
    * Gets static vent data for the given IDs on Polus.
    *
-   * @param ids The IDs of the vents that should be returned
+   * @param ids - The IDs of the vents that should be returned
    * @returns An array of vents whose IDs were included in `ids`
    */
   static forPolusFromId(ids: number[]): readonly Readonly<LevelVent>[] {
@@ -146,7 +146,7 @@ export class Vents {
   /**
    * Gets static vent data for the given IDs on Airship.
    *
-   * @param ids The IDs of the vents that should be returned
+   * @param ids - The IDs of the vents that should be returned
    * @returns An array of vents whose IDs were included in `ids`
    */
   static forAirshipFromId(ids: number[]): readonly Readonly<LevelVent>[] {
@@ -156,8 +156,8 @@ export class Vents {
   /**
    * Gets static vent data for the given IDs on the given level.
    *
-   * @param level The level whose vents will be searched
-   * @param ids The IDs of the vents that should be returned
+   * @param level - The level whose vents will be searched
+   * @param ids - The IDs of the vents that should be returned
    * @returns An array of vents whose IDs were included in `ids`
    */
   static forLevelFromId(level: Level, ids: number[]): readonly Readonly<LevelVent>[] {
@@ -177,7 +177,7 @@ export class Vents {
   /**
    * Gets static vent data for the vent at the given position on The Skeld.
    *
-   * @param position The position of the vent that should be returned
+   * @param position - The position of the vent that should be returned
    * @returns The vent at `position`, or `undefined` if there is no vent at `position`
    */
   static forSkeldFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
@@ -187,7 +187,7 @@ export class Vents {
   /**
    * Gets static vent data for the vent at the given position on MIRA HQ.
    *
-   * @param position The position of the vent that should be returned
+   * @param position - The position of the vent that should be returned
    * @returns The vent at `position`, or `undefined` if there is no vent at `position`
    */
   static forMiraHqFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
@@ -197,7 +197,7 @@ export class Vents {
   /**
    * Gets static vent data for the vent at the given position on Polus.
    *
-   * @param position The position of the vent that should be returned
+   * @param position - The position of the vent that should be returned
    * @returns The vent at `position`, or `undefined` if there is no vent at `position`
    */
   static forPolusFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
@@ -207,7 +207,7 @@ export class Vents {
   /**
    * Gets static vent data for the vent at the given position on Airship.
    *
-   * @param position The position of the vent that should be returned
+   * @param position - The position of the vent that should be returned
    * @returns The vent at `position`, or `undefined` if there is no vent at `position`
    */
   static forAirshipFromPosition(position: Vector2): Readonly<LevelVent> | undefined {
@@ -217,8 +217,8 @@ export class Vents {
   /**
    * Gets static vent data for the vent at the given position on the given level.
    *
-   * @param level The level whose vents will be searched
-   * @param position The position of the vent that should be returned
+   * @param level - The level whose vents will be searched
+   * @param position - The position of the vent that should be returned
    * @returns The vent at `position` on `level`, or `undefined` if there is no vent at `position`
    */
   static forLevelFromPosition(level: Level, position: Vector2): Readonly<LevelVent> | undefined {

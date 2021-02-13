@@ -8,9 +8,9 @@ import { LobbyInstance } from "../../lobby";
  */
 export class ServerLobbyJoinEvent extends DisconnectableEvent {
   /**
-   * @param connection The connection that is joining the lobby
-   * @param lobbyCode The lobby code provided by the connection
-   * @param lobby The lobby that is being joined
+   * @param connection - The connection that is joining the lobby
+   * @param lobbyCode - The lobby code provided by the connection
+   * @param lobby - The lobby that is being joined
    */
   constructor(
     private readonly connection: Connection,
@@ -46,7 +46,7 @@ export class ServerLobbyJoinEvent extends DisconnectableEvent {
   /**
    * Sets the lobby that is being joined.
    *
-   * @param lobby The new lobby that is being joined, or `undefined` to act as if the lobby was not found
+   * @param lobby - The new lobby that is being joined, or `undefined` to act as if the lobby was not found
    */
   setLobby(lobby?: LobbyInstance): void {
     this.lobby = lobby;

@@ -8,8 +8,8 @@ import { LobbyInstance } from "../../lobby";
  */
 export class ServerLobbyCreatedEvent extends DisconnectableEvent {
   /**
-   * @param connection The connection that created the lobby
-   * @param lobby The newly created lobby
+   * @param connection - The connection that created the lobby
+   * @param lobby - The newly created lobby
    */
   constructor(
     private readonly connection: Connection,

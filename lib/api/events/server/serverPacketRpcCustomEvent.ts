@@ -7,10 +7,10 @@ import { Connection } from "../../../protocol/connection";
  */
 export class ServerPacketRpcCustomEvent {
   /**
-   * @param connection The connection that sent the packet
-   * @param netId The ID of the InnerNetObject that sent the packet
-   * @param sender The InnerNetObject that sent the packet
-   * @param packet The RPC packet that was sent
+   * @param connection - The connection that sent the packet
+   * @param netId - The ID of the InnerNetObject that sent the packet
+   * @param sender - The InnerNetObject that sent the packet
+   * @param packet - The RPC packet that was sent
    */
   constructor(
     private readonly connection: Connection,

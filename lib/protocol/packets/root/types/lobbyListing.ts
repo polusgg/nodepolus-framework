@@ -7,15 +7,15 @@ import { Level } from "../../../../types/enums";
  */
 export class LobbyListing {
   /**
-   * @param ipAddress The IP address to which the server hosting the lobby is bound
-   * @param port The port on which the server hosting the lobby listens for packets
-   * @param lobbyCode The code for the lobby
-   * @param hostName The display name of the lobby
-   * @param playerCount The number of players in the lobby
-   * @param age The age, in seconds, of the lobby
-   * @param level The level that the lobby is set to play on
-   * @param impostorCount The max number of Impostors in the lobby
-   * @param maxPlayers The max number of players allowed in the lobby
+   * @param ipAddress - The IP address to which the server hosting the lobby is bound
+   * @param port - The port on which the server hosting the lobby listens for packets
+   * @param lobbyCode - The code for the lobby
+   * @param hostName - The display name of the lobby
+   * @param playerCount - The number of players in the lobby
+   * @param age - The age, in seconds, of the lobby
+   * @param level - The level that the lobby is set to play on
+   * @param impostorCount - The max number of Impostors in the lobby
+   * @param maxPlayers - The max number of players allowed in the lobby
    */
   constructor(
     private readonly ipAddress: string,
@@ -32,7 +32,7 @@ export class LobbyListing {
   /**
    * Gets a new LobbyListing by reading from the given MessageReader.
    *
-   * @param reader The MessageReader to read from
+   * @param reader - The MessageReader to read from
    */
   static deserialize(reader: MessageReader): LobbyListing {
     return new LobbyListing(
@@ -123,7 +123,7 @@ export class LobbyListing {
   /**
    * Writes the LobbyListing to the given MessageWriter
    *
-   * @param reader The MessageWriter to write to
+   * @param reader - The MessageWriter to write to
    */
   serialize(writer: MessageWriter): void {
     writer.writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet, 10)))

@@ -6,9 +6,9 @@ import { Game } from "../../game";
  */
 export class RoomCommunicationsConsoleClosedEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param player The player that closed the communications console
-   * @param console The communications console that was closed
+   * @param game - The game from which this event was fired
+   * @param player - The player that closed the communications console
+   * @param console - The communications console that was closed
    */
   constructor(
     private readonly game: Game,

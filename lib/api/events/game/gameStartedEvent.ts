@@ -6,8 +6,8 @@ import { Game } from "../../game";
  */
 export class GameStartedEvent {
   /**
-   * @param game The game that started
-   * @param impostors The players that were chosen to be an Impostor
+   * @param game - The game that started
+   * @param impostors - The players that were chosen to be an Impostor
    */
   constructor(
     private readonly game: Game,
@@ -31,7 +31,7 @@ export class GameStartedEvent {
   /**
    * Sets the players that will be assigned Impostor.
    *
-   * @param impostors The new players that will be assigned Impostor
+   * @param impostors - The new players that will be assigned Impostor
    */
   setImpostors(impostors: PlayerInstance[]): void {
     this.impostors = impostors;

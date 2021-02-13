@@ -6,8 +6,8 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerVotekickAddedEvent extends CancellableEvent {
   /**
-   * @param voter The player that cast the vote
-   * @param target The player that was voted to be kicked by the voting player
+   * @param voter - The player that cast the vote
+   * @param target - The player that was voted to be kicked by the voting player
    */
   constructor(
     private readonly voter: PlayerInstance,
@@ -33,7 +33,7 @@ export class PlayerVotekickAddedEvent extends CancellableEvent {
   /**
    * Sets the player that was voted to be kicked by the voting player.
    *
-   * @param target The new player that voted to be kicked by the voting player
+   * @param target - The new player that voted to be kicked by the voting player
    */
   setTarget(target: PlayerInstance): void {
     this.target = target;

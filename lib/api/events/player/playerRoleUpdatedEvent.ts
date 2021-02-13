@@ -7,9 +7,9 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerRoleUpdatedEvent extends CancellableEvent {
   /**
-   * @param player The player whose role was updatd
-   * @param newRole The player's old role
-   * @param oldRole The player's new role
+   * @param player - The player whose role was updatd
+   * @param newRole - The player's old role
+   * @param oldRole - The player's new role
    */
   constructor(
     private readonly player: PlayerInstance,
@@ -45,7 +45,7 @@ export class PlayerRoleUpdatedEvent extends CancellableEvent {
   /**
    * Sets the player's new role.
    *
-   * @param newRole The player's new role
+   * @param newRole - The player's new role
    */
   setNetRole(newRole: PlayerRole): void {
     this.newRole = newRole;

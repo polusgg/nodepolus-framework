@@ -10,8 +10,8 @@ export abstract class BasePlugin {
   private readonly logger: Logger;
 
   /**
-   * @param server The NodePolus server instance
-   * @param pluginMetadata The metadata for the plugin
+   * @param server - The NodePolus server instance
+   * @param pluginMetadata - The metadata for the plugin
    */
   constructor(
     private readonly server: Server,

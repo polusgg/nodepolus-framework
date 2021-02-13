@@ -6,9 +6,9 @@ import { Game } from "../../game";
  */
 export class GameScannerQueuedEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param player The player that entered the queue for the Medbay scanner
-   * @param queue The queue for the Medbay scanner, *excluding* the player that entered
+   * @param game - The game from which this event was fired
+   * @param player - The player that entered the queue for the Medbay scanner
+   * @param queue - The queue for the Medbay scanner, *excluding* the player that entered
    */
   constructor(
     private readonly game: Game,

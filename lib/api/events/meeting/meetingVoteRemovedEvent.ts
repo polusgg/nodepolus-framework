@@ -7,8 +7,8 @@ import { Game } from "../../game";
  */
 export class MeetingVoteRemovedEvent extends CancellableEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param player The player whose vote is being cleared
+   * @param game - The game from which this event was fired
+   * @param player - The player whose vote is being cleared
    */
   constructor(
     private readonly game: Game,
@@ -34,7 +34,7 @@ export class MeetingVoteRemovedEvent extends CancellableEvent {
   /**
    * Sets the player whose vote is being cleared.
    *
-   * @param player The new player whose vote is being cleared
+   * @param player - The new player whose vote is being cleared
    */
   setPlayer(player: PlayerInstance): void {
     this.player = player;

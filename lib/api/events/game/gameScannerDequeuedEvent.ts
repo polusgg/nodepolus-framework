@@ -7,9 +7,9 @@ import { Game } from "../../game";
  */
 export class GameScannerDequeuedEvent extends CancellableEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param player The player that left the queue for the Medbay scanner
-   * @param queue The queue for the Medbay scanner, *excluding* the player that left
+   * @param game - The game from which this event was fired
+   * @param player - The player that left the queue for the Medbay scanner
+   * @param queue - The queue for the Medbay scanner, *excluding* the player that left
    */
   constructor(
     private readonly game: Game,
@@ -43,7 +43,7 @@ export class GameScannerDequeuedEvent extends CancellableEvent {
   /**
    * Sets the queue for the Medbay scanner.
    *
-   * @param queue The new queue for the Medbay scanner
+   * @param queue - The new queue for the Medbay scanner
    */
   setQueue(queue: Set<PlayerInstance>): void {
     this.queue = queue;

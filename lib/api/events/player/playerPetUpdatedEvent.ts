@@ -7,9 +7,9 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerPetUpdatedEvent extends CancellableEvent {
   /**
-   * @param player The player whose pet was updated
-   * @param oldPet The player's old pet
-   * @param newPet The player's new pet
+   * @param player - The player whose pet was updated
+   * @param oldPet - The player's old pet
+   * @param newPet - The player's new pet
    */
   constructor(
     private readonly player: PlayerInstance,
@@ -43,7 +43,7 @@ export class PlayerPetUpdatedEvent extends CancellableEvent {
   /**
    * Sets the player's new pet.
    *
-   * @param newPet The player's new pet
+   * @param newPet - The player's new pet
    */
   setNewPet(newPet: PlayerPet): void {
     this.newPet = newPet;

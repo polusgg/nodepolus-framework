@@ -7,8 +7,8 @@ import { Game } from "../../game";
  */
 export class GameScannerStartedEvent extends CancellableEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param player The player that started scanning on the Medbay scanner
+   * @param game - The game from which this event was fired
+   * @param player - The player that started scanning on the Medbay scanner
    */
   constructor(
     private readonly game: Game,

@@ -7,9 +7,9 @@ import { LevelTask } from "../../../types";
  */
 export class PlayerTaskCompletedEvent extends CancellableEvent {
   /**
-   * @param player The player that completed a task
-   * @param taskIndex The index of the task that was completed from the player's task list
-   * @param task The task that was completed
+   * @param player - The player that completed a task
+   * @param taskIndex - The index of the task that was completed from the player's task list
+   * @param task - The task that was completed
    */
   constructor(
     private readonly player: PlayerInstance,

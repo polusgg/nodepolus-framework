@@ -5,9 +5,9 @@ import { PlayerInstance } from "../api/player";
  */
 export class VoteResult {
   /**
-   * @param player The player that the VoteResult belongs to
-   * @param votedFor The player that was voted for
-   * @param skipped `true` if the vote was to skip, `false` if not
+   * @param player - The player that the VoteResult belongs to
+   * @param votedFor - The player that was voted for
+   * @param skipped - `true` if the vote was to skip, `false` if not
    */
   constructor(
     private readonly player: PlayerInstance,
@@ -34,7 +34,7 @@ export class VoteResult {
   /**
    * Sets the player that was voted for.
    *
-   * @param votedFor The player that was voted for, or `undefined` to indicate that the player did not cast a vote
+   * @param votedFor - The player that was voted for, or `undefined` to indicate that the player did not cast a vote
    */
   setVotedFor(votedFor?: PlayerInstance): void {
     this.votedFor = votedFor;
@@ -52,7 +52,7 @@ export class VoteResult {
   /**
    * Sets whether or not the vote was to skip.
    *
-   * @param isSkipping `true` to set the vote to skip, `false` for a regular vote or to indicate that the player did not cast a vote (default `true`)
+   * @param isSkipping - `true` to set the vote to skip, `false` for a regular vote or to indicate that the player did not cast a vote (default `true`)
    */
   setSkipping(isSkipping: boolean = true): void {
     this.skipped = isSkipping;

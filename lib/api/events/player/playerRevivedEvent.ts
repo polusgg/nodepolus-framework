@@ -6,7 +6,7 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerRevivedEvent extends CancellableEvent {
   /**
-   * @param player The player that was revived
+   * @param player - The player that was revived
    */
   constructor(
     private readonly player: PlayerInstance,

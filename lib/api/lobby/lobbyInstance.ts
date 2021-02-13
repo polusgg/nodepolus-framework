@@ -113,14 +113,14 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Adds the given connection to the lobby.
    *
-   * @param connection The connection to be added to the lobby
+   * @param connection - The connection to be added to the lobby
    */
   addConnection(connection: Connection): void;
 
   /**
    * Removes the given connection from the lobby.
    *
-   * @param connection The connection to be removed from the lobby
+   * @param connection - The connection to be removed from the lobby
    */
   removeConnection(connection: Connection): void;
 
@@ -132,7 +132,7 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Adds the given player to the lobby.
    *
-   * @param player The player to be added to the lobby
+   * @param player - The player to be added to the lobby
    */
   addPlayer(player: PlayerInstance): void;
 
@@ -144,14 +144,14 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Removes the given player from the lobby.
    *
-   * @param player The player to be removed from the lobby
+   * @param player - The player to be removed from the lobby
    */
   removePlayer(player: PlayerInstance): void;
 
   /**
    * Gets the first InnerNetObject whose ID matches the given ID.
    *
-   * @param netId The ID of the InnerNetObject
+   * @param netId - The ID of the InnerNetObject
    * @returns The InnerNetObject, or `undefined` if no InnerNetObject in the lobby has the ID `netId`
    */
   findInnerNetObject(netId: number): BaseInnerNetObject | undefined;
@@ -159,7 +159,7 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Gets the first player with the given client ID.
    *
-   * @param clientId The ID of the connection
+   * @param clientId - The ID of the connection
    * @returns The player, or `undefined` if no players in the lobby belong to a connection with the ID `clientId`
    */
   findPlayerByClientId(clientId: number): PlayerInstance | undefined;
@@ -167,7 +167,7 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Gets the first player with the given player ID.
    *
-   * @param playerId The ID of the player
+   * @param playerId - The ID of the player
    * @returns The player, or `undefined` if no players in the lobby have the ID `playerId`
    */
   findPlayerByPlayerId(playerId: number): PlayerInstance | undefined;
@@ -175,7 +175,7 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Gets the first player with the given net ID.
    *
-   * @param netId The ID of the InnerNetObject
+   * @param netId - The ID of the InnerNetObject
    * @returns The player, or `undefined` if no players in the lobby have an InnerNetObject with the ID `netId`
    */
   findPlayerByNetId(netId: number): PlayerInstance | undefined;
@@ -183,7 +183,7 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Gets the first player belonging to the given connection.
    *
-   * @param connection The connection to which the player belongs
+   * @param connection - The connection to which the player belongs
    * @returns The player, or `undefined` if no players in the lobby belong to `connection`
    */
   findPlayerByConnection(connection: Connection): PlayerInstance | undefined;
@@ -191,7 +191,7 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Gets the first player that owns the given entity.
    *
-   * @param entity The entity that belongs to the player
+   * @param entity - The entity that belongs to the player
    * @returns The player, or `undefined` if no players in the lobby own `entity`
    */
   findPlayerByEntity(entity: EntityPlayer): PlayerInstance | undefined;
@@ -199,14 +199,14 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Gets the index of the first player belonging to the given connection.
    *
-   * @param connection The connection to which the player belongs
+   * @param connection - The connection to which the player belongs
    */
   findPlayerIndexByConnection(connection: Connection): number;
 
   /**
    * Gets the connection with the given client ID.
    *
-   * @param clientId The ID of the connection
+   * @param clientId - The ID of the connection
    * @returns The connection, or `undefined` if no connections in the lobby have the ID `clientId`
    */
   findConnection(id: number): Connection | undefined;
@@ -219,7 +219,7 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Sets the GameData instance for the lobby.
    *
-   * @param gameData The lobby's new GameData instance
+   * @param gameData - The lobby's new GameData instance
    */
   setGameData(gameData: EntityGameData): void;
 
@@ -236,7 +236,7 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Sets the LobbyBehaviour instance for the lobby.
    *
-   * @param lobbyBehaviour The lobby's new LobbyBehaviour instance
+   * @param lobbyBehaviour - The lobby's new LobbyBehaviour instance
    */
   setLobbyBehaviour(lobbyBehaviour: EntityLobbyBehaviour): void;
 
@@ -253,7 +253,7 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Sets the ShipStatus instance for the lobby.
    *
-   * @param shipStatus The lobby's new ShipStatus instance
+   * @param shipStatus - The lobby's new ShipStatus instance
    */
   setShipStatus(shipStatus: BaseEntityShipStatus): void;
 
@@ -270,7 +270,7 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Sets the MeetingHud instance for the lobby.
    *
-   * @param meetingHud The lobby's new MeetingHud instance
+   * @param meetingHud - The lobby's new MeetingHud instance
    */
   setMeetingHud(meetingHud: EntityMeetingHud): void;
 
@@ -302,15 +302,15 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Gets the given game tag for the lobby.
    *
-   * @param gameTag The game tag whose value will be returned
+   * @param gameTag - The game tag whose value will be returned
    */
   getGameTag(gameTag: AlterGameTag): number | undefined;
 
   /**
    * Sets the given game tag for the lobby.
    *
-   * @param gameTag The game tag whose value will be set
-   * @param value The value to be set
+   * @param gameTag - The game tag whose value will be set
+   * @param value - The value to be set
    */
   setGameTag(gameTag: AlterGameTag, value: number): void;
 
@@ -322,31 +322,31 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Sets the game state of the lobby.
    *
-   * @param gameState The lobby's new game state
+   * @param gameState - The lobby's new game state
    */
   setGameState(gameState: GameState): void;
 
   /**
    * Sends the given RPC packet to the given connections.
    *
-   * @param from The InnerNetObject from which the packet will be sent
-   * @param packet The packet to be sent
-   * @param sendTo The connections to which the packet will be sent
+   * @param from - The InnerNetObject from which the packet will be sent
+   * @param packet - The packet to be sent
+   * @param sendTo - The connections to which the packet will be sent
    */
   sendRpcPacket(from: BaseInnerNetObject, packet: BaseRpcPacket, sendTo?: Connection[]): void;
 
   /**
    * Spawns an entity in the lobby.
    *
-   * @param entity The lobby to nbe spawned
+   * @param entity - The lobby to nbe spawned
    */
   spawn(entity: BaseInnerNetEntity): void;
 
   /**
    * Spawns a player in the lobby.
    *
-   * @param player The player to be spawned
-   * @param playerData The data for the spawned player
+   * @param player - The player to be spawned
+   * @param playerData - The data for the spawned player
    * @returns The PlayerInstance for the spawned player
    */
   spawnPlayer(player: EntityPlayer, playerData: PlayerData): PlayerInstance;
@@ -354,7 +354,7 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Despawns the given InnerNetObject.
    *
-   * @param innerNetObject The InnerNetObject to be despawned
+   * @param innerNetObject - The InnerNetObject to be despawned
    */
   despawn(innerNetObject: BaseInnerNetObject): void;
 
@@ -366,10 +366,10 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Sends a server message in the lobby chat window.
    *
-   * @param name The chat message avatar's name
-   * @param color The chat message avatar's color
-   * @param message The message to be sent
-   * @param onLeft `true` to display the message on the left-hand side, `false` to display it on the right-hand side
+   * @param name - The chat message avatar's name
+   * @param color - The chat message avatar's color
+   * @param message - The message to be sent
+   * @param onLeft - `true` to display the message on the left-hand side, `false` to display it on the right-hand side
    */
   sendChat(name: string, color: PlayerColor, message: string | TextComponent, onLeft: boolean): void;
 }

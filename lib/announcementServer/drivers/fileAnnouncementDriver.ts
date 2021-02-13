@@ -9,7 +9,7 @@ import fs from "fs/promises";
  */
 export class FileAnnouncementDriver extends BaseAnnouncementDriver {
   /**
-   * @param jsonFilePath The absolute path to the JSON file containing the announcement
+   * @param jsonFilePath - The absolute path to the JSON file containing the announcement
    */
   constructor(
     private readonly jsonFilePath: string,
@@ -49,7 +49,7 @@ export class FileAnnouncementDriver extends BaseAnnouncementDriver {
   /**
    * Checks if the given announcement contains all necessary data.
    *
-   * @param data The announcement to be checked
+   * @param data - The announcement to be checked
    * @returns `true` if the announcement data is valid, `false` if not
    */
   private isValidAnnouncement(data: AnnouncementData): data is Required<AnnouncementData> {

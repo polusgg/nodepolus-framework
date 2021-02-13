@@ -7,9 +7,9 @@ import { Game } from "../../game";
  */
 export class RoomCommunicationsConsoleRepairedEvent extends CancellableEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param console The communications console that was repaired
-   * @param player The player that repaired the communications console
+   * @param game - The game from which this event was fired
+   * @param console - The communications console that was repaired
+   * @param player - The player that repaired the communications console
    */
   constructor(
     private readonly game: Game,

@@ -80,7 +80,7 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
   /**
    * Sets the driver used to fetch announcements.
    *
-   * @param driver The new announcement driver
+   * @param driver - The new announcement driver
    */
   setDriver(driver?: BaseAnnouncementDriver): this {
     this.logger.debug("Driver set to %s", driver?.constructor.name);
@@ -95,7 +95,7 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
    * names to all connections.
    *
    * @experimental
-   * @param sendLanguages `true` to send custom language names, `false` to only send announcements
+   * @param sendLanguages - `true` to send custom language names, `false` to only send announcements
    */
   sendLanguagesOnHello(sendLanguages: boolean = true): this {
     this.sendLanguages = sendLanguages;
@@ -107,7 +107,7 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
    * Sets the custom language names.
    *
    * @experimental
-   * @param languages The custom language names
+   * @param languages - The custom language names
    */
   setLanguages(languages: Map<number, string>): this {
     this.languages = languages;
@@ -119,8 +119,8 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
    * Sets a custom language name.
    *
    * @experimental
-   * @param id The ID of the language name
-   * @param text The language name
+   * @param id - The ID of the language name
+   * @param text - The language name
    */
   setLanguage(id: number, text: string): this {
     this.languages.set(id, text);
@@ -132,7 +132,7 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
    * Removes the language name with the given ID.
    *
    * @experimental
-   * @param id The ID of the language name to be removed
+   * @param id - The ID of the language name to be removed
    */
   deleteLanguage(id: number): this {
     this.languages.delete(id);
@@ -144,7 +144,7 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
    * Adds a custom language name.
    *
    * @experimental
-   * @param text The custom language name
+   * @param text - The custom language name
    */
   addLanguage(text: string): this {
     const id = this.languages.entries()[this.languages.size - 1].id + 1;

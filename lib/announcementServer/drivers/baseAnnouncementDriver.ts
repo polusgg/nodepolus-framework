@@ -55,7 +55,7 @@ export abstract class BaseAnnouncementDriver {
    * This will force the announcement to display __*every time*__ the user
    * returns to the main menu.
    *
-   * @param force `true` to force the announcement to be displayed, `false` to respect the client cache
+   * @param force - `true` to force the announcement to be displayed, `false` to respect the client cache
    */
   setForceShowAnnouncement(force: boolean = false): this {
     this.forceShowAnnouncement = force;
@@ -72,10 +72,10 @@ export abstract class BaseAnnouncementDriver {
    *
    * Override this method if its implementation does not suit your needs.
    *
-   * @param connection The connection requesting the latest announcement
-   * @param announcementVersion The version of announcements that the connection is expecting
-   * @param lastAnnouncementId The ID of the last announcement that the connection received
-   * @param language The language in which the connection is requesting the announcement text
+   * @param connection - The connection requesting the latest announcement
+   * @param announcementVersion - The version of announcements that the connection is expecting
+   * @param lastAnnouncementId - The ID of the last announcement that the connection received
+   * @param language - The language in which the connection is requesting the announcement text
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async onRequest(connectionInfo: ConnectionInfo, announcementVersion: number, lastAnnouncementId: number, language: ClientLanguage): Promise<Announcement | undefined> {
@@ -95,7 +95,7 @@ export abstract class BaseAnnouncementDriver {
    * necessary, and updates `latestAnnouncement` if the fetched announcement has
    * an ID that differs from that of the cached announcement.
    *
-   * @param force `true` to force a data fetch operation, `false` to use the refresh rate returned by `getRefreshRate()`
+   * @param force - `true` to force a data fetch operation, `false` to use the refresh rate returned by `getRefreshRate()`
    * @returns A promise that resolves to `true` if the fetched announcement is different from the cached `latestAnnouncement`, `false` if not
    */
   async refresh(force: boolean = false): Promise<boolean> {
@@ -120,7 +120,7 @@ export abstract class BaseAnnouncementDriver {
    * Gets a dynamic ID based on the given ID in order to force a client to
    * display the announcement.
    *
-   * @param lastAnnouncementId The ID of the last announcement that the connection received
+   * @param lastAnnouncementId - The ID of the last announcement that the connection received
    */
   protected getForcefulAnnouncementId(lastAnnouncementId: number): number {
     return lastAnnouncementId % 5 == 0 ? --lastAnnouncementId : ++lastAnnouncementId;

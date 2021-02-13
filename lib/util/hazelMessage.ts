@@ -6,9 +6,9 @@ import { Vector2 } from "../types";
  * Gets the result of `value`, clamped in the range of `0..1`, and linearly
  * interpolated in the range of `min..max`.
  *
- * @param min The minimum value
- * @param max The maximum value
- * @param value The raw value
+ * @param min - The minimum value
+ * @param max - The maximum value
+ * @param value - The raw value
  * @returns The linearly interpolated `value`
  */
 function lerp(min: number, max: number, value: number): number {
@@ -19,9 +19,9 @@ function lerp(min: number, max: number, value: number): number {
  * Gets the result of `value`, normalized in the range of `min..max`, and
  * clamped in the range of `0..1`.
  *
- * @param min The minimum value
- * @param max The maximum value
- * @param value The linearly interpolated value
+ * @param min - The minimum value
+ * @param max - The maximum value
+ * @param value - The linearly interpolated value
  * @returns The normalized `value`
  */
 function unlerp(min: number, max: number, value: number): number {
@@ -42,8 +42,8 @@ export abstract class HazelMessage {
   protected cursor = 0;
 
   /**
-   * @param source The data source to read into the underlying buffer (default `0`)
-   * @param isHex `true` if `source` is a hexadecimal string, `false` if not (default `true`)
+   * @param source - The data source to read into the underlying buffer (default `0`)
+   * @param isHex - `true` if `source` is a hexadecimal string, `false` if not (default `true`)
    */
   constructor(source: BuildFrom = 0, isHex: boolean = true) {
     if (source instanceof HazelMessage) {
@@ -89,7 +89,7 @@ export class MessageWriter extends HazelMessage {
    * Gets a new MessageWriter by combining the underlying buffers of each given
    * MessageWriter.
    *
-   * @param writers The MessageWriters to combine
+   * @param writers - The MessageWriters to combine
    * @returns A new MessageWriter containing the data from all `writers`
    */
   static concat(...writers: HazelMessage[]): MessageWriter {
@@ -103,7 +103,7 @@ export class MessageWriter extends HazelMessage {
   /**
    * Starts a new nested message with the given tag.
    *
-   * @param tag The tag for the message
+   * @param tag - The tag for the message
    */
   startMessage(tag: number = 0): this {
     this.writeUInt16(0).writeByte(tag % 256);
@@ -138,7 +138,7 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes a boolean.
    *
-   * @param value The boolean to write
+   * @param value - The boolean to write
    */
   writeBoolean(value: boolean): this {
     return this.writeByte(value ? 1 : 0);
@@ -147,7 +147,7 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes a signed byte (sbyte).
    *
-   * @param value The sbyte to write
+   * @param value - The sbyte to write
    */
   writeSByte(value: number): this {
     this.resizeBuffer(1);
@@ -164,7 +164,7 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes an unsigned byte.
    *
-   * @param value The byte to write
+   * @param value - The byte to write
    */
   writeByte(value: number): this {
     this.resizeBuffer(1);
@@ -181,8 +181,8 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes a 16-bit integer (short).
    *
-   * @param value The int16 to write
-   * @param isBigEndian `true` if the int16 should be written in Big Endian byte order, `false` if not (default `false`)
+   * @param value - The int16 to write
+   * @param isBigEndian - `true` if the int16 should be written in Big Endian byte order, `false` if not (default `false`)
    */
   writeInt16(value: number, isBigEndian: boolean = false): this {
     this.resizeBuffer(2);
@@ -201,8 +201,8 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes an unsigned 16-bit integer (ushort).
    *
-   * @param value The uint16 to write
-   * @param isBigEndian `true` if the uint16 should be written in Big Endian byte order, `false` if not (default `false`)
+   * @param value - The uint16 to write
+   * @param isBigEndian - `true` if the uint16 should be written in Big Endian byte order, `false` if not (default `false`)
    */
   writeUInt16(value: number, isBigEndian: boolean = false): this {
     this.resizeBuffer(2);
@@ -221,8 +221,8 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes a 32-bit integer (int).
    *
-   * @param value The int32 to write
-   * @param isBigEndian `true` if the int32 should be written in Big Endian byte order, `false` if not (default `false`)
+   * @param value - The int32 to write
+   * @param isBigEndian - `true` if the int32 should be written in Big Endian byte order, `false` if not (default `false`)
    */
   writeInt32(value: number, isBigEndian: boolean = false): this {
     this.resizeBuffer(4);
@@ -241,8 +241,8 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes an unsigned 32-bit integer (uint).
    *
-   * @param value The uint32 to write
-   * @param isBigEndian `true` if the uint32 should be written in Big Endian byte order, `false` if not (default `false`)
+   * @param value - The uint32 to write
+   * @param isBigEndian - `true` if the uint32 should be written in Big Endian byte order, `false` if not (default `false`)
    */
   writeUInt32(value: number, isBigEndian: boolean = false): this {
     this.resizeBuffer(4);
@@ -261,8 +261,8 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes a single-precision floating-point number (single).
    *
-   * @param value The float32 to write
-   * @param isBigEndian `true` if the float32 should be written in Big Endian byte order, `false` if not (default `false`)
+   * @param value - The float32 to write
+   * @param isBigEndian - `true` if the float32 should be written in Big Endian byte order, `false` if not (default `false`)
    */
   writeFloat32(value: number, isBigEndian: boolean = false): this {
     this.resizeBuffer(4);
@@ -280,7 +280,7 @@ export class MessageWriter extends HazelMessage {
    * This will write one uint16 for the normalized `x` value and one uint16 for
    * the normalized `y` value.
    *
-   * @param value The Vector2 to write
+   * @param value - The Vector2 to write
    */
   writeVector2(value: Vector2): this {
     return this.writeUInt16(unlerp(-40, 40, value.getX()) * 65535.0)
@@ -292,7 +292,7 @@ export class MessageWriter extends HazelMessage {
    *
    * This will first write a packed uint32 describing the string's byte length.
    *
-   * @param value The string to write
+   * @param value - The string to write
    */
   writeString(value: string): this {
     return this.writeBytesAndSize(value);
@@ -301,7 +301,7 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes a packed 32-bit integer (int).
    *
-   * @param value The packet int32 to write
+   * @param value - The packet int32 to write
    */
   writePackedInt32(value: number): this {
     if (value > MaxValue.Int32 || value < MinValue.Int32) {
@@ -314,7 +314,7 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes a packed unsigned 32-bit integer (uint).
    *
-   * @param value The packet uint32 to write
+   * @param value - The packet uint32 to write
    */
   writePackedUInt32(value: number): this {
     if (value > MaxValue.UInt32 || value < MinValue.UInt32) {
@@ -340,7 +340,7 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes the given data as raw bytes.
    *
-   * @param bytes The data to write
+   * @param bytes - The data to write
    */
   writeBytes(bytes: Buffer | number[] | string | HazelMessage): this {
     if (bytes instanceof HazelMessage) {
@@ -361,7 +361,7 @@ export class MessageWriter extends HazelMessage {
    * Writes the given data as raw bytes, prefixed with the byte length of the
    * data as a packed uint32.
    *
-   * @param bytes The data to write
+   * @param bytes - The data to write
    */
   writeBytesAndSize(bytes: Buffer | number[] | string | HazelMessage): this {
     if (bytes instanceof HazelMessage) {
@@ -379,10 +379,10 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes the given items inside the given `writer` function.
    *
-   * @typeParam T The type of items that will be written
-   * @param items The items to write
-   * @param writer The function used to serialize each item
-   * @param lengthIsPacked `true` if the length prefixing the list should be a packed uint32, `false` if it should be a byte
+   * @typeParam T - The type of items that will be written
+   * @param items - The items to write
+   * @param writer - The function used to serialize each item
+   * @param lengthIsPacked - `true` if the length prefixing the list should be a packed uint32, `false` if it should be a byte
    */
   writeList<T>(
     items: Iterable<T>,
@@ -411,11 +411,11 @@ export class MessageWriter extends HazelMessage {
    * If each nested MessageWriter should have a unique or variable tag, then use
    * `writeList` instead and create a new message inside the writer function.
    *
-   * @typeParam T The type of items that will be written
-   * @param items The items to write
-   * @param writer The function used to serialize each item
-   * @param lengthIsPacked `true` if the length prefixing the list should be a packed uint32, `false` if it should be a byte
-   * @param defaultTag The tag to be used for each nested MessageWriter (default `0`)
+   * @typeParam T - The type of items that will be written
+   * @param items - The items to write
+   * @param writer - The function used to serialize each item
+   * @param lengthIsPacked - `true` if the length prefixing the list should be a packed uint32, `false` if it should be a byte
+   * @param defaultTag - The tag to be used for each nested MessageWriter (default `0`)
    */
   writeMessageList<T>(
     items: Iterable<T>,
@@ -435,7 +435,7 @@ export class MessageWriter extends HazelMessage {
   /**
    * Recreates the buffer with an adjusted size.
    *
-   * @param addend The number of octects to add to the end of the buffer
+   * @param addend - The number of octects to add to the end of the buffer
    */
   private resizeBuffer(addend: number): void {
     let newLength = this.cursor + addend;
@@ -461,8 +461,8 @@ export class MessageReader extends HazelMessage {
   /**
    * Gets a new MessageReader with the length and tag read from `source`.
    *
-   * @param source The data source to read into the underlying buffer (default `0`)
-   * @param isHex `true` if `source` is a hexadecimal string, `false` if not (default `true`)
+   * @param source - The data source to read into the underlying buffer (default `0`)
+   * @param isHex - `true` if `source` is a hexadecimal string, `false` if not (default `true`)
    */
   static fromMessage(source: BuildFrom = 0, isHex: boolean = true): MessageReader {
     const reader = new MessageReader(source, isHex);
@@ -478,8 +478,8 @@ export class MessageReader extends HazelMessage {
    * Gets a new MessageReader with the length set to the length of bytes in
    * `source`, and the tag set to `0xff`.
    *
-   * @param source The data source to read into the underlying buffer (default `0`)
-   * @param isHex `true` if `source` is a hexadecimal string, `false` if not (default `true`)
+   * @param source - The data source to read into the underlying buffer (default `0`)
+   * @param isHex - `true` if `source` is a hexadecimal string, `false` if not (default `true`)
    */
   static fromRawBytes(source: BuildFrom = 0, isHex: boolean = true): MessageReader {
     const reader = new MessageReader(source, isHex);
@@ -557,7 +557,7 @@ export class MessageReader extends HazelMessage {
   /**
    * Reads a 16-bit integer (short).
    *
-   * @param isBigEndian `true` if the int16 should be read in Big Endian byte order, `false` if not (default `false`)
+   * @param isBigEndian - `true` if the int16 should be read in Big Endian byte order, `false` if not (default `false`)
    */
   readInt16(isBigEndian: boolean = false): number {
     const val = this.buffer[isBigEndian ? "readInt16BE" : "readInt16LE"](this.cursor);
@@ -570,7 +570,7 @@ export class MessageReader extends HazelMessage {
   /**
    * Reads an unsigned 16-bit integer (ushort).
    *
-   * @param isBigEndian `true` if the uint16 should be read in Big Endian byte order, `false` if not (default `false`)
+   * @param isBigEndian - `true` if the uint16 should be read in Big Endian byte order, `false` if not (default `false`)
    */
   readUInt16(isBigEndian: boolean = false): number {
     const val = this.buffer[isBigEndian ? "readUInt16BE" : "readUInt16LE"](this.cursor);
@@ -583,7 +583,7 @@ export class MessageReader extends HazelMessage {
   /**
    * Reads a 32-bit integer (int).
    *
-   * @param isBigEndian `true` if the int32 should be read in Big Endian byte order, `false` if not (default `false`)
+   * @param isBigEndian - `true` if the int32 should be read in Big Endian byte order, `false` if not (default `false`)
    */
   readInt32(isBigEndian: boolean = false): number {
     const val = this.buffer[isBigEndian ? "readInt32BE" : "readInt32LE"](this.cursor);
@@ -596,7 +596,7 @@ export class MessageReader extends HazelMessage {
   /**
    * Reads an unsigned 32-bit integer (uint).
    *
-   * @param isBigEndian `true` if the uint32 should be read in Big Endian byte order, `false` if not (default `false`)
+   * @param isBigEndian - `true` if the uint32 should be read in Big Endian byte order, `false` if not (default `false`)
    */
   readUInt32(isBigEndian: boolean = false): number {
     const val = this.buffer[isBigEndian ? "readUInt32BE" : "readUInt32LE"](this.cursor);
@@ -609,7 +609,7 @@ export class MessageReader extends HazelMessage {
   /**
    * Reads a single-precision floating-point number (single).
    *
-   * @param isBigEndian `true` if the float32 should be read in Big Endian byte order, `false` if not (default `false`)
+   * @param isBigEndian - `true` if the float32 should be read in Big Endian byte order, `false` if not (default `false`)
    */
   readFloat32(isBigEndian: boolean = false): number {
     const val = this.buffer[isBigEndian ? "readFloatBE" : "readFloatLE"](this.cursor);
@@ -680,7 +680,7 @@ export class MessageReader extends HazelMessage {
   /**
    * Gets a new MessageReader with the given number of read bytes.
    *
-   * @param length The number of bytes to read
+   * @param length - The number of bytes to read
    */
   readBytes(length: number): MessageReader {
     const available = this.getReadableBytesLength();
@@ -718,9 +718,9 @@ export class MessageReader extends HazelMessage {
    * Gets an array of items read from the MessageReader in the given `reader`
    * function.
    *
-   * @typeParam T The type of items that will be returned
-   * @param reader The function used to deserialize each item
-   * @param lengthIsPacked `true` if the length prefixing the list is a packed uint32, `false` if it is a byte
+   * @typeParam T - The type of items that will be returned
+   * @param reader - The function used to deserialize each item
+   * @param lengthIsPacked - `true` if the length prefixing the list is a packed uint32, `false` if it is a byte
    */
   readList<T>(reader: (subReader: MessageReader) => T, lengthIsPacked: boolean = true): T[] {
     const length = lengthIsPacked ? this.readPackedUInt32() : this.readByte();
@@ -737,9 +737,9 @@ export class MessageReader extends HazelMessage {
    * Gets an array of items read from the MessageReader in the given `reader`
    * function, where each item is inside a nested MessageReader.
    *
-   * @typeParam T The type of items that will be returned
-   * @param reader The function used to deserialize each item
-   * @param lengthIsPacked `true` if the length prefixing the list is a packed uint32, `false` if it is a byte
+   * @typeParam T - The type of items that will be returned
+   * @param reader - The function used to deserialize each item
+   * @param lengthIsPacked - `true` if the length prefixing the list is a packed uint32, `false` if it is a byte
    */
   readMessageList<T>(reader: (subReader: MessageReader) => T, lengthIsPacked: boolean = true): T[] {
     return this.readList((sub: MessageReader) => {
@@ -771,8 +771,8 @@ export class MessageReader extends HazelMessage {
    * Gets an array of items read from the MessageReader in the given `reader`
    * function, where each item is inside a nested MessageReader.
    *
-   * @typeParam T The type of items that will be returned
-   * @param reader The function used to deserialize each item
+   * @typeParam T - The type of items that will be returned
+   * @param reader - The function used to deserialize each item
    */
   readAllChildMessages<T>(reader: (child: MessageReader, index: number) => T): T[] {
     const children = this.getAllChildMessages();
@@ -789,15 +789,15 @@ export class MessageReader extends HazelMessage {
    * Gets the numeric value of the byte at the given position without advancing
    * the cursor.
    *
-   * @param position The position of the byte to peek at
+   * @param position - The position of the byte to peek at
    */
   peek(position: number): number;
   /**
    * Gets the numeric value of the given amount of bytes at the given position
    * without advancing the cursor.
    *
-   * @param position The starting position of the sbyte to peek at
-   * @param length The amount of bytes to peek at
+   * @param position - The starting position of the sbyte to peek at
+   * @param length - The amount of bytes to peek at
    */
   peek(position: number, length: number): number[];
   /**
@@ -805,8 +805,8 @@ export class MessageReader extends HazelMessage {
    * or the numeric value of the byte at the given position, without advancing
    * the cursor.
    *
-   * @param position The starting position of the sbyte to peek at
-   * @param length The amount of bytes to peek at, or `undefined` to only peet at one byte
+   * @param position - The starting position of the sbyte to peek at
+   * @param length - The amount of bytes to peek at, or `undefined` to only peet at one byte
    * @returns The byte, or bytes if `length` is not `undefined`, being peeked at
    */
   peek(position: number, length?: number): number | number[] {

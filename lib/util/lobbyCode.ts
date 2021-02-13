@@ -41,7 +41,7 @@ export class LobbyCode {
   /**
    * Gets a randomized lobby code of the given version.
    *
-   * @param version The version to generate (default `LobbyCodeVersion.Two`)
+   * @param version - The version to generate (default `LobbyCodeVersion.Two`)
    */
   static generate(version: LobbyCodeVersion = LobbyCodeVersion.Two): string {
     return new Array(version)
@@ -54,7 +54,7 @@ export class LobbyCode {
    * Gets the encoded integer value of the given lobby code whose version is
    * inferred based on its length.
    *
-   * @param code The lobby code
+   * @param code - The lobby code
    * @returns The encoded integer value
    */
   static encode(code: string): number {
@@ -74,7 +74,7 @@ export class LobbyCode {
   /**
    * Gets the encoded integer value of the given V1 lobby code.
    *
-   * @param code The lobby code
+   * @param code - The lobby code
    * @returns The encoded integer value
    */
   static encodeV1(code: string): number {
@@ -88,7 +88,7 @@ export class LobbyCode {
   /**
    * Gets the encoded integer value of the given V2 lobby code.
    *
-   * @param code The lobby code
+   * @param code - The lobby code
    * @returns The encoded integer value
    */
   static encodeV2(code: string): number {
@@ -109,7 +109,7 @@ export class LobbyCode {
    * Gets the lobby code from the given encoded integer value whose version is
    * inferred based on its sign.
    *
-   * @param id The encoded integer value
+   * @param id - The encoded integer value
    * @returns The lobby code
    */
   static decode(id: number): string {
@@ -119,7 +119,7 @@ export class LobbyCode {
   /**
    * Gets the V1 lobby code from the given encoded integer value.
    *
-   * @param id The encoded integer value
+   * @param id - The encoded integer value
    * @returns The lobby code
    */
   static decodeV1(id: number): string {
@@ -133,7 +133,7 @@ export class LobbyCode {
   /**
    * Gets the V2 lobby code from the given encoded integer value.
    *
-   * @param id The encoded integer value
+   * @param id - The encoded integer value
    * @returns The lobby code
    */
   static decodeV2(id: number): string {

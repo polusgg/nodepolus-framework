@@ -6,8 +6,8 @@ import { LobbyInstance } from "../../lobby";
  */
 export class PlayerLeftEvent {
   /**
-   * @param lobby The lobby that the player left
-   * @param player The player that left
+   * @param lobby - The lobby that the player left
+   * @param player - The player that left
    */
   constructor(
     private readonly lobby: LobbyInstance,

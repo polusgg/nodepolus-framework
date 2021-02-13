@@ -7,9 +7,9 @@ import { Door, Game } from "../../game";
  */
 export class RoomDoorsOpenedEvent extends CancellableEvent {
   /**
-   * @param game The game from which this event was fired
-   * @param doors The doors that were opened
-   * @param player The player that opened the doors
+   * @param game - The game from which this event was fired
+   * @param doors - The doors that were opened
+   * @param player - The player that opened the doors
    */
   constructor(
     private readonly game: Game,
@@ -36,7 +36,7 @@ export class RoomDoorsOpenedEvent extends CancellableEvent {
   /**
    * Sets the doors that were opened.
    *
-   * @param doors The new doors that were opened
+   * @param doors - The new doors that were opened
    */
   setDoors(doors: Door[]): void {
     this.doors = doors;

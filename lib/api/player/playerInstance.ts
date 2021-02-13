@@ -32,7 +32,7 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Sets the player's name.
    *
-   * @param name The player's new name
+   * @param name - The player's new name
    */
   setName(name: TextComponent | string): this;
 
@@ -44,7 +44,7 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Sets the player's color.
    *
-   * @param color The player's new color
+   * @param color - The player's new color
    */
   setColor(color: PlayerColor): this;
 
@@ -56,7 +56,7 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Sets the player's hat.
    *
-   * @param hat The player's new hat
+   * @param hat - The player's new hat
    */
   setHat(hat: PlayerHat): this;
 
@@ -68,7 +68,7 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Sets the player's pet.
    *
-   * @param pet The player's new pet
+   * @param pet - The player's new pet
    */
   setPet(pet: PlayerPet): this;
 
@@ -80,7 +80,7 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Sets the player's skin.
    *
-   * @param skin The player's new skin
+   * @param skin - The player's new skin
    */
   setSkin(skin: PlayerSkin): this;
 
@@ -93,7 +93,7 @@ export interface PlayerInstance extends Metadatable {
    * Sets the player's role.
    *
    * @experimental
-   * @param role The player's new role
+   * @param role - The player's new role
    */
   setRole(role: PlayerRole): this;
 
@@ -131,28 +131,28 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Sets the player's tasks.
    *
-   * @param tasks The player's new tasks
+   * @param tasks - The player's new tasks
    */
   setTasks(tasks: Set<LevelTask>): this;
 
   /**
    * Adds the given tasks to the player's tasks.
    *
-   * @param tasks The tasks to be added
+   * @param tasks - The tasks to be added
    */
   addTasks(tasks: Set<LevelTask>): void;
 
   /**
    * Removes the given tasks from the player's tasks.
    *
-   * @param tasks The tasks to be removed
+   * @param tasks - The tasks to be removed
    */
   removeTasks(tasks: Set<LevelTask>): void;
 
   /**
    * Gets whether or not the player has completed the task at the given index.
    *
-   * @param taskIndex The index whose task completion state will be checked
+   * @param taskIndex - The index whose task completion state will be checked
    * @returns `true` if the task at position `index` is completed, `false` if not
    */
   isTaskAtIndexCompleted(taskIndex: number): boolean;
@@ -160,7 +160,7 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Gets whether or not the player has completed the given task.
    *
-   * @param task The task whose completion state will be checked
+   * @param task - The task whose completion state will be checked
    * @returns `true` if the `task` is completed, `false` if not
    */
   isTaskCompleted(task: LevelTask): boolean;
@@ -168,28 +168,28 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Marks the task at the given index as complete for the player.
    *
-   * @param taskIndex The index whose task will be marked as complete
+   * @param taskIndex - The index whose task will be marked as complete
    */
   completeTaskAtIndex(taskIndex: number): this;
 
   /**
    * Marks the given task as complete for the player.
    *
-   * @param task The task to marked as complete
+   * @param task - The task to marked as complete
    */
   completeTask(task: LevelTask): this;
 
   /**
    * Marks the task at the given index as incomplete for the player.
    *
-   * @param taskIndex The index whose task will be marked as incomplete
+   * @param taskIndex - The index whose task will be marked as incomplete
    */
   uncompleteTaskAtIndex(taskIndex: number): void;
 
   /**
    * Marks the given task as incomplete for the player.
    *
-   * @param task The task to marked as incomplete
+   * @param task - The task to marked as incomplete
    */
   uncompleteTask(task: LevelTask): void;
 
@@ -201,7 +201,7 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Sets the player's position.
    *
-   * @param position The player's new position
+   * @param position - The player's new position
    */
   setPosition(position: Vector2): this;
 
@@ -221,7 +221,7 @@ export interface PlayerInstance extends Metadatable {
    * Forces the player to enter the given vent.
    *
    * @experimental
-   * @param vent The vent to be entered
+   * @param vent - The vent to be entered
    */
   enterVent(vent: LevelVent): this;
 
@@ -229,7 +229,7 @@ export interface PlayerInstance extends Metadatable {
    * Forces the player to exit the given vent.
    *
    * @experimental
-   * @param vent The vent to be exited
+   * @param vent - The vent to be exited
    */
   exitVent(vent: LevelVent): this;
 
@@ -248,7 +248,7 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Kills the player as though they were murdered by the given player.
    *
-   * @param player The player whose character will show in the kill animation
+   * @param player - The player whose character will show in the kill animation
    */
   murder(player: PlayerInstance): this;
 
@@ -260,21 +260,21 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Forces the player to send a message.
    *
-   * @param message The message to be sent
+   * @param message - The message to be sent
    */
   sendChat(message: string): this;
 
   /**
    * Forces the player to call an emergency meeting.
    *
-   * @param victim The body to be reported, or `undefined` to call an emergency meeting (default `undefined`)
+   * @param victim - The body to be reported, or `undefined` to call an emergency meeting (default `undefined`)
    */
   startMeeting(victim?: PlayerInstance): this;
 
   /**
    * Forces the player to cast a vote to exile the given player.
    *
-   * @param suspect The player to be voted for, or `undefined` to vote to skip (default `undefined)
+   * @param suspect - The player to be voted for, or `undefined` to vote to skip (default `undefined`)
    */
   castVote(suspect?: PlayerInstance): this;
 
@@ -286,14 +286,14 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Forces the player to cast a vote to kick the given player from the lobby.
    *
-   * @param target The player who will be voted to be kicked from the lobby
+   * @param target - The player who will be voted to be kicked from the lobby
    */
   castVotekick(target: PlayerInstance): this;
 
   /**
    * Clears the player's vote to kick the given player from the lobby.
    *
-   * @param target The player whose vote to kick from the lobby will be cleared
+   * @param target - The player whose vote to kick from the lobby will be cleared
    */
   clearVotekick(target: PlayerInstance): this;
 
@@ -310,14 +310,14 @@ export interface PlayerInstance extends Metadatable {
   /**
    * Kicks the player from the lobby.
    *
-   * @param reason The reason for why the player was kicked
+   * @param reason - The reason for why the player was kicked
    */
   kick(reason?: DisconnectReason): this;
 
   /**
    * Bans the player from the lobby.
    *
-   * @param reason The reason for why the player was banned
+   * @param reason - The reason for why the player was banned
    */
   ban(reason?: DisconnectReason): this;
 

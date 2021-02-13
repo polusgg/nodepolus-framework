@@ -17,8 +17,12 @@
   },
   "parser": "@typescript-eslint/parser",
   // "plugins": ["@typescript-eslint", "import"],
-  "plugins": ["@typescript-eslint"],
+  "plugins": [
+    "@typescript-eslint",
+    "eslint-plugin-tsdoc"
+  ],
   "rules": {
+    "tsdoc/syntax": "error",
     // "prettier/prettier": "error",
     "no-empty": ["error", {
       "allowEmptyCatch": true

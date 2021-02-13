@@ -6,9 +6,9 @@ import { LobbyInstance } from "../../lobby";
  */
 export class PlayerJoinedEvent {
   /**
-   * @param lobby The lobby from which this event was fired
-   * @param player The player that joined the lobby
-   * @param rejoining `true` if the player is rejoining the game, `false` if not (default `false`)
+   * @param lobby - The lobby from which this event was fired
+   * @param player - The player that joined the lobby
+   * @param rejoining - `true` if the player is rejoining the game, `false` if not (default `false`)
    */
   constructor(
     private readonly lobby: LobbyInstance,

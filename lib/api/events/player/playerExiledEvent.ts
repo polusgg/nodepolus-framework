@@ -7,8 +7,8 @@ import { PlayerInstance } from "../../player";
  */
 export class PlayerExiledEvent extends PlayerDiedEvent {
   /**
-   * @param player The player that died
-   * @param voters The players who voted to exile the player
+   * @param player - The player that died
+   * @param voters - The players who voted to exile the player
    */
   constructor(
     player: PlayerInstance,

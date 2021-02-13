@@ -7,8 +7,8 @@ import { CancellableEvent } from "../types";
  */
 export class PlayerChatNoteEvent extends CancellableEvent {
   /**
-   * @param player The player that sent the chat note
-   * @param chatNoteType The type of chat note that was sent
+   * @param player - The player that sent the chat note
+   * @param chatNoteType - The type of chat note that was sent
    */
   constructor(
     private readonly player: PlayerInstance,
@@ -34,7 +34,7 @@ export class PlayerChatNoteEvent extends CancellableEvent {
   /**
    * Sets the type of chat note that was sent.
    *
-   * @param chatNoteType The new type of chat note that was sent
+   * @param chatNoteType - The new type of chat note that was sent
    */
   setChatNoteType(chatNoteType: ChatNoteType): void {
     this.chatNoteType = chatNoteType;

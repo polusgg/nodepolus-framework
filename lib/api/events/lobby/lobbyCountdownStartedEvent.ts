@@ -7,9 +7,9 @@ import { CancellableEvent } from "../types";
  */
 export class LobbyCountdownStartedEvent extends CancellableEvent {
   /**
-   * @param lobby The lobby from which this event was fired
-   * @param secondsUntilStart The number of seconds until the game will start
-   * @param starter The player that clicked the Start Game button
+   * @param lobby - The lobby from which this event was fired
+   * @param secondsUntilStart - The number of seconds until the game will start
+   * @param starter - The player that clicked the Start Game button
    */
   constructor(
     private readonly lobby: LobbyInstance,
@@ -36,7 +36,7 @@ export class LobbyCountdownStartedEvent extends CancellableEvent {
   /**
    * Sets the time in seconds until the game will start.
    *
-   * @param secondsUntilStart The new time in seconds until the game will start
+   * @param secondsUntilStart - The new time in seconds until the game will start
    */
   setSecondsUntilStart(secondsUntilStart: number): void {
     this.secondsUntilStart = secondsUntilStart;

@@ -6,9 +6,9 @@ import ipaddr from "ipaddr.js";
  */
 export class ConnectionInfo {
   /**
-   * @param address The IP address
-   * @param port The port
-   * @param family The family that the IP address belongs to
+   * @param address - The IP address
+   * @param port - The port
+   * @param family - The family that the IP address belongs to
    */
   constructor(
     private readonly address: string,
@@ -19,7 +19,7 @@ export class ConnectionInfo {
   /**
    * Gets a ConnectionInfo from a stringified address-port pair.
    *
-   * @param infoString The stringified address-port pair
+   * @param infoString - The stringified address-port pair
    */
   static fromString(infoString: string): ConnectionInfo {
     const parts = infoString.split(":");

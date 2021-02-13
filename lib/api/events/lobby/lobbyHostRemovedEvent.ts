@@ -7,8 +7,8 @@ import { CancellableEvent } from "../types";
  */
 export class LobbyHostRemovedEvent extends CancellableEvent {
   /**
-   * @param lobby The lobby from which this event was fired
-   * @param host The connection that is no longer an acting host
+   * @param lobby - The lobby from which this event was fired
+   * @param host - The connection that is no longer an acting host
    */
   constructor(
     private readonly lobby: LobbyInstance,

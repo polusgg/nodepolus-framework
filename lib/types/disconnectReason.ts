@@ -6,8 +6,8 @@ import { DisconnectReasonType } from "./enums";
  */
 export class DisconnectReason {
   /**
-   * @param type The disconnect reason
-   * @param message The custom message to be displayed to the player when `type` is `DisconnectReasonType.Custom`
+   * @param type - The disconnect reason
+   * @param message - The custom message to be displayed to the player when `type` is `DisconnectReasonType.Custom`
    */
   constructor(
     private type: DisconnectReasonType,
@@ -17,8 +17,8 @@ export class DisconnectReason {
   /**
    * Gets a new DisconnectReason by reading from the given MessageReader.
    *
-   * @param reader The MessageReader to read from
-   * @param asInt `true` if the type should be read as a UInt32, `false` if it should be read as a byte (default `false`)
+   * @param reader - The MessageReader to read from
+   * @param asInt - `true` if the type should be read as a UInt32, `false` if it should be read as a byte (default `false`)
    */
   static deserialize(reader: MessageReader, asInt: boolean = false): DisconnectReason {
     const type = reader[asInt ? "readUInt32" : "readByte"]();
@@ -83,7 +83,7 @@ export class DisconnectReason {
   /**
    * Gets a new DisconnectReason whose type is `DisconnectReasonType.Custom`
    *
-   * @param message The custom message to be displayed to the player
+   * @param message - The custom message to be displayed to the player
    */
   static custom(message: string): DisconnectReason {
     return new DisconnectReason(DisconnectReasonType.Custom, message);
@@ -176,7 +176,7 @@ export class DisconnectReason {
   /**
    * Sets the disconnect reason.
    *
-   * @param type The disconnect reason
+   * @param type - The disconnect reason
    */
   setType(type: DisconnectReasonType): this {
     this.type = type;
@@ -194,7 +194,7 @@ export class DisconnectReason {
   /**
    * Sets the custom message to be displayed to the player when `type` is `DisconnectReasonType.Custom`.
    *
-   * @param message The custom message
+   * @param message - The custom message
    */
   setMessage(message: string): this {
     this.message = message;
@@ -205,8 +205,8 @@ export class DisconnectReason {
   /**
    * Writes the DisconnectReason to the given MessageWriter
    *
-   * @param reader The MessageWriter to write to
-   * @param asInt `true` if the type should be written as a UInt32, `false` if it should be written as a byte (default `false`)
+   * @param reader - The MessageWriter to write to
+   * @param asInt - `true` if the type should be written as a UInt32, `false` if it should be written as a byte (default `false`)
    */
   serialize(writer: MessageWriter, asInt: boolean = false): void {
     writer[asInt ? "writeUInt32" : "writeByte"](this.type);

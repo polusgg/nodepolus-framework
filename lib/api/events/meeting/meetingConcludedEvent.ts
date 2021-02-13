@@ -11,8 +11,8 @@ export class MeetingConcludedEvent extends CancellableEvent {
   private exiledPlayerId = -1;
 
   /**
-   * @param game The game from which this event was fired
-   * @param votes The votes from the meeting
+   * @param game - The game from which this event was fired
+   * @param votes - The votes from the meeting
    */
   constructor(
     private readonly game: Game,
@@ -38,7 +38,7 @@ export class MeetingConcludedEvent extends CancellableEvent {
   /**
    * Sets the votes from the meeting.
    *
-   * @param votes The new votes from the meeting
+   * @param votes - The new votes from the meeting
    */
   setVotes(votes: VoteResult[]): void {
     this.votes = votes;

@@ -6,7 +6,7 @@ export interface Bindable<T> {
   /**
    * Sets whether or not the packet is being sent from the server to a client.
    *
-   * @param isClientBound `true` if the packet is being sent from the server to a client, `false` if it was sent from a client to the server
+   * @param isClientBound - `true` if the packet is being sent from the server to a client, `false` if it was sent from a client to the server
    */
   bound(isClientBound: boolean): T;
 }
