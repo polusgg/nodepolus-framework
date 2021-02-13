@@ -33,7 +33,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   private readonly level: Level;
 
   protected constructor(
-    public readonly type: InnerNetObjectType,
+    type: InnerNetObjectType,
     netId: number,
     parent: BaseInnerNetEntity,
     public readonly systemTypes: SystemType[],
