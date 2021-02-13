@@ -39,6 +39,7 @@ export interface PlayerInstance {
   /**
    * Gets the metadata for the given key.
    *
+   * @typeParam T The type of the returned metadata (default `unknown`)
    * @param key The key whose associated metadata will be returned
    * @returns The metadata, or `undefined` if no metadata is associated with `key`
    */
@@ -48,6 +49,7 @@ export interface PlayerInstance {
    * Gets the metadata for the given key, or all of the metadata associated
    * with the player.
    *
+   * @typeParam T The type of the returned metadata (default `unknown`)
    * @param key The key whose associated data will be returned, or `undefined` to return all metadata
    * @returns The metadata, or `undefined` if no metadata is associated with `key`
    */
