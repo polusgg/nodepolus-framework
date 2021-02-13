@@ -59,9 +59,9 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getMeta(): Map<string, unknown>;
-  getMeta(key: string): unknown;
-  getMeta(key?: string): Map<string, unknown> | unknown {
-    return key === undefined ? this.metadata : this.metadata.get(key);
+  getMeta<T = unknown>(key: string): T;
+  getMeta<T = unknown>(key?: string): Map<string, unknown> | T {
+    return key === undefined ? this.metadata : this.metadata.get(key) as T;
   }
 
   setMeta(pair: Record<string, unknown>): void;

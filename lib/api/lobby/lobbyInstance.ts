@@ -118,7 +118,7 @@ export interface LobbyInstance {
    * @param key The key whose associated metadata will be returned
    * @returns The metadata, or `undefined` if no metadata is associated with `key`
    */
-  getMeta(key: string): unknown;
+  getMeta<T = unknown>(key: string): T;
 
   /**
    * Gets the metadata for the given key, or all of the metadata associated
@@ -127,7 +127,7 @@ export interface LobbyInstance {
    * @param key The key whose associated data will be returned, or `undefined` to return all metadata
    * @returns The metadata, or `undefined` if no metadata is associated with `key`
    */
-  getMeta(key?: string): Map<string, unknown> | unknown;
+  getMeta<T = unknown>(key?: string): Map<string, unknown> | T;
 
   /**
    * Sets the metadata for the given key-value pairs.
