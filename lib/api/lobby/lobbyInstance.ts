@@ -8,9 +8,9 @@ import { EntityGameData } from "../../protocol/entities/gameData";
 import { LobbyListing } from "../../protocol/packets/root/types";
 import { EntityPlayer } from "../../protocol/entities/player";
 import { BaseRpcPacket } from "../../protocol/packets/rpc";
-import { GameOptionsData, Immutable } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { LobbySettings } from "./lobbySettings";
+import { GameOptionsData } from "../../types";
 import { PlayerInstance } from "../player";
 import { TextComponent } from "../text";
 import { HostInstance } from "../host";
@@ -349,7 +349,7 @@ export interface LobbyInstance {
   /**
    * Gets the raw settings for the lobby.
    */
-  getOptions(): Immutable<GameOptionsData>;
+  getOptions(): GameOptionsData;
 
   /**
    * Gets the current level on which the lobby is playing.

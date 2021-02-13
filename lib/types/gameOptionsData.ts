@@ -37,28 +37,28 @@ export class GameOptionsData {
    * @param taskBarUpdates When, if at all, the task bar will update to show how many tasks have been completed (default `TaskBarUpdate.Always`)
    */
   constructor(
-    public version: number = 4,
-    public maxPlayers: number = 10,
-    public languages: Language[] = [Language.Other],
-    public levels: Level[] = [Level.TheSkeld],
-    public playerSpeedModifier: number = 1.0,
-    public crewmateLightModifier: number = 1.0,
-    public impostorLightModifier: number = 1.5,
-    public killCooldown: number = 45.0,
-    public commonTaskCount: number = 1,
-    public longTaskCount: number = 1,
-    public shortTaskCount: number = 2,
-    public emergencyMeetingCount: number = 1,
-    public impostorCount: number = 1,
-    public killDistance: KillDistance = KillDistance.Medium,
-    public discussionTime: number = 15,
-    public votingTime: number = 120,
-    public isDefault: boolean = true,
-    public emergencyCooldown: number = 15,
-    public confirmEjects: boolean = true,
-    public visualTasks: boolean = true,
-    public anonymousVoting: boolean = false,
-    public taskBarUpdates: TaskBarMode = TaskBarMode.Normal,
+    private version: number = 4,
+    private maxPlayers: number = 10,
+    private languages: Language[] = [Language.Other],
+    private levels: Level[] = [Level.TheSkeld],
+    private playerSpeedModifier: number = 1.0,
+    private crewmateLightModifier: number = 1.0,
+    private impostorLightModifier: number = 1.5,
+    private killCooldown: number = 45.0,
+    private commonTaskCount: number = 1,
+    private longTaskCount: number = 1,
+    private shortTaskCount: number = 2,
+    private emergencyMeetingCount: number = 1,
+    private impostorCount: number = 1,
+    private killDistance: KillDistance = KillDistance.Medium,
+    private discussionTime: number = 15,
+    private votingTime: number = 120,
+    private isDefault: boolean = true,
+    private emergencyCooldown: number = 15,
+    private confirmEjects: boolean = true,
+    private visualTasks: boolean = true,
+    private anonymousVoting: boolean = false,
+    private taskBarUpdates: TaskBarMode = TaskBarMode.Normal,
   ) {}
 
   /**
@@ -170,5 +170,379 @@ export class GameOptionsData {
       writer.writeBoolean(this.anonymousVoting);
       writer.writeByte(this.taskBarUpdates);
     }
+  }
+
+  /**
+   * Gets the version of the GameOptionsData.
+   */
+  getVersion(): number {
+    return this.version;
+  }
+
+  /**
+   * Sets the version of the GameOptionsData.
+   *
+   * @param version The version of the GameOptionsData
+   */
+  setVersion(version: number): void {
+    this.version = version;
+  }
+
+  /**
+   * Gets the maximum number of players.
+   */
+  getMaxPlayers(): number {
+    return this.maxPlayers;
+  }
+
+  /**
+   * Sets the maximum number of players.
+   *
+   * @param maxPlayers The maximum number of players
+   */
+  setMaxPlayers(maxPlayers: number): void {
+    this.maxPlayers = maxPlayers;
+  }
+
+  /**
+   * Gets the array of languages.
+   */
+  getLanguages(): Language[] {
+    return this.languages;
+  }
+
+  /**
+   * Sets the array of languages.
+   *
+   * @param languages The array of languages
+   */
+  setLanguages(languages: Language[]): void {
+    this.languages = languages;
+  }
+
+  /**
+   * Gets the array of levels.
+   */
+  getLevels(): Level[] {
+    return this.levels;
+  }
+
+  /**
+   * Sets the array of levels.
+   *
+   * @param levels The array of levels
+   */
+  setLevels(levels: Level[]): void {
+    this.levels = levels;
+  }
+
+  /**
+   * Gets the multiplicative number for the speed at which players will move.
+   */
+  getPlayerSpeedModifier(): number {
+    return this.playerSpeedModifier;
+  }
+
+  /**
+   * Sets the multiplicative number for the speed at which players will move.
+   *
+   * @param playerSpeedModifier The multiplicative number for the speed at which players will move
+   */
+  setPlayerSpeedModifier(playerSpeedModifier: number): void {
+    this.playerSpeedModifier = playerSpeedModifier;
+  }
+
+  /**
+   * Gets the multiplicative number for the size of the fog-of-war ring
+   * encircling Crewmates.
+   */
+  getCrewmateLightModifier(): number {
+    return this.crewmateLightModifier;
+  }
+
+  /**
+   * Sets the multiplicative number for the size of the fog-of-war ring
+   * encircling Crewmates
+   *
+   * @param crewmateLightModifier The multiplicative number for the size of the fog-of-war ring encircling Crewmates
+   */
+  setCrewmateLightModifier(crewmateLightModifier: number): void {
+    this.crewmateLightModifier = crewmateLightModifier;
+  }
+
+  /**
+   * Gets the multiplicative number for the size of the fog-of-war ring
+   * encircling Impostors.
+   */
+  getImpostorLightModifier(): number {
+    return this.impostorLightModifier;
+  }
+
+  /**
+   * Sets the multiplicative number for the size of the fog-of-war ring
+   * encircling Impostors.
+   *
+   * @param impostorLightModifier The multiplicative number for the size of the fog-of-war ring encircling Impostors
+   */
+  setImpostorLightModifier(impostorLightModifier: number): void {
+    this.impostorLightModifier = impostorLightModifier;
+  }
+
+  /**
+   * Gets the number of seconds after the game starts, between kills, and after
+   * a meeting ends, that an Impostor must wait before being able to kill.
+   */
+  getKillCooldown(): number {
+    return this.killCooldown;
+  }
+
+  /**
+   * Sets the number of seconds after the game starts, between kills, and after
+   * a meeting ends, that an Impostor must wait before being able to kill
+   *
+   * @param killCooldown The number of seconds after the game starts, between kills, and after a meeting ends, that an Impostor must wait before being able to kill
+   */
+  setKillCooldown(killCooldown: number): void {
+    this.killCooldown = killCooldown;
+  }
+
+  /**
+   * Gets the number of common tasks each Crewmate will have.
+   */
+  getCommonTaskCount(): number {
+    return this.commonTaskCount;
+  }
+
+  /**
+   * Sets the number of common tasks each Crewmate will have.
+   *
+   * @param commonTaskCount The number of common tasks each Crewmate will have
+   */
+  setCommonTaskCount(commonTaskCount: number): void {
+    this.commonTaskCount = commonTaskCount;
+  }
+
+  /**
+   * Gets the number of long tasks each Crewmate will have.
+   */
+  getLongTaskCount(): number {
+    return this.longTaskCount;
+  }
+
+  /**
+   * Sets the number of long tasks each Crewmate will have.
+   *
+   * @param longTaskCount The number of long tasks each Crewmate will have
+   */
+  setLongTaskCount(longTaskCount: number): void {
+    this.longTaskCount = longTaskCount;
+  }
+
+  /**
+   * Gets the number of short tasks each Crewmate will have.
+   */
+  getShortTaskCount(): number {
+    return this.shortTaskCount;
+  }
+
+  /**
+   * Sets the number of short tasks each Crewmate will have.
+   *
+   * @param shortTaskCount The number of short tasks each Crewmate will have
+   */
+  setShortTaskCount(shortTaskCount: number): void {
+    this.shortTaskCount = shortTaskCount;
+  }
+
+  /**
+   * Gets the number of emergency meetings each player will be able to call.
+   */
+  getEmergencyMeetingCount(): number {
+    return this.emergencyMeetingCount;
+  }
+
+  /**
+   * Sets the number of emergency meetings each player will be able to call.
+   *
+   * @param emergencyMeetingCount The number of emergency meetings each player will be able to call
+   */
+  setEmergencyMeetingCount(emergencyMeetingCount: number): void {
+    this.emergencyMeetingCount = emergencyMeetingCount;
+  }
+
+  /**
+   * Gets the maximum number of Impostors.
+   */
+  getImpostorCount(): number {
+    return this.impostorCount;
+  }
+
+  /**
+   * Sets the maximum number of Impostors.
+   *
+   * @param impostorCount The maximum number of Impostors
+   */
+  setImpostorCount(impostorCount: number): void {
+    this.impostorCount = impostorCount;
+  }
+
+  /**
+   * Gets how far of a reach an Impostor has when killing Crewmates.
+   */
+  getKillDistance(): KillDistance {
+    return this.killDistance;
+  }
+
+  /**
+   * Sets how far of a reach an Impostor has when killing Crewmates.
+   *
+   * @param killDistance How far of a reach an Impostor has when killing Crewmates
+   */
+  setKillDistance(killDistance: KillDistance): void {
+    this.killDistance = killDistance;
+  }
+
+  /**
+   * Gets how many seconds before voting starts during a meeting.
+   */
+  getDiscussionTime(): number {
+    return this.discussionTime;
+  }
+
+  /**
+   * Sets how many seconds before voting starts during a meeting.
+   *
+   * @param discussionTime How many seconds before voting starts during a meeting
+   */
+  setDiscussionTime(discussionTime: number): void {
+    this.discussionTime = discussionTime;
+  }
+
+  /**
+   * Gets how many seconds players will have to cast a vote during a meeting.
+   */
+  getVotingTime(): number {
+    return this.votingTime;
+  }
+
+  /**
+   * Sets how many seconds players will have to cast a vote during a meeting.
+   *
+   * @param votingTime How many seconds players will have to cast a vote during a meeting
+   */
+  setVotingTime(votingTime: number): void {
+    this.votingTime = votingTime;
+  }
+
+  /**
+   * Gets whether or not the GameOptionsData is using the default options.
+   *
+   * @returns `true` if the GameOptionsData is using the default options, `false` if not
+   */
+  getIsDefault(): boolean {
+    return this.isDefault;
+  }
+
+  /**
+   * Sets whether or not the GameOptionsData is using the default options.
+   *
+   * @param isDefault `true` if the GameOptionsData is using the default options, `false` if not
+   */
+  setIsDefault(isDefault: boolean): void {
+    this.isDefault = isDefault;
+  }
+
+  /**
+   * Gets how many seconds Crewmates must wait between emergency meetings.
+   */
+  getEmergencyCooldown(): number {
+    return this.emergencyCooldown;
+  }
+
+  /**
+   * Sets how many seconds Crewmates must wait between emergency meetings.
+   *
+   * @param emergencyCooldown How many seconds Crewmates must wait between emergency meetings
+   */
+  setEmergencyCooldown(emergencyCooldown: number): void {
+    this.emergencyCooldown = emergencyCooldown;
+  }
+
+  /**
+   * Gets whether or not the game will say if the ejected player was or wasn't
+   * an Impostor.
+   *
+   * @returns `true` if the game will say if the ejected player was or wasn't an Impostor, `false` if not
+   */
+  getConfirmEjects(): boolean {
+    return this.confirmEjects;
+  }
+
+  /**
+   * Sets whether or not the game will say if the ejected player was or wasn't
+   * an Impostor.
+   *
+   * @param confirmEjects `true` if the game will say if the ejected player was or wasn't an Impostor, `false` if not
+   */
+  setConfirmEjects(confirmEjects: boolean): void {
+    this.confirmEjects = confirmEjects;
+  }
+
+  /**
+   * Gets whether or not tasks which play animations (e.g. Clear Asteroids) will
+   * play those animations to other players.
+   *
+   * @returns `true` if tasks which play animations will play those animations to other players, `false` if not
+   */
+  getVisualTasks(): boolean {
+    return this.visualTasks;
+  }
+
+  /**
+   * Sets whether or not tasks which play animations (e.g. Clear Asteroids) will
+   * play those animations to other players.
+   *
+   * @param visualTasks `true` if tasks which play animations will play those animations to other players, `false` if not
+   */
+  setVisualTasks(visualTasks: boolean): void {
+    this.visualTasks = visualTasks;
+  }
+
+  /**
+   * Gets whether or not the votes on the meeting HUD will show the color of the
+   * players who voted.
+   *
+   * @returns `true` if the votes on the meeting HUD will show the color of the players who voted, `false` if not
+   */
+  getAnonymousVoting(): boolean {
+    return this.anonymousVoting;
+  }
+
+  /**
+   * Sets whether or not the votes on the meeting HUD will show the color of the
+   * players who voted.
+   *
+   * @param anonymousVoting `true` if the votes on the meeting HUD will show the color of the players who voted, `false` if not
+   */
+  setAnonymousVoting(anonymousVoting: boolean): void {
+    this.anonymousVoting = anonymousVoting;
+  }
+
+  /**
+   * Gets when, if at all, the task bar will update to show how many tasks have
+   * been completed.
+   */
+  getTaskBarUpdates(): TaskBarMode {
+    return this.taskBarUpdates;
+  }
+
+  /**
+   * Sets when, if at all, the task bar will update to show how many tasks have
+   * been completed.
+   *
+   * @param taskBarUpdates When, if at all, the task bar will update to show how many tasks have been completed
+   */
+  setTaskBarUpdates(taskBarUpdates: TaskBarMode): void {
+    this.taskBarUpdates = taskBarUpdates;
   }
 }

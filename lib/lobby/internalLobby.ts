@@ -5,9 +5,9 @@ import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEn
 import { BaseRpcPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { LobbyHostMigratedEvent, LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
-import { DisconnectReason, GameOptionsData, Immutable, Vector2 } from "../types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { InnerNetObjectType } from "../protocol/entities/types/enums";
+import { DisconnectReason, GameOptionsData, Vector2 } from "../types";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { PlayerData } from "../protocol/entities/gameData/types";
@@ -130,7 +130,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   isFull(): boolean {
-    return this.connections.length >= this.options.maxPlayers;
+    return this.connections.length >= this.options.getMaxPlayers();
   }
 
   getLobbyListing(): LobbyListing {
@@ -141,9 +141,9 @@ export class InternalLobby implements LobbyInstance {
       this.getHostName().substring(0, 12),
       this.connections.length,
       this.getAge(),
-      this.options.levels[0],
-      this.options.impostorCount,
-      this.options.maxPlayers,
+      this.options.getLevels()[0],
+      this.options.getImpostorCount(),
+      this.options.getMaxPlayers(),
     );
   }
 
@@ -344,16 +344,7 @@ export class InternalLobby implements LobbyInstance {
     return this.settings;
   }
 
-  getOptions(): Immutable<GameOptionsData> {
-    return this.options;
-  }
-
-  /**
-   * Gets the lobby's raw editable settings.
-   *
-   * @internal
-   */
-  getMutableOptions(): GameOptionsData {
+  getOptions(): GameOptionsData {
     return this.options;
   }
 
@@ -368,7 +359,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   getLevel(): Level {
-    return this.options.levels[0];
+    return this.options.getLevels()[0];
   }
 
   getGameTags(): Map<AlterGameTag, number> {
@@ -794,7 +785,7 @@ export class InternalLobby implements LobbyInstance {
     if (this.connections.indexOf(connection) == -1) {
       const count = this.connections.length;
 
-      if (count >= this.options.maxPlayers || count >= this.server.getMaxPlayersPerLobby()) {
+      if (count >= this.options.getMaxPlayers() || count >= this.server.getMaxPlayersPerLobby()) {
         const event = new ServerLobbyJoinRefusedEvent(connection, this);
 
         await this.server.emit("server.lobby.join.refused", event);

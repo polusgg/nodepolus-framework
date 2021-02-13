@@ -280,11 +280,11 @@ export class InternalHost implements HostInstance {
      * the original as possible.
      */
     const options = this.lobby.getOptions();
-    const level = options.levels[0];
-    const numCommon = options.commonTaskCount;
-    const numLong = options.longTaskCount;
+    const level = options.getLevels()[0];
+    const numCommon = options.getCommonTaskCount();
+    const numLong = options.getLongTaskCount();
     // Minimum of 1 short task
-    const numShort = numCommon + numLong + options.shortTaskCount > 0 ? options.shortTaskCount : 1;
+    const numShort = numCommon + numLong + options.getShortTaskCount() > 0 ? options.getShortTaskCount() : 1;
     const allTasks = Tasks.forLevel(level);
     const allCommon: LevelTask[] = [];
     const allShort: LevelTask[] = [];
@@ -635,7 +635,7 @@ export class InternalHost implements HostInstance {
     }
 
     this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getShipStatus()!.serializeSpawn()], this.lobby.getCode()));
-    this.setInfected(this.lobby.getOptions().impostorCount);
+    this.setInfected(this.lobby.getOptions().getImpostorCount());
     this.setTasks();
     gameData.gameData.updateGameData(gameData.gameData.players, connections);
     this.lobby.setGameState(GameState.Started);
@@ -714,7 +714,7 @@ export class InternalHost implements HostInstance {
 
     await this.lobby.sendRootGamePacket(new GameDataPacket([player.entity.serializeSpawn()], this.lobby.getCode()));
 
-    player.entity.playerControl.syncSettings(this.lobby.getMutableOptions(), [sender]);
+    player.entity.playerControl.syncSettings(this.lobby.getOptions(), [sender]);
 
     this.confirmPlayerData(player);
 
@@ -907,7 +907,7 @@ export class InternalHost implements HostInstance {
       players[i].setPosition(SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), players[i].getId(), players.length, false));
     }
 
-    this.meetingHudTimeout = setTimeout(this.endMeeting.bind(this), (this.lobby.getOptions().votingTime + this.lobby.getOptions().discussionTime) * 1000);
+    this.meetingHudTimeout = setTimeout(this.endMeeting.bind(this), (this.lobby.getOptions().getVotingTime() + this.lobby.getOptions().getDiscussionTime()) * 1000);
   }
 
   async handleCastVote(votingPlayerId: number, suspectPlayerId: number): Promise<void> {
