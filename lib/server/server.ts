@@ -36,7 +36,7 @@ import {
 
 export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   private readonly startedAt = Date.now();
-  private readonly serverSocket = dgram.createSocket("udp4");
+  private readonly socket = dgram.createSocket("udp4");
   private readonly logger: Logger;
   private readonly connections: Map<string, Connection> = new Map();
   private readonly lobbies: LobbyInstance[] = [];
@@ -64,7 +64,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
       this.config.logging?.maxFiles ?? DEFAULT_CONFIG.logging.maxFiles,
     );
 
-    this.serverSocket.on("message", (buffer, remoteInfo) => {
+    this.socket.on("message", (buffer, remoteInfo) => {
       if (!this.listening) {
         return;
       }
@@ -78,7 +78,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
       );
     });
 
-    this.serverSocket.on("error", error => {
+    this.socket.on("error", error => {
       this.logger.catch(error);
     });
 
@@ -131,7 +131,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * Gets the underlying socket for the server.
    */
   getSocket(): dgram.Socket {
-    return this.serverSocket;
+    return this.socket;
   }
 
   /**
@@ -325,7 +325,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    */
   async listen(): Promise<void> {
     return new Promise((resolve, _reject) => {
-      this.serverSocket.bind(this.getPort(), this.getAddress(), () => {
+      this.socket.bind(this.getPort(), this.getAddress(), () => {
         this.listening = true;
         this.emit("server.ready");
 
@@ -399,7 +399,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   private initializeConnection(connectionInfo: ConnectionInfo): Connection {
     const newConnection = new Connection(
       connectionInfo,
-      this.serverSocket,
+      this.socket,
       PacketDestination.Client,
       (): OutboundPacketTransformer | undefined => this.getOutboundPacketTransformer(),
     );

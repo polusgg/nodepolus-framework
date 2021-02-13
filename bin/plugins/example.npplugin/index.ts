@@ -2,13 +2,13 @@ import { ServerLobbyJoinEvent, ServerPacketCustomEvent, ServerPacketRpcCustomEve
 import { FileAnnouncementDriver } from "../../../lib/announcementServer/drivers";
 import { InnerNetObjectType } from "../../../lib/protocol/entities/types/enums";
 import { ConnectionInfo, DisconnectReason, Vector2 } from "../../../lib/types";
+import { MessageReader, MessageWriter } from "../../../lib/util/hazelMessage";
 import { JoinGameErrorPacket } from "../../../lib/protocol/packets/root";
 import { AnnouncementServer } from "../../../lib/announcementServer";
 import { BasePlugin, PluginMetadata } from "../../../lib/api/plugin";
 import { RpcPacket } from "../../../lib/protocol/packets/gameData";
 import { PlayerJoinedEvent } from "../../../lib/api/events/player";
 import { RootPacket } from "../../../lib/protocol/packets/hazel";
-import { MessageReader } from "../../../lib/util/hazelMessage";
 import { Connection } from "../../../lib/protocol/connection";
 import { shuffleArrayClone } from "../../../lib/util/shuffle";
 import { AddressFamily } from "../../../lib/types/enums";
@@ -42,10 +42,35 @@ const pluginMeta: PluginMetadata = {
   version: [1, 2, 3],
 };
 
-const usersDatabase: Map<string, string> = new Map([
-  ["ec4435dfe404482b8e8a0946e12a9f9a", "3a6adcf92fec282614f9a77b9ad5d24bcacab84522631eaa789c05090156ca5135a4753236142993"],
-  ["fc54bb9de1434234986b7bd873e93c86", "07f34399f3162ad5baf871f41646259e7b9d8cebb045b6e4648222de0cb38fe1b9a28bc177794648"],
-  ["3af27ba3f117422fb399093a1393ec0e", "5848db9438bf15b53703e00b4b37fa1df7088002e197a7bb6b8b241c403691a9faf13364b32d72b4"],
+// DEBUG
+type User = {
+  token: string;
+  name: string;
+};
+
+// DEBUG
+const usersDatabase: Map<string, User> = new Map([
+  [
+    "ec4435dfe404482b8e8a0946e12a9f9a",
+    {
+      token: "3a6adcf92fec282614f9a77b9ad5d24bcacab84522631eaa789c05090156ca5135a4753236142993",
+      name: "Cody",
+    },
+  ],
+  [
+    "fc54bb9de1434234986b7bd873e93c86",
+    {
+      token: "07f34399f3162ad5baf871f41646259e7b9d8cebb045b6e4648222de0cb38fe1b9a28bc177794648",
+      name: "Rose",
+    },
+  ],
+  [
+    "3af27ba3f117422fb399093a1393ec0e",
+    {
+      token: "5848db9438bf15b53703e00b4b37fa1df7088002e197a7bb6b8b241c403691a9faf13364b32d72b4",
+      name: "Sanae",
+    },
+  ],
 ]);
 
 /**
@@ -55,6 +80,10 @@ export default class extends BasePlugin {
   constructor() {
     super(server, pluginMeta);
 
+    /**
+     * Sets the inbound packet transformer to one that authenticates packets
+     * prefixed with a marker byte (0x69), client ID, and packet HMAC.
+     */
     server.setInboundPacketTransformer((connection: Connection, reader: MessageReader): MessageReader => {
       if (reader.peek(0) != 0x69) {
         connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("This server does not supported unauthenticated packets"))]);
@@ -65,9 +94,9 @@ export default class extends BasePlugin {
       reader.readByte();
 
       const clientId = reader.readBytes(16).getBuffer().toString("hex");
-      const clientToken = usersDatabase.get(clientId);
+      const user = usersDatabase.get(clientId);
 
-      if (clientToken === undefined) {
+      if (user === undefined) {
         connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("Unknown user"))]);
 
         return new MessageReader();
@@ -76,7 +105,7 @@ export default class extends BasePlugin {
       const hash = reader.readBytes(20).getBuffer().toString("hex");
       const message = reader.readRemainingBytes();
 
-      if (!Hmac.verify(message.getBuffer().toString("hex"), hash, clientToken)) {
+      if (!Hmac.verify(message.getBuffer().toString("hex"), hash, user.token)) {
         connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("Signature mismatch"))]);
 
         return new MessageReader();
@@ -94,7 +123,7 @@ export default class extends BasePlugin {
 
       // Set other meta like purchases, display name, friends, etc
 
-      this.getLogger().debug("Authenticated packet from connection %s: %s", connection, message);
+      this.getLogger().info("Authenticated packet from %s on connection %s: %s", user.name, connection, message);
 
       return message;
     });
@@ -204,6 +233,28 @@ export default class extends BasePlugin {
     server.getConnection(new ConnectionInfo("127.0.0.1", 42069, AddressFamily.IPv4)).emit("message", MessageReader.fromRawBytes([
       0x01, 0x00, 0x07, 0x06, 0x00, 0x40, 0x05, 0x68, 0x65, 0x6c, 0x6c, 0x6f,
     ]));
+
+    const user = [...usersDatabase.entries()][0];
+    const message = MessageReader.fromRawBytes([
+      0x01, 0x00, 0x07, 0x06, 0x00, 0x40, 0x05, 0x68, 0x65, 0x6c, 0x6c, 0x6f,
+    ]);
+
+    // DEBUG: Simulates sending an authenticated packet from a connection
+    server.getSocket().emit(
+      "message",
+      new MessageWriter()
+        .writeByte(0x69)
+        .writeBytes(Buffer.from(user[0], "hex"))
+        .writeBytes(Buffer.from(Hmac.sign(message.getBuffer().toString("hex"), user[1].token), "hex"))
+        .writeBytes(message)
+        .getBuffer(),
+      {
+        address: "127.0.0.1",
+        family: "IPv4",
+        port: 42069,
+        size: -1,
+      },
+    );
   }
 
   /**
