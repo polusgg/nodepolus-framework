@@ -29,7 +29,7 @@ process.on("uncaughtException", err => {
 /**
  * Gets the contents of the config file at the given path.
  *
- * @param configPath The path to the config file (default `__dirname/config.json`)
+ * @param configPath - The path to the config file (default `__dirname/config.json`)
  */
 async function loadConfig(configPath: string = path.join(__dirname, "config.json")): Promise<ServerConfig> {
   logger.info("Loading config.json");
@@ -44,7 +44,7 @@ declare const announcementServer: AnnouncementServer;
  * Sets the server and announcement server as properties on the global object
  * so that they may be used in plugins.
  *
- * @param serverConfig The server configuration
+ * @param serverConfig - The server configuration
  */
 function createServers(serverConfig: ServerConfig): void {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -91,7 +91,7 @@ function listenForShutdown(): void {
  * * Folders must end with `.npplugin`
  *   * Folders must contain either an `index.ts` or `index.js` file
  *
- * @param pluginsPath The path to the plugins folder (default `__dirname/plugins`)
+ * @param pluginsPath - The path to the plugins folder (default `__dirname/plugins`)
  */
 async function loadPluginsFolder(pluginsPath: string = path.join(__dirname, "plugins")): Promise<void> {
   try {
@@ -190,7 +190,7 @@ async function loadPlugins(): Promise<void> {
 /**
  * Starts the server and announcement server.
  *
- * @param enableAnnouncementServer `true` if the announcement server should be started, `false` if not
+ * @param enableAnnouncementServer - `true` if the announcement server should be started, `false` if not
  */
 async function start(enableAnnouncementServer: boolean = server.getConfig().enableAnnouncementServer ?? DEFAULT_CONFIG.enableAnnouncementServer): Promise<void> {
   if (enableAnnouncementServer) {

@@ -112,17 +112,17 @@ export class Palette {
   static playerBody(): Readonly<PlayerColorValues>;
   /**
    * Gets the RGB color values for the given PlayerColor.
+   *
+   * @param color - The player color whose RGB values will be returned
    */
   static playerBody(color: PlayerColor): Readonly<ColorShades>;
   /**
    * Gets the RGB color values for the given PlayerColor, or all PlayerColors if
    * no PlayerColor was given.
+   *
+   * @param color - The player color whose RGB values will be returned, or `undefined` to return all color RGB values
    */
   static playerBody(color?: PlayerColor): Readonly<PlayerColorValues> | Readonly<ColorShades> {
-    if (color !== undefined) {
-      return playerBody[color];
-    }
-
-    return playerBody;
+    return color !== undefined ? playerBody[color] : playerBody;
   }
 }
