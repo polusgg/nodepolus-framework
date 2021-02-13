@@ -8,9 +8,9 @@ import { EntityGameData } from "../../protocol/entities/gameData";
 import { LobbyListing } from "../../protocol/packets/root/types";
 import { EntityPlayer } from "../../protocol/entities/player";
 import { BaseRpcPacket } from "../../protocol/packets/rpc";
+import { GameOptionsData, Metadatable } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { LobbySettings } from "./lobbySettings";
-import { GameOptionsData } from "../../types";
 import { PlayerInstance } from "../player";
 import { TextComponent } from "../text";
 import { HostInstance } from "../host";
@@ -21,7 +21,7 @@ import { Game } from "../game";
 /**
  * An interface describing the public API of lobbies hosted on a server.
  */
-export interface LobbyInstance {
+export interface LobbyInstance extends Metadatable {
   /**
    * Gets the lobby's named logger.
    */
@@ -99,70 +99,6 @@ export interface LobbyInstance {
    * server.
    */
   close(): void;
-
-  /**
-   * Gets whether or not the lobby has metadata for the given key.
-   *
-   * @param key The metadata key
-   */
-  hasMeta(key: string): boolean;
-
-  /**
-   * Gets all of the metadata associated with the lobby.
-   */
-  getMeta(): Map<string, unknown>;
-
-  /**
-   * Gets the metadata for the given key.
-   *
-   * @typeParam T The type of the returned metadata (default `unknown`)
-   * @param key The key whose associated metadata will be returned
-   * @returns The metadata, or `undefined` if no metadata is associated with `key`
-   */
-  getMeta<T = unknown>(key: string): T;
-
-  /**
-   * Gets the metadata for the given key, or all of the metadata associated
-   * with the lobby.
-   *
-   * @typeParam T The type of the returned metadata (default `unknown`)
-   * @param key The key whose associated data will be returned, or `undefined` to return all metadata
-   * @returns The metadata, or `undefined` if no metadata is associated with `key`
-   */
-  getMeta<T = unknown>(key?: string): Map<string, unknown> | T;
-
-  /**
-   * Sets the metadata for the given key-value pairs.
-   *
-   * @param pair The key-value metadata pairs to be set
-   */
-  setMeta(pair: Record<string, unknown>): void;
-  /**
-   * Sets the metadata for the given key.
-   *
-   * @param key The key whose metadata will be set
-   * @param value The metadata to be set
-   */
-  setMeta(key: string, value: unknown): void;
-  /**
-   * Sets the metadata for the given key or key-value pairs.
-   *
-   * @param key The key whose metadata will be set, or the key-value metadata pairs to be set
-   * @param value The metadata to be set if `key` is a `string`
-   */
-  setMeta(key: string | Record<string, unknown>, value?: unknown): void;
-
-  /**
-   * Deletes the metadata for the given key.
-   *
-   * @param key The key whose metatada will be deleted
-   */
-  deleteMeta(key: string): void;
-
-  /**
-   * Deletes all metadata associated with the lobby.
-   */
-  clearMeta(): void;
 
   /**
    * Gets the host controller for the lobby.

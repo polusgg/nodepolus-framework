@@ -8,15 +8,17 @@ export { ConnectionInfo } from "./connectionInfo";
 
 export { DisconnectReason } from "./disconnectReason";
 
+export { GameOptionsData } from "./gameOptionsData";
+
 export { Immutable } from "./immutable";
 
 export { InboundPacketTransformer } from "./inboundPacketTransformer";
 
-export { GameOptionsData } from "./gameOptionsData";
-
 export { LevelTask } from "./levelTask";
 
 export { LevelVent } from "./levelVent";
+
+export { Metadatable } from "./metadatable";
 
 export { Mutable } from "./mutable";
 

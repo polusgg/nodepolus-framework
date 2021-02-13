@@ -1,4 +1,4 @@
-import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, NetworkAccessible, OutboundPacketTransformer } from "../../types";
+import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer } from "../../types";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { BaseRootPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
@@ -14,7 +14,7 @@ import { Packet } from "../packets";
 import Emittery from "emittery";
 import dgram from "dgram";
 
-export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implements NetworkAccessible {
+export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implements Metadatable, NetworkAccessible {
   public timeoutLength = 6000;
   public id = -1;
   public lobby?: InternalLobby;
@@ -116,6 +116,36 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
      */
   }
 
+  hasMeta(key: string): boolean {
+    return this.metadata.has(key);
+  }
+
+  getMeta(): Map<string, unknown>;
+  getMeta<T = unknown>(key: string): T;
+  getMeta<T = unknown>(key?: string): Map<string, unknown> | T {
+    return key === undefined ? this.metadata : this.metadata.get(key) as T;
+  }
+
+  setMeta(pair: Record<string, unknown>): void;
+  setMeta(key: string, value: unknown): void;
+  setMeta(key: string | Record<string, unknown>, value?: unknown): void {
+    if (typeof key === "string") {
+      this.metadata.set(key, value);
+    } else {
+      for (const [k, v] of Object.entries(key)) {
+        this.metadata.set(k, v);
+      }
+    }
+  }
+
+  deleteMeta(key: string): void {
+    this.metadata.delete(key);
+  }
+
+  clearMeta(): void {
+    this.metadata.clear();
+  }
+
   /**
    * Gets the destination type for packets sent from the connection.
    */
@@ -142,84 +172,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    */
   getName(): string | undefined {
     return this.name;
-  }
-
-  /**
-   * Gets whether or not the connection has metadata for the given key.
-   *
-   * @param key The metadata key
-   */
-  hasMeta(key: string): boolean {
-    return this.metadata.has(key);
-  }
-
-  /**
-   * Gets all of the metadata associated with the connection.
-   */
-  getMeta(): Map<string, unknown>;
-  /**
-   * Gets the metadata for the given key.
-   *
-   * @typeParam T The type of the returned metadata (default `unknown`)
-   * @param key The key whose associated metadata will be returned
-   * @returns The metadata, or `undefined` if no metadata is associated with `key`
-   */
-  getMeta<T = unknown>(key: string): T;
-  /**
-   * Gets the metadata for the given key, or all of the metadata associated
-   * with the connection.
-   *
-   * @typeParam T The type of the returned metadata (default `unknown`)
-   * @param key The key whose associated data will be returned, or `undefined` to return all metadata
-   * @returns The metadata, or `undefined` if no metadata is associated with `key`
-   */
-  getMeta<T = unknown>(key?: string): Map<string, unknown> | T {
-    return key === undefined ? this.metadata : this.metadata.get(key) as T;
-  }
-
-  /**
-   * Sets the metadata for the given key-value pairs.
-   *
-   * @param pair The key-value metadata pairs to be set
-   */
-  setMeta(pair: Record<string, unknown>): void;
-  /**
-   * Sets the metadata for the given key.
-   *
-   * @param key The key whose metadata will be set
-   * @param value The metadata to be set
-   */
-  setMeta(key: string, value: unknown): void;
-  /**
-   * Sets the metadata for the given key or key-value pairs.
-   *
-   * @param key The key whose metadata will be set, or the key-value metadata pairs to be set
-   * @param value The metadata to be set if `key` is a `string`
-   */
-  setMeta(key: string | Record<string, unknown>, value?: unknown): void {
-    if (typeof key === "string") {
-      this.metadata.set(key, value);
-    } else {
-      for (const [k, v] of Object.entries(key)) {
-        this.metadata.set(k, v);
-      }
-    }
-  }
-
-  /**
-   * Deletes the metadata for the given key.
-   *
-   * @param key The key whose metatada will be deleted
-   */
-  deleteMeta(key: string): void {
-    this.metadata.delete(key);
-  }
-
-  /**
-   * Deletes all metadata associated with the connection.
-   */
-  clearMeta(): void {
-    this.metadata.clear();
   }
 
   /**
