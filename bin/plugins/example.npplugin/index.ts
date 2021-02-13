@@ -127,7 +127,7 @@ export default class extends BasePlugin {
       }
 
       if (connection.hasMeta("clientId")) {
-        if (connection.getMeta("clientId") as string !== clientId) {
+        if (connection.getMeta<string>("clientId") !== clientId) {
           connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("Wrong connection for user"))]);
 
           return new MessageReader();
