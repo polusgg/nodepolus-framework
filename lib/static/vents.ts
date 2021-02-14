@@ -48,6 +48,7 @@ const VENTS_POLUS: readonly LevelVent[] = [
 ];
 
 const VENTS_AIRSHIP: readonly LevelVent[] = [
+  // TODO
   new LevelVent(Level.Airship, 0, "", SystemType.VaultRoom, new Vector2(0, 0), []),
   new LevelVent(Level.Airship, 1, "", SystemType.Cockpit, new Vector2(0, 0), []),
   new LevelVent(Level.Airship, 2, "", SystemType.ViewingDeck, new Vector2(0, 0), []),
