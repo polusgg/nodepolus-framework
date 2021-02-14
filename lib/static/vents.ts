@@ -139,7 +139,7 @@ export class Vents {
    * Gets static vent data for the given ID or IDs on The Skeld.
    *
    * @param ids - The ID or IDs of the vents that should be returned
-   * @returns The vent with the given ID of an array of vents whose IDs were included in `ids`
+   * @returns The vent with the given ID or an array of vents whose IDs were included in `ids`
    */
   static forSkeldFromId(ids: number | number[]): LevelVent | undefined | readonly LevelVent[] {
     return Vents.forLevelFromId(Level.TheSkeld, Array.isArray(ids) ? ids : [ids]);
@@ -163,7 +163,7 @@ export class Vents {
    * Gets static vent data for the given ID or IDs on MIRA HQ.
    *
    * @param ids - The ID or IDs of the vents that should be returned
-   * @returns The vent with the given ID of an array of vents whose IDs were included in `ids`
+   * @returns The vent with the given ID or an array of vents whose IDs were included in `ids`
    */
   static forMiraHqFromId(ids: number | number[]): LevelVent | undefined | readonly LevelVent[] {
     return Vents.forLevelFromId(Level.MiraHq, Array.isArray(ids) ? ids : [ids]);
@@ -187,7 +187,7 @@ export class Vents {
    * Gets static vent data for the given ID or IDs on Polus.
    *
    * @param ids - The ID or IDs of the vents that should be returned
-   * @returns The vent with the given ID of an array of vents whose IDs were included in `ids`
+   * @returns The vent with the given ID or an array of vents whose IDs were included in `ids`
    */
   static forPolusFromId(ids: number | number[]): LevelVent | undefined | readonly LevelVent[] {
     return Vents.forLevelFromId(Level.Polus, Array.isArray(ids) ? ids : [ids]);
@@ -211,7 +211,7 @@ export class Vents {
    * Gets static vent data for the given ID or IDs on Airship.
    *
    * @param ids - The ID or IDs of the vents that should be returned
-   * @returns The vent with the given ID of an array of vents whose IDs were included in `ids`
+   * @returns The vent with the given ID or an array of vents whose IDs were included in `ids`
    */
   static forAirshipFromId(ids: number | number[]): LevelVent | undefined | readonly LevelVent[] {
     return Vents.forLevelFromId(Level.Airship, Array.isArray(ids) ? ids : [ids]);
