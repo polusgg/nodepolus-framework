@@ -249,13 +249,13 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   completeTaskAtIndex(taskIndex: number): this {
-    this.lobby.getHostInstance().handleCompleteTask(this.entity.playerControl, taskIndex);
+    this.entity.playerControl.completeTask(taskIndex, this.lobby.getConnections());
 
     return this;
   }
 
   completeTask(task: LevelTask): this {
-    this.lobby.getHostInstance().handleCompleteTask(this.entity.playerControl, this.getTasks().findIndex(t => t[0] == task));
+    this.entity.playerControl.completeTask(this.getTasks().findIndex(t => t[0] == task), this.lobby.getConnections());
 
     return this;
   }
