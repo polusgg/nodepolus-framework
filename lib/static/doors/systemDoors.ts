@@ -4,7 +4,7 @@ type SystemDoorList = {
   [key in SystemType]?: readonly number[];
 };
 
-const DOORS_SKELD: Readonly<SystemDoorList> = {
+const DOORS_THE_SKELD: Readonly<SystemDoorList> = {
   [SystemType.Electrical]: [9],
   [SystemType.LowerEngine]: [4, 11],
   [SystemType.UpperEngine]: [2, 5],
@@ -30,7 +30,7 @@ const DOORS_AIRSHIP: Readonly<SystemDoorList> = {
   // TODO
 };
 
-const DOOR_COUNT_SKELD: number = Object.values(DOORS_SKELD).flat().length;
+const DOOR_COUNT_THE_SKELD: number = Object.values(DOORS_THE_SKELD).flat().length;
 
 const DOOR_COUNT_MIRA_HQ: number = Object.values(DOORS_MIRA_HQ).flat().length;
 
@@ -46,7 +46,7 @@ export class SystemDoors {
    * Gets each system and their doors for The Skeld.
    */
   static forSkeld(): Readonly<SystemDoorList> {
-    return DOORS_SKELD;
+    return DOORS_THE_SKELD;
   }
 
   /**
@@ -93,7 +93,7 @@ export class SystemDoors {
    * Gets the number of doors on The Skeld.
    */
   static countForSkeld(): number {
-    return DOOR_COUNT_SKELD;
+    return DOOR_COUNT_THE_SKELD;
   }
 
   /**

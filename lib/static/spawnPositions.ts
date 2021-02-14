@@ -7,7 +7,13 @@ type LevelSpawnPositions = Readonly<{
   meetingTwo: Vector2;
 }>;
 
-const SPAWN_RADIUS = 1.55 as const;
+const SPAWN_RADIUS_THE_SKELD = 1.6 as const;
+
+const SPAWN_RADIUS_MIRA_HQ = 1.55 as const;
+
+const SPAWN_RADIUS_POLUS = 1 as const;
+
+const SPAWN_RADIUS_AIRSHIP = 1 as const;
 
 const SPAWN_POSITIONS_DROPSHIP: readonly Vector2[] = [
   new Vector2(-1.6, 2.4),
@@ -54,10 +60,48 @@ const OFFSET: Vector2 = new Vector2(0, 0.3636);
  */
 export class SpawnPositions {
   /**
-   * Gets the spawn radius.
+   * Gets the spawn radius for The Skeld.
    */
-  static spawnRadius(): number {
-    return SPAWN_RADIUS;
+  static spawnRadiusForSkeld(): number {
+    return SPAWN_RADIUS_THE_SKELD;
+  }
+
+  /**
+   * Gets the spawn radius for MIRA HQ.
+   */
+  static spawnRadiusForMiraHq(): number {
+    return SPAWN_RADIUS_MIRA_HQ;
+  }
+
+  /**
+   * Gets the spawn radius for Polus.
+   */
+  static spawnRadiusForPolus(): number {
+    return SPAWN_RADIUS_POLUS;
+  }
+
+  /**
+   * Gets the spawn radius for Airship.
+   */
+  static spawnRadiusForAirship(): number {
+    return SPAWN_RADIUS_AIRSHIP;
+  }
+
+  /**
+   * Gets the spawn radius for Airship.
+   */
+  static spawnRadiusForLevel(level: Level): number {
+    switch (level) {
+      case Level.TheSkeld:
+      case Level.AprilSkeld:
+        return SpawnPositions.spawnRadiusForSkeld();
+      case Level.MiraHq:
+        return SpawnPositions.spawnRadiusForMiraHq();
+      case Level.Polus:
+        return SpawnPositions.spawnRadiusForPolus();
+      case Level.Airship:
+        return SpawnPositions.spawnRadiusForAirship();
+    }
   }
 
   /**
@@ -188,7 +232,7 @@ export class SpawnPositions {
     const center = isSpawn ? positions.initial : positions.meetingOne;
     const spawnPosition = Vector2.up()
       .rotate((playerId - 1) * (360 / playerCount))
-      .multiply(SpawnPositions.spawnRadius());
+      .multiply(SpawnPositions.spawnRadiusForLevel(level));
 
     return center.add(spawnPosition).add(OFFSET);
   }

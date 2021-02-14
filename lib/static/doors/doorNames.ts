@@ -1,6 +1,6 @@
 import { Level } from "../../types/enums";
 
-const DOOR_NAMES_SKELD: readonly string[] = [
+const DOOR_NAMES_THE_SKELD: readonly string[] = [
   "Cafeteria",
   "Storage",
   "Upper Engine",
@@ -45,7 +45,7 @@ export class DoorNames {
    * Gets the display names for the doors on The Skeld.
    */
   static forSkeld(): readonly string[] {
-    return DOOR_NAMES_SKELD;
+    return DOOR_NAMES_THE_SKELD;
   }
 
   /**
