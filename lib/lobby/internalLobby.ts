@@ -38,7 +38,6 @@ import {
   JoinedGamePacket,
   KickPlayerPacket,
   RemovePlayerPacket,
-  StartGamePacket,
   RemoveGamePacket,
 } from "../protocol/packets/root";
 import {
@@ -892,9 +891,6 @@ export class InternalLobby implements LobbyInstance {
       case RootPacketType.RemovePlayer:
         break;
       case RootPacketType.StartGame: {
-        this.sendRootGamePacket(new StartGamePacket(this.code));
-
-        this.gameState = GameState.Started;
         break;
       }
       case RootPacketType.WaitForHost:
