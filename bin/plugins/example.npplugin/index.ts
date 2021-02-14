@@ -147,6 +147,9 @@ export default class extends BasePlugin {
       return message;
     });
 
+    // ^ disable it quickly lmao
+    server.setInboundPacketTransformer((_connection: Connection, reader: MessageReader): MessageReader => reader);
+
     /**
      * Register some event handlers.
      */
