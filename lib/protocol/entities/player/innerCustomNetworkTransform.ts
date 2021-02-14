@@ -1,18 +1,17 @@
 import { PlayerPositionTeleportedEvent, PlayerPositionWalkedEvent } from "../../../api/events/player";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { BaseInnerNetEntity, BaseInnerNetObject } from "../types";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { SnapToPacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
-import { BaseInnerNetObject } from "../types";
 import { Vector2 } from "../../../types";
-import { EntityPlayer } from ".";
 
 export class InnerCustomNetworkTransform extends BaseInnerNetObject {
   constructor(
     netId: number,
-    public readonly parent: EntityPlayer,
+    public readonly parent: BaseInnerNetEntity,
     public sequenceId: number,
     public position: Vector2,
     public velocity: Vector2,

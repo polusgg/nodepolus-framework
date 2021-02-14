@@ -2,6 +2,7 @@ Conventions:
   Convert boolean to number: `val ? 1 : 0`
   Convert number to boolean: `!!val`
   New array: `new Array(size)`
+  String to Number: `parseInt(string, 10)`
 
 
 
@@ -67,4 +68,3 @@ MovingPlatformBehaviour, 44 [12]
 HeliSabotageSystem, 3 [3]
 SecurityCameras, 11 [11]
 Sabotage, 17 [17]
-
