@@ -1,4 +1,4 @@
-import { ChatNoteType, GameState, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SystemType, TaskType } from "../types/enums";
+import { ChatNoteType, GameState, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SystemType, TaskType, TeleportReason } from "../types/enums";
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { LadderSize, LadderDirection } from "../protocol/packets/rpc/climbLadderPacket";
 import { RepairAmount } from "../protocol/packets/rpc/repairSystem/amounts";
@@ -420,7 +420,7 @@ export class RpcHandler {
   }
 
   handleSnapTo(sender: InnerCustomNetworkTransform, position: Vector2, _lastSequenceId: number, sendTo: Connection[]): void {
-    sender.snapTo(position, sendTo);
+    sender.snapTo(position, sendTo, TeleportReason.Unknown);
   }
 
   handleCastVote(sender: InnerMeetingHud, votingPlayerId: number, suspectPlayerId: number): void {

@@ -1,6 +1,7 @@
 import { PlayerPositionTeleportedEvent, PlayerPositionWalkedEvent } from "../../../api/events/player";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { TeleportReason } from "../../../types/enums";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { SnapToPacket } from "../../packets/rpc";
@@ -20,7 +21,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     super(InnerNetObjectType.CustomNetworkTransform, netId, parent);
   }
 
-  async snapTo(position: Vector2, sendTo: Connection[]): Promise<void> {
+  async snapTo(position: Vector2, sendTo: Connection[], reason: TeleportReason): Promise<void> {
     const player = this.parent.lobby.findPlayerByNetId(this.netId);
 
     if (!player) {
@@ -29,7 +30,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
 
     this.sequenceId += 5;
 
-    const event = new PlayerPositionTeleportedEvent(player, this.position, this.velocity, position, Vector2.zero());
+    const event = new PlayerPositionTeleportedEvent(player, this.position, this.velocity, position, Vector2.zero(), reason);
 
     await this.parent.lobby.getServer().emit("player.position.updated", event);
     await this.parent.lobby.getServer().emit("player.position.teleported", event);

@@ -1,5 +1,5 @@
+import { PlayerSkin, PlayerPet, PlayerHat, PlayerColor, PlayerRole, TeleportReason } from "../types/enums";
 import { RemovePlayerPacket, JoinGameResponsePacket, GameDataPacket } from "../protocol/packets/root";
-import { PlayerSkin, PlayerPet, PlayerHat, PlayerColor, PlayerRole } from "../types/enums";
 import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../types";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
@@ -286,8 +286,8 @@ export class InternalPlayer implements PlayerInstance {
     return this.entity.customNetworkTransform.position;
   }
 
-  setPosition(position: Vector2): this {
-    this.entity.customNetworkTransform.snapTo(position, this.lobby.getConnections());
+  setPosition(position: Vector2, reason: TeleportReason = TeleportReason.Unknown): this {
+    this.entity.customNetworkTransform.snapTo(position, this.lobby.getConnections(), reason);
 
     return this;
   }

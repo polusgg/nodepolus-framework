@@ -1,4 +1,4 @@
-import { PlayerColor, PlayerHat, PlayerPet, PlayerRole, PlayerSkin } from "../../types/enums";
+import { PlayerColor, PlayerHat, PlayerPet, PlayerRole, PlayerSkin, TeleportReason } from "../../types/enums";
 import { DisconnectReason, LevelTask, LevelVent, Metadatable, Vector2 } from "../../types";
 import { PlayerData } from "../../protocol/entities/gameData/types";
 import { Connection } from "../../protocol/connection";
@@ -202,8 +202,9 @@ export interface PlayerInstance extends Metadatable {
    * Sets the player's position.
    *
    * @param position - The player's new position
+   * @param reason - The reason for why the player's position was updated
    */
-  setPosition(position: Vector2): this;
+  setPosition(position: Vector2, reason: TeleportReason): this;
 
   /**
    * Gets the player's velocity.

@@ -96,6 +96,7 @@ import {
   SystemType,
   TaskLength,
   TaskType,
+  TeleportReason,
 } from "../types/enums";
 
 export class InternalHost implements HostInstance {
@@ -643,7 +644,10 @@ export class InternalHost implements HostInstance {
     const players = this.lobby.getPlayers();
 
     for (let i = 0; i < players.length; i++) {
-      players[i].setPosition(SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), players[i].getId(), players.length, true));
+      players[i].setPosition(
+        SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), players[i].getId(), players.length, true),
+        TeleportReason.GameStart,
+      );
     }
   }
 
@@ -904,7 +908,10 @@ export class InternalHost implements HostInstance {
     const players = this.lobby.getPlayers();
 
     for (let i = 0; i < players.length; i++) {
-      players[i].setPosition(SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), players[i].getId(), players.length, false));
+      players[i].setPosition(
+        SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), players[i].getId(), players.length, false),
+        TeleportReason.MeetingStart,
+      );
     }
 
     this.meetingHudTimeout = setTimeout(this.endMeeting.bind(this), (this.lobby.getOptions().getVotingTime() + this.lobby.getOptions().getDiscussionTime()) * 1000);
