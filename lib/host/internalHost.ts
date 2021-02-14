@@ -652,7 +652,11 @@ export class InternalHost implements HostInstance {
   }
 
   async handleSceneChange(sender: Connection, sceneName: string): Promise<void> {
-    this.stopCountdown();
+    if (this.lobby.getConnections().length > this.lobby.getOptions().getMaxPlayers()) {
+      sender.sendLateRejection(DisconnectReason.gameFull());
+
+      return;
+    }
 
     if (sceneName !== "OnlineGame") {
       return;
@@ -666,7 +670,11 @@ export class InternalHost implements HostInstance {
 
     if (newPlayerId == -1) {
       sender.sendLateRejection(DisconnectReason.gameFull());
+
+      return;
     }
+
+    this.stopCountdown();
 
     this.playersInScene.set(sender.id, sceneName);
 
