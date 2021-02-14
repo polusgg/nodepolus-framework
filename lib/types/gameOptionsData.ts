@@ -10,7 +10,6 @@ const LENGTHS = [41, 42, 44, 46];
  * A class used to store, serialize, and deserialize the options when creating
  * or searching for a lobby.
  */
-// TODO: Private properties with getters/setters
 export class GameOptionsData {
   /**
    * @param version - The version of the GameOptionsData (default `4`)
@@ -544,5 +543,35 @@ export class GameOptionsData {
    */
   setTaskBarUpdates(taskBarUpdates: TaskBarMode): void {
     this.taskBarUpdates = taskBarUpdates;
+  }
+
+  /**
+   * Clones the GameOptionsData into a new instance.
+   */
+  clone(): GameOptionsData {
+    return new GameOptionsData(
+      this.version,
+      this.maxPlayers,
+      this.languages,
+      this.levels,
+      this.playerSpeedModifier,
+      this.crewmateLightModifier,
+      this.impostorLightModifier,
+      this.killCooldown,
+      this.commonTaskCount,
+      this.longTaskCount,
+      this.shortTaskCount,
+      this.emergencyMeetingCount,
+      this.impostorCount,
+      this.killDistance,
+      this.discussionTime,
+      this.votingTime,
+      this.isDefault,
+      this.emergencyCooldown,
+      this.confirmEjects,
+      this.visualTasks,
+      this.anonymousVoting,
+      this.taskBarUpdates,
+    );
   }
 }

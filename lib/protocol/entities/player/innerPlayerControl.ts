@@ -1,11 +1,12 @@
 import { ChatNoteType, DeathReason, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, TaskType } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { LobbyOptionsUpdatedEvent } from "../../../api/events/lobby";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { GameOptionsData, Immutable } from "../../../types";
 import { PlayerInstance } from "../../../api/player";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { TextComponent } from "../../../api/text";
-import { GameOptionsData } from "../../../types";
 import { InternalLobby } from "../../../lobby";
 import { PlayerData } from "../gameData/types";
 import { Connection } from "../../connection";
@@ -103,10 +104,21 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacketTo(sendTo, new CompleteTaskPacket(taskIndex));
   }
 
-  syncSettings(options: GameOptionsData, sendTo: Connection[]): void {
-    (this.parent.lobby as InternalLobby).setOptions(options);
+  async syncSettings(options: GameOptionsData, sendTo: Connection[]): Promise<void> {
+    const oldOptions = this.parent.lobby.getOptions();
+    const event = new LobbyOptionsUpdatedEvent(this.parent.lobby, oldOptions.clone() as Immutable<GameOptionsData>, options);
 
-    this.sendRpcPacketTo(sendTo, new SyncSettingsPacket(options));
+    await this.parent.lobby.getServer().emit("lobby.options.updated", event);
+
+    if (event.isCancelled()) {
+      this.sendRpcPacketTo([this.getConnection()], new SyncSettingsPacket(oldOptions));
+
+      return;
+    }
+
+    (this.parent.lobby as InternalLobby).setOptions(event.getNewOptions());
+
+    this.sendRpcPacketTo(sendTo, new SyncSettingsPacket(event.getNewOptions()));
   }
 
   async exile(): Promise<void> {

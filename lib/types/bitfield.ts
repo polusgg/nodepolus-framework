@@ -59,6 +59,9 @@ export class Bitfield {
     return this.bits.every((bit, index) => bit == other.has(index));
   }
 
+  /**
+   * Clones the Bitfield into a new instance.
+   */
   clone(): Bitfield {
     return new Bitfield([...this.bits]);
   }

@@ -21,6 +21,7 @@ import {
   LobbyHostAddedEvent,
   LobbyHostMigratedEvent,
   LobbyHostRemovedEvent,
+  LobbyOptionsUpdatedEvent,
   LobbyPrivacyUpdatedEvent,
 } from "./lobby";
 import {
@@ -138,6 +139,7 @@ export type ServerEvents = {
   "lobby.host.added": LobbyHostAddedEvent;
   "lobby.host.removed": LobbyHostRemovedEvent;
   "lobby.host.migrated": LobbyHostMigratedEvent;
+  "lobby.options.updated": LobbyOptionsUpdatedEvent;
   "lobby.privacy.updated": LobbyPrivacyUpdatedEvent;
 
   /**
