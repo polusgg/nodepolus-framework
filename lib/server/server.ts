@@ -327,6 +327,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     return new Promise((resolve, _reject) => {
       this.socket.bind(this.getPort(), this.getAddress(), () => {
         this.listening = true;
+
         this.emit("server.ready");
 
         resolve();
