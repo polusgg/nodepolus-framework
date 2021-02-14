@@ -80,7 +80,7 @@ export class GameOptionsData {
    * @returns `true` if `length` matches the expected length of `version`, `false` if not
    */
   static isExpectedLength(version: number, length: number): boolean {
-    return LENGTHS[version - 1] == length;
+    return LENGTHS[version - 1] === length;
   }
 
   /**
