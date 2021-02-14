@@ -12,7 +12,16 @@ export abstract class BaseEntityShipStatus extends BaseInnerNetEntity {
     super(type, lobby, GLOBAL_OWNER, SpawnFlag.None);
   }
 
-  abstract serializeSpawn(): SpawnPacket;
+  serializeSpawn(): SpawnPacket {
+    return new SpawnPacket(
+      this.type,
+      this.owner,
+      this.flags,
+      [
+        this.getShipStatus().serializeSpawn(),
+      ],
+    );
+  }
 
   despawn(): void {
     this.lobby.despawn(this.getShipStatus());

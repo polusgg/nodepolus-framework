@@ -1,6 +1,5 @@
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from ".";
 import { SpawnFlag, SpawnType } from "../../../types/enums";
-import { SpawnPacket } from "../../packets/gameData";
 import { LobbyInstance } from "../../../api/lobby";
 import { InternalLobby } from "../../../lobby";
 import { BaseInnerNetEntity } from "../types";
@@ -40,19 +39,6 @@ export class EntityPlayer extends BaseInnerNetEntity {
       new InnerPlayerPhysics(playerPhysicsNetId, this),
       new InnerCustomNetworkTransform(customNetworkTransformNetId, this, sequenceId, position, velocity),
     ];
-  }
-
-  serializeSpawn(): SpawnPacket {
-    return new SpawnPacket(
-      SpawnType.PlayerControl,
-      this.owner,
-      this.flags,
-      [
-        this.playerControl.serializeSpawn(),
-        this.playerPhysics.serializeSpawn(),
-        this.customNetworkTransform.serializeSpawn(),
-      ],
-    );
   }
 
   despawn(): void {

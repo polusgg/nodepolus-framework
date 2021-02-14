@@ -1,6 +1,5 @@
 import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { GLOBAL_OWNER } from "../../../util/constants";
-import { SpawnPacket } from "../../packets/gameData";
 import { LobbyInstance } from "../../../api/lobby";
 import { BaseInnerNetEntity } from "../types";
 import { InnerLobbyBehaviour } from ".";
@@ -18,17 +17,6 @@ export class EntityLobbyBehaviour extends BaseInnerNetEntity {
     this.innerNetObjects = [
       new InnerLobbyBehaviour(lobbyBehaviourNetId, this),
     ];
-  }
-
-  serializeSpawn(): SpawnPacket {
-    return new SpawnPacket(
-      SpawnType.LobbyBehaviour,
-      GLOBAL_OWNER,
-      SpawnFlag.None,
-      [
-        this.lobbyBehaviour.serializeSpawn(),
-      ],
-    );
   }
 
   despawn(): void {
