@@ -27,18 +27,25 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
       throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
     }
 
+    this.sequenceId += 5;
+
     const event = new PlayerPositionTeleportedEvent(player, this.position, this.velocity, position, Vector2.zero());
 
     await this.parent.lobby.getServer().emit("player.position.updated", event);
     await this.parent.lobby.getServer().emit("player.position.teleported", event);
 
     if (event.isCancelled()) {
+      const connection = player.getConnection();
+
+      if (connection) {
+        this.sendRpcPacketTo([connection], new SnapToPacket(this.position, this.sequenceId += 5));
+      }
+
       return;
     }
 
     this.position = event.getNewPosition();
     this.velocity = event.getNewVelocity();
-    this.sequenceId += 5;
 
     this.sendRpcPacketTo(sendTo, new SnapToPacket(this.position, this.sequenceId));
   }
