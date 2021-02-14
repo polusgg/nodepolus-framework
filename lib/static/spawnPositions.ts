@@ -13,6 +13,7 @@ const SPAWN_RADIUS_MIRA_HQ = 1.55 as const;
 
 const SPAWN_RADIUS_POLUS = 1 as const;
 
+// TODO
 const SPAWN_RADIUS_AIRSHIP = 1 as const;
 
 const SPAWN_POSITIONS_DROPSHIP: readonly Vector2[] = [
