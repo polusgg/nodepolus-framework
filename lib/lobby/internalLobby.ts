@@ -1,5 +1,5 @@
+import { ServerLobbyDestroyedEvent, ServerLobbyJoinRefusedEvent, ServerPacketCustomEvent, ServerPacketRpcCustomEvent } from "../api/events/server";
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RpcPacket, SceneChangePacket } from "../protocol/packets/gameData";
-import { ServerLobbyJoinRefusedEvent, ServerPacketCustomEvent, ServerPacketRpcCustomEvent } from "../api/events/server";
 import { GameDataPacketType, RootPacketType, RpcPacketType } from "../protocol/packets/types/enums";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { BaseRpcPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
@@ -89,7 +89,7 @@ export class InternalLobby implements LobbyInstance {
   ) {
     if (this.timeToJoinUntilClosed > 0) {
       this.joinTimer = setTimeout(() => {
-        this.server.deleteLobby(this);
+        this.close();
       }, this.timeToJoinUntilClosed * 1000);
     }
   }
@@ -165,7 +165,15 @@ export class InternalLobby implements LobbyInstance {
     return (new Date().getTime() - this.createdAt) / 1000;
   }
 
-  close(): void {
+  async close(force: boolean = false): Promise<void> {
+    const event = new ServerLobbyDestroyedEvent(this);
+
+    await this.server.emit("server.lobby.destroyed", event);
+
+    if (!force && event.isCancelled()) {
+      return;
+    }
+
     this.cancelJoinTimer();
     this.cancelStartTimer();
     this.server.deleteLobby(this);

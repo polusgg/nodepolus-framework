@@ -96,8 +96,10 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Disconnects all connections from the lobby and removes the lobby from the
    * server.
+   *
+   * @param force - `true` to force close the lobby, `false` to fire a cancellable event
    */
-  close(): void;
+  close(force: boolean): void;
 
   /**
    * Gets the host controller for the lobby.

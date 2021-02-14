@@ -343,6 +343,11 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     this.listening = false;
 
     this.connections.forEach(async connection => connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("The server is shutting down"))]));
+
+    for (let i = 0; i < this.lobbies.length; i++) {
+      this.lobbies[i].close(true);
+    }
+
     this.lobbies.splice(0, this.lobbies.length);
     this.lobbyMap.clear();
 
