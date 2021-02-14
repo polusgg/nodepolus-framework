@@ -10,7 +10,6 @@ import { EntityPlayer } from "../../protocol/entities/player";
 import { BaseRpcPacket } from "../../protocol/packets/rpc";
 import { GameOptionsData, Metadatable } from "../../types";
 import { Connection } from "../../protocol/connection";
-import { LobbySettings } from "./lobbySettings";
 import { PlayerInstance } from "../player";
 import { TextComponent } from "../text";
 import { HostInstance } from "../host";
@@ -278,11 +277,6 @@ export interface LobbyInstance extends Metadatable {
    * Deletes the MeetingHud instance for the lobby.
    */
   deleteMeetingHud(): void;
-
-  /**
-   * Gets the settings for the lobby.
-   */
-  getSettings(): LobbySettings;
 
   /**
    * Gets the raw settings for the lobby.

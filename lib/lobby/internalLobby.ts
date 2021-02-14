@@ -13,7 +13,6 @@ import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { LobbyListing } from "../protocol/packets/root/types";
-import { LobbyInstance, LobbySettings } from "../api/lobby";
 import { EntityPlayer } from "../protocol/entities/player";
 import { PlayerJoinedEvent } from "../api/events/player";
 import { RootPacket } from "../protocol/packets/hazel";
@@ -21,6 +20,7 @@ import { Connection } from "../protocol/connection";
 import { notUndefined } from "../util/functions";
 import { PlayerInstance } from "../api/player";
 import { LobbyCode } from "../util/lobbyCode";
+import { LobbyInstance } from "../api/lobby";
 import { TextComponent } from "../api/text";
 import { HostInstance } from "../api/host";
 import { InternalPlayer } from "../player";
@@ -64,7 +64,6 @@ export class InternalLobby implements LobbyInstance {
   private readonly rpcHandler: RpcHandler = new RpcHandler(this);
   private readonly spawningPlayers: Set<Connection> = new Set();
   private readonly connections: Connection[] = [];
-  private readonly settings: LobbySettings = new LobbySettings(this);
   private readonly gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
   private readonly metadata: Map<string, unknown> = new Map();
 
@@ -338,10 +337,6 @@ export class InternalLobby implements LobbyInstance {
 
   deleteMeetingHud(): void {
     delete this.meetingHud;
-  }
-
-  getSettings(): LobbySettings {
-    return this.settings;
   }
 
   getOptions(): GameOptionsData {
