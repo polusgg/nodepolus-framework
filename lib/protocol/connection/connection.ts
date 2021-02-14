@@ -1,6 +1,6 @@
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer } from "../../types";
+import { BaseRootPacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
-import { BaseRootPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
 import { PacketDestination, HazelPacketType } from "../packets/types/enums";
 import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
@@ -398,9 +398,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   disconnect(reason?: DisconnectReason): void {
     this.requestedDisconnect = true;
 
-    const packetToSend: MessageWriter = new Packet(undefined, new DisconnectPacket(true, reason)).serialize();
-
-    this.send(packetToSend.getBuffer());
+    this.send(new Packet(undefined, new RootPacket([new JoinGameErrorPacket(reason ?? DisconnectReason.exitGame())])).serialize().getBuffer());
+    this.send(new Packet(undefined, new DisconnectPacket(true, reason ?? DisconnectReason.exitGame())).serialize().getBuffer());
 
     this.disconnectTimeout = setTimeout(() => this.cleanup(reason), 6000);
   }

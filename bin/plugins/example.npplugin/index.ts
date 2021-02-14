@@ -3,7 +3,6 @@ import { FileAnnouncementDriver } from "../../../lib/announcementServer/drivers"
 import { InnerNetObjectType } from "../../../lib/protocol/entities/types/enums";
 import { ConnectionInfo, DisconnectReason, Vector2 } from "../../../lib/types";
 import { MessageReader, MessageWriter } from "../../../lib/util/hazelMessage";
-import { JoinGameErrorPacket } from "../../../lib/protocol/packets/root";
 import { AnnouncementServer } from "../../../lib/announcementServer";
 import { BasePlugin, PluginMetadata } from "../../../lib/api/plugin";
 import { RpcPacket } from "../../../lib/protocol/packets/gameData";
@@ -92,7 +91,7 @@ export default class extends BasePlugin {
     server.setInboundPacketTransformer((connection: Connection, reader: MessageReader): MessageReader => {
       if (reader.peek(0) != AUTHENTICATION_BYTE) {
         if (KICK_UNAUTHENTICATED) {
-          connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("This server does not supported unauthenticated packets"))]);
+          connection.disconnect(DisconnectReason.custom("This server does not supported unauthenticated packets"));
 
           return new MessageReader();
         }
@@ -101,7 +100,7 @@ export default class extends BasePlugin {
       }
 
       if (reader.getLength() < AUTHENTICATION_HEADER_LENGTH) {
-        connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("Invalid packet length"))]);
+        connection.disconnect(DisconnectReason.custom("Invalid packet length"));
 
         return new MessageReader();
       }
@@ -117,7 +116,7 @@ export default class extends BasePlugin {
       const user = USERS.get(clientId);
 
       if (user === undefined) {
-        connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("Unknown user"))]);
+        connection.disconnect(DisconnectReason.custom("Unknown user"));
 
         return new MessageReader();
       }
@@ -126,14 +125,14 @@ export default class extends BasePlugin {
       const message = reader.readRemainingBytes();
 
       if (!Hmac.verify(message.getBuffer().toString("hex"), hash, user.token)) {
-        connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("Signature mismatch"))]);
+        connection.disconnect(DisconnectReason.custom("Signature mismatch"));
 
         return new MessageReader();
       }
 
       if (connection.hasMeta("clientId")) {
         if (connection.getMeta<string>("clientId") !== clientId) {
-          connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("Wrong connection for user"))]);
+          connection.disconnect(DisconnectReason.custom("Wrong connection for user"));
 
           return new MessageReader();
         }
