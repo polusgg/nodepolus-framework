@@ -49,6 +49,7 @@ type User = {
 };
 
 // DEBUG
+const KICK_UNAUTHENTICATED = process.env.NP_KICK_UNAUTHENTICATED !== undefined;
 const AUTHENTICATION_BYTE = 0x69;
 const CLIENT_ID_BYTE_LENGTH = 16;
 const HASH_BYTE_LENGTH = 20;
@@ -90,9 +91,13 @@ export default class extends BasePlugin {
      */
     server.setInboundPacketTransformer((connection: Connection, reader: MessageReader): MessageReader => {
       if (reader.peek(0) != AUTHENTICATION_BYTE) {
-        connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("This server does not supported unauthenticated packets"))]);
+        if (KICK_UNAUTHENTICATED) {
+          connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("This server does not supported unauthenticated packets"))]);
 
-        return new MessageReader();
+          return new MessageReader();
+        }
+
+        return reader;
       }
 
       if (reader.getLength() < AUTHENTICATION_HEADER_LENGTH) {
@@ -146,9 +151,6 @@ export default class extends BasePlugin {
 
       return message;
     });
-
-    // ^ disable it quickly lmao
-    server.setInboundPacketTransformer((_connection: Connection, reader: MessageReader): MessageReader => reader);
 
     /**
      * Register some event handlers.
