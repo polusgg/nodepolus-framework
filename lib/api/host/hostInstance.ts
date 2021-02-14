@@ -1,8 +1,8 @@
 import { RepairAmount } from "../../protocol/packets/rpc/repairSystem/amounts";
 import { BaseInnerShipStatus } from "../../protocol/entities/baseShipStatus";
 import { GameOverReason, PlayerColor, SystemType } from "../../types/enums";
+import { DisconnectReason, GameOptionsData, LevelTask } from "../../types";
 import { InnerPlayerControl } from "../../protocol/entities/player";
-import { DisconnectReason, LevelTask } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { PlayerInstance } from "../player";
 import { LobbyInstance } from "../lobby";
@@ -115,6 +115,19 @@ export interface HostInstance {
   getDecontaminationHandlers(): DecontaminationHandler[];
 
   /**
+   * Called when an Impostor dies.
+   */
+  handleImpostorDeath(): void;
+
+  /**
+   * Called when a connection sends a Disconnect packet.
+   *
+   * @param connection - The connection that sent the packet
+   * @param reason - The reason for why the connection was disconnected
+   */
+  handleDisconnect(connection: Connection, reason: DisconnectReason | undefined): void;
+
+  /**
    * Called when a connection sends a Ready GameData packet.
    *
    * @param sender - The connection that sent the packet
@@ -128,6 +141,19 @@ export interface HostInstance {
    * @param sceneName - The name of the scene that the connection changed to
    */
   handleSceneChange(sender: Connection, sceneName: string): Promise<void>;
+
+  /**
+   * Called when a connection sends a CompleteTask RPC packet.
+   */
+  handleCompleteTask(): void;
+
+  /**
+   * Called when a player sends a SyncSettings RPC packet.
+   *
+   * @param sender - The connection that sent the packet
+   * @param options - The options that the player set
+   */
+  handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData): void;
 
   /**
    * Called when a connection sends a CheckName RPC packet.
@@ -154,27 +180,6 @@ export interface HostInstance {
   handleSetColor(sender: InnerPlayerControl, color: PlayerColor): void;
 
   /**
-   * Called when a connection sends a CompleteTask RPC packet.
-   *
-   * @param sender - The PlayerControl that sent the packet
-   * @param taskIndex - The index of the task that was completed from the player's task list
-   */
-  handleCompleteTask(sender: InnerPlayerControl, taskIndex: number): void;
-
-  /**
-   * Called when a connection sends a MurderPlayer RPC packet.
-   *
-   * @param sender - The PlayerControl that sent the packet
-   * @param victimPlayerControlNetId - The net ID of the PlayerControl for the player that was murdered
-   */
-  handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number): void;
-
-  /**
-   * Called when an Impostor dies.
-   */
-  handleImpostorDeath(): void;
-
-  /**
    * Called when a connection sends a ReportDeadBody RPC packet.
    *
    * @param sender - The PlayerControl that sent the packet
@@ -183,30 +188,12 @@ export interface HostInstance {
   handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void;
 
   /**
-   * Called when a connection sends a CastVote RPC packet.
+   * Called when a connection sends a MurderPlayer RPC packet.
    *
-   * @param votingPlayerId - The ID of the player who cast the vote
-   * @param suspectPlayerId - The ID of the player who is being voted to be exiled
+   * @param sender - The PlayerControl that sent the packet
+   * @param victimPlayerControlNetId - The net ID of the PlayerControl for the player that was murdered
    */
-  handleCastVote(votingPlayerId: number, suspectPlayerId: number): void;
-
-  /**
-   * Called when a connection sends a RepairSystem RPC packet.
-   *
-   * @param sender - The ShipStatus that sent the packet
-   * @param systemId - The ID of the system that is being repaired
-   * @param playerControlNetId - The net ID of the PlayerControl for the player that is repairing the system
-   * @param amount - The amount by which the system is being repaired
-   */
-  handleRepairSystem(sender: BaseInnerShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void;
-
-  /**
-   * Called when a connection sends a CloseDoorsOfType RPC packet.
-   *
-   * @param sender - The ShipStatus that sent the packet
-   * @param systemId - The ID of the system whose doors will be closed
-   */
-  handleCloseDoorsOfType(sender: BaseInnerShipStatus, systemId: SystemType): void;
+  handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number): void;
 
   /**
    * Called when a connection sends a SetStartCounter RPC packet.
@@ -218,12 +205,30 @@ export interface HostInstance {
   handleSetStartCounter(player: PlayerInstance, sequenceId: number, timeRemaining: number): void;
 
   /**
-   * Called when a connection sends a Disconnect packet.
+   * Called when a connection sends a CastVote RPC packet.
    *
-   * @param connection - The connection that sent the packet
-   * @param reason - The reason for why the connection was disconnected
+   * @param votingPlayerId - The ID of the player who cast the vote
+   * @param suspectPlayerId - The ID of the player who is being voted to be exiled
    */
-  handleDisconnect(connection: Connection, reason: DisconnectReason | undefined): void;
+  handleCastVote(votingPlayerId: number, suspectPlayerId: number): void;
+
+  /**
+   * Called when a connection sends a CloseDoorsOfType RPC packet.
+   *
+   * @param sender - The ShipStatus that sent the packet
+   * @param systemId - The ID of the system whose doors will be closed
+   */
+  handleCloseDoorsOfType(sender: BaseInnerShipStatus, systemId: SystemType): void;
+
+  /**
+   * Called when a connection sends a RepairSystem RPC packet.
+   *
+   * @param sender - The ShipStatus that sent the packet
+   * @param systemId - The ID of the system that is being repaired
+   * @param playerControlNetId - The net ID of the PlayerControl for the player that is repairing the system
+   * @param amount - The amount by which the system is being repaired
+   */
+  handleRepairSystem(sender: BaseInnerShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void;
 
   /**
    * Called when a connection sends a UsePlatform RPC packet.

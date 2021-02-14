@@ -1,4 +1,5 @@
 import { GameOptionsData, Immutable } from "../../../types";
+import { PlayerInstance } from "../../player";
 import { LobbyInstance } from "../../lobby";
 import { CancellableEvent } from "../types";
 
@@ -8,11 +9,13 @@ import { CancellableEvent } from "../types";
 export class LobbyOptionsUpdatedEvent extends CancellableEvent {
   /**
    * @param lobby - The lobby from which this event was fired
+   * @param host - The player that modified the options
    * @param oldOptions - The old lobby options
    * @param newOptions - The new lobby options
    */
   constructor(
     private readonly lobby: LobbyInstance,
+    private readonly host: PlayerInstance,
     private readonly oldOptions: Immutable<GameOptionsData>,
     private newOptions: GameOptionsData,
   ) {
@@ -24,6 +27,13 @@ export class LobbyOptionsUpdatedEvent extends CancellableEvent {
    */
   getLobby(): LobbyInstance {
     return this.lobby;
+  }
+
+  /**
+   * Gets the player that modified the options.
+   */
+  getHost(): PlayerInstance {
+    return this.host;
   }
 
   /**

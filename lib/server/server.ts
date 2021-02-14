@@ -542,6 +542,9 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         break;
       }
       case RootPacketType.GetGameList: {
+        const request = packet as GetGameListRequestPacket;
+        const levels = request.options.getLevels();
+        const languages = request.options.getLanguages();
         const results: LobbyListing[] = [];
         const counts = new LobbyCount();
 
@@ -550,6 +553,14 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
           const level: number = lobby.getLevel();
 
           if (!lobby.isPublic()) {
+            continue;
+          }
+
+          if (!levels.includes(lobby.getLevel())) {
+            continue;
+          }
+
+          if (!languages.includes(lobby.getOptions().getLanguages()[0])) {
             continue;
           }
 
@@ -564,7 +575,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
         results.sort((a, b) => b.getPlayerCount() - a.getPlayerCount());
 
-        const event = new ServerLobbyListEvent(sender, (packet as GetGameListRequestPacket).includePrivate, results, counts);
+        const event = new ServerLobbyListEvent(sender, request.includePrivate, results, counts);
 
         await this.emit("server.lobby.list", event);
 

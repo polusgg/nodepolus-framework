@@ -330,7 +330,6 @@ export class RpcHandler {
         }
 
         this.lobby.getHostInstance().handleUsePlatform(sender as InnerPlayerControl);
-
         this.handleUsePlatform(sender as InnerPlayerControl);
         break;
       }
@@ -344,11 +343,12 @@ export class RpcHandler {
   }
 
   handleCompleteTask(sender: InnerPlayerControl, taskIndex: number, sendTo: Connection[]): void {
-    this.lobby.getHostInstance().handleCompleteTask(sender, taskIndex);
-
-    if (this.lobby.getGameState() != GameState.Ended) {
-      sender.completeTask(taskIndex, sendTo);
+    if (this.lobby.getGameState() == GameState.Ended || this.lobby.getGameState() == GameState.Destroyed) {
+      return;
     }
+
+    sender.completeTask(taskIndex, sendTo);
+    this.lobby.getHostInstance().handleCompleteTask();
   }
 
   handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData, sendTo: Connection[]): void {

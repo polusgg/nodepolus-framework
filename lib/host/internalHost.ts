@@ -1,11 +1,11 @@
+import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent, LobbyOptionsUpdatedEvent } from "../api/events/lobby";
+import { DisconnectReason, GameOptionsData, Immutable, LevelTask, Vector2, VoteResult } from "../types";
 import { BaseInnerShipStatus, InternalSystemType } from "../protocol/entities/baseShipStatus";
-import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent } from "../api/events/lobby";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
 import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
 import { EntityPlayer, InnerPlayerControl } from "../protocol/entities/player";
 import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
 import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
-import { DisconnectReason, LevelTask, Vector2, VoteResult } from "../types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityMiraShipStatus } from "../protocol/entities/miraShipStatus";
 import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
@@ -558,6 +558,65 @@ export class InternalHost implements HostInstance {
     return this.decontaminationHandlers;
   }
 
+  handleImpostorDeath(): void {
+    if (this.shouldEndGame()) {
+      this.endGame(GameOverReason.CrewmatesByVote);
+    }
+  }
+
+  handleDisconnect(connection: Connection, _reason?: DisconnectReason): void {
+    const gameState = this.lobby.getGameState();
+    const gameData = this.lobby.getGameData();
+
+    if (gameState == GameState.NotStarted) {
+      this.stopCountdown();
+    }
+
+    if (!gameData) {
+      if (gameState == GameState.NotStarted || gameState == GameState.Started) {
+        throw new Error("Received Disconnect without a GameData instance");
+      }
+
+      return;
+    }
+
+    const player = this.lobby.findPlayerByConnection(connection);
+
+    if (!player) {
+      this.lobby.getLogger().warn("Received Disconnect from connection without a player");
+
+      return;
+    }
+
+    const playerIndex = gameData.gameData.players.findIndex(playerData => playerData.id == player.getId());
+    const playerData = gameData.gameData.players[playerIndex];
+
+    if (gameState == GameState.Started) {
+      playerData.isDisconnected = true;
+    } else {
+      gameData.gameData.players.splice(playerIndex, 1);
+    }
+
+    gameData.gameData.updateGameData(gameData.gameData.players, this.lobby.getConnections());
+    gameData.voteBanSystem.votes.delete(connection.id);
+
+    if (this.shouldEndGame()) {
+      if (playerData.isImpostor) {
+        this.endGame(GameOverReason.ImpostorDisconnect);
+      } else {
+        this.endGame(GameOverReason.CrewmateDisconnect);
+      }
+
+      return;
+    }
+
+    const meetingHud = this.lobby.getMeetingHud();
+
+    if (meetingHud) {
+      meetingHud.meetingHud.clearVote([player]);
+    }
+  }
+
   handleReady(sender: Connection): void {
     this.readyPlayerList.push(sender.id);
 
@@ -737,6 +796,47 @@ export class InternalHost implements HostInstance {
     gameData.gameData.updateGameData(gameData.gameData.players, this.lobby.getConnections());
   }
 
+  handleCompleteTask(): void {
+    const gameData = this.lobby.getGameData();
+
+    if (!gameData) {
+      throw new Error("Received CompleteTask without a GameData instance");
+    }
+
+    const crewmates = gameData.gameData.players.filter(playerData => !playerData.isImpostor);
+
+    if (crewmates.every(crewmate => crewmate.isDoneWithTasks())) {
+      this.endGame(GameOverReason.CrewmatesByTask);
+    }
+  }
+
+  async handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData): Promise<void> {
+    const owner = this.lobby.findConnection(sender.parent.owner);
+
+    if (!owner) {
+      throw new Error("Received CheckName from an InnerPlayerControl without an owner");
+    }
+
+    const player = this.lobby.findPlayerByConnection(owner);
+
+    if (!player) {
+      throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    const oldOptions = this.lobby.getOptions();
+    const event = new LobbyOptionsUpdatedEvent(this.lobby, player, oldOptions.clone() as Immutable<GameOptionsData>, options);
+
+    await this.lobby.getServer().emit("lobby.options.updated", event);
+
+    if (event.isCancelled()) {
+      sender.syncSettings(oldOptions, [owner]);
+
+      return;
+    }
+
+    sender.syncSettings(event.getNewOptions(), this.lobby.getConnections());
+  }
+
   async handleCheckName(sender: InnerPlayerControl, name: string): Promise<void> {
     let checkName: string = name;
     let index = 1;
@@ -824,40 +924,6 @@ export class InternalHost implements HostInstance {
     }
   }
 
-  handleCompleteTask(sender: InnerPlayerControl, taskIndex: number): void {
-    const gameData = this.lobby.getGameData();
-
-    if (!gameData) {
-      throw new Error("Received CompleteTask without a GameData instance");
-    }
-
-    const playerIndex = gameData.gameData.players.findIndex(playerData => playerData.id == sender.playerId);
-
-    if (playerIndex == -1) {
-      throw new Error("Received CompleteTask from a connection without an InnerPlayerControl instance");
-    }
-
-    gameData.gameData.players[playerIndex].completeTaskAtIndex(taskIndex);
-
-    const crewmates = gameData.gameData.players.filter(playerData => !playerData.isImpostor);
-
-    if (crewmates.every(crewmate => crewmate.isDoneWithTasks())) {
-      this.endGame(GameOverReason.CrewmatesByTask);
-    }
-  }
-
-  handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): void {
-    if (this.shouldEndGame()) {
-      this.endGame(GameOverReason.ImpostorsByKill);
-    }
-  }
-
-  handleImpostorDeath(): void {
-    if (this.shouldEndGame()) {
-      this.endGame(GameOverReason.CrewmatesByVote);
-    }
-  }
-
   async handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): Promise<void> {
     const gameData = this.lobby.getGameData();
 
@@ -925,6 +991,27 @@ export class InternalHost implements HostInstance {
     this.meetingHudTimeout = setTimeout(this.endMeeting.bind(this), (this.lobby.getOptions().getVotingTime() + this.lobby.getOptions().getDiscussionTime()) * 1000);
   }
 
+  handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): void {
+    if (this.shouldEndGame()) {
+      this.endGame(GameOverReason.ImpostorsByKill);
+    }
+  }
+
+  handleSetStartCounter(player: PlayerInstance, sequenceId: number, timeRemaining: number): void {
+    if (timeRemaining == -1) {
+      return;
+    }
+
+    if (this.counterSequenceId < sequenceId && this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+
+    if (timeRemaining == 5 && this.counterSequenceId != sequenceId) {
+      this.lobby.disableActingHosts(true);
+      this.startCountdown(this.lobby.getStartTimerDuration(), player);
+    }
+  }
+
   async handleCastVote(votingPlayerId: number, suspectPlayerId: number): Promise<void> {
     const meetingHud = this.lobby.getMeetingHud();
 
@@ -972,6 +1059,15 @@ export class InternalHost implements HostInstance {
       this.endMeeting();
       clearInterval(this.meetingHudTimeout);
     }
+  }
+
+  handleCloseDoorsOfType(_sender: BaseInnerShipStatus, systemId: SystemType): void {
+    if (!this.doorHandler) {
+      throw new Error("Received CloseDoorsOfType without a door handler");
+    }
+
+    this.doorHandler.closeDoor(this.doorHandler.getDoorsForSystem(systemId));
+    this.doorHandler.setSystemTimeout(systemId, 30);
   }
 
   handleRepairSystem(_sender: BaseInnerShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
@@ -1033,83 +1129,6 @@ export class InternalHost implements HostInstance {
         break;
       default:
         throw new Error(`Received RepairSystem packet for an unimplemented SystemType: ${system.type} (${SystemType[system.type]})`);
-    }
-  }
-
-  handleCloseDoorsOfType(_sender: BaseInnerShipStatus, systemId: SystemType): void {
-    if (!this.doorHandler) {
-      throw new Error("Received CloseDoorsOfType without a door handler");
-    }
-
-    this.doorHandler.closeDoor(this.doorHandler.getDoorsForSystem(systemId));
-    this.doorHandler.setSystemTimeout(systemId, 30);
-  }
-
-  handleSetStartCounter(player: PlayerInstance, sequenceId: number, timeRemaining: number): void {
-    if (timeRemaining == -1) {
-      return;
-    }
-
-    if (this.counterSequenceId < sequenceId && this.countdownInterval) {
-      clearInterval(this.countdownInterval);
-    }
-
-    if (timeRemaining == 5 && this.counterSequenceId != sequenceId) {
-      this.lobby.disableActingHosts(true);
-      this.startCountdown(this.lobby.getStartTimerDuration(), player);
-    }
-  }
-
-  handleDisconnect(connection: Connection, _reason?: DisconnectReason): void {
-    const gameState = this.lobby.getGameState();
-    const gameData = this.lobby.getGameData();
-
-    if (gameState == GameState.NotStarted) {
-      this.stopCountdown();
-    }
-
-    if (!gameData) {
-      if (gameState == GameState.NotStarted || gameState == GameState.Started) {
-        throw new Error("Received Disconnect without a GameData instance");
-      }
-
-      return;
-    }
-
-    const player = this.lobby.findPlayerByConnection(connection);
-
-    if (!player) {
-      this.lobby.getLogger().warn("Received Disconnect from connection without a player");
-
-      return;
-    }
-
-    const playerIndex = gameData.gameData.players.findIndex(playerData => playerData.id == player.getId());
-    const playerData = gameData.gameData.players[playerIndex];
-
-    if (gameState == GameState.Started) {
-      playerData.isDisconnected = true;
-    } else {
-      gameData.gameData.players.splice(playerIndex, 1);
-    }
-
-    gameData.gameData.updateGameData(gameData.gameData.players, this.lobby.getConnections());
-    gameData.voteBanSystem.votes.delete(connection.id);
-
-    if (this.shouldEndGame()) {
-      if (playerData.isImpostor) {
-        this.endGame(GameOverReason.ImpostorDisconnect);
-      } else {
-        this.endGame(GameOverReason.CrewmateDisconnect);
-      }
-
-      return;
-    }
-
-    const meetingHud = this.lobby.getMeetingHud();
-
-    if (meetingHud) {
-      meetingHud.meetingHud.clearVote([player]);
     }
   }
 
