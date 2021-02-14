@@ -198,8 +198,6 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
       return;
     }
 
-    console.log("sending", announcement.getId(), helloPacket.lastAnnouncementId);
-
     this.sendAnnouncementPacket(connectionInfo, announcement, helloPacket.language);
   }
 
