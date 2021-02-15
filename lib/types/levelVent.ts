@@ -35,15 +35,11 @@ export class LevelVent {
     return this.connectedVents;
   }
 
+  isOnSameLevelAs(other?: LevelVent): boolean {
+    return this.level === other?.level;
+  }
+
   isConnectedTo(other?: LevelVent): boolean {
-    if (other === undefined) {
-      return false;
-    }
-
-    if (this.level !== other.level) {
-      return false;
-    }
-
     return this.canMoveTo(other) || this.canMoveFrom(other);
   }
 
@@ -52,14 +48,14 @@ export class LevelVent {
       return false;
     }
 
-    return this.connectedVents.includes(other.getId());
-  }
-
-  canMoveFrom(other?: LevelVent): boolean {
-    if (other === undefined) {
+    if (!this.isOnSameLevelAs(other)) {
       return false;
     }
 
-    return other.canMoveTo(this);
+    return this.connectedVents.includes(other.id);
+  }
+
+  canMoveFrom(other?: LevelVent): boolean {
+    return other?.canMoveTo(this) ?? false;
   }
 }
