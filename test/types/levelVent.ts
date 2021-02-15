@@ -1,6 +1,6 @@
+import { Level, SystemType } from "../../lib/types/enums";
 import { LevelVent, Vector2 } from "../../lib/types";
 import test from "ava";
-import { Level, SystemType } from "../../lib/types/enums";
 
 test("checks if vents are on the same level", t => {
   const one = new LevelVent(Level.TheSkeld, 1, "I am connected to vent 2", SystemType.Admin, Vector2.zero(), [2]);
