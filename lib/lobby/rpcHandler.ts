@@ -379,8 +379,8 @@ export class RpcHandler {
     this.lobby.getHostInstance().handleReportDeadBody(sender, victimPlayerId);
   }
 
-  handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number, sendTo: Connection[]): void {
-    sender.murderPlayer(victimPlayerControlNetId, sendTo);
+  async handleMurderPlayer(sender: InnerPlayerControl, victimPlayerControlNetId: number, sendTo: Connection[]): Promise<void> {
+    await sender.murderPlayer(victimPlayerControlNetId, sendTo);
 
     this.lobby.getHostInstance().handleMurderPlayer(sender, victimPlayerControlNetId);
   }

@@ -1238,14 +1238,14 @@ export class InternalHost implements HostInstance {
    * @returns `true` if `impostors.length >= crewmates.length`, `false` if not
    */
   private shouldEndGame(): boolean {
+    if (this.lobby.getGameState() == GameState.NotStarted) {
+      return false;
+    }
+
     const gameData = this.lobby.getGameData();
 
     if (!gameData) {
       throw new Error("shouldEndGame called without a GameData instance");
-    }
-
-    if (this.lobby.getGameState() == GameState.NotStarted) {
-      return false;
     }
 
     const aliveImpostors: PlayerData[] = [];

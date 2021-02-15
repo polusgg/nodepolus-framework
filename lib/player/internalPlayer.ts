@@ -492,10 +492,10 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getGameDataEntry(): PlayerData {
-    const gameData = this.getGameData();
+    const players = this.getGameData().gameData.players;
 
-    for (let i = 0; i < gameData.gameData.players.length; i++) {
-      const player = gameData!.gameData.players[i];
+    for (let i = 0; i < players.length; i++) {
+      const player = players[i];
 
       if (player.id == this.id) {
         return player;
