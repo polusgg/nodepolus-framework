@@ -221,7 +221,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       return;
     }
 
-    this.getPlayerData(victim.getId()).isDead = true;
+    victim.getGameDataEntry().isDead = true;
 
     this.sendRpcPacketTo(sendTo, new MurderPlayerPacket(victimPlayerControlNetId));
   }
