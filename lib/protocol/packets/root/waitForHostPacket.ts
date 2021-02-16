@@ -7,8 +7,6 @@ import { BaseRootPacket } from "../root";
  * Root Packet ID: `0x0c` (`12`)
  */
 export class WaitForHostPacket extends BaseRootPacket {
-  public clientBound: boolean | undefined;
-
   constructor(
     public readonly lobbyCode: string,
     public readonly waitingClientId: number,

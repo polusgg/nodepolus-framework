@@ -415,9 +415,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     this.getLogger().verbose("Initialized connection %s", newConnection);
 
     newConnection.on("packet", (packet: BaseRootPacket) => {
-      if (!packet.isCancelled) {
-        this.handlePacket(packet, newConnection);
-      }
+      this.handlePacket(packet, newConnection);
     });
 
     newConnection.once("disconnected").then((reason?: DisconnectReason) => {

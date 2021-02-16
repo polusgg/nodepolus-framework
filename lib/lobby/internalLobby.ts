@@ -809,11 +809,7 @@ export class InternalLobby implements LobbyInstance {
     if (!connection.lobby) {
       connection.lobby = this;
 
-      connection.on("packet", (packet: BaseRootPacket) => {
-        if (!packet.isCancelled) {
-          this.handlePacket(packet, connection);
-        }
-      });
+      connection.on("packet", (packet: BaseRootPacket) => this.handlePacket(packet, connection));
     }
 
     switch (this.gameState) {
