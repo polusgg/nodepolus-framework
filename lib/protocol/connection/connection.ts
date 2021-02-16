@@ -350,7 +350,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
         packetBuffer = packetArr;
         packet = new Packet(nonce, new RootPacket(packetBuffer));
 
-        this.acknowledgementResolveMap.set(nonce!, resolveFuncs);
+        this.acknowledgementResolveMap.set(nonce, resolveFuncs);
       } else {
         packet = new Packet(nonce, new RootPacket(this.unreliablePacketBuffer));
         packetBuffer = this.unreliablePacketBuffer;
