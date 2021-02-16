@@ -7,7 +7,7 @@ import { GameDataPacketType } from "../types/enums";
  */
 export class DataPacket extends BaseGameDataPacket {
   constructor(
-    public innerNetObjectID: number,
+    public senderNetId: number,
     public data: MessageReader | MessageWriter,
   ) {
     super(GameDataPacketType.Data);
@@ -22,7 +22,7 @@ export class DataPacket extends BaseGameDataPacket {
 
   serialize(): MessageWriter {
     return new MessageWriter()
-      .writePackedUInt32(this.innerNetObjectID)
+      .writePackedUInt32(this.senderNetId)
       .writeBytes(this.data);
   }
 }

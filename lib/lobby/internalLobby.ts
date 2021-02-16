@@ -914,8 +914,8 @@ export class InternalLobby implements LobbyInstance {
 
     switch (packet.type) {
       case GameDataPacketType.Data:
-        if (!this.ignoredNetIds.includes((packet as DataPacket).innerNetObjectID)) {
-          this.handleData((packet as DataPacket).innerNetObjectID, (packet as DataPacket).data, sendTo);
+        if (!this.ignoredNetIds.includes((packet as DataPacket).senderNetId)) {
+          this.handleData((packet as DataPacket).senderNetId, (packet as DataPacket).data, sendTo);
         }
         break;
       case GameDataPacketType.Despawn:
