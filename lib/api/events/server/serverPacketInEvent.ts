@@ -1,10 +1,11 @@
 import { BaseRootPacket } from "../../../protocol/packets/root";
 import { Connection } from "../../../protocol/connection";
+import { CancellableEvent } from "../types";
 
 /**
- * Fired when a connection sends a root packet not defined in the base protocol.
+ * Fired when a connection sends a root packet defined in the base protocol.
  */
-export class ServerPacketCustomEvent {
+export class ServerPacketInEvent extends CancellableEvent {
   /**
    * @param connection - The connection that sent the packet
    * @param packet - The packet that was sent
@@ -12,7 +13,9 @@ export class ServerPacketCustomEvent {
   constructor(
     private readonly connection: Connection,
     private readonly packet: BaseRootPacket,
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * Gets the connection that sent the packet.

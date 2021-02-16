@@ -1,5 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { CustomRootPacketContainer } from "../../../types";
 import { RootPacketType } from "../types/enums";
+import { Connection } from "../../connection";
 import { Level } from "../../../types/enums";
 import {
   AlterGameTagPacket,
@@ -25,25 +27,32 @@ import {
 } from "../root";
 
 export class RootPacket {
-  private static readonly customPackets: Map<number, (reader: MessageReader) => BaseRootPacket> = new Map();
+  private static readonly customPackets: Map<number, CustomRootPacketContainer> = new Map();
 
   constructor(
     public readonly packets: BaseRootPacket[],
   ) {}
 
-  static registerPacket(id: number, deserializer: (reader: MessageReader) => BaseRootPacket): void {
+  static registerPacket<T extends BaseRootPacket>(id: number, deserializer: (reader: MessageReader) => T, handler: (connection: Connection, packet: T) => void): void {
     if (id in RootPacketType || RootPacket.customPackets.has(id)) {
       throw new Error(`Attempted to register a custom packet using an ID that is already in use: ${id}`);
     }
 
-    RootPacket.customPackets.set(id, deserializer);
+    RootPacket.customPackets.set(id, {
+      deserialize: deserializer,
+      handle: handler,
+    });
+  }
+
+  static unregisterPacket(id: number): void {
+    RootPacket.customPackets.delete(id);
   }
 
   static hasPacket(id: number): boolean {
     return RootPacket.customPackets.has(id);
   }
 
-  static getPacket(id: number): ((reader: MessageReader) => BaseRootPacket) | undefined {
+  static getPacket(id: number): CustomRootPacketContainer | undefined {
     return RootPacket.customPackets.get(id);
   }
 
@@ -115,14 +124,17 @@ export class RootPacket {
             packets.push(GetGameListRequestPacket.deserialize(child));
           }
           break;
-        default:
-          if (RootPacket.hasPacket(child.getTag())) {
-            packets.push(RootPacket.getPacket(child.getTag())!(child));
+        default: {
+          const custom = RootPacket.customPackets.get(child.getTag());
+
+          if (custom !== undefined) {
+            packets.push(custom.deserialize(child));
 
             break;
           }
 
           throw new Error(`Attempted to deserialize an unimplemented root game packet type: ${child.getTag()} (${RootPacketType[child.getTag()]})`);
+        }
       }
     });
 

@@ -1,4 +1,4 @@
-import { ServerLobbyDestroyedEvent, ServerLobbyJoinRefusedEvent, ServerPacketCustomEvent, ServerPacketRpcCustomEvent } from "../api/events/server";
+import { ServerLobbyDestroyedEvent, ServerLobbyJoinRefusedEvent, ServerPacketInRpcCustomEvent, ServerPacketInRpcEvent } from "../api/events/server";
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RpcPacket, SceneChangePacket } from "../protocol/packets/gameData";
 import { GameDataPacketType, RootPacketType, RpcPacketType } from "../protocol/packets/types/enums";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
@@ -266,8 +266,6 @@ export class InternalLobby implements LobbyInstance {
         }
       }
     }
-
-    throw new Error(`InnerNetObject #${netId} not found`);
   }
 
   findPlayerByClientId(clientId: number): InternalPlayer | undefined {
@@ -895,8 +893,6 @@ export class InternalLobby implements LobbyInstance {
         break;
       default: {
         if (RootPacket.hasPacket(packet.type)) {
-          this.server.emit("server.packet.custom", new ServerPacketCustomEvent(sender, packet));
-
           break;
         }
 
@@ -913,7 +909,7 @@ export class InternalLobby implements LobbyInstance {
    * @param sender - The connection that sent the packet
    * @param sendTo - The connections to which the packet was intended to be sent
    */
-  private handleGameDataPacket(packet: BaseGameDataPacket, sender: Connection, sendTo?: Connection[]): void {
+  private async handleGameDataPacket(packet: BaseGameDataPacket, sender: Connection, sendTo?: Connection[]): Promise<void> {
     sendTo = ((sendTo && sendTo.length > 0) ? sendTo : this.connections).filter(c => c.id != sender.id);
 
     switch (packet.type) {
@@ -932,6 +928,16 @@ export class InternalLobby implements LobbyInstance {
         }
 
         if (rpc.packet.type in RpcPacketType) {
+          if (this.server.listenerCount("server.packet.in.rpc") > 0) {
+            const event = new ServerPacketInRpcEvent(sender, rpc.senderNetId, this.findInnerNetObject(rpc.senderNetId), rpc.packet);
+
+            await this.server.emit("server.packet.in.rpc", event);
+
+            if (event.isCancelled()) {
+              break;
+            }
+          }
+
           this.rpcHandler.handleBaseRpc(
             rpc.packet.type,
             sender,
@@ -939,13 +945,24 @@ export class InternalLobby implements LobbyInstance {
             rpc.packet,
             sendTo,
           );
-        } else if (RpcPacket.hasPacket(rpc.packet.type)) {
-          this.server.emit("server.packet.rpc.custom", new ServerPacketRpcCustomEvent(
-            sender,
-            rpc.senderNetId,
-            this.findInnerNetObject(rpc.senderNetId),
-            rpc.packet,
-          ));
+        } else {
+          const custom = RpcPacket.getPacket(rpc.packet.type);
+
+          if (custom !== undefined) {
+            const object = this.findInnerNetObject(rpc.senderNetId);
+
+            if (this.server.listenerCount("server.packet.in.rpc.custom") > 0) {
+              const event = new ServerPacketInRpcCustomEvent(sender, rpc.senderNetId, object, rpc.packet);
+
+              await this.server.emit("server.packet.in.rpc.custom", event);
+
+              if (event.isCancelled()) {
+                break;
+              }
+            }
+
+            custom.handle(sender, rpc.packet, object);
+          }
         }
         break;
       }

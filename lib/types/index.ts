@@ -6,6 +6,10 @@ export { ClientVersion } from "./clientVersion";
 
 export { ConnectionInfo } from "./connectionInfo";
 
+export { CustomRootPacketContainer } from "./customRootPacketContainer";
+
+export { CustomRpcPacketContainer } from "./customRpcPacketContainer";
+
 export { DisconnectReason } from "./disconnectReason";
 
 export { GameOptionsData } from "./gameOptionsData";

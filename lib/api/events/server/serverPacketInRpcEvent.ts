@@ -1,11 +1,12 @@
 import { BaseInnerNetObject } from "../../../protocol/entities/types";
 import { BaseRpcPacket } from "../../../protocol/packets/rpc";
 import { Connection } from "../../../protocol/connection";
+import { CancellableEvent } from "../types";
 
 /**
- * Fired when a connection sends an RPC packet not defined in the base protocol.
+ * Fired when a connection sends an RPC packet defined in the base protocol.
  */
-export class ServerPacketRpcCustomEvent {
+export class ServerPacketInRpcEvent extends CancellableEvent {
   /**
    * @param connection - The connection that sent the packet
    * @param netId - The ID of the InnerNetObject that sent the packet
@@ -17,7 +18,9 @@ export class ServerPacketRpcCustomEvent {
     private readonly netId: number,
     private readonly sender: BaseInnerNetObject | undefined,
     private readonly packet: BaseRpcPacket,
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * Gets the connection that sent the packet.
@@ -36,7 +39,7 @@ export class ServerPacketRpcCustomEvent {
   /**
    * Gets the InnerNetObject that sent the packet.
    *
-   * @returns the InnerNetObject that sent the packet, or `undefined` if it does not exist
+   * @returns The InnerNetObject that sent the packet, or `undefined` if it does not exist
    */
   getSender(): BaseInnerNetObject | undefined {
     return this.sender;

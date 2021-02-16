@@ -1,8 +1,9 @@
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer } from "../../types";
 import { BaseRootPacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
+import { PacketDestination, HazelPacketType, RootPacketType } from "../packets/types/enums";
+import { ServerPacketOutCustomEvent, ServerPacketOutEvent } from "../../api/events/server";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
-import { PacketDestination, HazelPacketType } from "../packets/types/enums";
 import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
 import { MessageWriter } from "../../util/hazelMessage";
 import { PlayerInstance } from "../../api/player";
@@ -357,8 +358,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
       packet.setClientBound(true);
 
-      const packetToSend: MessageWriter = packet.serialize();
-
       if (nonce !== undefined) {
         this.unacknowledgedPackets.set(nonce, 0);
         this.flushResolveMap.set(nonce, resolve);
@@ -372,7 +371,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
               reject(new Error(`Connection ${this.id} did not acknowledge packet ${nonce} after 10 attempts`));
             } else {
-              this.send(packetToSend.getBuffer());
+              this.send(packet);
             }
           } else {
             clearInterval(resendInterval);
@@ -380,7 +379,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
         }, 1000);
       }
 
-      this.send(packetToSend.getBuffer());
+      this.send(packet);
 
       if (reliable) {
         this.packetBuffer = [];
@@ -398,8 +397,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   disconnect(reason?: DisconnectReason): void {
     this.requestedDisconnect = true;
 
-    this.send(new Packet(undefined, new RootPacket([new JoinGameErrorPacket(reason ?? DisconnectReason.exitGame())])).serialize().getBuffer());
-    this.send(new Packet(undefined, new DisconnectPacket(true, reason ?? DisconnectReason.exitGame())).serialize().getBuffer());
+    this.send(new Packet(undefined, new RootPacket([new JoinGameErrorPacket(reason ?? DisconnectReason.exitGame())])));
+    this.send(new Packet(undefined, new DisconnectPacket(true, reason ?? DisconnectReason.exitGame())));
 
     this.disconnectTimeout = setTimeout(() => this.cleanup(reason), 6000);
   }
@@ -525,7 +524,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * @param nonce - The ID of the packet being acknowledged
    */
   private acknowledgePacket(nonce: number): void {
-    this.send(new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))).serialize().getBuffer());
+    this.send(new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))));
 
     const resolveFunArr = this.acknowledgementResolveMap.get(nonce);
 
@@ -581,7 +580,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    */
   private handleDisconnect(reason?: DisconnectReason): void {
     if (!this.requestedDisconnect) {
-      this.send(Buffer.from([HazelPacketType.Disconnect]));
+      this.send(new Packet(undefined, new DisconnectPacket()));
     }
 
     this.cleanup(reason);
@@ -606,11 +605,50 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   }
 
   /**
-   * Sends the given byte buffer over the socket.
+   * Sends the given packet over the socket.
    *
-   * @param buffer - The byte buffer to send over the socket
+   * @param packet - The packet to send over the socket
    */
-  private send(buffer: Buffer): void {
+  private async send(packet: Packet): Promise<void> {
+    const writeListeners = this.listenerCount("write");
+    const writeCustomListeners = this.listenerCount("writeCustom");
+
+    if (writeListeners > 0 || writeCustomListeners > 0) {
+      if (packet.type === HazelPacketType.Reliable || packet.type === HazelPacketType.Unreliable) {
+        const subpackets = (packet.data as RootPacket).packets;
+        const filteredIndices: number[] = [];
+
+        for (let i = 0; i < subpackets.length; i++) {
+          const subpacket = subpackets[i];
+
+          if (subpacket.type in RootPacketType) {
+            if (writeListeners > 0) {
+              const event = new ServerPacketOutEvent(this, subpacket);
+
+              await this.emit("write", event);
+
+              if (event.isCancelled()) {
+                filteredIndices.push(i);
+              }
+            }
+          } else if (writeCustomListeners > 0) {
+            const event = new ServerPacketOutCustomEvent(this, subpacket);
+
+            await this.emit("writeCustom", event);
+
+            if (event.isCancelled()) {
+              filteredIndices.push(i);
+            }
+          }
+        }
+
+        for (let i = filteredIndices.length - 1; i >= 0; i--) {
+          subpackets.splice(filteredIndices[i], 1);
+        }
+      }
+    }
+
+    let buffer = packet.serialize().getBuffer();
     const outboundPacketTransformer = this.outboundPacketTransformerSupplier !== undefined
       ? this.outboundPacketTransformerSupplier()
       : undefined;

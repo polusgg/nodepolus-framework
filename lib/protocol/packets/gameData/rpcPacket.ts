@@ -1,6 +1,9 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { GameDataPacketType, RpcPacketType } from "../types/enums";
 import { BaseGameDataPacket } from "./baseGameDataPacket";
+import { CustomRpcPacketContainer } from "../../../types";
+import { BaseInnerNetObject } from "../../entities/types";
+import { Connection } from "../../connection";
 import { Level } from "../../../types/enums";
 import {
   AddVotePacket,
@@ -43,7 +46,7 @@ import {
  * Game Data Packet ID: `0x02` (`2`)
  */
 export class RpcPacket extends BaseGameDataPacket {
-  private static readonly customPackets: Map<number, (reader: MessageReader) => BaseRpcPacket> = new Map();
+  private static readonly customPackets: Map<number, CustomRpcPacketContainer> = new Map();
 
   constructor(
     public senderNetId: number,
@@ -52,19 +55,26 @@ export class RpcPacket extends BaseGameDataPacket {
     super(GameDataPacketType.RPC);
   }
 
-  static registerPacket(id: number, deserializer: (reader: MessageReader) => BaseRpcPacket): void {
+  static registerPacket<T extends BaseRpcPacket>(id: number, deserializer: (reader: MessageReader) => T, handler: (connection: Connection, packet: T, sender?: BaseInnerNetObject) => void): void {
     if (id in RpcPacketType || RpcPacket.customPackets.has(id)) {
       throw new Error(`Attempted to register a custom RPC packet using an ID that is already in use: ${id}`);
     }
 
-    RpcPacket.customPackets.set(id, deserializer);
+    RpcPacket.customPackets.set(id, {
+      deserialize: deserializer,
+      handle: handler,
+    });
+  }
+
+  static unregisterPacket(id: number): void {
+    RpcPacket.customPackets.delete(id);
   }
 
   static hasPacket(id: number): boolean {
     return RpcPacket.customPackets.has(id);
   }
 
-  static getPacket(id: number): ((reader: MessageReader) => BaseRpcPacket) | undefined {
+  static getPacket(id: number): CustomRpcPacketContainer | undefined {
     return RpcPacket.customPackets.get(id);
   }
 
@@ -139,12 +149,15 @@ export class RpcPacket extends BaseGameDataPacket {
         return new RpcPacket(senderNetId, ClimbLadderPacket.deserialize(reader));
       case RpcPacketType.UsePlatform:
         return new RpcPacket(senderNetId, UsePlatformPacket.deserialize(reader));
-      default:
-        if (RpcPacket.hasPacket(type)) {
-          return new RpcPacket(senderNetId, RpcPacket.getPacket(type)!(reader));
+      default: {
+        const custom = RpcPacket.customPackets.get(type);
+
+        if (custom !== undefined) {
+          return new RpcPacket(senderNetId, custom.deserialize(reader));
         }
 
         throw new Error(`Attempted to deserialize an unimplemented RPC packet type ${type} (${RpcPacketType[type]}) from InnerNetObject ${senderNetId}`);
+      }
     }
   }
 

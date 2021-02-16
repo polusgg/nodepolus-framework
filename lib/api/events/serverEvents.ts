@@ -86,8 +86,14 @@ import {
   ServerLobbyJoinEvent,
   ServerLobbyJoinRefusedEvent,
   ServerLobbyListEvent,
-  ServerPacketCustomEvent,
-  ServerPacketRpcCustomEvent,
+  ServerPacketInCustomEvent,
+  ServerPacketInEvent,
+  ServerPacketInRpcCustomEvent,
+  ServerPacketInRpcEvent,
+  ServerPacketOutCustomEvent,
+  ServerPacketOutEvent,
+  ServerPacketOutRpcCustomEvent,
+  ServerPacketOutRpcEvent,
 } from "./server";
 
 const basicServerEvents = [
@@ -212,6 +218,12 @@ export type ServerEvents = {
   "server.lobby.join": ServerLobbyJoinEvent;
   "server.lobby.join.refused": ServerLobbyJoinRefusedEvent;
   "server.lobby.list": ServerLobbyListEvent;
-  "server.packet.custom": ServerPacketCustomEvent;
-  "server.packet.rpc.custom": ServerPacketRpcCustomEvent;
+  "server.packet.in": ServerPacketInEvent;
+  "server.packet.in.custom": ServerPacketInCustomEvent;
+  "server.packet.in.rpc": ServerPacketInRpcEvent;
+  "server.packet.in.rpc.custom": ServerPacketInRpcCustomEvent;
+  "server.packet.out": ServerPacketOutEvent;
+  "server.packet.out.custom": ServerPacketOutCustomEvent;
+  "server.packet.out.rpc": ServerPacketOutRpcEvent;
+  "server.packet.out.rpc.custom": ServerPacketOutRpcCustomEvent;
 };

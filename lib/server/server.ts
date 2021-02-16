@@ -1,11 +1,12 @@
+import { GameDataPacketType, PacketDestination, RootPacketType, RpcPacketType } from "../protocol/packets/types/enums";
 import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, OutboundPacketTransformer } from "../types";
 import { PlayerBannedEvent, PlayerKickedEvent, PlayerLeftEvent } from "../api/events/player";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
-import { PacketDestination, RootPacketType } from "../protocol/packets/types/enums";
 import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
 import { DisconnectReasonType, FakeClientId } from "../types/enums";
 import { BasicServerEvents, ServerEvents } from "../api/events";
 import { DEFAULT_CONFIG, MaxValue } from "../util/constants";
+import { RpcPacket } from "../protocol/packets/gameData";
 import { RootPacket } from "../protocol/packets/hazel";
 import { MessageReader } from "../util/hazelMessage";
 import { Connection } from "../protocol/connection";
@@ -18,6 +19,7 @@ import Emittery from "emittery";
 import dgram from "dgram";
 import {
   BaseRootPacket,
+  GameDataPacket,
   GetGameListRequestPacket,
   GetGameListResponsePacket,
   HostGameRequestPacket,
@@ -31,7 +33,12 @@ import {
   ServerLobbyDestroyedEvent,
   ServerLobbyJoinEvent,
   ServerLobbyListEvent,
-  ServerPacketCustomEvent,
+  ServerPacketInCustomEvent,
+  ServerPacketInEvent,
+  ServerPacketOutCustomEvent,
+  ServerPacketOutEvent,
+  ServerPacketOutRpcCustomEvent,
+  ServerPacketOutRpcEvent,
 } from "../api/events/server";
 
 export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
@@ -396,6 +403,58 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     this.connections.delete(connection.getConnectionInfo().toString());
   }
 
+  private async emitRpcEvents(connection: Connection, event: ServerPacketOutEvent | ServerPacketOutCustomEvent): Promise<void> {
+    if (event.isCancelled()) {
+      return;
+    }
+
+    const rpcListeners = this.listenerCount("server.packet.out.rpc");
+    const rpcCustomListeners = this.listenerCount("server.packet.out.rpc.custom");
+
+    if (rpcListeners === 0 && rpcCustomListeners === 0) {
+      return;
+    }
+
+    if (event.getPacket().type !== RootPacketType.GameData && event.getPacket().type !== RootPacketType.GameDataTo) {
+      return;
+    }
+
+    const subpackets = (event.getPacket() as GameDataPacket).packets;
+    const filteredIndices: number[] = [];
+
+    for (let i = 0; i < subpackets.length; i++) {
+      if (subpackets[i].type !== GameDataPacketType.RPC) {
+        continue;
+      }
+
+      const rpc = subpackets[i] as RpcPacket;
+
+      if (rpc.type in RpcPacketType) {
+        if (rpcListeners > 0) {
+          const rpcEvent = new ServerPacketOutRpcEvent(connection, rpc.senderNetId, rpc.packet);
+
+          await this.emit("server.packet.out.rpc", rpcEvent);
+
+          if (rpcEvent.isCancelled()) {
+            filteredIndices.push(i);
+          }
+        }
+      } else if (rpcCustomListeners > 0) {
+        const rpcEvent = new ServerPacketOutRpcCustomEvent(connection, rpc.senderNetId, rpc.packet);
+
+        await this.emit("server.packet.out.rpc.custom", rpcEvent);
+
+        if (rpcEvent.isCancelled()) {
+          filteredIndices.push(i);
+        }
+      }
+    }
+
+    for (let i = filteredIndices.length - 1; i >= 0; i--) {
+      subpackets.splice(filteredIndices[i], 1);
+    }
+  }
+
   /**
    * Creates a new connection from the given ConnectionInfo.
    *
@@ -403,33 +462,47 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @returns A new connection described by `connectionInfo`
    */
   private initializeConnection(connectionInfo: ConnectionInfo): Connection {
-    const newConnection = new Connection(
+    const connection = new Connection(
       connectionInfo,
       this.socket,
       PacketDestination.Client,
       (): OutboundPacketTransformer | undefined => this.getOutboundPacketTransformer(),
     );
 
-    newConnection.id = this.getNextConnectionId();
+    connection.id = this.getNextConnectionId();
 
-    this.getLogger().verbose("Initialized connection %s", newConnection);
+    this.getLogger().verbose("Initialized connection %s", connection);
 
-    newConnection.on("packet", (packet: BaseRootPacket) => {
-      this.handlePacket(packet, newConnection);
+    connection.on("packet", (packet: BaseRootPacket) => {
+      this.handlePacket(packet, connection);
     });
 
-    newConnection.once("disconnected").then((reason?: DisconnectReason) => {
-      this.emit("connection.closed", new ConnectionClosedEvent(newConnection, reason));
-      this.handleDisconnect(newConnection, reason);
+    if (this.listenerCount("server.packet.out") > 0) {
+      connection.on("write", async event => {
+        await this.emit("server.packet.out", event);
+        await this.emitRpcEvents(connection, event);
+      });
+    }
+
+    if (this.listenerCount("server.packet.out.custom") > 0) {
+      connection.on("writeCustom", async event => {
+        await this.emit("server.packet.out.custom", event);
+        await this.emitRpcEvents(connection, event);
+      });
+    }
+
+    connection.once("disconnected").then((reason?: DisconnectReason) => {
+      this.emit("connection.closed", new ConnectionClosedEvent(connection, reason));
+      this.handleDisconnect(connection, reason);
     });
 
-    newConnection.once("kicked").then(({ isBanned, kickingPlayer, reason }) => {
-      if (!newConnection.lobby) {
+    connection.once("kicked").then(({ isBanned, kickingPlayer, reason }) => {
+      if (!connection.lobby) {
         return;
       }
 
-      const lobby = newConnection.lobby;
-      const player = lobby.findPlayerByConnection(newConnection);
+      const lobby = connection.lobby;
+      const player = lobby.findPlayerByConnection(connection);
 
       if (!player) {
         return;
@@ -441,17 +514,18 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         this.emit("player.kicked", new PlayerKickedEvent(lobby, player, kickingPlayer, reason));
       }
     });
-    newConnection.once("hello").then(async () => {
-      const event = new ConnectionOpenedEvent(newConnection);
+
+    connection.once("hello").then(async () => {
+      const event = new ConnectionOpenedEvent(connection);
 
       await this.emit("connection.opened", event);
 
       if (event.isCancelled()) {
-        newConnection.disconnect(event.getDisconnectReason());
+        connection.disconnect(event.getDisconnectReason());
       }
     });
 
-    return newConnection;
+    return connection;
   }
 
   /**
@@ -461,6 +535,36 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @param sender - The connection that sent the packet
    */
   private async handlePacket(packet: BaseRootPacket, sender: Connection): Promise<void> {
+    if (packet.type in RootPacketType) {
+      if (this.listenerCount("server.packet.in") > 0) {
+        const event = new ServerPacketInEvent(sender, packet);
+
+        await this.emit("server.packet.in", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
+      }
+    } else {
+      const custom = RootPacket.getPacket(packet.type);
+
+      if (custom !== undefined) {
+        if (this.listenerCount("server.packet.in.custom") > 0) {
+          const event = new ServerPacketInCustomEvent(sender, packet);
+
+          await this.emit("server.packet.in.custom", event);
+
+          if (event.isCancelled()) {
+            return;
+          }
+        }
+
+        custom.handle(sender, packet);
+
+        return;
+      }
+    }
+
     switch (packet.type) {
       case RootPacketType.HostGame: {
         this.getLogger().verbose("Connection %s trying to host lobby", sender);
@@ -587,14 +691,6 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         break;
       }
       default: {
-        if (RootPacket.hasPacket(packet.type)) {
-          if (!sender.lobby) {
-            this.emit("server.packet.custom", new ServerPacketCustomEvent(sender, packet));
-          }
-
-          break;
-        }
-
         if (!sender.lobby) {
           throw new Error(`Client ${sender.id} sent root game packet type ${packet.type} (${RootPacketType[packet.type]}) while not in a lobby`);
         }
