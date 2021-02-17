@@ -6,5 +6,7 @@ export abstract class BaseHazelPacket {
     public type: HazelPacketType,
   ) {}
 
+  abstract clone(): BaseHazelPacket;
+
   abstract serialize(): MessageWriter;
 }

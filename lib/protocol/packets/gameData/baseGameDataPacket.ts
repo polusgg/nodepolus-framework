@@ -6,5 +6,7 @@ export abstract class BaseGameDataPacket {
     public type: GameDataPacketType,
   ) {}
 
+  abstract clone(): BaseGameDataPacket;
+
   abstract serialize(): MessageWriter;
 }

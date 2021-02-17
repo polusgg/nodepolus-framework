@@ -6,5 +6,7 @@ export abstract class BaseRootPacket {
     public type: RootPacketType,
   ) {}
 
+  abstract clone(): BaseRootPacket;
+
   abstract serialize(): MessageWriter;
 }

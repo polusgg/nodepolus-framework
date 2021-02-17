@@ -16,6 +16,10 @@ export class MedbayAmount implements RepairAmount {
     );
   }
 
+  clone(): MedbayAmount {
+    return new MedbayAmount(this.playerId, this.action);
+  }
+
   serialize(): number {
     return this.playerId | this.action;
   }

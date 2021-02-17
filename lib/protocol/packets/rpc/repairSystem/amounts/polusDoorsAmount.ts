@@ -9,6 +9,10 @@ export class PolusDoorsAmount implements RepairAmount {
     return new PolusDoorsAmount(amount & 0x1f);
   }
 
+  clone(): PolusDoorsAmount {
+    return new PolusDoorsAmount(this.doorId);
+  }
+
   serialize(): number {
     return this.doorId | 0x40;
   }

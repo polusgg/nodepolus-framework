@@ -23,6 +23,16 @@ export class VotingCompletePacket extends BaseRpcPacket {
     );
   }
 
+  clone(): VotingCompletePacket {
+    const states = new Array(this.states.length);
+
+    for (let i = 0; i < states.length; i++) {
+      states[i] = this.states[i].clone();
+    }
+
+    return new VotingCompletePacket(states, this.exiledPlayerId, this.isTie);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeList(this.states, (sub, state) => state.serialize(sub))

@@ -25,6 +25,10 @@ export class JoinedGamePacket extends BaseRootPacket {
     );
   }
 
+  clone(): JoinedGamePacket {
+    return new JoinedGamePacket(this.lobbyCode, this.joinedClientId, this.hostClientId, [...this.otherClientIds]);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeInt32(LobbyCode.encode(this.lobbyCode))

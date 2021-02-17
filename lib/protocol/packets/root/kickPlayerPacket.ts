@@ -1,5 +1,4 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { AlterGameTag } from "../../../types/enums";
 import { LobbyCode } from "../../../util/lobbyCode";
 import { DisconnectReason } from "../../../types";
 import { RootPacketType } from "../types/enums";
@@ -11,7 +10,7 @@ import { BaseRootPacket } from "../root";
 export class KickPlayerPacket extends BaseRootPacket {
   constructor(
     public lobbyCode: string,
-    public kickedClientId: AlterGameTag,
+    public kickedClientId: number,
     public banned: boolean,
     public disconnectReason: DisconnectReason,
   ) {
@@ -31,6 +30,10 @@ export class KickPlayerPacket extends BaseRootPacket {
         ? new DisconnectReason(reader.readByte())
         : (banned ? DisconnectReason.banned() : DisconnectReason.kicked()),
     );
+  }
+
+  clone(): KickPlayerPacket {
+    return new KickPlayerPacket(this.lobbyCode, this.kickedClientId, this.banned, this.disconnectReason.clone());
   }
 
   serialize(): MessageWriter {

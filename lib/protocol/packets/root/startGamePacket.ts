@@ -17,6 +17,10 @@ export class StartGamePacket extends BaseRootPacket {
     return new StartGamePacket(LobbyCode.decode(reader.readInt32()));
   }
 
+  clone(): StartGamePacket {
+    return new StartGamePacket(this.lobbyCode);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeInt32(LobbyCode.encode(this.lobbyCode));
   }

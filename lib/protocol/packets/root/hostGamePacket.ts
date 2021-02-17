@@ -18,6 +18,10 @@ export class HostGameRequestPacket extends BaseRootPacket {
     return new HostGameRequestPacket(GameOptionsData.deserialize(reader));
   }
 
+  clone(): HostGameRequestPacket {
+    return new HostGameRequestPacket(this.options.clone());
+  }
+
   serialize(): MessageWriter {
     const writer = new MessageWriter();
 
@@ -39,6 +43,10 @@ export class HostGameResponsePacket extends BaseRootPacket {
 
   static deserialize(reader: MessageReader): HostGameResponsePacket {
     return new HostGameResponsePacket(LobbyCode.decode(reader.readInt32()));
+  }
+
+  clone(): HostGameResponsePacket {
+    return new HostGameResponsePacket(this.lobbyCode);
   }
 
   serialize(): MessageWriter {

@@ -138,4 +138,11 @@ export class LobbyCount {
       .writeUInt32(this.polus)
       .writeUInt32(this.airship);
   }
+
+  /**
+   * Gets a clone of the LobbyCounts instance.
+   */
+  clone(): LobbyCount {
+    return new LobbyCount(this.skeld, this.mira, this.polus, this.airship);
+  }
 }

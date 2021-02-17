@@ -136,4 +136,21 @@ export class LobbyListing {
       .writeByte(this.impostorCount)
       .writeByte(this.maxPlayers);
   }
+
+  /**
+   * Gets a clone of the LobbyListing instance.
+   */
+  clone(): LobbyListing {
+    return new LobbyListing(
+      this.ipAddress,
+      this.port,
+      this.lobbyCode,
+      this.hostName,
+      this.playerCount,
+      this.age,
+      this.level,
+      this.impostorCount,
+      this.maxPlayers,
+    );
+  }
 }

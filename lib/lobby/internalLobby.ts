@@ -42,7 +42,6 @@ import {
 } from "../protocol/packets/root";
 import {
   AlterGameTag,
-  DisconnectReasonType,
   FakeClientId,
   GameState,
   Level,
@@ -819,7 +818,7 @@ export class InternalLobby implements LobbyInstance {
         this.handleRejoin(connection);
         break;
       default:
-        connection.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameStarted)]);
+        connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameStarted())]);
     }
   }
 
@@ -1048,7 +1047,7 @@ export class InternalLobby implements LobbyInstance {
    */
   private handleRejoin(connection: Connection): void {
     if (connection.lobby?.code != this.code) {
-      connection.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameStarted)]);
+      connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameStarted())]);
     }
   }
 

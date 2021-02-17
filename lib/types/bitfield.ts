@@ -60,7 +60,7 @@ export class Bitfield {
   }
 
   /**
-   * Clones the Bitfield into a new instance.
+   * Gets a clone of the Bitfield instance.
    */
   clone(): Bitfield {
     return new Bitfield([...this.bits]);

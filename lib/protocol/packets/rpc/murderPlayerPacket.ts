@@ -16,6 +16,10 @@ export class MurderPlayerPacket extends BaseRpcPacket {
     return new MurderPlayerPacket(reader.readPackedUInt32());
   }
 
+  clone(): MurderPlayerPacket {
+    return new MurderPlayerPacket(this.victimPlayerControlNetId);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writePackedUInt32(this.victimPlayerControlNetId);
   }

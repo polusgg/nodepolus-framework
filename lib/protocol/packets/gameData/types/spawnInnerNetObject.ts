@@ -17,6 +17,10 @@ export class SpawnInnerNetObject extends BaseGameDataPacket {
     );
   }
 
+  clone(): SpawnInnerNetObject {
+    return new SpawnInnerNetObject(this.innerNetObjectID, this.data.clone());
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writePackedUInt32(this.innerNetObjectID)

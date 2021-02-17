@@ -14,6 +14,10 @@ export class ExiledPacket extends BaseRpcPacket {
     return new ExiledPacket();
   }
 
+  clone(): ExiledPacket {
+    return new ExiledPacket();
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter();
   }

@@ -121,4 +121,22 @@ export class PlayerData {
       )
       .writeList(this.tasks, (sub, task, i) => sub.writePackedUInt32(i).writeBoolean(task[1]));
   }
+
+  /**
+   * Gets a clone of the VoteState instance.
+   */
+  clone(): PlayerData {
+    return new PlayerData(
+      this.id,
+      this.name,
+      this.color,
+      this.hat,
+      this.pet,
+      this.skin,
+      this.isDisconnected,
+      this.isImpostor,
+      this.isDead,
+      [...this.tasks],
+    );
+  }
 }

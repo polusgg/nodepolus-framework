@@ -17,6 +17,10 @@ export class SetHatPacket extends BaseRpcPacket {
     return new SetHatPacket(reader.readPackedUInt32());
   }
 
+  clone(): SetHatPacket {
+    return new SetHatPacket(this.hat);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writePackedUInt32(this.hat);
   }

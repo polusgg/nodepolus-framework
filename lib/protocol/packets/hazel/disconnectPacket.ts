@@ -1,23 +1,14 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { DisconnectReasonType } from "../../../types/enums";
 import { DisconnectReason } from "../../../types";
 import { HazelPacketType } from "../types/enums";
 import { BaseHazelPacket } from ".";
 
 export class DisconnectPacket extends BaseHazelPacket {
-  public disconnectReason?: DisconnectReason;
-
   constructor(
     public isForced?: boolean,
-    disconnectReason?: DisconnectReason | DisconnectReasonType,
+    public disconnectReason?: DisconnectReason,
   ) {
     super(HazelPacketType.Acknowledgement);
-
-    if (disconnectReason instanceof DisconnectReason) {
-      this.disconnectReason = disconnectReason;
-    } else if (disconnectReason) {
-      this.disconnectReason = new DisconnectReason(disconnectReason);
-    }
   }
 
   static deserialize(reader: MessageReader): DisconnectPacket {
@@ -32,6 +23,10 @@ export class DisconnectPacket extends BaseHazelPacket {
     }
 
     return new DisconnectPacket();
+  }
+
+  clone(): DisconnectPacket {
+    return new DisconnectPacket(this.isForced, this.disconnectReason?.clone());
   }
 
   serialize(): MessageWriter {

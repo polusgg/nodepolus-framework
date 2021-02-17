@@ -18,6 +18,10 @@ export class WaitForHostPacket extends BaseRootPacket {
     return new WaitForHostPacket(LobbyCode.decode(reader.readInt32()), reader.readUInt32());
   }
 
+  clone(): WaitForHostPacket {
+    return new WaitForHostPacket(this.lobbyCode, this.waitingClientId);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeInt32(LobbyCode.encode(this.lobbyCode))

@@ -20,6 +20,10 @@ export class EndGamePacket extends BaseRootPacket {
     return new EndGamePacket(LobbyCode.decode(reader.readInt32()), reader.readByte(), reader.readBoolean());
   }
 
+  clone(): EndGamePacket {
+    return new EndGamePacket(this.lobbyCode, this.reason, this.showAd);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeInt32(LobbyCode.encode(this.lobbyCode))

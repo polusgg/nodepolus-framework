@@ -19,6 +19,10 @@ export class MiraCommunicationsAmount implements RepairAmount {
     return new MiraCommunicationsAmount(amount & 0xf, action);
   }
 
+  clone(): MiraCommunicationsAmount {
+    return new MiraCommunicationsAmount(this.consoleId, this.action);
+  }
+
   serialize(): number {
     return this.consoleId | this.action;
   }

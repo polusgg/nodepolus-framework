@@ -546,14 +546,14 @@ export class GameOptionsData {
   }
 
   /**
-   * Clones the GameOptionsData into a new instance.
+   * Gets a clone of the GameOptionsData instance.
    */
   clone(): GameOptionsData {
     return new GameOptionsData(
       this.version,
       this.maxPlayers,
-      this.languages,
-      this.levels,
+      [...this.languages],
+      [...this.levels],
       this.playerSpeedModifier,
       this.crewmateLightModifier,
       this.impostorLightModifier,

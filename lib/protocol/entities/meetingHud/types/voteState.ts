@@ -29,6 +29,9 @@ export class VoteState {
     );
   }
 
+  /**
+   * Gets a clone of the VoteState instance.
+   */
   clone(): VoteState {
     return new VoteState(this.didReport, this.didVote, this.isDead, this.votedFor);
   }

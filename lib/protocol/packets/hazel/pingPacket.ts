@@ -11,6 +11,10 @@ export class PingPacket extends BaseHazelPacket {
     return new PingPacket();
   }
 
+  clone(): PingPacket {
+    return new PingPacket();
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter();
   }

@@ -17,6 +17,10 @@ export class AddVotePacket extends BaseRpcPacket {
     return new AddVotePacket(reader.readUInt32(), reader.readUInt32());
   }
 
+  clone(): AddVotePacket {
+    return new AddVotePacket(this.votingClientId, this.targetClientId);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeUInt32(this.votingClientId)

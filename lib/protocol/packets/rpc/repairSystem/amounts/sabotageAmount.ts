@@ -10,6 +10,10 @@ export class SabotageAmount implements RepairAmount {
     return new SabotageAmount(amount);
   }
 
+  clone(): SabotageAmount {
+    return new SabotageAmount(this.system);
+  }
+
   serialize(): number {
     return this.system;
   }

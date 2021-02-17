@@ -20,6 +20,10 @@ export class AlterGameTagPacket extends BaseRootPacket {
     return new AlterGameTagPacket(LobbyCode.decode(reader.readInt32()), reader.readByte(), reader.readByte());
   }
 
+  clone(): AlterGameTagPacket {
+    return new AlterGameTagPacket(this.lobbyCode, this.tag, this.value);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeInt32(LobbyCode.encode(this.lobbyCode))

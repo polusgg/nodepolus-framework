@@ -17,6 +17,10 @@ export class SceneChangePacket extends BaseGameDataPacket {
     return new SceneChangePacket(reader.readPackedUInt32(), reader.readString());
   }
 
+  clone(): SceneChangePacket {
+    return new SceneChangePacket(this.clientId, this.scene);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writePackedUInt32(this.clientId)

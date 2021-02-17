@@ -20,6 +20,10 @@ export class DataPacket extends BaseGameDataPacket {
     );
   }
 
+  clone(): DataPacket {
+    return new DataPacket(this.senderNetId, this.data.clone());
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writePackedUInt32(this.senderNetId)

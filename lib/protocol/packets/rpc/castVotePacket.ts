@@ -17,6 +17,10 @@ export class CastVotePacket extends BaseRpcPacket {
     return new CastVotePacket(reader.readByte(), reader.readSByte());
   }
 
+  clone(): CastVotePacket {
+    return new CastVotePacket(this.votingPlayerId, this.suspectPlayerId);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeByte(this.votingPlayerId)

@@ -17,6 +17,10 @@ export class CloseDoorsOfTypePacket extends BaseRpcPacket {
     return new CloseDoorsOfTypePacket(reader.readByte());
   }
 
+  clone(): CloseDoorsOfTypePacket {
+    return new CloseDoorsOfTypePacket(this.system);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeByte(this.system);
   }

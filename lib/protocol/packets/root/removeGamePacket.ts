@@ -17,6 +17,10 @@ export class RemoveGamePacket extends BaseRootPacket {
     return new RemoveGamePacket(reader.hasBytesLeft() ? new DisconnectReason(reader.readByte()) : undefined);
   }
 
+  clone(): RemoveGamePacket {
+    return new RemoveGamePacket(this.disconnectReason?.clone());
+  }
+
   serialize(): MessageWriter {
     const writer = new MessageWriter();
 

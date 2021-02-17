@@ -26,6 +26,16 @@ export class SpawnPacket extends BaseGameDataPacket {
     );
   }
 
+  clone(): SpawnPacket {
+    const objects = new Array(this.innerNetObjects.length);
+
+    for (let i = 0; i < objects.length; i++) {
+      objects[i] = this.innerNetObjects[i].clone();
+    }
+
+    return new SpawnPacket(this.spawnType, this.owner, this.flags, objects);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writePackedUInt32(this.spawnType)

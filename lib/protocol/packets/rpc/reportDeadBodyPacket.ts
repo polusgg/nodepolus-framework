@@ -18,6 +18,10 @@ export class ReportDeadBodyPacket extends BaseRpcPacket {
     return new ReportDeadBodyPacket(victimPlayerId == 0xff ? undefined : victimPlayerId);
   }
 
+  clone(): ReportDeadBodyPacket {
+    return new ReportDeadBodyPacket(this.victimPlayerId);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeByte(this.victimPlayerId ?? 0xff);
   }

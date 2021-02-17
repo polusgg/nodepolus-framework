@@ -19,6 +19,10 @@ export class OxygenAmount implements RepairAmount {
     return new OxygenAmount(amount & 3, action);
   }
 
+  clone(): OxygenAmount {
+    return new OxygenAmount(this.consoleId, this.action);
+  }
+
   serialize(): number {
     return this.consoleId | this.action;
   }

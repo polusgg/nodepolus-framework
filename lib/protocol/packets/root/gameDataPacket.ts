@@ -56,6 +56,16 @@ export class GameDataPacket extends BaseRootPacket {
     return new GameDataPacket(packets, lobbyCode, targetClientId);
   }
 
+  clone(): GameDataPacket {
+    const packets = new Array(this.packets.length);
+
+    for (let i = 0; i < packets.length; i++) {
+      packets[i] = this.packets[i].clone();
+    }
+
+    return new GameDataPacket(packets, this.lobbyCode, this.targetClientId);
+  }
+
   serialize(): MessageWriter {
     const writer = new MessageWriter().writeInt32(LobbyCode.encode(this.lobbyCode));
 

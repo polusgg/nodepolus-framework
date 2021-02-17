@@ -17,6 +17,10 @@ export class SetStartCounterPacket extends BaseRpcPacket {
     return new SetStartCounterPacket(reader.readPackedUInt32(), reader.readSByte());
   }
 
+  clone(): SetStartCounterPacket {
+    return new SetStartCounterPacket(this.sequenceId, this.timeRemaining);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writePackedUInt32(this.sequenceId)

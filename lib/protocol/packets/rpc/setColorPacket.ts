@@ -17,6 +17,10 @@ export class SetColorPacket extends BaseRpcPacket {
     return new SetColorPacket(reader.readByte());
   }
 
+  clone(): SetColorPacket {
+    return new SetColorPacket(this.color);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeByte(this.color);
   }

@@ -215,4 +215,11 @@ export class DisconnectReason {
       writer.writeString(this.message);
     }
   }
+
+  /**
+   * Gets a clone of the DisconnectReason instance.
+   */
+  clone(): DisconnectReason {
+    return new DisconnectReason(this.type, this.message);
+  }
 }

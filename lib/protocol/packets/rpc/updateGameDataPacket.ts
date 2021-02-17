@@ -22,6 +22,16 @@ export class UpdateGameDataPacket extends BaseRpcPacket {
     return new UpdateGameDataPacket(reader.readAllChildMessages(sub => PlayerData.deserialize(sub, level, sub.getTag())));
   }
 
+  clone(): UpdateGameDataPacket {
+    const players = new Array(this.players.length);
+
+    for (let i = 0; i < players.length; i++) {
+      players[i] = this.players[i].clone();
+    }
+
+    return new UpdateGameDataPacket(players);
+  }
+
   serialize(): MessageWriter {
     const writer = new MessageWriter();
 

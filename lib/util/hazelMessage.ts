@@ -65,6 +65,11 @@ export abstract class HazelMessage {
   abstract getLength(): number;
 
   /**
+   * Gets a clone of the HazelMessage instance.
+   */
+  abstract clone(): HazelMessage;
+
+  /**
    * Gets the underlying buffer.
    */
   getBuffer(): Buffer {
@@ -85,6 +90,12 @@ export abstract class HazelMessage {
 export class MessageWriter extends HazelMessage {
   private readonly messageStarts: number[] = [];
 
+  constructor(source: BuildFrom = 0, isHex: boolean = true) {
+    super(source, isHex);
+
+    this.cursor = this.buffer.length;
+  }
+
   /**
    * Gets a new MessageWriter by combining the underlying buffers of each given
    * MessageWriter.
@@ -98,6 +109,15 @@ export class MessageWriter extends HazelMessage {
 
   getLength(): number {
     return this.buffer.length;
+  }
+
+  clone(): MessageWriter {
+    const clone = new MessageWriter();
+
+    clone.buffer = Buffer.from(this.buffer);
+    clone.cursor = this.cursor;
+
+    return clone;
   }
 
   /**
@@ -493,6 +513,17 @@ export class MessageReader extends HazelMessage {
 
   getLength(): number {
     return this.length;
+  }
+
+  clone(): MessageReader {
+    const clone = new MessageReader();
+
+    clone.buffer = Buffer.from(this.buffer);
+    clone.cursor = this.cursor;
+    clone.tag = this.tag;
+    clone.length = this.length;
+
+    return clone;
   }
 
   /**

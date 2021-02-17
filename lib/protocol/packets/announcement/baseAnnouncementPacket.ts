@@ -6,5 +6,7 @@ export abstract class BaseAnnouncementPacket {
     public type: AnnouncementPacketType,
   ) {}
 
+  abstract clone(): BaseAnnouncementPacket;
+
   abstract serialize(): MessageWriter;
 }

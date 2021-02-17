@@ -50,6 +50,10 @@ export class AnnouncementPacket {
     return new AnnouncementPacket(nonce, data);
   }
 
+  clone(): AnnouncementPacket {
+    return new AnnouncementPacket(this.nonce, this.data.clone());
+  }
+
   serialize(): MessageWriter {
     const writer = new MessageWriter().writeByte(this.type);
 

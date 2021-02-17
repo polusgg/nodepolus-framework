@@ -18,6 +18,10 @@ export class StartMeetingPacket extends BaseRpcPacket {
     return new StartMeetingPacket(victimPlayerId == 0xff ? undefined : victimPlayerId);
   }
 
+  clone(): StartMeetingPacket {
+    return new StartMeetingPacket(this.victimPlayerId);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeByte(this.victimPlayerId ?? 0xff);
   }

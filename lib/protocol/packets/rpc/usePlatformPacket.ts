@@ -14,6 +14,10 @@ export class UsePlatformPacket extends BaseRpcPacket {
     return new UsePlatformPacket();
   }
 
+  clone(): UsePlatformPacket {
+    return new UsePlatformPacket();
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter();
   }

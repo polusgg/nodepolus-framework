@@ -79,4 +79,11 @@ export class ClientVersion {
       this.revision == other.revision
     );
   }
+
+  /**
+   * Gets a clone of the ClientVersion instance.
+   */
+  clone(): ClientVersion {
+    return new ClientVersion(this.year, this.month, this.day, this.revision);
+  }
 }

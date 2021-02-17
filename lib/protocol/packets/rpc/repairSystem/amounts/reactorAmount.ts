@@ -19,6 +19,10 @@ export class ReactorAmount implements RepairAmount {
     return new ReactorAmount(amount & 3, action);
   }
 
+  clone(): ReactorAmount {
+    return new ReactorAmount(this.consoleId, this.action);
+  }
+
   serialize(): number {
     return this.consoleId | this.action;
   }

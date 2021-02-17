@@ -17,6 +17,10 @@ export class SetSkinPacket extends BaseRpcPacket {
     return new SetSkinPacket(reader.readPackedUInt32());
   }
 
+  clone(): SetSkinPacket {
+    return new SetSkinPacket(this.skin);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writePackedUInt32(this.skin);
   }

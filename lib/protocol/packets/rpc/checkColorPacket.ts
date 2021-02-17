@@ -17,6 +17,10 @@ export class CheckColorPacket extends BaseRpcPacket {
     return new CheckColorPacket(reader.readByte());
   }
 
+  clone(): CheckColorPacket {
+    return new CheckColorPacket(this.color);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeByte(this.color);
   }

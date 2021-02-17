@@ -20,6 +20,10 @@ export class HelloPacket extends BaseHazelPacket {
     );
   }
 
+  clone(): HelloPacket {
+    return new HelloPacket(this.hazelVersion, this.clientVersion.clone(), this.name);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeByte(this.hazelVersion)

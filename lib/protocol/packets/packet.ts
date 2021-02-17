@@ -12,7 +12,7 @@ type PacketDataType = AcknowledgementPacket
 export class Packet {
   public type: number;
 
-  public clientBound: boolean | undefined;
+  private clientBound: boolean | undefined;
 
   constructor(
     public nonce: number | undefined,
@@ -77,6 +77,14 @@ export class Packet {
     return new Packet(nonce, data).setClientBound(clientBound);
   }
 
+  clone(): Packet {
+    const packet = new Packet(this.nonce, this.data);
+
+    packet.clientBound = this.clientBound;
+
+    return packet;
+  }
+
   isReliable(): boolean {
     return Packet.isReliable(this.type);
   }
@@ -93,6 +101,10 @@ export class Packet {
     }
 
     return writer.writeBytes(this.data.serialize());
+  }
+
+  isClientBound(): boolean {
+    return this.clientBound ?? false;
   }
 
   setClientBound(clientBound: boolean): this {

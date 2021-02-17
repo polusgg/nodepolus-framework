@@ -17,6 +17,10 @@ export class SetScannerPacket extends BaseRpcPacket {
     return new SetScannerPacket(reader.readBoolean(), reader.readByte());
   }
 
+  clone(): SetScannerPacket {
+    return new SetScannerPacket(this.isScanning, this.sequenceId);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeBoolean(this.isScanning)

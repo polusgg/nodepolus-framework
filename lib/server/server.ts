@@ -3,13 +3,13 @@ import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, OutboundPac
 import { PlayerBannedEvent, PlayerKickedEvent, PlayerLeftEvent } from "../api/events/player";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
 import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
-import { DisconnectReasonType, FakeClientId } from "../types/enums";
 import { BasicServerEvents, ServerEvents } from "../api/events";
 import { DEFAULT_CONFIG, MaxValue } from "../util/constants";
 import { RpcPacket } from "../protocol/packets/gameData";
 import { RootPacket } from "../protocol/packets/hazel";
 import { MessageReader } from "../util/hazelMessage";
 import { Connection } from "../protocol/connection";
+import { FakeClientId } from "../types/enums";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
 import { LobbyInstance } from "../api/lobby";
@@ -636,7 +636,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
             (lobby as InternalLobby).handleJoin(sender);
           } else {
-            sender.sendReliable([new JoinGameErrorPacket(DisconnectReasonType.GameNotFound)]);
+            sender.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameNotFound())]);
           }
         } else {
           sender.sendReliable([new JoinGameErrorPacket(event.getDisconnectReason())]);

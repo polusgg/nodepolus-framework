@@ -16,6 +16,10 @@ export class CompleteTaskPacket extends BaseRpcPacket {
     return new CompleteTaskPacket(reader.readPackedUInt32());
   }
 
+  clone(): CompleteTaskPacket {
+    return new CompleteTaskPacket(this.taskIndex);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writePackedUInt32(this.taskIndex);
   }

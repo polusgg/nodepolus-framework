@@ -16,6 +16,10 @@ export class SendChatPacket extends BaseRpcPacket {
     return new SendChatPacket(reader.readString());
   }
 
+  clone(): SendChatPacket {
+    return new SendChatPacket(this.message);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeString(this.message);
   }

@@ -16,6 +16,10 @@ export class CheckNamePacket extends BaseRpcPacket {
     return new CheckNamePacket(reader.readString());
   }
 
+  clone(): CheckNamePacket {
+    return new CheckNamePacket(this.name);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeString(this.name);
   }

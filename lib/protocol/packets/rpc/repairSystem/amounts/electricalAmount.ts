@@ -9,6 +9,10 @@ export class ElectricalAmount implements RepairAmount {
     return new ElectricalAmount(amount);
   }
 
+  clone(): ElectricalAmount {
+    return new ElectricalAmount(this.switchIndex);
+  }
+
   serialize(): number {
     return this.switchIndex;
   }

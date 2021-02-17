@@ -17,6 +17,10 @@ export class RedirectPacket extends BaseRootPacket {
     return new RedirectPacket(reader.readBytes(4).getBuffer().join("."), reader.readUInt16());
   }
 
+  clone(): RedirectPacket {
+    return new RedirectPacket(this.ipAddress, this.port);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet, 10)))

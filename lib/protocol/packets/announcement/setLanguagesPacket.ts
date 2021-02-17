@@ -22,6 +22,10 @@ export class SetLanguagesPacket extends BaseAnnouncementPacket {
     return new SetLanguagesPacket(new Map([...languages]));
   }
 
+  clone(): SetLanguagesPacket {
+    return new SetLanguagesPacket(new Map(this.languages));
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeList(this.languages, (writer, item) => {
       writer.writeString(item[1]).writeUInt32(item[0]);

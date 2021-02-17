@@ -79,6 +79,14 @@ export class RepairSystemPacket extends BaseRpcPacket {
     }
   }
 
+  clone(): RepairSystemPacket {
+    const packet = new RepairSystemPacket(this.system, this.playerControlNetId, this.amountByte, this.level);
+
+    packet.amount = this.amount.clone();
+
+    return packet;
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeByte(this.system)

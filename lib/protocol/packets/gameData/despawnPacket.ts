@@ -16,6 +16,10 @@ export class DespawnPacket extends BaseGameDataPacket {
     return new DespawnPacket(reader.readPackedUInt32());
   }
 
+  clone(): DespawnPacket {
+    return new DespawnPacket(this.innerNetObjectID);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writePackedUInt32(this.innerNetObjectID);
   }

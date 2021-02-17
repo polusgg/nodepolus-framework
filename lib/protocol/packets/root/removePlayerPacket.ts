@@ -24,6 +24,10 @@ export class LateRejectionPacket extends BaseRootPacket {
     );
   }
 
+  clone(): LateRejectionPacket {
+    return new LateRejectionPacket(this.lobbyCode, this.removedClientId, this.disconnectReason.clone());
+  }
+
   serialize(): MessageWriter {
     const writer = new MessageWriter()
       .writeInt32(LobbyCode.encode(this.lobbyCode))
@@ -55,6 +59,10 @@ export class RemovePlayerPacket extends BaseRootPacket {
       reader.readUInt32(),
       reader.hasBytesLeft() ? new DisconnectReason(reader.readByte()) : DisconnectReason.destroy(),
     );
+  }
+
+  clone(): RemovePlayerPacket {
+    return new RemovePlayerPacket(this.lobbyCode, this.removedClientId, this.hostClientId, this.disconnectReason.clone());
   }
 
   serialize(): MessageWriter {

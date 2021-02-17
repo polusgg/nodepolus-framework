@@ -18,6 +18,10 @@ export class SnapToPacket extends BaseRpcPacket {
     return new SnapToPacket(reader.readVector2(), reader.readUInt16());
   }
 
+  clone(): SnapToPacket {
+    return new SnapToPacket(this.position.clone(), this.lastSequenceId);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeVector2(this.position).writeUInt16(this.lastSequenceId);
   }

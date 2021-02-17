@@ -22,6 +22,10 @@ export class GetGameListRequestPacket extends BaseRootPacket {
     );
   }
 
+  clone(): GetGameListRequestPacket {
+    return new GetGameListRequestPacket(this.includePrivate, this.options.clone());
+  }
+
   serialize(): MessageWriter {
     const writer = new MessageWriter().writeBoolean(this.includePrivate);
 
@@ -60,6 +64,16 @@ export class GetGameListResponsePacket extends BaseRootPacket {
       lobbies,
       counts,
     );
+  }
+
+  clone(): GetGameListResponsePacket {
+    const lobbies = new Array(this.lobbies.length);
+
+    for (let i = 0; i < lobbies.length; i++) {
+      lobbies[i] = this.lobbies[i].clone();
+    }
+
+    return new GetGameListResponsePacket(lobbies, this.counts?.clone());
   }
 
   serialize(): MessageWriter {

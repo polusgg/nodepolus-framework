@@ -20,6 +20,10 @@ export class AnnouncementDataPacket extends BaseAnnouncementPacket {
     );
   }
 
+  clone(): AnnouncementDataPacket {
+    return new AnnouncementDataPacket(this.announcementId, this.text);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writePackedUInt32(this.announcementId)

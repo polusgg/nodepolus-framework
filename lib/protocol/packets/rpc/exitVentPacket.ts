@@ -16,6 +16,10 @@ export class ExitVentPacket extends BaseRpcPacket {
     return new ExitVentPacket(reader.readPackedUInt32());
   }
 
+  clone(): ExitVentPacket {
+    return new ExitVentPacket(this.ventId);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writePackedUInt32(this.ventId);
   }

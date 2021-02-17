@@ -27,6 +27,16 @@ export class RootAnnouncementPacket {
     return new RootAnnouncementPacket(packets);
   }
 
+  clone(): RootAnnouncementPacket {
+    const packets = new Array(this.packets.length);
+
+    for (let i = 0; i < packets.length; i++) {
+      packets[i] = this.packets[i].clone();
+    }
+
+    return new RootAnnouncementPacket(packets);
+  }
+
   serialize(): MessageWriter {
     const writer = new MessageWriter();
 

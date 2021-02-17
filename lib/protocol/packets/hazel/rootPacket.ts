@@ -141,6 +141,16 @@ export class RootPacket {
     return new RootPacket(packets);
   }
 
+  clone(): RootPacket {
+    const packets = new Array(this.packets.length);
+
+    for (let i = 0; i < packets.length; i++) {
+      packets[i] = this.packets[i].clone();
+    }
+
+    return new RootPacket(packets);
+  }
+
   serialize(): MessageWriter {
     const writer = new MessageWriter();
 

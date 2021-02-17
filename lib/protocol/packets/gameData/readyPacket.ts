@@ -16,6 +16,10 @@ export class ReadyPacket extends BaseGameDataPacket {
     return new ReadyPacket(reader.readPackedUInt32());
   }
 
+  clone(): ReadyPacket {
+    return new ReadyPacket(this.playerClientID);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writePackedUInt32(this.playerClientID);
   }

@@ -19,6 +19,10 @@ export class MasterServer {
     );
   }
 
+  clone(): MasterServer {
+    return new MasterServer(this.name, this.ipAddress, this.port, this.playerCount);
+  }
+
   serialize(writer: MessageWriter): void {
     writer
       .writeString(this.name)
@@ -44,6 +48,16 @@ export class ReselectServerPacket extends BaseRootPacket {
       reader.readByte(),
       reader.readMessageList(sub => MasterServer.deserialize(sub)),
     );
+  }
+
+  clone(): ReselectServerPacket {
+    const servers = new Array(this.servers.length);
+
+    for (let i = 0; i < servers.length; i++) {
+      servers[i] = this.servers[i].clone();
+    }
+
+    return new ReselectServerPacket(this.unknown, servers);
   }
 
   serialize(): MessageWriter {

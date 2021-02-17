@@ -14,6 +14,10 @@ export class ClosePacket extends BaseRpcPacket {
     return new ClosePacket();
   }
 
+  clone(): ClosePacket {
+    return new ClosePacket();
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter();
   }

@@ -18,6 +18,10 @@ export class SendChatNotePacket extends BaseRpcPacket {
     return new SendChatNotePacket(reader.readByte(), reader.readByte());
   }
 
+  clone(): SendChatNotePacket {
+    return new SendChatNotePacket(this.playerId, this.chatNoteType);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeByte(this.playerId)

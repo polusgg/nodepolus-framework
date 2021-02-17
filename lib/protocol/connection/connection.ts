@@ -615,6 +615,8 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
     if (writeListeners > 0 || writeCustomListeners > 0) {
       if (packet.type === HazelPacketType.Reliable || packet.type === HazelPacketType.Unreliable) {
+        packet = packet.clone();
+
         const subpackets = (packet.data as RootPacket).packets;
         const filteredIndices: number[] = [];
 

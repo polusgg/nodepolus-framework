@@ -6,5 +6,7 @@ export abstract class BaseRpcPacket {
     public type: RpcPacketType,
   ) {}
 
+  abstract clone(): BaseRpcPacket;
+
   abstract serialize(): MessageWriter;
 }

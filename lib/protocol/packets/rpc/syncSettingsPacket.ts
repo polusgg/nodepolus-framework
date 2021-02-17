@@ -17,6 +17,10 @@ export class SyncSettingsPacket extends BaseRpcPacket {
     return new SyncSettingsPacket(GameOptionsData.deserialize(reader));
   }
 
+  clone(): SyncSettingsPacket {
+    return new SyncSettingsPacket(this.options.clone());
+  }
+
   serialize(): MessageWriter {
     const writer = new MessageWriter();
 

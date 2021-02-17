@@ -17,6 +17,10 @@ export class PlayAnimationPacket extends BaseRpcPacket {
     return new PlayAnimationPacket(reader.readByte());
   }
 
+  clone(): PlayAnimationPacket {
+    return new PlayAnimationPacket(this.taskType);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeByte(this.taskType);
   }

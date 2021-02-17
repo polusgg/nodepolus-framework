@@ -13,6 +13,10 @@ export class DecontaminationAmount implements RepairAmount {
     );
   }
 
+  clone(): DecontaminationAmount {
+    return new DecontaminationAmount(this.isEntering, this.isHeadingUp);
+  }
+
   serialize(): number {
     return this.isEntering
       ? (this.isHeadingUp ? 1 : 2)

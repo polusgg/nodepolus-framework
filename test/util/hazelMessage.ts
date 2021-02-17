@@ -596,3 +596,29 @@ test("peeks at multiple bytes", t => {
   t.deepEqual(buf.peek(1, 3), [2, 3, 4]);
   t.is(buf.getCursor(), 0);
 });
+
+test("clones itself as a MessageReader", t => {
+  const buf = MessageReader.fromRawBytes("12003205000104736f6d6507000206737472696e67");
+
+  buf.readBytes(4);
+
+  const clone = buf.clone();
+
+  buf.readBytes(2);
+
+  t.is(buf.getCursor(), 6);
+  t.is(clone.getCursor(), 4);
+  t.true(buf.getLength() == clone.getLength());
+});
+
+test("clones itself as a MessageWriter", t => {
+  const buf = new MessageWriter("12003205000104736f6d6507000206737472696e67", true);
+  const clone = buf.clone();
+
+  buf.writeBoolean(true);
+
+  t.is(buf.getCursor(), 22);
+  t.is(clone.getCursor(), 21);
+  t.is(buf.getLength(), 22);
+  t.is(clone.getLength(), 21);
+});

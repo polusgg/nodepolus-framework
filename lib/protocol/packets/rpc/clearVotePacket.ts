@@ -14,6 +14,10 @@ export class ClearVotePacket extends BaseRpcPacket {
     return new ClearVotePacket();
   }
 
+  clone(): ClearVotePacket {
+    return new ClearVotePacket();
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter();
   }

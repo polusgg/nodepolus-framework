@@ -16,6 +16,10 @@ export class SetNamePacket extends BaseRpcPacket {
     return new SetNamePacket(reader.readString());
   }
 
+  clone(): SetNamePacket {
+    return new SetNamePacket(this.name);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeString(this.name);
   }

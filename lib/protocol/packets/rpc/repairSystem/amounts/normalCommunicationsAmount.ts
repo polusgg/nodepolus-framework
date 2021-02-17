@@ -9,6 +9,10 @@ export class NormalCommunicationsAmount implements RepairAmount {
     return new NormalCommunicationsAmount(amount == 0);
   }
 
+  clone(): NormalCommunicationsAmount {
+    return new NormalCommunicationsAmount(this.isRepaired);
+  }
+
   serialize(): number {
     return this.isRepaired ? 1 : 0;
   }

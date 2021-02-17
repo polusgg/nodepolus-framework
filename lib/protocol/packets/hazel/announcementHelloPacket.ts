@@ -22,6 +22,10 @@ export class AnnouncementHelloPacket extends BaseHazelPacket {
     );
   }
 
+  clone(): AnnouncementHelloPacket {
+    return new AnnouncementHelloPacket(this.announcementVersion, this.lastAnnouncementId, this.language);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter()
       .writePackedInt32(this.announcementVersion)

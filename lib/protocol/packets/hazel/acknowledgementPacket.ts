@@ -14,6 +14,10 @@ export class AcknowledgementPacket extends BaseHazelPacket {
     return new AcknowledgementPacket(Bitfield.fromNumber(reader.readByte(), 8));
   }
 
+  clone(): AcknowledgementPacket {
+    return new AcknowledgementPacket(this.missingPackets.clone());
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeByte(this.missingPackets.toNumber());
   }

@@ -17,6 +17,10 @@ export class SetPetPacket extends BaseRpcPacket {
     return new SetPetPacket(reader.readPackedUInt32());
   }
 
+  clone(): SetPetPacket {
+    return new SetPetPacket(this.pet);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writePackedUInt32(this.pet);
   }
