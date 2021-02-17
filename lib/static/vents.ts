@@ -231,7 +231,7 @@ export class Vents {
     const validated: number[] = Array.isArray(ids) ? ids : [ids];
     const vents = Vents.forLevel(level).filter(v => validated.includes(v.getId()));
 
-    return Array.isArray(ids) ? vents[0] : vents;
+    return Array.isArray(ids) ? vents : vents[0];
   }
 
   /**

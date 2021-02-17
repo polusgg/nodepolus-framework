@@ -83,7 +83,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
 
       if (connection) {
         // TODO: Add delay
-        this.sendRpcPacketTo([connection], new ExitVentPacket(vent.getId()));
+        this.sendRpcPacketTo([connection], new EnterVentPacket(vent.getId()));
       }
 
       return;
