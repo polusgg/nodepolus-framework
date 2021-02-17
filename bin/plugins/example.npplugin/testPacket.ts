@@ -12,6 +12,10 @@ export class TestPacket extends BaseRootPacket {
     return new TestPacket(reader.readString());
   }
 
+  clone(): TestPacket {
+    return new TestPacket(this.message);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeString(this.message);
   }

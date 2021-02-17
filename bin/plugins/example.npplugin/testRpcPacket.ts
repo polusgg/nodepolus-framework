@@ -12,6 +12,10 @@ export class TestRpcPacket extends BaseRpcPacket {
     return new TestRpcPacket(reader.readString());
   }
 
+  clone(): TestRpcPacket {
+    return new TestRpcPacket(this.message);
+  }
+
   serialize(): MessageWriter {
     return new MessageWriter().writeString(this.message);
   }
