@@ -7,7 +7,7 @@ import { BaseRpcPacket } from ".";
  */
 export class CompleteTaskPacket extends BaseRpcPacket {
   constructor(
-    public readonly taskIndex: number,
+    public taskIndex: number,
   ) {
     super(RpcPacketType.CompleteTask);
   }

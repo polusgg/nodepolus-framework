@@ -10,8 +10,8 @@ import { BaseRootPacket } from "../root";
  */
 export class JoinGameRequestPacket extends BaseRootPacket {
   constructor(
-    public readonly lobbyCode: string,
-    public readonly ownedMaps: Level[],
+    public lobbyCode: string,
+    public ownedMaps: Level[],
   ) {
     super(RootPacketType.JoinGame);
   }
@@ -35,9 +35,9 @@ export class JoinGameRequestPacket extends BaseRootPacket {
  */
 export class JoinGameResponsePacket extends BaseRootPacket {
   constructor(
-    public readonly lobbyCode: string,
-    public readonly joiningClientId: number,
-    public readonly hostClientId: number,
+    public lobbyCode: string,
+    public joiningClientId: number,
+    public hostClientId: number,
   ) {
     super(RootPacketType.JoinGame);
   }
@@ -58,7 +58,7 @@ export class JoinGameResponsePacket extends BaseRootPacket {
  * Root Packet ID: `0x01` (`1`)
  */
 export class JoinGameErrorPacket extends BaseRootPacket {
-  public readonly disconnectReason: DisconnectReason;
+  public disconnectReason: DisconnectReason;
 
   constructor(
     disconnectReason: DisconnectReason | DisconnectReasonType,

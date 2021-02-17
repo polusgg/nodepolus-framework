@@ -7,7 +7,7 @@ import { BaseRpcPacket } from ".";
  */
 export class CheckNamePacket extends BaseRpcPacket {
   constructor(
-    public readonly name: string,
+    public name: string,
   ) {
     super(RpcPacketType.CheckName);
   }

@@ -3,8 +3,8 @@ import { RepairAmount } from ".";
 
 export class MiraCommunicationsAmount implements RepairAmount {
   constructor(
-    public readonly consoleId: number,
-    public readonly action: MiraCommunicationsAction,
+    public consoleId: number,
+    public action: MiraCommunicationsAction,
   ) {}
 
   static deserialize(amount: number): MiraCommunicationsAmount {

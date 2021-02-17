@@ -2,8 +2,8 @@ import { RepairAmount } from ".";
 
 export class DecontaminationAmount implements RepairAmount {
   constructor(
-    public readonly isEntering: boolean,
-    public readonly isHeadingUp: boolean,
+    public isEntering: boolean,
+    public isHeadingUp: boolean,
   ) {}
 
   static deserialize(amount: number): DecontaminationAmount {

@@ -8,7 +8,7 @@ import { BaseRpcPacket } from ".";
  */
 export class PlayAnimationPacket extends BaseRpcPacket {
   constructor(
-    public readonly taskType: TaskType,
+    public taskType: TaskType,
   ) {
     super(RpcPacketType.PlayAnimation);
   }

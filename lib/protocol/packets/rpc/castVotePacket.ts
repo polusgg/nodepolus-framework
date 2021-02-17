@@ -6,15 +6,11 @@ import { BaseRpcPacket } from ".";
  * RPC Packet ID: `0x18` (`24`)
  */
 export class CastVotePacket extends BaseRpcPacket {
-  public readonly didSkip: boolean;
-
   constructor(
-    public readonly votingPlayerId: number,
-    public readonly suspectPlayerId: number,
+    public votingPlayerId: number,
+    public suspectPlayerId: number,
   ) {
     super(RpcPacketType.CastVote);
-
-    this.didSkip = this.suspectPlayerId == 0xff;
   }
 
   static deserialize(reader: MessageReader): CastVotePacket {
@@ -25,5 +21,9 @@ export class CastVotePacket extends BaseRpcPacket {
     return new MessageWriter()
       .writeByte(this.votingPlayerId)
       .writeSByte(this.suspectPlayerId);
+  }
+
+  didSkip(): boolean {
+    return this.suspectPlayerId == 0xff;
   }
 }

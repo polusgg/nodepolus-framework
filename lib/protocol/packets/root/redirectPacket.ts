@@ -7,8 +7,8 @@ import { BaseRootPacket } from "../root";
  */
 export class RedirectPacket extends BaseRootPacket {
   constructor(
-    public readonly ipAddress: string,
-    public readonly port: number,
+    public ipAddress: string,
+    public port: number,
   ) {
     super(RootPacketType.Redirect);
   }

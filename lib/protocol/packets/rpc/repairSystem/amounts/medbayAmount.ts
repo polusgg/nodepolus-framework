@@ -3,8 +3,8 @@ import { RepairAmount } from ".";
 
 export class MedbayAmount implements RepairAmount {
   constructor(
-    public readonly playerId: number,
-    public readonly action: MedbayAction,
+    public playerId: number,
+    public action: MedbayAction,
   ) {}
 
   static deserialize(amount: number): MedbayAmount {

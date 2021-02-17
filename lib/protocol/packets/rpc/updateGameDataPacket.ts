@@ -9,7 +9,7 @@ import { BaseRpcPacket } from ".";
  */
 export class UpdateGameDataPacket extends BaseRpcPacket {
   constructor(
-    public readonly players: PlayerData[],
+    public players: PlayerData[],
   ) {
     super(RpcPacketType.UpdateGameData);
   }

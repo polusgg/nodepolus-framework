@@ -8,7 +8,7 @@ import { BaseRpcPacket } from ".";
  */
 export class SetSkinPacket extends BaseRpcPacket {
   constructor(
-    public readonly skin: PlayerSkin,
+    public skin: PlayerSkin,
   ) {
     super(RpcPacketType.SetSkin);
   }

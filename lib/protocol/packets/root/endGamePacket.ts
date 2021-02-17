@@ -9,9 +9,9 @@ import { BaseRootPacket } from "../root";
  */
 export class EndGamePacket extends BaseRootPacket {
   constructor(
-    public readonly lobbyCode: string,
-    public readonly reason: GameOverReason,
-    public readonly showAd: boolean,
+    public lobbyCode: string,
+    public reason: GameOverReason,
+    public showAd: boolean,
   ) {
     super(RootPacketType.EndGame);
   }

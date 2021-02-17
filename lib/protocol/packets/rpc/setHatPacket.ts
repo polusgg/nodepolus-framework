@@ -8,7 +8,7 @@ import { BaseRpcPacket } from ".";
  */
 export class SetHatPacket extends BaseRpcPacket {
   constructor(
-    public readonly hat: PlayerHat,
+    public hat: PlayerHat,
   ) {
     super(RpcPacketType.SetHat);
   }

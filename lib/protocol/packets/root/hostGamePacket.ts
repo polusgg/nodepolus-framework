@@ -9,7 +9,7 @@ import { BaseRootPacket } from "../root";
  */
 export class HostGameRequestPacket extends BaseRootPacket {
   constructor(
-    public readonly options: GameOptionsData,
+    public options: GameOptionsData,
   ) {
     super(RootPacketType.HostGame);
   }
@@ -32,7 +32,7 @@ export class HostGameRequestPacket extends BaseRootPacket {
  */
 export class HostGameResponsePacket extends BaseRootPacket {
   constructor(
-    public readonly lobbyCode: string,
+    public lobbyCode: string,
   ) {
     super(RootPacketType.HostGame);
   }

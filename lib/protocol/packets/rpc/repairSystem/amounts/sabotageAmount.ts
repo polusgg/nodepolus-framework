@@ -3,7 +3,7 @@ import { RepairAmount } from ".";
 
 export class SabotageAmount implements RepairAmount {
   constructor(
-    public readonly system: SystemType,
+    public system: SystemType,
   ) {}
 
   static deserialize(amount: number): SabotageAmount {

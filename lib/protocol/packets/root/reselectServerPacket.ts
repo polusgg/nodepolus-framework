@@ -4,10 +4,10 @@ import { BaseRootPacket } from "../root";
 
 export class MasterServer {
   constructor(
-    public readonly name: string,
-    public readonly ipAddress: string,
-    public readonly port: number,
-    public readonly playerCount: number,
+    public name: string,
+    public ipAddress: string,
+    public port: number,
+    public playerCount: number,
   ) {}
 
   static deserialize(reader: MessageReader): MasterServer {
@@ -33,8 +33,8 @@ export class MasterServer {
  */
 export class ReselectServerPacket extends BaseRootPacket {
   constructor(
-    public readonly unknown: number,
-    public readonly servers: MasterServer[],
+    public unknown: number,
+    public servers: MasterServer[],
   ) {
     super(RootPacketType.ReselectServer);
   }

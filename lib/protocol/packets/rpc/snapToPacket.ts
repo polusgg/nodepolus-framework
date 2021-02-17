@@ -8,8 +8,8 @@ import { BaseRpcPacket } from ".";
  */
 export class SnapToPacket extends BaseRpcPacket {
   constructor(
-    public readonly position: Vector2,
-    public readonly lastSequenceId: number,
+    public position: Vector2,
+    public lastSequenceId: number,
   ) {
     super(RpcPacketType.SnapTo);
   }

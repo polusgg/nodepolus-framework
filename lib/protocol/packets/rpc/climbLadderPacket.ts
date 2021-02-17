@@ -17,8 +17,8 @@ export enum LadderDirection {
  */
 export class ClimbLadderPacket extends BaseRpcPacket {
   constructor(
-    public readonly ladderSize: LadderSize,
-    public readonly ladderDirection: LadderDirection,
+    public ladderSize: LadderSize,
+    public ladderDirection: LadderDirection,
   ) {
     super(RpcPacketType.ExitVent);
   }

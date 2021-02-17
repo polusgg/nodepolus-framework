@@ -2,7 +2,7 @@ import { RepairAmount } from ".";
 
 export class NormalCommunicationsAmount implements RepairAmount {
   constructor(
-    public readonly isRepaired: boolean,
+    public isRepaired: boolean,
   ) {}
 
   static deserialize(amount: number): NormalCommunicationsAmount {

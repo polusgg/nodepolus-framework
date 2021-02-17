@@ -9,9 +9,9 @@ import { BaseRootPacket } from "../root";
  */
 export class LateRejectionPacket extends BaseRootPacket {
   constructor(
-    public readonly lobbyCode: string,
-    public readonly removedClientId: number,
-    public readonly disconnectReason: DisconnectReason,
+    public lobbyCode: string,
+    public removedClientId: number,
+    public disconnectReason: DisconnectReason,
   ) {
     super(RootPacketType.RemovePlayer);
   }
@@ -40,10 +40,10 @@ export class LateRejectionPacket extends BaseRootPacket {
  */
 export class RemovePlayerPacket extends BaseRootPacket {
   constructor(
-    public readonly lobbyCode: string,
-    public readonly removedClientId: number,
-    public readonly hostClientId: number,
-    public readonly disconnectReason: DisconnectReason,
+    public lobbyCode: string,
+    public removedClientId: number,
+    public hostClientId: number,
+    public disconnectReason: DisconnectReason,
   ) {
     super(RootPacketType.RemovePlayer);
   }

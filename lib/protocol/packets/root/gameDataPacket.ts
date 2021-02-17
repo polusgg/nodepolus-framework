@@ -10,9 +10,9 @@ import { BaseRootPacket } from "../root";
  */
 export class GameDataPacket extends BaseRootPacket {
   constructor(
-    public readonly packets: BaseGameDataPacket[],
-    public readonly lobbyCode: string,
-    public readonly targetClientId?: number,
+    public packets: BaseGameDataPacket[],
+    public lobbyCode: string,
+    public targetClientId?: number,
   ) {
     super(RootPacketType[targetClientId ? "GameDataTo" : "GameData"]);
 

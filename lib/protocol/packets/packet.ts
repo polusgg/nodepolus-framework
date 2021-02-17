@@ -10,13 +10,13 @@ type PacketDataType = AcknowledgementPacket
 | RootPacket;
 
 export class Packet {
-  public readonly type: number;
+  public type: number;
 
   public clientBound: boolean | undefined;
 
   constructor(
-    public readonly nonce: number | undefined,
-    public readonly data: PacketDataType,
+    public nonce: number | undefined,
+    public data: PacketDataType,
   ) {
     if (data instanceof AcknowledgementPacket) {
       this.type = HazelPacketType.Acknowledgement;

@@ -7,7 +7,7 @@ import { BaseRpcPacket } from ".";
  */
 export class MurderPlayerPacket extends BaseRpcPacket {
   constructor(
-    public readonly victimPlayerControlNetId: number,
+    public victimPlayerControlNetId: number,
   ) {
     super(RpcPacketType.MurderPlayer);
   }

@@ -8,7 +8,7 @@ import { BaseRootPacket } from "../root";
  */
 export class RemoveGamePacket extends BaseRootPacket {
   constructor(
-    public readonly disconnectReason?: DisconnectReason,
+    public disconnectReason?: DisconnectReason,
   ) {
     super(RootPacketType.RemoveGame);
   }

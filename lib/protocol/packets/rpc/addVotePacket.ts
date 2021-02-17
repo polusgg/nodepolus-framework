@@ -7,8 +7,8 @@ import { BaseRpcPacket } from ".";
  */
 export class AddVotePacket extends BaseRpcPacket {
   constructor(
-    public readonly votingClientId: number,
-    public readonly targetClientId: number,
+    public votingClientId: number,
+    public targetClientId: number,
   ) {
     super(RpcPacketType.AddVote);
   }

@@ -8,7 +8,7 @@ import { BaseRpcPacket } from ".";
  */
 export class CloseDoorsOfTypePacket extends BaseRpcPacket {
   constructor(
-    public readonly system: SystemType,
+    public system: SystemType,
   ) {
     super(RpcPacketType.CloseDoorsOfType);
   }

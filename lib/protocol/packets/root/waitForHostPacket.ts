@@ -8,8 +8,8 @@ import { BaseRootPacket } from "../root";
  */
 export class WaitForHostPacket extends BaseRootPacket {
   constructor(
-    public readonly lobbyCode: string,
-    public readonly waitingClientId: number,
+    public lobbyCode: string,
+    public waitingClientId: number,
   ) {
     super(RootPacketType.WaitForHost);
   }

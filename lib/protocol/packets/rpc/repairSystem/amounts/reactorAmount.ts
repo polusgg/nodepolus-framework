@@ -3,8 +3,8 @@ import { RepairAmount } from ".";
 
 export class ReactorAmount implements RepairAmount {
   constructor(
-    public readonly consoleId: number,
-    public readonly action: ReactorAction,
+    public consoleId: number,
+    public action: ReactorAction,
   ) {}
 
   static deserialize(amount: number): ReactorAmount {

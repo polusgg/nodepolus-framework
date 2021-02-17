@@ -7,7 +7,7 @@ import { BaseRpcPacket } from ".";
  */
 export class StartMeetingPacket extends BaseRpcPacket {
   constructor(
-    public readonly victimPlayerId?: number,
+    public victimPlayerId?: number,
   ) {
     super(RpcPacketType.StartMeeting);
   }

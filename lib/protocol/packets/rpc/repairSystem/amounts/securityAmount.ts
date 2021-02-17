@@ -2,7 +2,7 @@ import { RepairAmount } from ".";
 
 export class SecurityAmount implements RepairAmount {
   constructor(
-    public readonly isViewingCameras: boolean,
+    public isViewingCameras: boolean,
   ) {}
 
   static deserialize(amount: number): SecurityAmount {

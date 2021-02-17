@@ -7,8 +7,8 @@ import { BaseRpcPacket } from ".";
  */
 export class SetTasksPacket extends BaseRpcPacket {
   constructor(
-    public readonly playerId: number,
-    public readonly tasks: number[],
+    public playerId: number,
+    public tasks: number[],
   ) {
     super(RpcPacketType.SetTasks);
   }

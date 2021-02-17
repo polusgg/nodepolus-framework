@@ -5,7 +5,7 @@ import { HazelPacketType } from "../types/enums";
 import { BaseHazelPacket } from ".";
 
 export class DisconnectPacket extends BaseHazelPacket {
-  public readonly disconnectReason?: DisconnectReason;
+  public disconnectReason?: DisconnectReason;
 
   constructor(
     public isForced?: boolean,

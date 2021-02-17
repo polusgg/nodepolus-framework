@@ -202,7 +202,7 @@ export class RpcHandler {
           throw new Error(`Received SendChatNote packet from invalid InnerNetObject: expected PlayerControl but got ${type as number} (${typeString})`);
         }
 
-        this.handleSendChatNote(sender as InnerPlayerControl, packet.playerId, packet.noteType, sendTo);
+        this.handleSendChatNote(sender as InnerPlayerControl, packet.playerId, packet.chatNoteType, sendTo);
         break;
       }
       case RpcPacketType.SetPet: {
@@ -304,7 +304,7 @@ export class RpcHandler {
           throw new Error(`Received RepairSystem packet from invalid InnerNetObject: expected BaseShipStatus but got ${type as number} (${typeString})`);
         }
 
-        this.handleRepairSystem(sender as BaseInnerShipStatus, packet.system, packet.playerControlNetId, packet.amount);
+        this.handleRepairSystem(sender as BaseInnerShipStatus, packet.system, packet.playerControlNetId, packet.getAmount());
         break;
       }
       case RpcPacketType.SetTasks: {

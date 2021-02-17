@@ -30,7 +30,7 @@ export class RootPacket {
   private static readonly customPackets: Map<number, CustomRootPacketContainer> = new Map();
 
   constructor(
-    public readonly packets: BaseRootPacket[],
+    public packets: BaseRootPacket[],
   ) {}
 
   static registerPacket<T extends BaseRootPacket>(id: number, deserializer: (reader: MessageReader) => T, handler: (connection: Connection, packet: T) => void): void {

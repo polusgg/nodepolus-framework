@@ -7,7 +7,7 @@ import { BaseRpcPacket } from ".";
  */
 export class SendChatPacket extends BaseRpcPacket {
   constructor(
-    public readonly message: string,
+    public message: string,
   ) {
     super(RpcPacketType.SendChat);
   }

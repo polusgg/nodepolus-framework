@@ -7,7 +7,7 @@ import { BaseRpcPacket } from ".";
  */
 export class SetInfectedPacket extends BaseRpcPacket {
   constructor(
-    public readonly impostorPlayerIds: number[],
+    public impostorPlayerIds: number[],
   ) {
     super(RpcPacketType.SetInfected);
   }

@@ -9,9 +9,9 @@ import { BaseRootPacket } from "../root";
  */
 export class AlterGameTagPacket extends BaseRootPacket {
   constructor(
-    public readonly lobbyCode: string,
-    public readonly tag: AlterGameTag,
-    public readonly value: number,
+    public lobbyCode: string,
+    public tag: AlterGameTag,
+    public value: number,
   ) {
     super(RootPacketType.AlterGameTag);
   }

@@ -8,11 +8,11 @@ type PacketDataType = AnnouncementHelloPacket
 | RootAnnouncementPacket;
 
 export class AnnouncementPacket {
-  public readonly type: number;
+  public type: number;
 
   constructor(
-    public readonly nonce: number | undefined,
-    public readonly data: PacketDataType,
+    public nonce: number | undefined,
+    public data: PacketDataType,
   ) {
     if (data instanceof DisconnectPacket) {
       this.type = HazelPacketType.Disconnect;

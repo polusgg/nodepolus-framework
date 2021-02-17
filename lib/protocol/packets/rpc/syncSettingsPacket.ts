@@ -8,7 +8,7 @@ import { BaseRpcPacket } from ".";
  */
 export class SyncSettingsPacket extends BaseRpcPacket {
   constructor(
-    public readonly options: GameOptionsData,
+    public options: GameOptionsData,
   ) {
     super(RpcPacketType.SyncSettings);
   }

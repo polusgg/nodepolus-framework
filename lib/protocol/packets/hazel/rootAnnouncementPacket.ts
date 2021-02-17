@@ -4,7 +4,7 @@ import { AnnouncementPacketType } from "../types/enums";
 
 export class RootAnnouncementPacket {
   constructor(
-    public readonly packets: BaseAnnouncementPacket[],
+    public packets: BaseAnnouncementPacket[],
   ) {}
 
   static deserialize(reader: MessageReader): RootAnnouncementPacket {

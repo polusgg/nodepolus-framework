@@ -8,7 +8,7 @@ import { BaseRootPacket } from "../root";
  */
 export class StartGamePacket extends BaseRootPacket {
   constructor(
-    public readonly lobbyCode: string,
+    public lobbyCode: string,
   ) {
     super(RootPacketType.StartGame);
   }

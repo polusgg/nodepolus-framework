@@ -7,7 +7,7 @@ import { BaseRpcPacket } from ".";
  */
 export class EnterVentPacket extends BaseRpcPacket {
   constructor(
-    public readonly ventId: number,
+    public ventId: number,
   ) {
     super(RpcPacketType.EnterVent);
   }

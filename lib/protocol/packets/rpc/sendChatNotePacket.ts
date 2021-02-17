@@ -8,8 +8,8 @@ import { BaseRpcPacket } from ".";
  */
 export class SendChatNotePacket extends BaseRpcPacket {
   constructor(
-    public readonly playerId: number,
-    public readonly noteType: ChatNoteType,
+    public playerId: number,
+    public chatNoteType: ChatNoteType,
   ) {
     super(RpcPacketType.SendChatNote);
   }
@@ -21,6 +21,6 @@ export class SendChatNotePacket extends BaseRpcPacket {
   serialize(): MessageWriter {
     return new MessageWriter()
       .writeByte(this.playerId)
-      .writeByte(this.noteType);
+      .writeByte(this.chatNoteType);
   }
 }

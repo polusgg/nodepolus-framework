@@ -2,7 +2,7 @@ import { RepairAmount } from ".";
 
 export class PolusDoorsAmount implements RepairAmount {
   constructor(
-    public readonly doorId: number,
+    public doorId: number,
   ) {}
 
   static deserialize(amount: number): PolusDoorsAmount {

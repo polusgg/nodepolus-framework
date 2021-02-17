@@ -20,13 +20,13 @@ import {
  * RPC Packet ID: `1c` (`28`)
  */
 export class RepairSystemPacket extends BaseRpcPacket {
-  public readonly amount: RepairAmount;
+  private amount: RepairAmount;
 
   constructor(
-    public readonly system: SystemType,
-    public readonly playerControlNetId: number,
-    public readonly amountByte: number,
-    public readonly level: Level,
+    public system: SystemType,
+    public playerControlNetId: number,
+    public amountByte: number,
+    public level: Level,
   ) {
     super(RpcPacketType.RepairSystem);
 
@@ -84,5 +84,13 @@ export class RepairSystemPacket extends BaseRpcPacket {
       .writeByte(this.system)
       .writePackedUInt32(this.playerControlNetId)
       .writeByte(this.amount.serialize());
+  }
+
+  getAmount(): RepairAmount {
+    return this.amount;
+  }
+
+  updateAmount(): void {
+    this.amount = this.parseAmount();
   }
 }

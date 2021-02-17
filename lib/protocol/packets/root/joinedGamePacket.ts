@@ -8,10 +8,10 @@ import { BaseRootPacket } from "../root";
  */
 export class JoinedGamePacket extends BaseRootPacket {
   constructor(
-    public readonly lobbyCode: string,
-    public readonly joinedClientId: number,
-    public readonly hostClientId: number,
-    public readonly otherClientIds: number[],
+    public lobbyCode: string,
+    public joinedClientId: number,
+    public hostClientId: number,
+    public otherClientIds: number[],
   ) {
     super(RootPacketType.JoinedGame);
   }

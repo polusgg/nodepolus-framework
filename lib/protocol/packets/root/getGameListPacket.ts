@@ -9,8 +9,8 @@ import { BaseRootPacket } from "../root";
  */
 export class GetGameListRequestPacket extends BaseRootPacket {
   constructor(
-    public readonly includePrivate: boolean,
-    public readonly options: GameOptionsData,
+    public includePrivate: boolean,
+    public options: GameOptionsData,
   ) {
     super(RootPacketType.GetGameList);
   }
@@ -36,8 +36,8 @@ export class GetGameListRequestPacket extends BaseRootPacket {
  */
 export class GetGameListResponsePacket extends BaseRootPacket {
   constructor(
-    public readonly lobbies: LobbyListing[],
-    public readonly counts?: LobbyCount,
+    public lobbies: LobbyListing[],
+    public counts?: LobbyCount,
   ) {
     super(RootPacketType.GetGameList);
   }

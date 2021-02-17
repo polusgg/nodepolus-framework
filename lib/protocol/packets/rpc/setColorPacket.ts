@@ -8,7 +8,7 @@ import { BaseRpcPacket } from ".";
  */
 export class SetColorPacket extends BaseRpcPacket {
   constructor(
-    public readonly color: PlayerColor,
+    public color: PlayerColor,
   ) {
     super(RpcPacketType.SetColor);
   }

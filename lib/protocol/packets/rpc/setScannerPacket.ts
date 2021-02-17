@@ -7,8 +7,8 @@ import { BaseRpcPacket } from ".";
  */
 export class SetScannerPacket extends BaseRpcPacket {
   constructor(
-    public readonly isScanning: boolean,
-    public readonly sequenceId: number,
+    public isScanning: boolean,
+    public sequenceId: number,
   ) {
     super(RpcPacketType.SetScanner);
   }

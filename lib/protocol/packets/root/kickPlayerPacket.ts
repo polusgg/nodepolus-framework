@@ -10,10 +10,10 @@ import { BaseRootPacket } from "../root";
  */
 export class KickPlayerPacket extends BaseRootPacket {
   constructor(
-    public readonly lobbyCode: string,
-    public readonly kickedClientId: AlterGameTag,
-    public readonly banned: boolean,
-    public readonly disconnectReason: DisconnectReason,
+    public lobbyCode: string,
+    public kickedClientId: AlterGameTag,
+    public banned: boolean,
+    public disconnectReason: DisconnectReason,
   ) {
     super(RootPacketType.KickPlayer);
   }
