@@ -614,6 +614,10 @@ export class InternalLobby implements LobbyInstance {
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   sendEnableHost(connection: Connection, sendImmediately: boolean = true): void {
+    if (connection.limboState != LimboState.NotLimbo) {
+      return;
+    }
+
     if (sendImmediately) {
       connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, connection.id)]);
     } else {
@@ -629,6 +633,10 @@ export class InternalLobby implements LobbyInstance {
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   sendDisableHost(connection: Connection, sendImmediately: boolean = true): void {
+    if (connection.limboState != LimboState.NotLimbo) {
+      return;
+    }
+
     if (sendImmediately) {
       connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId())]);
     } else {
