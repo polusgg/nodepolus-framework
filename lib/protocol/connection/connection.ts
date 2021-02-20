@@ -37,7 +37,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   private packetBuffer: AwaitingPacket[] = [];
   private unreliablePacketBuffer: BaseRootPacket[] = [];
   private nonceIndex = 1;
-  private disconnectTimeout: NodeJS.Timeout | undefined;
+  private disconnectTimeout?: NodeJS.Timeout;
   private lastPingReceivedTime: number = Date.now();
   private requestedDisconnect = false;
 

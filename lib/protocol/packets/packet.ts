@@ -12,7 +12,7 @@ type PacketDataType = AcknowledgementPacket
 export class Packet {
   public type: number;
 
-  private clientBound: boolean | undefined;
+  private clientBound?: boolean;
 
   constructor(
     public nonce: number | undefined,

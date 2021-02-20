@@ -3,7 +3,7 @@ import { DecontaminationDoorState } from "../../types/enums";
 import { InternalHost } from "..";
 
 export class DecontaminationHandler {
-  private timer: NodeJS.Timeout | undefined;
+  private timer?: NodeJS.Timeout;
 
   constructor(
     public host: InternalHost,

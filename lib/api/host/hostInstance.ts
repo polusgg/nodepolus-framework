@@ -125,7 +125,7 @@ export interface HostInstance {
    * @param connection - The connection that sent the packet
    * @param reason - The reason for why the connection was disconnected
    */
-  handleDisconnect(connection: Connection, reason: DisconnectReason | undefined): void;
+  handleDisconnect(connection: Connection, reason?: DisconnectReason): void;
 
   /**
    * Called when a connection sends a Ready GameData packet.

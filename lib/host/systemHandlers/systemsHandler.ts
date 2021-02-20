@@ -47,7 +47,7 @@ import {
 
 export class SystemsHandler {
   private oldShipStatus: BaseInnerShipStatus = this.host.getLobby().getShipStatus()!.getShipStatus();
-  private sabotageCountdownInterval: NodeJS.Timeout | undefined;
+  private sabotageCountdownInterval?: NodeJS.Timeout;
 
   constructor(
     private readonly host: InternalHost,

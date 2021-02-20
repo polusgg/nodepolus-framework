@@ -11,7 +11,7 @@ import {
 } from "../../protocol/entities/baseShipStatus/systems";
 
 export class SabotageSystemHandler {
-  public timer: NodeJS.Timeout | undefined;
+  public timer?: NodeJS.Timeout;
 
   constructor(
     public host: InternalHost,

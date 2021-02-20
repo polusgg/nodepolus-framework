@@ -107,8 +107,8 @@ export class InternalHost implements HostInstance {
   private netIdIndex = 1;
   private counterSequenceId = 0;
   private secondsUntilStart = -1;
-  private countdownInterval: NodeJS.Timeout | undefined;
-  private meetingHudTimeout: NodeJS.Timeout | undefined;
+  private countdownInterval?: NodeJS.Timeout;
+  private meetingHudTimeout?: NodeJS.Timeout;
   private systemsHandler?: SystemsHandler;
   private sabotageHandler?: SabotageSystemHandler;
   private doorHandler?: DoorsHandler | AutoDoorsHandler;

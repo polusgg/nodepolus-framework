@@ -375,7 +375,7 @@ export class RpcHandler {
     sender.setSkin(skin, sendTo);
   }
 
-  handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId: number | undefined): void {
+  handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): void {
     this.lobby.getHostInstance().handleReportDeadBody(sender, victimPlayerId);
   }
 
