@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 /**
- * A helper class used to generate and verify signed SHA1 HMAC hashes.
+ * A helper class used to sign and verify messages using an HMAC SHA1 hash.
  */
 export class Hmac {
   /**
@@ -9,7 +9,7 @@ export class Hmac {
    *
    * @param message - The message to be hashed
    * @param secret - The secret used when hashing
-   * @returns The HMAC of `message`
+   * @returns The hash of `message`
    */
   static sign(message: string, secret: string): string {
     return crypto.createHmac("sha1", secret).update(message).digest("hex");
