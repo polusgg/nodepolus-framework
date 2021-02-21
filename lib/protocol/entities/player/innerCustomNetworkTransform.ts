@@ -3,6 +3,7 @@ import { InnerNetObjectType, TeleportReason } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { BaseInnerNetObject } from "../baseEntity";
+import { MaxValue } from "../../../util/constants";
 import { SnapToPacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
 import { Vector2 } from "../../../types";
@@ -26,7 +27,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
       throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
     }
 
-    this.sequenceId += 5;
+    this.incrementSequenceId(5);
 
     const event = new PlayerPositionTeleportedEvent(player, this.position, this.velocity, position, Vector2.zero(), reason);
 
@@ -37,7 +38,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
       const connection = player.getConnection();
 
       if (connection) {
-        this.sendRpcPacket(new SnapToPacket(this.position, this.sequenceId += 5), [connection]);
+        this.sendRpcPacket(new SnapToPacket(this.position, this.incrementSequenceId(5)), [connection]);
       }
 
       return;
@@ -67,8 +68,13 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     }
 
     const reader = MessageReader.fromRawBytes(packet.getBuffer());
+    const sequenceId = reader.readUInt16();
 
-    this.sequenceId = reader.readUInt16();
+    if (!this.isSequenceIdGreater(sequenceId)) {
+      return;
+    }
+
+    this.sequenceId = sequenceId;
 
     const position = reader.readVector2();
     const velocity = reader.readVector2();
@@ -81,7 +87,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
       const connection = player.getConnection();
 
       if (connection) {
-        this.sendRpcPacket(new SnapToPacket(this.position, this.sequenceId += 5), [connection]);
+        this.sendRpcPacket(new SnapToPacket(this.position, this.incrementSequenceId(5)), [connection]);
       }
 
       return;
@@ -103,5 +109,29 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
 
   clone(): InnerCustomNetworkTransform {
     return new InnerCustomNetworkTransform(this.netId, this.parent, this.sequenceId, this.position, this.velocity);
+  }
+
+  protected incrementSequenceId(amount: number): number {
+    this.sequenceId = (this.sequenceId + amount) % (MaxValue.UInt16 + 1);
+
+    return this.sequenceId;
+  }
+
+  protected isSequenceIdGreater(sequenceId: number): boolean {
+    const max = this.sequenceId + 32767;
+
+    if (this.sequenceId < max) {
+      if (sequenceId > this.sequenceId) {
+        return sequenceId <= max;
+      }
+
+      return false;
+    }
+
+    if (sequenceId <= this.sequenceId) {
+      return sequenceId <= max;
+    }
+
+    return true;
   }
 }
