@@ -1,5 +1,5 @@
-import { SwitchSystem } from "../../../protocol/entities/baseShipStatus/systems";
-import { InternalSystemType } from "../../../protocol/entities/baseShipStatus";
+import { SwitchSystem } from "../../../protocol/entities/shipStatus/baseShipStatus/systems";
+import { InternalSystemType } from "../../../protocol/entities/shipStatus/baseShipStatus";
 import { SystemType } from "../../../types/enums";
 import { Bitfield } from "../../../types";
 import { BaseDoorGameRoom } from ".";

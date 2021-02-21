@@ -1,4 +1,4 @@
-import { BaseInnerShipStatus } from "../../../protocol/entities/baseShipStatus";
+import { BaseInnerShipStatus } from "../../../protocol/entities/shipStatus/baseShipStatus";
 import { GameDataPacket } from "../../../protocol/packets/root";
 import { SystemType } from "../../../types/enums";
 import { InternalLobby } from "../../../lobby";

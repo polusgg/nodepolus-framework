@@ -1,7 +1,7 @@
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { LadderSize, LadderDirection } from "../protocol/packets/rpc/climbLadderPacket";
+import { BaseInnerShipStatus } from "../protocol/entities/shipStatus/baseShipStatus";
 import { RepairAmount } from "../protocol/packets/rpc/repairSystem/amounts";
-import { BaseInnerShipStatus } from "../protocol/entities/baseShipStatus";
 import { InnerVoteBanSystem } from "../protocol/entities/gameData";
 import { InnerMeetingHud } from "../protocol/entities/meetingHud";
 import { Connection } from "../protocol/connection";

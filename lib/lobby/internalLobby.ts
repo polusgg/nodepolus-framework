@@ -1,6 +1,6 @@
 import { ServerLobbyDestroyedEvent, ServerLobbyJoinRefusedEvent, ServerPacketInRpcCustomEvent, ServerPacketInRpcEvent } from "../api/events/server";
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RpcPacket, SceneChangePacket } from "../protocol/packets/gameData";
-import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
+import { BaseEntityShipStatus } from "../protocol/entities/shipStatus/baseShipStatus/baseEntityShipStatus";
 import { BaseRpcPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/baseEntity";
 import { EntityPlayer, InnerCustomNetworkTransform } from "../protocol/entities/player";
@@ -407,7 +407,7 @@ export class InternalLobby implements LobbyInstance {
 
     switch (type) {
       case SpawnType.SkeldShipStatus:
-      case SpawnType.SkeldAprilShipStatus:
+      case SpawnType.DleksShipStatus:
       case SpawnType.MiraShipStatus:
       case SpawnType.PolusShipStatus:
       case SpawnType.AirshipStatus:

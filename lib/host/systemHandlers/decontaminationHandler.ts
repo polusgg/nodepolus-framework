@@ -1,4 +1,4 @@
-import { DeconSystem, DeconTwoSystem } from "../../protocol/entities/baseShipStatus/systems";
+import { DeconSystem, DeconTwoSystem } from "../../protocol/entities/shipStatus/baseShipStatus/systems";
 import { DecontaminationDoorState } from "../../types/enums";
 import { InternalHost } from "..";
 

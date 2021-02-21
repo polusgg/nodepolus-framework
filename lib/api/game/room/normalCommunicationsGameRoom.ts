@@ -1,5 +1,5 @@
-import { HudOverrideSystem } from "../../../protocol/entities/baseShipStatus/systems";
-import { InternalSystemType } from "../../../protocol/entities/baseShipStatus";
+import { HudOverrideSystem } from "../../../protocol/entities/shipStatus/baseShipStatus/systems";
+import { InternalSystemType } from "../../../protocol/entities/shipStatus/baseShipStatus";
 import { SystemType } from "../../../types/enums";
 import { BaseDoorGameRoom } from ".";
 import { Game } from "..";

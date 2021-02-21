@@ -1,5 +1,5 @@
-import { SecurityCameraSystem } from "../../../protocol/entities/baseShipStatus/systems";
-import { InternalSystemType } from "../../../protocol/entities/baseShipStatus";
+import { SecurityCameraSystem } from "../../../protocol/entities/shipStatus/baseShipStatus/systems";
+import { InternalSystemType } from "../../../protocol/entities/shipStatus/baseShipStatus";
 import { SystemType } from "../../../types/enums";
 import { PlayerInstance } from "../../player";
 import { BaseDoorGameRoom } from ".";

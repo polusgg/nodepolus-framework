@@ -1,5 +1,5 @@
-import { BaseEntityShipStatus } from "../../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../../protocol/entities/baseEntity";
+import { BaseEntityShipStatus } from "../../protocol/entities/shipStatus/baseShipStatus";
 import { GameState, AlterGameTag, Level, PlayerColor } from "../../types/enums";
 import { EntityLobbyBehaviour } from "../../protocol/entities/lobbyBehaviour";
 import { GameOptionsData, LobbyListing, Metadatable } from "../../types";

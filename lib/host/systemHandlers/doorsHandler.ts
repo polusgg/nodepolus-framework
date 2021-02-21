@@ -1,5 +1,5 @@
-import { BaseInnerShipStatus } from "../../protocol/entities/baseShipStatus";
-import { DoorsSystem } from "../../protocol/entities/baseShipStatus/systems";
+import { BaseInnerShipStatus } from "../../protocol/entities/shipStatus/baseShipStatus";
+import { DoorsSystem } from "../../protocol/entities/shipStatus/baseShipStatus/systems";
 import { GameDataPacket } from "../../protocol/packets/root";
 import { SystemDoors } from "../../static/doors";
 import { SystemType } from "../../types/enums";

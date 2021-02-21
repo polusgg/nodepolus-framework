@@ -1,14 +1,14 @@
 import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent, LobbyOptionsUpdatedEvent } from "../api/events/lobby";
+import { BaseInnerShipStatus, InternalSystemType } from "../protocol/entities/shipStatus/baseShipStatus";
 import { DisconnectReason, GameOptionsData, Immutable, LevelTask, Vector2, VoteResult } from "../types";
-import { BaseInnerShipStatus, InternalSystemType } from "../protocol/entities/baseShipStatus";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
-import { EntitySkeldAprilShipStatus } from "../protocol/entities/skeldAprilShipStatus";
 import { EntityPlayer, InnerPlayerControl } from "../protocol/entities/player";
-import { EntityPolusShipStatus } from "../protocol/entities/polusShipStatus";
-import { EntitySkeldShipStatus } from "../protocol/entities/skeldShipStatus";
+import { EntityAirshipStatus } from "../protocol/entities/shipStatus/airship";
+import { EntityDleksShipStatus } from "../protocol/entities/shipStatus/dleks";
+import { EntityPolusShipStatus } from "../protocol/entities/shipStatus/polus";
+import { EntitySkeldShipStatus } from "../protocol/entities/shipStatus/skeld";
+import { EntityMiraShipStatus } from "../protocol/entities/shipStatus/mira";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
-import { EntityMiraShipStatus } from "../protocol/entities/miraShipStatus";
-import { EntityAirshipStatus } from "../protocol/entities/airshipStatus";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
 import { VoteState } from "../protocol/entities/meetingHud/types";
@@ -23,19 +23,6 @@ import { InternalPlayer } from "../player";
 import { InternalLobby } from "../lobby";
 import { Game } from "../api/game";
 import {
-  NormalCommunicationsAmount,
-  MiraCommunicationsAmount,
-  DecontaminationAmount,
-  ElectricalAmount,
-  PolusDoorsAmount,
-  SabotageAmount,
-  SecurityAmount,
-  ReactorAmount,
-  MedbayAmount,
-  OxygenAmount,
-  RepairAmount,
-} from "../protocol/packets/rpc/repairSystem/amounts";
-import {
   DeconSystem,
   DeconTwoSystem,
   DoorsSystem,
@@ -49,7 +36,20 @@ import {
   SabotageSystem,
   SecurityCameraSystem,
   SwitchSystem,
-} from "../protocol/entities/baseShipStatus/systems";
+} from "../protocol/entities/shipStatus/baseShipStatus/systems";
+import {
+  NormalCommunicationsAmount,
+  MiraCommunicationsAmount,
+  DecontaminationAmount,
+  ElectricalAmount,
+  PolusDoorsAmount,
+  SabotageAmount,
+  SecurityAmount,
+  ReactorAmount,
+  MedbayAmount,
+  OxygenAmount,
+  RepairAmount,
+} from "../protocol/packets/rpc/repairSystem/amounts";
 import {
   ClearVotePacket,
   ClosePacket,
@@ -646,7 +646,7 @@ export class InternalHost implements HostInstance {
         this.lobby.setShipStatus(new EntitySkeldShipStatus(this.lobby, this.getNextNetId()));
         break;
       case Level.AprilSkeld:
-        this.lobby.setShipStatus(new EntitySkeldAprilShipStatus(this.lobby, this.getNextNetId()));
+        this.lobby.setShipStatus(new EntityDleksShipStatus(this.lobby, this.getNextNetId()));
         break;
       case Level.MiraHq:
         this.lobby.setShipStatus(new EntityMiraShipStatus(this.lobby, this.getNextNetId()));

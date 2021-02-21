@@ -6,6 +6,6 @@ export enum SpawnType {
   PlayerControl = 4,
   MiraShipStatus = 5,
   PolusShipStatus = 6,
-  SkeldAprilShipStatus = 7,
+  DleksShipStatus = 7,
   AirshipStatus = 8,
 }

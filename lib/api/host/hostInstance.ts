@@ -1,5 +1,5 @@
+import { BaseInnerShipStatus } from "../../protocol/entities/shipStatus/baseShipStatus";
 import { RepairAmount } from "../../protocol/packets/rpc/repairSystem/amounts";
-import { BaseInnerShipStatus } from "../../protocol/entities/baseShipStatus";
 import { GameOverReason, PlayerColor, SystemType } from "../../types/enums";
 import { DisconnectReason, GameOptionsData, LevelTask } from "../../types";
 import { InnerPlayerControl } from "../../protocol/entities/player";

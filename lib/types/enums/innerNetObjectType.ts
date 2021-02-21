@@ -7,7 +7,7 @@ export enum InnerNetObjectType {
   CustomNetworkTransform,
   MeetingHud,
   SkeldShipStatus,
-  SkeldAprilShipStatus,
+  DleksShipStatus,
   MiraShipStatus,
   PolusShipStatus,
   AirshipStatus,
