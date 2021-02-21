@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseAnnouncementPacket } from "./baseAnnouncementPacket";
-import { AnnouncementPacketType } from "../types/enums";
+import { AnnouncementPacketType } from "../../../types/enums";
 
 /**
  * Announcement Packet ID: `0x04` (`4`)

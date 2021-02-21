@@ -1,12 +1,10 @@
 import { PlayerPositionTeleportedEvent, PlayerPositionWalkedEvent } from "../../../api/events/player";
+import { InnerNetObjectType, TeleportReason } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
-import { TeleportReason } from "../../../types/enums";
-import { InnerNetObjectType } from "../types/enums";
-import { DataPacket } from "../../packets/gameData";
+import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
+import { BaseInnerNetObject } from "../baseEntity";
 import { SnapToPacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
-import { BaseInnerNetObject } from "../types";
 import { Vector2 } from "../../../types";
 import { EntityPlayer } from ".";
 
@@ -93,8 +91,8 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     this.velocity = event.getNewVelocity();
   }
 
-  serializeSpawn(): SpawnInnerNetObject {
-    return new SpawnInnerNetObject(
+  serializeSpawn(): SpawnPacketObject {
+    return new SpawnPacketObject(
       this.netId,
       new MessageWriter()
         .writeUInt16(this.sequenceId)

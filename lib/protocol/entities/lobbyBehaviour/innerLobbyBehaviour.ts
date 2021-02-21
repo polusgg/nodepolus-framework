@@ -1,8 +1,7 @@
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MessageWriter } from "../../../util/hazelMessage";
-import { InnerNetObjectType } from "../types/enums";
-import { DataPacket } from "../../packets/gameData";
-import { BaseInnerNetObject } from "../types";
+import { InnerNetObjectType } from "../../../types/enums";
+import { BaseInnerNetObject } from "../baseEntity";
 import { EntityLobbyBehaviour } from ".";
 
 export class InnerLobbyBehaviour extends BaseInnerNetObject {
@@ -17,8 +16,8 @@ export class InnerLobbyBehaviour extends BaseInnerNetObject {
     return new DataPacket(this.netId, new MessageWriter());
   }
 
-  serializeSpawn(): SpawnInnerNetObject {
-    return new SpawnInnerNetObject(
+  serializeSpawn(): SpawnPacketObject {
+    return new SpawnPacketObject(
       this.netId,
       new MessageWriter(),
     );

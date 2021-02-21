@@ -1,5 +1,5 @@
+import { AnnouncementPacketType } from "../../../types/enums";
 import { MessageWriter } from "../../../util/hazelMessage";
-import { AnnouncementPacketType } from "../types/enums";
 
 export abstract class BaseAnnouncementPacket {
   constructor(

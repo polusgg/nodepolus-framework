@@ -1,4 +1,4 @@
-import { BaseInnerNetObject } from "../../../protocol/entities/types";
+import { BaseInnerNetObject } from "../../../protocol/entities/baseEntity";
 import { BaseRpcPacket } from "../../../protocol/packets/rpc";
 import { Connection } from "../../../protocol/connection";
 import { CancellableEvent } from "../types";

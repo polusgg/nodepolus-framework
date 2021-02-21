@@ -1,8 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { GameDataPacketType, SpawnFlag } from "../../../types/enums";
 import { BaseGameDataPacket } from "./baseGameDataPacket";
-import { GameDataPacketType } from "../types/enums";
-import { SpawnFlag } from "../../../types/enums";
-import { SpawnInnerNetObject } from "./types";
+import { SpawnPacketObject } from ".";
 
 /**
  * Game Data Packet ID: `0x04` (`4`)
@@ -12,7 +11,7 @@ export class SpawnPacket extends BaseGameDataPacket {
     public spawnType: number,
     public owner: number,
     public flags: SpawnFlag,
-    public innerNetObjects: SpawnInnerNetObject[],
+    public innerNetObjects: SpawnPacketObject[],
   ) {
     super(GameDataPacketType.Spawn);
   }
@@ -22,7 +21,7 @@ export class SpawnPacket extends BaseGameDataPacket {
       reader.readPackedUInt32(),
       reader.readPackedInt32(),
       reader.readByte(),
-      reader.readList<SpawnInnerNetObject>(sub => SpawnInnerNetObject.deserialize(sub)),
+      reader.readList<SpawnPacketObject>(sub => SpawnPacketObject.deserialize(sub)),
     );
   }
 

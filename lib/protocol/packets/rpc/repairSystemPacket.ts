@@ -1,6 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { Level, SystemType } from "../../../types/enums";
-import { RpcPacketType } from "../types/enums";
+import { Level, RpcPacketType, SystemType } from "../../../types/enums";
 import { BaseRpcPacket } from ".";
 import {
   DecontaminationAmount,

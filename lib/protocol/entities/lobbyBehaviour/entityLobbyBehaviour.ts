@@ -1,7 +1,7 @@
 import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { GLOBAL_OWNER } from "../../../util/constants";
+import { BaseInnerNetEntity } from "../baseEntity";
 import { LobbyInstance } from "../../../api/lobby";
-import { BaseInnerNetEntity } from "../types";
 import { InnerLobbyBehaviour } from ".";
 
 export class EntityLobbyBehaviour extends BaseInnerNetEntity {

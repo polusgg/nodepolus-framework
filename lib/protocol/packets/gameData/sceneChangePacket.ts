@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseGameDataPacket } from "./baseGameDataPacket";
-import { GameDataPacketType } from "../types/enums";
+import { GameDataPacketType } from "../../../types/enums";
 
 /**
  * Game Data Packet ID: `0x06` (`6`)

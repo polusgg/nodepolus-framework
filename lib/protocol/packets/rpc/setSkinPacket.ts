@@ -1,6 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { PlayerSkin } from "../../../types/enums";
-import { RpcPacketType } from "../types/enums";
+import { PlayerSkin, RpcPacketType } from "../../../types/enums";
 import { BaseRpcPacket } from ".";
 
 /**

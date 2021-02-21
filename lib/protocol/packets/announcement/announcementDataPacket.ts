@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { AnnouncementPacketType } from "../types/enums";
+import { AnnouncementPacketType } from "../../../types/enums";
 import { BaseAnnouncementPacket } from ".";
 
 /**

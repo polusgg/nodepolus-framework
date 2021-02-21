@@ -1,14 +1,13 @@
 import { BaseEntityShipStatus } from "../../protocol/entities/baseShipStatus/baseEntityShipStatus";
-import { BaseInnerNetEntity, BaseInnerNetObject } from "../../protocol/entities/types";
+import { BaseInnerNetEntity, BaseInnerNetObject } from "../../protocol/entities/baseEntity";
 import { GameState, AlterGameTag, Level, PlayerColor } from "../../types/enums";
 import { EntityLobbyBehaviour } from "../../protocol/entities/lobbyBehaviour";
+import { GameOptionsData, LobbyListing, Metadatable } from "../../types";
 import { EntityMeetingHud } from "../../protocol/entities/meetingHud";
 import { PlayerData } from "../../protocol/entities/gameData/types";
 import { EntityGameData } from "../../protocol/entities/gameData";
-import { LobbyListing } from "../../protocol/packets/root/types";
 import { EntityPlayer } from "../../protocol/entities/player";
 import { BaseRpcPacket } from "../../protocol/packets/rpc";
-import { GameOptionsData, Metadatable } from "../../types";
 import { Connection } from "../../protocol/connection";
 import { PlayerInstance } from "../player";
 import { TextComponent } from "../text";

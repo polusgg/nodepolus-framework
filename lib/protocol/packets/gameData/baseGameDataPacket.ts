@@ -1,5 +1,5 @@
 import { MessageWriter } from "../../../util/hazelMessage";
-import { GameDataPacketType } from "../types/enums";
+import { GameDataPacketType } from "../../../types/enums";
 
 export abstract class BaseGameDataPacket {
   constructor(

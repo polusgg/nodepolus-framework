@@ -1,12 +1,9 @@
-import { ChatNoteType, GameState, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, SystemType, TaskType, TeleportReason } from "../types/enums";
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from "../protocol/entities/player";
 import { LadderSize, LadderDirection } from "../protocol/packets/rpc/climbLadderPacket";
 import { RepairAmount } from "../protocol/packets/rpc/repairSystem/amounts";
 import { BaseInnerShipStatus } from "../protocol/entities/baseShipStatus";
-import { InnerNetObjectType } from "../protocol/entities/types/enums";
 import { InnerVoteBanSystem } from "../protocol/entities/gameData";
 import { InnerMeetingHud } from "../protocol/entities/meetingHud";
-import { RpcPacketType } from "../protocol/packets/types/enums";
 import { Connection } from "../protocol/connection";
 import { GameOptionsData, Vector2 } from "../types";
 import { MaxValue } from "../util/constants";
@@ -38,6 +35,19 @@ import {
   SnapToPacket,
   SyncSettingsPacket,
 } from "../protocol/packets/rpc";
+import {
+  ChatNoteType,
+  GameState,
+  InnerNetObjectType,
+  PlayerColor,
+  PlayerHat,
+  PlayerPet,
+  PlayerSkin,
+  RpcPacketType,
+  SystemType,
+  TaskType,
+  TeleportReason,
+} from "../types/enums";
 
 export class RpcHandler {
   constructor(

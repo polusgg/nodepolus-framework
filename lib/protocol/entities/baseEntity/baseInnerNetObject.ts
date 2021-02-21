@@ -1,8 +1,7 @@
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
-import { DataPacket } from "../../packets/gameData";
+import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
+import { InnerNetObjectType } from "../../../types/enums";
 import { BaseRpcPacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
-import { InnerNetObjectType } from "./enums";
 import { BaseInnerNetEntity } from ".";
 
 export abstract class BaseInnerNetObject {
@@ -16,7 +15,7 @@ export abstract class BaseInnerNetObject {
 
   abstract serializeData(old: BaseInnerNetObject): DataPacket;
 
-  abstract serializeSpawn(): SpawnInnerNetObject;
+  abstract serializeSpawn(): SpawnPacketObject;
 
   sendRpcPacket(packet: BaseRpcPacket, to: Connection[]): void {
     if (to.length == 0) {

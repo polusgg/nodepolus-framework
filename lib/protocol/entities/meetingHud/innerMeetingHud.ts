@@ -1,12 +1,11 @@
+import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MeetingVoteRemovedEvent } from "../../../api/events/meeting";
 import { notUndefined, shallowEqual } from "../../../util/functions";
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { MessageWriter } from "../../../util/hazelMessage";
+import { InnerNetObjectType } from "../../../types/enums";
 import { PlayerInstance } from "../../../api/player";
-import { InnerNetObjectType } from "../types/enums";
-import { DataPacket } from "../../packets/gameData";
 import { ClearVotePacket } from "../../packets/rpc";
-import { BaseInnerNetObject } from "../types";
+import { BaseInnerNetObject } from "../baseEntity";
 import { EntityMeetingHud } from ".";
 import { VoteState } from "./types";
 
@@ -63,14 +62,14 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     return new DataPacket(this.netId, writer);
   }
 
-  serializeSpawn(): SpawnInnerNetObject {
+  serializeSpawn(): SpawnPacketObject {
     const writer = new MessageWriter();
 
     for (let i = 0; i < this.playerStates.length; i++) {
       this.playerStates[i].serialize(writer);
     }
 
-    return new SpawnInnerNetObject(this.netId, writer);
+    return new SpawnPacketObject(this.netId, writer);
   }
 
   clone(): InnerMeetingHud {

@@ -1,10 +1,8 @@
+import { InnerNetObjectType, Level, SystemType } from "../../../types/enums";
+import { BaseInnerNetEntity, BaseInnerNetObject } from "../baseEntity";
+import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { RepairAmount } from "../../packets/rpc/repairSystem/amounts";
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
-import { BaseInnerNetEntity, BaseInnerNetObject } from "../types";
 import { MessageWriter } from "../../../util/hazelMessage";
-import { Level, SystemType } from "../../../types/enums";
-import { InnerNetObjectType } from "../types/enums";
-import { DataPacket } from "../../packets/gameData";
 import { InternalSystemType } from ".";
 import {
   AirshipReactorSystem,
@@ -101,8 +99,8 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     );
   }
 
-  serializeSpawn(): SpawnInnerNetObject {
-    return new SpawnInnerNetObject(
+  serializeSpawn(): SpawnPacketObject {
+    return new SpawnPacketObject(
       this.netId,
       this.getSystems(undefined, this.spawnSystemTypes),
     );

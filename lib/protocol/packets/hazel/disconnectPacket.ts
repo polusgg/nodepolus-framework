@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { HazelPacketType } from "../../../types/enums";
 import { DisconnectReason } from "../../../types";
-import { HazelPacketType } from "../types/enums";
 import { BaseHazelPacket } from ".";
 
 export class DisconnectPacket extends BaseHazelPacket {

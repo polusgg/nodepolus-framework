@@ -1,10 +1,9 @@
+import { GameDataPacketType, Level, RpcPacketType } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { GameDataPacketType, RpcPacketType } from "../types/enums";
+import { BaseInnerNetObject } from "../../entities/baseEntity";
 import { BaseGameDataPacket } from "./baseGameDataPacket";
 import { CustomRpcPacketContainer } from "../../../types";
-import { BaseInnerNetObject } from "../../entities/types";
 import { Connection } from "../../connection";
-import { Level } from "../../../types/enums";
 import {
   AddVotePacket,
   BaseRpcPacket,

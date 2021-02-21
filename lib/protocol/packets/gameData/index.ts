@@ -11,3 +11,5 @@ export { RpcPacket } from "./rpcPacket";
 export { SceneChangePacket } from "./sceneChangePacket";
 
 export { SpawnPacket } from "./spawnPacket";
+
+export { SpawnPacketObject } from "./spawnPacketObject";

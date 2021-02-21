@@ -1,8 +1,7 @@
 import { BaseGameDataPacket, DataPacket, DespawnPacket, ReadyPacket, RpcPacket, SceneChangePacket, SpawnPacket } from "../gameData";
+import { GameDataPacketType, Level, RootPacketType } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { GameDataPacketType, RootPacketType } from "../types/enums";
 import { LobbyCode } from "../../../util/lobbyCode";
-import { Level } from "../../../types/enums";
 import { BaseRootPacket } from "../root";
 
 /**

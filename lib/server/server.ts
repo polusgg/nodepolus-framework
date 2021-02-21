@@ -1,15 +1,13 @@
-import { GameDataPacketType, PacketDestination, RootPacketType, RpcPacketType } from "../protocol/packets/types/enums";
-import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, OutboundPacketTransformer } from "../types";
+import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, LobbyCount, LobbyListing, OutboundPacketTransformer } from "../types";
+import { FakeClientId, GameDataPacketType, PacketDestination, RootPacketType, RpcPacketType } from "../types/enums";
 import { PlayerBannedEvent, PlayerKickedEvent, PlayerLeftEvent } from "../api/events/player";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
-import { LobbyCount, LobbyListing } from "../protocol/packets/root/types";
 import { BasicServerEvents, ServerEvents } from "../api/events";
 import { DEFAULT_CONFIG, MaxValue } from "../util/constants";
 import { RpcPacket } from "../protocol/packets/gameData";
 import { RootPacket } from "../protocol/packets/hazel";
 import { MessageReader } from "../util/hazelMessage";
 import { Connection } from "../protocol/connection";
-import { FakeClientId } from "../types/enums";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
 import { LobbyInstance } from "../api/lobby";

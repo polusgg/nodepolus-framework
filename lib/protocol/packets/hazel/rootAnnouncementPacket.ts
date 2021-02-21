@@ -1,6 +1,6 @@
 import { CacheDataPacket, AnnouncementDataPacket, SetLanguagesPacket, BaseAnnouncementPacket } from "../announcement";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { AnnouncementPacketType } from "../types/enums";
+import { AnnouncementPacketType } from "../../../types/enums";
 
 export class RootAnnouncementPacket {
   constructor(

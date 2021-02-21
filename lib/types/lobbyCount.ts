@@ -1,5 +1,5 @@
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { Level } from "../../../../types/enums";
+import { MessageReader, MessageWriter } from "../util/hazelMessage";
+import { Level } from "./enums";
 
 /**
  * A class used to represent the numbers displayed at the bottom of the game

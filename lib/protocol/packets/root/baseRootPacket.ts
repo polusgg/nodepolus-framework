@@ -1,5 +1,5 @@
 import { MessageWriter } from "../../../util/hazelMessage";
-import { RootPacketType } from "../types/enums";
+import { RootPacketType } from "../../../types/enums";
 
 export abstract class BaseRootPacket {
   constructor(

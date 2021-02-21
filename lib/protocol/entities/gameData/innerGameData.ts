@@ -1,10 +1,9 @@
 import { SetTasksPacket, UpdateGameDataPacket } from "../../packets/rpc";
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MessageWriter } from "../../../util/hazelMessage";
-import { InnerNetObjectType } from "../types/enums";
-import { DataPacket } from "../../packets/gameData";
+import { InnerNetObjectType } from "../../../types/enums";
+import { BaseInnerNetObject } from "../baseEntity";
 import { Connection } from "../../connection";
-import { BaseInnerNetObject } from "../types";
 import { Tasks } from "../../../static";
 import { PlayerData } from "./types";
 import { EntityGameData } from ".";
@@ -67,8 +66,8 @@ export class InnerGameData extends BaseInnerNetObject {
     );
   }
 
-  serializeSpawn(): SpawnInnerNetObject {
-    return new SpawnInnerNetObject(
+  serializeSpawn(): SpawnPacketObject {
+    return new SpawnPacketObject(
       this.netId,
       new MessageWriter().writeList(this.players, (sub, player) => player.serialize(sub)),
     );

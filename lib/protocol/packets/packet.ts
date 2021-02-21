@@ -1,7 +1,6 @@
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, PingPacket, RootPacket } from "./hazel";
 import { MessageReader, MessageWriter } from "../../util/hazelMessage";
-import { HazelPacketType } from "./types/enums";
-import { Level } from "../../types/enums";
+import { HazelPacketType, Level } from "../../types/enums";
 
 type PacketDataType = AcknowledgementPacket
 | DisconnectPacket

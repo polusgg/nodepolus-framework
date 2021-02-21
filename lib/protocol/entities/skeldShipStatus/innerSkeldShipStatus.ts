@@ -1,6 +1,5 @@
+import { InnerNetObjectType, SystemType } from "../../../types/enums";
 import { BaseInnerShipStatus } from "../baseShipStatus";
-import { InnerNetObjectType } from "../types/enums";
-import { SystemType } from "../../../types/enums";
 import { EntitySkeldShipStatus } from ".";
 
 export class InnerSkeldShipStatus extends BaseInnerShipStatus {

@@ -1,12 +1,11 @@
 import { ClimbLadderPacket, EnterVentPacket, ExitVentPacket } from "../../packets/rpc";
 import { GameVentEnteredEvent, GameVentExitedEvent } from "../../../api/events/game";
 import { LadderSize, LadderDirection } from "../../packets/rpc/climbLadderPacket";
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MessageWriter } from "../../../util/hazelMessage";
-import { InnerNetObjectType } from "../types/enums";
-import { DataPacket } from "../../packets/gameData";
+import { InnerNetObjectType } from "../../../types/enums";
+import { BaseInnerNetObject } from "../baseEntity";
 import { Connection } from "../../connection";
-import { BaseInnerNetObject } from "../types";
 import { LevelVent } from "../../../types";
 import { EntityPlayer } from ".";
 
@@ -102,8 +101,8 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     return new DataPacket(this.netId, new MessageWriter());
   }
 
-  serializeSpawn(): SpawnInnerNetObject {
-    return new SpawnInnerNetObject(
+  serializeSpawn(): SpawnPacketObject {
+    return new SpawnPacketObject(
       this.netId,
       new MessageWriter(),
     );

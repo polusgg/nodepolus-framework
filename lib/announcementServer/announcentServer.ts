@@ -2,11 +2,10 @@ import { CacheDataPacket, AnnouncementDataPacket, BaseAnnouncementPacket, SetLan
 import { AnnouncementHelloPacket, RootAnnouncementPacket } from "../protocol/packets/hazel";
 import { AnnouncementServerEvents, BasicAnnouncementServerEvents } from "../api/events";
 import { ANNOUNCEMENT_SERVER_PORT, DEFAULT_LANGUAGES } from "../util/constants";
-import { HazelPacketType } from "../protocol/packets/types/enums";
+import { ClientLanguage, HazelPacketType } from "../types/enums";
 import { AnnouncementPacket } from "../protocol/packets";
 import { MessageReader } from "../util/hazelMessage";
 import { BaseAnnouncementDriver } from "./drivers";
-import { ClientLanguage } from "../types/enums";
 import { TextComponent } from "../api/text";
 import { ConnectionInfo } from "../types";
 import { Announcement } from "./types";

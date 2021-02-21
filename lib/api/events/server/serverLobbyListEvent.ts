@@ -1,6 +1,5 @@
-import { LobbyCount, LobbyListing } from "../../../protocol/packets/root/types";
+import { DisconnectReason, LobbyCount, LobbyListing } from "../../../types";
 import { Connection } from "../../../protocol/connection";
-import { DisconnectReason } from "../../../types";
 import { DisconnectableEvent } from "../types";
 
 /**

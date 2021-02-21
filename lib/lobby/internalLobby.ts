@@ -1,19 +1,16 @@
 import { ServerLobbyDestroyedEvent, ServerLobbyJoinRefusedEvent, ServerPacketInRpcCustomEvent, ServerPacketInRpcEvent } from "../api/events/server";
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RpcPacket, SceneChangePacket } from "../protocol/packets/gameData";
-import { GameDataPacketType, RootPacketType, RpcPacketType } from "../protocol/packets/types/enums";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { BaseRpcPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
+import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/baseEntity";
 import { EntityPlayer, InnerCustomNetworkTransform } from "../protocol/entities/player";
 import { LobbyHostMigratedEvent, LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
-import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
+import { DisconnectReason, GameOptionsData, LobbyListing, Vector2 } from "../types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
-import { InnerNetObjectType } from "../protocol/entities/types/enums";
-import { DisconnectReason, GameOptionsData, Vector2 } from "../types";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
-import { LobbyListing } from "../protocol/packets/root/types";
 import { PlayerJoinedEvent } from "../api/events/player";
 import { RootPacket } from "../protocol/packets/hazel";
 import { Connection } from "../protocol/connection";
@@ -43,13 +40,17 @@ import {
 import {
   AlterGameTag,
   FakeClientId,
+  GameDataPacketType,
   GameState,
+  InnerNetObjectType,
   Level,
   LimboState,
   PlayerColor,
   PlayerHat,
   PlayerPet,
   PlayerSkin,
+  RootPacketType,
+  RpcPacketType,
   SpawnFlag,
   SpawnType,
 } from "../types/enums";

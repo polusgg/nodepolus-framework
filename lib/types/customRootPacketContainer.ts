@@ -4,5 +4,6 @@ import { Connection } from "../protocol/connection";
 
 export type CustomRootPacketContainer = {
   deserialize(reader: MessageReader): BaseRootPacket;
+
   handle(connection: Connection, packet: BaseRootPacket): void;
 };

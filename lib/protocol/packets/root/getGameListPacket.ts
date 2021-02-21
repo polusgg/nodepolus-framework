@@ -1,7 +1,6 @@
+import { GameOptionsData, LobbyCount, LobbyListing } from "../../../types";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { LobbyCount, LobbyListing } from "./types";
-import { GameOptionsData } from "../../../types";
-import { RootPacketType } from "../types/enums";
+import { RootPacketType } from "../../../types/enums";
 import { BaseRootPacket } from "../root";
 
 /**

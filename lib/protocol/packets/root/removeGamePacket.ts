@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { RootPacketType } from "../../../types/enums";
 import { DisconnectReason } from "../../../types";
-import { RootPacketType } from "../types/enums";
 import { BaseRootPacket } from "../root";
 
 /**

@@ -1,6 +1,6 @@
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { LobbyCode } from "../../../../util/lobbyCode";
-import { Level } from "../../../../types/enums";
+import { MessageReader, MessageWriter } from "../util/hazelMessage";
+import { LobbyCode } from "../util/lobbyCode";
+import { Level } from "./enums";
 
 /**
  * A class used to represent a lobby when searching for public games.

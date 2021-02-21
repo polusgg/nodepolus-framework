@@ -1,6 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { ClientLanguage } from "../../../types/enums";
-import { HazelPacketType } from "../types/enums";
+import { ClientLanguage, HazelPacketType } from "../../../types/enums";
 import { BaseHazelPacket } from ".";
 
 export class AnnouncementHelloPacket extends BaseHazelPacket {

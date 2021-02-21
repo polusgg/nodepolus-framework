@@ -1,6 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { ChatNoteType } from "../../../types/enums";
-import { RpcPacketType } from "../types/enums";
+import { ChatNoteType, RpcPacketType } from "../../../types/enums";
 import { BaseRpcPacket } from ".";
 
 /**

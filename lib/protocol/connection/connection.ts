@@ -1,14 +1,13 @@
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer } from "../../types";
 import { BaseRootPacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
-import { PacketDestination, HazelPacketType, RootPacketType } from "../packets/types/enums";
+import { HazelPacketType, LimboState, PacketDestination, RootPacketType } from "../../types/enums";
 import { ServerPacketOutCustomEvent, ServerPacketOutEvent } from "../../api/events/server";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
 import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
 import { MessageWriter } from "../../util/hazelMessage";
 import { PlayerInstance } from "../../api/player";
 import { AwaitingPacket } from "../packets/types";
-import { LimboState } from "../../types/enums";
 import { InternalLobby } from "../../lobby";
 import { ConnectionEvents } from ".";
 import { Packet } from "../packets";

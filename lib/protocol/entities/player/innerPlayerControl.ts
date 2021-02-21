@@ -1,14 +1,11 @@
-import { ChatNoteType, DeathReason, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, TaskType } from "../../../types/enums";
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MessageWriter } from "../../../util/hazelMessage";
 import { PlayerInstance } from "../../../api/player";
-import { InnerNetObjectType } from "../types/enums";
-import { DataPacket } from "../../packets/gameData";
+import { BaseInnerNetObject } from "../baseEntity";
 import { TextComponent } from "../../../api/text";
 import { GameOptionsData } from "../../../types";
 import { PlayerData } from "../gameData/types";
 import { Connection } from "../../connection";
-import { BaseInnerNetObject } from "../types";
 import { EntityGameData } from "../gameData";
 import { EntityPlayer } from ".";
 import {
@@ -24,6 +21,16 @@ import {
   PlayerTaskAnimationEvent,
   PlayerTaskCompletedEvent,
 } from "../../../api/events/player";
+import {
+  ChatNoteType,
+  DeathReason,
+  InnerNetObjectType,
+  PlayerColor,
+  PlayerHat,
+  PlayerPet,
+  PlayerSkin,
+  TaskType,
+} from "../../../types/enums";
 import {
   CompleteTaskPacket,
   ExiledPacket,
@@ -267,8 +274,8 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     );
   }
 
-  serializeSpawn(): SpawnInnerNetObject {
-    return new SpawnInnerNetObject(
+  serializeSpawn(): SpawnPacketObject {
+    return new SpawnPacketObject(
       this.netId,
       new MessageWriter()
         .writeBoolean(this.isNew)

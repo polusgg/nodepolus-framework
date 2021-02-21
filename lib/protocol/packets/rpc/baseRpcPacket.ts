@@ -1,5 +1,5 @@
 import { MessageWriter } from "../../../util/hazelMessage";
-import { RpcPacketType } from "../types/enums";
+import { RpcPacketType } from "../../../types/enums";
 
 export abstract class BaseRpcPacket {
   constructor(

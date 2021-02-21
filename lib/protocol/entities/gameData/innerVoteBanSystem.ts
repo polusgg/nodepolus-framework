@@ -1,15 +1,14 @@
 import { PlayerVotekickAddedEvent, PlayerVotekickRemovedEvent } from "../../../api/events/player";
-import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MessageWriter } from "../../../util/hazelMessage";
-import { InnerNetObjectType } from "../types/enums";
-import { DataPacket } from "../../packets/gameData";
+import { InnerNetObjectType } from "../../../types/enums";
 import { GameDataPacket } from "../../packets/root";
+import { BaseInnerNetObject } from "../baseEntity";
 import { AddVotePacket } from "../../packets/rpc";
 import { DisconnectReason } from "../../../types";
 import { InternalPlayer } from "../../../player";
 import { InternalLobby } from "../../../lobby";
 import { Connection } from "../../connection";
-import { BaseInnerNetObject } from "../types";
 import { EntityGameData } from ".";
 
 export class InnerVoteBanSystem extends BaseInnerNetObject {
@@ -120,8 +119,8 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     return new DataPacket(this.netId, writer);
   }
 
-  serializeSpawn(): SpawnInnerNetObject {
-    return new SpawnInnerNetObject(
+  serializeSpawn(): SpawnPacketObject {
+    return new SpawnPacketObject(
       this.netId,
       new MessageWriter().writeBytes(this.serializeData().data),
     );
