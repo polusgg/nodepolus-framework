@@ -87,9 +87,9 @@ function listenForShutdown(): void {
 /**
  * Loads all top-level plugin files and folders within the given folder.
  *
- * * Files must end with either `.npplugin.ts` or `.npplugin.js`
- * * Folders must end with `.npplugin`
- *   * Folders must contain either an `index.ts` or `index.js` file
+ * - Files must end with either `.npplugin.ts` or `.npplugin.js`
+ * - Folders must end with `.npplugin`
+ *   - Folders must contain either an `index.ts` or `index.js` file
  *
  * @param pluginsPath - The path to the plugins folder (default `__dirname/plugins`)
  */
