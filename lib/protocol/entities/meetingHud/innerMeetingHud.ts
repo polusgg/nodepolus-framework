@@ -41,7 +41,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
       return connection;
     }).filter(notUndefined);
 
-    this.sendRpcPacketTo(promises, new ClearVotePacket());
+    this.sendRpcPacket(new ClearVotePacket(), promises);
   }
 
   getData(old: InnerMeetingHud): DataPacket {

@@ -31,7 +31,7 @@ export abstract class BaseInnerNetObject {
     }
   }
 
-  sendRpcPacketTo(to: Connection[], packet: BaseRpcPacket): void {
+  sendRpcPacket(packet: BaseRpcPacket, to: Connection[]): void {
     if (to.length == 0) {
       return;
     }

@@ -48,7 +48,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
 
       if (connection) {
         // TODO: Add delay
-        this.sendRpcPacketTo([connection], new ExitVentPacket(vent.getId()));
+        this.sendRpcPacket(new ExitVentPacket(vent.getId()), [connection]);
       }
 
       return;
@@ -56,7 +56,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
 
     this.vent = vent;
 
-    this.sendRpcPacketTo(sendTo, new EnterVentPacket(vent.getId()));
+    this.sendRpcPacket(new EnterVentPacket(vent.getId()), sendTo);
   }
 
   async exitVent(vent: LevelVent | undefined, sendTo: Connection[]): Promise<void> {
@@ -83,7 +83,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
 
       if (connection) {
         // TODO: Add delay
-        this.sendRpcPacketTo([connection], new EnterVentPacket(vent.getId()));
+        this.sendRpcPacket(new EnterVentPacket(vent.getId()), [connection]);
       }
 
       return;
@@ -91,11 +91,11 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
 
     this.vent = undefined;
 
-    this.sendRpcPacketTo(sendTo, new ExitVentPacket(vent.getId()));
+    this.sendRpcPacket(new ExitVentPacket(vent.getId()), sendTo);
   }
 
   climbLadder(ladderSize: LadderSize, ladderDirection: LadderDirection, sendTo: Connection[]): void {
-    this.sendRpcPacketTo(sendTo, new ClimbLadderPacket(ladderSize, ladderDirection));
+    this.sendRpcPacket(new ClimbLadderPacket(ladderSize, ladderDirection), sendTo);
   }
 
   getData(): DataPacket {

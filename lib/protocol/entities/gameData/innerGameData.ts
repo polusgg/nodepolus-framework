@@ -35,7 +35,7 @@ export class InnerGameData extends BaseInnerNetObject {
       }
     }
 
-    this.sendRpcPacketTo(sendTo, new SetTasksPacket(playerId, taskIds));
+    this.sendRpcPacket(new SetTasksPacket(playerId, taskIds), sendTo);
   }
 
   updateGameData(playerData: PlayerData[], sendTo: Connection[]): void {
@@ -56,7 +56,7 @@ export class InnerGameData extends BaseInnerNetObject {
       }
     }
 
-    this.sendRpcPacketTo(sendTo, new UpdateGameDataPacket(playerData));
+    this.sendRpcPacket(new UpdateGameDataPacket(playerData), sendTo);
   }
 
   // TODO: compare players and only send those that have updated

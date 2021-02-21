@@ -62,7 +62,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       return;
     }
 
-    this.sendRpcPacketTo(sendTo, new PlayAnimationPacket(event.getTaskType()));
+    this.sendRpcPacket(new PlayAnimationPacket(event.getTaskType()), sendTo);
   }
 
   async completeTask(taskIndex: number, sendTo: Connection[]): Promise<void> {
@@ -82,27 +82,27 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       const tasks = [...playerData.tasks];
       const deleted = tasks.splice(taskIndex, 1);
 
-      this.sendRpcPacketTo([connection], new SetTasksPacket(this.playerId, tasks.map(task => task[0].id)));
+      this.sendRpcPacket(new SetTasksPacket(this.playerId, tasks.map(task => task[0].id)), [connection]);
       tasks.splice(taskIndex, 0, deleted[0]);
-      this.sendRpcPacketTo([connection], new SetTasksPacket(this.playerId, tasks.map(task => task[0].id)));
+      this.sendRpcPacket(new SetTasksPacket(this.playerId, tasks.map(task => task[0].id)), [connection]);
 
       for (let i = 0; i < tasks.length; i++) {
         if (!tasks[1]) {
           continue;
         }
 
-        this.sendRpcPacketTo([connection], new CompleteTaskPacket(i));
+        this.sendRpcPacket(new CompleteTaskPacket(i), [connection]);
       }
 
       return;
     }
 
     playerData.completeTaskAtIndex(taskIndex);
-    this.sendRpcPacketTo(sendTo, new CompleteTaskPacket(taskIndex));
+    this.sendRpcPacket(new CompleteTaskPacket(taskIndex), sendTo);
   }
 
   syncSettings(options: GameOptionsData, sendTo: Connection[]): void {
-    this.sendRpcPacketTo(sendTo, new SyncSettingsPacket(options));
+    this.sendRpcPacket(new SyncSettingsPacket(options), sendTo);
   }
 
   async exile(): Promise<void> {
@@ -116,7 +116,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     this.getPlayerData().isDead = true;
 
-    this.sendRpcPacketTo([this.getConnection()], new ExiledPacket());
+    this.sendRpcPacket(new ExiledPacket(), [this.getConnection()]);
   }
 
   async setName(name: string, sendTo: Connection[]): Promise<void> {
@@ -133,7 +133,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     this.getPlayerData().name = event.getNewName().toString();
 
-    this.sendRpcPacketTo(sendTo, new SetNamePacket(event.getNewName().toString()));
+    this.sendRpcPacket(new SetNamePacket(event.getNewName().toString()), sendTo);
   }
 
   async setColor(color: PlayerColor, sendTo: Connection[]): Promise<void> {
@@ -150,7 +150,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     this.getPlayerData().color = event.getNewColor();
 
-    this.sendRpcPacketTo(sendTo, new SetColorPacket(event.getNewColor()));
+    this.sendRpcPacket(new SetColorPacket(event.getNewColor()), sendTo);
   }
 
   async setHat(hat: PlayerHat, sendTo: Connection[]): Promise<void> {
@@ -167,7 +167,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     this.getPlayerData().hat = event.getNewHat();
 
-    this.sendRpcPacketTo(sendTo, new SetHatPacket(event.getNewHat()));
+    this.sendRpcPacket(new SetHatPacket(event.getNewHat()), sendTo);
   }
 
   async setPet(pet: PlayerPet, sendTo: Connection[]): Promise<void> {
@@ -184,7 +184,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     this.getPlayerData().pet = event.getNewPet();
 
-    this.sendRpcPacketTo(sendTo, new SetPetPacket(event.getNewPet()));
+    this.sendRpcPacket(new SetPetPacket(event.getNewPet()), sendTo);
   }
 
   async setSkin(skin: PlayerSkin, sendTo: Connection[]): Promise<void> {
@@ -201,7 +201,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     this.getPlayerData().skin = event.getNewSkin();
 
-    this.sendRpcPacketTo(sendTo, new SetSkinPacket(event.getNewSkin()));
+    this.sendRpcPacket(new SetSkinPacket(event.getNewSkin()), sendTo);
   }
 
   async murderPlayer(victimPlayerControlNetId: number, sendTo: Connection[]): Promise<void> {
@@ -223,7 +223,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     victim.getGameDataEntry().isDead = true;
 
-    this.sendRpcPacketTo(sendTo, new MurderPlayerPacket(victimPlayerControlNetId));
+    this.sendRpcPacket(new MurderPlayerPacket(victimPlayerControlNetId), sendTo);
   }
 
   async sendChat(message: string, sendTo: Connection[]): Promise<void> {
@@ -235,7 +235,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       return;
     }
 
-    this.sendRpcPacketTo(sendTo, new SendChatPacket(message));
+    this.sendRpcPacket(new SendChatPacket(message), sendTo);
   }
 
   setScanner(isScanning: boolean, sequenceId: number, sendTo: Connection[]): void {
@@ -245,7 +245,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       return;
     }
 
-    this.sendRpcPacketTo(sendTo, new SetScannerPacket(isScanning, this.scannerSequenceId));
+    this.sendRpcPacket(new SetScannerPacket(isScanning, this.scannerSequenceId), sendTo);
   }
 
   async sendChatNote(playerId: number, chatNoteType: ChatNoteType, sendTo: Connection[]): Promise<void> {
@@ -257,7 +257,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       return;
     }
 
-    this.sendRpcPacketTo(sendTo, new SendChatNotePacket(playerId, chatNoteType));
+    this.sendRpcPacket(new SendChatNotePacket(playerId, chatNoteType), sendTo);
   }
 
   getData(): DataPacket {

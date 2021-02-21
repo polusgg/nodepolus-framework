@@ -160,9 +160,9 @@ export class InternalHost implements HostInstance {
       const time = this.secondsUntilStart--;
 
       if (this.lobby.getPlayers().length > 0) {
-        this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacketTo(
-          this.lobby.getConnections(),
+        this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacket(
           new SetStartCounterPacket(this.counterSequenceId += 5, time),
+          this.lobby.getConnections(),
         );
       }
 
@@ -192,9 +192,9 @@ export class InternalHost implements HostInstance {
     this.secondsUntilStart = -1;
 
     if (this.lobby.getPlayers().length > 0) {
-      this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacketTo(
-        this.lobby.getConnections(),
+      this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacket(
         new SetStartCounterPacket(this.counterSequenceId += 5, -1),
+        this.lobby.getConnections(),
       );
     }
 
@@ -269,9 +269,9 @@ export class InternalHost implements HostInstance {
       impostors[i].setRole(PlayerRole.Impostor);
     }
 
-    this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacketTo(
-      this.lobby.getConnections(),
+    this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacket(
       new SetInfectedPacket(impostors.map(player => player.getId())),
+      this.lobby.getConnections(),
     );
   }
 
@@ -463,9 +463,10 @@ export class InternalHost implements HostInstance {
       }
     }
 
-    meetingHud.meetingHud.sendRpcPacketTo(this.lobby.getConnections(), new VotingCompletePacket(
-      meetingHud.meetingHud.playerStates, isTied ? 0xff : (exiledPlayer?.getId() ?? 0xff), isTied),
-    );
+    meetingHud.meetingHud.sendRpcPacket(new VotingCompletePacket(
+      meetingHud.meetingHud.playerStates, isTied ? 0xff : (exiledPlayer?.getId() ?? 0xff),
+      isTied,
+    ), this.lobby.getConnections());
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.meetingHud.data(oldData),
@@ -485,7 +486,7 @@ export class InternalHost implements HostInstance {
         return;
       }
 
-      meetingHud.meetingHud.sendRpcPacketTo(this.lobby.getConnections(), new ClosePacket());
+      meetingHud.meetingHud.sendRpcPacket(new ClosePacket(), this.lobby.getConnections());
 
       this.lobby.deleteMeetingHud();
 
@@ -956,7 +957,7 @@ export class InternalHost implements HostInstance {
       return;
     }
 
-    sender.sendRpcPacketTo(this.lobby.getConnections(), new StartMeetingPacket(event.getVictim()?.getId() ?? 0xff));
+    sender.sendRpcPacket(new StartMeetingPacket(event.getVictim()?.getId() ?? 0xff), this.lobby.getConnections());
 
     const meetingHud = new EntityMeetingHud(this.lobby, this.getNextNetId());
 
@@ -1037,7 +1038,7 @@ export class InternalHost implements HostInstance {
       const connection = player.getConnection();
 
       if (connection) {
-        meetingHud.meetingHud.sendRpcPacketTo([connection], new ClearVotePacket());
+        meetingHud.meetingHud.sendRpcPacket(new ClearVotePacket(), [connection]);
       }
 
       return;
