@@ -1,6 +1,6 @@
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
-import { Door, Game } from "../../game";
+import { Game } from "../../game";
 
 /**
  * Fired when the doors of a room have opened.
@@ -13,7 +13,7 @@ export class RoomDoorsOpenedEvent extends CancellableEvent {
    */
   constructor(
     private readonly game: Game,
-    private doors: Door[],
+    private doors: number[],
     private readonly player?: PlayerInstance,
   ) {
     super();
@@ -29,7 +29,7 @@ export class RoomDoorsOpenedEvent extends CancellableEvent {
   /**
    * Gets the doors that were opened.
    */
-  getDoors(): Door[] {
+  getDoors(): number[] {
     return this.doors;
   }
 
@@ -38,7 +38,7 @@ export class RoomDoorsOpenedEvent extends CancellableEvent {
    *
    * @param doors - The new doors that were opened
    */
-  setDoors(doors: Door[]): void {
+  setDoors(doors: number[]): void {
     this.doors = doors;
   }
 
