@@ -1,7 +1,7 @@
-import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { RepairAmount } from "../../packets/rpc/repairSystem/amounts";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../types";
+import { MessageWriter } from "../../../util/hazelMessage";
 import { Level, SystemType } from "../../../types/enums";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
@@ -100,9 +100,6 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
       writer,
     );
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setData(_packet: MessageReader | MessageWriter): void {}
 
   serializeSpawn(): SpawnInnerNetObject {
     return new SpawnInnerNetObject(

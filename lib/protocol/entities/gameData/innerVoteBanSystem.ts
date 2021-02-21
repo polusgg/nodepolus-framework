@@ -1,6 +1,6 @@
 import { PlayerVotekickAddedEvent, PlayerVotekickRemovedEvent } from "../../../api/events/player";
-import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { MessageWriter } from "../../../util/hazelMessage";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { GameDataPacket } from "../../packets/root";
@@ -118,21 +118,6 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     }, false);
 
     return new DataPacket(this.netId, writer);
-  }
-
-  setData(packet: MessageReader | MessageWriter): void {
-    const reader = MessageReader.fromRawBytes(packet);
-
-    reader.readList(sub => {
-      const playerClientId = sub.readUInt32();
-      const otherClientIds = new Array(3);
-
-      for (let i = 0; i < 3; i++) {
-        otherClientIds[i] = reader.readPackedUInt32();
-      }
-
-      this.votes.set(playerClientId, otherClientIds);
-    }, false);
   }
 
   serializeSpawn(): SpawnInnerNetObject {

@@ -3,6 +3,7 @@ import { BaseGameDataPacket, DataPacket, DespawnPacket, RpcPacket, SceneChangePa
 import { GameDataPacketType, RootPacketType, RpcPacketType } from "../protocol/packets/types/enums";
 import { BaseEntityShipStatus } from "../protocol/entities/baseShipStatus/baseEntityShipStatus";
 import { BaseRpcPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
+import { EntityPlayer, InnerCustomNetworkTransform } from "../protocol/entities/player";
 import { LobbyHostMigratedEvent, LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
@@ -13,7 +14,6 @@ import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { LobbyListing } from "../protocol/packets/root/types";
-import { EntityPlayer } from "../protocol/entities/player";
 import { PlayerJoinedEvent } from "../api/events/player";
 import { RootPacket } from "../protocol/packets/hazel";
 import { Connection } from "../protocol/connection";
@@ -1008,14 +1008,11 @@ export class InternalLobby implements LobbyInstance {
     const netObject = this.findInnerNetObject(netId);
 
     if (netObject) {
-      const oldNetObject = netObject.clone();
-
-      netObject.data(data);
-
       if (netObject.type == InnerNetObjectType.CustomNetworkTransform) {
-        this.sendUnreliableRootGamePacket(new GameDataPacket([netObject.data(oldNetObject)], this.code), sendTo ?? []);
-      } else {
-        this.sendRootGamePacket(new GameDataPacket([netObject.data(oldNetObject)], this.code), sendTo ?? []);
+        const oldNetObject = netObject.clone();
+
+        (netObject as InnerCustomNetworkTransform).setData(data);
+        this.sendUnreliableRootGamePacket(new GameDataPacket([netObject.serializeData(oldNetObject)], this.code), sendTo ?? []);
       }
     } else {
       throw new Error(`Data packet sent with unknown InnerNetObject ID: ${netId}`);

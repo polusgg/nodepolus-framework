@@ -1,6 +1,6 @@
 import { ChatNoteType, DeathReason, PlayerColor, PlayerHat, PlayerPet, PlayerSkin, TaskType } from "../../../types/enums";
-import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { MessageWriter } from "../../../util/hazelMessage";
 import { PlayerInstance } from "../../../api/player";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
@@ -265,12 +265,6 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       this.netId,
       new MessageWriter().writeByte(this.playerId),
     );
-  }
-
-  setData(packet: MessageReader | MessageWriter): void {
-    const reader = MessageReader.fromRawBytes(packet.getBuffer());
-
-    this.playerId = reader.readByte();
   }
 
   serializeSpawn(): SpawnInnerNetObject {

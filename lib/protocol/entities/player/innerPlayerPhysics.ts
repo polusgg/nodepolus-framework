@@ -1,8 +1,8 @@
 import { ClimbLadderPacket, EnterVentPacket, ExitVentPacket } from "../../packets/rpc";
 import { GameVentEnteredEvent, GameVentExitedEvent } from "../../../api/events/game";
 import { LadderSize, LadderDirection } from "../../packets/rpc/climbLadderPacket";
-import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { MessageWriter } from "../../../util/hazelMessage";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { Connection } from "../../connection";
@@ -101,9 +101,6 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
   serializeData(): DataPacket {
     return new DataPacket(this.netId, new MessageWriter());
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setData(_packet: MessageReader | MessageWriter): void {}
 
   serializeSpawn(): SpawnInnerNetObject {
     return new SpawnInnerNetObject(

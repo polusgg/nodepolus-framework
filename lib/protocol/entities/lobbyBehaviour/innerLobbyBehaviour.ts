@@ -1,5 +1,5 @@
-import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { MessageWriter } from "../../../util/hazelMessage";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { BaseInnerNetObject } from "../types";
@@ -16,9 +16,6 @@ export class InnerLobbyBehaviour extends BaseInnerNetObject {
   serializeData(): DataPacket {
     return new DataPacket(this.netId, new MessageWriter());
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setData(_packet: MessageReader | MessageWriter): void {}
 
   serializeSpawn(): SpawnInnerNetObject {
     return new SpawnInnerNetObject(

@@ -68,7 +68,7 @@ export class DoorsHandler {
 
   sendDataUpdate(): void {
     this.host.getLobby().sendRootGamePacket(new GameDataPacket([
-      this.shipStatus.data(this.oldShipStatus),
+      this.shipStatus.serializeData(this.oldShipStatus),
     ], this.host.getLobby().getCode()));
   }
 }

@@ -1,7 +1,7 @@
-import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { MeetingVoteRemovedEvent } from "../../../api/events/meeting";
 import { notUndefined, shallowEqual } from "../../../util/functions";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { MessageWriter } from "../../../util/hazelMessage";
 import { PlayerInstance } from "../../../api/player";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
@@ -62,9 +62,6 @@ export class InnerMeetingHud extends BaseInnerNetObject {
 
     return new DataPacket(this.netId, writer);
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setData(_packet: MessageReader | MessageWriter): void {}
 
   serializeSpawn(): SpawnInnerNetObject {
     const writer = new MessageWriter();

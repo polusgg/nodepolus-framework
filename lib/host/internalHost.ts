@@ -378,7 +378,7 @@ export class InternalHost implements HostInstance {
       throw new Error("Attempted to end a meeting without a GameData instance");
     }
 
-    const oldData = meetingHud.meetingHud.clone();
+    const oldMeetingHud = meetingHud.meetingHud.clone();
     const voteResults: Map<number, VoteResult> = new Map();
     const playerInstanceCache: Map<number, PlayerInstance> = new Map();
     const fetchPlayerById = (playerId: number): PlayerInstance | undefined => {
@@ -469,7 +469,7 @@ export class InternalHost implements HostInstance {
     ), this.lobby.getConnections());
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
-      meetingHud.meetingHud.data(oldData),
+      meetingHud.meetingHud.serializeData(oldMeetingHud),
     ], this.lobby.getCode()));
 
     setTimeout(async () => {
@@ -1052,7 +1052,7 @@ export class InternalHost implements HostInstance {
     states[event.getVoter().getId()].didVote = true;
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
-      meetingHud.meetingHud.data(oldMeetingHud),
+      meetingHud.meetingHud.serializeData(oldMeetingHud),
       new RpcPacket(player.entity.playerControl.netId, new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
     ], this.lobby.getCode()));
 

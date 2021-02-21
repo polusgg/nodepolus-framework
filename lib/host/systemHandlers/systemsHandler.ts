@@ -302,7 +302,7 @@ export class SystemsHandler {
 
   sendDataUpdate(): void {
     this.host.getLobby().sendRootGamePacket(new GameDataPacket([
-      this.getShipStatus().data(this.oldShipStatus),
+      this.getShipStatus().serializeData(this.oldShipStatus),
     ], this.host.getLobby().getCode()));
   }
 

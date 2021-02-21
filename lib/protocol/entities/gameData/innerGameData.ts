@@ -1,13 +1,13 @@
-import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { SetTasksPacket, UpdateGameDataPacket } from "../../packets/rpc";
 import { SpawnInnerNetObject } from "../../packets/gameData/types";
+import { MessageWriter } from "../../../util/hazelMessage";
 import { InnerNetObjectType } from "../types/enums";
 import { DataPacket } from "../../packets/gameData";
 import { Connection } from "../../connection";
 import { BaseInnerNetObject } from "../types";
+import { Tasks } from "../../../static";
 import { PlayerData } from "./types";
 import { EntityGameData } from ".";
-import { Tasks } from "../../../static";
 
 export class InnerGameData extends BaseInnerNetObject {
   constructor(
@@ -65,14 +65,6 @@ export class InnerGameData extends BaseInnerNetObject {
       this.netId,
       new MessageWriter().writeList(this.players, (sub, player) => player.serialize(sub), false),
     );
-  }
-
-  setData(packet: MessageReader | MessageWriter): void {
-    MessageReader.fromRawBytes(packet.getBuffer()).readList(sub => {
-      const player = PlayerData.deserialize(sub, this.parent.lobby.getLevel());
-
-      this.players[player.id] = player;
-    }, false);
   }
 
   serializeSpawn(): SpawnInnerNetObject {
