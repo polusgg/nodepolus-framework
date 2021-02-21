@@ -79,8 +79,8 @@ export class InternalLobby implements LobbyInstance {
 
   constructor(
     private readonly server: Server,
-    private readonly address: string,
-    private readonly port: number,
+    private readonly address: string = server.getDefaultLobbyAddress(),
+    private readonly port: number = server.getDefaultLobbyPort(),
     private readonly startTimerDuration: number = server.getDefaultLobbyStartTimerDuration(),
     private readonly timeToJoinUntilClosed: number = server.getDefaultLobbyTimeToJoinUntilClosed(),
     private readonly timeToStartUntilClosed: number = server.getDefaultLobbyTimeToStartUntilClosed(),
