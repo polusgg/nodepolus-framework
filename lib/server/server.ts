@@ -162,27 +162,18 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @param connectionInfo - The ConnectionInfo describing the connection that will be returned
    * @returns A connection described by `connectionInfo`
    */
-  getConnection(connectionInfo: string | ConnectionInfo): Connection {
-    let info: ConnectionInfo;
-    let identifier: string;
-
-    if (typeof connectionInfo != "string") {
-      info = connectionInfo;
-      identifier = info.toString();
-    } else {
-      info = ConnectionInfo.fromString(connectionInfo);
-      identifier = connectionInfo;
-    }
-
+  getConnection(connectionInfo: ConnectionInfo): Connection {
+    const identifier = connectionInfo.toString();
     let connection = this.connections.get(identifier);
 
     if (connection) {
       return connection;
     }
 
-    connection = this.initializeConnection(info);
-
-    this.connections.set(identifier, connection);
+    this.connections.set(
+      identifier,
+      connection = this.initializeConnection(connectionInfo),
+    );
 
     return connection;
   }
@@ -565,6 +556,10 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
     switch (packet.type) {
       case RootPacketType.HostGame: {
+        if (sender.lobby !== undefined) {
+          return;
+        }
+
         this.getLogger().verbose("Connection %s trying to host lobby", sender);
 
         if (this.lobbies.length >= this.getMaxLobbies()) {
@@ -617,6 +612,10 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         break;
       }
       case RootPacketType.JoinGame: {
+        if (sender.lobby !== undefined) {
+          return;
+        }
+
         const lobbyCode = (packet as JoinGameRequestPacket).lobbyCode;
         const event = new ServerLobbyJoinEvent(sender, lobbyCode, this.lobbyMap.get(lobbyCode));
 
@@ -642,6 +641,10 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         break;
       }
       case RootPacketType.GetGameList: {
+        if (sender.lobby !== undefined) {
+          return;
+        }
+
         const request = packet as GetGameListRequestPacket;
         const levels = request.options.getLevels();
         const languages = request.options.getLanguages();

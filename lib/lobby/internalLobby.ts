@@ -65,6 +65,7 @@ export class InternalLobby implements LobbyInstance {
   private readonly connections: Connection[] = [];
   private readonly gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
   private readonly metadata: Map<string, unknown> = new Map();
+  private readonly logger: Logger;
 
   private joinTimer?: NodeJS.Timeout;
   private startTimer?: NodeJS.Timeout;
@@ -91,10 +92,12 @@ export class InternalLobby implements LobbyInstance {
         this.close();
       }, this.timeToJoinUntilClosed * 1000);
     }
+
+    this.logger = this.server.getLogger(`Lobby ${this.code}`);
   }
 
   getLogger(): Logger {
-    return this.server.getLogger(`Lobby ${this.code}`);
+    return this.logger;
   }
 
   getServer(): Server {
@@ -423,7 +426,7 @@ export class InternalLobby implements LobbyInstance {
         this.lobbyBehaviour = entity as EntityLobbyBehaviour;
         break;
       case SpawnType.PlayerControl:
-        this.getLogger().warn("Use LobbyInstance#spawnPlayer() to spawn a player");
+        this.logger.warn("Use LobbyInstance#spawnPlayer() to spawn a player");
 
         return;
       default:
@@ -788,7 +791,7 @@ export class InternalLobby implements LobbyInstance {
    * @param connection - The connection that is joining the lobby
    */
   async handleJoin(connection: Connection): Promise<void> {
-    this.getLogger().verbose("Connection %s joining", connection);
+    this.logger.verbose("Connection %s joining", connection);
 
     if (this.connections.indexOf(connection) == -1) {
       const count = this.connections.length;
@@ -799,14 +802,14 @@ export class InternalLobby implements LobbyInstance {
         await this.server.emit("server.lobby.join.refused", event);
 
         if (!event.isCancelled()) {
-          this.getLogger().verbose("Preventing connection %s from joining full lobby", connection);
+          this.logger.verbose("Preventing connection %s from joining full lobby", connection);
 
           connection.writeReliable(new JoinGameErrorPacket(event.getDisconnectReason()));
 
           return;
         }
 
-        this.getLogger().verbose("Allowing connection %s to join full lobby", connection);
+        this.logger.verbose("Allowing connection %s to join full lobby", connection);
       }
     }
 
@@ -853,8 +856,6 @@ export class InternalLobby implements LobbyInstance {
         this.setGameTag(data.tag, data.value);
         break;
       }
-      case RootPacketType.EndGame:
-        break;
       case RootPacketType.GameData:
         // fallthrough
       case RootPacketType.GameDataTo: {
@@ -877,24 +878,27 @@ export class InternalLobby implements LobbyInstance {
       case RootPacketType.KickPlayer: {
         const data = packet as KickPlayerPacket;
         const id = data.kickedClientId;
-        const con = this.findConnection(id);
+        const connection = this.findConnection(id);
 
-        if (!con) {
-          throw new Error(`KickPlayer sent for unknown client: ${id}`);
+        if (!connection) {
+          this.logger.warn(`KickPlayer sent for unknown client: ${id}`);
+
+          return;
         }
 
         if (sender.isActingHost()) {
-          con.sendKick(data.banned, this.findPlayerByConnection(sender), data.disconnectReason);
+          connection.sendKick(data.banned, this.findPlayerByConnection(sender), data.disconnectReason);
         }
         break;
       }
+      case RootPacketType.EndGame:
+        break;
       case RootPacketType.RemoveGame:
         break;
       case RootPacketType.RemovePlayer:
         break;
-      case RootPacketType.StartGame: {
+      case RootPacketType.StartGame:
         break;
-      }
       case RootPacketType.WaitForHost:
         break;
       case RootPacketType.JoinGame:
