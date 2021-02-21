@@ -50,7 +50,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
 
       if (player) {
         player.kick(DisconnectReason.kicked());
-        (this.parent.lobby as InternalLobby).sendRootGamePacket(new GameDataPacket([this.getData()], this.parent.lobby.getCode()), sendTo);
+        (this.parent.lobby as InternalLobby).sendRootGamePacket(new GameDataPacket([this.serializeData()], this.parent.lobby.getCode()), sendTo);
       }
     } else {
       this.votes.set(target.entity.owner, votes);
@@ -106,7 +106,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     }
   }
 
-  getData(): DataPacket {
+  serializeData(): DataPacket {
     const writer = new MessageWriter();
 
     writer.writeList(this.votes.entries(), (sub, item) => {
@@ -138,7 +138,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
   serializeSpawn(): SpawnInnerNetObject {
     return new SpawnInnerNetObject(
       this.netId,
-      new MessageWriter().writeBytes(this.getData().data),
+      new MessageWriter().writeBytes(this.serializeData().data),
     );
   }
 
@@ -157,7 +157,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     if (index > -1) {
       votes.splice(index, 1);
       this.votes.set(targetClientId, votes);
-      (this.parent.lobby as InternalLobby).sendRootGamePacket(new GameDataPacket([this.getData()], this.parent.lobby.getCode()), sendTo);
+      (this.parent.lobby as InternalLobby).sendRootGamePacket(new GameDataPacket([this.serializeData()], this.parent.lobby.getCode()), sendTo);
     }
   }
 }

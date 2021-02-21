@@ -15,7 +15,7 @@ export abstract class BaseInnerNetObject {
 
   abstract clone(): BaseInnerNetObject;
 
-  abstract getData(old: BaseInnerNetObject): DataPacket;
+  abstract serializeData(old: BaseInnerNetObject): DataPacket;
 
   abstract setData(packet: MessageReader | MessageWriter): void;
 
@@ -27,7 +27,7 @@ export abstract class BaseInnerNetObject {
     if (arg0 instanceof MessageReader || arg0 instanceof MessageWriter) {
       this.setData(arg0);
     } else {
-      return this.getData(arg0);
+      return this.serializeData(arg0);
     }
   }
 

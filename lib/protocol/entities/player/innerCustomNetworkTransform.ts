@@ -51,7 +51,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     this.sendRpcPacket(new SnapToPacket(this.position, this.sequenceId), sendTo);
   }
 
-  getData(): DataPacket {
+  serializeData(): DataPacket {
     return new DataPacket(
       this.netId,
       new MessageWriter()

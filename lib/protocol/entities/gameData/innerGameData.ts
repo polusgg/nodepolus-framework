@@ -60,7 +60,7 @@ export class InnerGameData extends BaseInnerNetObject {
   }
 
   // TODO: compare players and only send those that have updated
-  getData(): DataPacket {
+  serializeData(): DataPacket {
     return new DataPacket(
       this.netId,
       new MessageWriter().writeList(this.players, (sub, player) => player.serialize(sub), false),

@@ -716,7 +716,7 @@ export class InternalLobby implements LobbyInstance {
       }
 
       this.sendRootGamePacket(new GameDataPacket([
-        this.meetingHud.meetingHud.getData(oldMeetingHud),
+        this.meetingHud.meetingHud.serializeData(oldMeetingHud),
       ], this.code));
       this.meetingHud.meetingHud.clearVote(votesToClear);
     }

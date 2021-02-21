@@ -13,7 +13,7 @@ export class InnerLobbyBehaviour extends BaseInnerNetObject {
     super(InnerNetObjectType.LobbyBehaviour, netId, parent);
   }
 
-  getData(): DataPacket {
+  serializeData(): DataPacket {
     return new DataPacket(this.netId, new MessageWriter());
   }
 

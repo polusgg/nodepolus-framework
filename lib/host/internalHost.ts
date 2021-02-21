@@ -1148,9 +1148,9 @@ export class InternalHost implements HostInstance {
 
     movingPlatform.sequenceId++;
 
-    const data = shipStatus.getShipStatus().getData(oldData);
-
-    this.lobby.sendRootGamePacket(new GameDataPacket([data], this.lobby.getCode()));
+    this.lobby.sendRootGamePacket(new GameDataPacket([
+      shipStatus.getShipStatus().serializeData(oldData),
+    ], this.lobby.getCode()));
   }
 
   /**

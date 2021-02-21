@@ -44,7 +44,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     this.sendRpcPacket(new ClearVotePacket(), promises);
   }
 
-  getData(old: InnerMeetingHud): DataPacket {
+  serializeData(old: InnerMeetingHud): DataPacket {
     const writer = new MessageWriter();
     const dirtyBits = this.serializeStatesToDirtyBits(old.playerStates);
 

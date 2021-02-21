@@ -74,7 +74,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   repairSystem(_systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
 
-  getData(old: BaseInnerShipStatus): DataPacket {
+  serializeData(old: BaseInnerShipStatus): DataPacket {
     const changedSystemTypes: SystemType[] = this.systems.map((currentSystem, systemIndex) => {
       const oldSystem = old.systems[systemIndex];
 

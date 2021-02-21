@@ -98,7 +98,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     this.sendRpcPacket(new ClimbLadderPacket(ladderSize, ladderDirection), sendTo);
   }
 
-  getData(): DataPacket {
+  serializeData(): DataPacket {
     return new DataPacket(this.netId, new MessageWriter());
   }
 

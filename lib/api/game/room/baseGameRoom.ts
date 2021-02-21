@@ -53,8 +53,8 @@ export class BaseGameRoom {
       throw new Error("Attempted to update ShipStatus but failed to first make a backup");
     }
 
-    const data = shipStatus.getShipStatus().getData(this.shipStatusBackup);
-
-    (this.game.lobby as InternalLobby).sendRootGamePacket(new GameDataPacket([data], this.game.lobby.getCode()));
+    (this.game.lobby as InternalLobby).sendRootGamePacket(new GameDataPacket([
+      shipStatus.getShipStatus().serializeData(this.shipStatusBackup),
+    ], this.game.lobby.getCode()));
   }
 }

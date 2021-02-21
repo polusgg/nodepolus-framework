@@ -260,7 +260,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SendChatNotePacket(playerId, chatNoteType), sendTo);
   }
 
-  getData(): DataPacket {
+  serializeData(): DataPacket {
     return new DataPacket(
       this.netId,
       new MessageWriter().writeByte(this.playerId),
