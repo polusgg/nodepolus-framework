@@ -36,8 +36,8 @@ export class InnerMeetingHud extends BaseInnerNetObject {
       const connection = event.getPlayer().getConnection();
       const state = this.playerStates[event.getPlayer().getId()];
 
-      state.didVote = false;
-      state.votedFor = -1;
+      state.setVoted(false);
+      state.setVotedFor(-1);
 
       return connection;
     }).filter(notUndefined);

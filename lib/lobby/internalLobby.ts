@@ -702,18 +702,18 @@ export class InternalLobby implements LobbyInstance {
         const state = this.meetingHud.getMeetingHud().playerStates[i];
 
         if (i == disconnectedId) {
-          state.isDead = true;
-          state.votedFor = -1;
-          state.didVote = false;
-        } else if (state.votedFor == disconnectedId) {
+          state.setDead(true);
+          state.setVotedFor(-1);
+          state.setVoted(false);
+        } else if (state.getVotedFor() == disconnectedId) {
           const votingPlayer = this.findPlayerByPlayerId(i);
 
           if (votingPlayer) {
             votesToClear.push(votingPlayer);
           }
 
-          state.votedFor = -1;
-          state.didVote = false;
+          state.setVotedFor(-1);
+          state.setVoted(false);
         }
       }
 

@@ -3,14 +3,10 @@ import { VoteStateMask } from "../../../../types/enums";
 
 export class VoteState {
   constructor(
-    // TODO: Make protected with getter/setter
-    public didReport: boolean,
-    // TODO: Make protected with getter/setter
-    public didVote: boolean,
-    // TODO: Make protected with getter/setter
-    public isDead: boolean,
-    // TODO: Make protected with getter/setter
-    public votedFor: number,
+    protected reported: boolean,
+    protected voted: boolean,
+    protected dead: boolean,
+    protected votedFor: number,
   ) {}
 
   static deserialize(reader: MessageReader): VoteState {
@@ -26,17 +22,57 @@ export class VoteState {
 
   serialize(writer: MessageWriter): void {
     writer.writeByte(
-      (this.didReport ? VoteStateMask.DidReport : 0) |
-      (this.didVote ? VoteStateMask.DidVote : 0) |
-      (this.isDead ? VoteStateMask.IsDead : 0) |
-      (this.didVote ? ((this.votedFor + 1) & VoteStateMask.VotedFor) : 15),
+      (this.reported ? VoteStateMask.DidReport : 0) |
+      (this.voted ? VoteStateMask.DidVote : 0) |
+      (this.dead ? VoteStateMask.IsDead : 0) |
+      (this.voted ? ((this.votedFor + 1) & VoteStateMask.VotedFor) : 15),
     );
+  }
+
+  didReport(): boolean {
+    return this.reported;
+  }
+
+  setReported(reported: boolean): this {
+    this.reported = reported;
+
+    return this;
+  }
+
+  didVote(): boolean {
+    return this.voted;
+  }
+
+  setVoted(voted: boolean): this {
+    this.voted = voted;
+
+    return this;
+  }
+
+  isDead(): boolean {
+    return this.dead;
+  }
+
+  setDead(dead: boolean): this {
+    this.dead = dead;
+
+    return this;
+  }
+
+  getVotedFor(): number {
+    return this.votedFor;
+  }
+
+  setVotedFor(votedFor: number): this {
+    this.votedFor = votedFor;
+
+    return this;
   }
 
   /**
    * Gets a clone of the VoteState instance.
    */
   clone(): VoteState {
-    return new VoteState(this.didReport, this.didVote, this.isDead, this.votedFor);
+    return new VoteState(this.reported, this.voted, this.dead, this.votedFor);
   }
 }

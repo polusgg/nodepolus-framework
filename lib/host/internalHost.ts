@@ -408,7 +408,7 @@ export class InternalHost implements HostInstance {
       const player = players[i];
       const state = meetingHud!.getMeetingHud().playerStates[player.getId()];
 
-      if (state.isDead) {
+      if (state.isDead()) {
         continue;
       }
 
@@ -418,11 +418,11 @@ export class InternalHost implements HostInstance {
 
       const vote = voteResults.get(player.getId())!;
 
-      if (state.didVote) {
-        const votedFor = fetchPlayerById(state.votedFor);
+      if (state.didVote()) {
+        const votedFor = fetchPlayerById(state.getVotedFor());
 
         if (!votedFor) {
-          if (state.votedFor == -1) {
+          if (state.getVotedFor() == -1) {
             vote.setSkipping();
           } else {
             voteResults.delete(player.getId());
@@ -1047,15 +1047,15 @@ export class InternalHost implements HostInstance {
     const states = meetingHud.getMeetingHud().playerStates;
     const id = event.getSuspect()?.getId();
 
-    states[event.getVoter().getId()].votedFor = id !== undefined ? id : -1;
-    states[event.getVoter().getId()].didVote = true;
+    states[event.getVoter().getId()].setVotedFor(id !== undefined ? id : -1);
+    states[event.getVoter().getId()].setVoted(true);
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.getMeetingHud().serializeData(oldMeetingHud),
       new RpcPacket(player.entity.getPlayerControl().getNetId(), new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
     ], this.lobby.getCode()));
 
-    if (this.meetingHudTimeout && states.every(p => p.didVote || p.isDead)) {
+    if (this.meetingHudTimeout && states.every(p => p.didVote() || p.isDead())) {
       this.endMeeting();
       clearInterval(this.meetingHudTimeout);
     }
