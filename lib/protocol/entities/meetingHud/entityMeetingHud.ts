@@ -5,12 +5,6 @@ import { LobbyInstance } from "../../../api/lobby";
 import { InnerMeetingHud } from ".";
 
 export class EntityMeetingHud extends BaseInnerNetEntity {
-  public innerNetObjects: [ InnerMeetingHud ];
-
-  get meetingHud(): InnerMeetingHud {
-    return this.innerNetObjects[0];
-  }
-
   constructor(
     lobby: LobbyInstance,
     meetingHudNetId: number = lobby.getHostInstance().getNextNetId(),
@@ -22,8 +16,12 @@ export class EntityMeetingHud extends BaseInnerNetEntity {
     ];
   }
 
+  getMeetingHud(): InnerMeetingHud {
+    return this.getObject(0);
+  }
+
   despawn(): void {
-    this.lobby.despawn(this.meetingHud);
+    this.lobby.despawn(this.getMeetingHud());
     this.lobby.deleteMeetingHud();
   }
 }

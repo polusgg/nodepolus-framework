@@ -384,7 +384,7 @@ export class LobbySettings {
         sendToConnections = this.lobby.getConnections();
       }
 
-      (this.lobby.getPlayers()[0] as InternalPlayer).entity.playerControl.syncSettings(customOptions, sendToConnections);
+      (this.lobby.getPlayers()[0] as InternalPlayer).entity.getPlayerControl().syncSettings(customOptions, sendToConnections);
     } else {
       this.lobby.getLogger().warn("Attempted to sync lobby settings without a player");
     }

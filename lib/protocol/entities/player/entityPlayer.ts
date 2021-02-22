@@ -6,20 +6,6 @@ import { InternalLobby } from "../../../lobby";
 import { Vector2 } from "../../../types";
 
 export class EntityPlayer extends BaseInnerNetEntity {
-  public innerNetObjects: [ InnerPlayerControl, InnerPlayerPhysics, InnerCustomNetworkTransform ];
-
-  get playerControl(): InnerPlayerControl {
-    return this.innerNetObjects[0];
-  }
-
-  get playerPhysics(): InnerPlayerPhysics {
-    return this.innerNetObjects[1];
-  }
-
-  get customNetworkTransform(): InnerCustomNetworkTransform {
-    return this.innerNetObjects[2];
-  }
-
   constructor(
     lobby: LobbyInstance,
     owner: number,
@@ -40,6 +26,18 @@ export class EntityPlayer extends BaseInnerNetEntity {
       new InnerPlayerPhysics(this, playerPhysicsNetId),
       new InnerCustomNetworkTransform(this, position, velocity, sequenceId, customNetworkTransformNetId),
     ];
+  }
+
+  getPlayerControl(): InnerPlayerControl {
+    return this.getObject(0);
+  }
+
+  getPlayerPhysics(): InnerPlayerPhysics {
+    return this.getObject(1);
+  }
+
+  getCustomNetworkTransform(): InnerCustomNetworkTransform {
+    return this.getObject(2);
   }
 
   despawn(): void {

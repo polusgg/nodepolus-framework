@@ -245,23 +245,24 @@ export class InternalLobby implements LobbyInstance {
 
   findInnerNetObject(netId: number): BaseInnerNetObject | undefined {
     switch (netId) {
-      case this.lobbyBehaviour?.lobbyBehaviour.netId:
-        return this.lobbyBehaviour!.lobbyBehaviour;
-      case this.gameData?.gameData.netId:
-        return this.gameData!.gameData;
-      case this.gameData?.voteBanSystem.netId:
-        return this.gameData!.voteBanSystem;
+      case this.lobbyBehaviour?.getLobbyBehaviour().netId:
+        return this.lobbyBehaviour!.getLobbyBehaviour();
+      case this.gameData?.getGameData().netId:
+        return this.gameData!.getGameData();
+      case this.gameData?.getVoteBanSystem().netId:
+        return this.gameData!.getVoteBanSystem();
       case this.shipStatus?.getShipStatus().netId:
         return this.shipStatus!.getShipStatus();
-      case this.meetingHud?.meetingHud.netId:
-        return this.meetingHud!.meetingHud;
+      case this.meetingHud?.getMeetingHud().netId:
+        return this.meetingHud!.getMeetingHud();
     }
 
     for (let i = 0; i < this.players.length; i++) {
       const player = this.players[i];
+      const objects = player.entity.getObjects();
 
-      for (let j = 0; j < player.entity.innerNetObjects.length; j++) {
-        const object = player.entity.innerNetObjects[j];
+      for (let j = 0; j < objects.length; j++) {
+        const object = objects[j];
 
         if (notUndefined(object) && object.netId == netId) {
           return object;
@@ -279,7 +280,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   findPlayerByNetId(netId: number): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.innerNetObjects.some(object => object.netId == netId));
+    return this.players.find(player => player.entity.getObjects().some(object => object.netId == netId));
   }
 
   findPlayerByConnection(connection: Connection): InternalPlayer | undefined {
@@ -436,8 +437,8 @@ export class InternalLobby implements LobbyInstance {
   }
 
   spawnPlayer(player: EntityPlayer, playerData: PlayerData): PlayerInstance {
-    if (player.playerControl.playerId != playerData.id) {
-      throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.playerControl.playerId}) != PlayerData(${playerData.id})`);
+    if (player.getPlayerControl().playerId != playerData.id) {
+      throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.getPlayerControl().playerId}) != PlayerData(${playerData.id})`);
     }
 
     const clientIdInUse = !!this.findPlayerByClientId(player.owner);
@@ -452,8 +453,8 @@ export class InternalLobby implements LobbyInstance {
     this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
 
     if (this.gameData) {
-      this.gameData.gameData.players.push(playerData);
-      this.sendRpcPacket(this.gameData.gameData, new UpdateGameDataPacket([playerData]));
+      this.gameData.getGameData().players.push(playerData);
+      this.sendRpcPacket(this.gameData.getGameData(), new UpdateGameDataPacket([playerData]));
     }
 
     return playerInstance;
@@ -502,7 +503,7 @@ export class InternalLobby implements LobbyInstance {
         [],
       ));
 
-      this.sendRpcPacket(fakePlayer.playerControl, new SendChatPacket(message.toString()));
+      this.sendRpcPacket(fakePlayer.getPlayerControl(), new SendChatPacket(message.toString()));
       fakePlayer.despawn();
     } else {
       for (let i = 0; i < this.players.length; i++) {
@@ -517,15 +518,15 @@ export class InternalLobby implements LobbyInstance {
           playerData.name = name;
 
           connection.writeReliable(new GameDataPacket([
-            new RpcPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([playerData])),
-            new RpcPacket(player.entity.playerControl.netId, new SendChatPacket(message.toString())),
+            new RpcPacket(this.gameData.getGameData().netId, new UpdateGameDataPacket([playerData])),
+            new RpcPacket(player.entity.getPlayerControl().netId, new SendChatPacket(message.toString())),
           ], this.code));
 
           playerData.color = oldColor;
           playerData.name = oldName;
 
           connection.writeReliable(new GameDataPacket([
-            new RpcPacket(this.gameData.gameData.netId, new UpdateGameDataPacket([playerData])),
+            new RpcPacket(this.gameData.getGameData().netId, new UpdateGameDataPacket([playerData])),
           ], this.code));
         }
       }
@@ -692,12 +693,12 @@ export class InternalLobby implements LobbyInstance {
     }
 
     if (this.meetingHud && disconnectingPlayerIndex) {
-      const oldMeetingHud = this.meetingHud.meetingHud.clone();
+      const oldMeetingHud = this.meetingHud.getMeetingHud().clone();
       const disconnectedId = this.players[disconnectingPlayerIndex].getId();
       const votesToClear: InternalPlayer[] = [];
 
-      for (let i = 0; i < this.meetingHud.meetingHud.playerStates.length; i++) {
-        const state = this.meetingHud.meetingHud.playerStates[i];
+      for (let i = 0; i < this.meetingHud.getMeetingHud().playerStates.length; i++) {
+        const state = this.meetingHud.getMeetingHud().playerStates[i];
 
         if (i == disconnectedId) {
           state.isDead = true;
@@ -716,9 +717,9 @@ export class InternalLobby implements LobbyInstance {
       }
 
       this.sendRootGamePacket(new GameDataPacket([
-        this.meetingHud.meetingHud.serializeData(oldMeetingHud),
+        this.meetingHud.getMeetingHud().serializeData(oldMeetingHud),
       ], this.code));
-      this.meetingHud.meetingHud.clearVote(votesToClear);
+      this.meetingHud.getMeetingHud().clearVote(votesToClear);
     }
 
     if (disconnectingPlayerIndex) {

@@ -5,12 +5,6 @@ import { LobbyInstance } from "../../../api/lobby";
 import { InnerLobbyBehaviour } from ".";
 
 export class EntityLobbyBehaviour extends BaseInnerNetEntity {
-  public innerNetObjects: [ InnerLobbyBehaviour ];
-
-  get lobbyBehaviour(): InnerLobbyBehaviour {
-    return this.innerNetObjects[0];
-  }
-
   constructor(
     lobby: LobbyInstance,
     lobbyBehaviourNetId: number = lobby.getHostInstance().getNextNetId(),
@@ -22,8 +16,12 @@ export class EntityLobbyBehaviour extends BaseInnerNetEntity {
     ];
   }
 
+  getLobbyBehaviour(): InnerLobbyBehaviour {
+    return this.getObject(0);
+  }
+
   despawn(): void {
-    this.lobby.despawn(this.lobbyBehaviour);
+    this.lobby.despawn(this.getLobbyBehaviour());
     this.lobby.deleteLobbyBehaviour();
   }
 }

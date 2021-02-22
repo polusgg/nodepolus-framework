@@ -6,16 +6,6 @@ import { LobbyInstance } from "../../../api/lobby";
 import { PlayerData } from "./types";
 
 export class EntityGameData extends BaseInnerNetEntity {
-  public innerNetObjects: [ InnerGameData, InnerVoteBanSystem ];
-
-  get gameData(): InnerGameData {
-    return this.innerNetObjects[0];
-  }
-
-  get voteBanSystem(): InnerVoteBanSystem {
-    return this.innerNetObjects[1];
-  }
-
   constructor(
     lobby: LobbyInstance,
     players: PlayerData[] = [],
@@ -30,8 +20,16 @@ export class EntityGameData extends BaseInnerNetEntity {
     ];
   }
 
+  getGameData(): InnerGameData {
+    return this.getObject(0);
+  }
+
+  getVoteBanSystem(): InnerVoteBanSystem {
+    return this.getObject(1);
+  }
+
   despawn(): void {
-    this.lobby.despawn(this.gameData);
+    this.lobby.despawn(this.getGameData());
     this.lobby.deleteGameData();
   }
 }

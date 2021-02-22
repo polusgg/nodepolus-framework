@@ -38,7 +38,7 @@ export class InternalPlayer implements PlayerInstance {
     public entity: EntityPlayer,
     private readonly connection?: Connection,
   ) {
-    this.id = entity.playerControl.playerId;
+    this.id = entity.getPlayerControl().playerId;
     this.name = TextComponent.from(connection?.getName() ?? "");
   }
 
@@ -95,7 +95,7 @@ export class InternalPlayer implements PlayerInstance {
       this.name = TextComponent.from(name);
     }
 
-    this.entity.playerControl.setName(name.toString(), this.lobby.getConnections());
+    this.entity.getPlayerControl().setName(name.toString(), this.lobby.getConnections());
 
     return this;
   }
@@ -105,7 +105,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   setColor(color: PlayerColor): this {
-    this.entity.playerControl.setColor(color, this.lobby.getConnections());
+    this.entity.getPlayerControl().setColor(color, this.lobby.getConnections());
 
     return this;
   }
@@ -115,7 +115,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   setHat(hat: PlayerHat): this {
-    this.entity.playerControl.setHat(hat, this.lobby.getConnections());
+    this.entity.getPlayerControl().setHat(hat, this.lobby.getConnections());
 
     return this;
   }
@@ -125,7 +125,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   setPet(pet: PlayerPet): this {
-    this.entity.playerControl.setPet(pet, this.lobby.getConnections());
+    this.entity.getPlayerControl().setPet(pet, this.lobby.getConnections());
 
     return this;
   }
@@ -135,7 +135,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   setSkin(skin: PlayerSkin): this {
-    this.entity.playerControl.setSkin(skin, this.lobby.getConnections());
+    this.entity.getPlayerControl().setSkin(skin, this.lobby.getConnections());
 
     return this;
   }
@@ -172,7 +172,7 @@ export class InternalPlayer implements PlayerInstance {
     // TODO: Check end state
     // TODO: Send UpdateGameData packet
 
-    this.entity.playerControl.sendRpcPacket(
+    this.entity.getPlayerControl().sendRpcPacket(
       new SetInfectedPacket([this.id]),
       this.lobby.getConnections(),
     );
@@ -249,13 +249,13 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   completeTaskAtIndex(taskIndex: number): this {
-    this.entity.playerControl.completeTask(taskIndex, this.lobby.getConnections());
+    this.entity.getPlayerControl().completeTask(taskIndex, this.lobby.getConnections());
 
     return this;
   }
 
   completeTask(task: LevelTask): this {
-    this.entity.playerControl.completeTask(this.getTasks().findIndex(t => t[0] == task), this.lobby.getConnections());
+    this.entity.getPlayerControl().completeTask(this.getTasks().findIndex(t => t[0] == task), this.lobby.getConnections());
 
     return this;
   }
@@ -283,31 +283,31 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getPosition(): Vector2 {
-    return this.entity.customNetworkTransform.position;
+    return this.entity.getCustomNetworkTransform().position;
   }
 
   setPosition(position: Vector2, reason: TeleportReason = TeleportReason.Unknown): this {
-    this.entity.customNetworkTransform.snapTo(position, reason, this.lobby.getConnections());
+    this.entity.getCustomNetworkTransform().snapTo(position, reason, this.lobby.getConnections());
 
     return this;
   }
 
   getVelocity(): Vector2 {
-    return this.entity.customNetworkTransform.velocity;
+    return this.entity.getCustomNetworkTransform().velocity;
   }
 
   getVent(): LevelVent | undefined {
-    return this.entity.playerPhysics.getVent();
+    return this.entity.getPlayerPhysics().getVent();
   }
 
   enterVent(vent: LevelVent): this {
-    this.entity.playerPhysics.enterVent(vent, this.lobby.getConnections());
+    this.entity.getPlayerPhysics().enterVent(vent, this.lobby.getConnections());
 
     return this;
   }
 
   exitVent(vent: LevelVent): this {
-    this.entity.playerPhysics.exitVent(vent, this.lobby.getConnections());
+    this.entity.getPlayerPhysics().exitVent(vent, this.lobby.getConnections());
 
     return this;
   }
@@ -320,25 +320,25 @@ export class InternalPlayer implements PlayerInstance {
   kill(): this {
     const gameData = this.getGameData();
 
-    this.entity.playerControl.exile();
+    this.entity.getPlayerControl().exile();
 
-    gameData.gameData.updateGameData([
+    gameData.getGameData().updateGameData([
       this.getGameDataEntry(),
     ], this.lobby.getConnections());
 
     if (this.isImpostor()) {
       this.lobby.getHostInstance().handleImpostorDeath();
     } else {
-      this.lobby.getHostInstance().handleMurderPlayer(this.entity.playerControl, 0);
+      this.lobby.getHostInstance().handleMurderPlayer(this.entity.getPlayerControl(), 0);
     }
 
     return this;
   }
 
   murder(player: PlayerInstance): this {
-    const playerControl = this.entity.playerControl;
+    const playerControl = this.entity.getPlayerControl();
 
-    playerControl.murderPlayer((player as InternalPlayer).entity.playerControl.netId, this.lobby.getConnections());
+    playerControl.murderPlayer((player as InternalPlayer).entity.getPlayerControl().netId, this.lobby.getConnections());
     this.lobby.getHostInstance().handleMurderPlayer(playerControl, 0);
 
     return this;
@@ -358,8 +358,8 @@ export class InternalPlayer implements PlayerInstance {
     const entity = new EntityPlayer(
       this.lobby,
       this.entity.owner,
-      this.entity.customNetworkTransform.position,
-      this.entity.customNetworkTransform.velocity,
+      this.entity.getCustomNetworkTransform().position,
+      this.entity.getCustomNetworkTransform().velocity,
       this.getId()!,
       false,
       SpawnFlag.None,
@@ -372,9 +372,9 @@ export class InternalPlayer implements PlayerInstance {
     const oldName = this.getName();
 
     this.lobby.ignoredNetIds.push(
-      this.entity.playerControl.netId,
-      this.entity.playerPhysics.netId,
-      this.entity.customNetworkTransform.netId,
+      this.entity.getPlayerControl().netId,
+      this.entity.getPlayerPhysics().netId,
+      this.entity.getCustomNetworkTransform().netId,
     );
 
     this.setName("");
@@ -396,9 +396,9 @@ export class InternalPlayer implements PlayerInstance {
 
       if (connection.id != this.entity.owner) {
         connection.writeReliable(new GameDataPacket([
-          new DespawnPacket(this.entity.playerControl.netId),
-          new DespawnPacket(this.entity.playerPhysics.netId),
-          new DespawnPacket(this.entity.customNetworkTransform.netId),
+          new DespawnPacket(this.entity.getPlayerControl().netId),
+          new DespawnPacket(this.entity.getPlayerPhysics().netId),
+          new DespawnPacket(this.entity.getCustomNetworkTransform().netId),
         ], this.lobby.getCode()));
       }
     }
@@ -406,7 +406,7 @@ export class InternalPlayer implements PlayerInstance {
     this.getGameDataEntry().isDead = false;
     this.entity = entity;
 
-    gameData.gameData.updateGameData([this.getGameDataEntry()], connections);
+    gameData.getGameData().updateGameData([this.getGameDataEntry()], connections);
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       entity.serializeSpawn(),
@@ -414,13 +414,13 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   sendChat(message: string): this {
-    this.entity.playerControl.sendChat(message, this.lobby.getConnections());
+    this.entity.getPlayerControl().sendChat(message, this.lobby.getConnections());
 
     return this;
   }
 
   startMeeting(victim?: PlayerInstance): this {
-    this.lobby.getHostInstance().handleReportDeadBody(this.entity.playerControl, victim?.getId());
+    this.lobby.getHostInstance().handleReportDeadBody(this.entity.getPlayerControl(), victim?.getId());
 
     return this;
   }
@@ -429,7 +429,7 @@ export class InternalPlayer implements PlayerInstance {
     const meetingHud = this.lobby.getMeetingHud();
 
     if (meetingHud) {
-      meetingHud.meetingHud.castVote(this.id, suspect?.getId() ?? -1);
+      meetingHud.getMeetingHud().castVote(this.id, suspect?.getId() ?? -1);
     }
 
     return this;
@@ -439,32 +439,32 @@ export class InternalPlayer implements PlayerInstance {
     const meetingHud = this.lobby.getMeetingHud();
 
     if (meetingHud) {
-      meetingHud.meetingHud.clearVote([this]);
+      meetingHud.getMeetingHud().clearVote([this]);
     }
 
     return this;
   }
 
   castVotekick(target: PlayerInstance): this {
-    this.getGameData().voteBanSystem.addVote(this, target as InternalPlayer, this.lobby.getConnections());
+    this.getGameData().getVoteBanSystem().addVote(this, target as InternalPlayer, this.lobby.getConnections());
 
     return this;
   }
 
   clearVotekick(target: PlayerInstance): this {
-    this.getGameData().voteBanSystem.clearVote(this, target as InternalPlayer, this.lobby.getConnections());
+    this.getGameData().getVoteBanSystem().clearVote(this, target as InternalPlayer, this.lobby.getConnections());
 
     return this;
   }
 
   clearVotekicksForMe(): this {
-    this.getGameData().voteBanSystem.clearVotesForPlayer(this, this.lobby.getConnections());
+    this.getGameData().getVoteBanSystem().clearVotesForPlayer(this, this.lobby.getConnections());
 
     return this;
   }
 
   clearVotekicksFromMe(): this {
-    this.getGameData().voteBanSystem.clearVotesFromPlayer(this, this.lobby.getConnections());
+    this.getGameData().getVoteBanSystem().clearVotesFromPlayer(this, this.lobby.getConnections());
 
     return this;
   }
@@ -490,7 +490,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getGameDataEntry(): PlayerData {
-    const players = this.getGameData().gameData.players;
+    const players = this.getGameData().getGameData().players;
 
     for (let i = 0; i < players.length; i++) {
       const player = players[i];
@@ -504,7 +504,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   updateGameData(): void {
-    this.getGameData().gameData.updateGameData([this.getGameDataEntry()], this.lobby.getConnections());
+    this.getGameData().getGameData().updateGameData([this.getGameDataEntry()], this.lobby.getConnections());
   }
 
   /**

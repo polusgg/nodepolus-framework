@@ -161,7 +161,7 @@ export class InternalHost implements HostInstance {
       const time = this.secondsUntilStart--;
 
       if (this.lobby.getPlayers().length > 0) {
-        this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacket(
+        this.lobby.getPlayers()[0].entity.getPlayerControl().sendRpcPacket(
           new SetStartCounterPacket(this.counterSequenceId += 5, time),
           this.lobby.getConnections(),
         );
@@ -193,7 +193,7 @@ export class InternalHost implements HostInstance {
     this.secondsUntilStart = -1;
 
     if (this.lobby.getPlayers().length > 0) {
-      this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacket(
+      this.lobby.getPlayers()[0].entity.getPlayerControl().sendRpcPacket(
         new SetStartCounterPacket(this.counterSequenceId += 5, -1),
         this.lobby.getConnections(),
       );
@@ -270,7 +270,7 @@ export class InternalHost implements HostInstance {
       impostors[i].setRole(PlayerRole.Impostor);
     }
 
-    this.lobby.getPlayers()[0].entity.playerControl.sendRpcPacket(
+    this.lobby.getPlayers()[0].entity.getPlayerControl().sendRpcPacket(
       new SetInfectedPacket(impostors.map(player => player.getId())),
       this.lobby.getConnections(),
     );
@@ -379,7 +379,7 @@ export class InternalHost implements HostInstance {
       throw new Error("Attempted to end a meeting without a GameData instance");
     }
 
-    const oldMeetingHud = meetingHud.meetingHud.clone();
+    const oldMeetingHud = meetingHud.getMeetingHud().clone();
     const voteResults: Map<number, VoteResult> = new Map();
     const playerInstanceCache: Map<number, PlayerInstance> = new Map();
     const fetchPlayerById = (playerId: number): PlayerInstance | undefined => {
@@ -406,7 +406,7 @@ export class InternalHost implements HostInstance {
 
     for (let i = 0; i < players.length; i++) {
       const player = players[i];
-      const state = meetingHud!.meetingHud.playerStates[player.getId()];
+      const state = meetingHud!.getMeetingHud().playerStates[player.getId()];
 
       if (state.isDead) {
         continue;
@@ -464,13 +464,13 @@ export class InternalHost implements HostInstance {
       }
     }
 
-    meetingHud.meetingHud.sendRpcPacket(new VotingCompletePacket(
-      meetingHud.meetingHud.playerStates, isTied ? 0xff : (exiledPlayer?.getId() ?? 0xff),
+    meetingHud.getMeetingHud().sendRpcPacket(new VotingCompletePacket(
+      meetingHud.getMeetingHud().playerStates, isTied ? 0xff : (exiledPlayer?.getId() ?? 0xff),
       isTied,
     ), this.lobby.getConnections());
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
-      meetingHud.meetingHud.serializeData(oldMeetingHud),
+      meetingHud.getMeetingHud().serializeData(oldMeetingHud),
     ], this.lobby.getCode()));
 
     setTimeout(async () => {
@@ -487,7 +487,7 @@ export class InternalHost implements HostInstance {
         return;
       }
 
-      meetingHud.meetingHud.sendRpcPacket(new ClosePacket(), this.lobby.getConnections());
+      meetingHud.getMeetingHud().sendRpcPacket(new ClosePacket(), this.lobby.getConnections());
 
       this.lobby.deleteMeetingHud();
 
@@ -590,17 +590,17 @@ export class InternalHost implements HostInstance {
       return;
     }
 
-    const playerIndex = gameData.gameData.players.findIndex(playerData => playerData.id == player.getId());
-    const playerData = gameData.gameData.players[playerIndex];
+    const playerIndex = gameData.getGameData().players.findIndex(playerData => playerData.id == player.getId());
+    const playerData = gameData.getGameData().players[playerIndex];
 
     if (gameState == GameState.Started) {
       playerData.isDisconnected = true;
     } else {
-      gameData.gameData.players.splice(playerIndex, 1);
+      gameData.getGameData().players.splice(playerIndex, 1);
     }
 
-    gameData.gameData.updateGameData(gameData.gameData.players, this.lobby.getConnections());
-    gameData.voteBanSystem.votes.delete(connection.id);
+    gameData.getGameData().updateGameData(gameData.getGameData().players, this.lobby.getConnections());
+    gameData.getVoteBanSystem().votes.delete(connection.id);
 
     if (this.shouldEndGame()) {
       if (playerData.isImpostor) {
@@ -615,7 +615,7 @@ export class InternalHost implements HostInstance {
     const meetingHud = this.lobby.getMeetingHud();
 
     if (meetingHud) {
-      meetingHud.meetingHud.clearVote([player]);
+      meetingHud.getMeetingHud().clearVote([player]);
     }
   }
 
@@ -639,7 +639,7 @@ export class InternalHost implements HostInstance {
     const lobbyBehaviour = this.lobby.getLobbyBehaviour();
 
     if (lobbyBehaviour) {
-      this.lobby.despawn(lobbyBehaviour.lobbyBehaviour);
+      this.lobby.despawn(lobbyBehaviour.getLobbyBehaviour());
     }
 
     switch (this.lobby.getLevel()) {
@@ -699,7 +699,7 @@ export class InternalHost implements HostInstance {
     this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getShipStatus()!.serializeSpawn()], this.lobby.getCode()));
     this.setInfected(this.lobby.getOptions().getImpostorCount());
     this.setTasks();
-    gameData.gameData.updateGameData(gameData.gameData.players, connections);
+    gameData.getGameData().updateGameData(gameData.getGameData().players, connections);
     this.lobby.setGameState(GameState.Started);
 
     const players = this.lobby.getPlayers();
@@ -773,7 +773,7 @@ export class InternalHost implements HostInstance {
       SpawnFlag.IsClientCharacter,
     );
 
-    entity.playerControl.isNew = event.isNew();
+    entity.getPlayerControl().isNew = event.isNew();
 
     const player = new InternalPlayer(this.lobby, entity, sender);
 
@@ -785,15 +785,15 @@ export class InternalHost implements HostInstance {
 
     await this.lobby.sendRootGamePacket(new GameDataPacket([player.entity.serializeSpawn()], this.lobby.getCode()));
 
-    player.entity.playerControl.syncSettings(this.lobby.getOptions(), [sender]);
+    player.entity.getPlayerControl().syncSettings(this.lobby.getOptions(), [sender]);
 
     this.confirmPlayerData(player);
 
-    player.entity.playerControl.isNew = false;
+    player.entity.getPlayerControl().isNew = false;
 
     sender.flush(true);
 
-    gameData.gameData.updateGameData(gameData.gameData.players, this.lobby.getConnections());
+    gameData.getGameData().updateGameData(gameData.getGameData().players, this.lobby.getConnections());
   }
 
   handleCompleteTask(): void {
@@ -803,7 +803,7 @@ export class InternalHost implements HostInstance {
       throw new Error("Received CompleteTask without a GameData instance");
     }
 
-    const crewmates = gameData.gameData.players.filter(playerData => !playerData.isImpostor);
+    const crewmates = gameData.getGameData().players.filter(playerData => !playerData.isImpostor);
 
     if (crewmates.every(crewmate => crewmate.isDoneWithTasks())) {
       this.endGame(GameOverReason.CrewmatesByTask);
@@ -962,12 +962,12 @@ export class InternalHost implements HostInstance {
 
     this.lobby.setMeetingHud(meetingHud);
 
-    meetingHud.meetingHud.playerStates = new Array(gameData.gameData.players.length);
+    meetingHud.getMeetingHud().playerStates = new Array(gameData.getGameData().players.length);
 
-    for (let i = 0; i < gameData.gameData.players.length; i++) {
-      const playerData = gameData.gameData.players[i];
+    for (let i = 0; i < gameData.getGameData().players.length; i++) {
+      const playerData = gameData.getGameData().players[i];
 
-      meetingHud!.meetingHud.playerStates[playerData.id] = new VoteState(
+      meetingHud!.getMeetingHud().playerStates[playerData.id] = new VoteState(
         playerData!.id == event.getCaller().getId(),
         false,
         playerData.isDead || playerData.isDisconnected,
@@ -1037,22 +1037,22 @@ export class InternalHost implements HostInstance {
       const connection = player.getConnection();
 
       if (connection) {
-        meetingHud.meetingHud.sendRpcPacket(new ClearVotePacket(), [connection]);
+        meetingHud.getMeetingHud().sendRpcPacket(new ClearVotePacket(), [connection]);
       }
 
       return;
     }
 
-    const oldMeetingHud = meetingHud.meetingHud.clone();
-    const states = meetingHud.meetingHud.playerStates;
+    const oldMeetingHud = meetingHud.getMeetingHud().clone();
+    const states = meetingHud.getMeetingHud().playerStates;
     const id = event.getSuspect()?.getId();
 
     states[event.getVoter().getId()].votedFor = id !== undefined ? id : -1;
     states[event.getVoter().getId()].didVote = true;
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
-      meetingHud.meetingHud.serializeData(oldMeetingHud),
-      new RpcPacket(player.entity.playerControl.netId, new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
+      meetingHud.getMeetingHud().serializeData(oldMeetingHud),
+      new RpcPacket(player.entity.getPlayerControl().netId, new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
     ], this.lobby.getCode()));
 
     if (this.meetingHudTimeout && states.every(p => p.didVote || p.isDead)) {
@@ -1078,7 +1078,7 @@ export class InternalHost implements HostInstance {
     }
 
     const system = shipStatus.getShipStatus().getSystemFromType(systemId);
-    const player = this.lobby.getPlayers().find(thePlayer => thePlayer.entity.playerControl.netId == playerControlNetId);
+    const player = this.lobby.getPlayers().find(thePlayer => thePlayer.entity.getPlayerControl().netId == playerControlNetId);
     const level = this.lobby.getLevel();
 
     if (!player) {
@@ -1142,7 +1142,7 @@ export class InternalHost implements HostInstance {
     const oldData = shipStatus.getShipStatus().clone();
     const movingPlatform = shipStatus.getShipStatus().systems[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
 
-    movingPlatform.innerPlayerControlNetId = sender.parent.playerControl.netId;
+    movingPlatform.innerPlayerControlNetId = sender.parent.getPlayerControl().netId;
     movingPlatform.side = (movingPlatform.side + 1) % 2;
 
     movingPlatform.sequenceId++;
@@ -1166,7 +1166,7 @@ export class InternalHost implements HostInstance {
       throw new Error("Attempted to set tasks without a GameData instance");
     }
 
-    gameData.gameData.setTasks(player.getId(), tasks.map(task => task.id), this.lobby.getConnections());
+    gameData.getGameData().setTasks(player.getId(), tasks.map(task => task.id), this.lobby.getConnections());
   }
 
   /**
@@ -1251,8 +1251,8 @@ export class InternalHost implements HostInstance {
     const aliveImpostors: PlayerData[] = [];
     const aliveCrewmates: PlayerData[] = [];
 
-    for (let i = 0; i < gameData.gameData.players.length; i++) {
-      const playerData = gameData.gameData.players[i];
+    for (let i = 0; i < gameData.getGameData().players.length; i++) {
+      const playerData = gameData.getGameData().players[i];
 
       if (playerData.isDead || playerData.isDisconnected) {
         continue;
@@ -1282,7 +1282,7 @@ export class InternalHost implements HostInstance {
       throw new Error("isNameTaken called without a GameData instance");
     }
 
-    return !!gameData.gameData.players.find(player => player.name == name);
+    return !!gameData.getGameData().players.find(player => player.name == name);
   }
 
   /**
@@ -1299,7 +1299,7 @@ export class InternalHost implements HostInstance {
       throw new Error("getTakenColors called without a GameData instance");
     }
 
-    return gameData.gameData.players.filter(player => {
+    return gameData.getGameData().players.filter(player => {
       if (player.id === excludePlayerId) {
         return false;
       }
@@ -1326,9 +1326,9 @@ export class InternalHost implements HostInstance {
       throw new Error("confirmPlayerData called without a GameData instance");
     }
 
-    if (!gameData.gameData.players.some(p => p.id == player.entity.playerControl.playerId)) {
+    if (!gameData.getGameData().players.some(p => p.id == player.entity.getPlayerControl().playerId)) {
       const playerData = new PlayerData(
-        player.entity.playerControl.playerId,
+        player.entity.getPlayerControl().playerId,
         "",
         PlayerColor.Red,
         0,
@@ -1340,7 +1340,7 @@ export class InternalHost implements HostInstance {
         [],
       );
 
-      gameData.gameData.updateGameData([playerData], this.lobby.getConnections());
+      gameData.getGameData().updateGameData([playerData], this.lobby.getConnections());
     }
   }
 }

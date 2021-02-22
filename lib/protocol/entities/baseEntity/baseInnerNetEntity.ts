@@ -23,4 +23,16 @@ export abstract class BaseInnerNetEntity {
       this.innerNetObjects.map(object => object.serializeSpawn()),
     );
   }
+
+  getObjects(): BaseInnerNetObject[] {
+    return this.innerNetObjects;
+  }
+
+  getObject<T extends BaseInnerNetObject>(index: number): T {
+    if (index > this.innerNetObjects.length - 1 || index < 0) {
+      throw new Error(`Tried to get an InnerNetObject from an index out of bounds: 0 <= ${index} <= ${this.innerNetObjects.length - 1}`);
+    }
+
+    return this.innerNetObjects[index] as T;
+  }
 }
