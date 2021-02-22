@@ -37,3 +37,5 @@ export { OutboundPacketTransformer } from "./outboundPacketTransformer";
 export { Vector2 } from "./vector2";
 
 export { VoteResult } from "./voteResult";
+
+export { VoteState } from "./voteState";

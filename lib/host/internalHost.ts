@@ -1,6 +1,6 @@
 import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent, LobbyOptionsUpdatedEvent } from "../api/events/lobby";
+import { DisconnectReason, GameOptionsData, Immutable, LevelTask, Vector2, VoteResult, VoteState } from "../types";
 import { BaseInnerShipStatus, InternalSystemType } from "../protocol/entities/shipStatus/baseShipStatus";
-import { DisconnectReason, GameOptionsData, Immutable, LevelTask, Vector2, VoteResult } from "../types";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
 import { EntityPlayer, InnerPlayerControl } from "../protocol/entities/player";
 import { EntityAirshipStatus } from "../protocol/entities/shipStatus/airship";
@@ -11,7 +11,6 @@ import { EntityMiraShipStatus } from "../protocol/entities/shipStatus/mira";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
-import { VoteState } from "../protocol/entities/meetingHud/types";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { RpcPacket } from "../protocol/packets/gameData";

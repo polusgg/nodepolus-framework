@@ -7,8 +7,8 @@ import { MessageWriter } from "../../../util/hazelMessage";
 import { PlayerInstance } from "../../../api/player";
 import { BaseInnerNetObject } from "../baseEntity";
 import { Connection } from "../../connection";
+import { VoteState } from "../../../types";
 import { EntityMeetingHud } from ".";
-import { VoteState } from "./types";
 
 export class InnerMeetingHud extends BaseInnerNetObject {
   // TODO: Make protected with getter/setter

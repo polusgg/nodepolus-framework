@@ -1,1 +1,0 @@
-export { VoteState } from "./voteState";

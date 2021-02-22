@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { VoteState } from "../../entities/meetingHud/types";
 import { RpcPacketType } from "../../../types/enums";
+import { VoteState } from "../../../types";
 import { BaseRpcPacket } from ".";
 
 /**
