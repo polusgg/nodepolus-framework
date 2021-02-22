@@ -61,47 +61,19 @@ const OFFSET: Vector2 = new Vector2(0, 0.3636);
  */
 export class SpawnPositions {
   /**
-   * Gets the spawn radius for The Skeld.
-   */
-  static spawnRadiusForSkeld(): number {
-    return SPAWN_RADIUS_THE_SKELD;
-  }
-
-  /**
-   * Gets the spawn radius for MIRA HQ.
-   */
-  static spawnRadiusForMiraHq(): number {
-    return SPAWN_RADIUS_MIRA_HQ;
-  }
-
-  /**
-   * Gets the spawn radius for Polus.
-   */
-  static spawnRadiusForPolus(): number {
-    return SPAWN_RADIUS_POLUS;
-  }
-
-  /**
    * Gets the spawn radius for Airship.
    */
-  static spawnRadiusForAirship(): number {
-    return SPAWN_RADIUS_AIRSHIP;
-  }
-
-  /**
-   * Gets the spawn radius for Airship.
-   */
-  static spawnRadiusForLevel(level: Level): number {
+  static radiusForLevel(level: Level): number {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return SpawnPositions.spawnRadiusForSkeld();
+        return SPAWN_RADIUS_THE_SKELD;
       case Level.MiraHq:
-        return SpawnPositions.spawnRadiusForMiraHq();
+        return SPAWN_RADIUS_MIRA_HQ;
       case Level.Polus:
-        return SpawnPositions.spawnRadiusForPolus();
+        return SPAWN_RADIUS_POLUS;
       case Level.Airship:
-        return SpawnPositions.spawnRadiusForAirship();
+        return SPAWN_RADIUS_AIRSHIP;
     }
   }
 
@@ -113,34 +85,6 @@ export class SpawnPositions {
   }
 
   /**
-   * Gets the spawn center positions for The Skeld.
-   */
-  static forSkeld(): Readonly<LevelSpawnPositions> {
-    return SPAWN_POSITIONS_SKELD;
-  }
-
-  /**
-   * Gets the spawn center positions for MIRA HQ.
-   */
-  static forMiraHq(): Readonly<LevelSpawnPositions> {
-    return SPAWN_POSITIONS_MIRA_HQ;
-  }
-
-  /**
-   * Gets the spawn center positions for Airship.
-   */
-  static forPolus(): Readonly<LevelSpawnPositions> {
-    return SPAWN_POSITIONS_POLUS;
-  }
-
-  /**
-   * Gets the spawn center positions for Airship.
-   */
-  static forAirship(): Readonly<LevelSpawnPositions> {
-    return SPAWN_POSITIONS_AIRSHIP;
-  }
-
-  /**
    * Gets the spawn center positions for the given level.
    *
    * @param level - The level whose spawn center positions should be returned
@@ -149,13 +93,13 @@ export class SpawnPositions {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return SpawnPositions.forSkeld();
+        return SPAWN_POSITIONS_SKELD;
       case Level.MiraHq:
-        return SpawnPositions.forMiraHq();
+        return SPAWN_POSITIONS_MIRA_HQ;
       case Level.Polus:
-        return SpawnPositions.forPolus();
+        return SPAWN_POSITIONS_POLUS;
       case Level.Airship:
-        return SpawnPositions.forAirship();
+        return SPAWN_POSITIONS_AIRSHIP;
     }
   }
 
@@ -169,50 +113,6 @@ export class SpawnPositions {
   }
 
   /**
-   * Gets a spawn position on The Skeld for a player with the given ID.
-   *
-   * @param playerId - The ID of the player used as a rotation index
-   * @param playerCount - The number of players in the game
-   * @param isSpawn - `true` if the position is for the initial spawn position, `false` if it is for a meeting position
-   */
-  static forPlayerOnSkeld(playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
-    return SpawnPositions.forPlayerOnLevel(Level.TheSkeld, playerId, playerCount, isSpawn);
-  }
-
-  /**
-   * Gets a spawn position on MIRA HQ for a player with the given ID.
-   *
-   * @param playerId - The ID of the player used as a rotation index
-   * @param playerCount - The number of players in the game
-   * @param isSpawn - `true` if the position is for the initial spawn position, `false` if it is for a meeting position
-   */
-  static forPlayerOnMiraHq(playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
-    return SpawnPositions.forPlayerOnLevel(Level.MiraHq, playerId, playerCount, isSpawn);
-  }
-
-  /**
-   * Gets a spawn position on Polus for a player with the given ID.
-   *
-   * @param playerId - The ID of the player used as a rotation index
-   * @param playerCount - The number of players in the game
-   * @param isSpawn - `true` if the position is for the initial spawn position, `false` if it is for a meeting position
-   */
-  static forPlayerOnPolus(playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
-    return SpawnPositions.forPlayerOnLevel(Level.Polus, playerId, playerCount, isSpawn);
-  }
-
-  /**
-   * Gets a spawn position on Airship for a player with the given ID.
-   *
-   * @param playerId - The ID of the player used as a rotation index
-   * @param playerCount - The number of players in the game
-   * @param isSpawn - `true` if the position is for the initial spawn position, `false` if it is for a meeting position
-   */
-  static forPlayerOnAirship(playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
-    return SpawnPositions.forPlayerOnLevel(Level.Airship, playerId, playerCount, isSpawn);
-  }
-
-  /**
    * Gets a spawn position on the given level for a player with the given ID.
    *
    * @param level - The level whose spawn center positions will be used
@@ -223,17 +123,17 @@ export class SpawnPositions {
   static forPlayerOnLevel(level: Level, playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
     if (level == Level.Polus && !isSpawn) {
       if (playerId < 5) {
-        return SpawnPositions.forPolus().meetingOne.add(Vector2.right().multiply(playerId));
+        return SpawnPositions.forLevel(Level.Polus).meetingOne.add(Vector2.right().multiply(playerId));
       }
 
-      return SpawnPositions.forPolus().meetingTwo.add(Vector2.right().multiply(playerId - 5));
+      return SpawnPositions.forLevel(Level.Polus).meetingTwo.add(Vector2.right().multiply(playerId - 5));
     }
 
     const positions = SpawnPositions.forLevel(level);
     const center = isSpawn ? positions.initial : positions.meetingOne;
     const spawnPosition = Vector2.up()
       .rotate((playerId - 1) * (360 / playerCount))
-      .multiply(SpawnPositions.spawnRadiusForLevel(level));
+      .multiply(SpawnPositions.radiusForLevel(level));
 
     return center.add(spawnPosition).add(OFFSET);
   }

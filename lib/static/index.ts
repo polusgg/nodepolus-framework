@@ -1,3 +1,5 @@
+export { Doors } from "./doors";
+
 export { Palette } from "./palette";
 
 export { SpawnPositions } from "./spawnPositions";

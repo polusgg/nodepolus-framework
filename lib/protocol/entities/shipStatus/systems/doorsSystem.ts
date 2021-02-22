@@ -1,14 +1,14 @@
 import { MessageWriter } from "../../../../util/hazelMessage";
+import { Level, SystemType } from "../../../../types/enums";
 import { BaseInnerShipStatus } from "../baseShipStatus";
-import { SystemDoors } from "../../../../static/doors";
-import { SystemType } from "../../../../types/enums";
+import { Doors } from "../../../../static";
 import { BaseSystem } from ".";
 
 export class DoorsSystem extends BaseSystem {
   // TODO: Make protected with getter/setter
   public timers: Map<SystemType, number> = new Map<SystemType, number>();
   // TODO: Make protected with getter/setter
-  public doorStates: boolean[] = new Array(SystemDoors.countForPolus()).fill(true);
+  public doorStates: boolean[] = new Array(Doors.countForLevel(Level.Polus)).fill(true);
 
   constructor(shipStatus: BaseInnerShipStatus) {
     super(shipStatus, SystemType.Doors);
@@ -24,7 +24,7 @@ export class DoorsSystem extends BaseSystem {
       sub.writeFloat32(item[1]);
     });
 
-    for (let i = 0; i < SystemDoors.countForPolus(); i++) {
+    for (let i = 0; i < Doors.countForLevel(Level.Polus); i++) {
       writer.writeBoolean(this.doorStates[i]);
     }
 

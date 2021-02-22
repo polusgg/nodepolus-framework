@@ -1,7 +1,7 @@
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
-import { Game } from "../../game";
 import { VoteResult } from "../../../types";
+import { Game } from "../../game";
 
 /**
  * Fired when the voting phase of a meeting has finished.

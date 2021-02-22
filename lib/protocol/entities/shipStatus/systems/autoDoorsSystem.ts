@@ -1,12 +1,12 @@
 import { MessageWriter } from "../../../../util/hazelMessage";
+import { Level, SystemType } from "../../../../types/enums";
 import { BaseInnerShipStatus } from "../baseShipStatus";
-import { SystemDoors } from "../../../../static/doors";
-import { SystemType } from "../../../../types/enums";
+import { Doors } from "../../../../static";
 import { BaseSystem } from ".";
 
 export class AutoDoorsSystem extends BaseSystem {
   // TODO: Make protected with getter/setter
-  public doors: boolean[] = new Array(SystemDoors.countForSkeld()).fill(true);
+  public doors: boolean[] = new Array(Doors.countForLevel(Level.TheSkeld)).fill(true);
 
   constructor(shipStatus: BaseInnerShipStatus) {
     super(shipStatus, SystemType.Doors);

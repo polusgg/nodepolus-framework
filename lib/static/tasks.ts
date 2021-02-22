@@ -107,34 +107,6 @@ const TASKS_AIRSHIP: readonly Readonly<LevelTask>[] = [
  */
 export class Tasks {
   /**
-   * Gets all static task data for The Skeld.
-   */
-  static forSkeld(): readonly Readonly<LevelTask>[] {
-    return TASKS_THE_SKELD;
-  }
-
-  /**
-   * Gets all static task data for MIRA HQ.
-   */
-  static forMiraHq(): readonly Readonly<LevelTask>[] {
-    return TASKS_MIRA_HQ;
-  }
-
-  /**
-   * Gets all static task data for Polus.
-   */
-  static forPolus(): readonly Readonly<LevelTask>[] {
-    return TASKS_POLUS;
-  }
-
-  /**
-   * Gets all static task data for Airship.
-   */
-  static forAirship(): readonly Readonly<LevelTask>[] {
-    return TASKS_AIRSHIP;
-  }
-
-  /**
    * Gets all static task data for the given level.
    *
    * @param level - The level whose tasks should be returned
@@ -143,54 +115,14 @@ export class Tasks {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return Tasks.forSkeld();
+        return TASKS_THE_SKELD;
       case Level.MiraHq:
-        return Tasks.forMiraHq();
+        return TASKS_MIRA_HQ;
       case Level.Polus:
-        return Tasks.forPolus();
+        return TASKS_POLUS;
       case Level.Airship:
-        return Tasks.forAirship();
+        return TASKS_AIRSHIP;
     }
-  }
-
-  /**
-   * Gets static task data for the given IDs on The Skeld.
-   *
-   * @param ids - The IDs of the tasks that should be returned
-   * @returns An array of tasks whose IDs were included in `ids`
-   */
-  static forSkeldFromId(ids: number[]): readonly Readonly<LevelTask>[] {
-    return Tasks.forSkeld().filter(t => ids.includes(t.id));
-  }
-
-  /**
-   * Gets static task data for the given IDs on MIRA HQ.
-   *
-   * @param ids - The IDs of the tasks that should be returned
-   * @returns An array of tasks whose IDs were included in `ids`
-   */
-  static forMiraHqFromId(ids: number[]): readonly Readonly<LevelTask>[] {
-    return Tasks.forMiraHq().filter(t => ids.includes(t.id));
-  }
-
-  /**
-   * Gets static task data for the given IDs on Polus.
-   *
-   * @param ids - The IDs of the tasks that should be returned
-   * @returns An array of tasks whose IDs were included in `ids`
-   */
-  static forPolusFromId(ids: number[]): readonly Readonly<LevelTask>[] {
-    return Tasks.forPolus().filter(t => ids.includes(t.id));
-  }
-
-  /**
-   * Gets static task data for the given IDs on Airship.
-   *
-   * @param ids - The IDs of the tasks that should be returned
-   * @returns An array of tasks whose IDs were included in `ids`
-   */
-  static forAirshipFromId(ids: number[]): readonly Readonly<LevelTask>[] {
-    return Tasks.forAirship().filter(t => ids.includes(t.id));
   }
 
   /**
@@ -204,13 +136,13 @@ export class Tasks {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return Tasks.forSkeldFromId(ids);
+        return Tasks.forLevel(Level.TheSkeld).filter(t => ids.includes(t.id));
       case Level.MiraHq:
-        return Tasks.forMiraHqFromId(ids);
+        return Tasks.forLevel(Level.MiraHq).filter(t => ids.includes(t.id));
       case Level.Polus:
-        return Tasks.forPolusFromId(ids);
+        return Tasks.forLevel(Level.Polus).filter(t => ids.includes(t.id));
       case Level.Airship:
-        return Tasks.forAirshipFromId(ids);
+        return Tasks.forLevel(Level.Airship).filter(t => ids.includes(t.id));
     }
   }
 }

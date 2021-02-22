@@ -1,7 +1,7 @@
 import { Connection } from "../../../protocol/connection";
 import { DisconnectReason } from "../../../types";
-import { CancellableEvent } from "../types";
 import { LobbyInstance } from "../../lobby";
+import { CancellableEvent } from "../types";
 
 /**
  * Fired when a connection tries to join a lobby that is full.

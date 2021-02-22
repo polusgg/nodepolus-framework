@@ -1,6 +1,6 @@
 import { PlayerInstance } from "../../player";
-import { Game } from "../../game";
 import { VoteResult } from "../../../types";
+import { Game } from "../../game";
 
 /**
  * Fired when the post-meeting exile animation has finished.

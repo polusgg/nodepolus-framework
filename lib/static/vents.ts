@@ -76,34 +76,6 @@ const VENT_COUNT_AIRSHIP: number = VENTS_AIRSHIP.length;
  */
 export class Vents {
   /**
-   * Gets all static vent data for The Skeld.
-   */
-  static forSkeld(): readonly LevelVent[] {
-    return VENTS_THE_SKELD;
-  }
-
-  /**
-   * Gets all static vent data for MIRA HQ.
-   */
-  static forMiraHq(): readonly LevelVent[] {
-    return VENTS_MIRA_HQ;
-  }
-
-  /**
-   * Gets all static vent data for Polus.
-   */
-  static forPolus(): readonly LevelVent[] {
-    return VENTS_POLUS;
-  }
-
-  /**
-   * Gets all static vent data for Airship.
-   */
-  static forAirship(): readonly LevelVent[] {
-    return VENTS_AIRSHIP;
-  }
-
-  /**
    * Gets all static vent data for the given level.
    *
    * @param level - The level whose vents should be returned
@@ -112,166 +84,44 @@ export class Vents {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return Vents.forSkeld();
+        return VENTS_THE_SKELD;
       case Level.MiraHq:
-        return Vents.forMiraHq();
+        return VENTS_MIRA_HQ;
       case Level.Polus:
-        return Vents.forPolus();
+        return VENTS_POLUS;
       case Level.Airship:
-        return Vents.forAirship();
+        return VENTS_AIRSHIP;
     }
   }
 
   /**
-   * Gets static vent data for the given ID on The Skeld.
+   * Gets static vent data for the given ID on the given level.
    *
-   * @param ids - The ID of the vent that should be returned
-   * @returns The vent with the given ID
+   * @param level - The level whose vents will be searched
+   * @param id - The ID of the vent that should be returned
+   * @returns The vent with the given ID on the given level
    */
-  static forSkeldFromId(id: number): LevelVent | undefined;
-  /**
-   * Gets static vent data for the given IDs on The Skeld.
-   *
-   * @param ids - The IDs of the vents that should be returned
-   * @returns An array of vents whose IDs were included in `ids`
-   */
-  static forSkeldFromId(ids: number[]): readonly LevelVent[];
-  /**
-   * Gets static vent data for the given ID or IDs on The Skeld.
-   *
-   * @param ids - The ID or IDs of the vents that should be returned
-   * @returns The vent with the given ID or an array of vents whose IDs were included in `ids`
-   */
-  static forSkeldFromId(ids: number | number[]): LevelVent | undefined | readonly LevelVent[] {
-    return Vents.forLevelFromId(Level.TheSkeld, Array.isArray(ids) ? ids : [ids]);
-  }
-
-  /**
-   * Gets static vent data for the given ID on MIRA HQ.
-   *
-   * @param ids - The ID of the vent that should be returned
-   * @returns The vent with the given ID
-   */
-  static forMiraHqFromId(id: number): LevelVent | undefined;
-  /**
-   * Gets static vent data for the given IDs on MIRA HQ.
-   *
-   * @param ids - The IDs of the vents that should be returned
-   * @returns An array of vents whose IDs were included in `ids`
-   */
-  static forMiraHqFromId(ids: number[]): readonly LevelVent[];
-  /**
-   * Gets static vent data for the given ID or IDs on MIRA HQ.
-   *
-   * @param ids - The ID or IDs of the vents that should be returned
-   * @returns The vent with the given ID or an array of vents whose IDs were included in `ids`
-   */
-  static forMiraHqFromId(ids: number | number[]): LevelVent | undefined | readonly LevelVent[] {
-    return Vents.forLevelFromId(Level.MiraHq, Array.isArray(ids) ? ids : [ids]);
-  }
-
-  /**
-   * Gets static vent data for the given ID on Polus.
-   *
-   * @param ids - The ID of the vent that should be returned
-   * @returns The vent with the given ID
-   */
-  static forPolusFromId(id: number): LevelVent | undefined;
-  /**
-   * Gets static vent data for the given IDs on Polus.
-   *
-   * @param ids - The IDs of the vents that should be returned
-   * @returns An array of vents whose IDs were included in `ids`
-   */
-  static forPolusFromId(ids: number[]): readonly LevelVent[];
-  /**
-   * Gets static vent data for the given ID or IDs on Polus.
-   *
-   * @param ids - The ID or IDs of the vents that should be returned
-   * @returns The vent with the given ID or an array of vents whose IDs were included in `ids`
-   */
-  static forPolusFromId(ids: number | number[]): LevelVent | undefined | readonly LevelVent[] {
-    return Vents.forLevelFromId(Level.Polus, Array.isArray(ids) ? ids : [ids]);
-  }
-
-  /**
-   * Gets static vent data for the given ID on Airship.
-   *
-   * @param ids - The ID of the vent that should be returned
-   * @returns The vent with the given ID
-   */
-  static forAirshipFromId(id: number): LevelVent | undefined;
-  /**
-   * Gets static vent data for the given IDs on Airship.
-   *
-   * @param ids - The IDs of the vents that should be returned
-   * @returns An array of vents whose IDs were included in `ids`
-   */
-  static forAirshipFromId(ids: number[]): readonly LevelVent[];
-  /**
-   * Gets static vent data for the given ID or IDs on Airship.
-   *
-   * @param ids - The ID or IDs of the vents that should be returned
-   * @returns The vent with the given ID or an array of vents whose IDs were included in `ids`
-   */
-  static forAirshipFromId(ids: number | number[]): LevelVent | undefined | readonly LevelVent[] {
-    return Vents.forLevelFromId(Level.Airship, Array.isArray(ids) ? ids : [ids]);
-  }
-
+  static forLevelFromId(level: Level, id: number): LevelVent | undefined;
   /**
    * Gets static vent data for the given IDs on the given level.
    *
    * @param level - The level whose vents will be searched
    * @param ids - The IDs of the vents that should be returned
-   * @returns An array of vents whose IDs were included in `ids`
+   * @returns An array of vents whose IDs were included in `ids` on the given level
    */
-  static forLevelFromId(level: Level, id: number): LevelVent | undefined;
   static forLevelFromId(level: Level, ids: number[]): readonly LevelVent[];
+  /**
+   * Gets static vent data for the given ID or IDs on the given level.
+   *
+   * @param level - The level whose vents will be searched
+   * @param ids - The ID or IDs of the vents that should be returned
+   * @returns The vent with the given ID or an array of vents whose IDs were included in `ids` on the given level
+   */
   static forLevelFromId(level: Level, ids: number | number[]): LevelVent | undefined | readonly LevelVent[] {
     const validated: number[] = Array.isArray(ids) ? ids : [ids];
     const vents = Vents.forLevel(level).filter(v => validated.includes(v.getId()));
 
     return Array.isArray(ids) ? vents : vents[0];
-  }
-
-  /**
-   * Gets static vent data for the vent at the given position on The Skeld.
-   *
-   * @param position - The position of the vent that should be returned
-   * @returns The vent at `position`, or `undefined` if there is no vent at `position`
-   */
-  static forSkeldFromPosition(position: Vector2): LevelVent | undefined {
-    return Vents.forLevelFromPosition(Level.TheSkeld, position);
-  }
-
-  /**
-   * Gets static vent data for the vent at the given position on MIRA HQ.
-   *
-   * @param position - The position of the vent that should be returned
-   * @returns The vent at `position`, or `undefined` if there is no vent at `position`
-   */
-  static forMiraHqFromPosition(position: Vector2): LevelVent | undefined {
-    return Vents.forLevelFromPosition(Level.MiraHq, position);
-  }
-
-  /**
-   * Gets static vent data for the vent at the given position on Polus.
-   *
-   * @param position - The position of the vent that should be returned
-   * @returns The vent at `position`, or `undefined` if there is no vent at `position`
-   */
-  static forPolusFromPosition(position: Vector2): LevelVent | undefined {
-    return Vents.forLevelFromPosition(Level.Polus, position);
-  }
-
-  /**
-   * Gets static vent data for the vent at the given position on Airship.
-   *
-   * @param position - The position of the vent that should be returned
-   * @returns The vent at `position`, or `undefined` if there is no vent at `position`
-   */
-  static forAirshipFromPosition(position: Vector2): LevelVent | undefined {
-    return Vents.forLevelFromPosition(Level.Airship, position);
   }
 
   /**
@@ -286,34 +136,6 @@ export class Vents {
   }
 
   /**
-   * Gets the number of vents on The Skeld.
-   */
-  static countForSkeld(): number {
-    return VENT_COUNT_THE_SKELD;
-  }
-
-  /**
-   * Gets the number of vents on MIRA HQ.
-   */
-  static countForMiraHq(): number {
-    return VENT_COUNT_MIRA_HQ;
-  }
-
-  /**
-   * Gets the number of vents on Polus.
-   */
-  static countForPolus(): number {
-    return VENT_COUNT_POLUS;
-  }
-
-  /**
-   * Gets the number of vents on Airship
-   */
-  static countForAirship(): number {
-    return VENT_COUNT_AIRSHIP;
-  }
-
-  /**
    * Gets the number of vents on the given level.
    *
    * @param level - The level whose number of vents should be returned
@@ -322,13 +144,13 @@ export class Vents {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        return Vents.countForSkeld();
+        return VENT_COUNT_THE_SKELD;
       case Level.MiraHq:
-        return Vents.countForMiraHq();
+        return VENT_COUNT_MIRA_HQ;
       case Level.Polus:
-        return Vents.countForPolus();
+        return VENT_COUNT_POLUS;
       case Level.Airship:
-        return Vents.countForAirship();
+        return VENT_COUNT_AIRSHIP;
     }
   }
 }
