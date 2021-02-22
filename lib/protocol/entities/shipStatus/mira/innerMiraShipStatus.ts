@@ -4,10 +4,10 @@ import { EntityMiraShipStatus } from ".";
 
 export class InnerMiraShipStatus extends BaseInnerShipStatus {
   constructor(
-    netId: number,
     public readonly parent: EntityMiraShipStatus,
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.MiraShipStatus, netId, parent, [
+    super(InnerNetObjectType.MiraShipStatus, parent, [
       SystemType.Reactor,
       SystemType.Electrical,
       SystemType.Oxygen,
@@ -22,11 +22,11 @@ export class InnerMiraShipStatus extends BaseInnerShipStatus {
       SystemType.Medbay,
       SystemType.Communications,
       SystemType.Sabotage,
-    ]);
+    ], netId);
   }
 
   clone(): InnerMiraShipStatus {
-    const clone = new InnerMiraShipStatus(this.netId, this.parent);
+    const clone = new InnerMiraShipStatus(this.parent, this.netId);
 
     clone.systems = this.systems.map(system => system.clone());
 

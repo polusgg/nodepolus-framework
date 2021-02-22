@@ -482,13 +482,10 @@ export class InternalLobby implements LobbyInstance {
       const fakePlayer = new EntityPlayer(
         this,
         FakeClientId.ServerChat,
-        this.hostInstance.getNextNetId(),
+        Vector2.zero(),
+        Vector2.zero(),
         playerId,
-        this.hostInstance.getNextNetId(),
-        this.hostInstance.getNextNetId(),
-        5,
-        Vector2.zero(),
-        Vector2.zero(),
+        false,
         SpawnFlag.None,
       );
 

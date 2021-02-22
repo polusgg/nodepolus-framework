@@ -10,11 +10,11 @@ import { EntityGameData } from ".";
 
 export class InnerGameData extends BaseInnerNetObject {
   constructor(
-    netId: number,
     public readonly parent: EntityGameData,
-    public readonly players: PlayerData[],
+    public readonly players: PlayerData[] = [],
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.GameData, netId, parent);
+    super(InnerNetObjectType.GameData, parent, netId);
   }
 
   setTasks(playerId: number, taskIds: number[], sendTo?: Connection[]): void {
@@ -86,6 +86,6 @@ export class InnerGameData extends BaseInnerNetObject {
   }
 
   clone(): InnerGameData {
-    return new InnerGameData(this.netId, this.parent, this.players);
+    return new InnerGameData(this.parent, this.players, this.netId);
   }
 }

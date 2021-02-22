@@ -23,21 +23,22 @@ export class EntityPlayer extends BaseInnerNetEntity {
   constructor(
     lobby: LobbyInstance,
     owner: number,
-    playerControlNetId: number,
-    playerId: number,
-    playerPhysicsNetId: number,
-    customNetworkTransformNetId: number,
-    sequenceId: number,
-    position: Vector2,
-    velocity: Vector2,
+    position: Vector2 = Vector2.zero(),
+    velocity: Vector2 = Vector2.zero(),
+    playerId: number = lobby.getHostInstance().getNextPlayerId(),
+    isNew: boolean = false,
     flags: SpawnFlag = SpawnFlag.IsClientCharacter,
+    sequenceId: number = 5,
+    playerControlNetId: number = lobby.getHostInstance().getNextNetId(),
+    playerPhysicsNetId: number = lobby.getHostInstance().getNextNetId(),
+    customNetworkTransformNetId: number = lobby.getHostInstance().getNextNetId(),
   ) {
     super(SpawnType.PlayerControl, lobby, owner, flags);
 
     this.innerNetObjects = [
-      new InnerPlayerControl(playerControlNetId, this, true, playerId),
-      new InnerPlayerPhysics(playerPhysicsNetId, this),
-      new InnerCustomNetworkTransform(customNetworkTransformNetId, this, sequenceId, position, velocity),
+      new InnerPlayerControl(this, playerId, isNew, playerControlNetId),
+      new InnerPlayerPhysics(this, playerPhysicsNetId),
+      new InnerCustomNetworkTransform(this, position, velocity, sequenceId, customNetworkTransformNetId),
     ];
   }
 

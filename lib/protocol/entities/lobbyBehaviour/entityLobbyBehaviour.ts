@@ -11,11 +11,14 @@ export class EntityLobbyBehaviour extends BaseInnerNetEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(lobby: LobbyInstance, lobbyBehaviourNetId: number) {
+  constructor(
+    lobby: LobbyInstance,
+    lobbyBehaviourNetId: number = lobby.getHostInstance().getNextNetId(),
+  ) {
     super(SpawnType.LobbyBehaviour, lobby, GLOBAL_OWNER, SpawnFlag.None);
 
     this.innerNetObjects = [
-      new InnerLobbyBehaviour(lobbyBehaviourNetId, this),
+      new InnerLobbyBehaviour(this, lobbyBehaviourNetId),
     ];
   }
 

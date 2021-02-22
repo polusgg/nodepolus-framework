@@ -8,10 +8,10 @@ import { EntityLobbyBehaviour } from ".";
 
 export class InnerLobbyBehaviour extends BaseInnerNetObject {
   constructor(
-    netId: number,
     public readonly parent: EntityLobbyBehaviour,
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.LobbyBehaviour, netId, parent);
+    super(InnerNetObjectType.LobbyBehaviour, parent, netId);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
@@ -29,6 +29,6 @@ export class InnerLobbyBehaviour extends BaseInnerNetObject {
   }
 
   clone(): InnerLobbyBehaviour {
-    return new InnerLobbyBehaviour(this.netId, this.parent);
+    return new InnerLobbyBehaviour(this.parent, this.netId);
   }
 }

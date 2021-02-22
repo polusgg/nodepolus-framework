@@ -7,17 +7,17 @@ import { BaseInnerNetEntity } from ".";
 export abstract class BaseInnerNetObject {
   constructor(
     public readonly type: InnerNetObjectType,
-    public readonly netId: number,
     public readonly parent: BaseInnerNetEntity,
+    public readonly netId: number,
   ) {}
 
-  abstract clone(): BaseInnerNetObject;
+  abstract handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void;
 
   abstract serializeData(old: BaseInnerNetObject): DataPacket;
 
   abstract serializeSpawn(): SpawnPacketObject;
 
-  abstract handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void;
+  abstract clone(): BaseInnerNetObject;
 
   sendRpcPacket(packet: BaseRpcPacket, sendTo?: Connection[]): void {
     if (sendTo === undefined || sendTo.length == 0) {

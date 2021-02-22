@@ -11,11 +11,14 @@ export class EntityMeetingHud extends BaseInnerNetEntity {
     return this.innerNetObjects[0];
   }
 
-  constructor(lobby: LobbyInstance, meetingHudNetId: number) {
+  constructor(
+    lobby: LobbyInstance,
+    meetingHudNetId: number = lobby.getHostInstance().getNextNetId(),
+  ) {
     super(SpawnType.MeetingHud, lobby, GLOBAL_OWNER, SpawnFlag.None);
 
     this.innerNetObjects = [
-      new InnerMeetingHud(meetingHudNetId, this),
+      new InnerMeetingHud(this, meetingHudNetId),
     ];
   }
 

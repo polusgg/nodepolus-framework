@@ -4,10 +4,10 @@ import { EntityAirshipStatus } from ".";
 
 export class InnerAirshipStatus extends BaseInnerShipStatus {
   constructor(
-    netId: number,
     public readonly parent: EntityAirshipStatus,
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.DleksShipStatus, netId, parent, [
+    super(InnerNetObjectType.DleksShipStatus, parent, [
       SystemType.Reactor,
       SystemType.Electrical,
       SystemType.Security,
@@ -15,11 +15,11 @@ export class InnerAirshipStatus extends BaseInnerShipStatus {
       SystemType.Doors,
       SystemType.Sabotage,
       SystemType.Weapons,
-    ]);
+    ], undefined, netId);
   }
 
   clone(): InnerAirshipStatus {
-    const clone = new InnerAirshipStatus(this.netId, this.parent);
+    const clone = new InnerAirshipStatus(this.parent, this.netId);
 
     clone.systems = this.systems.map(system => system.clone());
 

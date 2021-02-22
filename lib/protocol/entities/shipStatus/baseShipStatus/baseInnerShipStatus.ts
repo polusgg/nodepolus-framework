@@ -34,12 +34,12 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
 
   protected constructor(
     type: InnerNetObjectType,
-    netId: number,
     parent: BaseInnerNetEntity,
     public readonly systemTypes: SystemType[],
     spawnSystemTypes?: SystemType[],
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(type, netId, parent);
+    super(type, parent, netId);
 
     this.spawnSystemTypes = spawnSystemTypes ?? this.systemTypes;
 

@@ -14,10 +14,10 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
   private vent?: LevelVent;
 
   constructor(
-    netId: number,
     public readonly parent: EntityPlayer,
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.PlayerPhysics, netId, parent);
+    super(InnerNetObjectType.PlayerPhysics, parent, netId);
   }
 
   getVent(): LevelVent | undefined {
@@ -129,6 +129,6 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
   }
 
   clone(): InnerPlayerPhysics {
-    return new InnerPlayerPhysics(this.netId, this.parent);
+    return new InnerPlayerPhysics(this.parent, this.netId);
   }
 }

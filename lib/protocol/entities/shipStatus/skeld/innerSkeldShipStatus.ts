@@ -4,10 +4,10 @@ import { EntitySkeldShipStatus } from ".";
 
 export class InnerSkeldShipStatus extends BaseInnerShipStatus {
   constructor(
-    netId: number,
     public readonly parent: EntitySkeldShipStatus,
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.SkeldShipStatus, netId, parent, [
+    super(InnerNetObjectType.SkeldShipStatus, parent, [
       SystemType.Reactor,
       SystemType.Electrical,
       SystemType.Oxygen,
@@ -16,11 +16,11 @@ export class InnerSkeldShipStatus extends BaseInnerShipStatus {
       SystemType.Communications,
       SystemType.Doors,
       SystemType.Sabotage,
-    ]);
+    ], undefined, netId);
   }
 
   clone(): InnerSkeldShipStatus {
-    const clone = new InnerSkeldShipStatus(this.netId, this.parent);
+    const clone = new InnerSkeldShipStatus(this.parent, this.netId);
 
     clone.systems = this.systems.map(system => system.clone());
 

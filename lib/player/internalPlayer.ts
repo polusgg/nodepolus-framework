@@ -1,4 +1,4 @@
-import { PlayerSkin, PlayerPet, PlayerHat, PlayerColor, PlayerRole, TeleportReason } from "../types/enums";
+import { PlayerSkin, PlayerPet, PlayerHat, PlayerColor, PlayerRole, TeleportReason, SpawnFlag } from "../types/enums";
 import { RemovePlayerPacket, JoinGameResponsePacket, GameDataPacket } from "../protocol/packets/root";
 import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../types";
 import { PlayerData } from "../protocol/entities/gameData/types";
@@ -358,13 +358,11 @@ export class InternalPlayer implements PlayerInstance {
     const entity = new EntityPlayer(
       this.lobby,
       this.entity.owner,
-      this.lobby.getHostInstance().getNextNetId(),
-      this.getId()!,
-      this.lobby.getHostInstance().getNextNetId(),
-      this.lobby.getHostInstance().getNextNetId(),
-      0,
       this.entity.customNetworkTransform.position,
       this.entity.customNetworkTransform.velocity,
+      this.getId()!,
+      false,
+      SpawnFlag.None,
     );
 
     if (this.connection === undefined) {

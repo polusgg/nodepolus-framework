@@ -4,10 +4,10 @@ import { EntityPolusShipStatus } from ".";
 
 export class InnerPolusShipStatus extends BaseInnerShipStatus {
   constructor(
-    netId: number,
     public readonly parent: EntityPolusShipStatus,
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.PolusShipStatus, netId, parent, [
+    super(InnerNetObjectType.PolusShipStatus, parent, [
       SystemType.Electrical,
       SystemType.Medbay,
       SystemType.Security,
@@ -17,11 +17,11 @@ export class InnerPolusShipStatus extends BaseInnerShipStatus {
       SystemType.Decontamination2,
       SystemType.Sabotage,
       SystemType.Laboratory,
-    ]);
+    ], undefined, netId);
   }
 
   clone(): InnerPolusShipStatus {
-    const clone = new InnerPolusShipStatus(this.netId, this.parent);
+    const clone = new InnerPolusShipStatus(this.parent, this.netId);
 
     clone.systems = this.systems.map(system => system.clone());
 

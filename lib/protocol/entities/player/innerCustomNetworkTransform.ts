@@ -11,13 +11,13 @@ import { EntityPlayer } from ".";
 
 export class InnerCustomNetworkTransform extends BaseInnerNetObject {
   constructor(
-    netId: number,
     public readonly parent: EntityPlayer,
-    public sequenceId: number,
-    public position: Vector2,
-    public velocity: Vector2,
+    public position: Vector2 = Vector2.zero(),
+    public velocity: Vector2 = Vector2.zero(),
+    public sequenceId: number = 5,
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.CustomNetworkTransform, netId, parent);
+    super(InnerNetObjectType.CustomNetworkTransform, parent, netId);
   }
 
   async snapTo(position: Vector2, reason: TeleportReason, sendTo?: Connection[]): Promise<void> {
@@ -118,7 +118,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
   }
 
   clone(): InnerCustomNetworkTransform {
-    return new InnerCustomNetworkTransform(this.netId, this.parent, this.sequenceId, this.position, this.velocity);
+    return new InnerCustomNetworkTransform(this.parent, this.position, this.velocity, this.sequenceId, this.netId);
   }
 
   protected incrementSequenceId(amount: number): number {

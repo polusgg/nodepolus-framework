@@ -14,10 +14,10 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   public playerStates: VoteState[] = [];
 
   constructor(
-    netId: number,
     public readonly parent: EntityMeetingHud,
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.MeetingHud, netId, parent);
+    super(InnerNetObjectType.MeetingHud, parent, netId);
   }
 
   castVote(votingPlayerId: number, suspectPlayerId: number, _sendTo?: Connection[]): void {
@@ -90,7 +90,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   }
 
   clone(): InnerMeetingHud {
-    const clone = new InnerMeetingHud(this.netId, this.parent);
+    const clone = new InnerMeetingHud(this.parent, this.netId);
 
     clone.playerStates = this.playerStates.map(state => state.clone());
 

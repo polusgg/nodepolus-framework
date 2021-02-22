@@ -59,12 +59,12 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   public scannerSequenceId = 1;
 
   constructor(
-    netId: number,
     public readonly parent: EntityPlayer,
-    public isNew: boolean,
-    public playerId: number,
+    public playerId: number = parent.lobby.getHostInstance().getNextPlayerId(),
+    public isNew: boolean = false,
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.PlayerControl, netId, parent);
+    super(InnerNetObjectType.PlayerControl, parent, netId);
   }
 
   async playAnimation(taskType: TaskType, sendTo?: Connection[]): Promise<void> {
@@ -391,7 +391,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   clone(): InnerPlayerControl {
-    return new InnerPlayerControl(this.netId, this.parent, this.isNew, this.playerId);
+    return new InnerPlayerControl(this.parent, this.playerId, this.isNew, this.netId);
   }
 
   private getPlayerInstance(): PlayerInstance {

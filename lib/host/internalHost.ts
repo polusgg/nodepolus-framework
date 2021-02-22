@@ -93,6 +93,7 @@ import {
   LimboState,
   PlayerColor,
   PlayerRole,
+  SpawnFlag,
   SystemType,
   TaskLength,
   TaskType,
@@ -539,7 +540,7 @@ export class InternalHost implements HostInstance {
     delete this.sabotageHandler;
     delete this.systemsHandler;
 
-    this.lobby.setGameData(new EntityGameData(this.lobby, this.getNextNetId(), [], this.getNextNetId()));
+    this.lobby.setGameData(new EntityGameData(this.lobby));
     this.lobby.sendRootGamePacket(new EndGamePacket(this.lobby.getCode(), event.getReason(), false));
   }
 
@@ -643,19 +644,19 @@ export class InternalHost implements HostInstance {
 
     switch (this.lobby.getLevel()) {
       case Level.TheSkeld:
-        this.lobby.setShipStatus(new EntitySkeldShipStatus(this.lobby, this.getNextNetId()));
+        this.lobby.setShipStatus(new EntitySkeldShipStatus(this.lobby));
         break;
       case Level.AprilSkeld:
-        this.lobby.setShipStatus(new EntityDleksShipStatus(this.lobby, this.getNextNetId()));
+        this.lobby.setShipStatus(new EntityDleksShipStatus(this.lobby));
         break;
       case Level.MiraHq:
-        this.lobby.setShipStatus(new EntityMiraShipStatus(this.lobby, this.getNextNetId()));
+        this.lobby.setShipStatus(new EntityMiraShipStatus(this.lobby));
         break;
       case Level.Polus:
-        this.lobby.setShipStatus(new EntityPolusShipStatus(this.lobby, this.getNextNetId()));
+        this.lobby.setShipStatus(new EntityPolusShipStatus(this.lobby));
         break;
       case Level.Airship:
-        this.lobby.setShipStatus(new EntityAirshipStatus(this.lobby, this.getNextNetId()));
+        this.lobby.setShipStatus(new EntityAirshipStatus(this.lobby));
         break;
     }
 
@@ -741,7 +742,7 @@ export class InternalHost implements HostInstance {
     let lobbyBehaviour = this.lobby.getLobbyBehaviour();
 
     if (!lobbyBehaviour) {
-      lobbyBehaviour = new EntityLobbyBehaviour(this.lobby, this.getNextNetId());
+      lobbyBehaviour = new EntityLobbyBehaviour(this.lobby);
 
       this.lobby.setLobbyBehaviour(lobbyBehaviour);
     }
@@ -751,7 +752,7 @@ export class InternalHost implements HostInstance {
     let gameData = this.lobby.getGameData();
 
     if (!gameData) {
-      gameData = new EntityGameData(this.lobby, this.getNextNetId(), [], this.getNextNetId());
+      gameData = new EntityGameData(this.lobby);
 
       this.lobby.setGameData(gameData);
     }
@@ -765,13 +766,11 @@ export class InternalHost implements HostInstance {
     const entity = new EntityPlayer(
       this.lobby,
       sender.id,
-      this.getNextNetId(),
-      newPlayerId,
-      this.getNextNetId(),
-      this.getNextNetId(),
-      5,
       event.getPosition(),
       Vector2.zero(),
+      newPlayerId,
+      true,
+      SpawnFlag.IsClientCharacter,
     );
 
     entity.playerControl.isNew = event.isNew();
@@ -959,7 +958,7 @@ export class InternalHost implements HostInstance {
 
     sender.sendRpcPacket(new StartMeetingPacket(event.getVictim()?.getId() ?? 0xff), this.lobby.getConnections());
 
-    const meetingHud = new EntityMeetingHud(this.lobby, this.getNextNetId());
+    const meetingHud = new EntityMeetingHud(this.lobby);
 
     this.lobby.setMeetingHud(meetingHud);
 

@@ -16,10 +16,10 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
   public votes: Map<number, number[]> = new Map<number, number[]>();
 
   constructor(
-    netId: number,
     public readonly parent: EntityGameData,
+    netId: number = parent.lobby.getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.VoteBanSystem, netId, parent);
+    super(InnerNetObjectType.VoteBanSystem, parent, netId);
   }
 
   async addVote(voter: PlayerInstance, target: PlayerInstance, sendTo?: Connection[]): Promise<void> {
@@ -158,7 +158,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
   }
 
   clone(): InnerVoteBanSystem {
-    const clone = new InnerVoteBanSystem(this.netId, this.parent);
+    const clone = new InnerVoteBanSystem(this.parent, this.netId);
 
     clone.votes = new Map(this.votes);
 

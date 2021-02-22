@@ -16,12 +16,17 @@ export class EntityGameData extends BaseInnerNetEntity {
     return this.innerNetObjects[1];
   }
 
-  constructor(lobby: LobbyInstance, gameDataNetId: number, players: PlayerData[], voteBanSystemNetId: number) {
+  constructor(
+    lobby: LobbyInstance,
+    players: PlayerData[] = [],
+    gameDataNetId: number = lobby.getHostInstance().getNextNetId(),
+    voteBanSystemNetId: number = lobby.getHostInstance().getNextNetId(),
+  ) {
     super(SpawnType.GameData, lobby, GLOBAL_OWNER, SpawnFlag.None);
 
     this.innerNetObjects = [
-      new InnerGameData(gameDataNetId, this, players),
-      new InnerVoteBanSystem(voteBanSystemNetId, this),
+      new InnerGameData(this, players, gameDataNetId),
+      new InnerVoteBanSystem(this, voteBanSystemNetId),
     ];
   }
 
