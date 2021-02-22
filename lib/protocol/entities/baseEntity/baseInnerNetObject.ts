@@ -17,11 +17,11 @@ export abstract class BaseInnerNetObject {
 
   abstract serializeSpawn(): SpawnPacketObject;
 
-  sendRpcPacket(packet: BaseRpcPacket, to: Connection[]): void {
-    if (to.length == 0) {
+  sendRpcPacket(packet: BaseRpcPacket, sendTo?: Connection[]): void {
+    if (sendTo === undefined || sendTo.length == 0) {
       return;
     }
 
-    this.parent.lobby.sendRpcPacket(this, packet, to);
+    this.parent.lobby.sendRpcPacket(this, packet, sendTo);
   }
 }
