@@ -56,35 +56,36 @@ import {
 } from "../types/enums";
 
 export class InternalLobby implements LobbyInstance {
+  // TODO: Make protected with getter/setter
   public ignoredNetIds: number[] = [];
 
-  private readonly createdAt: number = Date.now();
-  private readonly hostInstance: HostInstance = new InternalHost(this);
-  private readonly spawningPlayers: Set<Connection> = new Set();
-  private readonly connections: Connection[] = [];
-  private readonly gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
-  private readonly metadata: Map<string, unknown> = new Map();
-  private readonly logger: Logger;
+  protected readonly createdAt: number = Date.now();
+  protected readonly hostInstance: HostInstance = new InternalHost(this);
+  protected readonly spawningPlayers: Set<Connection> = new Set();
+  protected readonly connections: Connection[] = [];
+  protected readonly gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
+  protected readonly metadata: Map<string, unknown> = new Map();
+  protected readonly logger: Logger;
 
-  private joinTimer?: NodeJS.Timeout;
-  private startTimer?: NodeJS.Timeout;
-  private game?: Game;
-  private players: InternalPlayer[] = [];
-  private gameState = GameState.NotStarted;
-  private gameData?: EntityGameData;
-  private lobbyBehaviour?: EntityLobbyBehaviour;
-  private shipStatus?: BaseEntityShipStatus;
-  private meetingHud?: EntityMeetingHud;
+  protected joinTimer?: NodeJS.Timeout;
+  protected startTimer?: NodeJS.Timeout;
+  protected game?: Game;
+  protected players: InternalPlayer[] = [];
+  protected gameState = GameState.NotStarted;
+  protected gameData?: EntityGameData;
+  protected lobbyBehaviour?: EntityLobbyBehaviour;
+  protected shipStatus?: BaseEntityShipStatus;
+  protected meetingHud?: EntityMeetingHud;
 
   constructor(
-    private readonly server: Server,
-    private readonly address: string = server.getDefaultLobbyAddress(),
-    private readonly port: number = server.getDefaultLobbyPort(),
-    private readonly startTimerDuration: number = server.getDefaultLobbyStartTimerDuration(),
-    private readonly timeToJoinUntilClosed: number = server.getDefaultLobbyTimeToJoinUntilClosed(),
-    private readonly timeToStartUntilClosed: number = server.getDefaultLobbyTimeToStartUntilClosed(),
-    private options: GameOptionsData = new GameOptionsData(),
-    private readonly code: string = LobbyCode.generate(),
+    protected readonly server: Server,
+    protected readonly address: string = server.getDefaultLobbyAddress(),
+    protected readonly port: number = server.getDefaultLobbyPort(),
+    protected readonly startTimerDuration: number = server.getDefaultLobbyStartTimerDuration(),
+    protected readonly timeToJoinUntilClosed: number = server.getDefaultLobbyTimeToJoinUntilClosed(),
+    protected readonly timeToStartUntilClosed: number = server.getDefaultLobbyTimeToStartUntilClosed(),
+    protected options: GameOptionsData = new GameOptionsData(),
+    protected readonly code: string = LobbyCode.generate(),
   ) {
     if (this.timeToJoinUntilClosed > 0) {
       this.joinTimer = setTimeout(() => {
@@ -245,15 +246,15 @@ export class InternalLobby implements LobbyInstance {
 
   findInnerNetObject(netId: number): BaseInnerNetObject | undefined {
     switch (netId) {
-      case this.lobbyBehaviour?.getLobbyBehaviour().netId:
+      case this.lobbyBehaviour?.getLobbyBehaviour().getNetId():
         return this.lobbyBehaviour!.getLobbyBehaviour();
-      case this.gameData?.getGameData().netId:
+      case this.gameData?.getGameData().getNetId():
         return this.gameData!.getGameData();
-      case this.gameData?.getVoteBanSystem().netId:
+      case this.gameData?.getVoteBanSystem().getNetId():
         return this.gameData!.getVoteBanSystem();
-      case this.shipStatus?.getShipStatus().netId:
+      case this.shipStatus?.getShipStatus().getNetId():
         return this.shipStatus!.getShipStatus();
-      case this.meetingHud?.getMeetingHud().netId:
+      case this.meetingHud?.getMeetingHud().getNetId():
         return this.meetingHud!.getMeetingHud();
     }
 
@@ -264,7 +265,7 @@ export class InternalLobby implements LobbyInstance {
       for (let j = 0; j < objects.length; j++) {
         const object = objects[j];
 
-        if (notUndefined(object) && object.netId == netId) {
+        if (notUndefined(object) && object.getNetId() == netId) {
           return object;
         }
       }
@@ -272,7 +273,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   findPlayerByClientId(clientId: number): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.ownerId == clientId);
+    return this.players.find(player => player.entity.getOwnerId() == clientId);
   }
 
   findPlayerByPlayerId(playerId: number): InternalPlayer | undefined {
@@ -280,19 +281,19 @@ export class InternalLobby implements LobbyInstance {
   }
 
   findPlayerByNetId(netId: number): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.getObjects().some(object => object.netId == netId));
+    return this.players.find(player => player.entity.getObjects().some(object => object.getNetId() == netId));
   }
 
   findPlayerByConnection(connection: Connection): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.ownerId == connection.id);
+    return this.players.find(player => player.entity.getOwnerId() == connection.id);
   }
 
   findPlayerByEntity(entity: EntityPlayer): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.ownerId == entity.ownerId);
+    return this.players.find(player => player.entity.getOwnerId() == entity.getOwnerId());
   }
 
   findPlayerIndexByConnection(connection: Connection): number {
-    return this.players.findIndex(player => player.entity.ownerId == connection.id);
+    return this.players.findIndex(player => player.entity.getOwnerId() == connection.id);
   }
 
   findConnection(id: number): Connection | undefined {
@@ -402,11 +403,11 @@ export class InternalLobby implements LobbyInstance {
   }
 
   sendRpcPacket(from: BaseInnerNetObject, packet: BaseRpcPacket, sendTo?: Connection[]): void {
-    this.sendRootGamePacket(new GameDataPacket([new RpcPacket(from.netId, packet)], this.code), sendTo);
+    this.sendRootGamePacket(new GameDataPacket([new RpcPacket(from.getNetId(), packet)], this.code), sendTo);
   }
 
   spawn(entity: BaseInnerNetEntity): void {
-    const type = entity.type;
+    const type = entity.getType();
 
     switch (type) {
       case SpawnType.SkeldShipStatus:
@@ -441,13 +442,13 @@ export class InternalLobby implements LobbyInstance {
       throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.getPlayerControl().playerId}) != PlayerData(${playerData.id})`);
     }
 
-    const clientIdInUse = !!this.findPlayerByClientId(player.ownerId);
-    const playerInstance = new InternalPlayer(this, player, this.findConnection(player.ownerId));
+    const clientIdInUse = !!this.findPlayerByClientId(player.getOwnerId());
+    const playerInstance = new InternalPlayer(this, player, this.findConnection(player.getOwnerId()));
 
     this.addPlayer(playerInstance);
 
     if (!clientIdInUse) {
-      this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.ownerId, this.hostInstance.getId()));
+      this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.getOwnerId(), this.hostInstance.getId()));
     }
 
     this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
@@ -461,11 +462,11 @@ export class InternalLobby implements LobbyInstance {
   }
 
   despawn(innerNetObject: BaseInnerNetObject): void {
-    if (innerNetObject.parent.lobby.getCode() != this.code) {
+    if (innerNetObject.getParent().getLobby().getCode() != this.code) {
       throw new Error(`Attempted to despawn an InnerNetObject from a lobby other than its own`);
     }
 
-    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.netId)], this.code));
+    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.getNetId())], this.code));
   }
 
   getActingHosts(): Connection[] {
@@ -518,15 +519,15 @@ export class InternalLobby implements LobbyInstance {
           playerData.name = name;
 
           connection.writeReliable(new GameDataPacket([
-            new RpcPacket(this.gameData.getGameData().netId, new UpdateGameDataPacket([playerData])),
-            new RpcPacket(player.entity.getPlayerControl().netId, new SendChatPacket(message.toString())),
+            new RpcPacket(this.gameData.getGameData().getNetId(), new UpdateGameDataPacket([playerData])),
+            new RpcPacket(player.entity.getPlayerControl().getNetId(), new SendChatPacket(message.toString())),
           ], this.code));
 
           playerData.color = oldColor;
           playerData.name = oldName;
 
           connection.writeReliable(new GameDataPacket([
-            new RpcPacket(this.gameData.getGameData().netId, new UpdateGameDataPacket([playerData])),
+            new RpcPacket(this.gameData.getGameData().getNetId(), new UpdateGameDataPacket([playerData])),
           ], this.code));
         }
       }
@@ -845,8 +846,8 @@ export class InternalLobby implements LobbyInstance {
    * @param packet - The packet that was sent to the lobby
    * @param sender - The connection that sent the packet
    */
-  private handlePacket(packet: BaseRootPacket, sender: Connection): void {
-    switch (packet.type) {
+  protected handlePacket(packet: BaseRootPacket, sender: Connection): void {
+    switch (packet.getType()) {
       case RootPacketType.AlterGameTag: {
         const data = packet as AlterGameTagPacket;
 
@@ -901,11 +902,11 @@ export class InternalLobby implements LobbyInstance {
       case RootPacketType.JoinGame:
         break;
       default: {
-        if (RootPacket.hasPacket(packet.type)) {
+        if (RootPacket.hasPacket(packet.getType())) {
           break;
         }
 
-        throw new Error(`Attempted to handle an unimplemented root game packet type: ${packet.type} (${RootPacketType[packet.type]})`);
+        throw new Error(`Attempted to handle an unimplemented root game packet type: ${packet.getType()} (${RootPacketType[packet.getType()]})`);
       }
     }
   }
@@ -918,10 +919,10 @@ export class InternalLobby implements LobbyInstance {
    * @param sender - The connection that sent the packet
    * @param sendTo - The connections to which the packet was intended to be sent
    */
-  private async handleGameDataPacket(packet: BaseGameDataPacket, sender: Connection, sendTo?: Connection[]): Promise<void> {
+  protected async handleGameDataPacket(packet: BaseGameDataPacket, sender: Connection, sendTo?: Connection[]): Promise<void> {
     sendTo = ((sendTo && sendTo.length > 0) ? sendTo : this.connections).filter(c => c.id != sender.id);
 
-    switch (packet.type) {
+    switch (packet.getType()) {
       case GameDataPacketType.Data:
         if (!this.ignoredNetIds.includes((packet as DataPacket).senderNetId)) {
           this.handleData((packet as DataPacket).senderNetId, (packet as DataPacket).data, sendTo);
@@ -936,7 +937,7 @@ export class InternalLobby implements LobbyInstance {
           break;
         }
 
-        if (rpc.packet.type in RpcPacketType) {
+        if (rpc.packet.getType() in RpcPacketType) {
           if (this.server.listenerCount("server.packet.in.rpc") > 0) {
             const event = new ServerPacketInRpcEvent(sender, rpc.senderNetId, this.findInnerNetObject(rpc.senderNetId), rpc.packet);
 
@@ -959,9 +960,9 @@ export class InternalLobby implements LobbyInstance {
             throw new Error(`RPC packet sent from unknown InnerNetObject: ${rpc.senderNetId}`);
           }
 
-          object.handleRpc(sender, rpc.packet.type, rpc.packet, sendTo);
+          object.handleRpc(sender, rpc.packet.getType(), rpc.packet, sendTo);
         } else {
-          const custom = RpcPacket.getPacket(rpc.packet.type);
+          const custom = RpcPacket.getPacket(rpc.packet.getType());
 
           if (custom !== undefined) {
             const object = this.findInnerNetObject(rpc.senderNetId);
@@ -1001,7 +1002,7 @@ export class InternalLobby implements LobbyInstance {
       case GameDataPacketType.Spawn:
         break;
       default:
-        throw new Error(`Attempted to handle an unimplemented game data packet type: ${packet.type as number} (${GameDataPacketType[packet.type]})`);
+        throw new Error(`Attempted to handle an unimplemented game data packet type: ${packet.getType() as number} (${GameDataPacketType[packet.getType()]})`);
     }
   }
 
@@ -1012,11 +1013,11 @@ export class InternalLobby implements LobbyInstance {
    * @param data - The packet's data
    * @param sendTo - The connections to which the packet was intended to be sent
    */
-  private handleData(netId: number, data: MessageReader | MessageWriter, sendTo?: Connection[]): void {
+  protected handleData(netId: number, data: MessageReader | MessageWriter, sendTo?: Connection[]): void {
     const netObject = this.findInnerNetObject(netId);
 
     if (netObject) {
-      if (netObject.type == InnerNetObjectType.CustomNetworkTransform) {
+      if (netObject.getType() == InnerNetObjectType.CustomNetworkTransform) {
         const oldNetObject = netObject.clone();
 
         (netObject as InnerCustomNetworkTransform).setData(data);
@@ -1033,7 +1034,7 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    * @param connection - The connection that joined the lobby
    */
-  private handleNewJoin(connection: Connection): void {
+  protected handleNewJoin(connection: Connection): void {
     if (this.connections.indexOf(connection) == -1) {
       this.connections.push(connection);
     }
@@ -1058,7 +1059,7 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    * @param connection - The connection that rejoined the lobby
    */
-  private handleRejoin(connection: Connection): void {
+  protected handleRejoin(connection: Connection): void {
     if (connection.lobby?.code != this.code) {
       connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameStarted())]);
     }
@@ -1070,7 +1071,7 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    * @param oldHost - The connection that is no longer an acting host
    */
-  private async migrateHost(oldHost: Connection): Promise<void> {
+  protected async migrateHost(oldHost: Connection): Promise<void> {
     const event = new LobbyHostMigratedEvent(this, oldHost, this.connections[0]);
 
     await this.server.emit("lobby.host.migrated", event);
@@ -1089,7 +1090,7 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    * @param connection - The connection that joined the lobby
    */
-  private broadcastJoinMessage(connection: Connection): void {
+  protected broadcastJoinMessage(connection: Connection): void {
     this.sendRootGamePacket(
       new JoinGameResponsePacket(
         this.code,
@@ -1108,7 +1109,7 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    * @param connection - The connection that joined the lobby
    */
-  private sendJoinedMessage(connection: Connection): void {
+  protected sendJoinedMessage(connection: Connection): void {
     connection.sendReliable([
       new JoinedGamePacket(
         this.code,

@@ -12,9 +12,9 @@ export class PlayerHatUpdatedEvent extends CancellableEvent {
    * @param newHat - The player's new hat
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private readonly oldHat: PlayerHat,
-    private newHat: PlayerHat,
+    protected readonly player: PlayerInstance,
+    protected readonly oldHat: PlayerHat,
+    protected newHat: PlayerHat,
   ) {
     super();
   }

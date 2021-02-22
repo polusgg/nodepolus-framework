@@ -4,7 +4,9 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class LaboratorySystem extends BaseSystem {
+  // TODO: Make protected with getter/setter
   public timer = 10000;
+  // TODO: Make protected with getter/setter
   public userConsoles: Map<number, number> = new Map();
 
   constructor(shipStatus: BaseInnerShipStatus) {

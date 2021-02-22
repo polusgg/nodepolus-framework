@@ -11,8 +11,8 @@ export class PlayerTaskAnimationEvent extends CancellableEvent {
    * @param taskType - The type of task whose animation is being played
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private taskType: TaskType,
+    protected readonly player: PlayerInstance,
+    protected taskType: TaskType,
   ) {
     super();
   }

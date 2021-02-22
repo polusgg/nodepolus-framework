@@ -75,7 +75,7 @@ export class GameDataPacket extends BaseRootPacket {
     for (let i = 0; i < this.packets.length; i++) {
       const packet = this.packets[i];
 
-      writer.startMessage(packet.type)
+      writer.startMessage(packet.getType())
         .writeBytes(packet.serialize())
         .endMessage();
     }

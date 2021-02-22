@@ -3,12 +3,12 @@ import { Vector2 } from "./vector2";
 
 export class LevelVent {
   constructor(
-    private readonly level: Level,
-    private readonly id: number,
-    private readonly name: string,
-    private readonly system: SystemType,
-    private readonly position: Vector2,
-    private readonly connectedVents: readonly number[],
+    protected readonly level: Level,
+    protected readonly id: number,
+    protected readonly name: string,
+    protected readonly system: SystemType,
+    protected readonly position: Vector2,
+    protected readonly connectedVents: readonly number[],
   ) {}
 
   getLevel(): Level {

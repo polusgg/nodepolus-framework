@@ -2,6 +2,7 @@ import { RepairAmount } from ".";
 
 export class SecurityAmount implements RepairAmount {
   constructor(
+    // TODO: Make protected with getter/setter
     public isViewingCameras: boolean,
   ) {}
 

@@ -12,8 +12,8 @@ export class ServerLobbyCreatedEvent extends DisconnectableEvent {
    * @param lobby - The newly created lobby
    */
   constructor(
-    private readonly connection: Connection,
-    private readonly lobby: LobbyInstance,
+    protected readonly connection: Connection,
+    protected readonly lobby: LobbyInstance,
   ) {
     super(DisconnectReason.custom("The server refused to create your game"));
   }

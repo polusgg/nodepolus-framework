@@ -3,6 +3,7 @@ import { RepairAmount } from ".";
 
 export class SabotageAmount implements RepairAmount {
   constructor(
+    // TODO: Make protected with getter/setter
     public system: SystemType,
   ) {}
 

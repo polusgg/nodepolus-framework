@@ -9,8 +9,8 @@ export class Vector2 {
    * @param y - The y value
    */
   constructor(
-    private readonly x: number,
-    private readonly y: number,
+    protected readonly x: number,
+    protected readonly y: number,
   ) {}
 
   /**

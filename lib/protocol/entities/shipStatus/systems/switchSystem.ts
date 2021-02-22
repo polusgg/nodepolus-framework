@@ -6,8 +6,11 @@ import { Bitfield } from "../../../../types";
 import { BaseSystem } from ".";
 
 export class SwitchSystem extends BaseSystem {
+  // TODO: Make protected with getter/setter
   public expectedSwitches: Bitfield = new Bitfield(new Array(5).fill(0).map(() => !!Math.round(Math.random() * 1)));
+  // TODO: Make protected with getter/setter
   public actualSwitches: Bitfield = this.expectedSwitches.clone();
+  // TODO: Make protected with getter/setter
   public visionModifier = 0xff;
 
   constructor(shipStatus: BaseInnerShipStatus) {
@@ -15,9 +18,9 @@ export class SwitchSystem extends BaseSystem {
   }
 
   async setSwitchState(switchIndex: number, switchState: boolean): Promise<void> {
-    const event = new RoomElectricalInteractedEvent(this.shipStatus.parent.lobby.getGame()!, switchIndex, switchState);
+    const event = new RoomElectricalInteractedEvent(this.shipStatus.getParent().getLobby().getGame()!, switchIndex, switchState);
 
-    await this.shipStatus.parent.lobby.getServer().emit("room.electrical.interacted", event);
+    await this.shipStatus.getParent().getLobby().getServer().emit("room.electrical.interacted", event);
 
     this.actualSwitches.update(switchIndex, event.isFlipped());
   }

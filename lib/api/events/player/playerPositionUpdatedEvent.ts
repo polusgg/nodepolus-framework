@@ -14,11 +14,11 @@ export class PlayerPositionUpdatedEvent extends CancellableEvent {
    * @param newVelocity - The player's new velocity
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private readonly oldPosition: Vector2,
-    private readonly oldVelocity: Vector2,
-    private newPosition: Vector2,
-    private newVelocity: Vector2,
+    protected readonly player: PlayerInstance,
+    protected readonly oldPosition: Vector2,
+    protected readonly oldVelocity: Vector2,
+    protected newPosition: Vector2,
+    protected newVelocity: Vector2,
   ) {
     super();
   }

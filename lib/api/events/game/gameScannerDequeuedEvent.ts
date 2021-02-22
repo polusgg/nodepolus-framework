@@ -12,9 +12,9 @@ export class GameScannerDequeuedEvent extends CancellableEvent {
    * @param queue - The queue for the Medbay scanner, *excluding* the player that left
    */
   constructor(
-    private readonly game: Game,
-    private readonly player: PlayerInstance,
-    private queue: Set<PlayerInstance>,
+    protected readonly game: Game,
+    protected readonly player: PlayerInstance,
+    protected queue: Set<PlayerInstance>,
   ) {
     super();
   }

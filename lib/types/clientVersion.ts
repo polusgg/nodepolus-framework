@@ -9,10 +9,10 @@ export class ClientVersion {
    * @param revision - The version's revision part
    */
   constructor(
-    private readonly year: number,
-    private readonly month: number,
-    private readonly day: number,
-    private readonly revision: number,
+    protected readonly year: number,
+    protected readonly month: number,
+    protected readonly day: number,
+    protected readonly revision: number,
   ) {}
 
   /**

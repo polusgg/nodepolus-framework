@@ -14,10 +14,10 @@ export class MeetingClosedEvent extends CancellableEvent {
    * @param exiledPlayer - The player that was exiled as a result of the final votes
    */
   constructor(
-    private readonly game: Game,
-    private readonly votes: Immutable<VoteResult>[],
-    private readonly tie: boolean,
-    private readonly exiledPlayer?: PlayerInstance,
+    protected readonly game: Game,
+    protected readonly votes: Immutable<VoteResult>[],
+    protected readonly tie: boolean,
+    protected readonly exiledPlayer?: PlayerInstance,
   ) {
     super();
   }

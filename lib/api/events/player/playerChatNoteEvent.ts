@@ -11,8 +11,8 @@ export class PlayerChatNoteEvent extends CancellableEvent {
    * @param chatNoteType - The type of chat note that was sent
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private chatNoteType: ChatNoteType,
+    protected readonly player: PlayerInstance,
+    protected chatNoteType: ChatNoteType,
   ) {
     super();
   }

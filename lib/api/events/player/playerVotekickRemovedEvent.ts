@@ -10,8 +10,8 @@ export class PlayerVotekickRemovedEvent extends CancellableEvent {
    * @param target - The player for which the voting player's vote is being cleared
    */
   constructor(
-    private readonly voter: PlayerInstance,
-    private readonly target: PlayerInstance,
+    protected readonly voter: PlayerInstance,
+    protected readonly target: PlayerInstance,
   ) {
     super();
   }

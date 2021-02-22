@@ -10,8 +10,8 @@ export class RoomReactorConsoleClearedEvent extends CancellableEvent {
    * @param console - The reactor console that was reset
    */
   constructor(
-    private readonly game: Game,
-    private readonly console: number,
+    protected readonly game: Game,
+    protected readonly console: number,
   ) {
     super();
   }

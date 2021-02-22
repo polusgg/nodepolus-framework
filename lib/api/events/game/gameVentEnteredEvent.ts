@@ -13,9 +13,9 @@ export class GameVentEnteredEvent extends CancellableEvent {
    * @param vent - The vent that the player entered
    */
   constructor(
-    private readonly game: Game,
-    private readonly player: PlayerInstance,
-    private readonly vent: LevelVent,
+    protected readonly game: Game,
+    protected readonly player: PlayerInstance,
+    protected readonly vent: LevelVent,
   ) {
     super();
   }

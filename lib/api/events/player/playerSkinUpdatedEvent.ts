@@ -12,9 +12,9 @@ export class PlayerSkinUpdatedEvent extends CancellableEvent {
    * @param newSkin - The player's new skin
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private readonly oldSkin: PlayerSkin,
-    private newSkin: PlayerSkin,
+    protected readonly player: PlayerInstance,
+    protected readonly oldSkin: PlayerSkin,
+    protected newSkin: PlayerSkin,
   ) {
     super();
   }

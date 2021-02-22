@@ -10,8 +10,8 @@ export class Announcement {
    * @param translations - The announcement text in various languages
    */
   constructor(
-    private readonly id: number,
-    private readonly translations: Map<ClientLanguage, TextComponent>,
+    protected readonly id: number,
+    protected readonly translations: Map<ClientLanguage, TextComponent>,
   ) {}
 
   /**

@@ -5,7 +5,9 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class DoorsSystem extends BaseSystem {
+  // TODO: Make protected with getter/setter
   public timers: Map<SystemType, number> = new Map<SystemType, number>();
+  // TODO: Make protected with getter/setter
   public doorStates: boolean[] = new Array(SystemDoors.countForPolus()).fill(true);
 
   constructor(shipStatus: BaseInnerShipStatus) {

@@ -8,7 +8,10 @@ import { LobbyInstance } from "../../../../api/lobby";
 export abstract class BaseEntityShipStatus extends BaseInnerNetEntity {
   protected shipStatus?: BaseInnerShipStatus;
 
-  constructor(type: SpawnType, lobby: LobbyInstance) {
+  constructor(
+    type: SpawnType,
+    lobby: LobbyInstance,
+  ) {
     super(type, lobby, GLOBAL_OWNER, SpawnFlag.None);
   }
 

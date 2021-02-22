@@ -11,9 +11,9 @@ export class GameScannerQueuedEvent {
    * @param queue - The queue for the Medbay scanner, *excluding* the player that entered
    */
   constructor(
-    private readonly game: Game,
-    private readonly player: PlayerInstance,
-    private readonly queue: Readonly<Set<PlayerInstance>>,
+    protected readonly game: Game,
+    protected readonly player: PlayerInstance,
+    protected readonly queue: Readonly<Set<PlayerInstance>>,
   ) {}
 
   /**

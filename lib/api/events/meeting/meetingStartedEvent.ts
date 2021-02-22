@@ -13,9 +13,9 @@ export class MeetingStartedEvent extends CancellableEvent {
    * @param victim - The player whose dead body was found
    */
   constructor(
-    private readonly game: Game,
-    private caller: PlayerInstance,
-    private victim?: PlayerInstance,
+    protected readonly game: Game,
+    protected caller: PlayerInstance,
+    protected victim?: PlayerInstance,
   ) {
     super();
   }

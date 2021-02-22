@@ -12,9 +12,9 @@ export class RoomDoorsClosedEvent extends CancellableEvent {
    * @param player - The player that closed the doors
    */
   constructor(
-    private readonly game: Game,
-    private doors: number[],
-    private readonly player?: PlayerInstance,
+    protected readonly game: Game,
+    protected doors: number[],
+    protected readonly player?: PlayerInstance,
   ) {
     super();
   }

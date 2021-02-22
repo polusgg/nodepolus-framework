@@ -10,8 +10,8 @@ export class RoomOxygenConsoleClearedEvent extends CancellableEvent {
    * @param console - The oxygen console that was reset
    */
   constructor(
-    private readonly game: Game,
-    private readonly console: number,
+    protected readonly game: Game,
+    protected readonly console: number,
   ) {
     super();
   }

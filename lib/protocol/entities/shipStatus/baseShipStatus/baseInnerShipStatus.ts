@@ -1,11 +1,11 @@
 import { BaseRpcPacket, CloseDoorsOfTypePacket, RepairSystemPacket } from "../../../packets/rpc";
 import { InnerNetObjectType, Level, RpcPacketType, SystemType } from "../../../../types/enums";
-import { BaseInnerNetEntity, BaseInnerNetObject } from "../../baseEntity";
 import { DataPacket, SpawnPacketObject } from "../../../packets/gameData";
 import { RepairAmount } from "../../../packets/rpc/repairSystem/amounts";
 import { MessageWriter } from "../../../../util/hazelMessage";
+import { BaseEntityShipStatus, InternalSystemType } from ".";
+import { BaseInnerNetObject } from "../../baseEntity";
 import { Connection } from "../../../connection";
-import { InternalSystemType } from ".";
 import {
   AirshipReactorSystem,
   AutoDoorsSystem,
@@ -26,18 +26,17 @@ import {
 } from "../systems";
 
 export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
-  public readonly spawnSystemTypes: SystemType[];
+  protected readonly spawnSystemTypes: SystemType[];
+  protected readonly level: Level;
 
-  public systems: BaseSystem[] = [];
+  protected systems: BaseSystem[] = [];
 
-  private readonly level: Level;
-
-  protected constructor(
+  constructor(
     type: InnerNetObjectType,
-    parent: BaseInnerNetEntity,
-    public readonly systemTypes: SystemType[],
+    protected readonly parent: BaseEntityShipStatus,
+    protected readonly systemTypes: SystemType[],
     spawnSystemTypes?: SystemType[],
-    netId: number = parent.lobby.getHostInstance().getNextNetId(),
+    netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(type, parent, netId);
 
@@ -68,6 +67,24 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
 
   abstract clone(): BaseInnerShipStatus;
 
+  abstract getParent(): BaseEntityShipStatus;
+
+  getLevel(): Level {
+    return this.level;
+  }
+
+  getSystemTypes(): SystemType[] {
+    return this.systemTypes;
+  }
+
+  getSpawnSystemTypes(): SystemType[] {
+    return this.spawnSystemTypes;
+  }
+
+  getSystems(): BaseSystem[] {
+    return this.systems;
+  }
+
   closeDoorsOfType(_systemId: SystemType, _sendTo?: Connection[]): void {
     // TODO: InnerNetObject refactor
   }
@@ -83,7 +100,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         // TODO: InnerNetObject refactor
         const data = packet as CloseDoorsOfTypePacket;
 
-        this.parent.lobby.getHostInstance().handleCloseDoorsOfType(this, data.system);
+        this.parent.getLobby().getHostInstance().handleCloseDoorsOfType(this, data.system);
         this.closeDoorsOfType(data.system);
         break;
       }
@@ -91,7 +108,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         // TODO: InnerNetObject refactor
         const data = packet as RepairSystemPacket;
 
-        this.parent.lobby.getHostInstance().handleRepairSystem(this, data.system, data.playerControlNetId, data.getAmount());
+        this.parent.getLobby().getHostInstance().handleRepairSystem(this, data.system, data.playerControlNetId, data.getAmount());
         this.repairSystem(data.system, data.playerControlNetId, data.getAmount());
         break;
       }
@@ -119,7 +136,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
 
     const writer = new MessageWriter()
       .writePackedUInt32(this.serializeSystemsToDirtyBits(changedSystemTypes))
-      .writeBytes(this.getSystems(old, changedSystemTypes));
+      .writeBytes(this.serializeSystems(old, changedSystemTypes));
 
     return new DataPacket(
       this.netId,
@@ -130,7 +147,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   serializeSpawn(): SpawnPacketObject {
     return new SpawnPacketObject(
       this.netId,
-      this.getSystems(undefined, this.spawnSystemTypes),
+      this.serializeSystems(undefined, this.spawnSystemTypes),
     );
   }
 
@@ -177,7 +194,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     }
   }
 
-  private initializeSystems(): void {
+  protected initializeSystems(): void {
     for (let i = 0; i < this.systemTypes.length; i++) {
       const type = this.systemTypes[i];
 
@@ -236,7 +253,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     }
   }
 
-  private serializeSystemsToDirtyBits(otherSystems: SystemType[]): number {
+  protected serializeSystemsToDirtyBits(otherSystems: SystemType[]): number {
     let n = 0;
 
     for (let i = 0; i < this.systemTypes.length; i++) {
@@ -248,7 +265,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     return n;
   }
 
-  private getSystems(old: BaseInnerShipStatus | undefined, systems: SystemType[]): MessageWriter {
+  protected serializeSystems(old: BaseInnerShipStatus | undefined, systems: SystemType[]): MessageWriter {
     const writers: MessageWriter[] = new Array(systems.length);
 
     for (let i = 0; i < systems.length; i++) {

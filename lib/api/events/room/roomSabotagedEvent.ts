@@ -13,9 +13,9 @@ export class RoomSabotagedEvent extends CancellableEvent {
    * @param player - The player that sabotaged the room
    */
   constructor(
-    private readonly game: Game,
-    // private readonly room: BaseGameRoom,
-    private readonly player?: PlayerInstance,
+    protected readonly game: Game,
+    // protected readonly room: BaseGameRoom,
+    protected readonly player?: PlayerInstance,
   ) {
     super();
   }

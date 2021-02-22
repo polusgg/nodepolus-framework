@@ -6,12 +6,14 @@ import { SystemType } from "../../types/enums";
 import { InternalHost } from "..";
 
 export class AutoDoorsHandler {
-  private readonly systemTimers: NodeJS.Timeout[] = [];
+  protected readonly systemTimers: NodeJS.Timeout[] = [];
 
-  private oldShipStatus: BaseInnerShipStatus;
+  protected oldShipStatus: BaseInnerShipStatus;
 
   constructor(
+    // TODO: Make protected with getter/setter
     public host: InternalHost,
+    // TODO: Make protected with getter/setter
     public shipStatus: BaseInnerShipStatus,
   ) {
     this.oldShipStatus = shipStatus.clone();

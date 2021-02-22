@@ -14,10 +14,10 @@ export class PlayerBannedEvent extends CancellableEvent {
    * @param reason - The disconnect reason to be sent to the player
    */
   constructor(
-    private readonly lobby: LobbyInstance,
-    private readonly player: PlayerInstance,
-    private readonly banningPlayer?: PlayerInstance,
-    private readonly reason?: DisconnectReason,
+    protected readonly lobby: LobbyInstance,
+    protected readonly player: PlayerInstance,
+    protected readonly banningPlayer?: PlayerInstance,
+    protected readonly reason?: DisconnectReason,
   ) {
     super();
   }

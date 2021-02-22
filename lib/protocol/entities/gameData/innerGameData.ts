@@ -10,15 +10,16 @@ import { EntityGameData } from ".";
 
 export class InnerGameData extends BaseInnerNetObject {
   constructor(
-    public readonly parent: EntityGameData,
+    protected readonly parent: EntityGameData,
+    // TODO: Make protected with getter/setter
     public readonly players: PlayerData[] = [],
-    netId: number = parent.lobby.getHostInstance().getNextNetId(),
+    netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.GameData, parent, netId);
   }
 
   setTasks(playerId: number, taskIds: number[], sendTo?: Connection[]): void {
-    const tasks = Tasks.forLevelFromId(this.parent.lobby.getLevel(), taskIds);
+    const tasks = Tasks.forLevelFromId(this.parent.getLobby().getLevel(), taskIds);
     const playerIndex = this.players.findIndex(p => p.id == playerId);
 
     if (playerIndex > -1) {
@@ -61,7 +62,7 @@ export class InnerGameData extends BaseInnerNetObject {
   handleRpc(connection: Connection, type: RpcPacketType, _packet: BaseRpcPacket, _sendTo: Connection[]): void {
     switch (type) {
       case RpcPacketType.SetTasks:
-        this.parent.lobby.getLogger().warn("Received SetTasks packet from connection %s in a server-as-host state", connection);
+        this.parent.getLobby().getLogger().warn("Received SetTasks packet from connection %s in a server-as-host state", connection);
         break;
       case RpcPacketType.UpdateGameData:
         break;
@@ -87,5 +88,9 @@ export class InnerGameData extends BaseInnerNetObject {
 
   clone(): InnerGameData {
     return new InnerGameData(this.parent, this.players, this.netId);
+  }
+
+  getParent(): EntityGameData {
+    return this.parent;
   }
 }

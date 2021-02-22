@@ -10,8 +10,8 @@ export class GameCamerasOpenedEvent {
    * @param player - The player that started viewing security cameras
    */
   constructor(
-    private readonly game: Game,
-    private readonly player: PlayerInstance,
+    protected readonly game: Game,
+    protected readonly player: PlayerInstance,
   ) {}
 
   /**

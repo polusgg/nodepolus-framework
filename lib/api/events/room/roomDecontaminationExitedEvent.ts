@@ -11,9 +11,9 @@ export class RoomDecontaminationExitedEvent extends CancellableEvent {
    * @param side - The side that the player exited through
    */
   constructor(
-    private readonly game: Game,
-    private readonly decontamination: number,
-    private readonly side: number,
+    protected readonly game: Game,
+    protected readonly decontamination: number,
+    protected readonly side: number,
   ) {
     super();
   }

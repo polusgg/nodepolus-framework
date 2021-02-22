@@ -7,15 +7,15 @@ import { PluginAuthor } from ".";
  * The base class for a NodePolus plugin.
  */
 export abstract class BasePlugin {
-  private readonly logger: Logger;
+  protected readonly logger: Logger;
 
   /**
    * @param server - The NodePolus server instance
    * @param pluginMetadata - The metadata for the plugin
    */
   constructor(
-    private readonly server: Server,
-    private readonly pluginMetadata: PluginMetadata,
+    protected readonly server: Server,
+    protected readonly pluginMetadata: PluginMetadata,
   ) {
     this.logger = server.getLogger(this.pluginMetadata.name);
   }

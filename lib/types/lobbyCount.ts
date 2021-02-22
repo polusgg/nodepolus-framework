@@ -13,10 +13,10 @@ export class LobbyCount {
    * @param airship - The number of lobbies playing on Airship
    */
   constructor(
-    public skeld: number = 0,
-    public mira: number = 0,
-    public polus: number = 0,
-    public airship: number = 0,
+    protected skeld: number = 0,
+    protected mira: number = 0,
+    protected polus: number = 0,
+    protected airship: number = 0,
   ) {}
 
   /**

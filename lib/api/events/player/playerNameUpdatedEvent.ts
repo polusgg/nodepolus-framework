@@ -12,9 +12,9 @@ export class PlayerNameUpdatedEvent extends CancellableEvent {
    * @param newName - The player's new name
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private readonly oldName: TextComponent,
-    private newName: TextComponent,
+    protected readonly player: PlayerInstance,
+    protected readonly oldName: TextComponent,
+    protected newName: TextComponent,
   ) {
     super();
   }

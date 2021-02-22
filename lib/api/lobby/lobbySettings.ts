@@ -6,26 +6,26 @@ import { InternalPlayer } from "../../player";
 import { PlayerInstance } from "../player";
 
 export class LobbySettings {
+  protected isPov = false;
+  protected connection?: Connection;
+  protected povSpeed?: number;
+  protected povCrewVision?: number;
+  protected povImpostorVision?: number;
+  protected povKillCooldown?: number;
+  protected povEmergencyMeetingCount?: number;
+  protected povKillDistance?: KillDistance;
+  protected povDiscussionTime?: number;
+  protected povVotingTime?: number;
+  protected povEmergencyCooldown?: number;
+  protected povConfirmEjects?: boolean;
+  protected povVisualTasks?: boolean;
+  protected povAnonymousVoting?: boolean;
+  protected povTaskBarUpdates?: TaskBarMode;
+
   private static readonly povCache: Map<number, LobbySettings> = new Map();
 
-  private isPov = false;
-  private connection?: Connection;
-  private povSpeed?: number;
-  private povCrewVision?: number;
-  private povImpostorVision?: number;
-  private povKillCooldown?: number;
-  private povEmergencyMeetingCount?: number;
-  private povKillDistance?: KillDistance;
-  private povDiscussionTime?: number;
-  private povVotingTime?: number;
-  private povEmergencyCooldown?: number;
-  private povConfirmEjects?: boolean;
-  private povVisualTasks?: boolean;
-  private povAnonymousVoting?: boolean;
-  private povTaskBarUpdates?: TaskBarMode;
-
   constructor(
-    private readonly lobby: LobbyInstance,
+    protected readonly lobby: LobbyInstance,
   ) {}
 
   getLobby(): LobbyInstance {
@@ -343,7 +343,7 @@ export class LobbySettings {
     return povSettings;
   }
 
-  private syncSettingsOnLobby(): void {
+  protected syncSettingsOnLobby(): void {
     if (this.lobby.getPlayers()[0]) {
       const customOptions = new GameOptionsData(
         4,

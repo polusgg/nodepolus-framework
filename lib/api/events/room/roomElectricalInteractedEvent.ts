@@ -13,10 +13,10 @@ export class RoomElectricalInteractedEvent extends CancellableEvent {
    * @param player - The player that flipped the switch
    */
   constructor(
-    private readonly game: Game,
-    private readonly index: number,
-    private flipped: boolean,
-    private readonly player?: PlayerInstance,
+    protected readonly game: Game,
+    protected readonly index: number,
+    protected flipped: boolean,
+    protected readonly player?: PlayerInstance,
   ) {
     super();
   }

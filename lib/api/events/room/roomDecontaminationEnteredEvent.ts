@@ -13,10 +13,10 @@ export class RoomDecontaminationEnteredEvent extends CancellableEvent {
    * @param player - The player that opened the decontamination room
    */
   constructor(
-    private readonly game: Game,
-    private readonly decontamination: number,
-    private readonly side: number,
-    private readonly player?: PlayerInstance,
+    protected readonly game: Game,
+    protected readonly decontamination: number,
+    protected readonly side: number,
+    protected readonly player?: PlayerInstance,
   ) {
     super();
   }

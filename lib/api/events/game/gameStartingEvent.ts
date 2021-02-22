@@ -9,7 +9,7 @@ export class GameStartingEvent extends CancellableEvent {
    * @param game - The game that is starting
    */
   constructor(
-    private readonly game: Game,
+    protected readonly game: Game,
   ) {
     super();
   }

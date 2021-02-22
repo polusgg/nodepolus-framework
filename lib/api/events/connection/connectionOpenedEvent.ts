@@ -11,7 +11,7 @@ export class ConnectionOpenedEvent extends DisconnectableEvent {
    * @param connection - The connection that was opened
    */
   constructor(
-    private readonly connection: Connection,
+    protected readonly connection: Connection,
   ) {
     super(DisconnectReason.custom("The server refused your connection"));
   }

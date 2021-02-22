@@ -9,7 +9,7 @@ export class ServerLobbyDestroyedEvent extends CancellableEvent {
    * @param lobby - The lobby that will be destroyed
    */
   constructor(
-    private readonly lobby: LobbyInstance,
+    protected readonly lobby: LobbyInstance,
   ) {
     super();
   }

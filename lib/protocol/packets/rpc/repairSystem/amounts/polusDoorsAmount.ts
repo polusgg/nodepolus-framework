@@ -2,6 +2,7 @@ import { RepairAmount } from ".";
 
 export class PolusDoorsAmount implements RepairAmount {
   constructor(
+    // TODO: Make protected with getter/setter
     public doorId: number,
   ) {}
 

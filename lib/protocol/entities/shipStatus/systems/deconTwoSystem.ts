@@ -4,7 +4,9 @@ import { BaseInnerShipStatus } from "../baseShipStatus";
 import { BaseSystem } from ".";
 
 export class DeconTwoSystem extends BaseSystem {
+  // TODO: Make protected with getter/setter
   public timer = 0;
+  // TODO: Make protected with getter/setter
   public state: DecontaminationDoorState = DecontaminationDoorState.Idle;
 
   constructor(shipStatus: BaseInnerShipStatus) {

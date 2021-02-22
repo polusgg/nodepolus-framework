@@ -4,8 +4,8 @@ import { EntityAirshipStatus } from ".";
 
 export class InnerAirshipStatus extends BaseInnerShipStatus {
   constructor(
-    public readonly parent: EntityAirshipStatus,
-    netId: number = parent.lobby.getHostInstance().getNextNetId(),
+    protected readonly parent: EntityAirshipStatus,
+    netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.DleksShipStatus, parent, [
       SystemType.Reactor,
@@ -24,5 +24,9 @@ export class InnerAirshipStatus extends BaseInnerShipStatus {
     clone.systems = this.systems.map(system => system.clone());
 
     return clone;
+  }
+
+  getParent(): EntityAirshipStatus {
+    return this.parent;
   }
 }

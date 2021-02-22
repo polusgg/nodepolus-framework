@@ -6,9 +6,9 @@ import { BaseInnerNetEntity } from ".";
 
 export abstract class BaseInnerNetObject {
   constructor(
-    public readonly type: InnerNetObjectType,
-    public readonly parent: BaseInnerNetEntity,
-    public readonly netId: number,
+    protected readonly type: InnerNetObjectType,
+    protected readonly parent: BaseInnerNetEntity,
+    protected readonly netId: number,
   ) {}
 
   abstract handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void;
@@ -19,11 +19,21 @@ export abstract class BaseInnerNetObject {
 
   abstract clone(): BaseInnerNetObject;
 
+  abstract getParent(): BaseInnerNetEntity;
+
+  getType(): InnerNetObjectType {
+    return this.type;
+  }
+
+  getNetId(): number {
+    return this.netId;
+  }
+
   sendRpcPacket(packet: BaseRpcPacket, sendTo?: Connection[]): void {
     if (sendTo === undefined || sendTo.length == 0) {
       return;
     }
 
-    this.parent.lobby.sendRpcPacket(this, packet, sendTo);
+    this.parent.getLobby().sendRpcPacket(this, packet, sendTo);
   }
 }

@@ -12,9 +12,9 @@ export class LobbyHostMigratedEvent extends CancellableEvent {
    * @param newHost - The connection that is now an acting host
    */
   constructor(
-    private readonly lobby: LobbyInstance,
-    private readonly oldHost: Connection,
-    private newHost: Connection,
+    protected readonly lobby: LobbyInstance,
+    protected readonly oldHost: Connection,
+    protected newHost: Connection,
   ) {
     super();
   }

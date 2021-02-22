@@ -21,12 +21,12 @@ import {
 } from "../api/events/player";
 
 export class InternalPlayer implements PlayerInstance {
-  private readonly id: number;
-  private readonly metadata: Map<string, unknown> = new Map();
+  protected readonly id: number;
+  protected readonly metadata: Map<string, unknown> = new Map();
 
-  private name: TextComponent;
-  private role: PlayerRole = PlayerRole.Crewmate;
-  private initialized = false;
+  protected name: TextComponent;
+  protected role: PlayerRole = PlayerRole.Crewmate;
+  protected initialized = false;
 
   /**
    * @param lobby - The lobby in which the player exists
@@ -34,9 +34,11 @@ export class InternalPlayer implements PlayerInstance {
    * @param connection - The connection to which the player belongs
    */
   constructor(
+    // TODO: Make protected with getter/setter
     public lobby: InternalLobby,
+    // TODO: Make protected with getter/setter
     public entity: EntityPlayer,
-    private readonly connection?: Connection,
+    protected readonly connection?: Connection,
   ) {
     this.id = entity.getPlayerControl().playerId;
     this.name = TextComponent.from(connection?.getName() ?? "");
@@ -283,7 +285,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getPosition(): Vector2 {
-    return this.entity.getCustomNetworkTransform().position;
+    return this.entity.getCustomNetworkTransform().getPosition();
   }
 
   setPosition(position: Vector2, reason: TeleportReason = TeleportReason.Unknown): this {
@@ -293,7 +295,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getVelocity(): Vector2 {
-    return this.entity.getCustomNetworkTransform().velocity;
+    return this.entity.getCustomNetworkTransform().getVelocity();
   }
 
   getVent(): LevelVent | undefined {
@@ -338,7 +340,7 @@ export class InternalPlayer implements PlayerInstance {
   murder(player: PlayerInstance): this {
     const playerControl = this.entity.getPlayerControl();
 
-    playerControl.murderPlayer((player as InternalPlayer).entity.getPlayerControl().netId, this.lobby.getConnections());
+    playerControl.murderPlayer((player as InternalPlayer).entity.getPlayerControl().getNetId(), this.lobby.getConnections());
     this.lobby.getHostInstance().handleMurderPlayer(playerControl, 0);
 
     return this;
@@ -357,9 +359,9 @@ export class InternalPlayer implements PlayerInstance {
 
     const entity = new EntityPlayer(
       this.lobby,
-      this.entity.ownerId,
-      this.entity.getCustomNetworkTransform().position,
-      this.entity.getCustomNetworkTransform().velocity,
+      this.entity.getOwnerId(),
+      this.entity.getCustomNetworkTransform().getPosition(),
+      this.entity.getCustomNetworkTransform().getVelocity(),
       this.getId()!,
       false,
       SpawnFlag.None,
@@ -372,19 +374,19 @@ export class InternalPlayer implements PlayerInstance {
     const oldName = this.getName();
 
     this.lobby.ignoredNetIds.push(
-      this.entity.getPlayerControl().netId,
-      this.entity.getPlayerPhysics().netId,
-      this.entity.getCustomNetworkTransform().netId,
+      this.entity.getPlayerControl().getNetId(),
+      this.entity.getPlayerPhysics().getNetId(),
+      this.entity.getCustomNetworkTransform().getNetId(),
     );
 
     this.setName("");
 
     if (this.connection.isActingHost()) {
-      this.connection.writeReliable(new RemovePlayerPacket(this.lobby.getCode(), this.entity.ownerId, this.entity.ownerId, DisconnectReason.destroy()));
-      this.connection.writeReliable(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.ownerId, this.entity.ownerId));
+      this.connection.writeReliable(new RemovePlayerPacket(this.lobby.getCode(), this.entity.getOwnerId(), this.entity.getOwnerId(), DisconnectReason.destroy()));
+      this.connection.writeReliable(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.getOwnerId(), this.entity.getOwnerId()));
     } else {
-      this.connection.writeReliable(new RemovePlayerPacket(this.lobby.getCode(), this.entity.ownerId, this.lobby.getHostInstance().getId(), DisconnectReason.destroy()));
-      this.connection.writeReliable(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.ownerId, this.lobby.getHostInstance().getId()));
+      this.connection.writeReliable(new RemovePlayerPacket(this.lobby.getCode(), this.entity.getOwnerId(), this.lobby.getHostInstance().getId(), DisconnectReason.destroy()));
+      this.connection.writeReliable(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.getOwnerId(), this.lobby.getHostInstance().getId()));
     }
 
     this.setName(oldName);
@@ -394,11 +396,11 @@ export class InternalPlayer implements PlayerInstance {
     for (let i = 0; i < connections.length; i++) {
       const connection = connections[i];
 
-      if (connection.id != this.entity.ownerId) {
+      if (connection.id != this.entity.getOwnerId()) {
         connection.writeReliable(new GameDataPacket([
-          new DespawnPacket(this.entity.getPlayerControl().netId),
-          new DespawnPacket(this.entity.getPlayerPhysics().netId),
-          new DespawnPacket(this.entity.getCustomNetworkTransform().netId),
+          new DespawnPacket(this.entity.getPlayerControl().getNetId()),
+          new DespawnPacket(this.entity.getPlayerPhysics().getNetId()),
+          new DespawnPacket(this.entity.getCustomNetworkTransform().getNetId()),
         ], this.lobby.getCode()));
       }
     }
@@ -533,7 +535,7 @@ export class InternalPlayer implements PlayerInstance {
    *
    * @internal
    */
-  private getGameData(): EntityGameData {
+  protected getGameData(): EntityGameData {
     const gameData = this.lobby.getGameData();
 
     if (!gameData) {

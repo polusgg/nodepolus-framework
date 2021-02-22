@@ -11,8 +11,8 @@ export class GameEndedEvent extends CancellableEvent {
    * @param reason - The reason for why the game ended
    */
   constructor(
-    private readonly game: Game,
-    private reason: GameOverReason,
+    protected readonly game: Game,
+    protected reason: GameOverReason,
   ) {
     super();
   }

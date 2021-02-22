@@ -8,8 +8,8 @@ import { EntityLobbyBehaviour } from ".";
 
 export class InnerLobbyBehaviour extends BaseInnerNetObject {
   constructor(
-    public readonly parent: EntityLobbyBehaviour,
-    netId: number = parent.lobby.getHostInstance().getNextNetId(),
+    protected readonly parent: EntityLobbyBehaviour,
+    netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.LobbyBehaviour, parent, netId);
   }
@@ -30,5 +30,9 @@ export class InnerLobbyBehaviour extends BaseInnerNetObject {
 
   clone(): InnerLobbyBehaviour {
     return new InnerLobbyBehaviour(this.parent, this.netId);
+  }
+
+  getParent(): EntityLobbyBehaviour {
+    return this.parent;
   }
 }

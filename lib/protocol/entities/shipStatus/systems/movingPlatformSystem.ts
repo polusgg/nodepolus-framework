@@ -9,8 +9,11 @@ enum MovingPlatformSide {
 }
 
 export class MovingPlatformSystem extends BaseSystem {
+  // TODO: Make protected with getter/setter
   public sequenceId = 0;
+  // TODO: Make protected with getter/setter
   public innerPlayerControlNetId?: number;
+  // TODO: Make protected with getter/setter
   public side: MovingPlatformSide = MovingPlatformSide.Left;
 
   constructor(shipStatus: BaseInnerShipStatus) {

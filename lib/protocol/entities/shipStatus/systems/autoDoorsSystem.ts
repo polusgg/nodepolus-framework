@@ -5,6 +5,7 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class AutoDoorsSystem extends BaseSystem {
+  // TODO: Make protected with getter/setter
   public doors: boolean[] = new Array(SystemDoors.countForSkeld()).fill(true);
 
   constructor(shipStatus: BaseInnerShipStatus) {

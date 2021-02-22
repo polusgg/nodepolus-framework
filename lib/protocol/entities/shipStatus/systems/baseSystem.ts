@@ -4,7 +4,9 @@ import { SystemType } from "../../../../types/enums";
 
 export abstract class BaseSystem {
   constructor(
+    // TODO: Make protected with getter
     public readonly shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter
     public readonly type: SystemType,
   ) {}
 

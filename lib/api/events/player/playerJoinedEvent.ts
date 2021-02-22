@@ -11,9 +11,9 @@ export class PlayerJoinedEvent {
    * @param rejoining - `true` if the player is rejoining the game, `false` if not (default `false`)
    */
   constructor(
-    private readonly lobby: LobbyInstance,
-    private readonly player: PlayerInstance,
-    private readonly rejoining: boolean = false,
+    protected readonly lobby: LobbyInstance,
+    protected readonly player: PlayerInstance,
+    protected readonly rejoining: boolean = false,
   ) {}
 
   /**

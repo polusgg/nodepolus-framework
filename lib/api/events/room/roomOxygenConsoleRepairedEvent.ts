@@ -12,9 +12,9 @@ export class RoomOxygenConsoleRepairedEvent extends CancellableEvent {
    * @param player - The player that repaired the oxygen console
    */
   constructor(
-    private readonly game: Game,
-    private readonly console: number,
-    private readonly player?: PlayerInstance,
+    protected readonly game: Game,
+    protected readonly console: number,
+    protected readonly player?: PlayerInstance,
   ) {
     super();
   }

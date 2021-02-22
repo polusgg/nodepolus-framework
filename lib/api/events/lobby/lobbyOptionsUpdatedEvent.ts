@@ -14,10 +14,10 @@ export class LobbyOptionsUpdatedEvent extends CancellableEvent {
    * @param newOptions - The new lobby options
    */
   constructor(
-    private readonly lobby: LobbyInstance,
-    private readonly host: PlayerInstance,
-    private readonly oldOptions: Immutable<GameOptionsData>,
-    private newOptions: GameOptionsData,
+    protected readonly lobby: LobbyInstance,
+    protected readonly host: PlayerInstance,
+    protected readonly oldOptions: Immutable<GameOptionsData>,
+    protected newOptions: GameOptionsData,
   ) {
     super();
   }

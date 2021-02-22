@@ -4,6 +4,7 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class HudOverrideSystem extends BaseSystem {
+  // TODO: Make protected with getter/setter
   public sabotaged = false;
 
   constructor(shipStatus: BaseInnerShipStatus) {

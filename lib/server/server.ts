@@ -40,24 +40,24 @@ import {
 } from "../api/events/server";
 
 export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
-  private readonly startedAt = Date.now();
-  private readonly socket = dgram.createSocket("udp4");
-  private readonly logger: Logger;
-  private readonly connections: Map<string, Connection> = new Map();
-  private readonly lobbies: LobbyInstance[] = [];
-  private readonly lobbyMap: Map<string, LobbyInstance> = new Map();
+  protected readonly startedAt = Date.now();
+  protected readonly socket = dgram.createSocket("udp4");
+  protected readonly logger: Logger;
+  protected readonly connections: Map<string, Connection> = new Map();
+  protected readonly lobbies: LobbyInstance[] = [];
+  protected readonly lobbyMap: Map<string, LobbyInstance> = new Map();
 
   // Reserve the fake client IDs
-  private connectionIndex = Object.keys(FakeClientId).length / 2;
-  private listening = false;
-  private inboundPacketTransformer?: InboundPacketTransformer;
-  private outboundPacketTransformer?: OutboundPacketTransformer;
+  protected connectionIndex = Object.keys(FakeClientId).length / 2;
+  protected listening = false;
+  protected inboundPacketTransformer?: InboundPacketTransformer;
+  protected outboundPacketTransformer?: OutboundPacketTransformer;
 
   /**
    * @param config - The server configuration
    */
   constructor(
-    private readonly config: ServerConfig = {},
+    protected readonly config: ServerConfig = {},
   ) {
     super();
 
@@ -356,7 +356,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @param connection - The connection that was disconnected
    * @param reason - The reason for why the connection was disconnected
    */
-  private async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
+  protected async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
     if (connection.lobby) {
       this.getLogger().verbose("Connection %s disconnected from lobby %s", connection, connection.lobby);
 
@@ -392,7 +392,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     this.connections.delete(connection.getConnectionInfo().toString());
   }
 
-  private async emitRpcEvents(connection: Connection, event: ServerPacketOutEvent | ServerPacketOutCustomEvent): Promise<void> {
+  protected async emitRpcEvents(connection: Connection, event: ServerPacketOutEvent | ServerPacketOutCustomEvent): Promise<void> {
     if (event.isCancelled()) {
       return;
     }
@@ -404,7 +404,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
       return;
     }
 
-    if (event.getPacket().type !== RootPacketType.GameData && event.getPacket().type !== RootPacketType.GameDataTo) {
+    if (event.getPacket().getType() !== RootPacketType.GameData && event.getPacket().getType() !== RootPacketType.GameDataTo) {
       return;
     }
 
@@ -412,13 +412,13 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     const filteredIndices: number[] = [];
 
     for (let i = 0; i < subpackets.length; i++) {
-      if (subpackets[i].type !== GameDataPacketType.RPC) {
+      if (subpackets[i].getType() !== GameDataPacketType.RPC) {
         continue;
       }
 
       const rpc = subpackets[i] as RpcPacket;
 
-      if (rpc.type in RpcPacketType) {
+      if (rpc.getType() in RpcPacketType) {
         if (rpcListeners > 0) {
           const rpcEvent = new ServerPacketOutRpcEvent(connection, rpc.senderNetId, rpc.packet);
 
@@ -450,7 +450,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @param connectionInfo - The ConnectionInfo describing the connection
    * @returns A new connection described by `connectionInfo`
    */
-  private initializeConnection(connectionInfo: ConnectionInfo): Connection {
+  protected initializeConnection(connectionInfo: ConnectionInfo): Connection {
     const connection = new Connection(
       connectionInfo,
       this.socket,
@@ -523,8 +523,8 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @param packet - The packet that was sent to the server
    * @param sender - The connection that sent the packet
    */
-  private async handlePacket(packet: BaseRootPacket, sender: Connection): Promise<void> {
-    if (packet.type in RootPacketType) {
+  protected async handlePacket(packet: BaseRootPacket, sender: Connection): Promise<void> {
+    if (packet.getType() in RootPacketType) {
       if (this.listenerCount("server.packet.in") > 0) {
         const event = new ServerPacketInEvent(sender, packet);
 
@@ -535,7 +535,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         }
       }
     } else {
-      const custom = RootPacket.getPacket(packet.type);
+      const custom = RootPacket.getPacket(packet.getType());
 
       if (custom !== undefined) {
         if (this.listenerCount("server.packet.in.custom") > 0) {
@@ -554,7 +554,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
       }
     }
 
-    switch (packet.type) {
+    switch (packet.getType()) {
       case RootPacketType.HostGame: {
         if (sender.lobby !== undefined) {
           return;
@@ -693,7 +693,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
       }
       default: {
         if (!sender.lobby) {
-          throw new Error(`Client ${sender.id} sent root game packet type ${packet.type} (${RootPacketType[packet.type]}) while not in a lobby`);
+          throw new Error(`Client ${sender.id} sent root game packet type ${packet.getType()} (${RootPacketType[packet.getType()]}) while not in a lobby`);
         }
       }
     }

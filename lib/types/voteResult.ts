@@ -10,9 +10,9 @@ export class VoteResult {
    * @param skipped - `true` if the vote was to skip, `false` if not
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private votedFor?: PlayerInstance,
-    private skipped: boolean = false,
+    protected readonly player: PlayerInstance,
+    protected votedFor?: PlayerInstance,
+    protected skipped: boolean = false,
   ) {}
 
   /**

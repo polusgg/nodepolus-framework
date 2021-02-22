@@ -2,7 +2,9 @@ import { RepairAmount } from ".";
 
 export class DecontaminationAmount implements RepairAmount {
   constructor(
+    // TODO: Make protected with getter/setter
     public isEntering: boolean,
+    // TODO: Make protected with getter/setter
     public isHeadingUp: boolean,
   ) {}
 

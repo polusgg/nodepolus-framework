@@ -11,8 +11,8 @@ export class ServerPacketInCustomEvent extends CancellableEvent {
    * @param packet - The packet that was sent
    */
   constructor(
-    private readonly connection: Connection,
-    private readonly packet: BaseRootPacket,
+    protected readonly connection: Connection,
+    protected readonly packet: BaseRootPacket,
   ) {
     super();
   }

@@ -9,7 +9,7 @@ export class Bitfield {
    * @param bits - The underlying boolean array representing each bit's state
    */
   constructor(
-    private bits: boolean[],
+    protected bits: boolean[],
   ) {}
 
   /**

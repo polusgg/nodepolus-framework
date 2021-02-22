@@ -11,8 +11,8 @@ export class ConnectionClosedEvent {
    * @param reason - The reason for why the connection was closed (default `ExitGame`)
    */
   constructor(
-    private readonly connection: Connection,
-    private readonly reason: DisconnectReason = DisconnectReason.exitGame(),
+    protected readonly connection: Connection,
+    protected readonly reason: DisconnectReason = DisconnectReason.exitGame(),
   ) {}
 
   /**

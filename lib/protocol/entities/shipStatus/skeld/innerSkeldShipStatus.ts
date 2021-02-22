@@ -4,8 +4,8 @@ import { EntitySkeldShipStatus } from ".";
 
 export class InnerSkeldShipStatus extends BaseInnerShipStatus {
   constructor(
-    public readonly parent: EntitySkeldShipStatus,
-    netId: number = parent.lobby.getHostInstance().getNextNetId(),
+    protected readonly parent: EntitySkeldShipStatus,
+    netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.SkeldShipStatus, parent, [
       SystemType.Reactor,
@@ -25,5 +25,9 @@ export class InnerSkeldShipStatus extends BaseInnerShipStatus {
     clone.systems = this.systems.map(system => system.clone());
 
     return clone;
+  }
+
+  getParent(): EntitySkeldShipStatus {
+    return this.parent;
   }
 }

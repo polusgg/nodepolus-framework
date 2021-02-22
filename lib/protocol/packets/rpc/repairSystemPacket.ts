@@ -19,7 +19,7 @@ import {
  * RPC Packet ID: `1c` (`28`)
  */
 export class RepairSystemPacket extends BaseRpcPacket {
-  private amount: RepairAmount;
+  protected amount: RepairAmount;
 
   constructor(
     public system: SystemType,

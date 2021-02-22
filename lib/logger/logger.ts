@@ -100,7 +100,7 @@ const prettyPrint = winston.format((info: winston.Logform.TransformableInfo, _op
  * Logs will be saved in the `logs` folder within the server's root folder.
  */
 export class Logger {
-  private readonly winston: winston.Logger;
+  protected readonly winston: winston.Logger;
 
   /**
    * @param logger - The name of the logger if it is a `string`, otherwise the parent logger when creating a child instance
@@ -111,10 +111,10 @@ export class Logger {
    */
   constructor(
     logger: string | winston.Logger,
-    private readonly displayLevel: LogLevel,
-    private readonly filename?: string,
-    private readonly maxFileSizeInBytes: number = 104857600,
-    private readonly maxFiles: number = 10,
+    protected readonly displayLevel: LogLevel,
+    protected readonly filename?: string,
+    protected readonly maxFileSizeInBytes: number = 104857600,
+    protected readonly maxFiles: number = 10,
   ) {
     if (typeof logger != "string") {
       this.winston = logger;

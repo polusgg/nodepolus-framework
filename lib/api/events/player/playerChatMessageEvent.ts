@@ -11,8 +11,8 @@ export class PlayerChatMessageEvent extends CancellableEvent {
    * @param message - The chat message
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private message: TextComponent,
+    protected readonly player: PlayerInstance,
+    protected message: TextComponent,
   ) {
     super();
   }

@@ -4,7 +4,9 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class AirshipReactorSystem extends BaseSystem {
+  // TODO: Make protected with getter/setter
   public activeConsoles: Map<number, number> = new Map();
+  // TODO: Make protected with getter/setter
   public completedConsoles: Set<number> = new Set([0, 1]);
 
   constructor(shipStatus: BaseInnerShipStatus) {

@@ -10,8 +10,8 @@ export class DisconnectReason {
    * @param message - The custom message to be displayed to the player when `type` is `DisconnectReasonType.Custom`
    */
   constructor(
-    private type: DisconnectReasonType,
-    private message: string = "",
+    protected type: DisconnectReasonType,
+    protected message: string = "",
   ) {}
 
   /**

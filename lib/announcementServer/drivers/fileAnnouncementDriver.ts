@@ -12,7 +12,7 @@ export class FileAnnouncementDriver extends BaseAnnouncementDriver {
    * @param jsonFilePath - The absolute path to the JSON file containing the announcement
    */
   constructor(
-    private readonly jsonFilePath: string,
+    protected readonly jsonFilePath: string,
   ) {
     super();
   }
@@ -52,7 +52,7 @@ export class FileAnnouncementDriver extends BaseAnnouncementDriver {
    * @param data - The announcement to be checked
    * @returns `true` if the announcement data is valid, `false` if not
    */
-  private isValidAnnouncement(data: AnnouncementData): data is Required<AnnouncementData> {
+  protected isValidAnnouncement(data: AnnouncementData): data is Required<AnnouncementData> {
     if (data.id === undefined) {
       return false;
     }

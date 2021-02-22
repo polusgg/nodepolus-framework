@@ -10,8 +10,8 @@ export class GameStartedEvent {
    * @param impostors - The players that were chosen to be an Impostor
    */
   constructor(
-    private readonly game: Game,
-    private impostors: PlayerInstance[],
+    protected readonly game: Game,
+    protected impostors: PlayerInstance[],
   ) {}
 
   /**

@@ -3,10 +3,12 @@ import { DecontaminationDoorState } from "../../types/enums";
 import { InternalHost } from "..";
 
 export class DecontaminationHandler {
-  private timer?: NodeJS.Timeout;
+  protected timer?: NodeJS.Timeout;
 
   constructor(
+    // TODO: Make protected with getter/setter
     public host: InternalHost,
+    // TODO: Make protected with getter/setter
     public system: DeconSystem | DeconTwoSystem,
   ) {}
 

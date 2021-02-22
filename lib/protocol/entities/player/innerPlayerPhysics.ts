@@ -11,11 +11,11 @@ import { Vents } from "../../../static";
 import { EntityPlayer } from ".";
 
 export class InnerPlayerPhysics extends BaseInnerNetObject {
-  private vent?: LevelVent;
+  protected vent?: LevelVent;
 
   constructor(
-    public readonly parent: EntityPlayer,
-    netId: number = parent.lobby.getHostInstance().getNextNetId(),
+    protected readonly parent: EntityPlayer,
+    netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.PlayerPhysics, parent, netId);
   }
@@ -29,19 +29,19 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
       return;
     }
 
-    const player = this.parent.lobby.findPlayerByNetId(this.netId);
+    const player = this.parent.getLobby().findPlayerByNetId(this.netId);
 
     if (!player) {
       throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
     }
 
     const event = new GameVentEnteredEvent(
-      this.parent.lobby.getGame()!,
+      this.parent.getLobby().getGame()!,
       player,
       vent,
     );
 
-    await this.parent.lobby.getServer().emit("game.vent.entered", event);
+    await this.parent.getLobby().getServer().emit("game.vent.entered", event);
 
     if (event.isCancelled()) {
       const connection = player.getConnection();
@@ -64,19 +64,19 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
       return;
     }
 
-    const player = this.parent.lobby.findPlayerByNetId(this.netId);
+    const player = this.parent.getLobby().findPlayerByNetId(this.netId);
 
     if (!player) {
       throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
     }
 
     const event = new GameVentExitedEvent(
-      this.parent.lobby.getGame()!,
+      this.parent.getLobby().getGame()!,
       player,
       vent,
     );
 
-    await this.parent.lobby.getServer().emit("game.vent.exited", event);
+    await this.parent.getLobby().getServer().emit("game.vent.exited", event);
 
     if (event.isCancelled()) {
       const connection = player.getConnection();
@@ -101,10 +101,10 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
   handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
     switch (type) {
       case RpcPacketType.EnterVent:
-        this.enterVent(Vents.forLevelFromId(this.parent.lobby.getLevel(), (packet as EnterVentPacket).ventId), sendTo);
+        this.enterVent(Vents.forLevelFromId(this.parent.getLobby().getLevel(), (packet as EnterVentPacket).ventId), sendTo);
         break;
       case RpcPacketType.ExitVent:
-        this.exitVent(Vents.forLevelFromId(this.parent.lobby.getLevel(), (packet as ExitVentPacket).ventId), sendTo);
+        this.exitVent(Vents.forLevelFromId(this.parent.getLobby().getLevel(), (packet as ExitVentPacket).ventId), sendTo);
         break;
       case RpcPacketType.ClimbLadder: {
         const data = packet as ClimbLadderPacket;
@@ -130,5 +130,9 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
 
   clone(): InnerPlayerPhysics {
     return new InnerPlayerPhysics(this.parent, this.netId);
+  }
+
+  getParent(): EntityPlayer {
+    return this.parent;
   }
 }

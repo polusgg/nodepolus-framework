@@ -12,9 +12,9 @@ export class LobbyCountdownStartedEvent extends CancellableEvent {
    * @param starter - The player that clicked the Start Game button
    */
   constructor(
-    private readonly lobby: LobbyInstance,
-    private secondsUntilStart: number,
-    private readonly starter?: PlayerInstance,
+    protected readonly lobby: LobbyInstance,
+    protected secondsUntilStart: number,
+    protected readonly starter?: PlayerInstance,
   ) {
     super();
   }

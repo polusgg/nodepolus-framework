@@ -14,15 +14,15 @@ import Emittery from "emittery";
 import dgram from "dgram";
 
 export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents, BasicAnnouncementServerEvents> {
-  private readonly announcementServerSocket = dgram.createSocket("udp4");
+  protected readonly announcementServerSocket = dgram.createSocket("udp4");
 
-  private driver?: BaseAnnouncementDriver;
-  private sendLanguages = false;
-  private languages: Map<number, string> = new Map(DEFAULT_LANGUAGES);
+  protected driver?: BaseAnnouncementDriver;
+  protected sendLanguages = false;
+  protected languages: Map<number, string> = new Map(DEFAULT_LANGUAGES);
 
   constructor(
-    private readonly address: string,
-    private readonly logger: Logger,
+    protected readonly address: string,
+    protected readonly logger: Logger,
   ) {
     super();
 
@@ -35,7 +35,7 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
         const connectionInfo = ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`);
         const parsed = AnnouncementPacket.deserialize(MessageReader.fromRawBytes(buf));
 
-        if (parsed.type == HazelPacketType.Hello) {
+        if (parsed.getType() == HazelPacketType.Hello) {
           this.handleHello(parsed.data as AnnouncementHelloPacket, connectionInfo);
         }
       } catch (error) {
@@ -175,7 +175,7 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
     });
   }
 
-  private async handleHello(helloPacket: AnnouncementHelloPacket, connectionInfo: ConnectionInfo): Promise<void> {
+  protected async handleHello(helloPacket: AnnouncementHelloPacket, connectionInfo: ConnectionInfo): Promise<void> {
     if (this.sendLanguages) {
       this.sendSetLanguagesPacket(connectionInfo);
     }
@@ -200,21 +200,21 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
     this.sendAnnouncementPacket(connectionInfo, announcement, helloPacket.language);
   }
 
-  private sendCachePacket(connectionInfo: ConnectionInfo): void {
+  protected sendCachePacket(connectionInfo: ConnectionInfo): void {
     this.sendTo(connectionInfo, new CacheDataPacket());
   }
 
-  private sendAnnouncementPacket(connectionInfo: ConnectionInfo, announcement: Announcement, language: ClientLanguage): void {
+  protected sendAnnouncementPacket(connectionInfo: ConnectionInfo, announcement: Announcement, language: ClientLanguage): void {
     const text = announcement.translate(language) ?? TextComponent.from("");
 
     this.sendTo(connectionInfo, new AnnouncementDataPacket(announcement.getId(), text.toString()));
   }
 
-  private sendSetLanguagesPacket(connectionInfo: ConnectionInfo): void {
+  protected sendSetLanguagesPacket(connectionInfo: ConnectionInfo): void {
     this.sendTo(connectionInfo, new SetLanguagesPacket(this.languages));
   }
 
-  private sendTo(connectionInfo: ConnectionInfo, packet: BaseAnnouncementPacket): void {
+  protected sendTo(connectionInfo: ConnectionInfo, packet: BaseAnnouncementPacket): void {
     this.announcementServerSocket.send(
       new AnnouncementPacket(1, new RootAnnouncementPacket([packet])).serialize().getBuffer(),
       connectionInfo.getPort(),

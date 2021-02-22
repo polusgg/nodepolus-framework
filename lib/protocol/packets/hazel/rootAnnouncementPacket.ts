@@ -41,7 +41,7 @@ export class RootAnnouncementPacket {
     const writer = new MessageWriter();
 
     for (let i = 0; i < this.packets.length; i++) {
-      writer.startMessage(this.packets[i].type)
+      writer.startMessage(this.packets[i].getType())
         .writeBytes(this.packets[i].serialize())
         .endMessage();
     }

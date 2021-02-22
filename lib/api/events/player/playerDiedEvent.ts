@@ -12,9 +12,9 @@ export class PlayerDiedEvent extends CancellableEvent {
    * @param killer - The player that killed the victim
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private readonly reason: DeathReason,
-    private readonly killer?: PlayerInstance,
+    protected readonly player: PlayerInstance,
+    protected readonly reason: DeathReason,
+    protected readonly killer?: PlayerInstance,
   ) {
     super();
   }

@@ -7,10 +7,10 @@ export abstract class BaseInnerNetEntity {
   protected innerNetObjects: BaseInnerNetObject[] = [];
 
   constructor(
-    public readonly type: SpawnType,
-    public readonly lobby: LobbyInstance,
-    public readonly ownerId: number,
-    public readonly flags: SpawnFlag,
+    protected readonly type: SpawnType,
+    protected readonly lobby: LobbyInstance,
+    protected readonly ownerId: number,
+    protected readonly flags: SpawnFlag,
   ) {}
 
   abstract despawn(): void;
@@ -22,6 +22,22 @@ export abstract class BaseInnerNetEntity {
       this.flags,
       this.innerNetObjects.map(object => object.serializeSpawn()),
     );
+  }
+
+  getType(): SpawnType {
+    return this.type;
+  }
+
+  getLobby(): LobbyInstance {
+    return this.lobby;
+  }
+
+  getOwnerId(): number {
+    return this.ownerId;
+  }
+
+  getFlags(): SpawnFlag {
+    return this.flags;
   }
 
   getObjects(): BaseInnerNetObject[] {

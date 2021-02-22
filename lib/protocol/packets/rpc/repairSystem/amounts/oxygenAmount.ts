@@ -3,7 +3,9 @@ import { RepairAmount } from ".";
 
 export class OxygenAmount implements RepairAmount {
   constructor(
+    // TODO: Make protected with getter/setter
     public consoleId: number,
+    // TODO: Make protected with getter/setter
     public action: OxygenAction,
   ) {}
 

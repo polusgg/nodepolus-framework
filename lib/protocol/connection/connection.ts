@@ -15,30 +15,35 @@ import Emittery from "emittery";
 import dgram from "dgram";
 
 export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implements Metadatable, NetworkAccessible {
+  // TODO: Make protected with getter/setter
   public timeoutLength = 6000;
+  // TODO: Make protected with getter/setter
   public id = -1;
+  // TODO: Make protected with getter/setter
   public lobby?: InternalLobby;
+  // TODO: Make protected with getter/setter
   public limboState = LimboState.PreSpawn;
+  // TODO: Make protected with getter/setter
   public firstJoin = true;
 
-  private readonly metadata: Map<string, unknown> = new Map();
-  private readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
-  private readonly flushResolveMap: Map<number, (value: void | PromiseLike<void>) => void> = new Map();
-  private readonly unacknowledgedPackets: Map<number, number> = new Map();
-  private readonly flushInterval: NodeJS.Timeout;
-  // private readonly timeoutInterval: NodeJS.Timeout;
+  protected readonly metadata: Map<string, unknown> = new Map();
+  protected readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
+  protected readonly flushResolveMap: Map<number, (value: void | PromiseLike<void>) => void> = new Map();
+  protected readonly unacknowledgedPackets: Map<number, number> = new Map();
+  protected readonly flushInterval: NodeJS.Timeout;
+  // protected readonly timeoutInterval: NodeJS.Timeout;
 
-  private initialized = false;
-  private hazelVersion?: number;
-  private clientVersion?: ClientVersion;
-  private name?: string;
-  private actingHost = false;
-  private packetBuffer: AwaitingPacket[] = [];
-  private unreliablePacketBuffer: BaseRootPacket[] = [];
-  private nonceIndex = 1;
-  private disconnectTimeout?: NodeJS.Timeout;
-  private lastPingReceivedTime: number = Date.now();
-  private requestedDisconnect = false;
+  protected initialized = false;
+  protected hazelVersion?: number;
+  protected clientVersion?: ClientVersion;
+  protected name?: string;
+  protected actingHost = false;
+  protected packetBuffer: AwaitingPacket[] = [];
+  protected unreliablePacketBuffer: BaseRootPacket[] = [];
+  protected nonceIndex = 1;
+  protected disconnectTimeout?: NodeJS.Timeout;
+  protected lastPingReceivedTime: number = Date.now();
+  protected requestedDisconnect = false;
 
   /**
    * @param connectionInfo - The ConnectionInfo describing the connection
@@ -47,10 +52,10 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * @param outboundPacketTransformerSupplier - The supplier for the function used to transform outgoing packets
    */
   constructor(
-    private readonly connectionInfo: ConnectionInfo,
-    private readonly socket: dgram.Socket,
-    private readonly packetDestination: PacketDestination,
-    private readonly outboundPacketTransformerSupplier?: () => OutboundPacketTransformer | undefined,
+    protected readonly connectionInfo: ConnectionInfo,
+    protected readonly socket: dgram.Socket,
+    protected readonly packetDestination: PacketDestination,
+    protected readonly outboundPacketTransformerSupplier?: () => OutboundPacketTransformer | undefined,
   ) {
     super();
 
@@ -65,7 +70,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
         this.acknowledgePacket(parsed.nonce!);
       }
 
-      switch (parsed.type) {
+      switch (parsed.getType()) {
         case HazelPacketType.Reliable:
           // fallthrough
         case HazelPacketType.Fragment:
@@ -92,7 +97,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
           this.handleAcknowledgement(parsed.nonce!);
           break;
         default:
-          throw new Error(`Socket received an unimplemented packet type: ${parsed.type} (${HazelPacketType[parsed.type]})`);
+          throw new Error(`Socket received an unimplemented packet type: ${parsed.getType()} (${HazelPacketType[parsed.getType()]})`);
       }
     });
 
@@ -488,7 +493,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @internal
    */
-  private handlePing(): void {
+  protected handlePing(): void {
     this.lastPingReceivedTime = Date.now();
   }
 
@@ -498,7 +503,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @returns An array of booleans for the acknowledged status of the last eight packets
    */
-  private getUnacknowledgedPacketArray(): boolean[] {
+  protected getUnacknowledgedPacketArray(): boolean[] {
     let index = this.nonceIndex;
     const packets = new Array(8).fill(true);
 
@@ -522,7 +527,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @param nonce - The ID of the packet being acknowledged
    */
-  private acknowledgePacket(nonce: number): void {
+  protected acknowledgePacket(nonce: number): void {
     this.send(new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))));
 
     const resolveFunArr = this.acknowledgementResolveMap.get(nonce);
@@ -550,7 +555,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @param nonce - The ID of the packet that has been acknowledged
    */
-  private handleAcknowledgement(nonce: number): void {
+  protected handleAcknowledgement(nonce: number): void {
     this.unacknowledgedPackets.delete(nonce);
   }
 
@@ -559,7 +564,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @param helloPacket - The connection's Hello packet
    */
-  private handleHello(helloPacket: HelloPacket): void {
+  protected handleHello(helloPacket: HelloPacket): void {
     if (this.initialized) {
       return;
     }
@@ -577,7 +582,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @param reason - The reason for why the connection was disconnected
    */
-  private handleDisconnect(reason?: DisconnectReason): void {
+  protected handleDisconnect(reason?: DisconnectReason): void {
     if (!this.requestedDisconnect) {
       this.send(new Packet(undefined, new DisconnectPacket()));
     }
@@ -590,7 +595,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @param reason - The reason for why the connection was disconnected
    */
-  private cleanup(reason?: DisconnectReason): void {
+  protected cleanup(reason?: DisconnectReason): void {
     clearInterval(this.flushInterval);
     // clearInterval(this.timeoutInterval);
 
@@ -608,12 +613,12 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @param packet - The packet to send over the socket
    */
-  private async send(packet: Packet): Promise<void> {
+  protected async send(packet: Packet): Promise<void> {
     const writeListeners = this.listenerCount("write");
     const writeCustomListeners = this.listenerCount("writeCustom");
 
     if (writeListeners > 0 || writeCustomListeners > 0) {
-      if (packet.type === HazelPacketType.Reliable || packet.type === HazelPacketType.Unreliable) {
+      if (packet.getType() === HazelPacketType.Reliable || packet.getType() === HazelPacketType.Unreliable) {
         packet = packet.clone();
 
         const subpackets = (packet.data as RootPacket).packets;
@@ -622,7 +627,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
         for (let i = 0; i < subpackets.length; i++) {
           const subpacket = subpackets[i];
 
-          if (subpacket.type in RootPacketType) {
+          if (subpacket.getType() in RootPacketType) {
             if (writeListeners > 0) {
               const event = new ServerPacketOutEvent(this, subpacket);
 

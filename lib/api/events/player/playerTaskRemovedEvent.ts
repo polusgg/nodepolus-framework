@@ -11,8 +11,8 @@ export class PlayerTaskRemovedEvent extends CancellableEvent {
    * @param tasks - The player's task list
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private readonly tasks: Set<LevelTask>,
+    protected readonly player: PlayerInstance,
+    protected readonly tasks: Set<LevelTask>,
   ) {
     super();
   }

@@ -14,10 +14,10 @@ export class ServerPacketInRpcEvent extends CancellableEvent {
    * @param packet - The RPC packet that was sent
    */
   constructor(
-    private readonly connection: Connection,
-    private readonly netId: number,
-    private readonly sender: BaseInnerNetObject | undefined,
-    private readonly packet: BaseRpcPacket,
+    protected readonly connection: Connection,
+    protected readonly netId: number,
+    protected readonly sender: BaseInnerNetObject | undefined,
+    protected readonly packet: BaseRpcPacket,
   ) {
     super();
   }

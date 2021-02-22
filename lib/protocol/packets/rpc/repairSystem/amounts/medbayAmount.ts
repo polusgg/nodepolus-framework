@@ -3,7 +3,9 @@ import { RepairAmount } from ".";
 
 export class MedbayAmount implements RepairAmount {
   constructor(
+    // TODO: Make protected with getter/setter
     public playerId: number,
+    // TODO: Make protected with getter/setter
     public action: MedbayAction,
   ) {}
 

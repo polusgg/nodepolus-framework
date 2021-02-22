@@ -3,9 +3,13 @@ import { VoteStateMask } from "../../../../types/enums";
 
 export class VoteState {
   constructor(
+    // TODO: Make protected with getter/setter
     public didReport: boolean,
+    // TODO: Make protected with getter/setter
     public didVote: boolean,
+    // TODO: Make protected with getter/setter
     public isDead: boolean,
+    // TODO: Make protected with getter/setter
     public votedFor: number,
   ) {}
 

@@ -3,10 +3,14 @@ import { MessageWriter } from "../../../util/hazelMessage";
 
 export abstract class BaseAnnouncementPacket {
   constructor(
-    public type: AnnouncementPacketType,
+    protected readonly type: AnnouncementPacketType,
   ) {}
 
   abstract clone(): BaseAnnouncementPacket;
 
   abstract serialize(): MessageWriter;
+
+  getType(): AnnouncementPacketType {
+    return this.type;
+  }
 }

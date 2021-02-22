@@ -11,24 +11,25 @@ import { EntityMeetingHud } from ".";
 import { VoteState } from "./types";
 
 export class InnerMeetingHud extends BaseInnerNetObject {
+  // TODO: Make protected with getter/setter
   public playerStates: VoteState[] = [];
 
   constructor(
-    public readonly parent: EntityMeetingHud,
-    netId: number = parent.lobby.getHostInstance().getNextNetId(),
+    protected readonly parent: EntityMeetingHud,
+    netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.MeetingHud, parent, netId);
   }
 
   castVote(votingPlayerId: number, suspectPlayerId: number, _sendTo?: Connection[]): void {
-    this.parent.lobby.getHostInstance().handleCastVote(votingPlayerId, suspectPlayerId);
+    this.parent.getLobby().getHostInstance().handleCastVote(votingPlayerId, suspectPlayerId);
   }
 
   async clearVote(players: PlayerInstance[]): Promise<void> {
     const promises = (await Promise.all(players.map(async player => {
-      const event = new MeetingVoteRemovedEvent(this.parent.lobby.getGame()!, player);
+      const event = new MeetingVoteRemovedEvent(this.parent.getLobby().getGame()!, player);
 
-      await this.parent.lobby.getServer().emit("meeting.vote.removed", event);
+      await this.parent.getLobby().getServer().emit("meeting.vote.removed", event);
 
       return event;
     }))).filter(event => !event.isCancelled()).map(event => {
@@ -53,7 +54,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
         break;
       }
       case RpcPacketType.ClearVote:
-        this.parent.lobby.getLogger().warn("Received ClearVote packet from connection %s in a server-as-host state", connection);
+        this.parent.getLobby().getLogger().warn("Received ClearVote packet from connection %s in a server-as-host state", connection);
         break;
       default:
         break;
@@ -97,7 +98,11 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     return clone;
   }
 
-  private serializeStatesToDirtyBits(states: VoteState[]): number {
+  getParent(): EntityMeetingHud {
+    return this.parent;
+  }
+
+  protected serializeStatesToDirtyBits(states: VoteState[]): number {
     let n = 0;
 
     for (let i = 0; i < this.playerStates.length; i++) {

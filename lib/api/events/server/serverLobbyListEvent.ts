@@ -13,10 +13,10 @@ export class ServerLobbyListEvent extends DisconnectableEvent {
    * @param lobbyCounts - The lobby counts for each level that will be sent to the connection
    */
   constructor(
-    private readonly connection: Connection,
-    private readonly includePrivateLobbies: boolean,
-    private lobbies: LobbyListing[],
-    private lobbyCounts?: LobbyCount,
+    protected readonly connection: Connection,
+    protected readonly includePrivateLobbies: boolean,
+    protected lobbies: LobbyListing[],
+    protected lobbyCounts?: LobbyCount,
   ) {
     super(DisconnectReason.custom("The server refused to list its public games"));
   }

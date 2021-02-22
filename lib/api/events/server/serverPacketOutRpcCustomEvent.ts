@@ -8,7 +8,7 @@ import { CancellableEvent } from "../types";
  * connection.
  */
 export class ServerPacketOutRpcCustomEvent extends CancellableEvent {
-  private sender?: BaseInnerNetObject;
+  protected sender?: BaseInnerNetObject;
 
   /**
    * @param connection - The connection to which the packet was sent
@@ -17,9 +17,9 @@ export class ServerPacketOutRpcCustomEvent extends CancellableEvent {
    * @param packet - The RPC packet that was sent
    */
   constructor(
-    private readonly connection: Connection,
-    private readonly netId: number,
-    private readonly packet: BaseRpcPacket,
+    protected readonly connection: Connection,
+    protected readonly netId: number,
+    protected readonly packet: BaseRpcPacket,
   ) {
     super();
   }

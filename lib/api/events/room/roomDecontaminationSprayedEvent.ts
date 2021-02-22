@@ -10,8 +10,8 @@ export class RoomDecontaminationSprayedEvent extends CancellableEvent {
    * @param decontamination - The decontamination room that activated its sprayers
    */
   constructor(
-    private readonly game: Game,
-    private readonly decontamination: number,
+    protected readonly game: Game,
+    protected readonly decontamination: number,
   ) {
     super();
   }

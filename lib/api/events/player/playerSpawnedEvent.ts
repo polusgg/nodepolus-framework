@@ -14,11 +14,11 @@ export class PlayerSpawnedEvent {
    * @param position - The player's spawn position
    */
   constructor(
-    private readonly connection: Connection | undefined,
-    private readonly lobby: LobbyInstance,
-    private readonly playerId: number,
-    private newPlayer: boolean,
-    private position: Vector2,
+    protected readonly connection: Connection | undefined,
+    protected readonly lobby: LobbyInstance,
+    protected readonly playerId: number,
+    protected newPlayer: boolean,
+    protected position: Vector2,
   ) {}
 
   /**

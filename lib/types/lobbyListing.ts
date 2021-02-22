@@ -18,15 +18,15 @@ export class LobbyListing {
    * @param maxPlayers - The max number of players allowed in the lobby
    */
   constructor(
-    private readonly ipAddress: string,
-    private readonly port: number,
-    private readonly lobbyCode: string,
-    private readonly hostName: string,
-    private readonly playerCount: number,
-    private readonly age: number,
-    private readonly level: Level,
-    private readonly impostorCount: number,
-    private readonly maxPlayers: number,
+    protected readonly ipAddress: string,
+    protected readonly port: number,
+    protected readonly lobbyCode: string,
+    protected readonly hostName: string,
+    protected readonly playerCount: number,
+    protected readonly age: number,
+    protected readonly level: Level,
+    protected readonly impostorCount: number,
+    protected readonly maxPlayers: number,
   ) {}
 
   /**

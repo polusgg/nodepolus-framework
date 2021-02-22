@@ -11,9 +11,9 @@ export class RoomCommunicationsConsoleClosedEvent {
    * @param console - The communications console that was closed
    */
   constructor(
-    private readonly game: Game,
-    private readonly player: PlayerInstance,
-    private readonly console: number,
+    protected readonly game: Game,
+    protected readonly player: PlayerInstance,
+    protected readonly console: number,
   ) {}
 
   /**

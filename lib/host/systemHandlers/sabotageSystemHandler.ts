@@ -11,9 +11,11 @@ import {
 } from "../../protocol/entities/shipStatus/systems";
 
 export class SabotageSystemHandler {
+  // TODO: Make protected with getter/setter
   public timer?: NodeJS.Timeout;
 
   constructor(
+    // TODO: Make protected with getter/setter
     public host: InternalHost,
   ) {}
 

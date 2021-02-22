@@ -10,8 +10,8 @@ export class PlayerLeftEvent {
    * @param player - The player that left
    */
   constructor(
-    private readonly lobby: LobbyInstance,
-    private readonly player: PlayerInstance,
+    protected readonly lobby: LobbyInstance,
+    protected readonly player: PlayerInstance,
   ) {}
 
   /**

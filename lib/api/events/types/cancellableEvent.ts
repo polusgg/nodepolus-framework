@@ -2,7 +2,7 @@
  * An event that may be cancelled to prevent the action described in the event from happening.
  */
 export abstract class CancellableEvent {
-  private cancelled = false;
+  protected cancelled = false;
 
   /**
    * Marks the event as cancelled.

@@ -12,9 +12,9 @@ export class MeetingVoteAddedEvent extends CancellableEvent {
    * @param suspect - The player that was voted to be exiled by the voting player
    */
   constructor(
-    private readonly game: Game,
-    private voter: PlayerInstance,
-    private suspect?: PlayerInstance,
+    protected readonly game: Game,
+    protected voter: PlayerInstance,
+    protected suspect?: PlayerInstance,
   ) {
     super();
   }

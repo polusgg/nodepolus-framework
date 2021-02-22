@@ -10,8 +10,8 @@ export class RoomCommunicationsConsoleClearedEvent extends CancellableEvent {
    * @param console - The communications console that was reset
    */
   constructor(
-    private readonly game: Game,
-    private readonly console: number,
+    protected readonly game: Game,
+    protected readonly console: number,
   ) {
     super();
   }

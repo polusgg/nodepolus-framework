@@ -11,8 +11,8 @@ export class GameScannerStoppedEvent extends CancellableEvent {
    * @param player - The player that stopped scanning on the Medbay scanner
    */
   constructor(
-    private readonly game: Game,
-    private readonly player: PlayerInstance,
+    protected readonly game: Game,
+    protected readonly player: PlayerInstance,
   ) {
     super();
   }

@@ -12,9 +12,9 @@ export class PlayerTaskUncompletedEvent extends CancellableEvent {
    * @param taskInfo - The task that was uncompleted
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private readonly taskIndex: number,
-    private readonly taskInfo: LevelTask,
+    protected readonly player: PlayerInstance,
+    protected readonly taskIndex: number,
+    protected readonly taskInfo: LevelTask,
   ) {
     super();
   }

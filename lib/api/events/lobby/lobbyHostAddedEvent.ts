@@ -11,8 +11,8 @@ export class LobbyHostAddedEvent extends CancellableEvent {
    * @param host - The connection that is now an acting host
    */
   constructor(
-    private readonly lobby: LobbyInstance,
-    private readonly host: Connection,
+    protected readonly lobby: LobbyInstance,
+    protected readonly host: Connection,
   ) {
     super();
   }

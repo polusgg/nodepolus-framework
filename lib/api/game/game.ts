@@ -2,7 +2,9 @@ import { Level } from "../../types/enums";
 import { LobbyInstance } from "../lobby";
 
 export class Game {
-  constructor(public lobby: LobbyInstance) {
+  constructor(
+    protected readonly lobby: LobbyInstance,
+  ) {
     switch (lobby.getLevel()) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
@@ -14,5 +16,9 @@ export class Game {
       case Level.Airship:
         break;
     }
+  }
+
+  getLobby(): LobbyInstance {
+    return this.lobby;
   }
 }

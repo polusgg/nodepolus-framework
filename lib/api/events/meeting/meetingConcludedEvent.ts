@@ -7,16 +7,16 @@ import { VoteResult } from "../../../types";
  * Fired when the voting phase of a meeting has finished.
  */
 export class MeetingConcludedEvent extends CancellableEvent {
-  private tied = false;
-  private exiledPlayerId = -1;
+  protected tied = false;
+  protected exiledPlayerId = -1;
 
   /**
    * @param game - The game from which this event was fired
    * @param votes - The votes from the meeting
    */
   constructor(
-    private readonly game: Game,
-    private votes: VoteResult[],
+    protected readonly game: Game,
+    protected votes: VoteResult[],
   ) {
     super();
   }
@@ -76,7 +76,7 @@ export class MeetingConcludedEvent extends CancellableEvent {
    * Does a tally of the current votes to determine if they result in a tie, and
    * which player will be exiled (if any) if the votes do not result in a tie.
    */
-  private tallyVotes(): void {
+  protected tallyVotes(): void {
     const counts: Map<number, number> = new Map([[-1, 0]]);
     const entries = [...this.votes];
 

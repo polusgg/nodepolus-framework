@@ -11,17 +11,29 @@ import { EntityPlayer } from ".";
 
 export class InnerCustomNetworkTransform extends BaseInnerNetObject {
   constructor(
-    public readonly parent: EntityPlayer,
-    public position: Vector2 = Vector2.zero(),
-    public velocity: Vector2 = Vector2.zero(),
-    public sequenceId: number = 5,
-    netId: number = parent.lobby.getHostInstance().getNextNetId(),
+    protected readonly parent: EntityPlayer,
+    protected position: Vector2 = Vector2.zero(),
+    protected velocity: Vector2 = Vector2.zero(),
+    protected sequenceId: number = 5,
+    netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.CustomNetworkTransform, parent, netId);
   }
 
+  getPosition(): Vector2 {
+    return this.position;
+  }
+
+  getVelocity(): Vector2 {
+    return this.velocity;
+  }
+
+  getSequenceId(): number {
+    return this.sequenceId;
+  }
+
   async snapTo(position: Vector2, reason: TeleportReason, sendTo?: Connection[]): Promise<void> {
-    const player = this.parent.lobby.findPlayerByNetId(this.netId);
+    const player = this.parent.getLobby().findPlayerByNetId(this.netId);
 
     if (!player) {
       throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
@@ -31,8 +43,8 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
 
     const event = new PlayerPositionTeleportedEvent(player, this.position, this.velocity, position, Vector2.zero(), reason);
 
-    await this.parent.lobby.getServer().emit("player.position.updated", event);
-    await this.parent.lobby.getServer().emit("player.position.teleported", event);
+    await this.parent.getLobby().getServer().emit("player.position.updated", event);
+    await this.parent.getLobby().getServer().emit("player.position.teleported", event);
 
     if (event.isCancelled()) {
       const connection = player.getConnection();
@@ -71,7 +83,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
   }
 
   async setData(packet: MessageReader | MessageWriter): Promise<void> {
-    const player = this.parent.lobby.findPlayerByNetId(this.netId);
+    const player = this.parent.getLobby().findPlayerByNetId(this.netId);
 
     if (!player) {
       throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
@@ -90,8 +102,8 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     const velocity = reader.readVector2();
     const event = new PlayerPositionWalkedEvent(player, this.position, this.velocity, position, velocity);
 
-    await this.parent.lobby.getServer().emit("player.position.updated", event);
-    await this.parent.lobby.getServer().emit("player.position.walked", event);
+    await this.parent.getLobby().getServer().emit("player.position.updated", event);
+    await this.parent.getLobby().getServer().emit("player.position.walked", event);
 
     if (event.isCancelled()) {
       const connection = player.getConnection();
@@ -119,6 +131,10 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
 
   clone(): InnerCustomNetworkTransform {
     return new InnerCustomNetworkTransform(this.parent, this.position, this.velocity, this.sequenceId, this.netId);
+  }
+
+  getParent(): EntityPlayer {
+    return this.parent;
   }
 
   protected incrementSequenceId(amount: number): number {

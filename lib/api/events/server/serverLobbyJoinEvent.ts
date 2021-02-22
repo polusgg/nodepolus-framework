@@ -13,9 +13,9 @@ export class ServerLobbyJoinEvent extends DisconnectableEvent {
    * @param lobby - The lobby that is being joined
    */
   constructor(
-    private readonly connection: Connection,
-    private readonly lobbyCode: string,
-    private lobby?: LobbyInstance,
+    protected readonly connection: Connection,
+    protected readonly lobbyCode: string,
+    protected lobby?: LobbyInstance,
   ) {
     super(DisconnectReason.custom("The server refused to let you join that game"));
   }

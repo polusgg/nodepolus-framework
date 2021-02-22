@@ -6,13 +6,13 @@ import { DisconnectReason } from "../../../types";
  * connection from the server.
  */
 export abstract class DisconnectableEvent extends CancellableEvent {
-  private disconnectReason?: DisconnectReason;
+  protected disconnectReason?: DisconnectReason;
 
   /**
    * @param defaultDisconnectReason - The default disconnect reason to be sent to the connection.
    */
   constructor(
-    private readonly defaultDisconnectReason: DisconnectReason,
+    protected readonly defaultDisconnectReason: DisconnectReason,
   ) {
     super();
   }

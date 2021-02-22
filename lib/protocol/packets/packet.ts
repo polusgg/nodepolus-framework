@@ -9,12 +9,14 @@ type PacketDataType = AcknowledgementPacket
 | RootPacket;
 
 export class Packet {
-  public type: number;
+  protected readonly type: HazelPacketType;
 
-  private clientBound?: boolean;
+  protected clientBound?: boolean;
 
   constructor(
+    // TODO: Make protected with getter/setter
     public nonce: number | undefined,
+    // TODO: Make protected with getter/setter
     public data: PacketDataType,
   ) {
     if (data instanceof AcknowledgementPacket) {
@@ -74,6 +76,10 @@ export class Packet {
     }
 
     return new Packet(nonce, data).setClientBound(clientBound);
+  }
+
+  getType(): HazelPacketType {
+    return this.type;
   }
 
   clone(): Packet {

@@ -4,7 +4,9 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class LifeSuppSystem extends BaseSystem {
+  // TODO: Make protected with getter/setter
   public timer = 10000;
+  // TODO: Make protected with getter/setter
   public completedConsoles: Set<number> = new Set([0, 1]);
 
   constructor(shipStatus: BaseInnerShipStatus) {

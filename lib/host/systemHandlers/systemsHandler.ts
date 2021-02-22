@@ -46,11 +46,11 @@ import {
 } from "../../api/events/game";
 
 export class SystemsHandler {
-  private oldShipStatus: BaseInnerShipStatus = this.host.getLobby().getShipStatus()!.getShipStatus();
-  private sabotageCountdownInterval?: NodeJS.Timeout;
+  protected oldShipStatus: BaseInnerShipStatus = this.host.getLobby().getShipStatus()!.getShipStatus();
+  protected sabotageCountdownInterval?: NodeJS.Timeout;
 
   constructor(
-    private readonly host: InternalHost,
+    protected readonly host: InternalHost,
   ) {}
 
   repairDecon<T extends DeconSystem | DeconTwoSystem>(_repairer: InternalPlayer, system: T, amount: DecontaminationAmount): void {
@@ -306,7 +306,7 @@ export class SystemsHandler {
     ], this.host.getLobby().getCode()));
   }
 
-  private getShipStatus(): BaseInnerShipStatus {
+  protected getShipStatus(): BaseInnerShipStatus {
     return this.host.getLobby().getShipStatus()!.getShipStatus();
   }
 }

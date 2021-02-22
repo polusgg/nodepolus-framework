@@ -10,8 +10,8 @@ export class LobbyPrivacyUpdatedEvent extends CancellableEvent {
    * @param publicity - `true` if the lobby is public, `false` if not
    */
   constructor(
-    private readonly lobby: LobbyInstance,
-    private publicity: boolean,
+    protected readonly lobby: LobbyInstance,
+    protected publicity: boolean,
   ) {
     super();
   }

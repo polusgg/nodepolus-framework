@@ -11,8 +11,8 @@ export class MeetingVoteRemovedEvent extends CancellableEvent {
    * @param player - The player whose vote is being cleared
    */
   constructor(
-    private readonly game: Game,
-    private player: PlayerInstance,
+    protected readonly game: Game,
+    protected player: PlayerInstance,
   ) {
     super();
   }

@@ -3,10 +3,14 @@ import { GameDataPacketType } from "../../../types/enums";
 
 export abstract class BaseGameDataPacket {
   constructor(
-    public type: GameDataPacketType,
+    protected readonly type: GameDataPacketType,
   ) {}
 
   abstract clone(): BaseGameDataPacket;
 
   abstract serialize(): MessageWriter;
+
+  getType(): GameDataPacketType {
+    return this.type;
+  }
 }

@@ -11,9 +11,9 @@ export class ConnectionInfo {
    * @param family - The family that the IP address belongs to
    */
   constructor(
-    private readonly address: string,
-    private readonly port: number,
-    private readonly family: AddressFamily,
+    protected readonly address: string,
+    protected readonly port: number,
+    protected readonly family: AddressFamily,
   ) {}
 
   /**

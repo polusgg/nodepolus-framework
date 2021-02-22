@@ -4,6 +4,7 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class SabotageSystem extends BaseSystem {
+  // TODO: Make protected with getter/setter
   public cooldown = 0;
 
   constructor(shipStatus: BaseInnerShipStatus) {

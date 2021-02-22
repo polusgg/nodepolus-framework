@@ -101,25 +101,25 @@ import {
 } from "../types/enums";
 
 export class InternalHost implements HostInstance {
-  private readonly id: number = FakeClientId.ServerAsHost;
-  private readonly playersInScene: Map<number, string> = new Map();
+  protected readonly id: number = FakeClientId.ServerAsHost;
+  protected readonly playersInScene: Map<number, string> = new Map();
 
-  private readyPlayerList: number[] = [];
-  private netIdIndex = 1;
-  private counterSequenceId = 0;
-  private secondsUntilStart = -1;
-  private countdownInterval?: NodeJS.Timeout;
-  private meetingHudTimeout?: NodeJS.Timeout;
-  private systemsHandler?: SystemsHandler;
-  private sabotageHandler?: SabotageSystemHandler;
-  private doorHandler?: DoorsHandler | AutoDoorsHandler;
-  private decontaminationHandlers: DecontaminationHandler[] = [];
+  protected readyPlayerList: number[] = [];
+  protected netIdIndex = 1;
+  protected counterSequenceId = 0;
+  protected secondsUntilStart = -1;
+  protected countdownInterval?: NodeJS.Timeout;
+  protected meetingHudTimeout?: NodeJS.Timeout;
+  protected systemsHandler?: SystemsHandler;
+  protected sabotageHandler?: SabotageSystemHandler;
+  protected doorHandler?: DoorsHandler | AutoDoorsHandler;
+  protected decontaminationHandlers: DecontaminationHandler[] = [];
 
   /**
    * @param lobby - The lobby being controlled by the host
    */
   constructor(
-    private readonly lobby: InternalLobby,
+    protected readonly lobby: InternalLobby,
   ) {}
 
   getLobby(): InternalLobby {
@@ -674,13 +674,13 @@ export class InternalHost implements HostInstance {
         break;
       case Level.MiraHq:
         this.decontaminationHandlers = [
-          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon] as DeconSystem),
+          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().getSystems()[InternalSystemType.Decon] as DeconSystem),
         ];
         break;
       case Level.Polus:
         this.decontaminationHandlers = [
-          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon] as DeconSystem),
-          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().systems[InternalSystemType.Decon2] as DeconTwoSystem),
+          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().getSystems()[InternalSystemType.Decon] as DeconSystem),
+          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().getSystems()[InternalSystemType.Decon2] as DeconTwoSystem),
         ];
         this.doorHandler = new DoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
         break;
@@ -811,7 +811,7 @@ export class InternalHost implements HostInstance {
   }
 
   async handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData): Promise<void> {
-    const owner = this.lobby.findConnection(sender.parent.ownerId);
+    const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
 
     if (!owner) {
       throw new Error("Received CheckName from an InnerPlayerControl without an owner");
@@ -820,7 +820,7 @@ export class InternalHost implements HostInstance {
     const player = this.lobby.findPlayerByConnection(owner);
 
     if (!player) {
-      throw new Error(`Client ${sender.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
+      throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
     }
 
     const oldOptions = this.lobby.getOptions();
@@ -841,7 +841,7 @@ export class InternalHost implements HostInstance {
     let checkName: string = name;
     let index = 1;
 
-    const owner = this.lobby.findConnection(sender.parent.ownerId);
+    const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
 
     if (!owner) {
       throw new Error("Received CheckName from an InnerPlayerControl without an owner");
@@ -852,7 +852,7 @@ export class InternalHost implements HostInstance {
     if (player) {
       this.confirmPlayerData(player);
     } else {
-      throw new Error(`Client ${sender.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
+      throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
     }
 
     while (this.isNameTaken(checkName)) {
@@ -872,7 +872,7 @@ export class InternalHost implements HostInstance {
     const takenColors = this.getTakenColors(sender.playerId);
     let setColor: PlayerColor = color;
 
-    const owner = this.lobby.findConnection(sender.parent.ownerId);
+    const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
 
     if (!owner) {
       throw new Error("Received CheckColor from an InnerPlayerControl without an owner");
@@ -883,7 +883,7 @@ export class InternalHost implements HostInstance {
     if (player) {
       this.confirmPlayerData(player);
     } else {
-      throw new Error(`Client ${sender.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
+      throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
     }
 
     if (this.lobby.getPlayers().length <= 12) {
@@ -902,7 +902,7 @@ export class InternalHost implements HostInstance {
   }
 
   handleSetColor(sender: InnerPlayerControl, color: PlayerColor): void {
-    const owner = this.lobby.findConnection(sender.parent.ownerId);
+    const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
 
     if (!owner) {
       throw new Error("Received SetColor from an InnerPlayerControl without an owner");
@@ -913,7 +913,7 @@ export class InternalHost implements HostInstance {
     if (player) {
       this.confirmPlayerData(player);
     } else {
-      throw new Error(`Client ${sender.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
+      throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
     }
 
     if (owner.isActingHost()) {
@@ -931,7 +931,7 @@ export class InternalHost implements HostInstance {
       throw new Error("Received ReportDeadBody without a GameData instance");
     }
 
-    const owner = this.lobby.findConnection(sender.parent.ownerId);
+    const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
 
     if (!owner) {
       throw new Error("Received ReportDeadBody from an InnerPlayerControl without an owner");
@@ -940,7 +940,7 @@ export class InternalHost implements HostInstance {
     const player = this.lobby.findPlayerByConnection(owner);
 
     if (!player) {
-      throw new Error(`Client ${sender.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
+      throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
     }
 
     const event = new MeetingStartedEvent(
@@ -1052,7 +1052,7 @@ export class InternalHost implements HostInstance {
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.getMeetingHud().serializeData(oldMeetingHud),
-      new RpcPacket(player.entity.getPlayerControl().netId, new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
+      new RpcPacket(player.entity.getPlayerControl().getNetId(), new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
     ], this.lobby.getCode()));
 
     if (this.meetingHudTimeout && states.every(p => p.didVote || p.isDead)) {
@@ -1078,7 +1078,7 @@ export class InternalHost implements HostInstance {
     }
 
     const system = shipStatus.getShipStatus().getSystemFromType(systemId);
-    const player = this.lobby.getPlayers().find(thePlayer => thePlayer.entity.getPlayerControl().netId == playerControlNetId);
+    const player = this.lobby.getPlayers().find(thePlayer => thePlayer.entity.getPlayerControl().getNetId() == playerControlNetId);
     const level = this.lobby.getLevel();
 
     if (!player) {
@@ -1140,9 +1140,9 @@ export class InternalHost implements HostInstance {
     }
 
     const oldData = shipStatus.getShipStatus().clone();
-    const movingPlatform = shipStatus.getShipStatus().systems[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
+    const movingPlatform = shipStatus.getShipStatus().getSystems()[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
 
-    movingPlatform.innerPlayerControlNetId = sender.parent.getPlayerControl().netId;
+    movingPlatform.innerPlayerControlNetId = sender.getParent().getPlayerControl().getNetId();
     movingPlatform.side = (movingPlatform.side + 1) % 2;
 
     movingPlatform.sequenceId++;
@@ -1179,7 +1179,7 @@ export class InternalHost implements HostInstance {
    * @param usedTaskTypes - The types of tasks that are already in the output array
    * @param unusedTasks - The source array of tasks
    */
-  private addTasksFromList(
+  protected addTasksFromList(
     start: { val: number },
     count: number,
     tasks: LevelTask[],
@@ -1237,7 +1237,7 @@ export class InternalHost implements HostInstance {
    * @internal
    * @returns `true` if `impostors.length >= crewmates.length`, `false` if not
    */
-  private shouldEndGame(): boolean {
+  protected shouldEndGame(): boolean {
     if (this.lobby.getGameState() == GameState.NotStarted) {
       return false;
     }
@@ -1275,7 +1275,7 @@ export class InternalHost implements HostInstance {
    * @param name - The name to be checked
    * @returns `true` if the name is already in use, `false` if not
    */
-  private isNameTaken(name: string): boolean {
+  protected isNameTaken(name: string): boolean {
     const gameData = this.lobby.getGameData();
 
     if (!gameData) {
@@ -1292,7 +1292,7 @@ export class InternalHost implements HostInstance {
    * @param excludePlayerId - The ID of a player whose color will be excluded from the results
    * @returns The colors that are already in use
    */
-  private getTakenColors(excludePlayerId: number): PlayerColor[] {
+  protected getTakenColors(excludePlayerId: number): PlayerColor[] {
     const gameData = this.lobby.getGameData();
 
     if (!gameData) {
@@ -1319,7 +1319,7 @@ export class InternalHost implements HostInstance {
    * @internal
    * @param player - The player whose PlayerData will be checked
    */
-  private confirmPlayerData(player: InternalPlayer): void {
+  protected confirmPlayerData(player: InternalPlayer): void {
     const gameData = this.lobby.getGameData();
 
     if (!gameData) {

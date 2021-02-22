@@ -5,15 +5,25 @@ import { Tasks } from "../../../../static";
 
 export class PlayerData {
   constructor(
+    // TODO: Make protected with getter/setter
     public readonly id: number,
+    // TODO: Make protected with getter/setter
     public name: string,
+    // TODO: Make protected with getter/setter
     public color: PlayerColor,
+    // TODO: Make protected with getter/setter
     public hat: PlayerHat,
+    // TODO: Make protected with getter/setter
     public pet: PlayerPet,
+    // TODO: Make protected with getter/setter
     public skin: PlayerSkin,
+    // TODO: Make protected with getter/setter
     public isDisconnected: boolean,
+    // TODO: Make protected with getter/setter
     public isImpostor: boolean,
+    // TODO: Make protected with getter/setter
     public isDead: boolean,
+    // TODO: Make protected with getter/setter
     public tasks: [task: LevelTask, isComplete: boolean][],
   ) {}
 

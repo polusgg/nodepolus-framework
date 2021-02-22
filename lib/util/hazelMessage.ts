@@ -88,7 +88,7 @@ export abstract class HazelMessage {
  * A class used for writing data to a buffer.
  */
 export class MessageWriter extends HazelMessage {
-  private readonly messageStarts: number[] = [];
+  protected readonly messageStarts: number[] = [];
 
   constructor(source: BuildFrom = 0, isHex: boolean = true) {
     super(source, isHex);
@@ -457,7 +457,7 @@ export class MessageWriter extends HazelMessage {
    *
    * @param addend - The number of octects to add to the end of the buffer
    */
-  private resizeBuffer(addend: number): void {
+  protected resizeBuffer(addend: number): void {
     let newLength = this.cursor + addend;
 
     if (this.buffer.length < this.cursor + addend) {
@@ -475,8 +475,8 @@ export class MessageWriter extends HazelMessage {
  * A class used for reading data from a buffer.
  */
 export class MessageReader extends HazelMessage {
-  private tag = 0xff;
-  private length = 0;
+  protected tag = 0xff;
+  protected length = 0;
 
   /**
    * Gets a new MessageReader with the length and tag read from `source`.

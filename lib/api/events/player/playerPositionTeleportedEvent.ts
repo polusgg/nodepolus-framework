@@ -21,7 +21,7 @@ export class PlayerPositionTeleportedEvent extends PlayerPositionUpdatedEvent {
     oldVelocity: Vector2,
     newPosition: Vector2,
     newVelocity: Vector2,
-    private readonly reason: TeleportReason,
+    protected readonly reason: TeleportReason,
   ) {
     super(player, oldPosition, oldVelocity, newPosition, newVelocity);
   }

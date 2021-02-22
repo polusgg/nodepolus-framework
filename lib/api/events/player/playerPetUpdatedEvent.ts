@@ -12,9 +12,9 @@ export class PlayerPetUpdatedEvent extends CancellableEvent {
    * @param newPet - The player's new pet
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private readonly oldPet: PlayerPet,
-    private newPet: PlayerPet,
+    protected readonly player: PlayerInstance,
+    protected readonly oldPet: PlayerPet,
+    protected newPet: PlayerPet,
   ) {
     super();
   }

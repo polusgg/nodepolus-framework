@@ -12,7 +12,7 @@ export class PlayerExiledEvent extends PlayerDiedEvent {
    */
   constructor(
     player: PlayerInstance,
-    private readonly voters: PlayerInstance[],
+    protected readonly voters: PlayerInstance[],
   ) {
     super(player, DeathReason.Exile);
   }

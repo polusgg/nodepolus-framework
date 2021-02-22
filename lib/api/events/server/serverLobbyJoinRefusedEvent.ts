@@ -13,9 +13,9 @@ export class ServerLobbyJoinRefusedEvent extends CancellableEvent {
    * @param disconnectReason - The disconnect reason to be sent to the connection (default `GameFull`)
    */
   constructor(
-    private readonly connection: Connection,
-    private readonly lobby: LobbyInstance,
-    private disconnectReason: DisconnectReason = DisconnectReason.gameFull(),
+    protected readonly connection: Connection,
+    protected readonly lobby: LobbyInstance,
+    protected disconnectReason: DisconnectReason = DisconnectReason.gameFull(),
   ) {
     super();
   }

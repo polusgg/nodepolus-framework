@@ -12,9 +12,9 @@ export class RoomCommunicationsConsoleRepairedEvent extends CancellableEvent {
    * @param player - The player that repaired the communications console
    */
   constructor(
-    private readonly game: Game,
-    private readonly console: number,
-    private readonly player?: PlayerInstance,
+    protected readonly game: Game,
+    protected readonly console: number,
+    protected readonly player?: PlayerInstance,
   ) {
     super();
   }

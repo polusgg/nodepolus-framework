@@ -12,9 +12,9 @@ export class PlayerColorUpdatedEvent extends CancellableEvent {
    * @param newColor - The player's new color
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private readonly oldColor: PlayerColor,
-    private newColor: PlayerColor,
+    protected readonly player: PlayerInstance,
+    protected readonly oldColor: PlayerColor,
+    protected newColor: PlayerColor,
   ) {
     super();
   }

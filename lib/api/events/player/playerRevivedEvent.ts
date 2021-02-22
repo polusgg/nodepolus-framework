@@ -9,7 +9,7 @@ export class PlayerRevivedEvent extends CancellableEvent {
    * @param player - The player that was revived
    */
   constructor(
-    private readonly player: PlayerInstance,
+    protected readonly player: PlayerInstance,
   ) {
     super();
   }

@@ -4,6 +4,7 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class SecurityCameraSystem extends BaseSystem {
+  // TODO: Make protected with getter/setter
   public playersViewingCameras: Set<number> = new Set();
 
   constructor(shipStatus: BaseInnerShipStatus) {

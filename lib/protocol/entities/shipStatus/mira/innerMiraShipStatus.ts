@@ -4,8 +4,8 @@ import { EntityMiraShipStatus } from ".";
 
 export class InnerMiraShipStatus extends BaseInnerShipStatus {
   constructor(
-    public readonly parent: EntityMiraShipStatus,
-    netId: number = parent.lobby.getHostInstance().getNextNetId(),
+    protected readonly parent: EntityMiraShipStatus,
+    netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.MiraShipStatus, parent, [
       SystemType.Reactor,
@@ -31,5 +31,9 @@ export class InnerMiraShipStatus extends BaseInnerShipStatus {
     clone.systems = this.systems.map(system => system.clone());
 
     return clone;
+  }
+
+  getParent(): EntityMiraShipStatus {
+    return this.parent;
   }
 }

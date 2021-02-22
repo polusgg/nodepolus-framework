@@ -12,9 +12,9 @@ export class PlayerRoleUpdatedEvent extends CancellableEvent {
    * @param oldRole - The player's new role
    */
   constructor(
-    private readonly player: PlayerInstance,
-    private newRole: PlayerRole,
-    private readonly oldRole?: PlayerRole,
+    protected readonly player: PlayerInstance,
+    protected newRole: PlayerRole,
+    protected readonly oldRole?: PlayerRole,
   ) {
     super();
   }

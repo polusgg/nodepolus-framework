@@ -11,8 +11,8 @@ export class ServerLobbyCreatedRefusedEvent extends CancellableEvent {
    * @param disconnectReason - The disconnect reason to be sent to the connection (default `ServerFull`)
    */
   constructor(
-    private readonly connection: Connection,
-    private disconnectReason: DisconnectReason = DisconnectReason.serverFull(),
+    protected readonly connection: Connection,
+    protected disconnectReason: DisconnectReason = DisconnectReason.serverFull(),
   ) {
     super();
   }

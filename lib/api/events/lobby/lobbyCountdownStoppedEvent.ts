@@ -10,8 +10,8 @@ export class LobbyCountdownStoppedEvent extends CancellableEvent {
    * @param secondsLeft - The number of seconds remaining until the game would have started
    */
   constructor(
-    private readonly lobby: LobbyInstance,
-    private readonly secondsLeft: number,
+    protected readonly lobby: LobbyInstance,
+    protected readonly secondsLeft: number,
   ) {
     super();
   }

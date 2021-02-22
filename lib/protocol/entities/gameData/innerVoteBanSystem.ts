@@ -13,11 +13,12 @@ import { Connection } from "../../connection";
 import { EntityGameData } from ".";
 
 export class InnerVoteBanSystem extends BaseInnerNetObject {
+  // TODO: Make protected with getter/setter
   public votes: Map<number, number[]> = new Map<number, number[]>();
 
   constructor(
-    public readonly parent: EntityGameData,
-    netId: number = parent.lobby.getHostInstance().getNextNetId(),
+    protected readonly parent: EntityGameData,
+    netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.VoteBanSystem, parent, netId);
   }
@@ -32,7 +33,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
 
     const event = new PlayerVotekickAddedEvent(voter, target);
 
-    await this.parent.lobby.getServer().emit("player.votekick.added", event);
+    await this.parent.getLobby().getServer().emit("player.votekick.added", event);
 
     if (event.isCancelled()) {
       return;
@@ -53,11 +54,11 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     }
 
     if (shouldKick) {
-      const player = this.parent.lobby.findPlayerByClientId(targetClientId);
+      const player = this.parent.getLobby().findPlayerByClientId(targetClientId);
 
       if (player) {
         player.kick(DisconnectReason.kicked());
-        (this.parent.lobby as InternalLobby).sendRootGamePacket(new GameDataPacket([this.serializeData()], this.parent.lobby.getCode()), sendTo);
+        (this.parent.getLobby() as InternalLobby).sendRootGamePacket(new GameDataPacket([this.serializeData()], this.parent.getLobby().getCode()), sendTo);
       }
     } else {
       this.votes.set(targetClientId, votes);
@@ -69,41 +70,41 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
   async clearVote(voter: InternalPlayer, target: InternalPlayer, sendTo?: Connection[]): Promise<void> {
     const event = new PlayerVotekickRemovedEvent(voter, target);
 
-    await this.parent.lobby.getServer().emit("player.votekick.removed", event);
+    await this.parent.getLobby().getServer().emit("player.votekick.removed", event);
 
     if (event.isCancelled()) {
       return;
     }
 
-    this.removeVote(voter.entity.ownerId, target.entity.ownerId, sendTo);
+    this.removeVote(voter.entity.getOwnerId(), target.entity.getOwnerId(), sendTo);
   }
 
   clearVotesForPlayer(player: InternalPlayer, sendTo?: Connection[]): void {
-    const votes = this.votes.get(player.entity.ownerId) ?? [];
+    const votes = this.votes.get(player.entity.getOwnerId()) ?? [];
 
     for (let i = 0; votes.length; i++) {
       if (votes[i] == 0) {
         continue;
       }
 
-      const voter = this.parent.lobby.findPlayerByClientId(votes[i]);
+      const voter = this.parent.getLobby().findPlayerByClientId(votes[i]);
 
       if (voter) {
         this.clearVote(voter as InternalPlayer, player, sendTo);
       } else {
-        this.removeVote(votes[i], player.entity.ownerId, sendTo);
+        this.removeVote(votes[i], player.entity.getOwnerId(), sendTo);
       }
     }
   }
 
   clearVotesFromPlayer(player: InternalPlayer, sendTo?: Connection[]): void {
-    const voterClientId = player.entity.ownerId;
+    const voterClientId = player.entity.getOwnerId();
     const votes = [...this.votes.entries()]
       .filter(entry => entry[0] != voterClientId && entry[1].includes(voterClientId))
       .map(entry => entry[0]);
 
     for (let i = 0; i < votes.length; i++) {
-      const target = this.parent.lobby.findPlayerByClientId(votes[i]);
+      const target = this.parent.getLobby().findPlayerByClientId(votes[i]);
 
       if (target) {
         this.clearVote(player, target as InternalPlayer, sendTo);
@@ -117,15 +118,15 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     switch (type) {
       case RpcPacketType.AddVote: {
         const data = packet as AddVotePacket;
-        const voter = this.parent.lobby.findPlayerByClientId(data.votingClientId);
-        const target = this.parent.lobby.findPlayerByClientId(data.targetClientId);
+        const voter = this.parent.getLobby().findPlayerByClientId(data.votingClientId);
+        const target = this.parent.getLobby().findPlayerByClientId(data.targetClientId);
 
         if (!voter) {
-          throw new Error(`Voting client ${this.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
+          throw new Error(`Voting client ${this.parent.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
         }
 
         if (!target) {
-          throw new Error(`Target client ${this.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
+          throw new Error(`Target client ${this.parent.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
         }
 
         this.addVote(voter, target, sendTo);
@@ -165,14 +166,18 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     return clone;
   }
 
-  private removeVote(voterClientId: number, targetClientId: number, sendTo?: Connection[]): void {
+  getParent(): EntityGameData {
+    return this.parent;
+  }
+
+  protected removeVote(voterClientId: number, targetClientId: number, sendTo?: Connection[]): void {
     const votes = this.votes.get(targetClientId) ?? [0, 0, 0];
     const index = votes.indexOf(voterClientId);
 
     if (index > -1) {
       votes.splice(index, 1);
       this.votes.set(targetClientId, votes);
-      (this.parent.lobby as InternalLobby).sendRootGamePacket(new GameDataPacket([this.serializeData()], this.parent.lobby.getCode()), sendTo);
+      (this.parent.getLobby() as InternalLobby).sendRootGamePacket(new GameDataPacket([this.serializeData()], this.parent.getLobby().getCode()), sendTo);
     }
   }
 }

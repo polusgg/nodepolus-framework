@@ -217,7 +217,7 @@ export default class extends BasePlugin {
 
       server.getLogger("Custom RPC").debug(
         "Received custom RPC packet from %s #%d: %s",
-        InnerNetObjectType[sender.type],
+        InnerNetObjectType[sender.getType()],
         event.getNetId(),
         packet,
       );
@@ -359,15 +359,15 @@ export default class extends BasePlugin {
       return;
     }
 
-    if (sender.type !== InnerNetObjectType.PlayerControl) {
+    if (sender.getType() !== InnerNetObjectType.PlayerControl) {
       return;
     }
 
     server.getLogger("TestRpcPacket").debug(
       "Received TestRpcPacket from connection %s (%s #%d): %s",
       connection,
-      InnerNetObjectType[sender.type],
-      sender.netId,
+      InnerNetObjectType[sender.getType()],
+      sender.getNetId(),
       packet,
     );
 
