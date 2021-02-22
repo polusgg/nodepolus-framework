@@ -75,11 +75,11 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
       return;
     }
 
-    this.removeVote(voter.entity.owner, target.entity.owner, sendTo);
+    this.removeVote(voter.entity.ownerId, target.entity.ownerId, sendTo);
   }
 
   clearVotesForPlayer(player: InternalPlayer, sendTo?: Connection[]): void {
-    const votes = this.votes.get(player.entity.owner) ?? [];
+    const votes = this.votes.get(player.entity.ownerId) ?? [];
 
     for (let i = 0; votes.length; i++) {
       if (votes[i] == 0) {
@@ -91,13 +91,13 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
       if (voter) {
         this.clearVote(voter as InternalPlayer, player, sendTo);
       } else {
-        this.removeVote(votes[i], player.entity.owner, sendTo);
+        this.removeVote(votes[i], player.entity.ownerId, sendTo);
       }
     }
   }
 
   clearVotesFromPlayer(player: InternalPlayer, sendTo?: Connection[]): void {
-    const voterClientId = player.entity.owner;
+    const voterClientId = player.entity.ownerId;
     const votes = [...this.votes.entries()]
       .filter(entry => entry[0] != voterClientId && entry[1].includes(voterClientId))
       .map(entry => entry[0]);
@@ -121,11 +121,11 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
         const target = this.parent.lobby.findPlayerByClientId(data.targetClientId);
 
         if (!voter) {
-          throw new Error(`Voting client ${this.parent.owner} does not have a PlayerInstance on the lobby instance`);
+          throw new Error(`Voting client ${this.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
         }
 
         if (!target) {
-          throw new Error(`Target client ${this.parent.owner} does not have a PlayerInstance on the lobby instance`);
+          throw new Error(`Target client ${this.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
         }
 
         this.addVote(voter, target, sendTo);

@@ -356,10 +356,10 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       case RpcPacketType.SetStartCounter: {
         // TODO: InnerNetObject refactor
         const data = packet as SetStartCounterPacket;
-        const player = this.parent.lobby.findPlayerByClientId(this.parent.owner);
+        const player = this.parent.lobby.findPlayerByClientId(this.parent.ownerId);
 
         if (!player) {
-          throw new Error(`Client ${this.parent.owner} does not have a PlayerInstance on the lobby instance`);
+          throw new Error(`Client ${this.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
         }
 
         this.parent.lobby.getHostInstance().handleSetStartCounter(player, data.sequenceId, data.timeRemaining);

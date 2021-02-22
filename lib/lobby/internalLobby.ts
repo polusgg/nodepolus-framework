@@ -272,7 +272,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   findPlayerByClientId(clientId: number): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.owner == clientId);
+    return this.players.find(player => player.entity.ownerId == clientId);
   }
 
   findPlayerByPlayerId(playerId: number): InternalPlayer | undefined {
@@ -284,15 +284,15 @@ export class InternalLobby implements LobbyInstance {
   }
 
   findPlayerByConnection(connection: Connection): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.owner == connection.id);
+    return this.players.find(player => player.entity.ownerId == connection.id);
   }
 
   findPlayerByEntity(entity: EntityPlayer): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.owner == entity.owner);
+    return this.players.find(player => player.entity.ownerId == entity.ownerId);
   }
 
   findPlayerIndexByConnection(connection: Connection): number {
-    return this.players.findIndex(player => player.entity.owner == connection.id);
+    return this.players.findIndex(player => player.entity.ownerId == connection.id);
   }
 
   findConnection(id: number): Connection | undefined {
@@ -441,13 +441,13 @@ export class InternalLobby implements LobbyInstance {
       throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.getPlayerControl().playerId}) != PlayerData(${playerData.id})`);
     }
 
-    const clientIdInUse = !!this.findPlayerByClientId(player.owner);
-    const playerInstance = new InternalPlayer(this, player, this.findConnection(player.owner));
+    const clientIdInUse = !!this.findPlayerByClientId(player.ownerId);
+    const playerInstance = new InternalPlayer(this, player, this.findConnection(player.ownerId));
 
     this.addPlayer(playerInstance);
 
     if (!clientIdInUse) {
-      this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.owner, this.hostInstance.getId()));
+      this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.ownerId, this.hostInstance.getId()));
     }
 
     this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());

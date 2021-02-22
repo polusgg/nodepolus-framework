@@ -811,7 +811,7 @@ export class InternalHost implements HostInstance {
   }
 
   async handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData): Promise<void> {
-    const owner = this.lobby.findConnection(sender.parent.owner);
+    const owner = this.lobby.findConnection(sender.parent.ownerId);
 
     if (!owner) {
       throw new Error("Received CheckName from an InnerPlayerControl without an owner");
@@ -820,7 +820,7 @@ export class InternalHost implements HostInstance {
     const player = this.lobby.findPlayerByConnection(owner);
 
     if (!player) {
-      throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+      throw new Error(`Client ${sender.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
     }
 
     const oldOptions = this.lobby.getOptions();
@@ -841,7 +841,7 @@ export class InternalHost implements HostInstance {
     let checkName: string = name;
     let index = 1;
 
-    const owner = this.lobby.findConnection(sender.parent.owner);
+    const owner = this.lobby.findConnection(sender.parent.ownerId);
 
     if (!owner) {
       throw new Error("Received CheckName from an InnerPlayerControl without an owner");
@@ -852,7 +852,7 @@ export class InternalHost implements HostInstance {
     if (player) {
       this.confirmPlayerData(player);
     } else {
-      throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+      throw new Error(`Client ${sender.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
     }
 
     while (this.isNameTaken(checkName)) {
@@ -872,7 +872,7 @@ export class InternalHost implements HostInstance {
     const takenColors = this.getTakenColors(sender.playerId);
     let setColor: PlayerColor = color;
 
-    const owner = this.lobby.findConnection(sender.parent.owner);
+    const owner = this.lobby.findConnection(sender.parent.ownerId);
 
     if (!owner) {
       throw new Error("Received CheckColor from an InnerPlayerControl without an owner");
@@ -883,7 +883,7 @@ export class InternalHost implements HostInstance {
     if (player) {
       this.confirmPlayerData(player);
     } else {
-      throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+      throw new Error(`Client ${sender.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
     }
 
     if (this.lobby.getPlayers().length <= 12) {
@@ -902,7 +902,7 @@ export class InternalHost implements HostInstance {
   }
 
   handleSetColor(sender: InnerPlayerControl, color: PlayerColor): void {
-    const owner = this.lobby.findConnection(sender.parent.owner);
+    const owner = this.lobby.findConnection(sender.parent.ownerId);
 
     if (!owner) {
       throw new Error("Received SetColor from an InnerPlayerControl without an owner");
@@ -913,7 +913,7 @@ export class InternalHost implements HostInstance {
     if (player) {
       this.confirmPlayerData(player);
     } else {
-      throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+      throw new Error(`Client ${sender.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
     }
 
     if (owner.isActingHost()) {
@@ -931,7 +931,7 @@ export class InternalHost implements HostInstance {
       throw new Error("Received ReportDeadBody without a GameData instance");
     }
 
-    const owner = this.lobby.findConnection(sender.parent.owner);
+    const owner = this.lobby.findConnection(sender.parent.ownerId);
 
     if (!owner) {
       throw new Error("Received ReportDeadBody from an InnerPlayerControl without an owner");
@@ -940,7 +940,7 @@ export class InternalHost implements HostInstance {
     const player = this.lobby.findPlayerByConnection(owner);
 
     if (!player) {
-      throw new Error(`Client ${sender.parent.owner} does not have a PlayerInstance on the lobby instance`);
+      throw new Error(`Client ${sender.parent.ownerId} does not have a PlayerInstance on the lobby instance`);
     }
 
     const event = new MeetingStartedEvent(

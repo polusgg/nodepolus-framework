@@ -15,7 +15,7 @@ export abstract class BaseEntityShipStatus extends BaseInnerNetEntity {
   serializeSpawn(): SpawnPacket {
     return new SpawnPacket(
       this.type,
-      this.owner,
+      this.ownerId,
       this.flags,
       [
         this.getShipStatus().serializeSpawn(),

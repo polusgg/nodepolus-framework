@@ -357,7 +357,7 @@ export class InternalPlayer implements PlayerInstance {
 
     const entity = new EntityPlayer(
       this.lobby,
-      this.entity.owner,
+      this.entity.ownerId,
       this.entity.getCustomNetworkTransform().position,
       this.entity.getCustomNetworkTransform().velocity,
       this.getId()!,
@@ -380,11 +380,11 @@ export class InternalPlayer implements PlayerInstance {
     this.setName("");
 
     if (this.connection.isActingHost()) {
-      this.connection.writeReliable(new RemovePlayerPacket(this.lobby.getCode(), this.entity.owner, this.entity.owner, DisconnectReason.destroy()));
-      this.connection.writeReliable(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.owner, this.entity.owner));
+      this.connection.writeReliable(new RemovePlayerPacket(this.lobby.getCode(), this.entity.ownerId, this.entity.ownerId, DisconnectReason.destroy()));
+      this.connection.writeReliable(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.ownerId, this.entity.ownerId));
     } else {
-      this.connection.writeReliable(new RemovePlayerPacket(this.lobby.getCode(), this.entity.owner, this.lobby.getHostInstance().getId(), DisconnectReason.destroy()));
-      this.connection.writeReliable(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.owner, this.lobby.getHostInstance().getId()));
+      this.connection.writeReliable(new RemovePlayerPacket(this.lobby.getCode(), this.entity.ownerId, this.lobby.getHostInstance().getId(), DisconnectReason.destroy()));
+      this.connection.writeReliable(new JoinGameResponsePacket(this.lobby.getCode(), this.entity.ownerId, this.lobby.getHostInstance().getId()));
     }
 
     this.setName(oldName);
@@ -394,7 +394,7 @@ export class InternalPlayer implements PlayerInstance {
     for (let i = 0; i < connections.length; i++) {
       const connection = connections[i];
 
-      if (connection.id != this.entity.owner) {
+      if (connection.id != this.entity.ownerId) {
         connection.writeReliable(new GameDataPacket([
           new DespawnPacket(this.entity.getPlayerControl().netId),
           new DespawnPacket(this.entity.getPlayerPhysics().netId),

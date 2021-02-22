@@ -8,7 +8,7 @@ import { Vector2 } from "../../../types";
 export class EntityPlayer extends BaseInnerNetEntity {
   constructor(
     lobby: LobbyInstance,
-    owner: number,
+    ownerId: number,
     position: Vector2 = Vector2.zero(),
     velocity: Vector2 = Vector2.zero(),
     playerId: number = lobby.getHostInstance().getNextPlayerId(),
@@ -19,7 +19,7 @@ export class EntityPlayer extends BaseInnerNetEntity {
     playerPhysicsNetId: number = lobby.getHostInstance().getNextNetId(),
     customNetworkTransformNetId: number = lobby.getHostInstance().getNextNetId(),
   ) {
-    super(SpawnType.PlayerControl, lobby, owner, flags);
+    super(SpawnType.PlayerControl, lobby, ownerId, flags);
 
     this.innerNetObjects = [
       new InnerPlayerControl(this, playerId, isNew, playerControlNetId),

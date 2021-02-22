@@ -9,7 +9,7 @@ export abstract class BaseInnerNetEntity {
   constructor(
     public readonly type: SpawnType,
     public readonly lobby: LobbyInstance,
-    public readonly owner: number,
+    public readonly ownerId: number,
     public readonly flags: SpawnFlag,
   ) {}
 
@@ -18,7 +18,7 @@ export abstract class BaseInnerNetEntity {
   serializeSpawn(): SpawnPacket {
     return new SpawnPacket(
       this.type,
-      this.owner,
+      this.ownerId,
       this.flags,
       this.innerNetObjects.map(object => object.serializeSpawn()),
     );
