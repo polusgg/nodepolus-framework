@@ -35,7 +35,7 @@ export class UpdateGameDataPacket extends BaseRpcPacket {
     const writer = new MessageWriter();
 
     for (let i = 0; i < this.players.length; i++) {
-      writer.startMessage(this.players[i].id);
+      writer.startMessage(this.players[i].getId());
       this.players[i].serialize(writer, false);
       writer.endMessage();
     }

@@ -103,7 +103,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getColor(): PlayerColor {
-    return this.getGameDataEntry().color;
+    return this.getGameDataEntry().getColor();
   }
 
   setColor(color: PlayerColor): this {
@@ -113,7 +113,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getHat(): PlayerHat {
-    return this.getGameDataEntry().hat;
+    return this.getGameDataEntry().getHat();
   }
 
   setHat(hat: PlayerHat): this {
@@ -123,7 +123,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getPet(): PlayerPet {
-    return this.getGameDataEntry().pet;
+    return this.getGameDataEntry().getPet();
   }
 
   setPet(pet: PlayerPet): this {
@@ -133,7 +133,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getSkin(): PlayerSkin {
-    return this.getGameDataEntry().skin;
+    return this.getGameDataEntry().getSkin();
   }
 
   setSkin(skin: PlayerSkin): this {
@@ -148,7 +148,8 @@ export class InternalPlayer implements PlayerInstance {
 
   setRole(role: PlayerRole): this {
     this.role = role;
-    this.getGameDataEntry().isImpostor = role == PlayerRole.Impostor;
+
+    this.getGameDataEntry().setImpostor(role == PlayerRole.Impostor);
 
     return this;
   }
@@ -185,11 +186,11 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   isDead(): boolean {
-    return this.getGameDataEntry().isDead;
+    return this.getGameDataEntry().isDead();
   }
 
   getTasks(): [LevelTask, boolean][] {
-    return this.getGameDataEntry().tasks;
+    return this.getGameDataEntry().getTasks();
   }
 
   setTasks(tasks: Set<LevelTask>): this {
@@ -199,7 +200,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   async addTasks(tasks: Set<LevelTask>): Promise<void> {
-    const taskList = [...this.getGameDataEntry().tasks];
+    const taskList = [...this.getGameDataEntry().getTasks()];
 
     for (let i = 0; i < tasks.size; i++) {
       if (taskList.findIndex(task => task[0] == tasks[i]) > -1) {
@@ -214,14 +215,13 @@ export class InternalPlayer implements PlayerInstance {
     await this.lobby.getServer().emit("player.task.added", event);
 
     if (!event.isCancelled()) {
-      this.getGameDataEntry().tasks = taskList;
-
+      this.getGameDataEntry().setTasks(taskList);
       (this.lobby.getHostInstance() as InternalHost).updatePlayerTasks(this, taskList.map(task => task[0]));
     }
   }
 
   async removeTasks(tasks: Set<LevelTask>): Promise<void> {
-    const taskList = [...this.getGameDataEntry().tasks];
+    const taskList = [...this.getGameDataEntry().getTasks()];
 
     for (let i = 0; i < tasks.size; i++) {
       const index = taskList.findIndex(task => task[0] == tasks[i]);
@@ -236,8 +236,7 @@ export class InternalPlayer implements PlayerInstance {
     await this.lobby.getServer().emit("player.task.removed", event);
 
     if (!event.isCancelled()) {
-      this.getGameDataEntry().tasks = taskList;
-
+      this.getGameDataEntry().setTasks(taskList);
       (this.lobby.getHostInstance() as InternalHost).updatePlayerTasks(this, taskList.map(task => task[0]));
     }
   }
@@ -405,7 +404,8 @@ export class InternalPlayer implements PlayerInstance {
       }
     }
 
-    this.getGameDataEntry().isDead = false;
+    this.getGameDataEntry().setDead(false);
+
     this.entity = entity;
 
     gameData.getGameData().updateGameData([this.getGameDataEntry()], connections);
@@ -497,7 +497,7 @@ export class InternalPlayer implements PlayerInstance {
     for (let i = 0; i < players.length; i++) {
       const player = players[i];
 
-      if (player.id == this.id) {
+      if (player.getId() == this.id) {
         return player;
       }
     }

@@ -438,8 +438,8 @@ export class InternalLobby implements LobbyInstance {
   }
 
   spawnPlayer(player: EntityPlayer, playerData: PlayerData): PlayerInstance {
-    if (player.getPlayerControl().playerId != playerData.id) {
-      throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.getPlayerControl().playerId}) != PlayerData(${playerData.id})`);
+    if (player.getPlayerControl().playerId != playerData.getId()) {
+      throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.getPlayerControl().playerId}) != PlayerData(${playerData.getId()})`);
     }
 
     const clientIdInUse = !!this.findPlayerByClientId(player.getOwnerId());
@@ -513,18 +513,19 @@ export class InternalLobby implements LobbyInstance {
 
         if (connection) {
           const playerData = player.getGameDataEntry();
-          const { color: oldColor, name: oldName } = playerData;
+          const oldColor = playerData.getColor();
+          const oldName = playerData.getName();
 
-          playerData.color = color;
-          playerData.name = name;
+          playerData.setColor(color);
+          playerData.setName(name);
 
           connection.writeReliable(new GameDataPacket([
             new RpcPacket(this.gameData.getGameData().getNetId(), new UpdateGameDataPacket([playerData])),
             new RpcPacket(player.entity.getPlayerControl().getNetId(), new SendChatPacket(message.toString())),
           ], this.code));
 
-          playerData.color = oldColor;
-          playerData.name = oldName;
+          playerData.setColor(oldColor);
+          playerData.setName(oldName);
 
           connection.writeReliable(new GameDataPacket([
             new RpcPacket(this.gameData.getGameData().getNetId(), new UpdateGameDataPacket([playerData])),

@@ -84,19 +84,19 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
   async completeTask(taskIndex: number, sendTo?: Connection[]): Promise<void> {
     const playerData = this.getPlayerData();
-    const taskCount = playerData.tasks.length;
+    const taskCount = playerData.getTasks().length;
 
     if (taskCount < taskIndex) {
       throw new Error(`Player ${this.playerId} has fewer tasks (${taskCount}) than the requested index (${taskIndex})`);
     }
 
-    const event = new PlayerTaskCompletedEvent(this.getPlayerInstance(), taskIndex, playerData.tasks[taskIndex][0]);
+    const event = new PlayerTaskCompletedEvent(this.getPlayerInstance(), taskIndex, playerData.getTasks()[taskIndex][0]);
 
     await this.parent.getLobby().getServer().emit("player.task.completed", event);
 
     if (event.isCancelled()) {
       const connection = this.getConnection();
-      const tasks = [...playerData.tasks];
+      const tasks = [...playerData.getTasks()];
       const deleted = tasks.splice(taskIndex, 1);
 
       this.sendRpcPacket(new SetTasksPacket(this.playerId, tasks.map(task => task[0].id)), [connection]);
@@ -131,8 +131,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       return;
     }
 
-    this.getPlayerData().isDead = true;
-
+    this.getPlayerData().setDead(true);
     this.sendRpcPacket(new ExiledPacket(), [this.getConnection()]);
   }
 
@@ -148,8 +147,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       event.setNewName(event.getOldName());
     }
 
-    this.getPlayerData().name = event.getNewName().toString();
-
+    this.getPlayerData().setName(event.getNewName().toString());
     this.sendRpcPacket(new SetNamePacket(event.getNewName().toString()), sendTo);
   }
 
@@ -165,8 +163,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       event.setNewColor(event.getOldColor());
     }
 
-    this.getPlayerData().color = event.getNewColor();
-
+    this.getPlayerData().setColor(event.getNewColor());
     this.sendRpcPacket(new SetColorPacket(event.getNewColor()), sendTo);
   }
 
@@ -182,8 +179,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       event.setNewHat(event.getOldHat());
     }
 
-    this.getPlayerData().hat = event.getNewHat();
-
+    this.getPlayerData().setHat(event.getNewHat());
     this.sendRpcPacket(new SetHatPacket(event.getNewHat()), sendTo);
   }
 
@@ -199,8 +195,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       event.setNewPet(event.getOldPet());
     }
 
-    this.getPlayerData().pet = event.getNewPet();
-
+    this.getPlayerData().setPet(event.getNewPet());
     this.sendRpcPacket(new SetPetPacket(event.getNewPet()), sendTo);
   }
 
@@ -216,8 +211,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       event.setNewSkin(event.getOldSkin());
     }
 
-    this.getPlayerData().skin = event.getNewSkin();
-
+    this.getPlayerData().setSkin(event.getNewSkin());
     this.sendRpcPacket(new SetSkinPacket(event.getNewSkin()), sendTo);
   }
 
@@ -238,8 +232,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       return;
     }
 
-    victim.getGameDataEntry().isDead = true;
-
+    victim.getGameDataEntry().setDead(true);
     this.sendRpcPacket(new MurderPlayerPacket(victimPlayerControlNetId), sendTo);
   }
 
@@ -433,7 +426,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   protected getGameDataIndex(playerId: number = this.playerId): number {
-    const gameDataIndex: number = this.getGameData().getGameData().players.findIndex(p => p.id == playerId);
+    const gameDataIndex: number = this.getGameData().getGameData().players.findIndex(p => p.getId() == playerId);
 
     if (gameDataIndex == -1) {
       throw new Error(`Player ${playerId} does not have a PlayerData instance in GameData`);

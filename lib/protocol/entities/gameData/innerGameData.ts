@@ -20,19 +20,20 @@ export class InnerGameData extends BaseInnerNetObject {
 
   setTasks(playerId: number, taskIds: number[], sendTo?: Connection[]): void {
     const tasks = Tasks.forLevelFromId(this.parent.getLobby().getLevel(), taskIds);
-    const playerIndex = this.players.findIndex(p => p.id == playerId);
+    const playerIndex = this.players.findIndex(p => p.getId() == playerId);
 
     if (playerIndex > -1) {
       const player = this.players[playerIndex];
-
-      player.tasks = new Array(tasks.length);
+      const newTasks = new Array(tasks.length);
 
       for (let j = 0; j < tasks.length; j++) {
-        player.tasks[j] = [
+        newTasks[j] = [
           tasks[j],
           false,
         ];
       }
+
+      player.setTasks(newTasks);
     }
 
     this.sendRpcPacket(new SetTasksPacket(playerId, taskIds), sendTo);
@@ -43,7 +44,7 @@ export class InnerGameData extends BaseInnerNetObject {
       let hasPlayer = false;
 
       for (let j = 0; j < this.players.length; j++) {
-        if (this.players[j].id == playerData[i].id) {
+        if (this.players[j].getId() == playerData[i].getId()) {
           hasPlayer = true;
           this.players[j] = playerData[i];
 

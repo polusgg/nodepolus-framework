@@ -5,26 +5,16 @@ import { Tasks } from "../../../../static";
 
 export class PlayerData {
   constructor(
-    // TODO: Make protected with getter/setter
-    public readonly id: number,
-    // TODO: Make protected with getter/setter
-    public name: string,
-    // TODO: Make protected with getter/setter
-    public color: PlayerColor,
-    // TODO: Make protected with getter/setter
-    public hat: PlayerHat,
-    // TODO: Make protected with getter/setter
-    public pet: PlayerPet,
-    // TODO: Make protected with getter/setter
-    public skin: PlayerSkin,
-    // TODO: Make protected with getter/setter
-    public isDisconnected: boolean,
-    // TODO: Make protected with getter/setter
-    public isImpostor: boolean,
-    // TODO: Make protected with getter/setter
-    public isDead: boolean,
-    // TODO: Make protected with getter/setter
-    public tasks: [task: LevelTask, isComplete: boolean][],
+    protected readonly id: number,
+    protected name: string,
+    protected color: PlayerColor,
+    protected hat: PlayerHat,
+    protected pet: PlayerPet,
+    protected skin: PlayerSkin,
+    protected disconnected: boolean,
+    protected impostor: boolean,
+    protected dead: boolean,
+    protected tasks: [task: LevelTask, isComplete: boolean][],
   ) {}
 
   static deserialize(reader: MessageReader, level: Level, tag?: number): PlayerData {
@@ -43,6 +33,100 @@ export class PlayerData {
       id, name, color, hat, pet, skin, isDisconnected, isImpostor, isDead,
       reader.readList(list => [Tasks.forLevelFromId(level, [list.readByte()])[0], list.readBoolean()]),
     );
+  }
+
+  getId(): number {
+    return this.id;
+  }
+
+  getName(): string {
+    return this.name;
+  }
+
+  setName(name: string): this {
+    this.name = name;
+
+    return this;
+  }
+
+  getColor(): PlayerColor {
+    return this.color;
+  }
+
+  setColor(color: PlayerColor): this {
+    this.color = color;
+
+    return this;
+  }
+
+  getHat(): PlayerHat {
+    return this.hat;
+  }
+
+  setHat(hat: PlayerHat): this {
+    this.hat = hat;
+
+    return this;
+  }
+
+  getPet(): PlayerPet {
+    return this.pet;
+  }
+
+  setPet(pet: PlayerPet): this {
+    this.pet = pet;
+
+    return this;
+  }
+
+  getSkin(): PlayerSkin {
+    return this.skin;
+  }
+
+  setSkin(skin: PlayerSkin): this {
+    this.skin = skin;
+
+    return this;
+  }
+
+  isDisconnected(): boolean {
+    return this.disconnected;
+  }
+
+  setDisconnected(disconnected: boolean): this {
+    this.disconnected = disconnected;
+
+    return this;
+  }
+
+  isImpostor(): boolean {
+    return this.impostor;
+  }
+
+  setImpostor(impostor: boolean): this {
+    this.impostor = impostor;
+
+    return this;
+  }
+
+  isDead(): boolean {
+    return this.dead;
+  }
+
+  setDead(dead: boolean): this {
+    this.dead = dead;
+
+    return this;
+  }
+
+  getTasks(): [task: LevelTask, isComplete: boolean][] {
+    return this.tasks;
+  }
+
+  setTasks(tasks: [task: LevelTask, isComplete: boolean][]): this {
+    this.tasks = tasks;
+
+    return this;
   }
 
   isDoneWithTasks(): boolean {
@@ -125,9 +209,9 @@ export class PlayerData {
       .writePackedUInt32(this.pet)
       .writePackedUInt32(this.skin)
       .writeByte(
-        (this.isDisconnected ? PlayerFlagMask.IsDisconnected : 0) |
-        (this.isImpostor ? PlayerFlagMask.IsImpostor : 0) |
-        (this.isDead ? PlayerFlagMask.IsDead : 0),
+        (this.disconnected ? PlayerFlagMask.IsDisconnected : 0) |
+        (this.impostor ? PlayerFlagMask.IsImpostor : 0) |
+        (this.dead ? PlayerFlagMask.IsDead : 0),
       )
       .writeList(this.tasks, (sub, task, i) => sub.writePackedUInt32(i).writeBoolean(task[1]));
   }
@@ -143,9 +227,9 @@ export class PlayerData {
       this.hat,
       this.pet,
       this.skin,
-      this.isDisconnected,
-      this.isImpostor,
-      this.isDead,
+      this.disconnected,
+      this.impostor,
+      this.dead,
       [...this.tasks],
     );
   }

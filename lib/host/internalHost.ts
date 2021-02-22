@@ -459,7 +459,8 @@ export class InternalHost implements HostInstance {
       if (!exiledEvent.isCancelled()) {
         exiledPlayer = exiledEvent.getPlayer();
         exiledPlayerData = exiledPlayer.getGameDataEntry();
-        exiledPlayerData.isDead = true;
+
+        exiledPlayerData.setDead(true);
       }
     }
 
@@ -499,7 +500,7 @@ export class InternalHost implements HostInstance {
         ));
 
         if (this.shouldEndGame()) {
-          if (exiledPlayerData!.isImpostor) {
+          if (exiledPlayerData!.isImpostor()) {
             this.endGame(GameOverReason.CrewmatesByVote);
           } else {
             this.endGame(GameOverReason.ImpostorsByVote);
@@ -589,11 +590,11 @@ export class InternalHost implements HostInstance {
       return;
     }
 
-    const playerIndex = gameData.getGameData().players.findIndex(playerData => playerData.id == player.getId());
+    const playerIndex = gameData.getGameData().players.findIndex(playerData => playerData.getId() == player.getId());
     const playerData = gameData.getGameData().players[playerIndex];
 
     if (gameState == GameState.Started) {
-      playerData.isDisconnected = true;
+      playerData.setDisconnected(true);
     } else {
       gameData.getGameData().players.splice(playerIndex, 1);
     }
@@ -602,7 +603,7 @@ export class InternalHost implements HostInstance {
     gameData.getVoteBanSystem().votes.delete(connection.id);
 
     if (this.shouldEndGame()) {
-      if (playerData.isImpostor) {
+      if (playerData.isImpostor()) {
         this.endGame(GameOverReason.ImpostorDisconnect);
       } else {
         this.endGame(GameOverReason.CrewmateDisconnect);
@@ -802,7 +803,7 @@ export class InternalHost implements HostInstance {
       throw new Error("Received CompleteTask without a GameData instance");
     }
 
-    const crewmates = gameData.getGameData().players.filter(playerData => !playerData.isImpostor);
+    const crewmates = gameData.getGameData().players.filter(playerData => !playerData.isImpostor());
 
     if (crewmates.every(crewmate => crewmate.isDoneWithTasks())) {
       this.endGame(GameOverReason.CrewmatesByTask);
@@ -966,10 +967,10 @@ export class InternalHost implements HostInstance {
     for (let i = 0; i < gameData.getGameData().players.length; i++) {
       const playerData = gameData.getGameData().players[i];
 
-      meetingHud!.getMeetingHud().playerStates[playerData.id] = new VoteState(
-        playerData!.id == event.getCaller().getId(),
+      meetingHud!.getMeetingHud().playerStates[playerData.getId()] = new VoteState(
+        playerData!.getId() == event.getCaller().getId(),
         false,
-        playerData.isDead || playerData.isDisconnected,
+        playerData.isDead() || playerData.isDisconnected(),
         -1,
       );
     }
@@ -1253,11 +1254,11 @@ export class InternalHost implements HostInstance {
     for (let i = 0; i < gameData.getGameData().players.length; i++) {
       const playerData = gameData.getGameData().players[i];
 
-      if (playerData.isDead || playerData.isDisconnected) {
+      if (playerData.isDead() || playerData.isDisconnected()) {
         continue;
       }
 
-      if (playerData.isImpostor) {
+      if (playerData.isImpostor()) {
         aliveImpostors.push(playerData);
       } else {
         aliveCrewmates.push(playerData);
@@ -1281,7 +1282,7 @@ export class InternalHost implements HostInstance {
       throw new Error("isNameTaken called without a GameData instance");
     }
 
-    return !!gameData.getGameData().players.find(player => player.name == name);
+    return !!gameData.getGameData().players.find(player => player.getName() == name);
   }
 
   /**
@@ -1299,16 +1300,16 @@ export class InternalHost implements HostInstance {
     }
 
     return gameData.getGameData().players.filter(player => {
-      if (player.id === excludePlayerId) {
+      if (player.getId() === excludePlayerId) {
         return false;
       }
 
-      if (this.lobby.getPlayers().find(p => p.getId() == player.id)?.getConnection() === undefined) {
+      if (this.lobby.getPlayers().find(p => p.getId() == player.getId())?.getConnection() === undefined) {
         return false;
       }
 
       return true;
-    }).map(player => player.color);
+    }).map(player => player.getColor());
   }
 
   /**
@@ -1325,7 +1326,7 @@ export class InternalHost implements HostInstance {
       throw new Error("confirmPlayerData called without a GameData instance");
     }
 
-    if (!gameData.getGameData().players.some(p => p.id == player.entity.getPlayerControl().playerId)) {
+    if (!gameData.getGameData().players.some(p => p.getId() == player.entity.getPlayerControl().playerId)) {
       const playerData = new PlayerData(
         player.entity.getPlayerControl().playerId,
         "",
