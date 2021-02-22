@@ -1,5 +1,5 @@
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
 import { RoomElectricalInteractedEvent } from "../../../../api/events/room";
+import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseInnerShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../../types/enums";
 import { Bitfield } from "../../../../types";
@@ -25,17 +25,11 @@ export class SwitchSystem extends BaseSystem {
     this.actualSwitches.update(switchIndex, event.isFlipped());
   }
 
-  getData(): MessageWriter {
-    return this.getSpawn();
+  serializeData(): MessageWriter {
+    return this.serializeSpawn();
   }
 
-  setData(data: MessageReader): void {
-    this.expectedSwitches = Bitfield.fromNumber(data.readByte(), 5);
-    this.actualSwitches = Bitfield.fromNumber(data.readByte(), 5);
-    this.visionModifier = data.readByte();
-  }
-
-  getSpawn(): MessageWriter {
+  serializeSpawn(): MessageWriter {
     return new MessageWriter()
       .writeByte(this.expectedSwitches.toNumber())
       .writeByte(this.actualSwitches.toNumber())

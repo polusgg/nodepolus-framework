@@ -1,4 +1,4 @@
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseInnerShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
@@ -11,15 +11,11 @@ export class SecurityCameraSystem extends BaseSystem {
     super(shipStatus, SystemType.Security);
   }
 
-  getData(): MessageWriter {
-    return this.getSpawn();
+  serializeData(): MessageWriter {
+    return this.serializeSpawn();
   }
 
-  setData(data: MessageReader): void {
-    this.playersViewingCameras = new Set(data.readList(reader => reader.readByte()));
-  }
-
-  getSpawn(): MessageWriter {
+  serializeSpawn(): MessageWriter {
     return new MessageWriter().writeList(this.playersViewingCameras, (writer, player) => {
       writer.writeByte(player);
     });

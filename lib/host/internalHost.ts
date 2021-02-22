@@ -1085,7 +1085,7 @@ export class InternalHost implements HostInstance {
       throw new Error(`Received RepairSystem from a non-player InnerNetObject: ${playerControlNetId}`);
     }
 
-    switch (system.type) {
+    switch (system.getType()) {
       case SystemType.Electrical:
         this.systemsHandler!.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
         break;
@@ -1128,7 +1128,7 @@ export class InternalHost implements HostInstance {
         this.systemsHandler!.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
         break;
       default:
-        throw new Error(`Received RepairSystem packet for an unimplemented SystemType: ${system.type} (${SystemType[system.type]})`);
+        throw new Error(`Received RepairSystem packet for an unimplemented SystemType: ${system.getType()} (${SystemType[system.getType()]})`);
     }
   }
 

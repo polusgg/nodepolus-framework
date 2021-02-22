@@ -1,4 +1,4 @@
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseInnerShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
@@ -13,19 +13,11 @@ export class HqHudSystem extends BaseSystem {
     super(shipStatus, SystemType.Communications);
   }
 
-  getData(): MessageWriter {
-    return this.getSpawn();
+  serializeData(): MessageWriter {
+    return this.serializeSpawn();
   }
 
-  setData(data: MessageReader): void {
-    this.activeConsoles = new Map(data.readList(reader => [
-      reader.readByte(),
-      reader.readByte(),
-    ]));
-    this.completedConsoles = new Set(data.readList(reader => reader.readByte()));
-  }
-
-  getSpawn(): MessageWriter {
+  serializeSpawn(): MessageWriter {
     return new MessageWriter().writeList(this.activeConsoles, (writer, pair) => {
       writer.writeByte(pair[0]);
       writer.writeByte(pair[1]);

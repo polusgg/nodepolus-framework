@@ -1,4 +1,4 @@
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseInnerShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
@@ -20,23 +20,11 @@ export class MovingPlatformSystem extends BaseSystem {
     super(shipStatus, SystemType.GapRoom);
   }
 
-  getData(): MessageWriter {
-    return this.getSpawn();
+  serializeData(): MessageWriter {
+    return this.serializeSpawn();
   }
 
-  setData(data: MessageReader): void {
-    this.sequenceId = data.readByte();
-
-    const innerPlayerControlNetId = data.readInt32();
-
-    if (innerPlayerControlNetId > -1) {
-      this.innerPlayerControlNetId = innerPlayerControlNetId;
-    }
-
-    this.side = data.readByte();
-  }
-
-  getSpawn(): MessageWriter {
+  serializeSpawn(): MessageWriter {
     return new MessageWriter()
       .writeByte(this.sequenceId % 256)
       .writeInt32(this.innerPlayerControlNetId ?? -1)

@@ -1,4 +1,4 @@
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseInnerShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
@@ -11,15 +11,11 @@ export class MedScanSystem extends BaseSystem {
     super(shipStatus, SystemType.Medbay);
   }
 
-  getData(): MessageWriter {
-    return this.getSpawn();
+  serializeData(): MessageWriter {
+    return this.serializeSpawn();
   }
 
-  setData(data: MessageReader): void {
-    this.playersInQueue = new Set(data.readList(reader => reader.readByte()));
-  }
-
-  getSpawn(): MessageWriter {
+  serializeSpawn(): MessageWriter {
     return new MessageWriter().writeList(this.playersInQueue, (writer, player) => {
       writer.writeByte(player);
     });

@@ -1,4 +1,4 @@
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseInnerShipStatus } from "../baseShipStatus";
 import { SystemDoors } from "../../../../static/doors";
 import { SystemType } from "../../../../types/enums";
@@ -12,7 +12,7 @@ export class AutoDoorsSystem extends BaseSystem {
     super(shipStatus, SystemType.Doors);
   }
 
-  getData(old: AutoDoorsSystem): MessageWriter {
+  serializeData(old: AutoDoorsSystem): MessageWriter {
     const writer = new MessageWriter();
     let mask = 0;
     const dirtyDoors: number[] = [];
@@ -28,17 +28,7 @@ export class AutoDoorsSystem extends BaseSystem {
     return writer.writePackedUInt32(mask).writeBytes(dirtyDoors);
   }
 
-  setData(data: MessageReader): void {
-    const mask = data.readPackedUInt32();
-
-    for (let i = 0; i < this.doors.length; i++) {
-      if ((mask & (1 << i)) != 0) {
-        this.doors[i] = data.readBoolean();
-      }
-    }
-  }
-
-  getSpawn(): MessageWriter {
+  serializeSpawn(): MessageWriter {
     const writer = new MessageWriter();
 
     for (let i = 0; i < this.doors.length; i++) {

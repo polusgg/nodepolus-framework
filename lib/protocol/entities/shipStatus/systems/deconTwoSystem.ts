@@ -1,5 +1,5 @@
 import { DecontaminationDoorState, SystemType } from "../../../../types/enums";
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseInnerShipStatus } from "../baseShipStatus";
 import { BaseSystem } from ".";
 
@@ -13,16 +13,11 @@ export class DeconTwoSystem extends BaseSystem {
     super(shipStatus, SystemType.Decontamination2);
   }
 
-  getData(): MessageWriter {
-    return this.getSpawn();
+  serializeData(): MessageWriter {
+    return this.serializeSpawn();
   }
 
-  setData(data: MessageReader): void {
-    this.timer = data.readByte();
-    this.state = data.readByte();
-  }
-
-  getSpawn(): MessageWriter {
+  serializeSpawn(): MessageWriter {
     return new MessageWriter()
       .writeByte(this.timer)
       .writeByte(this.state);

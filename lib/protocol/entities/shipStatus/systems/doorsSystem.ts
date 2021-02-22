@@ -1,4 +1,4 @@
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseInnerShipStatus } from "../baseShipStatus";
 import { SystemDoors } from "../../../../static/doors";
 import { SystemType } from "../../../../types/enums";
@@ -14,19 +14,11 @@ export class DoorsSystem extends BaseSystem {
     super(shipStatus, SystemType.Doors);
   }
 
-  getData(): MessageWriter {
-    return this.getSpawn();
+  serializeData(): MessageWriter {
+    return this.serializeSpawn();
   }
 
-  setData(data: MessageReader): void {
-    this.timers = new Map(data.readList(reader => [reader.readByte(), reader.readFloat32()]));
-
-    for (let i = 0; i < SystemDoors.countForPolus(); i++) {
-      this.doorStates[i] = data.readBoolean();
-    }
-  }
-
-  getSpawn(): MessageWriter {
+  serializeSpawn(): MessageWriter {
     const writer = new MessageWriter().writeList(this.timers, (sub, item) => {
       sub.writeByte(item[0]);
       sub.writeFloat32(item[1]);

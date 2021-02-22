@@ -1,4 +1,4 @@
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseInnerShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
@@ -13,16 +13,11 @@ export class LifeSuppSystem extends BaseSystem {
     super(shipStatus, SystemType.Oxygen);
   }
 
-  getData(): MessageWriter {
-    return this.getSpawn();
+  serializeData(): MessageWriter {
+    return this.serializeSpawn();
   }
 
-  setData(data: MessageReader): void {
-    this.timer = data.readFloat32();
-    this.completedConsoles = new Set(data.readList(reader => reader.readPackedUInt32()));
-  }
-
-  getSpawn(): MessageWriter {
+  serializeSpawn(): MessageWriter {
     return new MessageWriter()
       .writeFloat32(this.timer)
       .writeList(this.completedConsoles, (writer, con) => writer.writePackedUInt32(con));

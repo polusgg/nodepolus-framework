@@ -121,14 +121,14 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     const changedSystemTypes: SystemType[] = this.systems.map((currentSystem, systemIndex) => {
       const oldSystem = old.systems[systemIndex];
 
-      if (currentSystem.type != oldSystem.type) {
-        throw new Error(`Attempted comparison of two disparate SystemTypes: expected ${currentSystem.type} (${SystemType[currentSystem.type]}) but got ${oldSystem.type} (${SystemType[oldSystem.type]})`);
+      if (currentSystem.getType() != oldSystem.getType()) {
+        throw new Error(`Attempted comparison of two disparate SystemTypes: expected ${currentSystem.getType()} (${SystemType[currentSystem.getType()]}) but got ${oldSystem.getType()} (${SystemType[oldSystem.getType()]})`);
       }
 
       const isEqual = currentSystem.equals(oldSystem);
 
       if (!isEqual) {
-        return currentSystem.type;
+        return currentSystem.getType();
       }
 
       return -1;
@@ -272,9 +272,9 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
       const system = this.getSystemFromType(systems[i]);
 
       if (old) {
-        writers[i] = system.data(old.getSystemFromType(systems[i]));
+        writers[i] = system.serializeData(old.getSystemFromType(systems[i]));
       } else {
-        writers[i] = system.getSpawn();
+        writers[i] = system.serializeSpawn();
       }
     }
 
