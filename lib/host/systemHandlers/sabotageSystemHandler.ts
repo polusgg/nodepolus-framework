@@ -8,7 +8,7 @@ import {
   LifeSuppSystem,
   ReactorSystem,
   SwitchSystem,
-} from "../../protocol/entities/shipStatus/baseShipStatus/systems";
+} from "../../protocol/entities/shipStatus/systems";
 
 export class SabotageSystemHandler {
   public timer?: NodeJS.Timeout;

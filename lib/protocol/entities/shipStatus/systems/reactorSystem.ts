@@ -1,6 +1,6 @@
-import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
-import { SystemType } from "../../../../../types/enums";
-import { BaseInnerShipStatus } from "..";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { BaseInnerShipStatus } from "../baseShipStatus";
+import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class ReactorSystem extends BaseSystem {

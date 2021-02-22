@@ -23,6 +23,19 @@ import { InternalPlayer } from "../player";
 import { InternalLobby } from "../lobby";
 import { Game } from "../api/game";
 import {
+  NormalCommunicationsAmount,
+  MiraCommunicationsAmount,
+  DecontaminationAmount,
+  ElectricalAmount,
+  PolusDoorsAmount,
+  SabotageAmount,
+  SecurityAmount,
+  ReactorAmount,
+  MedbayAmount,
+  OxygenAmount,
+  RepairAmount,
+} from "../protocol/packets/rpc/repairSystem/amounts";
+import {
   DeconSystem,
   DeconTwoSystem,
   DoorsSystem,
@@ -36,20 +49,7 @@ import {
   SabotageSystem,
   SecurityCameraSystem,
   SwitchSystem,
-} from "../protocol/entities/shipStatus/baseShipStatus/systems";
-import {
-  NormalCommunicationsAmount,
-  MiraCommunicationsAmount,
-  DecontaminationAmount,
-  ElectricalAmount,
-  PolusDoorsAmount,
-  SabotageAmount,
-  SecurityAmount,
-  ReactorAmount,
-  MedbayAmount,
-  OxygenAmount,
-  RepairAmount,
-} from "../protocol/packets/rpc/repairSystem/amounts";
+} from "../protocol/entities/shipStatus/systems";
 import {
   ClearVotePacket,
   ClosePacket,

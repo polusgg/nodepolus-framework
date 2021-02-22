@@ -1,14 +1,14 @@
-import { DecontaminationDoorState, SystemType } from "../../../../../types/enums";
-import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
-import { BaseInnerShipStatus } from "../baseInnerShipStatus";
+import { DecontaminationDoorState, SystemType } from "../../../../types/enums";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { BaseInnerShipStatus } from "../baseShipStatus";
 import { BaseSystem } from ".";
 
-export class DeconSystem extends BaseSystem {
+export class DeconTwoSystem extends BaseSystem {
   public timer = 0;
   public state: DecontaminationDoorState = DecontaminationDoorState.Idle;
 
   constructor(shipStatus: BaseInnerShipStatus) {
-    super(shipStatus, SystemType.Decontamination);
+    super(shipStatus, SystemType.Decontamination2);
   }
 
   getData(): MessageWriter {
@@ -26,7 +26,7 @@ export class DeconSystem extends BaseSystem {
       .writeByte(this.state);
   }
 
-  equals(old: DeconSystem): boolean {
+  equals(old: DeconTwoSystem): boolean {
     if (this.timer != old.timer) {
       return false;
     }
@@ -38,8 +38,8 @@ export class DeconSystem extends BaseSystem {
     return true;
   }
 
-  clone(): DeconSystem {
-    const clone = new DeconSystem(this.shipStatus);
+  clone(): DeconTwoSystem {
+    const clone = new DeconTwoSystem(this.shipStatus);
 
     clone.state = this.state;
     clone.timer = this.timer;

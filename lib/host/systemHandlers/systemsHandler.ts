@@ -5,20 +5,6 @@ import { notUndefined } from "../../util/functions";
 import { InternalPlayer } from "../../player";
 import { InternalHost } from "..";
 import {
-  DeconSystem,
-  DeconTwoSystem,
-  DoorsSystem,
-  HqHudSystem,
-  HudOverrideSystem,
-  LaboratorySystem,
-  LifeSuppSystem,
-  MedScanSystem,
-  ReactorSystem,
-  SabotageSystem,
-  SecurityCameraSystem,
-  SwitchSystem,
-} from "../../protocol/entities/shipStatus/baseShipStatus/systems";
-import {
   MedbayAction,
   MiraCommunicationsAction,
   OxygenAction,
@@ -36,6 +22,20 @@ import {
   SabotageAmount,
   SecurityAmount,
 } from "../../protocol/packets/rpc/repairSystem/amounts";
+import {
+  DeconSystem,
+  DeconTwoSystem,
+  DoorsSystem,
+  HqHudSystem,
+  HudOverrideSystem,
+  LaboratorySystem,
+  LifeSuppSystem,
+  MedScanSystem,
+  ReactorSystem,
+  SabotageSystem,
+  SecurityCameraSystem,
+  SwitchSystem,
+} from "../../protocol/entities/shipStatus/systems";
 import {
   GameScannerQueuedEvent,
   GameScannerStartedEvent,

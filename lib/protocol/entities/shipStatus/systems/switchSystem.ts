@@ -1,8 +1,8 @@
-import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
-import { RoomElectricalInteractedEvent } from "../../../../../api/events/room";
-import { SystemType } from "../../../../../types/enums";
-import { Bitfield } from "../../../../../types";
-import { BaseInnerShipStatus } from "..";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { RoomElectricalInteractedEvent } from "../../../../api/events/room";
+import { BaseInnerShipStatus } from "../baseShipStatus";
+import { SystemType } from "../../../../types/enums";
+import { Bitfield } from "../../../../types";
 import { BaseSystem } from ".";
 
 export class SwitchSystem extends BaseSystem {

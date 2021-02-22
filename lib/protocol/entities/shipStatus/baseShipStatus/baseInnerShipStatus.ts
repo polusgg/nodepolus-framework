@@ -21,7 +21,7 @@ import {
   SabotageSystem,
   SecurityCameraSystem,
   SwitchSystem,
-} from "./systems";
+} from "../systems";
 
 export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   public readonly spawnSystemTypes: SystemType[];

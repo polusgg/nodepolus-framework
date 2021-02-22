@@ -1,7 +1,7 @@
-import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
-import { SystemDoors } from "../../../../../static/doors";
-import { SystemType } from "../../../../../types/enums";
-import { BaseInnerShipStatus } from "..";
+import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { BaseInnerShipStatus } from "../baseShipStatus";
+import { SystemDoors } from "../../../../static/doors";
+import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class AutoDoorsSystem extends BaseSystem {
