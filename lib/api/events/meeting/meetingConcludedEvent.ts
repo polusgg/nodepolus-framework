@@ -68,7 +68,7 @@ export class MeetingConcludedEvent extends CancellableEvent {
     }
 
     if (this.exiledPlayerId > -1) {
-      return this.game.lobby.findPlayerByPlayerId(this.exiledPlayerId);
+      return this.game.getLobby().findPlayerByPlayerId(this.exiledPlayerId);
     }
   }
 
