@@ -1,7 +1,7 @@
-import { SetTasksPacket, UpdateGameDataPacket } from "../../packets/rpc";
+import { BaseRpcPacket, SetTasksPacket, UpdateGameDataPacket } from "../../packets/rpc";
+import { InnerNetObjectType, RpcPacketType } from "../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MessageWriter } from "../../../util/hazelMessage";
-import { InnerNetObjectType } from "../../../types/enums";
 import { BaseInnerNetObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { Tasks } from "../../../static";
@@ -17,7 +17,7 @@ export class InnerGameData extends BaseInnerNetObject {
     super(InnerNetObjectType.GameData, netId, parent);
   }
 
-  setTasks(playerId: number, taskIds: number[], sendTo: Connection[]): void {
+  setTasks(playerId: number, taskIds: number[], sendTo?: Connection[]): void {
     const tasks = Tasks.forLevelFromId(this.parent.lobby.getLevel(), taskIds);
     const playerIndex = this.players.findIndex(p => p.id == playerId);
 
@@ -37,7 +37,7 @@ export class InnerGameData extends BaseInnerNetObject {
     this.sendRpcPacket(new SetTasksPacket(playerId, taskIds), sendTo);
   }
 
-  updateGameData(playerData: PlayerData[], sendTo: Connection[]): void {
+  updateGameData(playerData: PlayerData[], sendTo?: Connection[]): void {
     for (let i = 0; i < playerData.length; i++) {
       let hasPlayer = false;
 
@@ -56,6 +56,18 @@ export class InnerGameData extends BaseInnerNetObject {
     }
 
     this.sendRpcPacket(new UpdateGameDataPacket(playerData), sendTo);
+  }
+
+  handleRpc(connection: Connection, type: RpcPacketType, _packet: BaseRpcPacket, _sendTo: Connection[]): void {
+    switch (type) {
+      case RpcPacketType.SetTasks:
+        this.parent.lobby.getLogger().warn("Received SetTasks packet from connection %s in a server-as-host state", connection);
+        break;
+      case RpcPacketType.UpdateGameData:
+        break;
+      default:
+        break;
+    }
   }
 
   // TODO: compare players and only send those that have updated

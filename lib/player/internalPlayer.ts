@@ -287,7 +287,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   setPosition(position: Vector2, reason: TeleportReason = TeleportReason.Unknown): this {
-    this.entity.customNetworkTransform.snapTo(position, this.lobby.getConnections(), reason);
+    this.entity.customNetworkTransform.snapTo(position, reason, this.lobby.getConnections());
 
     return this;
   }

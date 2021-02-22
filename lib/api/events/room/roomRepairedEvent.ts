@@ -1,4 +1,4 @@
-import { BaseGameRoom } from "../../game/room";
+// import { BaseGameRoom } from "../../game/room";
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
 import { Game } from "../../game";
@@ -14,7 +14,7 @@ export class RoomRepairedEvent extends CancellableEvent {
    */
   constructor(
     private readonly game: Game,
-    private readonly room: BaseGameRoom,
+    // private readonly room: BaseGameRoom,
     private readonly player?: PlayerInstance,
   ) {
     super();
@@ -30,9 +30,9 @@ export class RoomRepairedEvent extends CancellableEvent {
   /**
    * Gets the room that was repaired.
    */
-  getRoom(): BaseGameRoom {
-    return this.room;
-  }
+  // getRoom(): BaseGameRoom {
+  //   return this.room;
+  // }
 
   /**
    * Gets the player that repaired the room.

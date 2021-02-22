@@ -1,11 +1,12 @@
+import { BaseRpcPacket, CastVotePacket, ClearVotePacket } from "../../packets/rpc";
+import { InnerNetObjectType, RpcPacketType } from "../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MeetingVoteRemovedEvent } from "../../../api/events/meeting";
 import { notUndefined, shallowEqual } from "../../../util/functions";
 import { MessageWriter } from "../../../util/hazelMessage";
-import { InnerNetObjectType } from "../../../types/enums";
 import { PlayerInstance } from "../../../api/player";
-import { ClearVotePacket } from "../../packets/rpc";
 import { BaseInnerNetObject } from "../baseEntity";
+import { Connection } from "../../connection";
 import { EntityMeetingHud } from ".";
 import { VoteState } from "./types";
 
@@ -19,7 +20,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     super(InnerNetObjectType.MeetingHud, netId, parent);
   }
 
-  castVote(votingPlayerId: number, suspectPlayerId: number): void {
+  castVote(votingPlayerId: number, suspectPlayerId: number, _sendTo?: Connection[]): void {
     this.parent.lobby.getHostInstance().handleCastVote(votingPlayerId, suspectPlayerId);
   }
 
@@ -41,6 +42,22 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     }).filter(notUndefined);
 
     this.sendRpcPacket(new ClearVotePacket(), promises);
+  }
+
+  handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
+    switch (type) {
+      case RpcPacketType.CastVote: {
+        const data = packet as CastVotePacket;
+
+        this.castVote(data.votingPlayerId, data.suspectPlayerId, sendTo);
+        break;
+      }
+      case RpcPacketType.ClearVote:
+        this.parent.lobby.getLogger().warn("Received ClearVote packet from connection %s in a server-as-host state", connection);
+        break;
+      default:
+        break;
+    }
   }
 
   serializeData(old: InnerMeetingHud): DataPacket {

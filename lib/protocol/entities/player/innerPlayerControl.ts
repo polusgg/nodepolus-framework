@@ -24,18 +24,24 @@ import {
 import {
   ChatNoteType,
   DeathReason,
+  GameState,
   InnerNetObjectType,
   PlayerColor,
   PlayerHat,
   PlayerPet,
   PlayerSkin,
+  RpcPacketType,
   TaskType,
 } from "../../../types/enums";
 import {
+  BaseRpcPacket,
+  CheckColorPacket,
+  CheckNamePacket,
   CompleteTaskPacket,
   ExiledPacket,
   MurderPlayerPacket,
   PlayAnimationPacket,
+  ReportDeadBodyPacket,
   SendChatNotePacket,
   SendChatPacket,
   SetColorPacket,
@@ -44,6 +50,7 @@ import {
   SetPetPacket,
   SetScannerPacket,
   SetSkinPacket,
+  SetStartCounterPacket,
   SetTasksPacket,
   SyncSettingsPacket,
 } from "../../packets/rpc";
@@ -60,7 +67,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     super(InnerNetObjectType.PlayerControl, netId, parent);
   }
 
-  async playAnimation(taskType: TaskType, sendTo: Connection[]): Promise<void> {
+  async playAnimation(taskType: TaskType, sendTo?: Connection[]): Promise<void> {
     const event = new PlayerTaskAnimationEvent(this.getPlayerInstance(), taskType);
 
     await this.parent.lobby.getServer().emit("player.task.animation", event);
@@ -72,7 +79,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new PlayAnimationPacket(event.getTaskType()), sendTo);
   }
 
-  async completeTask(taskIndex: number, sendTo: Connection[]): Promise<void> {
+  async completeTask(taskIndex: number, sendTo?: Connection[]): Promise<void> {
     const playerData = this.getPlayerData();
     const taskCount = playerData.tasks.length;
 
@@ -108,7 +115,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new CompleteTaskPacket(taskIndex), sendTo);
   }
 
-  syncSettings(options: GameOptionsData, sendTo: Connection[]): void {
+  syncSettings(options: GameOptionsData, sendTo?: Connection[]): void {
     this.sendRpcPacket(new SyncSettingsPacket(options), sendTo);
   }
 
@@ -126,7 +133,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new ExiledPacket(), [this.getConnection()]);
   }
 
-  async setName(name: string, sendTo: Connection[]): Promise<void> {
+  async setName(name: string, sendTo?: Connection[]): Promise<void> {
     const player = this.getPlayerInstance();
     const event = new PlayerNameUpdatedEvent(player, player.getName(), TextComponent.from(name));
 
@@ -143,7 +150,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetNamePacket(event.getNewName().toString()), sendTo);
   }
 
-  async setColor(color: PlayerColor, sendTo: Connection[]): Promise<void> {
+  async setColor(color: PlayerColor, sendTo?: Connection[]): Promise<void> {
     const player = this.getPlayerInstance();
     const event = new PlayerColorUpdatedEvent(player, player.getColor(), color);
 
@@ -160,7 +167,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetColorPacket(event.getNewColor()), sendTo);
   }
 
-  async setHat(hat: PlayerHat, sendTo: Connection[]): Promise<void> {
+  async setHat(hat: PlayerHat, sendTo?: Connection[]): Promise<void> {
     const player = this.getPlayerInstance();
     const event = new PlayerHatUpdatedEvent(player, player.getHat(), hat);
 
@@ -177,7 +184,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetHatPacket(event.getNewHat()), sendTo);
   }
 
-  async setPet(pet: PlayerPet, sendTo: Connection[]): Promise<void> {
+  async setPet(pet: PlayerPet, sendTo?: Connection[]): Promise<void> {
     const player = this.getPlayerInstance();
     const event = new PlayerPetUpdatedEvent(player, player.getPet(), pet);
 
@@ -194,7 +201,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetPetPacket(event.getNewPet()), sendTo);
   }
 
-  async setSkin(skin: PlayerSkin, sendTo: Connection[]): Promise<void> {
+  async setSkin(skin: PlayerSkin, sendTo?: Connection[]): Promise<void> {
     const player = this.getPlayerInstance();
     const event = new PlayerSkinUpdatedEvent(player, player.getSkin(), skin);
 
@@ -211,7 +218,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetSkinPacket(event.getNewSkin()), sendTo);
   }
 
-  async murderPlayer(victimPlayerControlNetId: number, sendTo: Connection[]): Promise<void> {
+  async murderPlayer(victimPlayerControlNetId: number, sendTo?: Connection[]): Promise<void> {
     const victim = this.parent.lobby.findPlayerByNetId(victimPlayerControlNetId);
 
     if (!victim) {
@@ -233,7 +240,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new MurderPlayerPacket(victimPlayerControlNetId), sendTo);
   }
 
-  async sendChat(message: string, sendTo: Connection[]): Promise<void> {
+  async sendChat(message: string, sendTo?: Connection[]): Promise<void> {
     const event = new PlayerChatMessageEvent(this.getPlayerInstance(), TextComponent.from(message));
 
     await this.parent.lobby.getServer().emit("player.chat.message", event);
@@ -245,7 +252,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SendChatPacket(message), sendTo);
   }
 
-  setScanner(isScanning: boolean, sequenceId: number, sendTo: Connection[]): void {
+  setScanner(isScanning: boolean, sequenceId: number, sendTo?: Connection[]): void {
     this.scannerSequenceId++;
 
     if (sequenceId < this.scannerSequenceId) {
@@ -255,7 +262,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetScannerPacket(isScanning, this.scannerSequenceId), sendTo);
   }
 
-  async sendChatNote(playerId: number, chatNoteType: ChatNoteType, sendTo: Connection[]): Promise<void> {
+  async sendChatNote(playerId: number, chatNoteType: ChatNoteType, sendTo?: Connection[]): Promise<void> {
     const event = new PlayerChatNoteEvent(this.getPlayerInstance(), chatNoteType);
 
     await this.parent.lobby.getServer().emit("player.chat.note", event);
@@ -265,6 +272,106 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     }
 
     this.sendRpcPacket(new SendChatNotePacket(playerId, chatNoteType), sendTo);
+  }
+
+  async handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): Promise<void> {
+    switch (type) {
+      case RpcPacketType.PlayAnimation:
+        this.playAnimation((packet as PlayAnimationPacket).taskType, sendTo);
+        break;
+      case RpcPacketType.CompleteTask: {
+        if (this.parent.lobby.getGameState() == GameState.Ended || this.parent.lobby.getGameState() == GameState.Destroyed) {
+          return;
+        }
+
+        this.completeTask((packet as CompleteTaskPacket).taskIndex, sendTo);
+        // TODO: InnerNetObject refactor
+        this.parent.lobby.getHostInstance().handleCompleteTask();
+        break;
+      }
+      case RpcPacketType.SyncSettings:
+        this.syncSettings((packet as SyncSettingsPacket).options, sendTo);
+        break;
+      case RpcPacketType.SetInfected:
+        this.parent.lobby.getLogger().warn("Received SetInfected packet from connection %s in a server-as-host state", connection);
+        break;
+      case RpcPacketType.Exiled:
+        this.parent.lobby.getLogger().warn("Received Exiled packet from connection %s in a server-as-host state", connection);
+        break;
+      case RpcPacketType.CheckName:
+        // TODO: InnerNetObject refactor
+        this.parent.lobby.getHostInstance().handleCheckName(this, (packet as CheckNamePacket).name);
+        break;
+      case RpcPacketType.SetName:
+        this.parent.lobby.getLogger().warn("Received SetName packet from connection %s in a server-as-host state", connection);
+        break;
+      case RpcPacketType.CheckColor:
+        // TODO: InnerNetObject refactor
+        this.parent.lobby.getHostInstance().handleCheckColor(this, (packet as CheckColorPacket).color);
+        break;
+      case RpcPacketType.SetColor:
+        // TODO: InnerNetObject refactor
+        this.parent.lobby.getHostInstance().handleSetColor(this, (packet as SetColorPacket).color);
+        break;
+      case RpcPacketType.SetHat:
+        this.setHat((packet as SetHatPacket).hat, sendTo);
+        break;
+      case RpcPacketType.SetSkin:
+        this.setSkin((packet as SetSkinPacket).skin, sendTo);
+        break;
+      case RpcPacketType.ReportDeadBody:
+        // TODO: InnerNetObject refactor
+        this.parent.lobby.getHostInstance().handleReportDeadBody(this, (packet as ReportDeadBodyPacket).victimPlayerId);
+        break;
+      case RpcPacketType.MurderPlayer: {
+        const data = packet as MurderPlayerPacket;
+
+        await this.murderPlayer(data.victimPlayerControlNetId, sendTo);
+
+        // TODO: InnerNetObject refactor
+        this.parent.lobby.getHostInstance().handleMurderPlayer(this, data.victimPlayerControlNetId);
+        break;
+      }
+      case RpcPacketType.SendChat:
+        this.sendChat((packet as SendChatPacket).message, sendTo);
+        break;
+      case RpcPacketType.StartMeeting:
+        this.parent.lobby.getLogger().warn("Received StartMeeting packet from connection %s in a server-as-host state", connection);
+        break;
+      case RpcPacketType.SetScanner: {
+        const data = packet as SetScannerPacket;
+
+        this.setScanner(data.isScanning, data.sequenceId, sendTo);
+        break;
+      }
+      case RpcPacketType.SendChatNote: {
+        const data = packet as SendChatNotePacket;
+
+        this.sendChatNote(data.playerId, data.chatNoteType, sendTo);
+        break;
+      }
+      case RpcPacketType.SetPet:
+        this.setPet((packet as SetPetPacket).pet, sendTo);
+        break;
+      case RpcPacketType.SetStartCounter: {
+        // TODO: InnerNetObject refactor
+        const data = packet as SetStartCounterPacket;
+        const player = this.parent.lobby.findPlayerByClientId(this.parent.owner);
+
+        if (!player) {
+          throw new Error(`Client ${this.parent.owner} does not have a PlayerInstance on the lobby instance`);
+        }
+
+        this.parent.lobby.getHostInstance().handleSetStartCounter(player, data.sequenceId, data.timeRemaining);
+        break;
+      }
+      case RpcPacketType.UsePlatform:
+        // TODO: InnerNetObject refactor
+        this.parent.lobby.getHostInstance().handleUsePlatform(this);
+        break;
+      default:
+        break;
+    }
   }
 
   serializeData(): DataPacket {

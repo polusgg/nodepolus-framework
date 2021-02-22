@@ -1,10 +1,11 @@
 import { PlayerVotekickAddedEvent, PlayerVotekickRemovedEvent } from "../../../api/events/player";
+import { InnerNetObjectType, RpcPacketType } from "../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
+import { AddVotePacket, BaseRpcPacket } from "../../packets/rpc";
 import { MessageWriter } from "../../../util/hazelMessage";
-import { InnerNetObjectType } from "../../../types/enums";
+import { PlayerInstance } from "../../../api/player";
 import { GameDataPacket } from "../../packets/root";
 import { BaseInnerNetObject } from "../baseEntity";
-import { AddVotePacket } from "../../packets/rpc";
 import { DisconnectReason } from "../../../types";
 import { InternalPlayer } from "../../../player";
 import { InternalLobby } from "../../../lobby";
@@ -21,7 +22,14 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     super(InnerNetObjectType.VoteBanSystem, netId, parent);
   }
 
-  async addVote(voter: InternalPlayer, target: InternalPlayer, sendTo: Connection[]): Promise<void> {
+  async addVote(voter: PlayerInstance, target: PlayerInstance, sendTo?: Connection[]): Promise<void> {
+    const voterClientId = voter.getConnection()?.id;
+    const targetClientId = target.getConnection()?.id;
+
+    if (voterClientId === undefined || targetClientId === undefined) {
+      return;
+    }
+
     const event = new PlayerVotekickAddedEvent(voter, target);
 
     await this.parent.lobby.getServer().emit("player.votekick.added", event);
@@ -30,12 +38,12 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
       return;
     }
 
-    const votes = this.votes.get(target.entity.owner) ?? [0, 0, 0];
+    const votes = this.votes.get(targetClientId) ?? [0, 0, 0];
     let shouldKick = false;
 
     for (let i = 0; i < 3; i++) {
       if (votes[i] == 0) {
-        votes[i] = voter.entity.owner;
+        votes[i] = voterClientId;
 
         if (i == 2) {
           shouldKick = true;
@@ -45,20 +53,20 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     }
 
     if (shouldKick) {
-      const player = this.parent.lobby.findPlayerByClientId(target.entity.owner);
+      const player = this.parent.lobby.findPlayerByClientId(targetClientId);
 
       if (player) {
         player.kick(DisconnectReason.kicked());
         (this.parent.lobby as InternalLobby).sendRootGamePacket(new GameDataPacket([this.serializeData()], this.parent.lobby.getCode()), sendTo);
       }
     } else {
-      this.votes.set(target.entity.owner, votes);
+      this.votes.set(targetClientId, votes);
 
-      this.sendRpcPacket(new AddVotePacket(voter.entity.owner, target.entity.owner), sendTo);
+      this.sendRpcPacket(new AddVotePacket(voterClientId, targetClientId), sendTo);
     }
   }
 
-  async clearVote(voter: InternalPlayer, target: InternalPlayer, sendTo: Connection[]): Promise<void> {
+  async clearVote(voter: InternalPlayer, target: InternalPlayer, sendTo?: Connection[]): Promise<void> {
     const event = new PlayerVotekickRemovedEvent(voter, target);
 
     await this.parent.lobby.getServer().emit("player.votekick.removed", event);
@@ -70,7 +78,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     this.removeVote(voter.entity.owner, target.entity.owner, sendTo);
   }
 
-  clearVotesForPlayer(player: InternalPlayer, sendTo: Connection[]): void {
+  clearVotesForPlayer(player: InternalPlayer, sendTo?: Connection[]): void {
     const votes = this.votes.get(player.entity.owner) ?? [];
 
     for (let i = 0; votes.length; i++) {
@@ -88,7 +96,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     }
   }
 
-  clearVotesFromPlayer(player: InternalPlayer, sendTo: Connection[]): void {
+  clearVotesFromPlayer(player: InternalPlayer, sendTo?: Connection[]): void {
     const voterClientId = player.entity.owner;
     const votes = [...this.votes.entries()]
       .filter(entry => entry[0] != voterClientId && entry[1].includes(voterClientId))
@@ -102,6 +110,29 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
       } else {
         this.removeVote(voterClientId, votes[i], sendTo);
       }
+    }
+  }
+
+  handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
+    switch (type) {
+      case RpcPacketType.AddVote: {
+        const data = packet as AddVotePacket;
+        const voter = this.parent.lobby.findPlayerByClientId(data.votingClientId);
+        const target = this.parent.lobby.findPlayerByClientId(data.targetClientId);
+
+        if (!voter) {
+          throw new Error(`Voting client ${this.parent.owner} does not have a PlayerInstance on the lobby instance`);
+        }
+
+        if (!target) {
+          throw new Error(`Target client ${this.parent.owner} does not have a PlayerInstance on the lobby instance`);
+        }
+
+        this.addVote(voter, target, sendTo);
+        break;
+      }
+      default:
+        break;
     }
   }
 
@@ -134,7 +165,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     return clone;
   }
 
-  private removeVote(voterClientId: number, targetClientId: number, sendTo: Connection[]): void {
+  private removeVote(voterClientId: number, targetClientId: number, sendTo?: Connection[]): void {
     const votes = this.votes.get(targetClientId) ?? [0, 0, 0];
     const index = votes.indexOf(voterClientId);
 

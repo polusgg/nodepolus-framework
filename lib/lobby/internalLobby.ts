@@ -17,11 +17,11 @@ import { Connection } from "../protocol/connection";
 import { notUndefined } from "../util/functions";
 import { PlayerInstance } from "../api/player";
 import { LobbyCode } from "../util/lobbyCode";
+import { MaxValue } from "../util/constants";
 import { LobbyInstance } from "../api/lobby";
 import { TextComponent } from "../api/text";
 import { HostInstance } from "../api/host";
 import { InternalPlayer } from "../player";
-import { RpcHandler } from "./rpcHandler";
 import { InternalHost } from "../host";
 import { Game } from "../api/game";
 import { Logger } from "../logger";
@@ -60,7 +60,6 @@ export class InternalLobby implements LobbyInstance {
 
   private readonly createdAt: number = Date.now();
   private readonly hostInstance: HostInstance = new InternalHost(this);
-  private readonly rpcHandler: RpcHandler = new RpcHandler(this);
   private readonly spawningPlayers: Set<Connection> = new Set();
   private readonly connections: Connection[] = [];
   private readonly gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
@@ -950,13 +949,19 @@ export class InternalLobby implements LobbyInstance {
             }
           }
 
-          this.rpcHandler.handleBaseRpc(
-            rpc.packet.type,
-            sender,
-            rpc.senderNetId,
-            rpc.packet,
-            sendTo,
-          );
+          if (rpc.senderNetId === MaxValue.UInt32) {
+            this.getLogger().warn("RPC packet sent from unexpected InnerNetObject: -1");
+
+            return;
+          }
+
+          const object = this.findInnerNetObject(rpc.senderNetId);
+
+          if (!object) {
+            throw new Error(`RPC packet sent from unknown InnerNetObject: ${rpc.senderNetId}`);
+          }
+
+          object.handleRpc(sender, rpc.packet.type, rpc.packet, sendTo);
         } else {
           const custom = RpcPacket.getPacket(rpc.packet.type);
 

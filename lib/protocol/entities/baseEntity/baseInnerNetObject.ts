@@ -1,5 +1,5 @@
+import { InnerNetObjectType, RpcPacketType } from "../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
-import { InnerNetObjectType } from "../../../types/enums";
 import { BaseRpcPacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
 import { BaseInnerNetEntity } from ".";
@@ -16,6 +16,8 @@ export abstract class BaseInnerNetObject {
   abstract serializeData(old: BaseInnerNetObject): DataPacket;
 
   abstract serializeSpawn(): SpawnPacketObject;
+
+  abstract handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void;
 
   sendRpcPacket(packet: BaseRpcPacket, sendTo?: Connection[]): void {
     if (sendTo === undefined || sendTo.length == 0) {

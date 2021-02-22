@@ -1,10 +1,10 @@
 import { PlayerPositionTeleportedEvent, PlayerPositionWalkedEvent } from "../../../api/events/player";
-import { InnerNetObjectType, TeleportReason } from "../../../types/enums";
+import { InnerNetObjectType, RpcPacketType, TeleportReason } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
+import { BaseRpcPacket, SnapToPacket } from "../../packets/rpc";
 import { BaseInnerNetObject } from "../baseEntity";
 import { MaxValue } from "../../../util/constants";
-import { SnapToPacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
 import { Vector2 } from "../../../types";
 import { EntityPlayer } from ".";
@@ -20,7 +20,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     super(InnerNetObjectType.CustomNetworkTransform, netId, parent);
   }
 
-  async snapTo(position: Vector2, sendTo: Connection[], reason: TeleportReason): Promise<void> {
+  async snapTo(position: Vector2, reason: TeleportReason, sendTo?: Connection[]): Promise<void> {
     const player = this.parent.lobby.findPlayerByNetId(this.netId);
 
     if (!player) {
@@ -48,6 +48,16 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     this.velocity = event.getNewVelocity();
 
     this.sendRpcPacket(new SnapToPacket(this.position, this.sequenceId), sendTo);
+  }
+
+  handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
+    switch (type) {
+      case RpcPacketType.SnapTo:
+        this.snapTo((packet as SnapToPacket).position, TeleportReason.Unknown, sendTo);
+        break;
+      default:
+        break;
+    }
   }
 
   serializeData(): DataPacket {

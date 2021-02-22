@@ -1,8 +1,10 @@
-import { InnerNetObjectType, Level, SystemType } from "../../../../types/enums";
+import { BaseRpcPacket, CloseDoorsOfTypePacket, RepairSystemPacket } from "../../../packets/rpc";
+import { InnerNetObjectType, Level, RpcPacketType, SystemType } from "../../../../types/enums";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../../baseEntity";
 import { DataPacket, SpawnPacketObject } from "../../../packets/gameData";
 import { RepairAmount } from "../../../packets/rpc/repairSystem/amounts";
 import { MessageWriter } from "../../../../util/hazelMessage";
+import { Connection } from "../../../connection";
 import { InternalSystemType } from ".";
 import {
   AirshipReactorSystem,
@@ -66,11 +68,37 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
 
   abstract clone(): BaseInnerShipStatus;
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  closeDoorsOfType(_systemId: SystemType): void {}
+  closeDoorsOfType(_systemId: SystemType, _sendTo?: Connection[]): void {
+    // TODO: InnerNetObject refactor
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  repairSystem(_systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount): void {}
+  // TODO: Change amount to number and deserialize in the system itself
+  repairSystem(_systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount, _sendTo?: Connection[]): void {
+    // TODO: InnerNetObject refactor
+  }
+
+  handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, _sendTo: Connection[]): void {
+    switch (type) {
+      case RpcPacketType.CloseDoorsOfType: {
+        // TODO: InnerNetObject refactor
+        const data = packet as CloseDoorsOfTypePacket;
+
+        this.parent.lobby.getHostInstance().handleCloseDoorsOfType(this, data.system);
+        this.closeDoorsOfType(data.system);
+        break;
+      }
+      case RpcPacketType.RepairSystem: {
+        // TODO: InnerNetObject refactor
+        const data = packet as RepairSystemPacket;
+
+        this.parent.lobby.getHostInstance().handleRepairSystem(this, data.system, data.playerControlNetId, data.getAmount());
+        this.repairSystem(data.system, data.playerControlNetId, data.getAmount());
+        break;
+      }
+      default:
+        break;
+    }
+  }
 
   serializeData(old: BaseInnerShipStatus): DataPacket {
     const changedSystemTypes: SystemType[] = this.systems.map((currentSystem, systemIndex) => {
