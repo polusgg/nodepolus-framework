@@ -6,12 +6,31 @@ import { BaseSystem } from ".";
 export class ReactorSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    // TODO: Make protected with getter/setter
-    public timer: number = 10000,
+    protected timer: number = 10000,
     // TODO: Make protected with getter/setter
     public userConsoles: Map<number, number> = new Map(),
   ) {
     super(shipStatus, SystemType.Reactor);
+  }
+
+  getTimer(): number {
+    return this.timer;
+  }
+
+  setTimer(seconds: number): this {
+    this.timer = seconds;
+
+    return this;
+  }
+
+  decrementTimer(seconds: number = 1): this {
+    this.timer -= Math.abs(seconds);
+
+    if (this.timer < 0) {
+      this.timer = 0;
+    }
+
+    return this;
   }
 
   serializeData(): MessageWriter {

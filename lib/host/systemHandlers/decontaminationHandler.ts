@@ -6,37 +6,35 @@ export class DecontaminationHandler {
   protected timer?: NodeJS.Timeout;
 
   constructor(
-    // TODO: Make protected with getter/setter
-    public host: InternalHost,
-    // TODO: Make protected with getter/setter
-    public system: DeconSystem | DeconTwoSystem,
+    protected host: InternalHost,
+    protected system: DeconSystem | DeconTwoSystem,
   ) {}
 
   update(): void {
-    if (--this.system.timer < 0) {
-      this.system.timer = 0;
-    }
+    this.system.decrementTimer();
 
-    if (this.system.timer == 0) {
-      this.system.timer = 3;
+    if (this.system.getTimer() == 0) {
+      this.system.setTimer(3);
 
-      if (this.system.state & DecontaminationDoorState.Enter) {
-        this.system.state &= ~DecontaminationDoorState.Enter;
-        this.system.state |= DecontaminationDoorState.Closed;
+      const state = this.system.getState();
 
-        return;
-      }
-
-      if (this.system.state & DecontaminationDoorState.Closed) {
-        this.system.state &= ~DecontaminationDoorState.Closed;
-        this.system.state |= DecontaminationDoorState.Exit;
+      if (state & DecontaminationDoorState.Enter) {
+        this.system.setState(state & ~DecontaminationDoorState.Enter);
+        this.system.setState(state | DecontaminationDoorState.Closed);
 
         return;
       }
 
-      if (this.system.state & DecontaminationDoorState.Exit) {
-        this.system.state = DecontaminationDoorState.Idle;
-        this.system.timer = 0;
+      if (state & DecontaminationDoorState.Closed) {
+        this.system.setState(state & ~DecontaminationDoorState.Closed);
+        this.system.setState(state | DecontaminationDoorState.Exit);
+
+        return;
+      }
+
+      if (state & DecontaminationDoorState.Exit) {
+        this.system.setState(DecontaminationDoorState.Idle);
+        this.system.setTimer(0);
 
         if (this.timer) {
           clearInterval(this.timer);
@@ -56,8 +54,8 @@ export class DecontaminationHandler {
       throw new Error("Attempted to decontaminate without a SystemsHandler instance");
     }
 
-    this.system.state = from;
-    this.system.timer = 3;
+    this.system.setState(from);
+    this.system.setTimer(3);
 
     this.timer = setInterval(() => {
       systemsHandler.setOldShipStatus();

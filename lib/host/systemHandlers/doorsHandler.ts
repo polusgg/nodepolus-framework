@@ -11,10 +11,8 @@ export class DoorsHandler {
   protected oldShipStatus: BaseInnerShipStatus;
 
   constructor(
-    // TODO: Make protected with getter/setter
-    public host: InternalHost,
-    // TODO: Make protected with getter/setter
-    public shipStatus: BaseInnerShipStatus,
+    protected host: InternalHost,
+    protected shipStatus: BaseInnerShipStatus,
   ) {
     this.oldShipStatus = shipStatus.clone();
   }
@@ -28,10 +26,10 @@ export class DoorsHandler {
       for (let i = 0; i < doorIds.length; i++) {
         const id = doorIds[i];
 
-        doorsSystem.doorStates[id] = false;
+        doorsSystem.setDoorState(id, false);
       }
     } else {
-      doorsSystem.doorStates[doorIds] = false;
+      doorsSystem.setDoorState(doorIds, false);
     }
 
     this.sendDataUpdate();

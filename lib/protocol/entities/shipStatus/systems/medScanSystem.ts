@@ -6,10 +6,37 @@ import { BaseSystem } from ".";
 export class MedScanSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    // TODO: Make protected with getter/setter
-    public playersInQueue: Set<number> = new Set(),
+    protected playersInQueue: Set<number> = new Set(),
   ) {
     super(shipStatus, SystemType.Medbay);
+  }
+
+  getPlayersInQueue(): Set<number> {
+    return this.playersInQueue;
+  }
+
+  setPlayersInQueue(playersInQueue: Set<number>): this {
+    this.playersInQueue = playersInQueue;
+
+    return this;
+  }
+
+  clearPlayersInQueue(): this {
+    this.playersInQueue.clear();
+
+    return this;
+  }
+
+  addPlayerInQueue(playerId: number): this {
+    this.playersInQueue.add(playerId);
+
+    return this;
+  }
+
+  removePlayerInQueue(playerId: number): this {
+    this.playersInQueue.delete(playerId);
+
+    return this;
   }
 
   serializeData(): MessageWriter {

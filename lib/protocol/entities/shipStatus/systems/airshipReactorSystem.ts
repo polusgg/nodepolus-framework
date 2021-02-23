@@ -8,10 +8,37 @@ export class AirshipReactorSystem extends BaseSystem {
     shipStatus: BaseInnerShipStatus,
     // TODO: Make protected with getter/setter
     public activeConsoles: Map<number, number> = new Map(),
-    // TODO: Make protected with getter/setter
-    public completedConsoles: Set<number> = new Set([0, 1]),
+    protected completedConsoles: Set<number> = new Set([0, 1]),
   ) {
     super(shipStatus, SystemType.Reactor);
+  }
+
+  getCompletedConsoles(): Set<number> {
+    return this.completedConsoles;
+  }
+
+  setCompletedConsoles(completedConsoles: Set<number>): this {
+    this.completedConsoles = completedConsoles;
+
+    return this;
+  }
+
+  clearCompletedConsoles(): this {
+    this.completedConsoles.clear();
+
+    return this;
+  }
+
+  addCompletedConsole(consoleId: number): this {
+    this.completedConsoles.add(consoleId);
+
+    return this;
+  }
+
+  removeCompletedConsole(consoleId: number): this {
+    this.completedConsoles.delete(consoleId);
+
+    return this;
   }
 
   serializeData(): MessageWriter {

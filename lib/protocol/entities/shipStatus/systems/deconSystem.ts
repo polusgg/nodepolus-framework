@@ -6,12 +6,40 @@ import { BaseSystem } from ".";
 export class DeconSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    // TODO: Make protected with getter/setter
-    public timer: number = 0,
-    // TODO: Make protected with getter/setter
-    public state: DecontaminationDoorState = DecontaminationDoorState.Idle,
+    protected timer: number = 0,
+    protected state: DecontaminationDoorState = DecontaminationDoorState.Idle,
   ) {
     super(shipStatus, SystemType.Decontamination);
+  }
+
+  getTimer(): number {
+    return this.timer;
+  }
+
+  setTimer(seconds: number): this {
+    this.timer = seconds;
+
+    return this;
+  }
+
+  decrementTimer(seconds: number = 1): this {
+    this.timer -= Math.abs(seconds);
+
+    if (this.timer < 0) {
+      this.timer = 0;
+    }
+
+    return this;
+  }
+
+  getState(): DecontaminationDoorState {
+    return this.state;
+  }
+
+  setState(state: DecontaminationDoorState): this {
+    this.state = state;
+
+    return this;
   }
 
   serializeData(): MessageWriter {

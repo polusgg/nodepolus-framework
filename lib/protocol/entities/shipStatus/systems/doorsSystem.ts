@@ -9,10 +9,31 @@ export class DoorsSystem extends BaseSystem {
     shipStatus: BaseInnerShipStatus,
     // TODO: Make protected with getter/setter
     public timers: Map<SystemType, number> = new Map<SystemType, number>(),
-    // TODO: Make protected with getter/setter
-    public doorStates: boolean[] = new Array(Doors.countForLevel(Level.Polus)).fill(true),
+    protected doorStates: boolean[] = new Array(Doors.countForLevel(Level.Polus)).fill(true),
   ) {
     super(shipStatus, SystemType.Doors);
+  }
+
+  getDoorStates(): boolean[] {
+    return this.doorStates;
+  }
+
+  setDoorStates(doorStates: boolean[]): this {
+    this.doorStates = doorStates;
+
+    return this;
+  }
+
+  getDoorState(index: number): boolean | undefined {
+    return this.doorStates[index];
+  }
+
+  setDoorState(index: number, open: boolean): this {
+    if (this.doorStates.length >= index) {
+      this.doorStates[index] = open;
+    }
+
+    return this;
   }
 
   serializeData(): MessageWriter {

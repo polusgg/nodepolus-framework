@@ -1142,11 +1142,9 @@ export class InternalHost implements HostInstance {
     const oldData = shipStatus.getShipStatus().clone();
     const movingPlatform = shipStatus.getShipStatus().getSystems()[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
 
-    movingPlatform.innerPlayerControlNetId = sender.getParent().getPlayerControl().getNetId();
-    movingPlatform.side = (movingPlatform.side + 1) % 2;
-
-    movingPlatform.sequenceId++;
-
+    movingPlatform.setInnerPlayerControlNetId(sender.getParent().getPlayerControl().getNetId());
+    movingPlatform.toggleSide();
+    movingPlatform.incrementSequenceId();
     this.lobby.sendRootGamePacket(new GameDataPacket([
       shipStatus.getShipStatus().serializeData(oldData),
     ], this.lobby.getCode()));

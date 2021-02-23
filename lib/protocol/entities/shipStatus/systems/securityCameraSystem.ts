@@ -6,10 +6,37 @@ import { BaseSystem } from ".";
 export class SecurityCameraSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    // TODO: Make protected with getter/setter
-    public playersViewingCameras: Set<number> = new Set(),
+    protected playersViewingCameras: Set<number> = new Set(),
   ) {
     super(shipStatus, SystemType.Security);
+  }
+
+  getPlayersViewingCameras(): Set<number> {
+    return this.playersViewingCameras;
+  }
+
+  setPlayersViewingCameras(playersViewingCameras: Set<number>): this {
+    this.playersViewingCameras = playersViewingCameras;
+
+    return this;
+  }
+
+  clearPlayersViewingCameras(): this {
+    this.playersViewingCameras.clear();
+
+    return this;
+  }
+
+  addPlayerViewingCameras(playerId: number): this {
+    this.playersViewingCameras.add(playerId);
+
+    return this;
+  }
+
+  removePlayerViewingCameras(playerId: number): this {
+    this.playersViewingCameras.delete(playerId);
+
+    return this;
   }
 
   serializeData(): MessageWriter {

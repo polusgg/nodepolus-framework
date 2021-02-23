@@ -71,9 +71,7 @@ export class SystemsHandler {
 
   repairPolusDoors<T extends DoorsSystem>(_repairer: InternalPlayer, system: T, amount: PolusDoorsAmount): void {
     this.setOldShipStatus();
-
-    system.doorStates[amount.getDoorId()] = true;
-
+    system.setDoorState(amount.getDoorId(), true);
     this.sendDataUpdate();
   }
 
@@ -88,7 +86,7 @@ export class SystemsHandler {
         system.activeConsoles.delete(repairer.getId());
         break;
       case MiraCommunicationsAction.EnteredCode:
-        system.completedConsoles.add(amount.getConsoleId());
+        system.addCompletedConsole(amount.getConsoleId());
         break;
     }
 
@@ -97,9 +95,7 @@ export class SystemsHandler {
 
   repairHudOverride<T extends HudOverrideSystem>(_repairer: InternalPlayer, system: T, amount: NormalCommunicationsAmount): void {
     this.setOldShipStatus();
-
-    system.sabotaged = !amount.isRepaired();
-
+    system.setSabotaged(!amount.isRepaired());
     this.sendDataUpdate();
   }
 
@@ -114,10 +110,10 @@ export class SystemsHandler {
 
     switch (amount.getAction()) {
       case OxygenAction.Completed:
-        system.completedConsoles.add(amount.getConsoleId());
+        system.addCompletedConsole(amount.getConsoleId());
 
-        if (system.completedConsoles.size == 2) {
-          system.timer = 10000;
+        if (system.getCompletedConsoles().size == 2) {
+          system.setTimer(10000);
 
           if (sabotageHandler.timer) {
             clearInterval(sabotageHandler.timer);
@@ -125,7 +121,7 @@ export class SystemsHandler {
         }
         break;
       case OxygenAction.Repaired:
-        system.timer = 10000;
+        system.setTimer(10000);
 
         if (sabotageHandler.timer) {
           clearInterval(sabotageHandler.timer);
@@ -143,11 +139,11 @@ export class SystemsHandler {
     const player = this.host.getLobby().findPlayerByPlayerId(amount.getPlayerId())!;
 
     if (amount.getAction() == MedbayAction.EnteredQueue) {
-      if (system.playersInQueue.size > 0) {
+      if (system.getPlayersInQueue().size > 0) {
         await this.host.getLobby().getServer().emit("game.scanner.queued", new GameScannerQueuedEvent(
           game,
           player,
-          new Set([...system.playersInQueue]
+          new Set([...system.getPlayersInQueue()]
             .map(id => this.host.getLobby().findPlayerByPlayerId(id))
             .filter(notUndefined),
           ),
@@ -156,15 +152,15 @@ export class SystemsHandler {
         await this.host.getLobby().getServer().emit("game.scanner.started", new GameScannerStartedEvent(game, player));
       }
 
-      system.playersInQueue.add(player.getId());
+      system.addPlayerInQueue(player.getId());
     } else {
-      system.playersInQueue.delete(amount.getPlayerId());
+      system.removePlayerInQueue(amount.getPlayerId());
 
-      if (system.playersInQueue.size > 0) {
+      if (system.getPlayersInQueue().size > 0) {
         await this.host.getLobby().getServer().emit("game.scanner.dequeued", new GameScannerDequeuedEvent(
           game,
           player,
-          new Set([...system.playersInQueue]
+          new Set([...system.getPlayersInQueue()]
             .map(id => this.host.getLobby().findPlayerByPlayerId(id))
             .filter(notUndefined),
           ),
@@ -191,7 +187,7 @@ export class SystemsHandler {
         system.userConsoles.set(repairer.getId(), amount.getConsoleId());
 
         if (system.userConsoles.size == 2) {
-          system.timer = 10000;
+          system.setTimer(10000);
 
           if (sabotageHandler.timer) {
             clearInterval(sabotageHandler.timer);
@@ -202,7 +198,7 @@ export class SystemsHandler {
         system.userConsoles.delete(repairer.getId());
         break;
       case ReactorAction.Repaired:
-        system.timer = 10000;
+        system.setTimer(10000);
 
         if (sabotageHandler.timer) {
           clearInterval(sabotageHandler.timer);
@@ -213,7 +209,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairSabotage<T extends SabotageSystem>(_repairer: InternalPlayer, _system: T, amount: SabotageAmount): void {
+  repairSabotage<T extends SabotageSystem>(_repairer: InternalPlayer, system: T, amount: SabotageAmount): void {
     this.setOldShipStatus();
 
     const ship = this.getShipStatus();
@@ -224,15 +220,12 @@ export class SystemsHandler {
       throw new Error("Attempted to sabotage without a SabotageHandler instance");
     }
 
-    (ship.getSystemFromType(SystemType.Sabotage) as SabotageSystem).cooldown = 30;
+    system.setCooldown(30);
 
     this.sabotageCountdownInterval = setInterval(() => {
-      (ship.getSystemFromType(SystemType.Sabotage) as SabotageSystem).cooldown--;
+      system.decrementCooldown();
 
-      if (
-        (ship.getSystemFromType(SystemType.Sabotage) as SabotageSystem).cooldown == 0 &&
-        this.sabotageCountdownInterval
-      ) {
+      if (system.getCooldown() == 0 && this.sabotageCountdownInterval) {
         clearInterval(this.sabotageCountdownInterval);
       }
     }, 1000);
@@ -264,11 +257,11 @@ export class SystemsHandler {
     if (amount.isViewingCameras()) {
       await this.host.getLobby().getServer().emit("game.cameras.opened", new GameCamerasOpenedEvent(this.host.getLobby().getGame()!, repairer));
 
-      system.playersViewingCameras.add(repairer.getId());
+      system.addPlayerViewingCameras(repairer.getId());
     } else {
       await this.host.getLobby().getServer().emit("game.cameras.closed", new GameCamerasClosedEvent(this.host.getLobby().getGame()!, repairer));
 
-      system.playersViewingCameras.delete(repairer.getId());
+      system.removePlayerViewingCameras(repairer.getId());
     }
 
     this.sendDataUpdate();
@@ -276,18 +269,15 @@ export class SystemsHandler {
 
   repairSwitch<T extends SwitchSystem>(_repairer: InternalPlayer, system: T, amount: ElectricalAmount): void {
     this.setOldShipStatus();
+    system.getActualSwitches().toggle(amount.getSwitchIndex());
 
-    system.actualSwitches.toggle(amount.getSwitchIndex());
-
-    if (system.actualSwitches.equals(system.expectedSwitches)) {
+    if (system.getActualSwitches().equals(system.getExpectedSwitches())) {
       // TODO: Count back up (like +85 every second)
       setTimeout(() => {
         // Don't fix the lights if they somehow get immediately sabotaged again
-        if (system.actualSwitches.equals(system.expectedSwitches)) {
+        if (system.getActualSwitches().equals(system.getExpectedSwitches())) {
           this.setOldShipStatus();
-
-          system.visionModifier = 0xff;
-
+          system.setVisionModifier(0xff);
           this.sendDataUpdate();
         }
       }, 3000);

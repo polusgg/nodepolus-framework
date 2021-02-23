@@ -7,10 +7,31 @@ import { BaseSystem } from ".";
 export class AutoDoorsSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    // TODO: Make protected with getter/setter
-    public doors: boolean[] = new Array(Doors.countForLevel(Level.TheSkeld)).fill(true),
+    protected doorStates: boolean[] = new Array(Doors.countForLevel(Level.TheSkeld)).fill(true),
   ) {
     super(shipStatus, SystemType.Doors);
+  }
+
+  getDoorStates(): boolean[] {
+    return this.doorStates;
+  }
+
+  setDoorStates(doorStates: boolean[]): this {
+    this.doorStates = doorStates;
+
+    return this;
+  }
+
+  getDoorState(index: number): boolean | undefined {
+    return this.doorStates[index];
+  }
+
+  setDoorState(index: number, open: boolean): this {
+    if (this.doorStates.length >= index) {
+      this.doorStates[index] = open;
+    }
+
+    return this;
   }
 
   serializeData(old: AutoDoorsSystem): MessageWriter {
@@ -18,11 +39,11 @@ export class AutoDoorsSystem extends BaseSystem {
     let mask = 0;
     const dirtyDoors: number[] = [];
 
-    for (let i = 0; i < this.doors.length; i++) {
-      if (old.doors[i] != this.doors[i]) {
+    for (let i = 0; i < this.doorStates.length; i++) {
+      if (old.doorStates[i] != this.doorStates[i]) {
         mask |= 1 << i;
 
-        dirtyDoors.push(this.doors[i] ? 1 : 0);
+        dirtyDoors.push(this.doorStates[i] ? 1 : 0);
       }
     }
 
@@ -32,20 +53,20 @@ export class AutoDoorsSystem extends BaseSystem {
   serializeSpawn(): MessageWriter {
     const writer = new MessageWriter();
 
-    for (let i = 0; i < this.doors.length; i++) {
-      writer.writeBoolean(this.doors[i]);
+    for (let i = 0; i < this.doorStates.length; i++) {
+      writer.writeBoolean(this.doorStates[i]);
     }
 
     return writer;
   }
 
   equals(old: AutoDoorsSystem): boolean {
-    if (this.doors.length != old.doors.length) {
+    if (this.doorStates.length != old.doorStates.length) {
       return false;
     }
 
-    for (let i = 0; i < this.doors.length; i++) {
-      if (this.doors[i] != old.doors[i]) {
+    for (let i = 0; i < this.doorStates.length; i++) {
+      if (this.doorStates[i] != old.doorStates[i]) {
         return false;
       }
     }
@@ -54,6 +75,6 @@ export class AutoDoorsSystem extends BaseSystem {
   }
 
   clone(): AutoDoorsSystem {
-    return new AutoDoorsSystem(this.shipStatus, [...this.doors]);
+    return new AutoDoorsSystem(this.shipStatus, [...this.doorStates]);
   }
 }

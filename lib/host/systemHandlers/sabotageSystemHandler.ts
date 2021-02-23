@@ -15,31 +15,30 @@ export class SabotageSystemHandler {
   public timer?: NodeJS.Timeout;
 
   constructor(
-    // TODO: Make protected with getter/setter
-    public host: InternalHost,
+    protected host: InternalHost,
   ) {}
 
   sabotageReactor(system: ReactorSystem | LaboratorySystem): void {
     switch (this.host.getLobby().getLevel()) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        system.timer = 30;
+        system.setTimer(30);
         break;
       case Level.MiraHq:
-        system.timer = 45;
+        system.setTimer(45);
         break;
       case Level.Polus:
-        system.timer = 60;
+        system.setTimer(60);
         break;
       case Level.Airship:
-        system.timer = 100;
+        system.setTimer(100);
         break;
     }
 
     this.timer = setInterval(() => {
-      system.timer--;
+      system.decrementTimer();
 
-      if (system.timer <= 0) {
+      if (system.getTimer() <= 0) {
         this.host.endGame(GameOverReason.ImpostorsBySabotage);
 
         if (this.timer) {
@@ -51,49 +50,52 @@ export class SabotageSystemHandler {
 
   sabotageCommunications(system: HudOverrideSystem | HqHudSystem): void {
     if (system instanceof HudOverrideSystem) {
-      system.sabotaged = true;
+      system.setSabotaged(true);
     } else {
       system.activeConsoles.clear();
-      system.completedConsoles.clear();
+      system.clearCompletedConsoles();
     }
   }
 
   sabotageElectrical(system: SwitchSystem): void {
-    system.expectedSwitches = new Bitfield(new Array(5).fill(false).map(() => Math.random() < 0.5));
-    system.actualSwitches = system.expectedSwitches.clone();
+    system.setExpectedSwitches(new Bitfield(new Array(5).fill(false).map(() => Math.random() < 0.5)));
+    system.setActualSwitches(system.getExpectedSwitches().clone());
 
-    for (let i = 0; i < system.expectedSwitches.getSize(); i++) {
-      const pos = Math.floor(Math.random() * (system.expectedSwitches.getSize() - i)) * i;
+    const expected = system.getExpectedSwitches();
+    const actual = system.getActualSwitches();
 
-      system.actualSwitches.update(pos, !system.expectedSwitches.has(pos));
+    for (let i = 0; i < expected.getSize(); i++) {
+      const pos = Math.floor(Math.random() * (expected.getSize() - i)) * i;
+
+      actual.update(pos, !expected.has(pos));
     }
 
     // TODO: Actually count down like every other system (like -85 every second)
     setTimeout(() => {
-      system.visionModifier = 0;
+      system.setVisionModifier(0);
     }, 3000);
   }
 
   sabotageOxygen(system: LifeSuppSystem): void {
-    system.completedConsoles.clear();
+    system.clearCompletedConsoles();
 
     const level = this.host.getLobby().getLevel();
 
     switch (level) {
       case Level.TheSkeld:
-        system.timer = 30;
+        system.setTimer(30);
         break;
       case Level.MiraHq:
-        system.timer = 45;
+        system.setTimer(45);
         break;
       default:
         throw new Error(`Attempted to sabotage oxygen on an unsupported map: ${level} (${Level[level]})`);
     }
 
     this.timer = setInterval(() => {
-      system.timer--;
+      system.decrementTimer();
 
-      if (system.timer <= 0) {
+      if (system.getTimer() <= 0) {
         this.host.endGame(GameOverReason.ImpostorsBySabotage);
 
         if (this.timer) {

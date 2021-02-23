@@ -6,10 +6,19 @@ import { BaseSystem } from ".";
 export class HudOverrideSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    // TODO: Make protected with getter/setter
-    public sabotaged: boolean = false,
+    protected sabotaged: boolean = false,
   ) {
     super(shipStatus, SystemType.Communications);
+  }
+
+  isSabotaged(): boolean {
+    return this.sabotaged;
+  }
+
+  setSabotaged(sabotaged: boolean): this {
+    this.sabotaged = sabotaged;
+
+    return this;
   }
 
   serializeData(): MessageWriter {

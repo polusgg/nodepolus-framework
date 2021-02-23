@@ -6,10 +6,29 @@ import { BaseSystem } from ".";
 export class SabotageSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    // TODO: Make protected with getter/setter
-    public cooldown: number = 0,
+    protected cooldown: number = 0,
   ) {
     super(shipStatus, SystemType.Sabotage);
+  }
+
+  getCooldown(): number {
+    return this.cooldown;
+  }
+
+  setCooldown(seconds: number): this {
+    this.cooldown = seconds;
+
+    return this;
+  }
+
+  decrementCooldown(seconds: number = 1): this {
+    this.cooldown -= Math.abs(seconds);
+
+    if (this.cooldown < 0) {
+      this.cooldown = 0;
+    }
+
+    return this;
   }
 
   serializeData(): MessageWriter {

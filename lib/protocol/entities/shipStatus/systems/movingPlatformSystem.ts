@@ -11,14 +11,57 @@ export enum MovingPlatformSide {
 export class MovingPlatformSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    // TODO: Make protected with getter/setter
-    public sequenceId: number = 0,
-    // TODO: Make protected with getter/setter
-    public innerPlayerControlNetId?: number,
-    // TODO: Make protected with getter/setter
-    public side: MovingPlatformSide = MovingPlatformSide.Left,
+    protected sequenceId: number = 0,
+    protected innerPlayerControlNetId?: number,
+    protected side: MovingPlatformSide = MovingPlatformSide.Left,
   ) {
     super(shipStatus, SystemType.GapRoom);
+  }
+
+  getSequenceId(): number {
+    return this.sequenceId;
+  }
+
+  setSequenceId(sequenceId: number): this {
+    this.sequenceId = sequenceId;
+
+    return this;
+  }
+
+  incrementSequenceId(amount: number = 1): this {
+    this.sequenceId += amount;
+
+    return this;
+  }
+
+  getInnerPlayerControlNetId(): number | undefined {
+    return this.innerPlayerControlNetId;
+  }
+
+  setInnerPlayerControlNetId(innerPlayerControlNetId?: number): this {
+    this.innerPlayerControlNetId = innerPlayerControlNetId;
+
+    return this;
+  }
+
+  getSide(): MovingPlatformSide {
+    return this.side;
+  }
+
+  setSide(side: MovingPlatformSide): this {
+    this.side = side;
+
+    return this;
+  }
+
+  toggleSide(): this {
+    if (!(this.side in MovingPlatformSide)) {
+      return this;
+    }
+
+    this.side = (this.side + 1) % 2;
+
+    return this;
   }
 
   serializeData(): MessageWriter {
