@@ -14,9 +14,7 @@ export class Packet {
   protected clientBound?: boolean;
 
   constructor(
-    // TODO: Make protected with getter/setter
     public nonce: number | undefined,
-    // TODO: Make protected with getter/setter
     public data: PacketDataType,
   ) {
     if (data instanceof AcknowledgementPacket) {

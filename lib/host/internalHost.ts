@@ -160,7 +160,7 @@ export class InternalHost implements HostInstance {
       const time = this.secondsUntilStart--;
 
       if (this.lobby.getPlayers().length > 0) {
-        this.lobby.getPlayers()[0].entity.getPlayerControl().sendRpcPacket(
+        this.lobby.getPlayers()[0].getEntity().getPlayerControl().sendRpcPacket(
           new SetStartCounterPacket(this.counterSequenceId += 5, time),
           this.lobby.getConnections(),
         );
@@ -192,7 +192,7 @@ export class InternalHost implements HostInstance {
     this.secondsUntilStart = -1;
 
     if (this.lobby.getPlayers().length > 0) {
-      this.lobby.getPlayers()[0].entity.getPlayerControl().sendRpcPacket(
+      this.lobby.getPlayers()[0].getEntity().getPlayerControl().sendRpcPacket(
         new SetStartCounterPacket(this.counterSequenceId += 5, -1),
         this.lobby.getConnections(),
       );
@@ -269,7 +269,7 @@ export class InternalHost implements HostInstance {
       impostors[i].setRole(PlayerRole.Impostor);
     }
 
-    this.lobby.getPlayers()[0].entity.getPlayerControl().sendRpcPacket(
+    this.lobby.getPlayers()[0].getEntity().getPlayerControl().sendRpcPacket(
       new SetInfectedPacket(impostors.map(player => player.getId())),
       this.lobby.getConnections(),
     );
@@ -778,18 +778,18 @@ export class InternalHost implements HostInstance {
     const player = new InternalPlayer(this.lobby, entity, sender);
 
     for (let i = 0; i < this.lobby.getPlayers().length; i++) {
-      sender.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].entity.serializeSpawn()], this.lobby.getCode()));
+      sender.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].getEntity().serializeSpawn()], this.lobby.getCode()));
     }
 
     this.lobby.addPlayer(player);
 
-    await this.lobby.sendRootGamePacket(new GameDataPacket([player.entity.serializeSpawn()], this.lobby.getCode()));
+    await this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
 
-    player.entity.getPlayerControl().syncSettings(this.lobby.getOptions(), [sender]);
+    player.getEntity().getPlayerControl().syncSettings(this.lobby.getOptions(), [sender]);
 
     this.confirmPlayerData(player);
 
-    player.entity.getPlayerControl().isNew = false;
+    player.getEntity().getPlayerControl().isNew = false;
 
     sender.flush(true);
 
@@ -1052,7 +1052,7 @@ export class InternalHost implements HostInstance {
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.getMeetingHud().serializeData(oldMeetingHud),
-      new RpcPacket(player.entity.getPlayerControl().getNetId(), new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
+      new RpcPacket(player.getEntity().getPlayerControl().getNetId(), new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
     ], this.lobby.getCode()));
 
     if (this.meetingHudTimeout && states.every(p => p.didVote() || p.isDead())) {
@@ -1078,7 +1078,7 @@ export class InternalHost implements HostInstance {
     }
 
     const system = shipStatus.getShipStatus().getSystemFromType(systemId);
-    const player = this.lobby.getPlayers().find(thePlayer => thePlayer.entity.getPlayerControl().getNetId() == playerControlNetId);
+    const player = this.lobby.getPlayers().find(thePlayer => thePlayer.getEntity().getPlayerControl().getNetId() == playerControlNetId);
     const level = this.lobby.getLevel();
 
     if (!player) {
@@ -1326,9 +1326,9 @@ export class InternalHost implements HostInstance {
       throw new Error("confirmPlayerData called without a GameData instance");
     }
 
-    if (!gameData.getGameData().players.some(p => p.getId() == player.entity.getPlayerControl().playerId)) {
+    if (!gameData.getGameData().players.some(p => p.getId() == player.getEntity().getPlayerControl().playerId)) {
       const playerData = new PlayerData(
-        player.entity.getPlayerControl().playerId,
+        player.getEntity().getPlayerControl().playerId,
         "",
         PlayerColor.Red,
         0,

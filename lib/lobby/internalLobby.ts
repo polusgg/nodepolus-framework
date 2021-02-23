@@ -56,9 +56,6 @@ import {
 } from "../types/enums";
 
 export class InternalLobby implements LobbyInstance {
-  // TODO: Make protected with getter/setter
-  public ignoredNetIds: number[] = [];
-
   protected readonly createdAt: number = Date.now();
   protected readonly hostInstance: HostInstance = new InternalHost(this);
   protected readonly spawningPlayers: Set<Connection> = new Set();
@@ -66,6 +63,7 @@ export class InternalLobby implements LobbyInstance {
   protected readonly gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
   protected readonly metadata: Map<string, unknown> = new Map();
   protected readonly logger: Logger;
+  protected readonly ignoredNetIds: number[] = [];
 
   protected joinTimer?: NodeJS.Timeout;
   protected startTimer?: NodeJS.Timeout;
@@ -260,7 +258,7 @@ export class InternalLobby implements LobbyInstance {
 
     for (let i = 0; i < this.players.length; i++) {
       const player = this.players[i];
-      const objects = player.entity.getObjects();
+      const objects = player.getEntity().getObjects();
 
       for (let j = 0; j < objects.length; j++) {
         const object = objects[j];
@@ -273,7 +271,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   findPlayerByClientId(clientId: number): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.getOwnerId() == clientId);
+    return this.players.find(player => player.getEntity().getOwnerId() == clientId);
   }
 
   findPlayerByPlayerId(playerId: number): InternalPlayer | undefined {
@@ -281,19 +279,19 @@ export class InternalLobby implements LobbyInstance {
   }
 
   findPlayerByNetId(netId: number): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.getObjects().some(object => object.getNetId() == netId));
+    return this.players.find(player => player.getEntity().getObjects().some(object => object.getNetId() == netId));
   }
 
   findPlayerByConnection(connection: Connection): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.getOwnerId() == connection.id);
+    return this.players.find(player => player.getEntity().getOwnerId() == connection.id);
   }
 
   findPlayerByEntity(entity: EntityPlayer): InternalPlayer | undefined {
-    return this.players.find(player => player.entity.getOwnerId() == entity.getOwnerId());
+    return this.players.find(player => player.getEntity().getOwnerId() == entity.getOwnerId());
   }
 
   findPlayerIndexByConnection(connection: Connection): number {
-    return this.players.findIndex(player => player.entity.getOwnerId() == connection.id);
+    return this.players.findIndex(player => player.getEntity().getOwnerId() == connection.id);
   }
 
   findConnection(id: number): Connection | undefined {
@@ -521,7 +519,7 @@ export class InternalLobby implements LobbyInstance {
 
           connection.writeReliable(new GameDataPacket([
             new RpcPacket(this.gameData.getGameData().getNetId(), new UpdateGameDataPacket([playerData])),
-            new RpcPacket(player.entity.getPlayerControl().getNetId(), new SendChatPacket(message.toString())),
+            new RpcPacket(player.getEntity().getPlayerControl().getNetId(), new SendChatPacket(message.toString())),
           ], this.code));
 
           playerData.setColor(oldColor);
@@ -533,6 +531,16 @@ export class InternalLobby implements LobbyInstance {
         }
       }
     }
+  }
+
+  /**
+   * Adds the given net IDs to the array of ignored net IDs.
+   *
+   * @internal
+   * @param ids - The net IDs to be ignored
+   */
+  ignoreNetIds(...ids: number[]): void {
+    this.ignoredNetIds.push(...ids);
   }
 
   /**

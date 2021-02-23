@@ -8,13 +8,10 @@ type PacketDataType = AnnouncementHelloPacket
 | RootAnnouncementPacket;
 
 export class AnnouncementPacket {
-  // TODO: Make protected with getter/setter
   protected readonly type: HazelPacketType;
 
   constructor(
-    // TODO: Make protected with getter/setter
     public nonce: number | undefined,
-    // TODO: Make protected with getter/setter
     public data: PacketDataType,
   ) {
     if (data instanceof DisconnectPacket) {

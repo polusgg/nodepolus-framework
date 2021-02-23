@@ -57,6 +57,8 @@ import {
 
 export class InnerPlayerControl extends BaseInnerNetObject {
   // TODO: Make protected with getter/setter
+  public isScanning = false;
+  // TODO: Make protected with getter/setter
   public scannerSequenceId = 1;
 
   constructor(
@@ -249,11 +251,11 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   setScanner(isScanning: boolean, sequenceId: number, sendTo?: Connection[]): void {
-    this.scannerSequenceId++;
-
-    if (sequenceId < this.scannerSequenceId) {
+    if (sequenceId < ++this.scannerSequenceId) {
       return;
     }
+
+    this.isScanning = isScanning;
 
     this.sendRpcPacket(new SetScannerPacket(isScanning, this.scannerSequenceId), sendTo);
   }

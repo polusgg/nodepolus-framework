@@ -76,11 +76,11 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
       return;
     }
 
-    this.removeVote(voter.entity.getOwnerId(), target.entity.getOwnerId(), sendTo);
+    this.removeVote(voter.getEntity().getOwnerId(), target.getEntity().getOwnerId(), sendTo);
   }
 
   clearVotesForPlayer(player: InternalPlayer, sendTo?: Connection[]): void {
-    const votes = this.votes.get(player.entity.getOwnerId()) ?? [];
+    const votes = this.votes.get(player.getEntity().getOwnerId()) ?? [];
 
     for (let i = 0; votes.length; i++) {
       if (votes[i] == 0) {
@@ -92,13 +92,13 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
       if (voter) {
         this.clearVote(voter as InternalPlayer, player, sendTo);
       } else {
-        this.removeVote(votes[i], player.entity.getOwnerId(), sendTo);
+        this.removeVote(votes[i], player.getEntity().getOwnerId(), sendTo);
       }
     }
   }
 
   clearVotesFromPlayer(player: InternalPlayer, sendTo?: Connection[]): void {
-    const voterClientId = player.entity.getOwnerId();
+    const voterClientId = player.getEntity().getOwnerId();
     const votes = [...this.votes.entries()]
       .filter(entry => entry[0] != voterClientId && entry[1].includes(voterClientId))
       .map(entry => entry[0]);

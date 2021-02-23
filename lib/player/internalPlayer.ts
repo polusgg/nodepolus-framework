@@ -21,7 +21,6 @@ import {
 } from "../api/events/player";
 
 export class InternalPlayer implements PlayerInstance {
-  protected readonly id: number;
   protected readonly metadata: Map<string, unknown> = new Map();
 
   protected name: TextComponent;
@@ -34,18 +33,15 @@ export class InternalPlayer implements PlayerInstance {
    * @param connection - The connection to which the player belongs
    */
   constructor(
-    // TODO: Make protected with getter/setter
-    public lobby: InternalLobby,
-    // TODO: Make protected with getter/setter
-    public entity: EntityPlayer,
+    protected readonly lobby: InternalLobby,
+    protected entity: EntityPlayer,
     protected readonly connection?: Connection,
   ) {
-    this.id = entity.getPlayerControl().playerId;
     this.name = TextComponent.from(connection?.getName() ?? "");
   }
 
   getId(): number {
-    return this.id;
+    return this.entity.getPlayerControl().playerId;
   }
 
   getConnection(): Connection | undefined {
@@ -176,7 +172,7 @@ export class InternalPlayer implements PlayerInstance {
     // TODO: Send UpdateGameData packet
 
     this.entity.getPlayerControl().sendRpcPacket(
-      new SetInfectedPacket([this.id]),
+      new SetInfectedPacket([this.getId()]),
       this.lobby.getConnections(),
     );
   }
@@ -314,8 +310,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   isScanning(): boolean {
-    // TODO: set via scanning events
-    return false;
+    return this.entity.getPlayerControl().isScanning;
   }
 
   kill(): this {
@@ -372,7 +367,7 @@ export class InternalPlayer implements PlayerInstance {
 
     const oldName = this.getName();
 
-    this.lobby.ignoredNetIds.push(
+    this.lobby.ignoreNetIds(
       this.entity.getPlayerControl().getNetId(),
       this.entity.getPlayerPhysics().getNetId(),
       this.entity.getCustomNetworkTransform().getNetId(),
@@ -431,7 +426,7 @@ export class InternalPlayer implements PlayerInstance {
     const meetingHud = this.lobby.getMeetingHud();
 
     if (meetingHud) {
-      meetingHud.getMeetingHud().castVote(this.id, suspect?.getId() ?? -1);
+      meetingHud.getMeetingHud().castVote(this.getId(), suspect?.getId() ?? -1);
     }
 
     return this;
@@ -473,7 +468,7 @@ export class InternalPlayer implements PlayerInstance {
 
   kick(reason?: DisconnectReason): this {
     if (this.connection === undefined) {
-      throw new Error(`Player ${this.id} does not have a connection on the lobby instance`);
+      throw new Error(`Player ${this.getId()} does not have a connection on the lobby instance`);
     }
 
     this.connection.sendKick(false, undefined, reason);
@@ -483,7 +478,7 @@ export class InternalPlayer implements PlayerInstance {
 
   ban(reason?: DisconnectReason): this {
     if (this.connection === undefined) {
-      throw new Error(`Player ${this.id} does not have a connection on the lobby instance`);
+      throw new Error(`Player ${this.getId()} does not have a connection on the lobby instance`);
     }
 
     this.connection.sendKick(true, undefined, reason);
@@ -497,16 +492,26 @@ export class InternalPlayer implements PlayerInstance {
     for (let i = 0; i < players.length; i++) {
       const player = players[i];
 
-      if (player.getId() == this.id) {
+      if (player.getId() == this.getId()) {
         return player;
       }
     }
 
-    throw new Error(`Player ${this.id} does not have a PlayerData instance in GameData`);
+    throw new Error(`Player ${this.getId()} does not have a PlayerData instance in GameData`);
   }
 
   updateGameData(): void {
     this.getGameData().getGameData().updateGameData([this.getGameDataEntry()], this.lobby.getConnections());
+  }
+
+  /**
+   * Gets the player's entity containing their PlayerControl, PlayerPhysics, and
+   * CustomNetworkTransform InnerNetObjects.
+   *
+   * @internal
+   */
+  getEntity(): EntityPlayer {
+    return this.entity;
   }
 
   /**
