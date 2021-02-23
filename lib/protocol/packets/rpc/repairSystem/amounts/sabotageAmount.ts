@@ -14,8 +14,8 @@ export class SabotageAmount implements RepairAmount {
     return this.systemType;
   }
 
-  setSystemType(system: SystemType): this {
-    this.systemType = system;
+  setSystemType(systemType: SystemType): this {
+    this.systemType = systemType;
 
     return this;
   }
