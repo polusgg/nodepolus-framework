@@ -2,12 +2,21 @@ import { RepairAmount } from ".";
 
 export class PolusDoorsAmount implements RepairAmount {
   constructor(
-    // TODO: Make protected with getter/setter
-    public doorId: number,
+    protected doorId: number,
   ) {}
 
   static deserialize(amount: number): PolusDoorsAmount {
     return new PolusDoorsAmount(amount & 0x1f);
+  }
+
+  getDoorId(): number {
+    return this.doorId;
+  }
+
+  setDoorId(doorId: number): this {
+    this.doorId = doorId;
+
+    return this;
   }
 
   clone(): PolusDoorsAmount {

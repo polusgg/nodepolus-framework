@@ -3,10 +3,8 @@ import { RepairAmount } from ".";
 
 export class MedbayAmount implements RepairAmount {
   constructor(
-    // TODO: Make protected with getter/setter
-    public playerId: number,
-    // TODO: Make protected with getter/setter
-    public action: MedbayAction,
+    protected playerId: number,
+    protected action: MedbayAction,
   ) {}
 
   static deserialize(amount: number): MedbayAmount {
@@ -16,6 +14,26 @@ export class MedbayAmount implements RepairAmount {
         ? MedbayAction.EnteredQueue
         : MedbayAction.LeftQueue,
     );
+  }
+
+  getPlayerId(): number {
+    return this.playerId;
+  }
+
+  setPlayerId(playerId: number): this {
+    this.playerId = playerId;
+
+    return this;
+  }
+
+  getAction(): MedbayAction {
+    return this.action;
+  }
+
+  setAction(action: MedbayAction): this {
+    this.action = action;
+
+    return this;
   }
 
   clone(): MedbayAmount {

@@ -56,13 +56,13 @@ export class SystemsHandler {
   repairDecon<T extends DeconSystem | DeconTwoSystem>(_repairer: InternalPlayer, system: T, amount: DecontaminationAmount): void {
     let state = 0;
 
-    if (amount.isEntering) {
+    if (amount.isEntering()) {
       state |= DecontaminationDoorState.Enter;
     } else {
       state |= DecontaminationDoorState.Exit;
     }
 
-    if (amount.isHeadingUp) {
+    if (amount.isHeadingUp()) {
       state |= DecontaminationDoorState.HeadingUp;
     }
 
@@ -72,7 +72,7 @@ export class SystemsHandler {
   repairPolusDoors<T extends DoorsSystem>(_repairer: InternalPlayer, system: T, amount: PolusDoorsAmount): void {
     this.setOldShipStatus();
 
-    system.doorStates[amount.doorId] = true;
+    system.doorStates[amount.getDoorId()] = true;
 
     this.sendDataUpdate();
   }
@@ -80,15 +80,15 @@ export class SystemsHandler {
   repairHqHud<T extends HqHudSystem>(repairer: InternalPlayer, system: T, amount: MiraCommunicationsAmount): void {
     this.setOldShipStatus();
 
-    switch (amount.action) {
+    switch (amount.getAction()) {
       case MiraCommunicationsAction.OpenedConsole:
-        system.activeConsoles.set(repairer.getId(), amount.consoleId);
+        system.activeConsoles.set(repairer.getId(), amount.getConsoleId());
         break;
       case MiraCommunicationsAction.ClosedConsole:
         system.activeConsoles.delete(repairer.getId());
         break;
       case MiraCommunicationsAction.EnteredCode:
-        system.completedConsoles.add(amount.consoleId);
+        system.completedConsoles.add(amount.getConsoleId());
         break;
     }
 
@@ -98,7 +98,7 @@ export class SystemsHandler {
   repairHudOverride<T extends HudOverrideSystem>(_repairer: InternalPlayer, system: T, amount: NormalCommunicationsAmount): void {
     this.setOldShipStatus();
 
-    system.sabotaged = !amount.isRepaired;
+    system.sabotaged = !amount.isRepaired();
 
     this.sendDataUpdate();
   }
@@ -112,9 +112,9 @@ export class SystemsHandler {
       throw new Error("Attempted to repair oxygen without a SabotageHandler instance");
     }
 
-    switch (amount.action) {
+    switch (amount.getAction()) {
       case OxygenAction.Completed:
-        system.completedConsoles.add(amount.consoleId);
+        system.completedConsoles.add(amount.getConsoleId());
 
         if (system.completedConsoles.size == 2) {
           system.timer = 10000;
@@ -140,9 +140,9 @@ export class SystemsHandler {
     this.setOldShipStatus();
 
     const game = this.host.getLobby().getGame()!;
-    const player = this.host.getLobby().findPlayerByPlayerId(amount.playerId)!;
+    const player = this.host.getLobby().findPlayerByPlayerId(amount.getPlayerId())!;
 
-    if (amount.action == MedbayAction.EnteredQueue) {
+    if (amount.getAction() == MedbayAction.EnteredQueue) {
       if (system.playersInQueue.size > 0) {
         await this.host.getLobby().getServer().emit("game.scanner.queued", new GameScannerQueuedEvent(
           game,
@@ -158,7 +158,7 @@ export class SystemsHandler {
 
       system.playersInQueue.add(player.getId());
     } else {
-      system.playersInQueue.delete(amount.playerId);
+      system.playersInQueue.delete(amount.getPlayerId());
 
       if (system.playersInQueue.size > 0) {
         await this.host.getLobby().getServer().emit("game.scanner.dequeued", new GameScannerDequeuedEvent(
@@ -186,9 +186,9 @@ export class SystemsHandler {
       throw new Error("Attempted to repair reactor without a SabotageHandler instance");
     }
 
-    switch (amount.action) {
+    switch (amount.getAction()) {
       case ReactorAction.PlacedHand:
-        system.userConsoles.set(repairer.getId(), amount.consoleId);
+        system.userConsoles.set(repairer.getId(), amount.getConsoleId());
 
         if (system.userConsoles.size == 2) {
           system.timer = 10000;
@@ -217,7 +217,7 @@ export class SystemsHandler {
     this.setOldShipStatus();
 
     const ship = this.getShipStatus();
-    const type = amount.system;
+    const type = amount.getSystemType();
     const sabotageHandler = this.host.getSabotageHandler();
 
     if (!sabotageHandler) {
@@ -261,7 +261,7 @@ export class SystemsHandler {
   async repairSecurity<T extends SecurityCameraSystem>(repairer: InternalPlayer, system: T, amount: SecurityAmount): Promise<void> {
     this.setOldShipStatus();
 
-    if (amount.isViewingCameras) {
+    if (amount.isViewingCameras()) {
       await this.host.getLobby().getServer().emit("game.cameras.opened", new GameCamerasOpenedEvent(this.host.getLobby().getGame()!, repairer));
 
       system.playersViewingCameras.add(repairer.getId());
@@ -277,7 +277,7 @@ export class SystemsHandler {
   repairSwitch<T extends SwitchSystem>(_repairer: InternalPlayer, system: T, amount: ElectricalAmount): void {
     this.setOldShipStatus();
 
-    system.actualSwitches.toggle(amount.switchIndex);
+    system.actualSwitches.toggle(amount.getSwitchIndex());
 
     if (system.actualSwitches.equals(system.expectedSwitches)) {
       // TODO: Count back up (like +85 every second)

@@ -3,10 +3,8 @@ import { RepairAmount } from ".";
 
 export class OxygenAmount implements RepairAmount {
   constructor(
-    // TODO: Make protected with getter/setter
-    public consoleId: number,
-    // TODO: Make protected with getter/setter
-    public action: OxygenAction,
+    protected consoleId: number,
+    protected action: OxygenAction,
   ) {}
 
   static deserialize(amount: number): OxygenAmount {
@@ -19,6 +17,26 @@ export class OxygenAmount implements RepairAmount {
     }
 
     return new OxygenAmount(amount & 3, action);
+  }
+
+  getConsoleId(): number {
+    return this.consoleId;
+  }
+
+  setConsoleId(consoleId: number): this {
+    this.consoleId = consoleId;
+
+    return this;
+  }
+
+  getAction(): OxygenAction {
+    return this.action;
+  }
+
+  setAction(action: OxygenAction): this {
+    this.action = action;
+
+    return this;
   }
 
   clone(): OxygenAmount {

@@ -2,12 +2,21 @@ import { RepairAmount } from ".";
 
 export class ElectricalAmount implements RepairAmount {
   constructor(
-    // TODO: Make protected with getter/setter
-    public switchIndex: number,
+    protected switchIndex: number,
   ) {}
 
   static deserialize(amount: number): ElectricalAmount {
     return new ElectricalAmount(amount);
+  }
+
+  getSwitchIndex(): number {
+    return this.switchIndex;
+  }
+
+  setSwitchIndex(switchIndex: number): this {
+    this.switchIndex = switchIndex;
+
+    return this;
   }
 
   clone(): ElectricalAmount {

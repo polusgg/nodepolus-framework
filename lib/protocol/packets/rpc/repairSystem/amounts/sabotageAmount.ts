@@ -3,19 +3,28 @@ import { RepairAmount } from ".";
 
 export class SabotageAmount implements RepairAmount {
   constructor(
-    // TODO: Make protected with getter/setter
-    public system: SystemType,
+    protected systemType: SystemType,
   ) {}
 
   static deserialize(amount: number): SabotageAmount {
     return new SabotageAmount(amount);
   }
 
+  getSystemType(): SystemType {
+    return this.systemType;
+  }
+
+  setSystemType(system: SystemType): this {
+    this.systemType = system;
+
+    return this;
+  }
+
   clone(): SabotageAmount {
-    return new SabotageAmount(this.system);
+    return new SabotageAmount(this.systemType);
   }
 
   serialize(): number {
-    return this.system;
+    return this.systemType;
   }
 }

@@ -2,19 +2,28 @@ import { RepairAmount } from ".";
 
 export class SecurityAmount implements RepairAmount {
   constructor(
-    // TODO: Make protected with getter/setter
-    public isViewingCameras: boolean,
+    protected viewingCameras: boolean,
   ) {}
 
   static deserialize(amount: number): SecurityAmount {
     return new SecurityAmount(amount == 1);
   }
 
+  isViewingCameras(): boolean {
+    return this.viewingCameras;
+  }
+
+  setViewingCameras(viewingCameras: boolean): this {
+    this.viewingCameras = viewingCameras;
+
+    return this;
+  }
+
   clone(): SecurityAmount {
-    return new SecurityAmount(this.isViewingCameras);
+    return new SecurityAmount(this.viewingCameras);
   }
 
   serialize(): number {
-    return this.isViewingCameras ? 1 : 0;
+    return this.viewingCameras ? 1 : 0;
   }
 }

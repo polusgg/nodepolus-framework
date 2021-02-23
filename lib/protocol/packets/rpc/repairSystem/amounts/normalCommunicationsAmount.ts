@@ -2,19 +2,28 @@ import { RepairAmount } from ".";
 
 export class NormalCommunicationsAmount implements RepairAmount {
   constructor(
-    // TODO: Make protected with getter/setter
-    public isRepaired: boolean,
+    protected repaired: boolean,
   ) {}
 
   static deserialize(amount: number): NormalCommunicationsAmount {
     return new NormalCommunicationsAmount(amount == 0);
   }
 
+  isRepaired(): boolean {
+    return this.repaired;
+  }
+
+  setRepaired(repaired: boolean): this {
+    this.repaired = repaired;
+
+    return this;
+  }
+
   clone(): NormalCommunicationsAmount {
-    return new NormalCommunicationsAmount(this.isRepaired);
+    return new NormalCommunicationsAmount(this.repaired);
   }
 
   serialize(): number {
-    return this.isRepaired ? 1 : 0;
+    return this.repaired ? 1 : 0;
   }
 }

@@ -2,10 +2,8 @@ import { RepairAmount } from ".";
 
 export class DecontaminationAmount implements RepairAmount {
   constructor(
-    // TODO: Make protected with getter/setter
-    public isEntering: boolean,
-    // TODO: Make protected with getter/setter
-    public isHeadingUp: boolean,
+    protected entering: boolean,
+    protected headingUp: boolean,
   ) {}
 
   static deserialize(amount: number): DecontaminationAmount {
@@ -15,13 +13,33 @@ export class DecontaminationAmount implements RepairAmount {
     );
   }
 
+  isEntering(): boolean {
+    return this.entering;
+  }
+
+  setEntering(entering: boolean): this {
+    this.entering = entering;
+
+    return this;
+  }
+
+  isHeadingUp(): boolean {
+    return this.headingUp;
+  }
+
+  setHeadingUp(headingUp: boolean): this {
+    this.headingUp = headingUp;
+
+    return this;
+  }
+
   clone(): DecontaminationAmount {
-    return new DecontaminationAmount(this.isEntering, this.isHeadingUp);
+    return new DecontaminationAmount(this.entering, this.headingUp);
   }
 
   serialize(): number {
-    return this.isEntering
-      ? (this.isHeadingUp ? 1 : 2)
-      : (this.isHeadingUp ? 3 : 4);
+    return this.entering
+      ? (this.headingUp ? 1 : 2)
+      : (this.headingUp ? 3 : 4);
   }
 }

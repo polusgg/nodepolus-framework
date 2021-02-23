@@ -3,10 +3,8 @@ import { RepairAmount } from ".";
 
 export class MiraCommunicationsAmount implements RepairAmount {
   constructor(
-    // TODO: Make protected with getter/setter
-    public consoleId: number,
-    // TODO: Make protected with getter/setter
-    public action: MiraCommunicationsAction,
+    protected consoleId: number,
+    protected action: MiraCommunicationsAction,
   ) {}
 
   static deserialize(amount: number): MiraCommunicationsAmount {
@@ -19,6 +17,26 @@ export class MiraCommunicationsAmount implements RepairAmount {
     }
 
     return new MiraCommunicationsAmount(amount & 0xf, action);
+  }
+
+  getConsoleId(): number {
+    return this.consoleId;
+  }
+
+  setConsoleId(consoleId: number): this {
+    this.consoleId = consoleId;
+
+    return this;
+  }
+
+  getAction(): MiraCommunicationsAction {
+    return this.action;
+  }
+
+  setAction(action: MiraCommunicationsAction): this {
+    this.action = action;
+
+    return this;
   }
 
   clone(): MiraCommunicationsAmount {
