@@ -12,7 +12,7 @@ export class InnerGameData extends BaseInnerNetObject {
   constructor(
     protected readonly parent: EntityGameData,
     // TODO: Make protected with getter/setter
-    public readonly players: PlayerData[] = [],
+    public players: PlayerData[] = [],
     netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.GameData, parent, netId);
@@ -72,6 +72,10 @@ export class InnerGameData extends BaseInnerNetObject {
     }
   }
 
+  getParent(): EntityGameData {
+    return this.parent;
+  }
+
   // TODO: compare players and only send those that have updated
   serializeData(): DataPacket {
     return new DataPacket(
@@ -88,10 +92,6 @@ export class InnerGameData extends BaseInnerNetObject {
   }
 
   clone(): InnerGameData {
-    return new InnerGameData(this.parent, this.players, this.netId);
-  }
-
-  getParent(): EntityGameData {
-    return this.parent;
+    return new InnerGameData(this.parent, this.players.map(data => data.clone()), this.netId);
   }
 }

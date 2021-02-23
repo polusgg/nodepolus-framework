@@ -41,7 +41,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getId(): number {
-    return this.entity.getPlayerControl().playerId;
+    return this.entity.getPlayerControl().getPlayerId();
   }
 
   getConnection(): Connection | undefined {
@@ -310,7 +310,7 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   isScanning(): boolean {
-    return this.entity.getPlayerControl().isScanning;
+    return this.entity.getPlayerControl().isScanning();
   }
 
   kill(): this {

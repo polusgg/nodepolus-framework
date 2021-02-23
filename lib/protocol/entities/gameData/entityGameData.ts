@@ -9,6 +9,7 @@ export class EntityGameData extends BaseInnerNetEntity {
   constructor(
     lobby: LobbyInstance,
     players: PlayerData[] = [],
+    votes: Map<number, number[]> = new Map(),
     gameDataNetId: number = lobby.getHostInstance().getNextNetId(),
     voteBanSystemNetId: number = lobby.getHostInstance().getNextNetId(),
   ) {
@@ -16,7 +17,7 @@ export class EntityGameData extends BaseInnerNetEntity {
 
     this.innerNetObjects = [
       new InnerGameData(this, players, gameDataNetId),
-      new InnerVoteBanSystem(this, voteBanSystemNetId),
+      new InnerVoteBanSystem(this, votes, voteBanSystemNetId),
     ];
   }
 

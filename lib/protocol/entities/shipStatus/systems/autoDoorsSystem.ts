@@ -5,10 +5,11 @@ import { Doors } from "../../../../static";
 import { BaseSystem } from ".";
 
 export class AutoDoorsSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public doors: boolean[] = new Array(Doors.countForLevel(Level.TheSkeld)).fill(true);
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public doors: boolean[] = new Array(Doors.countForLevel(Level.TheSkeld)).fill(true),
+  ) {
     super(shipStatus, SystemType.Doors);
   }
 
@@ -53,10 +54,6 @@ export class AutoDoorsSystem extends BaseSystem {
   }
 
   clone(): AutoDoorsSystem {
-    const clone = new AutoDoorsSystem(this.shipStatus);
-
-    clone.doors = [...this.doors];
-
-    return clone;
+    return new AutoDoorsSystem(this.shipStatus, [...this.doors]);
   }
 }

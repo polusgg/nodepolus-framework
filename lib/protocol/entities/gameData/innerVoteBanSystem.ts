@@ -13,11 +13,10 @@ import { Connection } from "../../connection";
 import { EntityGameData } from ".";
 
 export class InnerVoteBanSystem extends BaseInnerNetObject {
-  // TODO: Make protected with getter/setter
-  public votes: Map<number, number[]> = new Map<number, number[]>();
-
   constructor(
     protected readonly parent: EntityGameData,
+    // TODO: Make protected with getter/setter
+    public votes: Map<number, number[]> = new Map(),
     netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.VoteBanSystem, parent, netId);
@@ -137,6 +136,10 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     }
   }
 
+  getParent(): EntityGameData {
+    return this.parent;
+  }
+
   serializeData(): DataPacket {
     const writer = new MessageWriter();
 
@@ -159,15 +162,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
   }
 
   clone(): InnerVoteBanSystem {
-    const clone = new InnerVoteBanSystem(this.parent, this.netId);
-
-    clone.votes = new Map(this.votes);
-
-    return clone;
-  }
-
-  getParent(): EntityGameData {
-    return this.parent;
+    return new InnerVoteBanSystem(this.parent, new Map(this.votes), this.netId);
   }
 
   protected removeVote(voterClientId: number, targetClientId: number, sendTo?: Connection[]): void {

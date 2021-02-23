@@ -4,10 +4,11 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class SecurityCameraSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public playersViewingCameras: Set<number> = new Set();
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public playersViewingCameras: Set<number> = new Set(),
+  ) {
     super(shipStatus, SystemType.Security);
   }
 
@@ -39,10 +40,6 @@ export class SecurityCameraSystem extends BaseSystem {
   }
 
   clone(): SecurityCameraSystem {
-    const clone = new SecurityCameraSystem(this.shipStatus);
-
-    clone.playersViewingCameras = new Set(this.playersViewingCameras);
-
-    return clone;
+    return new SecurityCameraSystem(this.shipStatus, new Set(this.playersViewingCameras));
   }
 }

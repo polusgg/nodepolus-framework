@@ -4,12 +4,13 @@ import { BaseInnerShipStatus } from "../baseShipStatus";
 import { BaseSystem } from ".";
 
 export class DeconTwoSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public timer = 0;
-  // TODO: Make protected with getter/setter
-  public state: DecontaminationDoorState = DecontaminationDoorState.Idle;
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public timer: number = 0,
+    // TODO: Make protected with getter/setter
+    public state: DecontaminationDoorState = DecontaminationDoorState.Idle,
+  ) {
     super(shipStatus, SystemType.Decontamination2);
   }
 
@@ -36,11 +37,6 @@ export class DeconTwoSystem extends BaseSystem {
   }
 
   clone(): DeconTwoSystem {
-    const clone = new DeconTwoSystem(this.shipStatus);
-
-    clone.state = this.state;
-    clone.timer = this.timer;
-
-    return clone;
+    return new DeconTwoSystem(this.shipStatus, this.timer, this.state);
   }
 }

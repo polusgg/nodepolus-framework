@@ -19,15 +19,11 @@ export class InnerDleksShipStatus extends BaseInnerShipStatus {
     ], undefined, netId);
   }
 
-  clone(): InnerDleksShipStatus {
-    const clone = new InnerDleksShipStatus(this.parent, this.netId);
-
-    clone.systems = this.systems.map(system => system.clone());
-
-    return clone;
-  }
-
   getParent(): EntityDleksShipStatus {
     return this.parent;
+  }
+
+  clone(): InnerDleksShipStatus {
+    return new InnerDleksShipStatus(this.parent, this.netId);
   }
 }

@@ -20,15 +20,11 @@ export class InnerPolusShipStatus extends BaseInnerShipStatus {
     ], undefined, netId);
   }
 
-  clone(): InnerPolusShipStatus {
-    const clone = new InnerPolusShipStatus(this.parent, this.netId);
-
-    clone.systems = this.systems.map(system => system.clone());
-
-    return clone;
-  }
-
   getParent(): EntityPolusShipStatus {
     return this.parent;
+  }
+
+  clone(): InnerPolusShipStatus {
+    return new InnerPolusShipStatus(this.parent, this.netId);
   }
 }

@@ -11,11 +11,10 @@ import { VoteState } from "../../../types";
 import { EntityMeetingHud } from ".";
 
 export class InnerMeetingHud extends BaseInnerNetObject {
-  // TODO: Make protected with getter/setter
-  public playerStates: VoteState[] = [];
-
   constructor(
     protected readonly parent: EntityMeetingHud,
+    // TODO: Make protected with getter/setter
+    public playerStates: VoteState[] = [],
     netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.MeetingHud, parent, netId);
@@ -61,6 +60,10 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     }
   }
 
+  getParent(): EntityMeetingHud {
+    return this.parent;
+  }
+
   serializeData(old: InnerMeetingHud): DataPacket {
     const writer = new MessageWriter();
     const dirtyBits = this.serializeStatesToDirtyBits(old.playerStates);
@@ -91,15 +94,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   }
 
   clone(): InnerMeetingHud {
-    const clone = new InnerMeetingHud(this.parent, this.netId);
-
-    clone.playerStates = this.playerStates.map(state => state.clone());
-
-    return clone;
-  }
-
-  getParent(): EntityMeetingHud {
-    return this.parent;
+    return new InnerMeetingHud(this.parent, this.playerStates.map(state => state.clone()), this.netId);
   }
 
   protected serializeStatesToDirtyBits(states: VoteState[]): number {

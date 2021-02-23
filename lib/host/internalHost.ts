@@ -773,7 +773,7 @@ export class InternalHost implements HostInstance {
       SpawnFlag.IsClientCharacter,
     );
 
-    entity.getPlayerControl().isNew = event.isNew();
+    entity.getPlayerControl().setNewPlayer(event.isNew());
 
     const player = new InternalPlayer(this.lobby, entity, sender);
 
@@ -789,7 +789,7 @@ export class InternalHost implements HostInstance {
 
     this.confirmPlayerData(player);
 
-    player.getEntity().getPlayerControl().isNew = false;
+    player.getEntity().getPlayerControl().setNewPlayer(false);
 
     sender.flush(true);
 
@@ -869,7 +869,7 @@ export class InternalHost implements HostInstance {
   }
 
   handleCheckColor(sender: InnerPlayerControl, color: PlayerColor): void {
-    const takenColors = this.getTakenColors(sender.playerId);
+    const takenColors = this.getTakenColors(sender.getPlayerId());
     let setColor: PlayerColor = color;
 
     const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
@@ -1326,9 +1326,9 @@ export class InternalHost implements HostInstance {
       throw new Error("confirmPlayerData called without a GameData instance");
     }
 
-    if (!gameData.getGameData().players.some(p => p.getId() == player.getEntity().getPlayerControl().playerId)) {
+    if (!gameData.getGameData().players.some(p => p.getId() == player.getEntity().getPlayerControl().getPlayerId())) {
       const playerData = new PlayerData(
-        player.getEntity().getPlayerControl().playerId,
+        player.getEntity().getPlayerControl().getPlayerId(),
         "",
         PlayerColor.Red,
         0,

@@ -4,12 +4,13 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class HqHudSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public activeConsoles: Map<number, number> = new Map();
-  // TODO: Make protected with getter/setter
-  public completedConsoles: Set<number> = new Set([0, 1]);
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public activeConsoles: Map<number, number> = new Map(),
+    // TODO: Make protected with getter/setter
+    public completedConsoles: Set<number> = new Set([0, 1]),
+  ) {
     super(shipStatus, SystemType.Communications);
   }
 
@@ -64,11 +65,6 @@ export class HqHudSystem extends BaseSystem {
   }
 
   clone(): HqHudSystem {
-    const clone = new HqHudSystem(this.shipStatus);
-
-    clone.activeConsoles = new Map(this.activeConsoles);
-    clone.completedConsoles = new Set(this.completedConsoles);
-
-    return clone;
+    return new HqHudSystem(this.shipStatus, new Map(this.activeConsoles), new Set(this.completedConsoles));
   }
 }

@@ -56,20 +56,56 @@ import {
 } from "../../packets/rpc";
 
 export class InnerPlayerControl extends BaseInnerNetObject {
-  // TODO: Make protected with getter/setter
-  public isScanning = false;
-  // TODO: Make protected with getter/setter
-  public scannerSequenceId = 1;
+  protected scanning = false;
+  protected scannerSequenceId = 1;
 
   constructor(
     protected readonly parent: EntityPlayer,
-    // TODO: Make protected with getter/setter
-    public playerId: number = parent.getLobby().getHostInstance().getNextPlayerId(),
-    // TODO: Make protected with getter/setter
-    public isNew: boolean = false,
+    protected playerId: number = parent.getLobby().getHostInstance().getNextPlayerId(),
+    protected newPlayer: boolean = false,
     netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.PlayerControl, parent, netId);
+  }
+
+  getPlayerId(): number {
+    return this.playerId;
+  }
+
+  setPlayerId(playerId: number): this {
+    this.playerId = playerId;
+
+    return this;
+  }
+
+  isNewPlayer(): boolean {
+    return this.newPlayer;
+  }
+
+  setNewPlayer(newPlayer: boolean): this {
+    this.newPlayer = newPlayer;
+
+    return this;
+  }
+
+  isScanning(): boolean {
+    return this.scanning;
+  }
+
+  setScanning(scanning: boolean): this {
+    this.scanning = scanning;
+
+    return this;
+  }
+
+  getScannerSequenceId(): number {
+    return this.scannerSequenceId;
+  }
+
+  setScannerSequenceId(scannerSequenceId: number): this {
+    this.scannerSequenceId = scannerSequenceId;
+
+    return this;
   }
 
   async playAnimation(taskType: TaskType, sendTo?: Connection[]): Promise<void> {
@@ -255,7 +291,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       return;
     }
 
-    this.isScanning = isScanning;
+    this.scanning = isScanning;
 
     this.sendRpcPacket(new SetScannerPacket(isScanning, this.scannerSequenceId), sendTo);
   }
@@ -372,6 +408,10 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     }
   }
 
+  getParent(): EntityPlayer {
+    return this.parent;
+  }
+
   serializeData(): DataPacket {
     return new DataPacket(
       this.netId,
@@ -383,17 +423,18 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     return new SpawnPacketObject(
       this.netId,
       new MessageWriter()
-        .writeBoolean(this.isNew)
+        .writeBoolean(this.newPlayer)
         .writeByte(this.playerId),
     );
   }
 
   clone(): InnerPlayerControl {
-    return new InnerPlayerControl(this.parent, this.playerId, this.isNew, this.netId);
-  }
+    const clone = new InnerPlayerControl(this.parent, this.playerId, this.newPlayer, this.netId);
 
-  getParent(): EntityPlayer {
-    return this.parent;
+    clone.scanning = this.scanning;
+    clone.scannerSequenceId = this.scannerSequenceId;
+
+    return clone;
   }
 
   protected getPlayerInstance(): PlayerInstance {

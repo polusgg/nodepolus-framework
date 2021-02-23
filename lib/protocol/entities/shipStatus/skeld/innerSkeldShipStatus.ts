@@ -19,15 +19,11 @@ export class InnerSkeldShipStatus extends BaseInnerShipStatus {
     ], undefined, netId);
   }
 
-  clone(): InnerSkeldShipStatus {
-    const clone = new InnerSkeldShipStatus(this.parent, this.netId);
-
-    clone.systems = this.systems.map(system => system.clone());
-
-    return clone;
-  }
-
   getParent(): EntitySkeldShipStatus {
     return this.parent;
+  }
+
+  clone(): InnerSkeldShipStatus {
+    return new InnerSkeldShipStatus(this.parent, this.netId);
   }
 }

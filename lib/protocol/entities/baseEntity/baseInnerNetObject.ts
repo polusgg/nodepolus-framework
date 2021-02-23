@@ -13,13 +13,13 @@ export abstract class BaseInnerNetObject {
 
   abstract handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void;
 
+  abstract getParent(): BaseInnerNetEntity;
+
   abstract serializeData(old: BaseInnerNetObject): DataPacket;
 
   abstract serializeSpawn(): SpawnPacketObject;
 
   abstract clone(): BaseInnerNetObject;
-
-  abstract getParent(): BaseInnerNetEntity;
 
   getType(): InnerNetObjectType {
     return this.type;

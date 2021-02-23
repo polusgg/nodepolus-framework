@@ -4,10 +4,11 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class SabotageSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public cooldown = 0;
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public cooldown: number = 0,
+  ) {
     super(shipStatus, SystemType.Sabotage);
   }
 
@@ -28,10 +29,6 @@ export class SabotageSystem extends BaseSystem {
   }
 
   clone(): SabotageSystem {
-    const clone = new SabotageSystem(this.shipStatus);
-
-    clone.cooldown = this.cooldown;
-
-    return clone;
+    return new SabotageSystem(this.shipStatus, this.cooldown);
   }
 }

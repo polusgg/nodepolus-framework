@@ -4,10 +4,11 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class MedScanSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public playersInQueue: Set<number> = new Set();
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public playersInQueue: Set<number> = new Set(),
+  ) {
     super(shipStatus, SystemType.Medbay);
   }
 
@@ -39,10 +40,6 @@ export class MedScanSystem extends BaseSystem {
   }
 
   clone(): MedScanSystem {
-    const clone = new MedScanSystem(this.shipStatus);
-
-    clone.playersInQueue = new Set(this.playersInQueue);
-
-    return clone;
+    return new MedScanSystem(this.shipStatus, new Set(this.playersInQueue));
   }
 }

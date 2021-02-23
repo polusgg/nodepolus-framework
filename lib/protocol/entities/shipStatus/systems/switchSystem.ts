@@ -6,14 +6,15 @@ import { Bitfield } from "../../../../types";
 import { BaseSystem } from ".";
 
 export class SwitchSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public expectedSwitches: Bitfield = new Bitfield(new Array(5).fill(0).map(() => !!Math.round(Math.random() * 1)));
-  // TODO: Make protected with getter/setter
-  public actualSwitches: Bitfield = this.expectedSwitches.clone();
-  // TODO: Make protected with getter/setter
-  public visionModifier = 0xff;
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public expectedSwitches: Bitfield = new Bitfield(new Array(5).fill(0).map(() => !!Math.round(Math.random() * 1))),
+    // TODO: Make protected with getter/setter
+    public actualSwitches: Bitfield = expectedSwitches.clone(),
+    // TODO: Make protected with getter/setter
+    public visionModifier: number = 0xff,
+  ) {
     super(shipStatus, SystemType.Electrical);
   }
 
@@ -53,12 +54,6 @@ export class SwitchSystem extends BaseSystem {
   }
 
   clone(): SwitchSystem {
-    const clone = new SwitchSystem(this.shipStatus);
-
-    clone.actualSwitches = this.actualSwitches.clone();
-    clone.expectedSwitches = this.expectedSwitches.clone();
-    clone.visionModifier = this.visionModifier;
-
-    return clone;
+    return new SwitchSystem(this.shipStatus, this.expectedSwitches.clone(), this.actualSwitches.clone(), this.visionModifier);
   }
 }

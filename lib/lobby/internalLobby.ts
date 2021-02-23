@@ -436,8 +436,8 @@ export class InternalLobby implements LobbyInstance {
   }
 
   spawnPlayer(player: EntityPlayer, playerData: PlayerData): PlayerInstance {
-    if (player.getPlayerControl().playerId != playerData.getId()) {
-      throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.getPlayerControl().playerId}) != PlayerData(${playerData.getId()})`);
+    if (player.getPlayerControl().getPlayerId() != playerData.getId()) {
+      throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.getPlayerControl().getPlayerId()}) != PlayerData(${playerData.getId()})`);
     }
 
     const clientIdInUse = !!this.findPlayerByClientId(player.getOwnerId());

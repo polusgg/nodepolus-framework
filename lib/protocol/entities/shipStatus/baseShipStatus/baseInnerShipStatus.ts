@@ -65,9 +65,9 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     this.initializeSystems();
   }
 
-  abstract clone(): BaseInnerShipStatus;
-
   abstract getParent(): BaseEntityShipStatus;
+
+  abstract clone(): BaseInnerShipStatus;
 
   getLevel(): Level {
     return this.level;

@@ -24,8 +24,20 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     return this.position;
   }
 
+  setPosition(position: Vector2): this {
+    this.position = position;
+
+    return this;
+  }
+
   getVelocity(): Vector2 {
     return this.velocity;
+  }
+
+  setVelocity(velocity: Vector2): this {
+    this.velocity = velocity;
+
+    return this;
   }
 
   getSequenceId(): number {
@@ -70,6 +82,10 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
       default:
         break;
     }
+  }
+
+  getParent(): EntityPlayer {
+    return this.parent;
   }
 
   serializeData(): DataPacket {
@@ -131,10 +147,6 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
 
   clone(): InnerCustomNetworkTransform {
     return new InnerCustomNetworkTransform(this.parent, this.position, this.velocity, this.sequenceId, this.netId);
-  }
-
-  getParent(): EntityPlayer {
-    return this.parent;
   }
 
   protected incrementSequenceId(amount: number): number {

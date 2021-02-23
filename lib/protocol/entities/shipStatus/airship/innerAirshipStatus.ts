@@ -18,15 +18,11 @@ export class InnerAirshipStatus extends BaseInnerShipStatus {
     ], undefined, netId);
   }
 
-  clone(): InnerAirshipStatus {
-    const clone = new InnerAirshipStatus(this.parent, this.netId);
-
-    clone.systems = this.systems.map(system => system.clone());
-
-    return clone;
-  }
-
   getParent(): EntityAirshipStatus {
     return this.parent;
+  }
+
+  clone(): InnerAirshipStatus {
+    return new InnerAirshipStatus(this.parent, this.netId);
   }
 }

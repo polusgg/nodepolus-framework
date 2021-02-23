@@ -3,20 +3,21 @@ import { BaseInnerShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
-enum MovingPlatformSide {
+export enum MovingPlatformSide {
   Left = 0x00,
   Right = 0x01,
 }
 
 export class MovingPlatformSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public sequenceId = 0;
-  // TODO: Make protected with getter/setter
-  public innerPlayerControlNetId?: number;
-  // TODO: Make protected with getter/setter
-  public side: MovingPlatformSide = MovingPlatformSide.Left;
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public sequenceId: number = 0,
+    // TODO: Make protected with getter/setter
+    public innerPlayerControlNetId?: number,
+    // TODO: Make protected with getter/setter
+    public side: MovingPlatformSide = MovingPlatformSide.Left,
+  ) {
     super(shipStatus, SystemType.GapRoom);
   }
 
@@ -48,12 +49,6 @@ export class MovingPlatformSystem extends BaseSystem {
   }
 
   clone(): MovingPlatformSystem {
-    const clone = new MovingPlatformSystem(this.shipStatus);
-
-    clone.sequenceId = this.sequenceId;
-    clone.innerPlayerControlNetId = this.innerPlayerControlNetId;
-    clone.side = this.side;
-
-    return clone;
+    return new MovingPlatformSystem(this.shipStatus, this.sequenceId, this.innerPlayerControlNetId, this.side);
   }
 }

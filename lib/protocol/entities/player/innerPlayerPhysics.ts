@@ -117,6 +117,10 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     }
   }
 
+  getParent(): EntityPlayer {
+    return this.parent;
+  }
+
   serializeData(): DataPacket {
     return new DataPacket(this.netId, new MessageWriter());
   }
@@ -129,10 +133,10 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
   }
 
   clone(): InnerPlayerPhysics {
-    return new InnerPlayerPhysics(this.parent, this.netId);
-  }
+    const clone = new InnerPlayerPhysics(this.parent, this.netId);
 
-  getParent(): EntityPlayer {
-    return this.parent;
+    clone.vent = this.vent;
+
+    return clone;
   }
 }

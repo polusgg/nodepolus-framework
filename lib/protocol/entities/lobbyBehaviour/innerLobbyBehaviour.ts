@@ -17,6 +17,10 @@ export class InnerLobbyBehaviour extends BaseInnerNetObject {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
   handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {}
 
+  getParent(): EntityLobbyBehaviour {
+    return this.parent;
+  }
+
   serializeData(): DataPacket {
     return new DataPacket(this.netId, new MessageWriter());
   }
@@ -30,9 +34,5 @@ export class InnerLobbyBehaviour extends BaseInnerNetObject {
 
   clone(): InnerLobbyBehaviour {
     return new InnerLobbyBehaviour(this.parent, this.netId);
-  }
-
-  getParent(): EntityLobbyBehaviour {
-    return this.parent;
   }
 }

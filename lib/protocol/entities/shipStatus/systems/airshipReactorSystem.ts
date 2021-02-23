@@ -4,12 +4,13 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class AirshipReactorSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public activeConsoles: Map<number, number> = new Map();
-  // TODO: Make protected with getter/setter
-  public completedConsoles: Set<number> = new Set([0, 1]);
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public activeConsoles: Map<number, number> = new Map(),
+    // TODO: Make protected with getter/setter
+    public completedConsoles: Set<number> = new Set([0, 1]),
+  ) {
     super(shipStatus, SystemType.Reactor);
   }
 
@@ -65,11 +66,6 @@ export class AirshipReactorSystem extends BaseSystem {
   }
 
   clone(): AirshipReactorSystem {
-    const clone = new AirshipReactorSystem(this.shipStatus);
-
-    clone.activeConsoles = new Map(this.activeConsoles);
-    clone.completedConsoles = new Set(this.completedConsoles);
-
-    return clone;
+    return new AirshipReactorSystem(this.shipStatus, new Map(this.activeConsoles), new Set(this.completedConsoles));
   }
 }

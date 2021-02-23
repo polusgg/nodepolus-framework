@@ -4,12 +4,13 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class LifeSuppSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public timer = 10000;
-  // TODO: Make protected with getter/setter
-  public completedConsoles: Set<number> = new Set([0, 1]);
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public timer: number = 10000,
+    // TODO: Make protected with getter/setter
+    public completedConsoles: Set<number> = new Set([0, 1]),
+  ) {
     super(shipStatus, SystemType.Oxygen);
   }
 
@@ -45,11 +46,6 @@ export class LifeSuppSystem extends BaseSystem {
   }
 
   clone(): LifeSuppSystem {
-    const clone = new LifeSuppSystem(this.shipStatus);
-
-    clone.timer = this.timer;
-    clone.completedConsoles = new Set(this.completedConsoles);
-
-    return clone;
+    return new LifeSuppSystem(this.shipStatus, this.timer, new Set(this.completedConsoles));
   }
 }

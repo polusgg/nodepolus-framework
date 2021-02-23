@@ -5,12 +5,13 @@ import { Doors } from "../../../../static";
 import { BaseSystem } from ".";
 
 export class DoorsSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public timers: Map<SystemType, number> = new Map<SystemType, number>();
-  // TODO: Make protected with getter/setter
-  public doorStates: boolean[] = new Array(Doors.countForLevel(Level.Polus)).fill(true);
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public timers: Map<SystemType, number> = new Map<SystemType, number>(),
+    // TODO: Make protected with getter/setter
+    public doorStates: boolean[] = new Array(Doors.countForLevel(Level.Polus)).fill(true),
+  ) {
     super(shipStatus, SystemType.Doors);
   }
 
@@ -59,11 +60,6 @@ export class DoorsSystem extends BaseSystem {
   }
 
   clone(): DoorsSystem {
-    const clone = new DoorsSystem(this.shipStatus);
-
-    clone.doorStates = [...this.doorStates];
-    clone.timers = new Map(this.timers);
-
-    return clone;
+    return new DoorsSystem(this.shipStatus, new Map(this.timers), [...this.doorStates]);
   }
 }

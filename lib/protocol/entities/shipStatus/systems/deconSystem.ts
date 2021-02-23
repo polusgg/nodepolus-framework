@@ -4,12 +4,13 @@ import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseSystem } from ".";
 
 export class DeconSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public timer = 0;
-  // TODO: Make protected with getter/setter
-  public state: DecontaminationDoorState = DecontaminationDoorState.Idle;
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public timer: number = 0,
+    // TODO: Make protected with getter/setter
+    public state: DecontaminationDoorState = DecontaminationDoorState.Idle,
+  ) {
     super(shipStatus, SystemType.Decontamination);
   }
 
@@ -36,11 +37,6 @@ export class DeconSystem extends BaseSystem {
   }
 
   clone(): DeconSystem {
-    const clone = new DeconSystem(this.shipStatus);
-
-    clone.state = this.state;
-    clone.timer = this.timer;
-
-    return clone;
+    return new DeconSystem(this.shipStatus, this.timer, this.state);
   }
 }

@@ -4,10 +4,11 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export class HudOverrideSystem extends BaseSystem {
-  // TODO: Make protected with getter/setter
-  public sabotaged = false;
-
-  constructor(shipStatus: BaseInnerShipStatus) {
+  constructor(
+    shipStatus: BaseInnerShipStatus,
+    // TODO: Make protected with getter/setter
+    public sabotaged: boolean = false,
+  ) {
     super(shipStatus, SystemType.Communications);
   }
 
@@ -24,10 +25,6 @@ export class HudOverrideSystem extends BaseSystem {
   }
 
   clone(): HudOverrideSystem {
-    const clone = new HudOverrideSystem(this.shipStatus);
-
-    clone.sabotaged = this.sabotaged;
-
-    return clone;
+    return new HudOverrideSystem(this.shipStatus, this.sabotaged);
   }
 }

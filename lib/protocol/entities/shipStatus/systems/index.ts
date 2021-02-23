@@ -20,7 +20,7 @@ export { LifeSuppSystem } from "./lifeSuppSystem";
 
 export { MedScanSystem } from "./medScanSystem";
 
-export { MovingPlatformSystem } from "./movingPlatformSystem";
+export { MovingPlatformSide, MovingPlatformSystem } from "./movingPlatformSystem";
 
 export { ReactorSystem } from "./reactorSystem";
 
