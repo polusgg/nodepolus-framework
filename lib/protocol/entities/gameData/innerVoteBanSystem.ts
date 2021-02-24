@@ -23,8 +23,8 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
   }
 
   async addVote(voter: PlayerInstance, target: PlayerInstance, sendTo?: Connection[]): Promise<void> {
-    const voterClientId = voter.getConnection()?.id;
-    const targetClientId = target.getConnection()?.id;
+    const voterClientId = voter.getConnection()?.getId();
+    const targetClientId = target.getConnection()?.getId();
 
     if (voterClientId === undefined || targetClientId === undefined) {
       return;

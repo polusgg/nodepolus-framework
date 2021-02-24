@@ -283,7 +283,7 @@ export class InternalLobby implements LobbyInstance {
   }
 
   findPlayerByConnection(connection: Connection): InternalPlayer | undefined {
-    return this.players.find(player => player.getEntity().getOwnerId() == connection.id);
+    return this.players.find(player => player.getEntity().getOwnerId() == connection.getId());
   }
 
   findPlayerByEntity(entity: EntityPlayer): InternalPlayer | undefined {
@@ -291,11 +291,11 @@ export class InternalLobby implements LobbyInstance {
   }
 
   findPlayerIndexByConnection(connection: Connection): number {
-    return this.players.findIndex(player => player.getEntity().getOwnerId() == connection.id);
+    return this.players.findIndex(player => player.getEntity().getOwnerId() == connection.getId());
   }
 
   findConnection(id: number): Connection | undefined {
-    return this.connections.find(con => con.id == id);
+    return this.connections.find(con => con.getId() == id);
   }
 
   getGameData(): EntityGameData | undefined {
@@ -568,9 +568,7 @@ export class InternalLobby implements LobbyInstance {
     if (player && !player.hasBeenInitialized()) {
       player.setInitialized(true);
 
-      await this.getServer().emit("player.joined", new PlayerJoinedEvent(this, player, !connection.firstJoin));
-
-      connection.firstJoin = false;
+      await this.getServer().emit("player.joined", new PlayerJoinedEvent(this, player, connection.isRejoining()));
     }
   }
 
@@ -595,7 +593,7 @@ export class InternalLobby implements LobbyInstance {
     const actingHosts = this.getActingHosts();
 
     for (let i = 0; i < actingHosts.length; i++) {
-      if (actingHosts[i].limboState == LimboState.NotLimbo) {
+      if (actingHosts[i].getLimboState() == LimboState.NotLimbo) {
         this.sendDisableHost(actingHosts[i], sendImmediately);
       }
     }
@@ -611,7 +609,7 @@ export class InternalLobby implements LobbyInstance {
     const actingHosts = this.getActingHosts();
 
     for (let i = 0; i < actingHosts.length; i++) {
-      if (actingHosts[i].limboState == LimboState.NotLimbo) {
+      if (actingHosts[i].getLimboState() == LimboState.NotLimbo) {
         this.sendEnableHost(actingHosts[i], sendImmediately);
       }
     }
@@ -625,14 +623,14 @@ export class InternalLobby implements LobbyInstance {
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   sendEnableHost(connection: Connection, sendImmediately: boolean = true): void {
-    if (connection.limboState != LimboState.NotLimbo) {
+    if (connection.getLimboState() != LimboState.NotLimbo) {
       return;
     }
 
     if (sendImmediately) {
-      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, connection.id)]);
+      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.getId(), connection.getId())]);
     } else {
-      connection.writeReliable(new JoinGameResponsePacket(this.code, connection.id, connection.id));
+      connection.writeReliable(new JoinGameResponsePacket(this.code, connection.getId(), connection.getId()));
     }
   }
 
@@ -644,14 +642,14 @@ export class InternalLobby implements LobbyInstance {
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   sendDisableHost(connection: Connection, sendImmediately: boolean = true): void {
-    if (connection.limboState != LimboState.NotLimbo) {
+    if (connection.getLimboState() != LimboState.NotLimbo) {
       return;
     }
 
     if (sendImmediately) {
-      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId())]);
+      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.getId(), this.hostInstance.getId())]);
     } else {
-      connection.writeReliable(new JoinGameResponsePacket(this.code, connection.id, this.hostInstance.getId()));
+      connection.writeReliable(new JoinGameResponsePacket(this.code, connection.getId(), this.hostInstance.getId()));
     }
   }
 
@@ -740,7 +738,7 @@ export class InternalLobby implements LobbyInstance {
       this.migrateHost(connection);
     }
 
-    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.id, 0, reason ?? DisconnectReason.exitGame()));
+    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.getId(), 0, reason ?? DisconnectReason.exitGame()));
   }
 
   /**
@@ -822,8 +820,8 @@ export class InternalLobby implements LobbyInstance {
 
     this.disableActingHosts();
 
-    if (!connection.lobby) {
-      connection.lobby = this;
+    if (connection.getLobby() === undefined) {
+      connection.setLobby(this);
 
       connection.on("packet", (packet: BaseRootPacket) => this.handlePacket(packet, connection));
     }
@@ -866,7 +864,7 @@ export class InternalLobby implements LobbyInstance {
       case RootPacketType.GameData:
         // fallthrough
       case RootPacketType.GameDataTo: {
-        if (sender.limboState == LimboState.PreSpawn) {
+        if (sender.getLimboState() == LimboState.PreSpawn) {
           return;
         }
 
@@ -929,7 +927,7 @@ export class InternalLobby implements LobbyInstance {
    * @param sendTo - The connections to which the packet was intended to be sent
    */
   protected async handleGameDataPacket(packet: BaseGameDataPacket, sender: Connection, sendTo?: Connection[]): Promise<void> {
-    sendTo = ((sendTo && sendTo.length > 0) ? sendTo : this.connections).filter(c => c.id != sender.id);
+    sendTo = ((sendTo && sendTo.length > 0) ? sendTo : this.connections).filter(con => con.getId() != sender.getId());
 
     switch (packet.getType()) {
       case GameDataPacketType.Data:
@@ -1055,7 +1053,7 @@ export class InternalLobby implements LobbyInstance {
       connection.updateActingHost(true);
     }
 
-    connection.limboState = LimboState.NotLimbo;
+    connection.setLimboState(LimboState.NotLimbo);
 
     this.startedSpawningPlayer(connection);
     this.sendJoinedMessage(connection);
@@ -1069,7 +1067,7 @@ export class InternalLobby implements LobbyInstance {
    * @param connection - The connection that rejoined the lobby
    */
   protected handleRejoin(connection: Connection): void {
-    if (connection.lobby?.code != this.code) {
+    if (connection.getLobby()?.code != this.code) {
       connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameStarted())]);
     }
   }
@@ -1103,12 +1101,12 @@ export class InternalLobby implements LobbyInstance {
     this.sendRootGamePacket(
       new JoinGameResponsePacket(
         this.code,
-        connection.id,
+        connection.getId(),
         this.hostInstance.getId(),
       ),
       this.connections
-        .filter(con => con.id != connection.id)
-        .filter(con => con.limboState == LimboState.NotLimbo),
+        .filter(con => con.getId() != connection.getId())
+        .filter(con => con.getLimboState() == LimboState.NotLimbo),
     );
   }
 
@@ -1122,11 +1120,11 @@ export class InternalLobby implements LobbyInstance {
     connection.sendReliable([
       new JoinedGamePacket(
         this.code,
-        connection.id,
+        connection.getId(),
         this.hostInstance.getId(),
         this.connections
-          .filter(con => con.id != connection.id && con.limboState == LimboState.NotLimbo)
-          .map(con => con.id)),
+          .filter(con => con.getId() != connection.getId() && con.getLimboState() == LimboState.NotLimbo)
+          .map(con => con.getId())),
       new AlterGameTagPacket(
         this.code,
         AlterGameTag.ChangePrivacy,

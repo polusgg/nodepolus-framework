@@ -185,12 +185,13 @@ export default class extends BasePlugin {
       event.cancel();
 
       const packet = event.getPacket();
+      const lobby = event.getConnection().getLobby();
 
-      if (event.getConnection().lobby) {
+      if (lobby !== undefined) {
         server.getLogger("Custom Packet").debug(
           "Received custom root packet from connection %s in lobby %s: %s",
           event.getConnection(),
-          event.getConnection().lobby,
+          lobby,
           packet,
         );
       } else {
@@ -334,11 +335,13 @@ export default class extends BasePlugin {
    * `server.packet.in.custom` event handler is removed.
    */
   private handleTestPacket(connection: Connection, packet: TestPacket): void {
-    if (connection.lobby) {
+    const lobby = connection.getLobby();
+
+    if (lobby !== undefined) {
       server.getLogger("TestPacket").debug(
         "Received TestPacket from connection %s in lobby %s: %s",
         connection,
-        connection.lobby,
+        lobby,
         packet.message,
       );
     } else {

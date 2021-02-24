@@ -45,7 +45,7 @@ export class ServerPacketOutRpcCustomEvent extends CancellableEvent {
    */
   getSender(): BaseInnerNetObject | undefined {
     if (this.sender === undefined) {
-      this.sender = this.connection.lobby?.findInnerNetObject(this.netId);
+      this.sender = this.connection.getLobby()?.findInnerNetObject(this.netId);
     }
 
     return this.sender;

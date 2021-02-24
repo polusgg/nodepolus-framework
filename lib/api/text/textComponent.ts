@@ -22,8 +22,7 @@ function stringToColor(str: string): [number, number, number, number] {
 }
 
 export class TextComponent {
-  // TODO: Make protected with getter/setter
-  public readonly elements: (TextElement | LinkElement | ResetElement)[] = [];
+  protected readonly elements: (TextElement | LinkElement | ResetElement)[] = [];
 
   protected currentColor: [number, number, number] = [255, 255, 255];
   protected currentOpacity = 255;
@@ -70,6 +69,10 @@ export class TextComponent {
     text.addReader(reader);
 
     return text;
+  }
+
+  getElements(): readonly (TextElement | LinkElement | ResetElement)[] {
+    return [...this.elements];
   }
 
   add(content: string): TextComponent {

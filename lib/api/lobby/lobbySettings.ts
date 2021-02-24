@@ -329,8 +329,8 @@ export class LobbySettings {
       throw new Error(`Player ${player.getId()} does not have a connection on the lobby instance`);
     }
 
-    if (LobbySettings.povCache.has(connection.id)) {
-      return LobbySettings.povCache.get(connection.id)!;
+    if (LobbySettings.povCache.has(connection.getId())) {
+      return LobbySettings.povCache.get(connection.getId())!;
     }
 
     const povSettings = new LobbySettings(this.lobby);
@@ -338,7 +338,7 @@ export class LobbySettings {
     povSettings.isPov = true;
     povSettings.connection = connection;
 
-    LobbySettings.povCache.set(connection.id, povSettings);
+    LobbySettings.povCache.set(connection.getId(), povSettings);
 
     return povSettings;
   }

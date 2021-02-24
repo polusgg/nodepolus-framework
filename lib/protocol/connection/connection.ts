@@ -15,17 +15,6 @@ import Emittery from "emittery";
 import dgram from "dgram";
 
 export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implements Metadatable, NetworkAccessible {
-  // TODO: Make protected with getter/setter
-  public timeoutLength = 6000;
-  // TODO: Make protected with getter/setter
-  public id = -1;
-  // TODO: Make protected with getter/setter
-  public lobby?: InternalLobby;
-  // TODO: Make protected with getter/setter
-  public limboState = LimboState.PreSpawn;
-  // TODO: Make protected with getter/setter
-  public firstJoin = true;
-
   protected readonly metadata: Map<string, unknown> = new Map();
   protected readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
   protected readonly flushResolveMap: Map<number, (value: void | PromiseLike<void>) => void> = new Map();
@@ -33,17 +22,22 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   protected readonly flushInterval: NodeJS.Timeout;
   // protected readonly timeoutInterval: NodeJS.Timeout;
 
+  protected id = -1;
   protected initialized = false;
   protected hazelVersion?: number;
   protected clientVersion?: ClientVersion;
   protected name?: string;
+  protected lastPingReceivedTime: number = Date.now();
+  protected lobby?: InternalLobby;
+  protected firstJoin = true;
+  protected limboState = LimboState.PreSpawn;
   protected actingHost = false;
   protected packetBuffer: AwaitingPacket[] = [];
   protected unreliablePacketBuffer: BaseRootPacket[] = [];
   protected nonceIndex = 1;
   protected disconnectTimeout?: NodeJS.Timeout;
-  protected lastPingReceivedTime: number = Date.now();
   protected requestedDisconnect = false;
+  // protected timeoutLength = 6000;
 
   /**
    * @param connectionInfo - The ConnectionInfo describing the connection
@@ -159,6 +153,39 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   }
 
   /**
+   * Gets the client ID of the connection.
+   */
+  getId(): number {
+    return this.id;
+  }
+
+  /**
+   * Sets the client ID of the connection.
+   *
+   * A connection's client ID may only be set once, subsequent calls to this
+   * method will do nothing.
+   *
+   * @param id - The new client ID of the connection
+   */
+  setId(id: number): this {
+    if (this.id === -1) {
+      this.id = id;
+    }
+
+    return this;
+  }
+
+  /**
+   * Gets whether or not the connection has been initialized with a Hello
+   * packet.
+   *
+   * @returns `true` if the connection has issued a Hello packet, `false` if not
+   */
+  isInitialized(): boolean {
+    return this.initialized;
+  }
+
+  /**
    * Gets the version of Hazel that the connection is using.
    */
   getHazelVersion(): number | undefined {
@@ -191,6 +218,58 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    */
   getTimeSinceLastPing(): number {
     return Date.now() - this.lastPingReceivedTime;
+  }
+
+  /**
+   * Gets the lboby in which this connection is located.
+   */
+  getLobby(): InternalLobby | undefined {
+    return this.lobby;
+  }
+
+  /**
+   * Sets the lobby in which this connection is located.
+   *
+   * @param lobby - The new lobby in which this connection is located
+   */
+  setLobby(lobby?: InternalLobby): this {
+    this.lobby = lobby;
+
+    return this;
+  }
+
+  /**
+   * Gets whether or not the connection is rejoining their current lobby after
+   * the end of a game.
+   *
+   * @returns `true` if the connection is rejoining their current lobby, `false` if they are joining it for the first time in their session
+   */
+  isRejoining(): boolean {
+    if (this.firstJoin) {
+      this.firstJoin = false;
+
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Gets the current limbo state of the connection.
+   */
+  getLimboState(): LimboState {
+    return this.limboState;
+  }
+
+  /**
+   * Sets the current limbo state of the connection.
+   *
+   * @param limbState - The new limbo state of the connection
+   */
+  setLimboState(limbState: LimboState): this {
+    this.limboState = limbState;
+
+    return this;
   }
 
   /**

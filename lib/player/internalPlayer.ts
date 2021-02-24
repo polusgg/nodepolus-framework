@@ -390,7 +390,7 @@ export class InternalPlayer implements PlayerInstance {
     for (let i = 0; i < connections.length; i++) {
       const connection = connections[i];
 
-      if (connection.id != this.entity.getOwnerId()) {
+      if (connection.getId() != this.entity.getOwnerId()) {
         connection.writeReliable(new GameDataPacket([
           new DespawnPacket(this.entity.getPlayerControl().getNetId()),
           new DespawnPacket(this.entity.getPlayerPhysics().getNetId()),

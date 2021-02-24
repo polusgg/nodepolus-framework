@@ -84,7 +84,7 @@ test("encodes complex text", t => {
 test("decodes complex text", t => {
   const text = TextComponent.from("ABC[FF00FF00]Outer[]Empty[https://www.google.com/]link[00FF00FF]Color");
 
-  t.deepEqual(text.elements, [
+  t.deepEqual(text.getElements(), [
     {
       type: 0,
       content: "ABC",

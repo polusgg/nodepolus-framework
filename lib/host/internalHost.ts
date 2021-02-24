@@ -530,7 +530,7 @@ export class InternalHost implements HostInstance {
     this.playersInScene.clear();
 
     for (let i = 0; i < this.lobby.getConnections().length; i++) {
-      this.lobby.getConnections()[i].limboState = LimboState.PreSpawn;
+      this.lobby.getConnections()[i].setLimboState(LimboState.PreSpawn);
     }
 
     this.lobby.deleteLobbyBehaviour();
@@ -600,7 +600,7 @@ export class InternalHost implements HostInstance {
     }
 
     gameData.getGameData().updateGameData(gameData.getGameData().players, this.lobby.getConnections());
-    gameData.getVoteBanSystem().votes.delete(connection.id);
+    gameData.getVoteBanSystem().votes.delete(connection.getId());
 
     if (this.shouldEndGame()) {
       if (playerData.isImpostor()) {
@@ -620,7 +620,7 @@ export class InternalHost implements HostInstance {
   }
 
   handleReady(sender: Connection): void {
-    this.readyPlayerList.push(sender.id);
+    this.readyPlayerList.push(sender.getId());
 
     /**
      * TODO:
@@ -723,7 +723,7 @@ export class InternalHost implements HostInstance {
       return;
     }
 
-    if (this.playersInScene.has(sender.id)) {
+    if (this.playersInScene.has(sender.getId())) {
       throw new Error("Sender has already changed scene");
     }
 
@@ -737,7 +737,7 @@ export class InternalHost implements HostInstance {
 
     this.stopCountdown();
 
-    this.playersInScene.set(sender.id, sceneName);
+    this.playersInScene.set(sender.getId(), sceneName);
 
     let lobbyBehaviour = this.lobby.getLobbyBehaviour();
 
@@ -765,7 +765,7 @@ export class InternalHost implements HostInstance {
 
     const entity = new EntityPlayer(
       this.lobby,
-      sender.id,
+      sender.getId(),
       event.getPosition(),
       Vector2.zero(),
       newPlayerId,

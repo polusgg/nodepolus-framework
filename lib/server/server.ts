@@ -357,33 +357,35 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @param reason - The reason for why the connection was disconnected
    */
   protected async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
-    if (connection.lobby) {
-      this.getLogger().verbose("Connection %s disconnected from lobby %s", connection, connection.lobby);
+    const lobby = connection.getLobby();
 
-      const player = connection.lobby.findPlayerByConnection(connection);
+    if (lobby !== undefined) {
+      this.getLogger().verbose("Connection %s disconnected from lobby %s", connection, lobby);
+
+      const player = lobby.findPlayerByConnection(connection);
 
       if (player) {
-        this.emit("player.left", new PlayerLeftEvent(connection.lobby, player));
+        this.emit("player.left", new PlayerLeftEvent(lobby, player));
       }
 
-      connection.lobby.handleDisconnect(connection, reason);
+      lobby.handleDisconnect(connection, reason);
 
-      if (connection.lobby.getConnections().length == 0) {
-        this.getLogger().verbose("Destroying lobby %s", connection.lobby);
+      if (lobby.getConnections().length == 0) {
+        this.getLogger().verbose("Destroying lobby %s", lobby);
 
-        const event = new ServerLobbyDestroyedEvent(connection.lobby);
+        const event = new ServerLobbyDestroyedEvent(lobby);
 
         await this.emit("server.lobby.destroyed", event);
 
         if (event.isCancelled()) {
-          this.getLogger().verbose("Cancelled destroying lobby %s", connection.lobby);
+          this.getLogger().verbose("Cancelled destroying lobby %s", lobby);
 
           return;
         }
 
-        this.getLogger().verbose("Destroyed lobby %s", connection.lobby);
+        this.getLogger().verbose("Destroyed lobby %s", lobby);
 
-        this.deleteLobby(connection.lobby);
+        this.deleteLobby(lobby);
       }
     } else {
       this.getLogger().verbose("Connection %s disconnected", connection);
@@ -458,7 +460,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
       (): OutboundPacketTransformer | undefined => this.getOutboundPacketTransformer(),
     );
 
-    connection.id = this.getNextConnectionId();
+    connection.setId(this.getNextConnectionId());
 
     this.getLogger().verbose("Initialized connection %s", connection);
 
@@ -486,11 +488,12 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     });
 
     connection.once("kicked").then(({ isBanned, kickingPlayer, reason }) => {
-      if (!connection.lobby) {
+      const lobby = connection.getLobby();
+
+      if (lobby === undefined) {
         return;
       }
 
-      const lobby = connection.lobby;
       const player = lobby.findPlayerByConnection(connection);
 
       if (!player) {
@@ -556,7 +559,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
     switch (packet.getType()) {
       case RootPacketType.HostGame: {
-        if (sender.lobby !== undefined) {
+        if (sender.getLobby() !== undefined) {
           return;
         }
 
@@ -612,7 +615,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         break;
       }
       case RootPacketType.JoinGame: {
-        if (sender.lobby !== undefined) {
+        if (sender.getLobby() !== undefined) {
           return;
         }
 
@@ -641,7 +644,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         break;
       }
       case RootPacketType.GetGameList: {
-        if (sender.lobby !== undefined) {
+        if (sender.getLobby() !== undefined) {
           return;
         }
 
@@ -692,8 +695,8 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         break;
       }
       default: {
-        if (!sender.lobby) {
-          throw new Error(`Client ${sender.id} sent root game packet type ${packet.getType()} (${RootPacketType[packet.getType()]}) while not in a lobby`);
+        if (sender.getLobby() === undefined) {
+          throw new Error(`Client ${sender.getId()} sent root game packet type ${packet.getType()} (${RootPacketType[packet.getType()]}) while not in a lobby`);
         }
       }
     }
