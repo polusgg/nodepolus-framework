@@ -7,11 +7,42 @@ import { BaseSystem } from ".";
 export class DoorsSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    // TODO: Make protected with getter/setter
-    public timers: Map<SystemType, number> = new Map<SystemType, number>(),
+    protected timers: Map<SystemType, number> = new Map(),
     protected doorStates: boolean[] = new Array(Doors.countForLevel(Level.Polus)).fill(true),
   ) {
     super(shipStatus, SystemType.Doors);
+  }
+
+  getTimers(): Map<SystemType, number> {
+    return this.timers;
+  }
+
+  setTimers(timers: Map<SystemType, number>): this {
+    this.timers = timers;
+
+    return this;
+  }
+
+  clearTimers(): this {
+    this.timers.clear();
+
+    return this;
+  }
+
+  getTimer(systemType: SystemType): number | undefined {
+    return this.timers.get(systemType);
+  }
+
+  setTimer(systemType: SystemType, consoleId: number): this {
+    this.timers.set(systemType, consoleId);
+
+    return this;
+  }
+
+  removeTimer(systemType: SystemType): this {
+    this.timers.delete(systemType);
+
+    return this;
   }
 
   getDoorStates(): boolean[] {

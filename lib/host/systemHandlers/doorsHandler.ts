@@ -50,13 +50,13 @@ export class DoorsHandler {
 
     const doorsSystem = this.shipStatus.getSystemFromType(SystemType.Doors) as DoorsSystem;
 
-    doorsSystem.timers.set(systemId, time);
+    doorsSystem.setTimer(systemId, time);
 
     this.systemTimers[systemId] = setInterval(() => {
-      let currentTime = doorsSystem.timers.get(systemId);
+      let currentTime = doorsSystem.getTimer(systemId);
 
       if (currentTime && currentTime != 0) {
-        doorsSystem.timers.set(systemId, --currentTime);
+        doorsSystem.setTimer(systemId, --currentTime);
       } else {
         clearInterval(this.systemTimers[systemId]);
       }

@@ -6,11 +6,42 @@ import { BaseSystem } from ".";
 export class HqHudSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    // TODO: Make protected with getter/setter
-    public activeConsoles: Map<number, number> = new Map(),
+    protected activeConsoles: Map<number, number> = new Map(),
     protected completedConsoles: Set<number> = new Set([0, 1]),
   ) {
     super(shipStatus, SystemType.Communications);
+  }
+
+  getActiveConsoles(): Map<number, number> {
+    return this.activeConsoles;
+  }
+
+  setActiveConsoles(activeConsoles: Map<number, number>): this {
+    this.activeConsoles = activeConsoles;
+
+    return this;
+  }
+
+  clearActiveConsoles(): this {
+    this.activeConsoles.clear();
+
+    return this;
+  }
+
+  getActiveConsole(playerId: number): number | undefined {
+    return this.activeConsoles.get(playerId);
+  }
+
+  setActiveConsole(playerId: number, consoleId: number): this {
+    this.activeConsoles.set(playerId, consoleId);
+
+    return this;
+  }
+
+  removeActiveConsole(playerId: number): this {
+    this.activeConsoles.delete(playerId);
+
+    return this;
   }
 
   getCompletedConsoles(): Set<number> {

@@ -7,8 +7,7 @@ export class ReactorSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
     protected timer: number = 10000,
-    // TODO: Make protected with getter/setter
-    public userConsoles: Map<number, number> = new Map(),
+    protected userConsoles: Map<number, number> = new Map(),
   ) {
     super(shipStatus, SystemType.Reactor);
   }
@@ -29,6 +28,38 @@ export class ReactorSystem extends BaseSystem {
     if (this.timer < 0) {
       this.timer = 0;
     }
+
+    return this;
+  }
+
+  getUserConsoles(): Map<number, number> {
+    return this.userConsoles;
+  }
+
+  setUserConsoles(userConsoles: Map<number, number>): this {
+    this.userConsoles = userConsoles;
+
+    return this;
+  }
+
+  clearUserConsoles(): this {
+    this.userConsoles.clear();
+
+    return this;
+  }
+
+  getUserConsole(playerId: number): number | undefined {
+    return this.userConsoles.get(playerId);
+  }
+
+  setUserConsole(playerId: number, consoleId: number): this {
+    this.userConsoles.set(playerId, consoleId);
+
+    return this;
+  }
+
+  removeUserConsole(playerId: number): this {
+    this.userConsoles.delete(playerId);
 
     return this;
   }

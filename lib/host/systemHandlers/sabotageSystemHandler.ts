@@ -52,7 +52,7 @@ export class SabotageSystemHandler {
     if (system instanceof HudOverrideSystem) {
       system.setSabotaged(true);
     } else {
-      system.activeConsoles.clear();
+      system.clearActiveConsoles();
       system.clearCompletedConsoles();
     }
   }

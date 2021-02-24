@@ -80,10 +80,10 @@ export class SystemsHandler {
 
     switch (amount.getAction()) {
       case MiraCommunicationsAction.OpenedConsole:
-        system.activeConsoles.set(repairer.getId(), amount.getConsoleId());
+        system.setActiveConsole(repairer.getId(), amount.getConsoleId());
         break;
       case MiraCommunicationsAction.ClosedConsole:
-        system.activeConsoles.delete(repairer.getId());
+        system.removeActiveConsole(repairer.getId());
         break;
       case MiraCommunicationsAction.EnteredCode:
         system.addCompletedConsole(amount.getConsoleId());
@@ -184,9 +184,9 @@ export class SystemsHandler {
 
     switch (amount.getAction()) {
       case ReactorAction.PlacedHand:
-        system.userConsoles.set(repairer.getId(), amount.getConsoleId());
+        system.setUserConsole(repairer.getId(), amount.getConsoleId());
 
-        if (system.userConsoles.size == 2) {
+        if (system.getUserConsoles().size == 2) {
           system.setTimer(10000);
 
           if (sabotageHandler.timer) {
@@ -195,7 +195,7 @@ export class SystemsHandler {
         }
         break;
       case ReactorAction.RemovedHand:
-        system.userConsoles.delete(repairer.getId());
+        system.removeUserConsole(repairer.getId());
         break;
       case ReactorAction.Repaired:
         system.setTimer(10000);
