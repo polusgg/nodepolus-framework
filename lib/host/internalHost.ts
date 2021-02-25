@@ -513,15 +513,18 @@ export class InternalHost implements HostInstance {
   }
 
   async endGame(reason: GameOverReason): Promise<void> {
+    const oldState = this.lobby.getGameState();
     const event = new GameEndedEvent(this.lobby.getGame()!, reason);
+
+    this.lobby.setGameState(GameState.NotStarted);
 
     await this.lobby.getServer().emit("game.ended", event);
 
     if (event.isCancelled()) {
+      this.lobby.setGameState(oldState);
+
       return;
     }
-
-    this.lobby.setGameState(GameState.NotStarted);
 
     this.decontaminationHandlers = [];
     this.readyPlayerList = [];
@@ -697,10 +700,10 @@ export class InternalHost implements HostInstance {
     }
 
     this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getShipStatus()!.serializeSpawn()], this.lobby.getCode()));
+    this.lobby.setGameState(GameState.Started);
     this.setInfected(this.lobby.getOptions().getImpostorCount());
     this.setTasks();
     gameData.getGameData().updateGameData(gameData.getGameData().players, connections);
-    this.lobby.setGameState(GameState.Started);
 
     const players = this.lobby.getPlayers();
 
