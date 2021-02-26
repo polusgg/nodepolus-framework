@@ -64,6 +64,10 @@ export class InnerGameData extends BaseInnerNetObject {
     this.sendRpcPacket(new SetTasksPacket(playerId, taskIds), sendTo);
   }
 
+  updateAllGameData(sendTo?: Connection[]): void {
+    this.updateGameData(this.players, sendTo);
+  }
+
   updateGameData(playerData: PlayerData[], sendTo?: Connection[]): void {
     for (let i = 0; i < playerData.length; i++) {
       let hasPlayer = false;

@@ -317,10 +317,7 @@ export class InternalPlayer implements PlayerInstance {
     const gameData = this.getGameData();
 
     this.entity.getPlayerControl().exile();
-
-    gameData.getGameData().updateGameData([
-      this.getGameDataEntry(),
-    ], this.lobby.getConnections());
+    gameData.getGameData().updateGameData([this.getGameDataEntry()], this.lobby.getConnections());
 
     if (this.isImpostor()) {
       this.lobby.getHostInstance().handleImpostorDeath();

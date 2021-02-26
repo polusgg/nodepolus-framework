@@ -611,7 +611,7 @@ export class InternalHost implements HostInstance {
       gameData.getGameData().removePlayer(playerIndex);
     }
 
-    gameData.getGameData().updateGameData(gameData.getGameData().getPlayers(), this.lobby.getConnections());
+    gameData.getGameData().updateAllGameData(this.lobby.getConnections());
     gameData.getVoteBanSystem().removeVotesForPlayer(connection.getId());
 
     if (this.shouldEndGame()) {
@@ -712,7 +712,7 @@ export class InternalHost implements HostInstance {
     this.lobby.setGameState(GameState.Started);
     this.setInfected(this.lobby.getOptions().getImpostorCount());
     this.setTasks();
-    gameData.getGameData().updateGameData(gameData.getGameData().getPlayers(), connections);
+    gameData.getGameData().updateAllGameData(connections);
 
     const players = this.lobby.getPlayers();
 
@@ -748,7 +748,6 @@ export class InternalHost implements HostInstance {
     }
 
     this.stopCountdown();
-
     this.playersInScene.set(sender.getId(), sceneName);
 
     let lobbyBehaviour = this.lobby.getLobbyBehaviour();
@@ -803,7 +802,7 @@ export class InternalHost implements HostInstance {
 
     sender.flush(true);
 
-    gameData.getGameData().updateGameData(gameData.getGameData().getPlayers(), this.lobby.getConnections());
+    gameData.getGameData().updateAllGameData(this.lobby.getConnections());
   }
 
   handleCompleteTask(): void {
