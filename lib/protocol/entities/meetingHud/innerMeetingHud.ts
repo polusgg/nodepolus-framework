@@ -13,11 +13,30 @@ import { EntityMeetingHud } from ".";
 export class InnerMeetingHud extends BaseInnerNetObject {
   constructor(
     protected readonly parent: EntityMeetingHud,
-    // TODO: Make protected with getter/setter
-    public playerStates: VoteState[] = [],
+    protected playerStates: VoteState[] = [],
     netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.MeetingHud, parent, netId);
+  }
+
+  getPlayerStates(): VoteState[] {
+    return this.playerStates;
+  }
+
+  setPlayerStates(playerStates: VoteState[]): this {
+    this.playerStates = playerStates;
+
+    return this;
+  }
+
+  getPlayerState(playerId: number): VoteState | undefined {
+    return this.playerStates[playerId];
+  }
+
+  setPlayerState(playerId: number, voteState: VoteState): this {
+    this.playerStates[playerId] = voteState;
+
+    return this;
   }
 
   castVote(votingPlayerId: number, suspectPlayerId: number, _sendTo?: Connection[]): void {

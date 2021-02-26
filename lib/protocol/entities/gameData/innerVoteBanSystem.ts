@@ -15,11 +15,42 @@ import { EntityGameData } from ".";
 export class InnerVoteBanSystem extends BaseInnerNetObject {
   constructor(
     protected readonly parent: EntityGameData,
-    // TODO: Make protected with getter/setter
-    public votes: Map<number, number[]> = new Map(),
+    protected votes: Map<number, number[]> = new Map(),
     netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.VoteBanSystem, parent, netId);
+  }
+
+  getVotes(): Map<number, number[]> {
+    return this.votes;
+  }
+
+  setVotes(votes: Map<number, number[]>): this {
+    this.votes = votes;
+
+    return this;
+  }
+
+  clearVotes(): this {
+    this.votes.clear();
+
+    return this;
+  }
+
+  getVotesForPlayer(playerId: number): number[] | undefined {
+    return this.votes.get(playerId);
+  }
+
+  setVotesForPlayer(playerId: number, votes: number[]): this {
+    this.votes.set(playerId, votes);
+
+    return this;
+  }
+
+  removeVotesForPlayer(playerId: number): this {
+    this.votes.delete(playerId);
+
+    return this;
   }
 
   async addVote(voter: PlayerInstance, target: PlayerInstance, sendTo?: Connection[]): Promise<void> {

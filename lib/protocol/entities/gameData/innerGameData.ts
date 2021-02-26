@@ -11,11 +11,36 @@ import { EntityGameData } from ".";
 export class InnerGameData extends BaseInnerNetObject {
   constructor(
     protected readonly parent: EntityGameData,
-    // TODO: Make protected with getter/setter
-    public players: PlayerData[] = [],
+    protected players: PlayerData[] = [],
     netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.GameData, parent, netId);
+  }
+
+  getPlayers(): PlayerData[] {
+    return this.players;
+  }
+
+  setPlayers(players: PlayerData[]): this {
+    this.players = players;
+
+    return this;
+  }
+
+  getPlayer(playerId: number): PlayerData | undefined {
+    return this.players[playerId];
+  }
+
+  setPlayer(playerId: number, playerData: PlayerData): this {
+    this.players[playerId] = playerData;
+
+    return this;
+  }
+
+  removePlayer(playerId: number): this {
+    this.players.splice(playerId, 1);
+
+    return this;
   }
 
   setTasks(playerId: number, taskIds: number[], sendTo?: Connection[]): void {
