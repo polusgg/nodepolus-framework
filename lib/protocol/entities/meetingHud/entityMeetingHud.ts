@@ -8,7 +8,7 @@ import { InnerMeetingHud } from ".";
 export class EntityMeetingHud extends BaseInnerNetEntity {
   constructor(
     lobby: LobbyInstance,
-    playerStates: VoteState[] = [],
+    playerStates: Map<number, VoteState> = new Map(),
     meetingHudNetId: number = lobby.getHostInstance().getNextNetId(),
   ) {
     super(SpawnType.MeetingHud, lobby, GLOBAL_OWNER, SpawnFlag.None);

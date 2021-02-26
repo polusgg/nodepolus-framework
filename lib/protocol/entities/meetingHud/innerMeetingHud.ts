@@ -13,28 +13,40 @@ import { EntityMeetingHud } from ".";
 export class InnerMeetingHud extends BaseInnerNetObject {
   constructor(
     protected readonly parent: EntityMeetingHud,
-    protected playerStates: VoteState[] = [],
+    protected playerStates: Map<number, VoteState> = new Map(),
     netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.MeetingHud, parent, netId);
   }
 
-  getPlayerStates(): VoteState[] {
+  getPlayerStates(): Map<number, VoteState> {
     return this.playerStates;
   }
 
-  setPlayerStates(playerStates: VoteState[]): this {
+  setPlayerStates(playerStates: Map<number, VoteState>): this {
     this.playerStates = playerStates;
 
     return this;
   }
 
+  clearPlayerStates(): this {
+    this.playerStates.clear();
+
+    return this;
+  }
+
   getPlayerState(playerId: number): VoteState | undefined {
-    return this.playerStates[playerId];
+    return this.playerStates.get(playerId);
   }
 
   setPlayerState(playerId: number, voteState: VoteState): this {
-    this.playerStates[playerId] = voteState;
+    this.playerStates.set(playerId, voteState);
+
+    return this;
+  }
+
+  removePlayerState(playerId: number): this {
+    this.playerStates.delete(playerId);
 
     return this;
   }
@@ -89,10 +101,8 @@ export class InnerMeetingHud extends BaseInnerNetObject {
 
     writer.writePackedUInt32(dirtyBits);
 
-    for (let i = 0; i < this.playerStates.length; i++) {
-      const state = this.playerStates[i];
-
-      if (shallowEqual(state, old.playerStates[i])) {
+    for (const [id, state] of this.playerStates) {
+      if (shallowEqual(state, old.playerStates.get(id))) {
         continue;
       }
 
@@ -105,23 +115,23 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   serializeSpawn(): SpawnPacketObject {
     const writer = new MessageWriter();
 
-    for (let i = 0; i < this.playerStates.length; i++) {
-      this.playerStates[i].serialize(writer);
+    for (const [, state] of this.playerStates) {
+      state.serialize(writer);
     }
 
     return new SpawnPacketObject(this.netId, writer);
   }
 
   clone(): InnerMeetingHud {
-    return new InnerMeetingHud(this.parent, this.playerStates.map(state => state.clone()), this.netId);
+    return new InnerMeetingHud(this.parent, new Map(Array.from(this.playerStates, ([id, state]) => [id, state.clone()])), this.netId);
   }
 
-  protected serializeStatesToDirtyBits(states: VoteState[]): number {
+  protected serializeStatesToDirtyBits(states: Map<number, VoteState>): number {
     let n = 0;
 
-    for (let i = 0; i < this.playerStates.length; i++) {
-      if (!shallowEqual(states[i], this.playerStates[i])) {
-        n |= 1 << i;
+    for (const [id, state] of this.playerStates) {
+      if (!shallowEqual(state, states.get(id))) {
+        n |= 1 << id;
       }
     }
 

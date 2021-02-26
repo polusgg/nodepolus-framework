@@ -468,20 +468,9 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     return gameData;
   }
 
-  protected getGameDataIndex(playerId: number = this.playerId): number {
-    const gameDataIndex: number = this.getGameData().getGameData().getPlayers().findIndex(p => p.getId() == playerId);
-
-    if (gameDataIndex == -1) {
-      throw new Error(`Player ${playerId} does not have a PlayerData instance in GameData`);
-    }
-
-    return gameDataIndex;
-  }
-
   protected getPlayerData(playerId: number = this.playerId): PlayerData {
     const gameData = this.getGameData();
-    const gameDataPlayerIndex = this.getGameDataIndex(playerId);
 
-    return gameData.getGameData().getPlayer(gameDataPlayerIndex)!;
+    return gameData.getGameData().getPlayer(playerId)!;
   }
 }

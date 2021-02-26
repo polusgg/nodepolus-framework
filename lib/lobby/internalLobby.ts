@@ -452,7 +452,7 @@ export class InternalLobby implements LobbyInstance {
     this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
 
     if (this.gameData) {
-      this.gameData.getGameData().getPlayers().push(playerData);
+      this.gameData.getGameData().addPlayer(playerData);
       this.sendRpcPacket(this.gameData.getGameData(), new UpdateGameDataPacket([playerData]));
     }
 
@@ -706,15 +706,13 @@ export class InternalLobby implements LobbyInstance {
       const votesToClear: InternalPlayer[] = [];
       const states = this.meetingHud.getMeetingHud().getPlayerStates();
 
-      for (let i = 0; i < states.length; i++) {
-        const state = states[i];
-
-        if (i == disconnectedId) {
+      for (const [id, state] of states) {
+        if (id == disconnectedId) {
           state.setDead(true);
           state.setVotedFor(-1);
           state.setVoted(false);
         } else if (state.getVotedFor() == disconnectedId) {
-          const votingPlayer = this.findPlayerByPlayerId(i);
+          const votingPlayer = this.findPlayerByPlayerId(id);
 
           if (votingPlayer) {
             votesToClear.push(votingPlayer);

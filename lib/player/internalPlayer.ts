@@ -484,17 +484,13 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   getGameDataEntry(): PlayerData {
-    const players = this.getGameData().getGameData().getPlayers();
+    const data = this.getGameData().getGameData().getPlayer(this.getId());
 
-    for (let i = 0; i < players.length; i++) {
-      const player = players[i];
-
-      if (player.getId() == this.getId()) {
-        return player;
-      }
+    if (data === undefined) {
+      throw new Error(`Player ${this.getId()} does not have a PlayerData instance in GameData`);
     }
 
-    throw new Error(`Player ${this.getId()} does not have a PlayerData instance in GameData`);
+    return data;
   }
 
   updateGameData(): void {

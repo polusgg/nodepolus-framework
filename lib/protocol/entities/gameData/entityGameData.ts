@@ -8,7 +8,7 @@ import { PlayerData } from "./types";
 export class EntityGameData extends BaseInnerNetEntity {
   constructor(
     lobby: LobbyInstance,
-    players: PlayerData[] = [],
+    players: Map<number, PlayerData> = new Map(),
     votes: Map<number, number[]> = new Map(),
     gameDataNetId: number = lobby.getHostInstance().getNextNetId(),
     voteBanSystemNetId: number = lobby.getHostInstance().getNextNetId(),
