@@ -1,6 +1,6 @@
+import { CanSerializeToHazel, Vector2 } from "../types";
 import { MaxValue, MinValue } from "./constants";
 import { clamp } from "./functions";
-import { Vector2 } from "../types";
 
 /**
  * Gets the result of `value`, clamped in the range of `0..1`, and linearly
@@ -392,6 +392,18 @@ export class MessageWriter extends HazelMessage {
 
     this.writePackedUInt32(buf.length);
     this.writeBytes(buf);
+
+    return this;
+  }
+
+  /**
+   * Writes the given object by passing this MessageWriter into the `serialize`
+   * method on the given object.
+   *
+   * @param object - The object whose data will be written to this MessageWriter
+   */
+  writeObject(object: CanSerializeToHazel): this {
+    object.serialize(this);
 
     return this;
   }

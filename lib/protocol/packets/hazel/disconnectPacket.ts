@@ -29,17 +29,13 @@ export class DisconnectPacket extends BaseHazelPacket {
     return new DisconnectPacket(this.isForced, this.disconnectReason?.clone());
   }
 
-  serialize(): MessageWriter {
-    const writer = new MessageWriter();
-
+  serialize(writer: MessageWriter): void {
     if (this.isForced !== undefined) {
       writer.writeBoolean(this.isForced);
 
       if (this.isForced) {
-        (this.disconnectReason ?? DisconnectReason.custom("")).serialize(writer);
+        writer.writeObject(this.disconnectReason ?? DisconnectReason.custom(""));
       }
     }
-
-    return writer;
   }
 }

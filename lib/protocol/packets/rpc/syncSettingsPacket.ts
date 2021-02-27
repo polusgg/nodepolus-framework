@@ -21,11 +21,7 @@ export class SyncSettingsPacket extends BaseRpcPacket {
     return new SyncSettingsPacket(this.options.clone());
   }
 
-  serialize(): MessageWriter {
-    const writer = new MessageWriter();
-
-    this.options.serialize(writer);
-
-    return writer;
+  serialize(writer: MessageWriter): void {
+    writer.writeObject(this.options);
   }
 }

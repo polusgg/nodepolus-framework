@@ -2,6 +2,8 @@ export { AllRequired } from "./allRequired";
 
 export { Bitfield } from "./bitfield";
 
+export { CanSerializeToHazel } from "./canSerializeToHazel";
+
 export { ClientVersion } from "./clientVersion";
 
 export { ConnectionInfo } from "./connectionInfo";

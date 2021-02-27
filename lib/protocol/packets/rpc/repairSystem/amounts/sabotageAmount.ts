@@ -1,10 +1,12 @@
 import { SystemType } from "../../../../../types/enums";
 import { RepairAmount } from ".";
 
-export class SabotageAmount implements RepairAmount {
+export class SabotageAmount extends RepairAmount {
   constructor(
     protected systemType: SystemType,
-  ) {}
+  ) {
+    super();
+  }
 
   static deserialize(amount: number): SabotageAmount {
     return new SabotageAmount(amount);
@@ -24,7 +26,7 @@ export class SabotageAmount implements RepairAmount {
     return new SabotageAmount(this.systemType);
   }
 
-  serialize(): number {
+  getValue(): number {
     return this.systemType;
   }
 }

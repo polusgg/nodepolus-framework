@@ -1,9 +1,11 @@
 import { RepairAmount } from ".";
 
-export class ElectricalAmount implements RepairAmount {
+export class ElectricalAmount extends RepairAmount {
   constructor(
     protected switchIndex: number,
-  ) {}
+  ) {
+    super();
+  }
 
   static deserialize(amount: number): ElectricalAmount {
     return new ElectricalAmount(amount);
@@ -23,7 +25,7 @@ export class ElectricalAmount implements RepairAmount {
     return new ElectricalAmount(this.switchIndex);
   }
 
-  serialize(): number {
+  getValue(): number {
     return this.switchIndex;
   }
 }

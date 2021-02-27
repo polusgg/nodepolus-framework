@@ -22,12 +22,8 @@ export class HostGameRequestPacket extends BaseRootPacket {
     return new HostGameRequestPacket(this.options.clone());
   }
 
-  serialize(): MessageWriter {
-    const writer = new MessageWriter();
-
-    this.options.serialize(writer);
-
-    return writer;
+  serialize(writer: MessageWriter): void {
+    writer.writeObject(this.options);
   }
 }
 
@@ -49,7 +45,7 @@ export class HostGameResponsePacket extends BaseRootPacket {
     return new HostGameResponsePacket(this.lobbyCode);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeInt32(LobbyCode.encode(this.lobbyCode));
+  serialize(writer: MessageWriter): void {
+    writer.writeInt32(LobbyCode.encode(this.lobbyCode));
   }
 }

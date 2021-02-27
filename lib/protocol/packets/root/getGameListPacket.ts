@@ -25,12 +25,9 @@ export class GetGameListRequestPacket extends BaseRootPacket {
     return new GetGameListRequestPacket(this.includePrivate, this.options.clone());
   }
 
-  serialize(): MessageWriter {
-    const writer = new MessageWriter().writeBoolean(this.includePrivate);
-
+  serialize(writer: MessageWriter): void {
+    writer.writeBoolean(this.includePrivate);
     this.options.serialize(writer, true);
-
-    return writer;
   }
 }
 
@@ -75,23 +72,21 @@ export class GetGameListResponsePacket extends BaseRootPacket {
     return new GetGameListResponsePacket(lobbies, this.counts?.clone());
   }
 
-  serialize(): MessageWriter {
-    const writer = new MessageWriter();
-
+  serialize(writer: MessageWriter): void {
     if (this.counts) {
-      writer.startMessage(1);
-      this.counts.serialize(writer);
-      writer.endMessage();
+      writer.startMessage(1)
+        .writeObject(this.counts)
+        .endMessage();
     }
 
     writer.startMessage(0);
 
     for (let i = 0; i < this.lobbies.length; i++) {
-      writer.startMessage(0x01);
-      this.lobbies[i].serialize(writer);
-      writer.endMessage();
+      writer.startMessage(0x01)
+        .writeObject(this.lobbies[i])
+        .endMessage();
     }
 
-    return writer.endMessage();
+    writer.endMessage();
   }
 }

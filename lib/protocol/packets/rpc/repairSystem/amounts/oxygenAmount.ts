@@ -1,11 +1,13 @@
 import { OxygenAction } from "../actions";
 import { RepairAmount } from ".";
 
-export class OxygenAmount implements RepairAmount {
+export class OxygenAmount extends RepairAmount {
   constructor(
     protected consoleId: number,
     protected action: OxygenAction,
-  ) {}
+  ) {
+    super();
+  }
 
   static deserialize(amount: number): OxygenAmount {
     let action = OxygenAction.Completed;
@@ -43,7 +45,7 @@ export class OxygenAmount implements RepairAmount {
     return new OxygenAmount(this.consoleId, this.action);
   }
 
-  serialize(): number {
+  getValue(): number {
     return this.consoleId | this.action;
   }
 }

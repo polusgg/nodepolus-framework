@@ -35,11 +35,10 @@ export class SpawnPacket extends BaseGameDataPacket {
     return new SpawnPacket(this.spawnType, this.owner, this.flags, objects);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writePackedUInt32(this.spawnType)
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.spawnType)
       .writePackedInt32(this.owner)
       .writeByte(this.flags)
-      .writeList(this.innerNetObjects, (writer, item) => writer.writeBytes(item.serialize()));
+      .writeList(this.innerNetObjects, (sub, item) => sub.writeObject(item));
   }
 }

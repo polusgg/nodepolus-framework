@@ -133,14 +133,14 @@ export class InnerGameData extends BaseInnerNetObject {
   serializeData(): DataPacket {
     return new DataPacket(
       this.netId,
-      new MessageWriter().writeList(this.players.values(), (sub, player) => player.serialize(sub), false),
+      new MessageWriter().writeList(this.players.values(), (sub, player) => sub.writeObject(player), false),
     );
   }
 
   serializeSpawn(): SpawnPacketObject {
     return new SpawnPacketObject(
       this.netId,
-      new MessageWriter().writeList(this.players.values(), (sub, player) => player.serialize(sub)),
+      new MessageWriter().writeList(this.players.values(), (sub, player) => sub.writeObject(player)),
     );
   }
 

@@ -1,5 +1,12 @@
-export interface RepairAmount {
-  clone(): RepairAmount;
+import { MessageWriter } from "../../../../../util/hazelMessage";
+import { CanSerializeToHazel } from "../../../../../types";
 
-  serialize(): number;
+export abstract class RepairAmount implements CanSerializeToHazel {
+  abstract clone(): RepairAmount;
+
+  abstract getValue(): number;
+
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.getValue());
+  }
 }

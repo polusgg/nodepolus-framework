@@ -20,7 +20,7 @@ export class SetHatPacket extends BaseRpcPacket {
     return new SetHatPacket(this.hat);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writePackedUInt32(this.hat);
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.hat);
   }
 }

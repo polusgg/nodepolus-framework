@@ -1,11 +1,12 @@
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { LobbyCode } from "../util/lobbyCode";
+import { CanSerializeToHazel } from ".";
 import { Level } from "./enums";
 
 /**
  * A class used to represent a lobby when searching for public games.
  */
-export class LobbyListing {
+export class LobbyListing implements CanSerializeToHazel {
   /**
    * @param ipAddress - The IP address to which the server hosting the lobby is bound
    * @param port - The port on which the server hosting the lobby listens for packets

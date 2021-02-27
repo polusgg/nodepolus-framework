@@ -23,9 +23,8 @@ export class EndGamePacket extends BaseRootPacket {
     return new EndGamePacket(this.lobbyCode, this.reason, this.showAd);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeInt32(LobbyCode.encode(this.lobbyCode))
+  serialize(writer: MessageWriter): void {
+    writer.writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeByte(this.reason)
       .writeBoolean(this.showAd);
   }

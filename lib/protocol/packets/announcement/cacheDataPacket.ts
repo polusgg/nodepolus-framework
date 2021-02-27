@@ -18,7 +18,6 @@ export class CacheDataPacket extends BaseAnnouncementPacket {
     return new CacheDataPacket();
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter();
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  serialize(_writer: MessageWriter): void {}
 }

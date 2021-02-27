@@ -33,9 +33,8 @@ export class VotingCompletePacket extends BaseRpcPacket {
     return new VotingCompletePacket(states, this.exiledPlayerId, this.isTie);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeList(this.states, (sub, state) => state.serialize(sub))
+  serialize(writer: MessageWriter): void {
+    writer.writeList(this.states, (sub, state) => sub.writeObject(state))
       .writeByte(this.didVotePlayerOff() ? this.exiledPlayerId : 0xff)
       .writeBoolean(this.isTie);
   }

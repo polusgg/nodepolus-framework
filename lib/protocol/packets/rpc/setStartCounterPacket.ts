@@ -21,9 +21,8 @@ export class SetStartCounterPacket extends BaseRpcPacket {
     return new SetStartCounterPacket(this.sequenceId, this.timeRemaining);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writePackedUInt32(this.sequenceId)
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.sequenceId)
       .writeSByte(this.timeRemaining);
   }
 

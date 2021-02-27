@@ -22,7 +22,7 @@ export class ReportDeadBodyPacket extends BaseRpcPacket {
     return new ReportDeadBodyPacket(this.victimPlayerId);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.victimPlayerId ?? 0xff);
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.victimPlayerId ?? 0xff);
   }
 }

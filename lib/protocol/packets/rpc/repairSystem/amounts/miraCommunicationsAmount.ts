@@ -1,11 +1,13 @@
 import { MiraCommunicationsAction } from "../actions";
 import { RepairAmount } from ".";
 
-export class MiraCommunicationsAmount implements RepairAmount {
+export class MiraCommunicationsAmount extends RepairAmount {
   constructor(
     protected consoleId: number,
     protected action: MiraCommunicationsAction,
-  ) {}
+  ) {
+    super();
+  }
 
   static deserialize(amount: number): MiraCommunicationsAmount {
     let action = MiraCommunicationsAction.OpenedConsole;
@@ -43,7 +45,7 @@ export class MiraCommunicationsAmount implements RepairAmount {
     return new MiraCommunicationsAmount(this.consoleId, this.action);
   }
 
-  serialize(): number {
+  getValue(): number {
     return this.consoleId | this.action;
   }
 }

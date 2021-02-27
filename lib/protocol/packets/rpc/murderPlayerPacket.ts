@@ -20,7 +20,7 @@ export class MurderPlayerPacket extends BaseRpcPacket {
     return new MurderPlayerPacket(this.victimPlayerControlNetId);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writePackedUInt32(this.victimPlayerControlNetId);
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.victimPlayerControlNetId);
   }
 }

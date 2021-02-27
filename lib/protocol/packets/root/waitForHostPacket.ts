@@ -22,9 +22,8 @@ export class WaitForHostPacket extends BaseRootPacket {
     return new WaitForHostPacket(this.lobbyCode, this.waitingClientId);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeInt32(LobbyCode.encode(this.lobbyCode))
+  serialize(writer: MessageWriter): void {
+    writer.writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeUInt32(this.waitingClientId);
   }
 }

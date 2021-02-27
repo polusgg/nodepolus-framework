@@ -1,5 +1,5 @@
 import { Level, SystemType } from "./enums";
-import { Vector2 } from "./vector2";
+import { Vector2 } from ".";
 
 export class LevelVent {
   constructor(

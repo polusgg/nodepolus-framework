@@ -1,8 +1,9 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { RootPacketType } from "../../../types/enums";
+import { CanSerializeToHazel } from "../../../types";
 import { BaseRootPacket } from "../root";
 
-export class MasterServer {
+export class MasterServer implements CanSerializeToHazel {
   constructor(
     public name: string,
     public ipAddress: string,
@@ -24,8 +25,7 @@ export class MasterServer {
   }
 
   serialize(writer: MessageWriter): void {
-    writer
-      .writeString(this.name)
+    writer.writeString(this.name)
       .writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet, 10)))
       .writeUInt16(this.port)
       .writePackedUInt32(this.playerCount);
@@ -60,11 +60,10 @@ export class ReselectServerPacket extends BaseRootPacket {
     return new ReselectServerPacket(this.unknown, servers);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeByte(this.unknown)
-      .writeMessageList(this.servers, (subWriter, item) => {
-        item.serialize(subWriter);
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.unknown)
+      .writeMessageList(this.servers, (sub, item) => {
+        sub.writeObject(item);
       });
   }
 }

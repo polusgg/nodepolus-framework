@@ -1,9 +1,9 @@
 import { Level, PlayerColor, PlayerFlagMask, PlayerHat, PlayerPet, PlayerSkin } from "../../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { LevelTask } from "../../../../types";
+import { CanSerializeToHazel, LevelTask } from "../../../../types";
 import { Tasks } from "../../../../static";
 
-export class PlayerData {
+export class PlayerData implements CanSerializeToHazel {
   constructor(
     protected readonly id: number,
     protected name: string,

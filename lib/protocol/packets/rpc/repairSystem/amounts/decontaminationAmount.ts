@@ -1,10 +1,12 @@
 import { RepairAmount } from ".";
 
-export class DecontaminationAmount implements RepairAmount {
+export class DecontaminationAmount extends RepairAmount {
   constructor(
     protected entering: boolean,
     protected headingUp: boolean,
-  ) {}
+  ) {
+    super();
+  }
 
   static deserialize(amount: number): DecontaminationAmount {
     return new DecontaminationAmount(
@@ -37,7 +39,7 @@ export class DecontaminationAmount implements RepairAmount {
     return new DecontaminationAmount(this.entering, this.headingUp);
   }
 
-  serialize(): number {
+  getValue(): number {
     return this.entering
       ? (this.headingUp ? 1 : 2)
       : (this.headingUp ? 3 : 4);

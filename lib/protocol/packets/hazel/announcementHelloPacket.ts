@@ -25,9 +25,8 @@ export class AnnouncementHelloPacket extends BaseHazelPacket {
     return new AnnouncementHelloPacket(this.announcementVersion, this.lastAnnouncementId, this.language);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writePackedInt32(this.announcementVersion)
+  serialize(writer: MessageWriter): void {
+    writer.writePackedInt32(this.announcementVersion)
       .writePackedInt32(this.lastAnnouncementId)
       .writePackedUInt32(this.language);
   }

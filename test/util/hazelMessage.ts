@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../lib/util/hazelMessage";
+import { CanSerializeToHazel, Vector2 } from "../../lib/types";
 import { MaxValue, MinValue } from "../../lib/util/constants";
 import { isFloatEqual } from "../../lib/util/functions";
-import { Vector2 } from "../../lib/types";
 import test from "ava";
 
 type Example = {
@@ -517,7 +517,6 @@ test("reads bytes and size", t => {
 
 test("reads remaining bytes", t => {
   const buf = MessageReader.fromMessage("0d00010600010f68656c6c6f66e6f642");
-
   const child = buf.readMessage();
 
   t.false(typeof child == "undefined");
@@ -526,6 +525,21 @@ test("reads remaining bytes", t => {
   t.false(child!.hasBytesLeft());
   t.is(buf.readUInt32(), 1123477094);
   t.false(buf.hasBytesLeft());
+});
+
+test("writes an object", t => {
+  const buf = new MessageWriter();
+  const myObject: CanSerializeToHazel = {
+    serialize(writer: MessageWriter): void {
+      writer.writeString("cody was here").writeUInt16(420);
+    },
+  };
+
+  buf.startMessage(69);
+  buf.writeObject(myObject);
+  buf.endMessage();
+
+  t.is(buf.getBuffer().toString("hex"), "1000450d636f6479207761732068657265a401");
 });
 
 test("throws an error when writing values outside of the allowed range", t => {

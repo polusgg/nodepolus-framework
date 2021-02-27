@@ -20,7 +20,7 @@ export class SetNamePacket extends BaseRpcPacket {
     return new SetNamePacket(this.name);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeString(this.name);
+  serialize(writer: MessageWriter): void {
+    writer.writeString(this.name);
   }
 }

@@ -1,9 +1,11 @@
 import { RepairAmount } from ".";
 
-export class NormalCommunicationsAmount implements RepairAmount {
+export class NormalCommunicationsAmount extends RepairAmount {
   constructor(
     protected repaired: boolean,
-  ) {}
+  ) {
+    super();
+  }
 
   static deserialize(amount: number): NormalCommunicationsAmount {
     return new NormalCommunicationsAmount(amount == 0);
@@ -23,7 +25,7 @@ export class NormalCommunicationsAmount implements RepairAmount {
     return new NormalCommunicationsAmount(this.repaired);
   }
 
-  serialize(): number {
+  getValue(): number {
     return this.repaired ? 1 : 0;
   }
 }

@@ -164,10 +164,9 @@ export class RpcPacket extends BaseGameDataPacket {
     return new RpcPacket(this.senderNetId, this.packet.clone());
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writePackedUInt32(this.senderNetId)
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.senderNetId)
       .writeByte(this.packet.getType())
-      .writeBytes(this.packet.serialize());
+      .writeObject(this.packet);
   }
 }

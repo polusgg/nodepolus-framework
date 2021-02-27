@@ -1,11 +1,12 @@
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
+import { CanSerializeToHazel } from ".";
 import { Level } from "./enums";
 
 /**
  * A class used to represent the numbers displayed at the bottom of the game
  * list screen indicating how many lobbies exist for each level.
  */
-export class LobbyCount {
+export class LobbyCount implements CanSerializeToHazel {
   /**
    * @param skeld - The number of lobbies playing on The Skeld
    * @param mira - The number of lobbies playing on MIRA HQ

@@ -24,9 +24,8 @@ export class HelloPacket extends BaseHazelPacket {
     return new HelloPacket(this.hazelVersion, this.clientVersion.clone(), this.name);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeByte(this.hazelVersion)
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.hazelVersion)
       .writeUInt32(this.clientVersion.encode())
       .writeString(this.name);
   }

@@ -16,7 +16,7 @@ export class TestRpcPacket extends BaseRpcPacket {
     return new TestRpcPacket(this.message);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeString(this.message);
+  serialize(writer: MessageWriter): void {
+    writer.writeString(this.message);
   }
 }

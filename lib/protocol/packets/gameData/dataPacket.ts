@@ -24,9 +24,8 @@ export class DataPacket extends BaseGameDataPacket {
     return new DataPacket(this.senderNetId, this.data.clone());
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writePackedUInt32(this.senderNetId)
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.senderNetId)
       .writeBytes(this.data);
   }
 }

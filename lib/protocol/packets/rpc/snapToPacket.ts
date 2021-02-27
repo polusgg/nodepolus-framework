@@ -22,7 +22,7 @@ export class SnapToPacket extends BaseRpcPacket {
     return new SnapToPacket(this.position.clone(), this.lastSequenceId);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeVector2(this.position).writeUInt16(this.lastSequenceId);
+  serialize(writer: MessageWriter): void {
+    writer.writeVector2(this.position).writeUInt16(this.lastSequenceId);
   }
 }

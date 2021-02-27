@@ -16,7 +16,7 @@ export class TestPacket extends BaseRootPacket {
     return new TestPacket(this.message);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeString(this.message);
+  serialize(writer: MessageWriter): void {
+    writer.writeString(this.message);
   }
 }

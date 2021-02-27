@@ -20,7 +20,7 @@ export class SetColorPacket extends BaseRpcPacket {
     return new SetColorPacket(this.color);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.color);
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.color);
   }
 }

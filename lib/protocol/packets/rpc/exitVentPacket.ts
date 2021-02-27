@@ -20,7 +20,7 @@ export class ExitVentPacket extends BaseRpcPacket {
     return new ExitVentPacket(this.ventId);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writePackedUInt32(this.ventId);
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.ventId);
   }
 }

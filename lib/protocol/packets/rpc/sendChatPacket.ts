@@ -20,7 +20,7 @@ export class SendChatPacket extends BaseRpcPacket {
     return new SendChatPacket(this.message);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeString(this.message);
+  serialize(writer: MessageWriter): void {
+    writer.writeString(this.message);
   }
 }

@@ -106,7 +106,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
         continue;
       }
 
-      state.serialize(writer);
+      writer.writeObject(state);
     }
 
     return new DataPacket(this.netId, writer);
@@ -116,7 +116,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     const writer = new MessageWriter();
 
     for (const [, state] of this.playerStates) {
-      state.serialize(writer);
+      writer.writeObject(state);
     }
 
     return new SpawnPacketObject(this.netId, writer);

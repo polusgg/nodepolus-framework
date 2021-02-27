@@ -20,7 +20,7 @@ export class CompleteTaskPacket extends BaseRpcPacket {
     return new CompleteTaskPacket(this.taskIndex);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writePackedUInt32(this.taskIndex);
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.taskIndex);
   }
 }

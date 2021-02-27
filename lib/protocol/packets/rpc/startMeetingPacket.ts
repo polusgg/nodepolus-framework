@@ -22,7 +22,7 @@ export class StartMeetingPacket extends BaseRpcPacket {
     return new StartMeetingPacket(this.victimPlayerId);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.victimPlayerId ?? 0xff);
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.victimPlayerId ?? 0xff);
   }
 }

@@ -21,9 +21,8 @@ export class SetTasksPacket extends BaseRpcPacket {
     return new SetTasksPacket(this.playerId, [...this.tasks]);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeByte(this.playerId)
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.playerId)
       .writeList(this.tasks, (sub, task) => sub.writeByte(task));
   }
 }

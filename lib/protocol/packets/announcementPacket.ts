@@ -65,6 +65,6 @@ export class AnnouncementPacket {
       writer.writeUInt16(this.nonce, true);
     }
 
-    return writer.writeBytes(this.data.serialize());
+    return writer.writeObject(this.data);
   }
 }

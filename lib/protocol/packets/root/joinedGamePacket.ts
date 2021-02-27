@@ -29,9 +29,8 @@ export class JoinedGamePacket extends BaseRootPacket {
     return new JoinedGamePacket(this.lobbyCode, this.joinedClientId, this.hostClientId, [...this.otherClientIds]);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeInt32(LobbyCode.encode(this.lobbyCode))
+  serialize(writer: MessageWriter): void {
+    writer.writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeUInt32(this.joinedClientId)
       .writeUInt32(this.hostClientId)
       .writeList(this.otherClientIds, (sub, id) => sub.writePackedUInt32(id));

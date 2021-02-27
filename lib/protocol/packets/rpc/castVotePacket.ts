@@ -21,9 +21,8 @@ export class CastVotePacket extends BaseRpcPacket {
     return new CastVotePacket(this.votingPlayerId, this.suspectPlayerId);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeByte(this.votingPlayerId)
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.votingPlayerId)
       .writeSByte(this.suspectPlayerId);
   }
 

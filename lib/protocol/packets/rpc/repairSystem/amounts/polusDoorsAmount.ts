@@ -1,9 +1,11 @@
 import { RepairAmount } from ".";
 
-export class PolusDoorsAmount implements RepairAmount {
+export class PolusDoorsAmount extends RepairAmount {
   constructor(
     protected doorId: number,
-  ) {}
+  ) {
+    super();
+  }
 
   static deserialize(amount: number): PolusDoorsAmount {
     return new PolusDoorsAmount(amount & 0x1f);
@@ -23,7 +25,7 @@ export class PolusDoorsAmount implements RepairAmount {
     return new PolusDoorsAmount(this.doorId);
   }
 
-  serialize(): number {
+  getValue(): number {
     return this.doorId | 0x40;
   }
 }

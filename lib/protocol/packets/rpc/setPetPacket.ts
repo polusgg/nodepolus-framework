@@ -20,7 +20,7 @@ export class SetPetPacket extends BaseRpcPacket {
     return new SetPetPacket(this.pet);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writePackedUInt32(this.pet);
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.pet);
   }
 }

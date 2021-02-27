@@ -21,13 +21,9 @@ export class RemoveGamePacket extends BaseRootPacket {
     return new RemoveGamePacket(this.disconnectReason?.clone());
   }
 
-  serialize(): MessageWriter {
-    const writer = new MessageWriter();
-
+  serialize(writer: MessageWriter): void {
     if (this.disconnectReason) {
-      this.disconnectReason.serialize(writer);
+      writer.writeObject(this.disconnectReason);
     }
-
-    return writer;
   }
 }

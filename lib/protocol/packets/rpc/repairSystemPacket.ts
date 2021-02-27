@@ -86,11 +86,10 @@ export class RepairSystemPacket extends BaseRpcPacket {
     return packet;
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeByte(this.system)
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.system)
       .writePackedUInt32(this.playerControlNetId)
-      .writeByte(this.amount.serialize());
+      .writeObject(this.amount);
   }
 
   getAmount(): RepairAmount {

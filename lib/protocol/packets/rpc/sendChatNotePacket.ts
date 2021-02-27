@@ -21,9 +21,8 @@ export class SendChatNotePacket extends BaseRpcPacket {
     return new SendChatNotePacket(this.playerId, this.chatNoteType);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeByte(this.playerId)
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.playerId)
       .writeByte(this.chatNoteType);
   }
 }

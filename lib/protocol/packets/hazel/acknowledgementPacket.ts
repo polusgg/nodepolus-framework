@@ -18,7 +18,7 @@ export class AcknowledgementPacket extends BaseHazelPacket {
     return new AcknowledgementPacket(this.missingPackets.clone());
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.missingPackets.toNumber());
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.missingPackets.toNumber());
   }
 }

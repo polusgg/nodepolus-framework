@@ -36,14 +36,10 @@ export class KickPlayerPacket extends BaseRootPacket {
     return new KickPlayerPacket(this.lobbyCode, this.kickedClientId, this.banned, this.disconnectReason.clone());
   }
 
-  serialize(): MessageWriter {
-    const writer = new MessageWriter()
-      .writeInt32(LobbyCode.encode(this.lobbyCode))
+  serialize(writer: MessageWriter): void {
+    writer.writeInt32(LobbyCode.encode(this.lobbyCode))
       .writePackedUInt32(this.kickedClientId)
-      .writeBoolean(this.banned);
-
-    this.disconnectReason.serialize(writer);
-
-    return writer;
+      .writeBoolean(this.banned)
+      .writeObject(this.disconnectReason);
   }
 }

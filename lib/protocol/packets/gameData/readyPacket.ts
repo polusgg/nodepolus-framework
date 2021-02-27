@@ -20,7 +20,7 @@ export class ReadyPacket extends BaseGameDataPacket {
     return new ReadyPacket(this.playerClientID);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writePackedUInt32(this.playerClientID);
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.playerClientID);
   }
 }

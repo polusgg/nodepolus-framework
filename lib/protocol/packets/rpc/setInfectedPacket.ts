@@ -20,7 +20,7 @@ export class SetInfectedPacket extends BaseRpcPacket {
     return new SetInfectedPacket([...this.impostorPlayerIds]);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeList(this.impostorPlayerIds, (sub, id) => sub.writeByte(id));
+  serialize(writer: MessageWriter): void {
+    writer.writeList(this.impostorPlayerIds, (sub, id) => sub.writeByte(id));
   }
 }

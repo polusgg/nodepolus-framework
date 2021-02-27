@@ -31,15 +31,11 @@ export class UpdateGameDataPacket extends BaseRpcPacket {
     return new UpdateGameDataPacket(players);
   }
 
-  serialize(): MessageWriter {
-    const writer = new MessageWriter();
-
+  serialize(writer: MessageWriter): void {
     for (let i = 0; i < this.players.length; i++) {
       writer.startMessage(this.players[i].getId());
       this.players[i].serialize(writer, false);
       writer.endMessage();
     }
-
-    return writer;
   }
 }

@@ -33,9 +33,7 @@ export class ClimbLadderPacket extends BaseRpcPacket {
     return new ClimbLadderPacket(this.ladderSize, this.ladderDirection);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeByte(
-      (this.ladderSize == LadderSize.Short ? 0 : 2) | this.ladderDirection,
-    );
+  serialize(writer: MessageWriter): void {
+    writer.writeByte((this.ladderSize == LadderSize.Short ? 0 : 2) | this.ladderDirection);
   }
 }

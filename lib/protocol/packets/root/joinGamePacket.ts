@@ -26,9 +26,8 @@ export class JoinGameRequestPacket extends BaseRootPacket {
     return new JoinGameRequestPacket(this.lobbyCode, [...this.ownedMaps]);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeInt32(LobbyCode.encode(this.lobbyCode))
+  serialize(writer: MessageWriter): void {
+    writer.writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeByte(this.ownedMaps.reduce((accum, val) => accum | val));
   }
 }
@@ -53,9 +52,8 @@ export class JoinGameResponsePacket extends BaseRootPacket {
     return new JoinGameResponsePacket(this.lobbyCode, this.joiningClientId, this.hostClientId);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeInt32(LobbyCode.encode(this.lobbyCode))
+  serialize(writer: MessageWriter): void {
+    writer.writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeUInt32(this.joiningClientId)
       .writeUInt32(this.hostClientId);
   }
@@ -79,11 +77,7 @@ export class JoinGameErrorPacket extends BaseRootPacket {
     return new JoinGameErrorPacket(this.disconnectReason.clone());
   }
 
-  serialize(): MessageWriter {
-    const writer = new MessageWriter();
-
+  serialize(writer: MessageWriter): void {
     this.disconnectReason.serialize(writer, true);
-
-    return writer;
   }
 }

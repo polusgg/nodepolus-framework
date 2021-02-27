@@ -20,7 +20,7 @@ export class CloseDoorsOfTypePacket extends BaseRpcPacket {
     return new CloseDoorsOfTypePacket(this.system);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.system);
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.system);
   }
 }

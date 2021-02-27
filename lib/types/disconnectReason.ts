@@ -1,10 +1,11 @@
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { DisconnectReasonType } from "./enums";
+import { CanSerializeToHazel } from ".";
 
 /**
  * A class used to store, serialize, and deserialize a disconnect reason.
  */
-export class DisconnectReason {
+export class DisconnectReason implements CanSerializeToHazel {
   /**
    * @param type - The disconnect reason
    * @param message - The custom message to be displayed to the player when `type` is `DisconnectReasonType.Custom`

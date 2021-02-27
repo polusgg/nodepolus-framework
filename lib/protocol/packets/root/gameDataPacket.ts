@@ -65,8 +65,8 @@ export class GameDataPacket extends BaseRootPacket {
     return new GameDataPacket(packets, this.lobbyCode, this.targetClientId);
   }
 
-  serialize(): MessageWriter {
-    const writer = new MessageWriter().writeInt32(LobbyCode.encode(this.lobbyCode));
+  serialize(writer: MessageWriter): void {
+    writer.writeInt32(LobbyCode.encode(this.lobbyCode));
 
     if (this.targetClientId || this.targetClientId === 0) {
       writer.writePackedUInt32(this.targetClientId);
@@ -76,10 +76,8 @@ export class GameDataPacket extends BaseRootPacket {
       const packet = this.packets[i];
 
       writer.startMessage(packet.getType())
-        .writeBytes(packet.serialize())
+        .writeObject(packet)
         .endMessage();
     }
-
-    return writer;
   }
 }

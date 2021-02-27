@@ -1,9 +1,11 @@
 import { RepairAmount } from ".";
 
-export class SecurityAmount implements RepairAmount {
+export class SecurityAmount extends RepairAmount {
   constructor(
     protected viewingCameras: boolean,
-  ) {}
+  ) {
+    super();
+  }
 
   static deserialize(amount: number): SecurityAmount {
     return new SecurityAmount(amount == 1);
@@ -23,7 +25,7 @@ export class SecurityAmount implements RepairAmount {
     return new SecurityAmount(this.viewingCameras);
   }
 
-  serialize(): number {
+  getValue(): number {
     return this.viewingCameras ? 1 : 0;
   }
 }

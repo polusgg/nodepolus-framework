@@ -21,9 +21,8 @@ export class AddVotePacket extends BaseRpcPacket {
     return new AddVotePacket(this.votingClientId, this.targetClientId);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeUInt32(this.votingClientId)
+  serialize(writer: MessageWriter): void {
+    writer.writeUInt32(this.votingClientId)
       .writeUInt32(this.targetClientId);
   }
 }

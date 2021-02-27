@@ -20,7 +20,7 @@ export class PlayAnimationPacket extends BaseRpcPacket {
     return new PlayAnimationPacket(this.taskType);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writeByte(this.taskType);
+  serialize(writer: MessageWriter): void {
+    writer.writeByte(this.taskType);
   }
 }

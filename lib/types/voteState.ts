@@ -1,7 +1,8 @@
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
+import { CanSerializeToHazel } from ".";
 import { VoteStateMask } from "./enums";
 
-export class VoteState {
+export class VoteState implements CanSerializeToHazel {
   constructor(
     protected reported: boolean,
     protected voted: boolean,

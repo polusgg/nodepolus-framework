@@ -21,9 +21,8 @@ export class SpawnPacketObject extends BaseGameDataPacket {
     return new SpawnPacketObject(this.innerNetObjectID, this.data.clone());
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writePackedUInt32(this.innerNetObjectID)
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.innerNetObjectID)
       .startMessage(1)
       .writeBytes(this.data)
       .endMessage();

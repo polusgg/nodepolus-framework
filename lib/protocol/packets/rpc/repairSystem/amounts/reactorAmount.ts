@@ -1,11 +1,13 @@
 import { ReactorAction } from "../actions";
 import { RepairAmount } from ".";
 
-export class ReactorAmount implements RepairAmount {
+export class ReactorAmount extends RepairAmount {
   constructor(
     protected consoleId: number,
     protected action: ReactorAction,
-  ) {}
+  ) {
+    super();
+  }
 
   static deserialize(amount: number): ReactorAmount {
     let action = ReactorAction.PlacedHand;
@@ -43,7 +45,7 @@ export class ReactorAmount implements RepairAmount {
     return new ReactorAmount(this.consoleId, this.action);
   }
 
-  serialize(): number {
+  getValue(): number {
     return this.consoleId | this.action;
   }
 }

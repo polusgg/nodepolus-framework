@@ -21,9 +21,8 @@ export class RedirectPacket extends BaseRootPacket {
     return new RedirectPacket(this.ipAddress, this.port);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet, 10)))
+  serialize(writer: MessageWriter): void {
+    writer.writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet, 10)))
       .writeUInt16(this.port);
   }
 }

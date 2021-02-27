@@ -24,9 +24,8 @@ export class AnnouncementDataPacket extends BaseAnnouncementPacket {
     return new AnnouncementDataPacket(this.announcementId, this.text);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter()
-      .writePackedUInt32(this.announcementId)
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.announcementId)
       .writeString(this.text);
   }
 }

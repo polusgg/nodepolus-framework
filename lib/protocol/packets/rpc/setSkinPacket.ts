@@ -20,7 +20,7 @@ export class SetSkinPacket extends BaseRpcPacket {
     return new SetSkinPacket(this.skin);
   }
 
-  serialize(): MessageWriter {
-    return new MessageWriter().writePackedUInt32(this.skin);
+  serialize(writer: MessageWriter): void {
+    writer.writePackedUInt32(this.skin);
   }
 }

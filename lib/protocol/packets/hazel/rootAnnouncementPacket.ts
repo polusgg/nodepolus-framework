@@ -37,15 +37,11 @@ export class RootAnnouncementPacket {
     return new RootAnnouncementPacket(packets);
   }
 
-  serialize(): MessageWriter {
-    const writer = new MessageWriter();
-
+  serialize(writer: MessageWriter): void {
     for (let i = 0; i < this.packets.length; i++) {
       writer.startMessage(this.packets[i].getType())
-        .writeBytes(this.packets[i].serialize())
+        .writeObject(this.packets[i])
         .endMessage();
     }
-
-    return writer;
   }
 }

@@ -1,11 +1,13 @@
 import { MedbayAction } from "../actions";
 import { RepairAmount } from ".";
 
-export class MedbayAmount implements RepairAmount {
+export class MedbayAmount extends RepairAmount {
   constructor(
     protected playerId: number,
     protected action: MedbayAction,
-  ) {}
+  ) {
+    super();
+  }
 
   static deserialize(amount: number): MedbayAmount {
     return new MedbayAmount(
@@ -40,7 +42,7 @@ export class MedbayAmount implements RepairAmount {
     return new MedbayAmount(this.playerId, this.action);
   }
 
-  serialize(): number {
+  getValue(): number {
     return this.playerId | this.action;
   }
 }
