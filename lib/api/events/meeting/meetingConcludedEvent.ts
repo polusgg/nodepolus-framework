@@ -78,7 +78,7 @@ export class MeetingConcludedEvent extends CancellableEvent {
    * Does a tally of the current votes to determine if they result in a tie, and
    * which player will be exiled (if any) if the votes do not result in a tie.
    */
-  protected tallyVotes(): void {
+  protected tallyVotes(): this {
     const counts: Map<number, number> = new Map([[-1, 0]]);
     const entries = [...this.votes];
 
@@ -97,5 +97,7 @@ export class MeetingConcludedEvent extends CancellableEvent {
 
     this.tied = allLargestVotes.length > 1;
     this.exiledPlayerId = allLargestVotes.length == 1 ? allLargestVotes[0][0] : -1;
+
+    return this;
   }
 }
