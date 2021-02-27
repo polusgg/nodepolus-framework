@@ -18,21 +18,19 @@ export class DecontaminationHandler {
 
       const state = this.system.getState();
 
-      if (state & DecontaminationDoorState.Enter) {
-        this.system.setState(state & ~DecontaminationDoorState.Enter);
-        this.system.setState(state | DecontaminationDoorState.Closed);
+      if ((state & DecontaminationDoorState.Enter) == DecontaminationDoorState.Enter) {
+        this.system.setState((state & ~DecontaminationDoorState.Enter) | DecontaminationDoorState.Closed);
 
         return;
       }
 
-      if (state & DecontaminationDoorState.Closed) {
-        this.system.setState(state & ~DecontaminationDoorState.Closed);
-        this.system.setState(state | DecontaminationDoorState.Exit);
+      if ((state & DecontaminationDoorState.Closed) == DecontaminationDoorState.Closed) {
+        this.system.setState((state & ~DecontaminationDoorState.Closed) | DecontaminationDoorState.Exit);
 
         return;
       }
 
-      if (state & DecontaminationDoorState.Exit) {
+      if ((state & DecontaminationDoorState.Exit) == DecontaminationDoorState.Exit) {
         this.system.setState(DecontaminationDoorState.Idle);
         this.system.setTimer(0);
 
