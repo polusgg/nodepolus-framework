@@ -70,10 +70,14 @@ export class SabotageSystemHandler {
       actual.update(pos, !expected.has(pos));
     }
 
-    // TODO: Actually count down like every other system (like -85 every second)
-    setTimeout(() => {
-      system.setVisionModifier(0);
-    }, 3000);
+    const startOfSabotage = Date.now();
+    const sabotageCountdown = setInterval(() => {
+      system.setVisionModifier(Math.max(0xff - (((Date.now() - startOfSabotage) / 3000) * 0xff), 0x00));
+
+      if (system.getVisionModifier() == 0x00) {
+        clearInterval(sabotageCountdown);
+      }
+    }, 20);
   }
 
   sabotageOxygen(system: LifeSuppSystem): void {
