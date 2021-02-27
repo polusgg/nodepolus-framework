@@ -49,8 +49,10 @@ export class ServerLobbyListEvent extends DisconnectableEvent {
    *
    * @param lobbies - The new lobbies that will be sent to the connection.
    */
-  setLobbies(lobbies: LobbyListing[]): void {
+  setLobbies(lobbies: LobbyListing[]): this {
     this.lobbies = lobbies;
+
+    return this;
   }
 
   /**
@@ -67,7 +69,9 @@ export class ServerLobbyListEvent extends DisconnectableEvent {
    *
    * @param lobbyCounts - The new lobby counts that will be sent to the connection, or `undefined` if no counts should be sent
    */
-  setLobbyCounts(lobbyCounts?: LobbyCount): void {
+  setLobbyCounts(lobbyCounts?: LobbyCount): this {
     this.lobbyCounts = lobbyCounts;
+
+    return this;
   }
 }

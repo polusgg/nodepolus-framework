@@ -55,7 +55,9 @@ export class LobbyOptionsUpdatedEvent extends CancellableEvent {
    *
    * @param newOptions - The new lobby options
    */
-  setNewOptions(newOptions: GameOptionsData): void {
+  setNewOptions(newOptions: GameOptionsData): this {
     this.newOptions = newOptions;
+
+    return this;
   }
 }

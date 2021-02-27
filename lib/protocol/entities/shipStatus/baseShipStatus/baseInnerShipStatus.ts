@@ -194,7 +194,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     }
   }
 
-  protected initializeSystems(): void {
+  protected initializeSystems(): this {
     for (let i = 0; i < this.systemTypes.length; i++) {
       const type = this.systemTypes[i];
 
@@ -251,6 +251,8 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
           throw new Error(`Tried to get unimplemented SystemType: ${type} (${SystemType[type]})`);
       }
     }
+
+    return this;
   }
 
   protected serializeSystemsToDirtyBits(otherSystems: SystemType[]): number {

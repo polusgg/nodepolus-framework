@@ -49,7 +49,7 @@ export class AutoDoorsHandler {
     return doors as number[];
   }
 
-  setSystemTimeout(systemId: SystemType, time: number): void {
+  setSystemTimeout(systemId: SystemType, time: number): this {
     this.setOldShipStatus();
 
     this.systemTimers[systemId] = setInterval(() => {
@@ -57,10 +57,14 @@ export class AutoDoorsHandler {
     }, time * 1000);
 
     this.sendDataUpdate();
+
+    return this;
   }
 
-  setOldShipStatus(): void {
+  setOldShipStatus(): this {
     this.oldShipStatus = this.shipStatus.clone();
+
+    return this;
   }
 
   sendDataUpdate(): void {

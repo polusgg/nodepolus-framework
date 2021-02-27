@@ -524,8 +524,10 @@ export class InternalPlayer implements PlayerInstance {
    * @internal
    * @param initialized - `true` if the player has been initialized, `false` if not
    */
-  setInitialized(initialized: boolean): void {
+  setInitialized(initialized: boolean): this {
     this.initialized = initialized;
+
+    return this;
   }
 
   /**

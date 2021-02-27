@@ -104,8 +104,10 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    *
    * @param inboundPacketTransformer - The function used to transform incoming packets
    */
-  setInboundPacketTransformer(inboundPacketTransformer: InboundPacketTransformer): void {
+  setInboundPacketTransformer(inboundPacketTransformer: InboundPacketTransformer): this {
     this.inboundPacketTransformer = inboundPacketTransformer;
+
+    return this;
   }
 
   /**
@@ -120,8 +122,10 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    *
    * @param inboundPacketTransformer - The function used to transform outgoing packets
    */
-  setOutboundPacketTransformer(outboundPacketTransformer: OutboundPacketTransformer): void {
+  setOutboundPacketTransformer(outboundPacketTransformer: OutboundPacketTransformer): this {
     this.outboundPacketTransformer = outboundPacketTransformer;
+
+    return this;
   }
 
   /**
@@ -200,13 +204,15 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    *
    * @param lobby - The lobby to be added
    */
-  addLobby(lobby: LobbyInstance): void {
+  addLobby(lobby: LobbyInstance): this {
     if (this.lobbyMap.has(lobby.getCode())) {
       throw new Error(`A lobby with the code ${lobby.getCode()} already exists`);
     }
 
     this.lobbies.push(lobby);
     this.lobbyMap.set(lobby.getCode(), lobby);
+
+    return this;
   }
 
   /**
@@ -214,7 +220,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    *
    * @param lobby - The lobby to be removed
    */
-  deleteLobby(lobby: LobbyInstance): void {
+  deleteLobby(lobby: LobbyInstance): this {
     if (lobby instanceof InternalLobby) {
       (lobby as InternalLobby).cancelJoinTimer();
       (lobby as InternalLobby).cancelStartTimer();
@@ -222,6 +228,8 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
     this.lobbies.splice(this.lobbies.indexOf(lobby), 1);
     this.lobbyMap.delete(lobby.getCode());
+
+    return this;
   }
 
   /**

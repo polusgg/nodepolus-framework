@@ -36,7 +36,9 @@ export class GameEndedEvent extends CancellableEvent {
    *
    * @param reason - The new reason for why the game ended
    */
-  setReason(reason: GameOverReason): void {
+  setReason(reason: GameOverReason): this {
     this.reason = reason;
+
+    return this;
   }
 }

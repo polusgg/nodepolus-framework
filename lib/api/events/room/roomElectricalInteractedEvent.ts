@@ -49,8 +49,10 @@ export class RoomElectricalInteractedEvent extends CancellableEvent {
    *
    * @param flipped - `true` for flipped up, `false` for down
    */
-  setFlipped(flipped: boolean): void {
+  setFlipped(flipped: boolean): this {
     this.flipped = flipped;
+
+    return this;
   }
 
   /**

@@ -56,8 +56,10 @@ export class PlayerPositionUpdatedEvent extends CancellableEvent {
    *
    * @param newPosition - The player's new position
    */
-  setNewPosition(newPosition: Vector2): void {
+  setNewPosition(newPosition: Vector2): this {
     this.newPosition = newPosition;
+
+    return this;
   }
 
   /**
@@ -72,7 +74,9 @@ export class PlayerPositionUpdatedEvent extends CancellableEvent {
    *
    * @param newVelocity - The player's new velocity
    */
-  setNewVelocity(newVelocity: Vector2): void {
+  setNewVelocity(newVelocity: Vector2): this {
     this.newVelocity = newVelocity;
+
+    return this;
   }
 }

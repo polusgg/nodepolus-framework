@@ -36,7 +36,9 @@ export class PlayerChatMessageEvent extends CancellableEvent {
    *
    * @param message - The new chat message
    */
-  setMessage(message: TextComponent): void {
+  setMessage(message: TextComponent): this {
     this.message = message;
+
+    return this;
   }
 }

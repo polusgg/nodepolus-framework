@@ -48,7 +48,9 @@ export class ServerLobbyJoinEvent extends DisconnectableEvent {
    *
    * @param lobby - The new lobby that is being joined, or `undefined` to act as if the lobby was not found
    */
-  setLobby(lobby?: LobbyInstance): void {
+  setLobby(lobby?: LobbyInstance): this {
     this.lobby = lobby;
+
+    return this;
   }
 }

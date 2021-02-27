@@ -109,7 +109,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     this.removeVote(voter.getEntity().getOwnerId(), target.getEntity().getOwnerId(), sendTo);
   }
 
-  clearVotesForPlayer(player: InternalPlayer, sendTo?: Connection[]): void {
+  clearVotesForPlayer(player: InternalPlayer, sendTo?: Connection[]): this {
     const votes = this.votes.get(player.getEntity().getOwnerId()) ?? [];
 
     for (let i = 0; votes.length; i++) {
@@ -125,9 +125,11 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
         this.removeVote(votes[i], player.getEntity().getOwnerId(), sendTo);
       }
     }
+
+    return this;
   }
 
-  clearVotesFromPlayer(player: InternalPlayer, sendTo?: Connection[]): void {
+  clearVotesFromPlayer(player: InternalPlayer, sendTo?: Connection[]): this {
     const voterClientId = player.getEntity().getOwnerId();
     const votes = [...this.votes.entries()]
       .filter(entry => entry[0] != voterClientId && entry[1].includes(voterClientId))
@@ -142,6 +144,8 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
         this.removeVote(voterClientId, votes[i], sendTo);
       }
     }
+
+    return this;
   }
 
   handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
@@ -196,7 +200,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     return new InnerVoteBanSystem(this.parent, new Map(this.votes), this.netId);
   }
 
-  protected removeVote(voterClientId: number, targetClientId: number, sendTo?: Connection[]): void {
+  protected removeVote(voterClientId: number, targetClientId: number, sendTo?: Connection[]): this {
     const votes = this.votes.get(targetClientId) ?? [0, 0, 0];
     const index = votes.indexOf(voterClientId);
 
@@ -205,5 +209,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
       this.votes.set(targetClientId, votes);
       (this.parent.getLobby() as InternalLobby).sendRootGamePacket(new GameDataPacket([this.serializeData()], this.parent.getLobby().getCode()), sendTo);
     }
+
+    return this;
   }
 }

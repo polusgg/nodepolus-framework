@@ -6,7 +6,6 @@ import { ClientLanguage, HazelPacketType } from "../types/enums";
 import { AnnouncementPacket } from "../protocol/packets";
 import { MessageReader } from "../util/hazelMessage";
 import { BaseAnnouncementDriver } from "./drivers";
-import { TextComponent } from "../api/text";
 import { ConnectionInfo } from "../types";
 import { Announcement } from "./types";
 import { Logger } from "../logger";
@@ -200,25 +199,28 @@ export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents,
     this.sendAnnouncementPacket(connectionInfo, announcement, helloPacket.language);
   }
 
-  protected sendCachePacket(connectionInfo: ConnectionInfo): void {
-    this.sendTo(connectionInfo, new CacheDataPacket());
+  protected sendCachePacket(connectionInfo: ConnectionInfo): this {
+    return this.sendTo(connectionInfo, new CacheDataPacket());
   }
 
-  protected sendAnnouncementPacket(connectionInfo: ConnectionInfo, announcement: Announcement, language: ClientLanguage): void {
-    const text = announcement.translate(language) ?? TextComponent.from("");
-
-    this.sendTo(connectionInfo, new AnnouncementDataPacket(announcement.getId(), text.toString()));
+  protected sendAnnouncementPacket(connectionInfo: ConnectionInfo, announcement: Announcement, language: ClientLanguage): this {
+    return this.sendTo(connectionInfo, new AnnouncementDataPacket(
+      announcement.getId(),
+      announcement.translate(language)?.toString() ?? "",
+    ));
   }
 
-  protected sendSetLanguagesPacket(connectionInfo: ConnectionInfo): void {
-    this.sendTo(connectionInfo, new SetLanguagesPacket(this.languages));
+  protected sendSetLanguagesPacket(connectionInfo: ConnectionInfo): this {
+    return this.sendTo(connectionInfo, new SetLanguagesPacket(this.languages));
   }
 
-  protected sendTo(connectionInfo: ConnectionInfo, packet: BaseAnnouncementPacket): void {
+  protected sendTo(connectionInfo: ConnectionInfo, packet: BaseAnnouncementPacket): this {
     this.announcementServerSocket.send(
       new AnnouncementPacket(1, new RootAnnouncementPacket([packet])).serialize().getBuffer(),
       connectionInfo.getPort(),
       connectionInfo.getAddress(),
     );
+
+    return this;
   }
 }

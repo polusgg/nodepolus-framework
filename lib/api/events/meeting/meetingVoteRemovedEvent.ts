@@ -36,7 +36,9 @@ export class MeetingVoteRemovedEvent extends CancellableEvent {
    *
    * @param player - The new player whose vote is being cleared
    */
-  setPlayer(player: PlayerInstance): void {
+  setPlayer(player: PlayerInstance): this {
     this.player = player;
+
+    return this;
   }
 }

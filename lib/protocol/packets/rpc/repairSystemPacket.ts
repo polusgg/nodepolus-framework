@@ -97,7 +97,9 @@ export class RepairSystemPacket extends BaseRpcPacket {
     return this.amount;
   }
 
-  updateAmount(): void {
+  updateAmount(): this {
     this.amount = this.parseAmount();
+
+    return this;
   }
 }

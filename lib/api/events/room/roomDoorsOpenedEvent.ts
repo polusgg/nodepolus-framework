@@ -38,8 +38,10 @@ export class RoomDoorsOpenedEvent extends CancellableEvent {
    *
    * @param doors - The new doors that were opened
    */
-  setDoors(doors: number[]): void {
+  setDoors(doors: number[]): this {
     this.doors = doors;
+
+    return this;
   }
 
   /**

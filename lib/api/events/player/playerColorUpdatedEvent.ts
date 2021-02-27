@@ -45,7 +45,9 @@ export class PlayerColorUpdatedEvent extends CancellableEvent {
    *
    * @param newColor - The player's new color
    */
-  setNewColor(newColor: PlayerColor): void {
+  setNewColor(newColor: PlayerColor): this {
     this.newColor = newColor;
+
+    return this;
   }
 }

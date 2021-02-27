@@ -58,8 +58,10 @@ export class PlayerSpawnedEvent {
    *
    * @param isNew - `true` if the player is new, `false` if now
    */
-  setNew(isNew: boolean = true): void {
+  setNew(isNew: boolean = true): this {
     this.newPlayer = isNew;
+
+    return this;
   }
 
   /**
@@ -74,7 +76,9 @@ export class PlayerSpawnedEvent {
    *
    * @param position - The player's new spawn position
    */
-  setPosition(position: Vector2): void {
+  setPosition(position: Vector2): this {
     this.position = position;
+
+    return this;
   }
 }

@@ -73,7 +73,7 @@ export class InnerGameData extends BaseInnerNetObject {
     }).map(player => player.getColor());
   }
 
-  setTasks(playerId: number, taskIds: number[], sendTo?: Connection[]): void {
+  setTasks(playerId: number, taskIds: number[], sendTo?: Connection[]): this {
     const tasks = Tasks.forLevelFromId(this.parent.getLobby().getLevel(), taskIds);
     const player = this.players.get(playerId);
 
@@ -91,13 +91,15 @@ export class InnerGameData extends BaseInnerNetObject {
     }
 
     this.sendRpcPacket(new SetTasksPacket(playerId, taskIds), sendTo);
+
+    return this;
   }
 
-  updateAllGameData(sendTo?: Connection[]): void {
-    this.updateGameData(undefined, sendTo);
+  updateAllGameData(sendTo?: Connection[]): this {
+    return this.updateGameData(undefined, sendTo);
   }
 
-  updateGameData(playerData?: PlayerData[], sendTo?: Connection[]): void {
+  updateGameData(playerData?: PlayerData[], sendTo?: Connection[]): this {
     playerData ??= [...this.players.values()];
 
     for (let i = 0; i < playerData.length; i++) {
@@ -107,6 +109,8 @@ export class InnerGameData extends BaseInnerNetObject {
     }
 
     this.sendRpcPacket(new UpdateGameDataPacket(playerData), sendTo);
+
+    return this;
   }
 
   handleRpc(connection: Connection, type: RpcPacketType, _packet: BaseRpcPacket, _sendTo: Connection[]): void {

@@ -35,7 +35,9 @@ export class PlayerVotekickAddedEvent extends CancellableEvent {
    *
    * @param target - The new player that voted to be kicked by the voting player
    */
-  setTarget(target: PlayerInstance): void {
+  setTarget(target: PlayerInstance): this {
     this.target = target;
+
+    return this;
   }
 }

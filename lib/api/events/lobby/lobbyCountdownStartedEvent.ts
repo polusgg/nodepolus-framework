@@ -38,8 +38,10 @@ export class LobbyCountdownStartedEvent extends CancellableEvent {
    *
    * @param secondsUntilStart - The new time in seconds until the game will start
    */
-  setSecondsUntilStart(secondsUntilStart: number): void {
+  setSecondsUntilStart(secondsUntilStart: number): this {
     this.secondsUntilStart = secondsUntilStart;
+
+    return this;
   }
 
   /**

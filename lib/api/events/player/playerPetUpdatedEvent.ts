@@ -45,7 +45,9 @@ export class PlayerPetUpdatedEvent extends CancellableEvent {
    *
    * @param newPet - The player's new pet
    */
-  setNewPet(newPet: PlayerPet): void {
+  setNewPet(newPet: PlayerPet): this {
     this.newPet = newPet;
+
+    return this;
   }
 }

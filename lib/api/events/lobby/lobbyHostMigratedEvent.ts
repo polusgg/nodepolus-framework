@@ -45,7 +45,9 @@ export class LobbyHostMigratedEvent extends CancellableEvent {
    *
    * @param host - The new connection that is now an acting host
    */
-  setNewHost(host: Connection): void {
+  setNewHost(host: Connection): this {
     this.newHost = host;
+
+    return this;
   }
 }

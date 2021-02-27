@@ -183,8 +183,10 @@ export class GameOptionsData {
    *
    * @param version - The version of the GameOptionsData
    */
-  setVersion(version: number): void {
+  setVersion(version: number): this {
     this.version = version;
+
+    return this;
   }
 
   /**
@@ -199,8 +201,10 @@ export class GameOptionsData {
    *
    * @param maxPlayers - The maximum number of players
    */
-  setMaxPlayers(maxPlayers: number): void {
+  setMaxPlayers(maxPlayers: number): this {
     this.maxPlayers = maxPlayers;
+
+    return this;
   }
 
   /**
@@ -215,8 +219,10 @@ export class GameOptionsData {
    *
    * @param languages - The array of languages
    */
-  setLanguages(languages: Language[]): void {
+  setLanguages(languages: Language[]): this {
     this.languages = languages;
+
+    return this;
   }
 
   /**
@@ -231,8 +237,10 @@ export class GameOptionsData {
    *
    * @param levels - The array of levels
    */
-  setLevels(levels: Level[]): void {
+  setLevels(levels: Level[]): this {
     this.levels = levels;
+
+    return this;
   }
 
   /**
@@ -247,8 +255,10 @@ export class GameOptionsData {
    *
    * @param playerSpeedModifier - The multiplicative number for the speed at which players will move
    */
-  setPlayerSpeedModifier(playerSpeedModifier: number): void {
+  setPlayerSpeedModifier(playerSpeedModifier: number): this {
     this.playerSpeedModifier = playerSpeedModifier;
+
+    return this;
   }
 
   /**
@@ -265,8 +275,10 @@ export class GameOptionsData {
    *
    * @param crewmateLightModifier - The multiplicative number for the size of the fog-of-war ring encircling Crewmates
    */
-  setCrewmateLightModifier(crewmateLightModifier: number): void {
+  setCrewmateLightModifier(crewmateLightModifier: number): this {
     this.crewmateLightModifier = crewmateLightModifier;
+
+    return this;
   }
 
   /**
@@ -283,8 +295,10 @@ export class GameOptionsData {
    *
    * @param impostorLightModifier - The multiplicative number for the size of the fog-of-war ring encircling Impostors
    */
-  setImpostorLightModifier(impostorLightModifier: number): void {
+  setImpostorLightModifier(impostorLightModifier: number): this {
     this.impostorLightModifier = impostorLightModifier;
+
+    return this;
   }
 
   /**
@@ -301,8 +315,10 @@ export class GameOptionsData {
    *
    * @param killCooldown - The number of seconds after the game starts, between kills, and after a meeting ends, that an Impostor must wait before being able to kill
    */
-  setKillCooldown(killCooldown: number): void {
+  setKillCooldown(killCooldown: number): this {
     this.killCooldown = killCooldown;
+
+    return this;
   }
 
   /**
@@ -317,8 +333,10 @@ export class GameOptionsData {
    *
    * @param commonTaskCount - The number of common tasks each Crewmate will have
    */
-  setCommonTaskCount(commonTaskCount: number): void {
+  setCommonTaskCount(commonTaskCount: number): this {
     this.commonTaskCount = commonTaskCount;
+
+    return this;
   }
 
   /**
@@ -333,8 +351,10 @@ export class GameOptionsData {
    *
    * @param longTaskCount - The number of long tasks each Crewmate will have
    */
-  setLongTaskCount(longTaskCount: number): void {
+  setLongTaskCount(longTaskCount: number): this {
     this.longTaskCount = longTaskCount;
+
+    return this;
   }
 
   /**
@@ -349,8 +369,10 @@ export class GameOptionsData {
    *
    * @param shortTaskCount - The number of short tasks each Crewmate will have
    */
-  setShortTaskCount(shortTaskCount: number): void {
+  setShortTaskCount(shortTaskCount: number): this {
     this.shortTaskCount = shortTaskCount;
+
+    return this;
   }
 
   /**
@@ -365,8 +387,10 @@ export class GameOptionsData {
    *
    * @param emergencyMeetingCount - The number of emergency meetings each player will be able to call
    */
-  setEmergencyMeetingCount(emergencyMeetingCount: number): void {
+  setEmergencyMeetingCount(emergencyMeetingCount: number): this {
     this.emergencyMeetingCount = emergencyMeetingCount;
+
+    return this;
   }
 
   /**
@@ -381,8 +405,10 @@ export class GameOptionsData {
    *
    * @param impostorCount - The maximum number of Impostors
    */
-  setImpostorCount(impostorCount: number): void {
+  setImpostorCount(impostorCount: number): this {
     this.impostorCount = impostorCount;
+
+    return this;
   }
 
   /**
@@ -397,8 +423,10 @@ export class GameOptionsData {
    *
    * @param killDistance - How far of a reach an Impostor has when killing Crewmates
    */
-  setKillDistance(killDistance: KillDistance): void {
+  setKillDistance(killDistance: KillDistance): this {
     this.killDistance = killDistance;
+
+    return this;
   }
 
   /**
@@ -413,8 +441,10 @@ export class GameOptionsData {
    *
    * @param discussionTime - How many seconds before voting starts during a meeting
    */
-  setDiscussionTime(discussionTime: number): void {
+  setDiscussionTime(discussionTime: number): this {
     this.discussionTime = discussionTime;
+
+    return this;
   }
 
   /**
@@ -429,8 +459,10 @@ export class GameOptionsData {
    *
    * @param votingTime - How many seconds players will have to cast a vote during a meeting
    */
-  setVotingTime(votingTime: number): void {
+  setVotingTime(votingTime: number): this {
     this.votingTime = votingTime;
+
+    return this;
   }
 
   /**
@@ -447,8 +479,10 @@ export class GameOptionsData {
    *
    * @param isDefault - `true` if the GameOptionsData is using the default options, `false` if not
    */
-  setIsDefault(isDefault: boolean): void {
+  setIsDefault(isDefault: boolean): this {
     this.isDefault = isDefault;
+
+    return this;
   }
 
   /**
@@ -463,8 +497,10 @@ export class GameOptionsData {
    *
    * @param emergencyCooldown - How many seconds Crewmates must wait between emergency meetings
    */
-  setEmergencyCooldown(emergencyCooldown: number): void {
+  setEmergencyCooldown(emergencyCooldown: number): this {
     this.emergencyCooldown = emergencyCooldown;
+
+    return this;
   }
 
   /**
@@ -483,8 +519,10 @@ export class GameOptionsData {
    *
    * @param confirmEjects - `true` if the game will say if the ejected player was or wasn't an Impostor, `false` if not
    */
-  setConfirmEjects(confirmEjects: boolean): void {
+  setConfirmEjects(confirmEjects: boolean): this {
     this.confirmEjects = confirmEjects;
+
+    return this;
   }
 
   /**
@@ -503,8 +541,10 @@ export class GameOptionsData {
    *
    * @param visualTasks - `true` if tasks which play animations will play those animations to other players, `false` if not
    */
-  setVisualTasks(visualTasks: boolean): void {
+  setVisualTasks(visualTasks: boolean): this {
     this.visualTasks = visualTasks;
+
+    return this;
   }
 
   /**
@@ -523,8 +563,10 @@ export class GameOptionsData {
    *
    * @param anonymousVoting - `true` if the votes on the meeting HUD will show the color of the players who voted, `false` if not
    */
-  setAnonymousVoting(anonymousVoting: boolean): void {
+  setAnonymousVoting(anonymousVoting: boolean): this {
     this.anonymousVoting = anonymousVoting;
+
+    return this;
   }
 
   /**
@@ -541,8 +583,10 @@ export class GameOptionsData {
    *
    * @param taskBarUpdates - When, if at all, the task bar will update to show how many tasks have been completed
    */
-  setTaskBarUpdates(taskBarUpdates: TaskBarMode): void {
+  setTaskBarUpdates(taskBarUpdates: TaskBarMode): this {
     this.taskBarUpdates = taskBarUpdates;
+
+    return this;
   }
 
   /**

@@ -33,7 +33,9 @@ export class GameStartedEvent {
    *
    * @param impostors - The new players that will be assigned Impostor
    */
-  setImpostors(impostors: PlayerInstance[]): void {
+  setImpostors(impostors: PlayerInstance[]): this {
     this.impostors = impostors;
+
+    return this;
   }
 }

@@ -45,7 +45,9 @@ export class PlayerSkinUpdatedEvent extends CancellableEvent {
    *
    * @param newSkin - The player's new skin
    */
-  setNewSkin(newSkin: PlayerSkin): void {
+  setNewSkin(newSkin: PlayerSkin): this {
     this.newSkin = newSkin;
+
+    return this;
   }
 }

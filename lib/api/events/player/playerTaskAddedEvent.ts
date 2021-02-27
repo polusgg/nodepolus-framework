@@ -36,7 +36,9 @@ export class PlayerTaskAddedEvent extends CancellableEvent {
    *
    * @param tasks - The player's new task list
    */
-  setTasks(tasks: Set<LevelTask>): void {
+  setTasks(tasks: Set<LevelTask>): this {
     this.tasks = tasks;
+
+    return this;
   }
 }

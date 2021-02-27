@@ -47,7 +47,9 @@ export class PlayerRoleUpdatedEvent extends CancellableEvent {
    *
    * @param newRole - The player's new role
    */
-  setNetRole(newRole: PlayerRole): void {
+  setNetRole(newRole: PlayerRole): this {
     this.newRole = newRole;
+
+    return this;
   }
 }

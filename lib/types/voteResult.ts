@@ -36,8 +36,10 @@ export class VoteResult {
    *
    * @param votedFor - The player that was voted for, or `undefined` to indicate that the player did not cast a vote
    */
-  setVotedFor(votedFor?: PlayerInstance): void {
+  setVotedFor(votedFor?: PlayerInstance): this {
     this.votedFor = votedFor;
+
+    return this;
   }
 
   /**
@@ -54,8 +56,10 @@ export class VoteResult {
    *
    * @param isSkipping - `true` to set the vote to skip, `false` for a regular vote or to indicate that the player did not cast a vote (default `true`)
    */
-  setSkipping(isSkipping: boolean = true): void {
+  setSkipping(isSkipping: boolean = true): this {
     this.skipped = isSkipping;
+
+    return this;
   }
 
   /**

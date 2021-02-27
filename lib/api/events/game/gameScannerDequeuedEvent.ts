@@ -45,7 +45,9 @@ export class GameScannerDequeuedEvent extends CancellableEvent {
    *
    * @param queue - The new queue for the Medbay scanner
    */
-  setQueue(queue: Set<PlayerInstance>): void {
+  setQueue(queue: Set<PlayerInstance>): this {
     this.queue = queue;
+
+    return this;
   }
 }

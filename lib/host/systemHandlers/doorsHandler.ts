@@ -45,7 +45,7 @@ export class DoorsHandler {
     return doors as number[];
   }
 
-  setSystemTimeout(systemId: SystemType, time: number): void {
+  setSystemTimeout(systemId: SystemType, time: number): this {
     this.setOldShipStatus();
 
     const doorsSystem = this.shipStatus.getSystemFromType(SystemType.Doors) as DoorsSystem;
@@ -63,10 +63,14 @@ export class DoorsHandler {
     }, 1000);
 
     this.sendDataUpdate();
+
+    return this;
   }
 
-  setOldShipStatus(): void {
+  setOldShipStatus(): this {
     this.oldShipStatus = this.shipStatus.clone();
+
+    return this;
   }
 
   sendDataUpdate(): void {

@@ -36,7 +36,9 @@ export class PlayerTaskAnimationEvent extends CancellableEvent {
    *
    * @param task - The new type of task whose animation is being played
    */
-  setTaskType(task: TaskType): void {
+  setTaskType(task: TaskType): this {
     this.taskType = task;
+
+    return this;
   }
 }

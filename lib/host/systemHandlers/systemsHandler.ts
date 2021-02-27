@@ -286,8 +286,10 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  setOldShipStatus(): void {
+  setOldShipStatus(): this {
     this.oldShipStatus = this.getShipStatus().clone();
+
+    return this;
   }
 
   sendDataUpdate(): void {

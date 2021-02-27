@@ -1167,7 +1167,7 @@ export class InternalHost implements HostInstance {
    * @param player - The player whose task list will be updates
    * @param tasks - The player's new tasks
    */
-  updatePlayerTasks(player: PlayerInstance, tasks: LevelTask[]): void {
+  updatePlayerTasks(player: PlayerInstance, tasks: LevelTask[]): this {
     const gameData = this.lobby.getGameData();
 
     if (!gameData) {
@@ -1175,6 +1175,8 @@ export class InternalHost implements HostInstance {
     }
 
     gameData.getGameData().setTasks(player.getId(), tasks.map(task => task.id), this.lobby.getConnections());
+
+    return this;
   }
 
   /**
@@ -1193,7 +1195,7 @@ export class InternalHost implements HostInstance {
     tasks: LevelTask[],
     usedTaskTypes: Set<TaskType>,
     unusedTasks: LevelTask[],
-  ): void {
+  ): this {
     // A separate counter to prevent the following loop from running forever
     let sanityCheck = 0;
 
@@ -1236,6 +1238,8 @@ export class InternalHost implements HostInstance {
         tasks.push(task);
       }
     }
+
+    return this;
   }
 
   /**
@@ -1282,7 +1286,7 @@ export class InternalHost implements HostInstance {
    * @internal
    * @param player - The player whose PlayerData will be checked
    */
-  protected confirmPlayerData(player: InternalPlayer): void {
+  protected confirmPlayerData(player: InternalPlayer): this {
     const gameData = this.getGameData();
 
     if (![...gameData.getGameData().getPlayers().values()].some(p => p.getId() == player.getEntity().getPlayerControl().getPlayerId())) {
@@ -1301,6 +1305,8 @@ export class InternalHost implements HostInstance {
 
       gameData.getGameData().updateGameData([playerData], this.lobby.getConnections());
     }
+
+    return this;
   }
 
   protected getGameData(): EntityGameData {

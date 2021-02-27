@@ -36,7 +36,9 @@ export class PlayerChatNoteEvent extends CancellableEvent {
    *
    * @param chatNoteType - The new type of chat note that was sent
    */
-  setChatNoteType(chatNoteType: ChatNoteType): void {
+  setChatNoteType(chatNoteType: ChatNoteType): this {
     this.chatNoteType = chatNoteType;
+
+    return this;
   }
 }

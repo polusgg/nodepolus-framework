@@ -40,8 +40,10 @@ export class MeetingConcludedEvent extends CancellableEvent {
    *
    * @param votes - The new votes from the meeting
    */
-  setVotes(votes: VoteResult[]): void {
+  setVotes(votes: VoteResult[]): this {
     this.votes = votes;
+
+    return this;
   }
 
   /**

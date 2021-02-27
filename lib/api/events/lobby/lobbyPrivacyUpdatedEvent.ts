@@ -37,7 +37,9 @@ export class LobbyPrivacyUpdatedEvent extends CancellableEvent {
    *
    * @param isPublic - `true` for public, `false` for private
    */
-  setPublic(isPublic: boolean): void {
+  setPublic(isPublic: boolean): this {
     this.publicity = isPublic;
+
+    return this;
   }
 }

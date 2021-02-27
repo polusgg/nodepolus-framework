@@ -286,8 +286,10 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @param actingHost - `true` to add the acting host host status to the connection, `false` to remove it
    */
-  updateActingHost(actingHost: boolean): void {
+  updateActingHost(actingHost: boolean): this {
     this.actingHost = actingHost;
+
+    return this;
   }
 
   /**

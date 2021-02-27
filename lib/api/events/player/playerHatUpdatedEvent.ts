@@ -45,7 +45,9 @@ export class PlayerHatUpdatedEvent extends CancellableEvent {
    *
    * @param newHat - The player's new hat
    */
-  setNewHat(newHat: PlayerHat): void {
+  setNewHat(newHat: PlayerHat): this {
     this.newHat = newHat;
+
+    return this;
   }
 }

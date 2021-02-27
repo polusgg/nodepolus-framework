@@ -38,8 +38,10 @@ export class MeetingVoteAddedEvent extends CancellableEvent {
    *
    * @param voter - The new player that cast the vote
    */
-  setVoter(voter: PlayerInstance): void {
+  setVoter(voter: PlayerInstance): this {
     this.voter = voter;
+
+    return this;
   }
 
   /**
@@ -56,7 +58,9 @@ export class MeetingVoteAddedEvent extends CancellableEvent {
    *
    * @param suspect - The new player that was voted to be exiled
    */
-  setSuspect(suspect?: PlayerInstance): void {
+  setSuspect(suspect?: PlayerInstance): this {
     this.suspect = suspect;
+
+    return this;
   }
 }

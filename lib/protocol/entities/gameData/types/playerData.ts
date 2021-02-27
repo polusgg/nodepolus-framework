@@ -139,7 +139,7 @@ export class PlayerData {
     return true;
   }
 
-  addTasks(tasks: Set<LevelTask>): void {
+  addTasks(tasks: Set<LevelTask>): this {
     const newTasks = [...this.tasks];
 
     for (let i = 0; i < tasks.size; i++) {
@@ -149,9 +149,11 @@ export class PlayerData {
 
       newTasks.push(tasks[i]);
     }
+
+    return this;
   }
 
-  removeTasks(tasks: Set<LevelTask>): void {
+  removeTasks(tasks: Set<LevelTask>): this {
     for (let i = 0; i < tasks.size; i++) {
       const index = this.tasks.findIndex(task => task[0] == tasks[i]);
 
@@ -159,6 +161,8 @@ export class PlayerData {
         this.tasks.splice(index, 1);
       }
     }
+
+    return this;
   }
 
   isTaskAtIndexCompleted(index: number): boolean {

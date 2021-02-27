@@ -39,8 +39,10 @@ export class MeetingStartedEvent extends CancellableEvent {
    *
    * @param caller - The new player that called the meeting
    */
-  setCaller(caller: PlayerInstance): void {
+  setCaller(caller: PlayerInstance): this {
     this.caller = caller;
+
+    return this;
   }
 
   /**
@@ -57,7 +59,9 @@ export class MeetingStartedEvent extends CancellableEvent {
    *
    * @param victim - The new player whose dead body was found, or `undefined` to start the meeting as if the button was pressed
    */
-  setVictim(victim?: PlayerInstance): void {
+  setVictim(victim?: PlayerInstance): this {
     this.victim = victim;
+
+    return this;
   }
 }

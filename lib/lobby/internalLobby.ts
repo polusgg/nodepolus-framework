@@ -539,8 +539,10 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    * @param ids - The net IDs to be ignored
    */
-  ignoreNetIds(...ids: number[]): void {
+  ignoreNetIds(...ids: number[]): this {
     this.ignoredNetIds.push(...ids);
+
+    return this;
   }
 
   /**
@@ -579,8 +581,10 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    * @param connection - The connection to be marked as spawning
    */
-  startedSpawningPlayer(connection: Connection): void {
+  startedSpawningPlayer(connection: Connection): this {
     this.spawningPlayers.add(connection);
+
+    return this;
   }
 
   /**
@@ -589,7 +593,7 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  disableActingHosts(sendImmediately: boolean = true): void {
+  disableActingHosts(sendImmediately: boolean = true): this {
     const actingHosts = this.getActingHosts();
 
     for (let i = 0; i < actingHosts.length; i++) {
@@ -597,6 +601,8 @@ export class InternalLobby implements LobbyInstance {
         this.sendDisableHost(actingHosts[i], sendImmediately);
       }
     }
+
+    return this;
   }
 
   /**
@@ -605,7 +611,7 @@ export class InternalLobby implements LobbyInstance {
    * @internal
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  enableActingHosts(sendImmediately: boolean = true): void {
+  enableActingHosts(sendImmediately: boolean = true): this {
     const actingHosts = this.getActingHosts();
 
     for (let i = 0; i < actingHosts.length; i++) {
@@ -613,6 +619,8 @@ export class InternalLobby implements LobbyInstance {
         this.sendEnableHost(actingHosts[i], sendImmediately);
       }
     }
+
+    return this;
   }
 
   /**
@@ -622,16 +630,16 @@ export class InternalLobby implements LobbyInstance {
    * @param connection - The connection whose host abilities will be enabled
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  sendEnableHost(connection: Connection, sendImmediately: boolean = true): void {
-    if (connection.getLimboState() != LimboState.NotLimbo) {
-      return;
+  sendEnableHost(connection: Connection, sendImmediately: boolean = true): this {
+    if (connection.getLimboState() == LimboState.NotLimbo) {
+      if (sendImmediately) {
+        connection.sendReliable([new JoinGameResponsePacket(this.code, connection.getId(), connection.getId())]);
+      } else {
+        connection.writeReliable(new JoinGameResponsePacket(this.code, connection.getId(), connection.getId()));
+      }
     }
 
-    if (sendImmediately) {
-      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.getId(), connection.getId())]);
-    } else {
-      connection.writeReliable(new JoinGameResponsePacket(this.code, connection.getId(), connection.getId()));
-    }
+    return this;
   }
 
   /**
@@ -641,16 +649,16 @@ export class InternalLobby implements LobbyInstance {
    * @param connection - The connection whose host abilities will be disabled
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  sendDisableHost(connection: Connection, sendImmediately: boolean = true): void {
-    if (connection.getLimboState() != LimboState.NotLimbo) {
-      return;
+  sendDisableHost(connection: Connection, sendImmediately: boolean = true): this {
+    if (connection.getLimboState() == LimboState.NotLimbo) {
+      if (sendImmediately) {
+        connection.sendReliable([new JoinGameResponsePacket(this.code, connection.getId(), this.hostInstance.getId())]);
+      } else {
+        connection.writeReliable(new JoinGameResponsePacket(this.code, connection.getId(), this.hostInstance.getId()));
+      }
     }
 
-    if (sendImmediately) {
-      connection.sendReliable([new JoinGameResponsePacket(this.code, connection.getId(), this.hostInstance.getId())]);
-    } else {
-      connection.writeReliable(new JoinGameResponsePacket(this.code, connection.getId(), this.hostInstance.getId()));
-    }
+    return this;
   }
 
   /**
@@ -746,14 +754,14 @@ export class InternalLobby implements LobbyInstance {
    *
    * @internal
    */
-  cancelJoinTimer(): void {
-    if (!this.joinTimer) {
-      return;
+  cancelJoinTimer(): this {
+    if (this.joinTimer !== undefined) {
+      clearTimeout(this.joinTimer);
+
+      delete this.joinTimer;
     }
 
-    clearTimeout(this.joinTimer);
-
-    delete this.joinTimer;
+    return this;
   }
 
   /**
@@ -762,14 +770,14 @@ export class InternalLobby implements LobbyInstance {
    *
    * @internal
    */
-  beginStartTimer(): void {
-    if (this.startTimer || this.timeToStartUntilClosed < 1) {
-      return;
+  beginStartTimer(): this {
+    if (this.startTimer === undefined && this.timeToStartUntilClosed > 0) {
+      this.startTimer = setTimeout(() => {
+        this.close();
+      }, this.timeToStartUntilClosed * 1000);
     }
 
-    this.startTimer = setTimeout(() => {
-      this.close();
-    }, this.timeToStartUntilClosed * 1000);
+    return this;
   }
 
   /**
@@ -778,14 +786,14 @@ export class InternalLobby implements LobbyInstance {
    *
    * @internal
    */
-  cancelStartTimer(): void {
-    if (!this.startTimer) {
-      return;
+  cancelStartTimer(): this {
+    if (this.startTimer !== undefined) {
+      clearTimeout(this.startTimer);
+
+      delete this.startTimer;
     }
 
-    clearTimeout(this.startTimer);
-
-    delete this.startTimer;
+    return this;
   }
 
   /**

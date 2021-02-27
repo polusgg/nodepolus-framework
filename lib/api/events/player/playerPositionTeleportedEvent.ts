@@ -29,8 +29,9 @@ export class PlayerPositionTeleportedEvent extends PlayerPositionUpdatedEvent {
   /**
    * This method is a no-op as teleporting sets the player velocity to `0, 0`.
    */
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setNewVelocity(_newVelocity: Vector2): void {}
+  setNewVelocity(_newVelocity: Vector2): this {
+    return this;
+  }
 
   /**
    * Gets the reason for why the player was teleported.

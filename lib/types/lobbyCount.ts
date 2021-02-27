@@ -66,8 +66,8 @@ export class LobbyCount {
    *
    * @param level - The level whose count will be incremented
    */
-  increment(level: Level): void {
-    this.add(level, 1);
+  increment(level: Level): this {
+    return this.add(level, 1);
   }
 
   /**
@@ -75,8 +75,8 @@ export class LobbyCount {
    *
    * @param level - The level whose count will be decremented
    */
-  decrement(level: Level): void {
-    this.add(level, -1);
+  decrement(level: Level): this {
+    return this.add(level, -1);
   }
 
   /**
@@ -85,7 +85,7 @@ export class LobbyCount {
    * @param level - The level whose count will be modified
    * @param amount - The amount to add to the count for `level`
    */
-  add(level: Level, amount: number): void {
+  add(level: Level, amount: number): this {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
@@ -101,6 +101,8 @@ export class LobbyCount {
         this.airship += amount;
         break;
     }
+
+    return this;
   }
 
   /**
@@ -109,7 +111,7 @@ export class LobbyCount {
    * @param level - The level whose count will be set
    * @param amount - The amount that the count will be set to
    */
-  set(level: Level, amount: number): void {
+  set(level: Level, amount: number): this {
     switch (level) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
@@ -125,6 +127,8 @@ export class LobbyCount {
         this.airship = amount;
         break;
     }
+
+    return this;
   }
 
   /**

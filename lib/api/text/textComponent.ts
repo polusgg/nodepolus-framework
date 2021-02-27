@@ -66,16 +66,14 @@ export class TextComponent {
 
     reader.element = reader.element.slice(1);
 
-    text.addReader(reader);
-
-    return text;
+    return text.addReader(reader);
   }
 
   getElements(): readonly (TextElement | LinkElement | ResetElement)[] {
     return [...this.elements];
   }
 
-  add(content: string): TextComponent {
+  add(content: string): this {
     this.elements.push({
       type: ElementType.Text,
       content: content.split("[").join("[["),
@@ -86,19 +84,19 @@ export class TextComponent {
     return this;
   }
 
-  setColor(red: number, green: number, blue: number): TextComponent {
+  setColor(red: number, green: number, blue: number): this {
     this.currentColor = [red, green, blue];
 
     return this;
   }
 
-  setOpacity(opacity: number): TextComponent {
+  setOpacity(opacity: number): this {
     this.currentOpacity = opacity;
 
     return this;
   }
 
-  reset(): TextComponent {
+  reset(): this {
     this.currentColor = [255, 255, 255];
     this.currentOpacity = 255;
 
@@ -107,7 +105,7 @@ export class TextComponent {
     return this;
   }
 
-  link(content: string, link: URL | string): TextComponent {
+  link(content: string, link: URL | string): this {
     if (link instanceof URL) {
       this.elements.push({ type: ElementType.Link, content, link: link.toString() });
     } else {
@@ -159,7 +157,7 @@ export class TextComponent {
     return accumulator;
   }
 
-  protected addReader(reader: Reader): void {
+  protected addReader(reader: Reader): this {
     if (reader.element.length == 0) {
       if (this.elements.length != 0) {
         this.reset();
@@ -175,5 +173,7 @@ export class TextComponent {
         .setOpacity(a)
         .add(reader.chunk);
     }
+
+    return this;
   }
 }
