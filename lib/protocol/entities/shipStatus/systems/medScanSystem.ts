@@ -54,11 +54,10 @@ export class MedScanSystem extends BaseSystem {
       return false;
     }
 
-    const playersInQueueArray = [...this.playersInQueue];
-    const oldPlayersInQueueArray = [...old.playersInQueue];
+    const playersInQueue = [...this.playersInQueue];
 
-    for (let i = 0; i < playersInQueueArray.length; i++) {
-      if (playersInQueueArray[i] != oldPlayersInQueueArray[i]) {
+    for (let i = 0; i < playersInQueue.length; i++) {
+      if (!old.playersInQueue.has(playersInQueue[i])) {
         return false;
       }
     }

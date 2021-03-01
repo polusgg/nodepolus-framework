@@ -47,7 +47,7 @@ export class EntityPlayer extends BaseInnerNetEntity {
 
     const player = (this.lobby as Lobby).findPlayerByEntity(this);
 
-    if (player) {
+    if (player !== undefined) {
       this.lobby.removePlayer(player);
     }
   }

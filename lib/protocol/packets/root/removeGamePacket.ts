@@ -22,7 +22,7 @@ export class RemoveGamePacket extends BaseRootPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    if (this.disconnectReason) {
+    if (this.disconnectReason !== undefined) {
       writer.writeObject(this.disconnectReason);
     }
   }

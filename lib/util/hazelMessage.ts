@@ -139,7 +139,7 @@ export class MessageWriter extends HazelMessage {
   endMessage(): this {
     const start = this.messageStarts.pop();
 
-    if (start) {
+    if (start !== undefined) {
       const length = this.cursor - start;
 
       if (length > MaxValue.UInt16) {
@@ -788,7 +788,7 @@ export class MessageReader extends HazelMessage {
     return this.readList((sub: MessageReader) => {
       const child = sub.readMessage();
 
-      if (!child) {
+      if (child === undefined) {
         throw new Error(`Read length is longer than message length: ${sub.cursor + 3} > ${sub.length}`);
       }
 

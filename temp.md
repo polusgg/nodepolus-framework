@@ -3,6 +3,9 @@ Conventions:
   Convert number to boolean: `!!val`
   New array: `new Array(size)`
   String to Number: `parseInt(string, 10)`
+When checking if a variable is undefined, always use `===` or `!==` in `if` statements and ternary checks
+Always `delete` a timeout/interval after clearing it
+Use `instanceof Array` over `Array.isArray`
 
 
 

@@ -118,10 +118,10 @@ export class Vents {
    * @returns The vent with the given ID or an array of vents whose IDs were included in `ids` on the given level
    */
   static forLevelFromId(level: Level, ids: number | number[]): LevelVent | undefined | readonly LevelVent[] {
-    const validated: number[] = Array.isArray(ids) ? ids : [ids];
+    const validated: number[] = ids instanceof Array ? ids : [ids];
     const vents = Vents.forLevel(level).filter(v => validated.includes(v.getId()));
 
-    return Array.isArray(ids) ? vents : vents[0];
+    return ids instanceof Array ? vents : vents[0];
   }
 
   /**

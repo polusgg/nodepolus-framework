@@ -13,14 +13,7 @@ export class GameDataPacket extends BaseRootPacket {
     public lobbyCode: string,
     public targetClientId?: number,
   ) {
-    super(RootPacketType[targetClientId ? "GameDataTo" : "GameData"]);
-
-    if (targetClientId) {
-      this.targetClientId = targetClientId;
-    }
-
-    this.lobbyCode = lobbyCode;
-    this.packets = packets;
+    super(RootPacketType[targetClientId !== undefined ? "GameDataTo" : "GameData"]);
   }
 
   static deserialize(reader: MessageReader, level?: Level): GameDataPacket {
@@ -68,7 +61,7 @@ export class GameDataPacket extends BaseRootPacket {
   serialize(writer: MessageWriter): void {
     writer.writeInt32(LobbyCode.encode(this.lobbyCode));
 
-    if (this.targetClientId || this.targetClientId === 0) {
+    if (this.targetClientId !== undefined) {
       writer.writePackedUInt32(this.targetClientId);
     }
 

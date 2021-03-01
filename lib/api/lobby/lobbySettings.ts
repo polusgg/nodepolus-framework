@@ -386,7 +386,7 @@ export class LobbySettings {
   }
 
   protected syncSettingsOnLobby(): this {
-    if (this.lobby.getPlayers()[0]) {
+    if (this.lobby.getPlayers().length > 0) {
       const customOptions = new GameOptionsData(
         4,
         this.getMaxPlayers(),
@@ -415,7 +415,7 @@ export class LobbySettings {
       let sendToConnections: Connection[];
 
       if (this.isPov) {
-        if (this.connection) {
+        if (this.connection !== undefined) {
           sendToConnections = [this.connection];
         } else {
           this.lobby.getLogger().warn("Attempted to sync lobby settings on a POV without a connection");

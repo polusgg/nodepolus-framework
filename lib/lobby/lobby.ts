@@ -444,13 +444,13 @@ export class Lobby implements LobbyInstance {
 
     this.addPlayer(playerInstance);
 
-    if (this.findPlayerByClientId(player.getOwnerId()) == undefined) {
+    if (this.findPlayerByClientId(player.getOwnerId()) === undefined) {
       this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.getOwnerId(), this.hostInstance.getId()));
     }
 
     this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
 
-    if (this.gameData) {
+    if (this.gameData !== undefined) {
       this.gameData.getGameData().addPlayer(playerData);
       this.sendRpcPacket(this.gameData.getGameData(), new UpdateGameDataPacket([playerData]));
     }
@@ -471,7 +471,7 @@ export class Lobby implements LobbyInstance {
   }
 
   sendChat(name: string, color: PlayerColor, message: string | TextComponent, onLeft: boolean): void {
-    if (!this.gameData) {
+    if (this.gameData === undefined) {
       throw new Error("sendChat called without a GameData instance");
     }
 
@@ -508,7 +508,7 @@ export class Lobby implements LobbyInstance {
         const player = this.players[i];
         const connection = player.getConnection();
 
-        if (connection) {
+        if (connection !== undefined) {
           const playerData = player.getGameDataEntry();
           const oldColor = playerData.getColor();
           const oldName = playerData.getName();
@@ -566,7 +566,7 @@ export class Lobby implements LobbyInstance {
 
     const player = this.findPlayerByConnection(connection);
 
-    if (player && !player.hasBeenInitialized()) {
+    if (player !== undefined && !player.hasBeenInitialized()) {
       player.setInitialized(true);
 
       await this.getServer().emit("player.joined", new PlayerJoinedEvent(this, player, connection.isRejoining()));
@@ -707,7 +707,7 @@ export class Lobby implements LobbyInstance {
       this.connections.splice(disconnectingConnectionIndex, 1);
     }
 
-    if (this.meetingHud && disconnectingPlayerIndex) {
+    if (this.meetingHud !== undefined && disconnectingPlayerIndex) {
       const oldMeetingHud = this.meetingHud.getMeetingHud().clone();
       const disconnectedId = this.players[disconnectingPlayerIndex].getId();
       const votesToClear: Player[] = [];
@@ -721,7 +721,7 @@ export class Lobby implements LobbyInstance {
         } else if (state.getVotedFor() == disconnectedId) {
           const votingPlayer = this.findPlayerByPlayerId(id);
 
-          if (votingPlayer) {
+          if (votingPlayer !== undefined) {
             votesToClear.push(votingPlayer);
           }
 
@@ -756,7 +756,6 @@ export class Lobby implements LobbyInstance {
   cancelJoinTimer(): this {
     if (this.joinTimer !== undefined) {
       clearTimeout(this.joinTimer);
-
       delete this.joinTimer;
     }
 
@@ -877,12 +876,12 @@ export class Lobby implements LobbyInstance {
         const gameData = packet as GameDataPacket;
         let target: Connection | undefined;
 
-        if (gameData.targetClientId) {
+        if (gameData.targetClientId !== undefined) {
           target = this.findConnection(gameData.targetClientId);
         }
 
         for (let i = 0; i < gameData.packets.length; i++) {
-          this.handleGameDataPacket(gameData.packets[i], connection, target ? [target] : undefined);
+          this.handleGameDataPacket(gameData.packets[i], connection, target !== undefined ? [target] : undefined);
         }
         break;
       }
@@ -891,7 +890,7 @@ export class Lobby implements LobbyInstance {
         const id = data.kickedClientId;
         const connectionToKick = this.findConnection(id);
 
-        if (!connectionToKick) {
+        if (connectionToKick === undefined) {
           this.logger.warn(`KickPlayer sent for unknown client: ${id}`);
 
           return;
@@ -933,7 +932,7 @@ export class Lobby implements LobbyInstance {
    * @param sendTo - The connections to which the packet was intended to be sent
    */
   protected async handleGameDataPacket(packet: BaseGameDataPacket, connection: Connection, sendTo?: Connection[]): Promise<void> {
-    sendTo = ((sendTo && sendTo.length > 0) ? sendTo : this.connections).filter(con => con.getId() != connection.getId());
+    sendTo = ((sendTo !== undefined && sendTo.length > 0) ? sendTo : this.connections).filter(con => con.getId() != connection.getId());
 
     switch (packet.getType()) {
       case GameDataPacketType.Data:
@@ -969,7 +968,7 @@ export class Lobby implements LobbyInstance {
 
           const object = this.findInnerNetObject(rpc.senderNetId);
 
-          if (!object) {
+          if (object === undefined) {
             throw new Error(`RPC packet sent from unknown InnerNetObject: ${rpc.senderNetId}`);
           }
 
@@ -1005,7 +1004,7 @@ export class Lobby implements LobbyInstance {
 
         const connectionChangingScene = this.findConnection((packet as SceneChangePacket).clientId);
 
-        if (!connectionChangingScene) {
+        if (connectionChangingScene === undefined) {
           throw new Error(`SceneChange packet sent for unknown client: ${(packet as SceneChangePacket).clientId}`);
         }
 
@@ -1027,14 +1026,14 @@ export class Lobby implements LobbyInstance {
    * @param sendTo - The connections to which the packet was intended to be sent
    */
   protected handleData(netId: number, data: MessageReader | MessageWriter, sendTo?: Connection[]): void {
-    const netObject = this.findInnerNetObject(netId);
+    const object = this.findInnerNetObject(netId);
 
-    if (netObject) {
-      if (netObject.getType() == InnerNetObjectType.CustomNetworkTransform) {
-        const oldNetObject = netObject.clone();
+    if (object !== undefined) {
+      if (object.getType() == InnerNetObjectType.CustomNetworkTransform) {
+        const oldNetObject = object.clone();
 
-        (netObject as InnerCustomNetworkTransform).setData(data);
-        this.sendUnreliableRootGamePacket(new GameDataPacket([netObject.serializeData(oldNetObject)], this.code), sendTo ?? []);
+        (object as InnerCustomNetworkTransform).setData(data);
+        this.sendUnreliableRootGamePacket(new GameDataPacket([object.serializeData(oldNetObject)], this.code), sendTo ?? []);
       }
     } else {
       throw new Error(`Data packet sent with unknown InnerNetObject ID: ${netId}`);

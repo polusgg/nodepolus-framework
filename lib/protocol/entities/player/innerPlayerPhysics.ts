@@ -31,7 +31,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
 
     const player = this.parent.getLobby().findPlayerByNetId(this.netId);
 
-    if (!player) {
+    if (player === undefined) {
       throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
     }
 
@@ -46,7 +46,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     if (event.isCancelled()) {
       const connection = player.getConnection();
 
-      if (connection) {
+      if (connection !== undefined) {
         // TODO: Add delay
         this.sendRpcPacket(new ExitVentPacket(vent.getId()), [connection]);
       }
@@ -66,7 +66,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
 
     const player = this.parent.getLobby().findPlayerByNetId(this.netId);
 
-    if (!player) {
+    if (player === undefined) {
       throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
     }
 
@@ -81,7 +81,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     if (event.isCancelled()) {
       const connection = player.getConnection();
 
-      if (connection) {
+      if (connection !== undefined) {
         // TODO: Add delay
         this.sendRpcPacket(new EnterVentPacket(vent.getId()), [connection]);
       }

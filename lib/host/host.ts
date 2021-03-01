@@ -167,8 +167,9 @@ export class Host implements HostInstance {
       }
 
       if (time <= 0) {
-        if (this.countdownInterval) {
+        if (this.countdownInterval !== undefined) {
           clearInterval(this.countdownInterval);
+          delete this.countdownInterval;
         }
 
         this.startGame();
@@ -198,8 +199,9 @@ export class Host implements HostInstance {
       );
     }
 
-    if (this.countdownInterval) {
+    if (this.countdownInterval !== undefined) {
       clearInterval(this.countdownInterval);
+      delete this.countdownInterval;
     }
   }
 
@@ -223,7 +225,7 @@ export class Host implements HostInstance {
   async setInfected(infectedCount: number): Promise<void> {
     const gameData = this.lobby.getGameData();
 
-    if (!gameData) {
+    if (gameData === undefined) {
       throw new Error("GameData does not exist on the lobby instance");
     }
 
@@ -348,7 +350,7 @@ export class Host implements HostInstance {
 
       const player = this.lobby.getPlayers().find(pl => pl.getId() == pid);
 
-      if (player) {
+      if (player !== undefined) {
         this.setPlayerTasks(player, tasks);
       }
     }
@@ -370,11 +372,11 @@ export class Host implements HostInstance {
     const gameData = this.lobby.getGameData();
     const meetingHud = this.lobby.getMeetingHud();
 
-    if (!meetingHud) {
+    if (meetingHud === undefined) {
       throw new Error("Attempted to end a meeting without a MeetingHud instance");
     }
 
-    if (!gameData) {
+    if (gameData === undefined) {
       throw new Error("Attempted to end a meeting without a GameData instance");
     }
 
@@ -390,15 +392,15 @@ export class Host implements HostInstance {
         return playerInstanceCache.get(playerId);
       }
 
-      const playerInstance = this.lobby.findPlayerByPlayerId(playerId);
+      const player = this.lobby.findPlayerByPlayerId(playerId);
 
-      if (!playerInstance) {
+      if (player === undefined) {
         return;
       }
 
-      playerInstanceCache.set(playerId, playerInstance);
+      playerInstanceCache.set(playerId, player);
 
-      return playerInstance;
+      return player;
     };
 
     const players = this.lobby.getPlayers();
@@ -424,7 +426,7 @@ export class Host implements HostInstance {
       if (state.didVote()) {
         const votedFor = fetchPlayerById(state.getVotedFor());
 
-        if (!votedFor) {
+        if (votedFor === undefined) {
           if (state.getVotedFor() == -1) {
             vote.setSkipping();
           } else {
@@ -449,7 +451,7 @@ export class Host implements HostInstance {
 
     let exiledPlayerData: PlayerData | undefined;
 
-    if (!isTied && exiledPlayer) {
+    if (!isTied && exiledPlayer !== undefined) {
       const exiledEvent = new PlayerExiledEvent(
         exiledPlayer,
         [...concludedEvent.getVotes()]
@@ -587,7 +589,7 @@ export class Host implements HostInstance {
       this.stopCountdown();
     }
 
-    if (!gameData) {
+    if (gameData === undefined) {
       if (gameState == GameState.NotStarted || gameState == GameState.Started) {
         throw new Error("Received Disconnect without a GameData instance");
       }
@@ -597,7 +599,7 @@ export class Host implements HostInstance {
 
     const player = this.lobby.findPlayerByConnection(connection);
 
-    if (!player) {
+    if (player === undefined) {
       this.lobby.getLogger().warn("Received Disconnect from connection without a player");
 
       return;
@@ -631,7 +633,7 @@ export class Host implements HostInstance {
 
     const meetingHud = this.lobby.getMeetingHud();
 
-    if (meetingHud) {
+    if (meetingHud !== undefined) {
       meetingHud.getMeetingHud().clearVote([player]);
     }
   }
@@ -655,7 +657,7 @@ export class Host implements HostInstance {
 
     const lobbyBehaviour = this.lobby.getLobbyBehaviour();
 
-    if (lobbyBehaviour) {
+    if (lobbyBehaviour !== undefined) {
       this.lobby.despawn(lobbyBehaviour.getLobbyBehaviour());
     }
 
@@ -709,7 +711,7 @@ export class Host implements HostInstance {
 
     const gameData = this.lobby.getGameData();
 
-    if (!gameData) {
+    if (gameData === undefined) {
       throw new Error("Attempted to start game without a GameData instance");
     }
 
@@ -757,7 +759,7 @@ export class Host implements HostInstance {
 
     let lobbyBehaviour = this.lobby.getLobbyBehaviour();
 
-    if (!lobbyBehaviour) {
+    if (lobbyBehaviour === undefined) {
       lobbyBehaviour = new EntityLobbyBehaviour(this.lobby);
 
       this.lobby.setLobbyBehaviour(lobbyBehaviour);
@@ -767,7 +769,7 @@ export class Host implements HostInstance {
 
     let gameData = this.lobby.getGameData();
 
-    if (!gameData) {
+    if (gameData === undefined) {
       gameData = new EntityGameData(this.lobby);
 
       this.lobby.setGameData(gameData);
@@ -813,7 +815,7 @@ export class Host implements HostInstance {
   handleCompleteTask(): void {
     const gameData = this.lobby.getGameData();
 
-    if (!gameData) {
+    if (gameData === undefined) {
       throw new Error("Received CompleteTask without a GameData instance");
     }
 
@@ -827,13 +829,13 @@ export class Host implements HostInstance {
   async handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData): Promise<void> {
     const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
 
-    if (!owner) {
+    if (owner === undefined) {
       throw new Error("Received CheckName from an InnerPlayerControl without an owner");
     }
 
     const player = this.lobby.findPlayerByConnection(owner);
 
-    if (!player) {
+    if (player === undefined) {
       throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
     }
 
@@ -857,13 +859,13 @@ export class Host implements HostInstance {
 
     const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
 
-    if (!owner) {
+    if (owner === undefined) {
       throw new Error("Received CheckName from an InnerPlayerControl without an owner");
     }
 
     const player = this.lobby.findPlayerByConnection(owner);
 
-    if (player) {
+    if (player !== undefined) {
       this.confirmPlayerData(player);
     } else {
       throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
@@ -888,13 +890,13 @@ export class Host implements HostInstance {
 
     const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
 
-    if (!owner) {
+    if (owner === undefined) {
       throw new Error("Received CheckColor from an InnerPlayerControl without an owner");
     }
 
     const player = this.lobby.findPlayerByConnection(owner);
 
-    if (player) {
+    if (player !== undefined) {
       this.confirmPlayerData(player);
     } else {
       throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
@@ -918,13 +920,13 @@ export class Host implements HostInstance {
   handleSetColor(sender: InnerPlayerControl, color: PlayerColor): void {
     const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
 
-    if (!owner) {
+    if (owner === undefined) {
       throw new Error("Received SetColor from an InnerPlayerControl without an owner");
     }
 
     const player = this.lobby.findPlayerByConnection(owner);
 
-    if (player) {
+    if (player !== undefined) {
       this.confirmPlayerData(player);
     } else {
       throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
@@ -941,26 +943,26 @@ export class Host implements HostInstance {
   async handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): Promise<void> {
     const gameData = this.lobby.getGameData();
 
-    if (!gameData) {
+    if (gameData === undefined) {
       throw new Error("Received ReportDeadBody without a GameData instance");
     }
 
     const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
 
-    if (!owner) {
+    if (owner === undefined) {
       throw new Error("Received ReportDeadBody from an InnerPlayerControl without an owner");
     }
 
     const player = this.lobby.findPlayerByConnection(owner);
 
-    if (!player) {
+    if (player === undefined) {
       throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
     }
 
     const event = new MeetingStartedEvent(
       this.lobby.getGame()!,
       player,
-      victimPlayerId ? this.lobby.findPlayerByPlayerId(victimPlayerId) : undefined,
+      victimPlayerId !== undefined ? this.lobby.findPlayerByPlayerId(victimPlayerId) : undefined,
     );
 
     await this.lobby.getServer().emit("meeting.started", event);
@@ -1013,8 +1015,9 @@ export class Host implements HostInstance {
       return;
     }
 
-    if (this.counterSequenceId < sequenceId && this.countdownInterval) {
+    if (this.counterSequenceId < sequenceId && this.countdownInterval !== undefined) {
       clearInterval(this.countdownInterval);
+      delete this.countdownInterval;
     }
 
     if (timeRemaining == 5 && this.counterSequenceId != sequenceId) {
@@ -1026,13 +1029,13 @@ export class Host implements HostInstance {
   async handleCastVote(votingPlayerId: number, suspectPlayerId: number): Promise<void> {
     const meetingHud = this.lobby.getMeetingHud();
 
-    if (!meetingHud) {
+    if (meetingHud === undefined) {
       throw new Error("Received CastVote without a MeetingHud instance");
     }
 
     const player = this.lobby.findPlayerByPlayerId(votingPlayerId);
 
-    if (!player) {
+    if (player === undefined) {
       throw new Error(`Player ${votingPlayerId} does not have a PlayerInstance on the lobby instance`);
     }
 
@@ -1047,7 +1050,7 @@ export class Host implements HostInstance {
     if (event.isCancelled()) {
       const connection = player.getConnection();
 
-      if (connection) {
+      if (connection !== undefined) {
         meetingHud.getMeetingHud().sendRpcPacket(new ClearVotePacket(), [connection]);
       }
 
@@ -1078,7 +1081,7 @@ export class Host implements HostInstance {
   }
 
   handleCloseDoorsOfType(_sender: BaseInnerShipStatus, systemId: SystemType): void {
-    if (!this.doorHandler) {
+    if (this.doorHandler === undefined) {
       throw new Error("Received CloseDoorsOfType without a door handler");
     }
 
@@ -1089,7 +1092,7 @@ export class Host implements HostInstance {
   handleRepairSystem(_sender: BaseInnerShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
     const shipStatus = this.lobby.getShipStatus();
 
-    if (!shipStatus) {
+    if (shipStatus === undefined) {
       throw new Error("Received RepairSystem without a ShipStatus instance");
     }
 
@@ -1097,7 +1100,7 @@ export class Host implements HostInstance {
     const player = this.lobby.getPlayers().find(thePlayer => thePlayer.getEntity().getPlayerControl().getNetId() == playerControlNetId);
     const level = this.lobby.getLevel();
 
-    if (!player) {
+    if (player === undefined) {
       throw new Error(`Received RepairSystem from a non-player InnerNetObject: ${playerControlNetId}`);
     }
 
@@ -1151,7 +1154,7 @@ export class Host implements HostInstance {
   handleUsePlatform(sender: InnerPlayerControl): void {
     const shipStatus = this.lobby.getShipStatus();
 
-    if (!shipStatus) {
+    if (shipStatus === undefined) {
       throw new Error("Received UsePlatform without a ShipStatus instance");
     }
 
@@ -1176,7 +1179,7 @@ export class Host implements HostInstance {
   updatePlayerTasks(player: PlayerInstance, tasks: LevelTask[]): this {
     const gameData = this.lobby.getGameData();
 
-    if (!gameData) {
+    if (gameData === undefined) {
       throw new Error("Attempted to set tasks without a GameData instance");
     }
 
@@ -1230,7 +1233,7 @@ export class Host implements HostInstance {
       // Get the task
       const task: LevelTask | undefined = start.val >= unusedTasks.length ? undefined : unusedTasks[start.val++];
 
-      if (!task) {
+      if (task === undefined) {
         continue;
       }
 
@@ -1262,7 +1265,7 @@ export class Host implements HostInstance {
 
     const gameData = this.lobby.getGameData();
 
-    if (!gameData) {
+    if (gameData === undefined) {
       throw new Error("shouldEndGame called without a GameData instance");
     }
 
@@ -1318,7 +1321,7 @@ export class Host implements HostInstance {
   protected getGameData(): EntityGameData {
     const gameData = this.lobby.getGameData();
 
-    if (!gameData) {
+    if (gameData === undefined) {
       throw new Error("getTakenColors called without a GameData instance");
     }
 

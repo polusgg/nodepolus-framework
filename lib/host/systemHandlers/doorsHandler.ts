@@ -38,7 +38,7 @@ export class DoorsHandler {
   getDoorsForSystem(systemId: SystemType): number[] {
     const doors = Doors.forLevel(this.host.getLobby().getLevel())[systemId];
 
-    if (!doors) {
+    if (doors === undefined) {
       throw new Error(`SystemType ${systemId} (${SystemType[systemId]}) does not have any doors`);
     }
 
@@ -55,10 +55,11 @@ export class DoorsHandler {
     this.systemTimers[systemId] = setInterval(() => {
       let currentTime = doorsSystem.getTimer(systemId);
 
-      if (currentTime && currentTime != 0) {
+      if (currentTime !== undefined && currentTime != 0) {
         doorsSystem.setTimer(systemId, --currentTime);
       } else {
         clearInterval(this.systemTimers[systemId]);
+        this.systemTimers.splice(systemId, 1);
       }
     }, 1000);
 

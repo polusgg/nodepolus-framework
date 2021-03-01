@@ -127,8 +127,8 @@ export class Logger {
         winston.format.splat(),
         winston.format.metadata({ fillExcept: ["timestamp", "name", "label", "level", "message", "stack", "splat", "meta"] }),
         winston.format.printf(info => {
-          const extra = (Object.keys(info.metadata).length) ? ` ${JSON.stringify(info.metadata)}` : "";
-          const stack = info.stack ? `\n${info.stack}` : "";
+          const extra = Object.keys(info.metadata).length > 0 ? ` ${JSON.stringify(info.metadata)}` : "";
+          const stack = info.stack !== undefined ? `\n${info.stack}` : "";
 
           return `${info.timestamp} [${info.name ?? info.label}] ${info.level}: ${info.message}${extra}${stack}`;
         }),
@@ -147,7 +147,7 @@ export class Logger {
         }),
       ];
 
-      if (filename) {
+      if (filename !== undefined) {
         transports.push(new winston.transports.File({
           filename: filename,
           dirname: "logs",
@@ -201,7 +201,7 @@ export class Logger {
       this.maxFiles,
     );
 
-    if (!logger.winston.defaultMeta) {
+    if (logger.winston.defaultMeta === undefined) {
       logger.winston.defaultMeta = {};
     }
 

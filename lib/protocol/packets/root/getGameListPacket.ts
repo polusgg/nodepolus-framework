@@ -73,7 +73,7 @@ export class GetGameListResponsePacket extends BaseRootPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    if (this.counts) {
+    if (this.counts !== undefined) {
       writer.startMessage(1)
         .writeObject(this.counts)
         .endMessage();

@@ -256,7 +256,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   async murderPlayer(victimPlayerControlNetId: number, sendTo?: Connection[]): Promise<void> {
     const victim = this.parent.getLobby().findPlayerByNetId(victimPlayerControlNetId);
 
-    if (!victim) {
+    if (victim === undefined) {
       throw new Error("Victim does not have a PlayerInstance on the lobby instance");
     }
 
@@ -392,7 +392,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
         const data = packet as SetStartCounterPacket;
         const player = this.parent.getLobby().findPlayerByClientId(this.parent.getOwnerId());
 
-        if (!player) {
+        if (player === undefined) {
           throw new Error(`Client ${this.parent.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
         }
 
@@ -438,13 +438,13 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   protected getPlayerInstance(): PlayerInstance {
-    const playerInstance = this.parent.getLobby().findPlayerByPlayerId(this.playerId);
+    const player = this.parent.getLobby().findPlayerByPlayerId(this.playerId);
 
-    if (!playerInstance) {
+    if (player === undefined) {
       throw new Error(`Player ${this.playerId} does not have a PlayerInstance on the lobby instance`);
     }
 
-    return playerInstance;
+    return player;
   }
 
   protected getConnection(): Connection {
@@ -461,7 +461,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   protected getGameData(): EntityGameData {
     const gameData = this.parent.getLobby().getGameData();
 
-    if (!gameData) {
+    if (gameData === undefined) {
       throw new Error("Lobby does not have a GameData instance");
     }
 

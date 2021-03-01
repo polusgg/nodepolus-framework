@@ -26,7 +26,7 @@ export class Packet {
     } else if (data instanceof PingPacket) {
       this.type = HazelPacketType.Ping;
     } else if (data instanceof RootPacket) {
-      this.type = this.nonce ? HazelPacketType.Reliable : HazelPacketType.Unreliable;
+      this.type = this.nonce !== undefined ? HazelPacketType.Reliable : HazelPacketType.Unreliable;
     } else {
       throw new Error(`Unsupported packet type: ${typeof data}`);
     }

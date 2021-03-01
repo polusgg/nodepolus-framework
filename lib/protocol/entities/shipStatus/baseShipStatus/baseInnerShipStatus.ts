@@ -273,7 +273,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     for (let i = 0; i < systems.length; i++) {
       const system = this.getSystemFromType(systems[i]);
 
-      if (old) {
+      if (old !== undefined) {
         writers[i] = system.serializeData(old.getSystemFromType(systems[i]));
       } else {
         writers[i] = system.serializeSpawn();

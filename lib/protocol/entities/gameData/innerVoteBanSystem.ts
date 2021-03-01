@@ -86,7 +86,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     if (shouldKick) {
       const player = this.parent.getLobby().findPlayerByClientId(targetClientId);
 
-      if (player) {
+      if (player !== undefined) {
         player.kick(DisconnectReason.kicked());
         (this.parent.getLobby() as Lobby).sendRootGamePacket(new GameDataPacket([this.serializeData()], this.parent.getLobby().getCode()), sendTo);
       }
@@ -119,7 +119,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
 
       const voter = this.parent.getLobby().findPlayerByClientId(votes[i]);
 
-      if (voter) {
+      if (voter !== undefined) {
         this.clearVote(voter as Player, player, sendTo);
       } else {
         this.removeVote(votes[i], player.getEntity().getOwnerId(), sendTo);
@@ -138,7 +138,7 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     for (let i = 0; i < votes.length; i++) {
       const target = this.parent.getLobby().findPlayerByClientId(votes[i]);
 
-      if (target) {
+      if (target !== undefined) {
         this.clearVote(player, target as Player, sendTo);
       } else {
         this.removeVote(voterClientId, votes[i], sendTo);
@@ -155,11 +155,11 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
         const voter = this.parent.getLobby().findPlayerByClientId(data.votingClientId);
         const target = this.parent.getLobby().findPlayerByClientId(data.targetClientId);
 
-        if (!voter) {
+        if (voter === undefined) {
           throw new Error(`Voting client ${this.parent.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
         }
 
-        if (!target) {
+        if (target === undefined) {
           throw new Error(`Target client ${this.parent.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
         }
 

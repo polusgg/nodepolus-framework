@@ -34,10 +34,9 @@ export class DecontaminationHandler {
         this.system.setState(DecontaminationDoorState.Idle);
         this.system.setTimer(0);
 
-        if (this.timer) {
+        if (this.timer !== undefined) {
           clearInterval(this.timer);
-
-          this.timer = undefined;
+          delete this.timer;
         } else {
           throw new Error("Attempted to clear decontamination door timer that does not exist");
         }
@@ -48,7 +47,7 @@ export class DecontaminationHandler {
   start(from: DecontaminationDoorState): void {
     const systemsHandler = this.host.getSystemsHandler();
 
-    if (!systemsHandler) {
+    if (systemsHandler === undefined) {
       throw new Error("Attempted to decontaminate without a SystemsHandler instance");
     }
 

@@ -86,16 +86,10 @@ export class LaboratorySystem extends BaseSystem {
       return false;
     }
 
-    let testVal;
+    const userConsoles = [...this.userConsoles];
 
-    for (const [key, val] of this.userConsoles) {
-      testVal = old.userConsoles.get(key);
-
-      if (testVal !== val) {
-        return false;
-      }
-
-      if (!testVal && !old.userConsoles.has(key)) {
+    for (let i = 0; i < userConsoles.length; i++) {
+      if (old.userConsoles.get(userConsoles[i][0]) != userConsoles[i][1]) {
         return false;
       }
     }

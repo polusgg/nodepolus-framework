@@ -93,29 +93,18 @@ export class AirshipReactorSystem extends BaseSystem {
       return false;
     }
 
-    const completedConsolesArray = [...this.completedConsoles];
-    const oldCompletedConsolesArray = [...old.completedConsoles];
+    const activeConsoles = [...this.activeConsoles];
 
-    for (let i = 0; i < completedConsolesArray.length; i++) {
-      if (oldCompletedConsolesArray[i] != completedConsolesArray[i]) {
+    for (let i = 0; i < activeConsoles.length; i++) {
+      if (old.activeConsoles.get(activeConsoles[i][0]) != activeConsoles[i][1]) {
         return false;
       }
     }
 
-    if (this.activeConsoles.size != old.activeConsoles.size) {
-      return false;
-    }
+    const completedConsoles = [...this.completedConsoles];
 
-    let testVal: number | undefined;
-
-    for (const [key, val] of this.activeConsoles) {
-      testVal = old.activeConsoles.get(key);
-
-      if (testVal !== val) {
-        return false;
-      }
-
-      if (!testVal && !old.activeConsoles.has(key)) {
+    for (let i = 0; i < completedConsoles.length; i++) {
+      if (!old.completedConsoles.has(completedConsoles[i])) {
         return false;
       }
     }

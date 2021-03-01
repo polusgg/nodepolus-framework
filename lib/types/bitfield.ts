@@ -22,7 +22,7 @@ export class Bitfield {
    * @returns A new bitfield from `value` with all bits set accordingly
    */
   static fromNumber(value: number, size?: number): Bitfield {
-    if (!size) {
+    if (size === undefined) {
       size = bitsInNumber(value);
     }
 

@@ -170,7 +170,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     const identifier = connectionInfo.toString();
     let connection = this.connections.get(identifier);
 
-    if (connection) {
+    if (connection !== undefined) {
       return connection;
     }
 
@@ -372,7 +372,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
       const player = lobby.findPlayerByConnection(connection);
 
-      if (player) {
+      if (player !== undefined) {
         this.emit("player.left", new PlayerLeftEvent(lobby, player));
       }
 
@@ -504,7 +504,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
       const player = lobby.findPlayerByConnection(connection);
 
-      if (!player) {
+      if (player === undefined) {
         return;
       }
 

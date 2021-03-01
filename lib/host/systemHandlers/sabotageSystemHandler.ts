@@ -41,8 +41,9 @@ export class SabotageSystemHandler {
       if (system.getTimer() <= 0) {
         this.host.endGame(GameOverReason.ImpostorsBySabotage);
 
-        if (this.timer) {
+        if (this.timer !== undefined) {
           clearInterval(this.timer);
+          delete this.timer;
         }
       }
     }, 1000);
@@ -102,8 +103,9 @@ export class SabotageSystemHandler {
       if (system.getTimer() <= 0) {
         this.host.endGame(GameOverReason.ImpostorsBySabotage);
 
-        if (this.timer) {
+        if (this.timer !== undefined) {
           clearInterval(this.timer);
+          delete this.timer;
         }
       }
     }, 1000);

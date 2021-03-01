@@ -422,7 +422,7 @@ export class Player implements PlayerInstance {
   castVote(suspect?: PlayerInstance): this {
     const meetingHud = this.lobby.getMeetingHud();
 
-    if (meetingHud) {
+    if (meetingHud !== undefined) {
       meetingHud.getMeetingHud().castVote(this.getId(), suspect?.getId() ?? -1);
     }
 
@@ -432,7 +432,7 @@ export class Player implements PlayerInstance {
   clearVote(): this {
     const meetingHud = this.lobby.getMeetingHud();
 
-    if (meetingHud) {
+    if (meetingHud !== undefined) {
       meetingHud.getMeetingHud().clearVote([this]);
     }
 
@@ -538,7 +538,7 @@ export class Player implements PlayerInstance {
   protected getGameData(): EntityGameData {
     const gameData = this.lobby.getGameData();
 
-    if (!gameData) {
+    if (gameData === undefined) {
       throw new Error("Lobby does not have a GameData instance");
     }
 

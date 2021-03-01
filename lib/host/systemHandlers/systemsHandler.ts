@@ -104,7 +104,7 @@ export class SystemsHandler {
 
     const sabotageHandler = this.host.getSabotageHandler();
 
-    if (!sabotageHandler) {
+    if (sabotageHandler === undefined) {
       throw new Error("Attempted to repair oxygen without a SabotageHandler instance");
     }
 
@@ -115,16 +115,18 @@ export class SystemsHandler {
         if (system.getCompletedConsoles().size == 2) {
           system.setTimer(10000);
 
-          if (sabotageHandler.timer) {
+          if (sabotageHandler.timer !== undefined) {
             clearInterval(sabotageHandler.timer);
+            delete sabotageHandler.timer;
           }
         }
         break;
       case OxygenAction.Repaired:
         system.setTimer(10000);
 
-        if (sabotageHandler.timer) {
+        if (sabotageHandler.timer !== undefined) {
           clearInterval(sabotageHandler.timer);
+          delete sabotageHandler.timer;
         }
         break;
     }
@@ -178,7 +180,7 @@ export class SystemsHandler {
 
     const sabotageHandler = this.host.getSabotageHandler();
 
-    if (!sabotageHandler) {
+    if (sabotageHandler === undefined) {
       throw new Error("Attempted to repair reactor without a SabotageHandler instance");
     }
 
@@ -189,8 +191,9 @@ export class SystemsHandler {
         if (system.getUserConsoles().size == 2) {
           system.setTimer(10000);
 
-          if (sabotageHandler.timer) {
+          if (sabotageHandler.timer !== undefined) {
             clearInterval(sabotageHandler.timer);
+            delete sabotageHandler.timer;
           }
         }
         break;
@@ -200,8 +203,9 @@ export class SystemsHandler {
       case ReactorAction.Repaired:
         system.setTimer(10000);
 
-        if (sabotageHandler.timer) {
+        if (sabotageHandler.timer !== undefined) {
           clearInterval(sabotageHandler.timer);
+          delete sabotageHandler.timer;
         }
         break;
     }
@@ -216,7 +220,7 @@ export class SystemsHandler {
     const type = amount.getSystemType();
     const sabotageHandler = this.host.getSabotageHandler();
 
-    if (!sabotageHandler) {
+    if (sabotageHandler === undefined) {
       throw new Error("Attempted to sabotage without a SabotageHandler instance");
     }
 
@@ -225,8 +229,9 @@ export class SystemsHandler {
     this.sabotageCountdownInterval = setInterval(() => {
       system.decrementCooldown();
 
-      if (system.getCooldown() == 0 && this.sabotageCountdownInterval) {
+      if (system.getCooldown() == 0 && this.sabotageCountdownInterval !== undefined) {
         clearInterval(this.sabotageCountdownInterval);
+        delete this.sabotageCountdownInterval;
       }
     }, 1000);
 

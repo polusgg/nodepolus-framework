@@ -32,7 +32,7 @@ export abstract class BaseEntityShipStatus extends BaseInnerNetEntity {
   }
 
   getShipStatus(): BaseInnerShipStatus {
-    if (this.shipStatus) {
+    if (this.shipStatus !== undefined) {
       return this.shipStatus;
     }
 

@@ -299,7 +299,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets
    */
   async setActingHost(actingHost: boolean, sendImmediately: boolean = true): Promise<void> {
-    if (!this.lobby) {
+    if (this.lobby === undefined) {
       return;
     }
 
@@ -496,7 +496,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * @param reason - The reason for why the connection was kicked
    */
   sendKick(isBanned: boolean, kickingPlayer?: PlayerInstance, reason?: DisconnectReason): void {
-    if (!this.lobby) {
+    if (this.lobby === undefined) {
       throw new Error("Cannot kick a connection that is not in a lobby");
     }
 
@@ -521,7 +521,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * @param reason - The reason for why the connection was kicked
    */
   sendLateRejection(reason: DisconnectReason): void {
-    if (!this.lobby) {
+    if (this.lobby === undefined) {
       throw new Error("Cannot send a LateRejection packet to a connection that is not in a lobby");
     }
 
@@ -613,7 +613,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
     const resolveFunArr = this.acknowledgementResolveMap.get(nonce);
 
-    if (resolveFunArr) {
+    if (resolveFunArr !== undefined) {
       for (let i = 0; i < resolveFunArr.length; i++) {
         resolveFunArr[i]();
       }
@@ -625,7 +625,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
     this.flushResolveMap.delete(nonce);
 
-    if (resolve) {
+    if (resolve !== undefined) {
       resolve();
     }
   }
@@ -682,8 +682,9 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
     // TODO: socket.close() or socket.disconnect()
 
-    if (this.disconnectTimeout) {
+    if (this.disconnectTimeout !== undefined) {
       clearTimeout(this.disconnectTimeout);
+      delete this.disconnectTimeout;
     }
 
     this.emit("disconnected", reason);

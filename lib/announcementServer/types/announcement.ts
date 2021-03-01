@@ -47,6 +47,6 @@ export class Announcement {
    */
   translate(language: ClientLanguage): TextComponent | undefined {
     return this.translations.get(language)
-        ?? (this.translations.size ? this.translations.values()[0] : undefined);
+        ?? (this.translations.size > 0 ? this.translations.values()[0] : undefined);
   }
 }
