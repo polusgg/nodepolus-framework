@@ -440,12 +440,11 @@ export class Lobby implements LobbyInstance {
       throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.getPlayerControl().getPlayerId()}) != PlayerData(${playerData.getId()})`);
     }
 
-    const clientIdInUse = !!this.findPlayerByClientId(player.getOwnerId());
     const playerInstance = new Player(this, player, this.findConnection(player.getOwnerId()));
 
     this.addPlayer(playerInstance);
 
-    if (!clientIdInUse) {
+    if (this.findPlayerByClientId(player.getOwnerId()) == undefined) {
       this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.getOwnerId(), this.hostInstance.getId()));
     }
 
