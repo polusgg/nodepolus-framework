@@ -532,12 +532,12 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * Called when the server receives a packet from a connection.
    *
    * @param packet - The packet that was sent to the server
-   * @param sender - The connection that sent the packet
+   * @param connection - The connection that sent the packet
    */
-  protected async handlePacket(packet: BaseRootPacket, sender: Connection): Promise<void> {
+  protected async handlePacket(packet: BaseRootPacket, connection: Connection): Promise<void> {
     if (packet.getType() in RootPacketType) {
       if (this.listenerCount("server.packet.in") > 0) {
-        const event = new ServerPacketInEvent(sender, packet);
+        const event = new ServerPacketInEvent(connection, packet);
 
         await this.emit("server.packet.in", event);
 
@@ -550,7 +550,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
       if (custom !== undefined) {
         if (this.listenerCount("server.packet.in.custom") > 0) {
-          const event = new ServerPacketInCustomEvent(sender, packet);
+          const event = new ServerPacketInCustomEvent(connection, packet);
 
           await this.emit("server.packet.in.custom", event);
 
@@ -559,7 +559,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
           }
         }
 
-        custom.handle(sender, packet);
+        custom.handle(connection, packet);
 
         return;
       }
@@ -567,26 +567,26 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
     switch (packet.getType()) {
       case RootPacketType.HostGame: {
-        if (sender.getLobby() !== undefined) {
+        if (connection.getLobby() !== undefined) {
           return;
         }
 
-        this.getLogger().verbose("Connection %s trying to host lobby", sender);
+        this.getLogger().verbose("Connection %s trying to host lobby", connection);
 
         if (this.lobbies.length >= this.getMaxLobbies()) {
-          const event = new ServerLobbyCreatedRefusedEvent(sender);
+          const event = new ServerLobbyCreatedRefusedEvent(connection);
 
           await this.emit("server.lobby.created.refused", event);
 
           if (!event.isCancelled()) {
-            this.getLogger().verbose("Preventing connection %s from hosting lobby on full server", sender);
+            this.getLogger().verbose("Preventing connection %s from hosting lobby on full server", connection);
 
-            sender.writeReliable(new JoinGameErrorPacket(event.getDisconnectReason()));
+            connection.writeReliable(new JoinGameErrorPacket(event.getDisconnectReason()));
 
             return;
           }
 
-          this.getLogger().verbose("Allowing connection %s to host lobby on full server", sender);
+          this.getLogger().verbose("Allowing connection %s to host lobby on full server", connection);
         }
 
         let lobbyCode = LobbyCode.generate();
@@ -605,30 +605,30 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
           (packet as HostGameRequestPacket).options,
           lobbyCode,
         );
-        const event = new ServerLobbyCreatedEvent(sender, newLobby);
+        const event = new ServerLobbyCreatedEvent(connection, newLobby);
 
         await this.emit("server.lobby.created", event);
 
         if (!event.isCancelled()) {
-          this.getLogger().verbose("Connection %s hosting lobby %s", sender, newLobby);
+          this.getLogger().verbose("Connection %s hosting lobby %s", connection, newLobby);
 
           this.addLobby(newLobby);
 
-          sender.sendReliable([new HostGameResponsePacket(newLobby.getCode())]);
+          connection.sendReliable([new HostGameResponsePacket(newLobby.getCode())]);
         } else {
-          this.getLogger().verbose("Prevented connection %s from hosting lobby", sender);
+          this.getLogger().verbose("Prevented connection %s from hosting lobby", connection);
 
-          sender.disconnect(event.getDisconnectReason());
+          connection.disconnect(event.getDisconnectReason());
         }
         break;
       }
       case RootPacketType.JoinGame: {
-        if (sender.getLobby() !== undefined) {
+        if (connection.getLobby() !== undefined) {
           return;
         }
 
         const lobbyCode = (packet as JoinGameRequestPacket).lobbyCode;
-        const event = new ServerLobbyJoinEvent(sender, lobbyCode, this.lobbyMap.get(lobbyCode));
+        const event = new ServerLobbyJoinEvent(connection, lobbyCode, this.lobbyMap.get(lobbyCode));
 
         await this.emit("server.lobby.join", event);
 
@@ -639,20 +639,20 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
             const code = lobby.getCode();
 
             if (lobbyCode !== code) {
-              sender.sendReliable([new HostGameResponsePacket(code)]);
+              connection.sendReliable([new HostGameResponsePacket(code)]);
             }
 
-            (lobby as Lobby).handleJoin(sender);
+            (lobby as Lobby).handleJoin(connection);
           } else {
-            sender.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameNotFound())]);
+            connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameNotFound())]);
           }
         } else {
-          sender.sendReliable([new JoinGameErrorPacket(event.getDisconnectReason())]);
+          connection.sendReliable([new JoinGameErrorPacket(event.getDisconnectReason())]);
         }
         break;
       }
       case RootPacketType.GetGameList: {
-        if (sender.getLobby() !== undefined) {
+        if (connection.getLobby() !== undefined) {
           return;
         }
 
@@ -689,22 +689,22 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
         results.sort((a, b) => b.getPlayerCount() - a.getPlayerCount());
 
-        const event = new ServerLobbyListEvent(sender, request.includePrivate, results, counts);
+        const event = new ServerLobbyListEvent(connection, request.includePrivate, results, counts);
 
         await this.emit("server.lobby.list", event);
 
         if (!event.isCancelled()) {
-          this.getLogger().verbose("Sending game list to connection %s", sender);
+          this.getLogger().verbose("Sending game list to connection %s", connection);
 
-          sender.sendReliable([new GetGameListResponsePacket(event.getLobbies(), event.getLobbyCounts())]);
+          connection.sendReliable([new GetGameListResponsePacket(event.getLobbies(), event.getLobbyCounts())]);
         } else {
-          sender.disconnect(event.getDisconnectReason());
+          connection.disconnect(event.getDisconnectReason());
         }
         break;
       }
       default: {
-        if (sender.getLobby() === undefined) {
-          throw new Error(`Client ${sender.getId()} sent root game packet type ${packet.getType()} (${RootPacketType[packet.getType()]}) while not in a lobby`);
+        if (connection.getLobby() === undefined) {
+          throw new Error(`Client ${connection.getId()} sent root game packet type ${packet.getType()} (${RootPacketType[packet.getType()]}) while not in a lobby`);
         }
       }
     }

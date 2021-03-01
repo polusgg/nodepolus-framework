@@ -636,8 +636,8 @@ export class Host implements HostInstance {
     }
   }
 
-  handleReady(sender: Connection): void {
-    this.readyPlayerList.push(sender.getId());
+  handleReady(connection: Connection): void {
+    this.readyPlayerList.push(connection.getId());
 
     /**
      * TODO:
@@ -729,9 +729,9 @@ export class Host implements HostInstance {
     }
   }
 
-  async handleSceneChange(sender: Connection, sceneName: string): Promise<void> {
+  async handleSceneChange(connection: Connection, sceneName: string): Promise<void> {
     if (this.lobby.getConnections().length > this.lobby.getOptions().getMaxPlayers()) {
-      sender.sendLateRejection(DisconnectReason.gameFull());
+      connection.sendLateRejection(DisconnectReason.gameFull());
 
       return;
     }
@@ -740,20 +740,20 @@ export class Host implements HostInstance {
       return;
     }
 
-    if (this.playersInScene.has(sender.getId())) {
+    if (this.playersInScene.has(connection.getId())) {
       throw new Error("Sender has already changed scene");
     }
 
     const newPlayerId = this.getNextPlayerId();
 
     if (newPlayerId == -1) {
-      sender.sendLateRejection(DisconnectReason.gameFull());
+      connection.sendLateRejection(DisconnectReason.gameFull());
 
       return;
     }
 
     this.stopCountdown();
-    this.playersInScene.set(sender.getId(), sceneName);
+    this.playersInScene.set(connection.getId(), sceneName);
 
     let lobbyBehaviour = this.lobby.getLobbyBehaviour();
 
@@ -763,7 +763,7 @@ export class Host implements HostInstance {
       this.lobby.setLobbyBehaviour(lobbyBehaviour);
     }
 
-    sender.writeReliable(new GameDataPacket([lobbyBehaviour.serializeSpawn()], this.lobby.getCode()));
+    connection.writeReliable(new GameDataPacket([lobbyBehaviour.serializeSpawn()], this.lobby.getCode()));
 
     let gameData = this.lobby.getGameData();
 
@@ -773,15 +773,15 @@ export class Host implements HostInstance {
       this.lobby.setGameData(gameData);
     }
 
-    sender.writeReliable(new GameDataPacket([gameData.serializeSpawn()], this.lobby.getCode()));
+    connection.writeReliable(new GameDataPacket([gameData.serializeSpawn()], this.lobby.getCode()));
 
-    const event = new PlayerSpawnedEvent(sender, this.lobby, newPlayerId, true, SpawnPositions.forPlayerInDropship(newPlayerId));
+    const event = new PlayerSpawnedEvent(connection, this.lobby, newPlayerId, true, SpawnPositions.forPlayerInDropship(newPlayerId));
 
     await this.lobby.getServer().emit("player.spawned", event);
 
     const entity = new EntityPlayer(
       this.lobby,
-      sender.getId(),
+      connection.getId(),
       event.getPosition(),
       Vector2.zero(),
       newPlayerId,
@@ -791,21 +791,21 @@ export class Host implements HostInstance {
 
     entity.getPlayerControl().setNewPlayer(event.isNew());
 
-    const player = new Player(this.lobby, entity, sender);
+    const player = new Player(this.lobby, entity, connection);
 
     for (let i = 0; i < this.lobby.getPlayers().length; i++) {
-      sender.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].getEntity().serializeSpawn()], this.lobby.getCode()));
+      connection.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].getEntity().serializeSpawn()], this.lobby.getCode()));
     }
 
     this.lobby.addPlayer(player);
 
     await this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
 
-    player.getEntity().getPlayerControl().syncSettings(this.lobby.getOptions(), [sender]);
+    player.getEntity().getPlayerControl().syncSettings(this.lobby.getOptions(), [connection]);
     this.confirmPlayerData(player);
     player.getEntity().getPlayerControl().setNewPlayer(false);
 
-    sender.flush(true);
+    connection.flush(true);
 
     gameData.getGameData().updateAllGameData(this.lobby.getConnections());
   }

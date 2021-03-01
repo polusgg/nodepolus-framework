@@ -858,9 +858,9 @@ export class Lobby implements LobbyInstance {
    *
    * @internal
    * @param packet - The packet that was sent to the lobby
-   * @param sender - The connection that sent the packet
+   * @param connection - The connection that sent the packet
    */
-  protected handlePacket(packet: BaseRootPacket, sender: Connection): void {
+  protected handlePacket(packet: BaseRootPacket, connection: Connection): void {
     switch (packet.getType()) {
       case RootPacketType.AlterGameTag: {
         const data = packet as AlterGameTagPacket;
@@ -871,7 +871,7 @@ export class Lobby implements LobbyInstance {
       case RootPacketType.GameData:
         // fallthrough
       case RootPacketType.GameDataTo: {
-        if (sender.getLimboState() == LimboState.PreSpawn) {
+        if (connection.getLimboState() == LimboState.PreSpawn) {
           return;
         }
 
@@ -883,23 +883,23 @@ export class Lobby implements LobbyInstance {
         }
 
         for (let i = 0; i < gameData.packets.length; i++) {
-          this.handleGameDataPacket(gameData.packets[i], sender, target ? [target] : undefined);
+          this.handleGameDataPacket(gameData.packets[i], connection, target ? [target] : undefined);
         }
         break;
       }
       case RootPacketType.KickPlayer: {
         const data = packet as KickPlayerPacket;
         const id = data.kickedClientId;
-        const connection = this.findConnection(id);
+        const connectionToKick = this.findConnection(id);
 
-        if (!connection) {
+        if (!connectionToKick) {
           this.logger.warn(`KickPlayer sent for unknown client: ${id}`);
 
           return;
         }
 
-        if (sender.isActingHost()) {
-          connection.sendKick(data.banned, this.findPlayerByConnection(sender), data.disconnectReason);
+        if (connection.isActingHost()) {
+          connectionToKick.sendKick(data.banned, this.findPlayerByConnection(connection), data.disconnectReason);
         }
         break;
       }
@@ -930,11 +930,11 @@ export class Lobby implements LobbyInstance {
    *
    * @internal
    * @param packet - The packet that was sent to the lobby
-   * @param sender - The connection that sent the packet
+   * @param connection - The connection that sent the packet
    * @param sendTo - The connections to which the packet was intended to be sent
    */
-  protected async handleGameDataPacket(packet: BaseGameDataPacket, sender: Connection, sendTo?: Connection[]): Promise<void> {
-    sendTo = ((sendTo && sendTo.length > 0) ? sendTo : this.connections).filter(con => con.getId() != sender.getId());
+  protected async handleGameDataPacket(packet: BaseGameDataPacket, connection: Connection, sendTo?: Connection[]): Promise<void> {
+    sendTo = ((sendTo && sendTo.length > 0) ? sendTo : this.connections).filter(con => con.getId() != connection.getId());
 
     switch (packet.getType()) {
       case GameDataPacketType.Data:
@@ -953,7 +953,7 @@ export class Lobby implements LobbyInstance {
 
         if (rpc.packet.getType() in RpcPacketType) {
           if (this.server.listenerCount("server.packet.in.rpc") > 0) {
-            const event = new ServerPacketInRpcEvent(sender, rpc.senderNetId, this.findInnerNetObject(rpc.senderNetId), rpc.packet);
+            const event = new ServerPacketInRpcEvent(connection, rpc.senderNetId, this.findInnerNetObject(rpc.senderNetId), rpc.packet);
 
             await this.server.emit("server.packet.in.rpc", event);
 
@@ -974,7 +974,7 @@ export class Lobby implements LobbyInstance {
             throw new Error(`RPC packet sent from unknown InnerNetObject: ${rpc.senderNetId}`);
           }
 
-          object.handleRpc(sender, rpc.packet.getType(), rpc.packet, sendTo);
+          object.handleRpc(connection, rpc.packet.getType(), rpc.packet, sendTo);
         } else {
           const custom = RpcPacket.getPacket(rpc.packet.getType());
 
@@ -982,7 +982,7 @@ export class Lobby implements LobbyInstance {
             const object = this.findInnerNetObject(rpc.senderNetId);
 
             if (this.server.listenerCount("server.packet.in.rpc.custom") > 0) {
-              const event = new ServerPacketInRpcCustomEvent(sender, rpc.senderNetId, object, rpc.packet);
+              const event = new ServerPacketInRpcCustomEvent(connection, rpc.senderNetId, object, rpc.packet);
 
               await this.server.emit("server.packet.in.rpc.custom", event);
 
@@ -991,13 +991,13 @@ export class Lobby implements LobbyInstance {
               }
             }
 
-            custom.handle(sender, rpc.packet, object);
+            custom.handle(connection, rpc.packet, object);
           }
         }
         break;
       }
       case GameDataPacketType.Ready:
-        this.hostInstance.handleReady(sender);
+        this.hostInstance.handleReady(connection);
         break;
       case GameDataPacketType.SceneChange: {
         if ((packet as SceneChangePacket).scene != "OnlineGame") {

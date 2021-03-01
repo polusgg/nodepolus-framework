@@ -130,17 +130,17 @@ export interface HostInstance {
   /**
    * Called when a connection sends a Ready GameData packet.
    *
-   * @param sender - The connection that sent the packet
+   * @param connection - The connection that sent the packet
    */
-  handleReady(sender: Connection): void;
+  handleReady(connection: Connection): void;
 
   /**
    * Called when a connection sends a SceneChange GameData packet.
    *
-   * @param sender - The connection that sent the packet
+   * @param connection - The connection that sent the packet
    * @param sceneName - The name of the scene that the connection changed to
    */
-  handleSceneChange(sender: Connection, sceneName: string): Promise<void>;
+  handleSceneChange(connection: Connection, sceneName: string): Promise<void>;
 
   /**
    * Called when a connection sends a CompleteTask RPC packet.
