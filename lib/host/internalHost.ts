@@ -541,6 +541,11 @@ export class InternalHost implements HostInstance {
       this.lobby.getConnections()[i].setLimboState(LimboState.PreSpawn);
     }
 
+    if (this.meetingHudTimeout !== undefined) {
+      clearInterval(this.meetingHudTimeout);
+      delete this.meetingHudTimeout;
+    }
+
     this.lobby.deleteLobbyBehaviour();
     this.lobby.deleteShipStatus();
     this.lobby.deleteMeetingHud();
@@ -1065,9 +1070,10 @@ export class InternalHost implements HostInstance {
       new RpcPacket(player.getEntity().getPlayerControl().getNetId(), new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
     ], this.lobby.getCode()));
 
-    if (this.meetingHudTimeout && [...meetingHud.getMeetingHud().getPlayerStates().values()].every(p => p.didVote() || p.isDead())) {
+    if (this.meetingHudTimeout !== undefined && [...meetingHud.getMeetingHud().getPlayerStates().values()].every(p => p.didVote() || p.isDead())) {
       this.endMeeting();
       clearInterval(this.meetingHudTimeout);
+      delete this.meetingHudTimeout;
     }
   }
 
