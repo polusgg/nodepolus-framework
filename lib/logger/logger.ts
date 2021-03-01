@@ -1,9 +1,9 @@
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { Connection } from "../protocol/connection";
 import { TextComponent } from "../api/text";
-import { InternalPlayer } from "../player";
-import { InternalLobby } from "../lobby";
+import { Player } from "../player";
 import { Vector2 } from "../types";
+import { Lobby } from "../lobby";
 import winston from "winston";
 
 const levelNames = ["fatal", "error", "warn", "info", "verbose", "debug", "trace"];
@@ -72,12 +72,12 @@ const prettyPrint = winston.format((info: winston.Logform.TransformableInfo, _op
           const connection = item as Connection;
 
           splat[i] = `${connection.getId()} (${connection.getConnectionInfo().toString()})`;
-        } else if (item instanceof InternalPlayer) {
-          const player = item as InternalPlayer;
+        } else if (item instanceof Player) {
+          const player = item as Player;
 
           splat[i] = `${player.getName().toString()} (${player.getId()})`;
-        } else if (item instanceof InternalLobby) {
-          splat[i] = (item as InternalLobby).getCode();
+        } else if (item instanceof Lobby) {
+          splat[i] = (item as Lobby).getCode();
         } else if (item instanceof Vector2) {
           const vector = item as Vector2;
 

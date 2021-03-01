@@ -1,1 +1,1 @@
-export { InternalLobby } from "./internalLobby";
+export { Lobby } from "./lobby";

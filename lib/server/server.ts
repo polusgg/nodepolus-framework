@@ -11,8 +11,8 @@ import { Connection } from "../protocol/connection";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
 import { LobbyInstance } from "../api/lobby";
-import { InternalLobby } from "../lobby";
 import { Logger } from "../logger";
+import { Lobby } from "../lobby";
 import Emittery from "emittery";
 import dgram from "dgram";
 import {
@@ -221,9 +221,9 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @param lobby - The lobby to be removed
    */
   deleteLobby(lobby: LobbyInstance): this {
-    if (lobby instanceof InternalLobby) {
-      (lobby as InternalLobby).cancelJoinTimer();
-      (lobby as InternalLobby).cancelStartTimer();
+    if (lobby instanceof Lobby) {
+      (lobby as Lobby).cancelJoinTimer();
+      (lobby as Lobby).cancelStartTimer();
     }
 
     this.lobbies.splice(this.lobbies.indexOf(lobby), 1);
@@ -595,7 +595,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
           lobbyCode = LobbyCode.generate();
         }
 
-        const newLobby = new InternalLobby(
+        const newLobby = new Lobby(
           this,
           this.getDefaultLobbyAddress(),
           this.getDefaultLobbyPort(),
@@ -642,7 +642,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
               sender.sendReliable([new HostGameResponsePacket(code)]);
             }
 
-            (lobby as InternalLobby).handleJoin(sender);
+            (lobby as Lobby).handleJoin(sender);
           } else {
             sender.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameNotFound())]);
           }

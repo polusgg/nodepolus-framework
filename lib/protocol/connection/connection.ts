@@ -8,8 +8,8 @@ import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
 import { MessageWriter } from "../../util/hazelMessage";
 import { PlayerInstance } from "../../api/player";
 import { AwaitingPacket } from "../packets/types";
-import { InternalLobby } from "../../lobby";
 import { ConnectionEvents } from ".";
+import { Lobby } from "../../lobby";
 import { Packet } from "../packets";
 import Emittery from "emittery";
 import dgram from "dgram";
@@ -28,7 +28,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   protected clientVersion?: ClientVersion;
   protected name?: string;
   protected lastPingReceivedTime: number = Date.now();
-  protected lobby?: InternalLobby;
+  protected lobby?: Lobby;
   protected firstJoin = true;
   protected limboState = LimboState.PreSpawn;
   protected actingHost = false;
@@ -223,7 +223,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Gets the lboby in which this connection is located.
    */
-  getLobby(): InternalLobby | undefined {
+  getLobby(): Lobby | undefined {
     return this.lobby;
   }
 
@@ -232,7 +232,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @param lobby - The new lobby in which this connection is located
    */
-  setLobby(lobby?: InternalLobby): this {
+  setLobby(lobby?: Lobby): this {
     this.lobby = lobby;
 
     return this;

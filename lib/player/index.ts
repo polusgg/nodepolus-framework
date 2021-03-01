@@ -1,1 +1,1 @@
-export { InternalPlayer } from "./internalPlayer";
+export { Player } from "./player";

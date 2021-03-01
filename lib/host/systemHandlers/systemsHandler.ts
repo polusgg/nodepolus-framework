@@ -2,8 +2,8 @@ import { BaseInnerShipStatus } from "../../protocol/entities/shipStatus/baseShip
 import { DecontaminationDoorState, SystemType } from "../../types/enums";
 import { GameDataPacket } from "../../protocol/packets/root";
 import { notUndefined } from "../../util/functions";
-import { InternalPlayer } from "../../player";
-import { InternalHost } from "..";
+import { Player } from "../../player";
+import { Host } from "..";
 import {
   MedbayAction,
   MiraCommunicationsAction,
@@ -50,10 +50,10 @@ export class SystemsHandler {
   protected sabotageCountdownInterval?: NodeJS.Timeout;
 
   constructor(
-    protected readonly host: InternalHost,
+    protected readonly host: Host,
   ) {}
 
-  repairDecon<T extends DeconSystem | DeconTwoSystem>(_repairer: InternalPlayer, system: T, amount: DecontaminationAmount): void {
+  repairDecon<T extends DeconSystem | DeconTwoSystem>(_repairer: Player, system: T, amount: DecontaminationAmount): void {
     let state = 0;
 
     if (amount.isEntering()) {
@@ -69,13 +69,13 @@ export class SystemsHandler {
     this.host.getDecontaminationHandlers()[system instanceof DeconSystem ? 0 : 1].start(state);
   }
 
-  repairPolusDoors<T extends DoorsSystem>(_repairer: InternalPlayer, system: T, amount: PolusDoorsAmount): void {
+  repairPolusDoors<T extends DoorsSystem>(_repairer: Player, system: T, amount: PolusDoorsAmount): void {
     this.setOldShipStatus();
     system.setDoorState(amount.getDoorId(), true);
     this.sendDataUpdate();
   }
 
-  repairHqHud<T extends HqHudSystem>(repairer: InternalPlayer, system: T, amount: MiraCommunicationsAmount): void {
+  repairHqHud<T extends HqHudSystem>(repairer: Player, system: T, amount: MiraCommunicationsAmount): void {
     this.setOldShipStatus();
 
     switch (amount.getAction()) {
@@ -93,13 +93,13 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairHudOverride<T extends HudOverrideSystem>(_repairer: InternalPlayer, system: T, amount: NormalCommunicationsAmount): void {
+  repairHudOverride<T extends HudOverrideSystem>(_repairer: Player, system: T, amount: NormalCommunicationsAmount): void {
     this.setOldShipStatus();
     system.setSabotaged(!amount.isRepaired());
     this.sendDataUpdate();
   }
 
-  repairOxygen<T extends LifeSuppSystem>(_repairer: InternalPlayer, system: T, amount: OxygenAmount): void {
+  repairOxygen<T extends LifeSuppSystem>(_repairer: Player, system: T, amount: OxygenAmount): void {
     this.setOldShipStatus();
 
     const sabotageHandler = this.host.getSabotageHandler();
@@ -132,7 +132,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  async repairMedbay<T extends MedScanSystem>(_repairer: InternalPlayer, system: T, amount: MedbayAmount): Promise<void> {
+  async repairMedbay<T extends MedScanSystem>(_repairer: Player, system: T, amount: MedbayAmount): Promise<void> {
     this.setOldShipStatus();
 
     const game = this.host.getLobby().getGame()!;
@@ -173,7 +173,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairReactor<T extends ReactorSystem | LaboratorySystem>(repairer: InternalPlayer, system: T, amount: ReactorAmount): void {
+  repairReactor<T extends ReactorSystem | LaboratorySystem>(repairer: Player, system: T, amount: ReactorAmount): void {
     this.setOldShipStatus();
 
     const sabotageHandler = this.host.getSabotageHandler();
@@ -209,7 +209,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairSabotage<T extends SabotageSystem>(_repairer: InternalPlayer, system: T, amount: SabotageAmount): void {
+  repairSabotage<T extends SabotageSystem>(_repairer: Player, system: T, amount: SabotageAmount): void {
     this.setOldShipStatus();
 
     const ship = this.getShipStatus();
@@ -251,7 +251,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  async repairSecurity<T extends SecurityCameraSystem>(repairer: InternalPlayer, system: T, amount: SecurityAmount): Promise<void> {
+  async repairSecurity<T extends SecurityCameraSystem>(repairer: Player, system: T, amount: SecurityAmount): Promise<void> {
     this.setOldShipStatus();
 
     if (amount.isViewingCameras()) {
@@ -267,7 +267,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairSwitch<T extends SwitchSystem>(_repairer: InternalPlayer, system: T, amount: ElectricalAmount): void {
+  repairSwitch<T extends SwitchSystem>(_repairer: Player, system: T, amount: ElectricalAmount): void {
     this.setOldShipStatus();
     system.getActualSwitches().toggle(amount.getSwitchIndex());
 

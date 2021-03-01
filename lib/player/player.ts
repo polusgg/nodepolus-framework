@@ -10,8 +10,8 @@ import { Connection } from "../protocol/connection";
 import { PlayerInstance } from "../api/player";
 import { LobbyInstance } from "../api/lobby";
 import { TextComponent } from "../api/text";
-import { InternalLobby } from "../lobby";
-import { InternalHost } from "../host";
+import { Lobby } from "../lobby";
+import { Host } from "../host";
 import {
   PlayerRevivedEvent,
   PlayerRoleUpdatedEvent,
@@ -20,7 +20,7 @@ import {
   PlayerTaskUncompletedEvent,
 } from "../api/events/player";
 
-export class InternalPlayer implements PlayerInstance {
+export class Player implements PlayerInstance {
   protected readonly metadata: Map<string, unknown> = new Map();
 
   protected name: TextComponent;
@@ -33,7 +33,7 @@ export class InternalPlayer implements PlayerInstance {
    * @param connection - The connection to which the player belongs
    */
   constructor(
-    protected readonly lobby: InternalLobby,
+    protected readonly lobby: Lobby,
     protected entity: EntityPlayer,
     protected readonly connection?: Connection,
   ) {
@@ -212,7 +212,7 @@ export class InternalPlayer implements PlayerInstance {
 
     if (!event.isCancelled()) {
       this.getGameDataEntry().setTasks(taskList);
-      (this.lobby.getHostInstance() as InternalHost).updatePlayerTasks(this, taskList.map(task => task[0]));
+      (this.lobby.getHostInstance() as Host).updatePlayerTasks(this, taskList.map(task => task[0]));
     }
   }
 
@@ -233,7 +233,7 @@ export class InternalPlayer implements PlayerInstance {
 
     if (!event.isCancelled()) {
       this.getGameDataEntry().setTasks(taskList);
-      (this.lobby.getHostInstance() as InternalHost).updatePlayerTasks(this, taskList.map(task => task[0]));
+      (this.lobby.getHostInstance() as Host).updatePlayerTasks(this, taskList.map(task => task[0]));
     }
   }
 
@@ -331,7 +331,7 @@ export class InternalPlayer implements PlayerInstance {
   murder(player: PlayerInstance): this {
     const playerControl = this.entity.getPlayerControl();
 
-    playerControl.murderPlayer((player as InternalPlayer).entity.getPlayerControl().getNetId(), this.lobby.getConnections());
+    playerControl.murderPlayer((player as Player).entity.getPlayerControl().getNetId(), this.lobby.getConnections());
     this.lobby.getHostInstance().handleMurderPlayer(playerControl, 0);
 
     return this;
@@ -440,13 +440,13 @@ export class InternalPlayer implements PlayerInstance {
   }
 
   castVotekick(target: PlayerInstance): this {
-    this.getGameData().getVoteBanSystem().addVote(this, target as InternalPlayer, this.lobby.getConnections());
+    this.getGameData().getVoteBanSystem().addVote(this, target as Player, this.lobby.getConnections());
 
     return this;
   }
 
   clearVotekick(target: PlayerInstance): this {
-    this.getGameData().getVoteBanSystem().clearVote(this, target as InternalPlayer, this.lobby.getConnections());
+    this.getGameData().getVoteBanSystem().clearVote(this, target as Player, this.lobby.getConnections());
 
     return this;
   }

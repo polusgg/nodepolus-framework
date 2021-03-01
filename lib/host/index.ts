@@ -1,1 +1,1 @@
-export { InternalHost } from "./internalHost";
+export { Host } from "./host";

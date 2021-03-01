@@ -1,12 +1,12 @@
 import { DeconSystem, DeconTwoSystem } from "../../protocol/entities/shipStatus/systems";
 import { DecontaminationDoorState } from "../../types/enums";
-import { InternalHost } from "..";
+import { Host } from "..";
 
 export class DecontaminationHandler {
   protected timer?: NodeJS.Timeout;
 
   constructor(
-    protected host: InternalHost,
+    protected host: Host,
     protected system: DeconSystem | DeconTwoSystem,
   ) {}
 

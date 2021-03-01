@@ -2,8 +2,8 @@ import { KillDistance, Language, Level, TaskBarMode } from "../../types/enums";
 import { Connection } from "../../protocol/connection";
 import { GameOptionsData, Mutable } from "../../types";
 import { LobbyInstance } from "./lobbyInstance";
-import { InternalPlayer } from "../../player";
 import { PlayerInstance } from "../player";
+import { Player } from "../../player";
 
 export class LobbySettings {
   protected isPov = false;
@@ -426,7 +426,7 @@ export class LobbySettings {
         sendToConnections = this.lobby.getConnections();
       }
 
-      (this.lobby.getPlayers()[0] as InternalPlayer).getEntity().getPlayerControl().syncSettings(customOptions, sendToConnections);
+      (this.lobby.getPlayers()[0] as Player).getEntity().getPlayerControl().syncSettings(customOptions, sendToConnections);
     } else {
       this.lobby.getLogger().warn("Attempted to sync lobby settings without a player");
     }

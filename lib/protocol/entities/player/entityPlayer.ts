@@ -2,8 +2,8 @@ import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } f
 import { SpawnFlag, SpawnType } from "../../../types/enums";
 import { BaseInnerNetEntity } from "../baseEntity";
 import { LobbyInstance } from "../../../api/lobby";
-import { InternalLobby } from "../../../lobby";
 import { Vector2 } from "../../../types";
+import { Lobby } from "../../../lobby";
 
 export class EntityPlayer extends BaseInnerNetEntity {
   constructor(
@@ -45,7 +45,7 @@ export class EntityPlayer extends BaseInnerNetEntity {
       this.lobby.despawn(this.innerNetObjects[i]);
     }
 
-    const player = (this.lobby as InternalLobby).findPlayerByEntity(this);
+    const player = (this.lobby as Lobby).findPlayerByEntity(this);
 
     if (player) {
       this.lobby.removePlayer(player);

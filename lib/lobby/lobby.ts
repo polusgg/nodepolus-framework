@@ -21,11 +21,11 @@ import { MaxValue } from "../util/constants";
 import { LobbyInstance } from "../api/lobby";
 import { TextComponent } from "../api/text";
 import { HostInstance } from "../api/host";
-import { InternalPlayer } from "../player";
-import { InternalHost } from "../host";
 import { Game } from "../api/game";
 import { Logger } from "../logger";
+import { Player } from "../player";
 import { Server } from "../server";
+import { Host } from "../host";
 import {
   AlterGameTagPacket,
   BaseRootPacket,
@@ -55,9 +55,9 @@ import {
   SpawnType,
 } from "../types/enums";
 
-export class InternalLobby implements LobbyInstance {
+export class Lobby implements LobbyInstance {
   protected readonly createdAt: number = Date.now();
-  protected readonly hostInstance: HostInstance = new InternalHost(this);
+  protected readonly hostInstance: HostInstance = new Host(this);
   protected readonly spawningPlayers: Set<Connection> = new Set();
   protected readonly connections: Connection[] = [];
   protected readonly gameTags: Map<AlterGameTag, number> = new Map([[AlterGameTag.ChangePrivacy, 0]]);
@@ -68,7 +68,7 @@ export class InternalLobby implements LobbyInstance {
   protected joinTimer?: NodeJS.Timeout;
   protected startTimer?: NodeJS.Timeout;
   protected game?: Game;
-  protected players: InternalPlayer[] = [];
+  protected players: Player[] = [];
   protected gameState = GameState.NotStarted;
   protected gameData?: EntityGameData;
   protected lobbyBehaviour?: EntityLobbyBehaviour;
@@ -226,11 +226,11 @@ export class InternalLobby implements LobbyInstance {
     this.connections.splice(this.connections.indexOf(connection), 1);
   }
 
-  getPlayers(): InternalPlayer[] {
+  getPlayers(): Player[] {
     return this.players;
   }
 
-  addPlayer(player: InternalPlayer): void {
+  addPlayer(player: Player): void {
     this.players.push(player);
   }
 
@@ -238,7 +238,7 @@ export class InternalLobby implements LobbyInstance {
     this.players = [];
   }
 
-  removePlayer(player: InternalPlayer): void {
+  removePlayer(player: Player): void {
     this.players.splice(this.players.indexOf(player), 1);
   }
 
@@ -270,23 +270,23 @@ export class InternalLobby implements LobbyInstance {
     }
   }
 
-  findPlayerByClientId(clientId: number): InternalPlayer | undefined {
+  findPlayerByClientId(clientId: number): Player | undefined {
     return this.players.find(player => player.getEntity().getOwnerId() == clientId);
   }
 
-  findPlayerByPlayerId(playerId: number): InternalPlayer | undefined {
+  findPlayerByPlayerId(playerId: number): Player | undefined {
     return this.players.find(player => player.getId() == playerId);
   }
 
-  findPlayerByNetId(netId: number): InternalPlayer | undefined {
+  findPlayerByNetId(netId: number): Player | undefined {
     return this.players.find(player => player.getEntity().getObjects().some(object => object.getNetId() == netId));
   }
 
-  findPlayerByConnection(connection: Connection): InternalPlayer | undefined {
+  findPlayerByConnection(connection: Connection): Player | undefined {
     return this.players.find(player => player.getEntity().getOwnerId() == connection.getId());
   }
 
-  findPlayerByEntity(entity: EntityPlayer): InternalPlayer | undefined {
+  findPlayerByEntity(entity: EntityPlayer): Player | undefined {
     return this.players.find(player => player.getEntity().getOwnerId() == entity.getOwnerId());
   }
 
@@ -441,7 +441,7 @@ export class InternalLobby implements LobbyInstance {
     }
 
     const clientIdInUse = !!this.findPlayerByClientId(player.getOwnerId());
-    const playerInstance = new InternalPlayer(this, player, this.findConnection(player.getOwnerId()));
+    const playerInstance = new Player(this, player, this.findConnection(player.getOwnerId()));
 
     this.addPlayer(playerInstance);
 
@@ -711,7 +711,7 @@ export class InternalLobby implements LobbyInstance {
     if (this.meetingHud && disconnectingPlayerIndex) {
       const oldMeetingHud = this.meetingHud.getMeetingHud().clone();
       const disconnectedId = this.players[disconnectingPlayerIndex].getId();
-      const votesToClear: InternalPlayer[] = [];
+      const votesToClear: Player[] = [];
       const states = this.meetingHud.getMeetingHud().getPlayerStates();
 
       for (const [id, state] of states) {
@@ -838,7 +838,7 @@ export class InternalLobby implements LobbyInstance {
         this.handleNewJoin(connection);
         break;
       case GameState.Ended:
-        // TODO: Dead code, InternalHost#endGame sets gameState to NotStarted
+        // TODO: Dead code, Host#endGame sets gameState to NotStarted
         this.handleRejoin(connection);
         break;
       default:

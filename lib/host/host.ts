@@ -18,9 +18,9 @@ import { Connection } from "../protocol/connection";
 import { SpawnPositions, Tasks } from "../static";
 import { PlayerInstance } from "../api/player";
 import { HostInstance } from "../api/host";
-import { InternalPlayer } from "../player";
-import { InternalLobby } from "../lobby";
 import { Game } from "../api/game";
+import { Player } from "../player";
+import { Lobby } from "../lobby";
 import {
   NormalCommunicationsAmount,
   MiraCommunicationsAmount,
@@ -99,7 +99,7 @@ import {
   TeleportReason,
 } from "../types/enums";
 
-export class InternalHost implements HostInstance {
+export class Host implements HostInstance {
   protected readonly id: number = FakeClientId.ServerAsHost;
   protected readonly playersInScene: Map<number, string> = new Map();
 
@@ -118,10 +118,10 @@ export class InternalHost implements HostInstance {
    * @param lobby - The lobby being controlled by the host
    */
   constructor(
-    protected readonly lobby: InternalLobby,
+    protected readonly lobby: Lobby,
   ) {}
 
-  getLobby(): InternalLobby {
+  getLobby(): Lobby {
     return this.lobby;
   }
 
@@ -254,7 +254,7 @@ export class InternalHost implements HostInstance {
         }
       } else if (event.getNewRole() == PlayerRole.Impostor) {
         if (impostors.findIndex(impostor => impostor.getId() == event.getPlayer().getId()) == -1) {
-          impostors.push(event.getPlayer() as InternalPlayer);
+          impostors.push(event.getPlayer() as Player);
         }
       }
     }
@@ -263,7 +263,7 @@ export class InternalHost implements HostInstance {
 
     await this.lobby.getServer().emit("game.started", event);
 
-    impostors = event.getImpostors() as InternalPlayer[];
+    impostors = event.getImpostors() as Player[];
 
     for (let i = 0; i < impostors.length; i++) {
       impostors[i].setRole(PlayerRole.Impostor);
@@ -791,7 +791,7 @@ export class InternalHost implements HostInstance {
 
     entity.getPlayerControl().setNewPlayer(event.isNew());
 
-    const player = new InternalPlayer(this.lobby, entity, sender);
+    const player = new Player(this.lobby, entity, sender);
 
     for (let i = 0; i < this.lobby.getPlayers().length; i++) {
       sender.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].getEntity().serializeSpawn()], this.lobby.getCode()));
@@ -1292,7 +1292,7 @@ export class InternalHost implements HostInstance {
    * @internal
    * @param player - The player whose PlayerData will be checked
    */
-  protected confirmPlayerData(player: InternalPlayer): this {
+  protected confirmPlayerData(player: Player): this {
     const gameData = this.getGameData();
 
     if (![...gameData.getGameData().getPlayers().values()].some(p => p.getId() == player.getEntity().getPlayerControl().getPlayerId())) {
