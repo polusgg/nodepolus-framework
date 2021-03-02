@@ -188,7 +188,7 @@ export class SystemsHandler {
       case ReactorAction.PlacedHand:
         system.setUserConsole(repairer.getId(), amount.getConsoleId());
 
-        if (system.getUserConsoles().size == 2) {
+        if (new Set(system.getUserConsoles().values()).size == 2) {
           system.setTimer(10000);
 
           if (sabotageHandler.timer !== undefined) {
