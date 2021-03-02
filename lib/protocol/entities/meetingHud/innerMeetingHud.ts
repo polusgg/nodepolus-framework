@@ -96,17 +96,12 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   }
 
   serializeData(old: InnerMeetingHud): DataPacket {
-    const writer = new MessageWriter();
-    const dirtyBits = this.serializeStatesToDirtyBits(old.playerStates);
-
-    writer.writePackedUInt32(dirtyBits);
+    const writer = new MessageWriter().writePackedUInt32(this.serializeStatesToDirtyBits(old.playerStates));
 
     for (const [id, state] of this.playerStates) {
-      if (shallowEqual(state, old.playerStates.get(id))) {
-        continue;
+      if (!shallowEqual(state, old.playerStates.get(id))) {
+        writer.writeObject(state);
       }
-
-      writer.writeObject(state);
     }
 
     return new DataPacket(this.netId, writer);
@@ -127,14 +122,14 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   }
 
   protected serializeStatesToDirtyBits(states: Map<number, VoteState>): number {
-    let n = 0;
+    let dirtyBits = 0;
 
     for (const [id, state] of this.playerStates) {
       if (!shallowEqual(state, states.get(id))) {
-        n |= 1 << id;
+        dirtyBits |= 1 << id;
       }
     }
 
-    return n;
+    return dirtyBits;
   }
 }

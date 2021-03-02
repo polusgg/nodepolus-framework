@@ -125,9 +125,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         throw new Error(`Attempted comparison of two disparate SystemTypes: expected ${currentSystem.getType()} (${SystemType[currentSystem.getType()]}) but got ${oldSystem.getType()} (${SystemType[oldSystem.getType()]})`);
       }
 
-      const isEqual = currentSystem.equals(oldSystem);
-
-      if (!isEqual) {
+      if (!currentSystem.equals(oldSystem)) {
         return currentSystem.getType();
       }
 
@@ -256,15 +254,15 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   }
 
   protected serializeSystemsToDirtyBits(otherSystems: SystemType[]): number {
-    let n = 0;
+    let dirtyBits = 0;
 
     for (let i = 0; i < this.systemTypes.length; i++) {
       if (otherSystems.indexOf(this.systemTypes[i]) > -1) {
-        n |= 1 << this.systemTypes[i];
+        dirtyBits |= 1 << this.systemTypes[i];
       }
     }
 
-    return n;
+    return dirtyBits;
   }
 
   protected serializeSystems(old: BaseInnerShipStatus | undefined, systems: SystemType[]): MessageWriter {

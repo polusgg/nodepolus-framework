@@ -1070,7 +1070,7 @@ export class Host implements HostInstance {
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.getMeetingHud().serializeData(oldMeetingHud),
-      new RpcPacket(player.getEntity().getPlayerControl().getNetId(), new SendChatNotePacket(player.getId(), ChatNoteType.DidVote)),
+      new RpcPacket(player.getEntity().getPlayerControl().getNetId(), new SendChatNotePacket(event.getVoter().getId(), ChatNoteType.DidVote)),
     ], this.lobby.getCode()));
 
     if (this.meetingHudTimeout !== undefined && [...meetingHud.getMeetingHud().getPlayerStates().values()].every(p => p.didVote() || p.isDead())) {
