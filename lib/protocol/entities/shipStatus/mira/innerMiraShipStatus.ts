@@ -30,6 +30,10 @@ export class InnerMiraShipStatus extends BaseInnerShipStatus {
   }
 
   clone(): InnerMiraShipStatus {
-    return new InnerMiraShipStatus(this.parent, this.netId);
+    const clone = new InnerMiraShipStatus(this.parent, this.netId);
+
+    clone.systems = this.systems.map(system => system.clone());
+
+    return clone;
   }
 }
