@@ -2,6 +2,9 @@ import { CanSerializeToHazel, Vector2 } from "../types";
 import { MaxValue, MinValue } from "./constants";
 import { clamp } from "./functions";
 
+const LERP_MIN = -50 as const;
+const LERP_MAX = 50 as const;
+
 /**
  * Gets the result of `value`, clamped in the range of `0..1`, and linearly
  * interpolated in the range of `min..max`.
@@ -303,8 +306,8 @@ export class MessageWriter extends HazelMessage {
    * @param value - The Vector2 to write
    */
   writeVector2(value: Vector2): this {
-    return this.writeUInt16(unlerp(-40, 40, value.getX()) * 65535.0)
-      .writeUInt16(unlerp(-40, 40, value.getY()) * 65535.0);
+    return this.writeUInt16(unlerp(LERP_MIN, LERP_MAX, value.getX()) * 65535.0)
+      .writeUInt16(unlerp(LERP_MIN, LERP_MAX, value.getY()) * 65535.0);
   }
 
   /**
@@ -670,8 +673,8 @@ export class MessageReader extends HazelMessage {
    */
   readVector2(): Vector2 {
     return new Vector2(
-      lerp(-40, 40, this.readUInt16() / 65535.0),
-      lerp(-40, 40, this.readUInt16() / 65535.0),
+      lerp(LERP_MIN, LERP_MAX, this.readUInt16() / 65535.0),
+      lerp(LERP_MIN, LERP_MAX, this.readUInt16() / 65535.0),
     );
   }
 
