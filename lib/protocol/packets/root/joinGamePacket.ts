@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { Level, RootPacketType } from "../../../types/enums";
-import { Bitfield, DisconnectReason } from "../../../types";
+import { RootPacketType } from "../../../types/enums";
+import { DisconnectReason } from "../../../types";
 import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootPacket } from "../root";
 
@@ -10,7 +10,6 @@ import { BaseRootPacket } from "../root";
 export class JoinGameRequestPacket extends BaseRootPacket {
   constructor(
     public lobbyCode: string,
-    public ownedMaps: Level[],
   ) {
     super(RootPacketType.JoinGame);
   }
@@ -18,17 +17,15 @@ export class JoinGameRequestPacket extends BaseRootPacket {
   static deserialize(reader: MessageReader): JoinGameRequestPacket {
     return new JoinGameRequestPacket(
       LobbyCode.decode(reader.readInt32()),
-      Bitfield.fromNumber(reader.readByte(), 8).asNumbers<Level>(),
     );
   }
 
   clone(): JoinGameRequestPacket {
-    return new JoinGameRequestPacket(this.lobbyCode, [...this.ownedMaps]);
+    return new JoinGameRequestPacket(this.lobbyCode);
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writeInt32(LobbyCode.encode(this.lobbyCode))
-      .writeByte(this.ownedMaps.reduce((accum, val) => accum | val));
+    writer.writeInt32(LobbyCode.encode(this.lobbyCode));
   }
 }
 
