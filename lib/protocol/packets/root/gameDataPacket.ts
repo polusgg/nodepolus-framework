@@ -1,19 +1,47 @@
 import { BaseGameDataPacket, DataPacket, DespawnPacket, ReadyPacket, RpcPacket, SceneChangePacket, SpawnPacket } from "../gameData";
 import { GameDataPacketType, Level, RootPacketType } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { CustomGameDataPacketContainer } from "../../../types";
 import { LobbyCode } from "../../../util/lobbyCode";
+import { LobbyInstance } from "../../../api/lobby";
+import { Connection } from "../../connection";
 import { BaseRootPacket } from "../root";
 
 /**
  * Root Packet ID: `0x05` (`5`)
  */
 export class GameDataPacket extends BaseRootPacket {
+  private static readonly customPackets: Map<number, CustomGameDataPacketContainer> = new Map();
+
   constructor(
     public packets: BaseGameDataPacket[],
     public lobbyCode: string,
     public targetClientId?: number,
   ) {
     super(RootPacketType[targetClientId !== undefined ? "GameDataTo" : "GameData"]);
+  }
+
+  static registerPacket<T extends BaseGameDataPacket>(id: number, deserializer: (reader: MessageReader) => T, handler: (connection: Connection, packet: T, lobby: LobbyInstance) => void): void {
+    if (id in GameDataPacketType || GameDataPacket.customPackets.has(id)) {
+      throw new Error(`Attempted to register a custom GameData packet using an ID that is already in use: ${id}`);
+    }
+
+    GameDataPacket.customPackets.set(id, {
+      deserialize: deserializer,
+      handle: handler,
+    });
+  }
+
+  static unregisterPacket(id: number): void {
+    GameDataPacket.customPackets.delete(id);
+  }
+
+  static hasPacket(id: number): boolean {
+    return GameDataPacket.customPackets.has(id);
+  }
+
+  static getPacket(id: number): CustomGameDataPacketContainer | undefined {
+    return GameDataPacket.customPackets.get(id);
   }
 
   static deserialize(reader: MessageReader, level?: Level): GameDataPacket {
@@ -40,8 +68,15 @@ export class GameDataPacket extends BaseRootPacket {
           return packets.push(SceneChangePacket.deserialize(child));
         case GameDataPacketType.Ready:
           return packets.push(ReadyPacket.deserialize(child));
-        default:
+        default: {
+          const custom = GameDataPacket.customPackets.get(child.getTag());
+
+          if (custom !== undefined) {
+            return packets.push(custom.deserialize(child));
+          }
+
           throw new Error(`Attempted to deserialize an unimplemented game data packet type: ${child.getTag()} (${GameDataPacketType[child.getTag()]})`);
+        }
       }
     });
 

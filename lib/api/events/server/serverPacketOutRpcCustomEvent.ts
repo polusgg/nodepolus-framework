@@ -13,7 +13,6 @@ export class ServerPacketOutRpcCustomEvent extends CancellableEvent {
   /**
    * @param connection - The connection to which the packet was sent
    * @param netId - The ID of the InnerNetObject that sent the packet
-   * @param sender - The InnerNetObject that sent the packet
    * @param packet - The RPC packet that was sent
    */
   constructor(

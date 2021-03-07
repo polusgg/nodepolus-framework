@@ -62,74 +62,58 @@ export class RootPacket {
       switch (child.getTag()) {
         case RootPacketType.HostGame:
           if (clientBound) {
-            packets.push(HostGameResponsePacket.deserialize(child));
-          } else {
-            packets.push(HostGameRequestPacket.deserialize(child));
+            return packets.push(HostGameResponsePacket.deserialize(child));
           }
-          break;
+
+          return packets.push(HostGameRequestPacket.deserialize(child));
         case RootPacketType.JoinGame:
           if (clientBound) {
             if (child.getBuffer().length <= 4) {
-              packets.push(JoinGameErrorPacket.deserialize(child));
-            } else {
-              packets.push(JoinGameResponsePacket.deserialize(child));
+              return packets.push(JoinGameErrorPacket.deserialize(child));
             }
-          } else {
-            packets.push(JoinGameRequestPacket.deserialize(child));
+
+            return packets.push(JoinGameResponsePacket.deserialize(child));
           }
-          break;
+
+          return packets.push(JoinGameRequestPacket.deserialize(child));
         case RootPacketType.StartGame:
-          packets.push(StartGamePacket.deserialize(child));
-          break;
+          return packets.push(StartGamePacket.deserialize(child));
         case RootPacketType.RemoveGame:
-          packets.push(RemoveGamePacket.deserialize(child));
-          break;
+          return packets.push(RemoveGamePacket.deserialize(child));
         case RootPacketType.RemovePlayer:
           if (clientBound) {
-            packets.push(LateRejectionPacket.deserialize(child));
-          } else {
-            packets.push(RemovePlayerPacket.deserialize(child));
+            return packets.push(LateRejectionPacket.deserialize(child));
           }
-          break;
+
+          return packets.push(RemovePlayerPacket.deserialize(child));
         case RootPacketType.GameData:
         case RootPacketType.GameDataTo:
-          packets.push(GameDataPacket.deserialize(child, level));
-          break;
+          return packets.push(GameDataPacket.deserialize(child, level));
         case RootPacketType.JoinedGame:
-          packets.push(JoinedGamePacket.deserialize(child));
-          break;
+          return packets.push(JoinedGamePacket.deserialize(child));
         case RootPacketType.EndGame:
-          packets.push(EndGamePacket.deserialize(child));
-          break;
+          return packets.push(EndGamePacket.deserialize(child));
         case RootPacketType.AlterGameTag:
-          packets.push(AlterGameTagPacket.deserialize(child));
-          break;
+          return packets.push(AlterGameTagPacket.deserialize(child));
         case RootPacketType.KickPlayer:
-          packets.push(KickPlayerPacket.deserialize(child));
-          break;
+          return packets.push(KickPlayerPacket.deserialize(child));
         case RootPacketType.WaitForHost:
-          packets.push(WaitForHostPacket.deserialize(child));
-          break;
+          return packets.push(WaitForHostPacket.deserialize(child));
         case RootPacketType.Redirect:
-          packets.push(RedirectPacket.deserialize(child));
-          break;
+          return packets.push(RedirectPacket.deserialize(child));
         case RootPacketType.ReselectServer:
-          packets.push(ReselectServerPacket.deserialize(child));
-          break;
+          return packets.push(ReselectServerPacket.deserialize(child));
         case RootPacketType.GetGameList:
           if (clientBound) {
-            packets.push(GetGameListResponsePacket.deserialize(child));
-          } else {
-            packets.push(GetGameListRequestPacket.deserialize(child));
+            return packets.push(GetGameListResponsePacket.deserialize(child));
           }
-          break;
+
+          return packets.push(GetGameListRequestPacket.deserialize(child));
         default: {
           const custom = RootPacket.customPackets.get(child.getTag());
 
           if (custom !== undefined) {
-            packets.push(custom.deserialize(child));
-
-            break;
+            return packets.push(custom.deserialize(child));
           }
 
           throw new Error(`Attempted to deserialize an unimplemented root game packet type: ${child.getTag()} (${RootPacketType[child.getTag()]})`);

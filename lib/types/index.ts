@@ -8,6 +8,8 @@ export { ClientVersion } from "./clientVersion";
 
 export { ConnectionInfo } from "./connectionInfo";
 
+export { CustomGameDataPacketContainer } from "./customGameDataPacketContainer";
+
 export { CustomRootPacketContainer } from "./customRootPacketContainer";
 
 export { CustomRpcPacketContainer } from "./customRpcPacketContainer";

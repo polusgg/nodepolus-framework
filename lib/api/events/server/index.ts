@@ -14,6 +14,10 @@ export { ServerPacketInCustomEvent } from "./serverPacketInCustomEvent";
 
 export { ServerPacketInEvent } from "./serverPacketInEvent";
 
+export { ServerPacketInGameDataCustomEvent } from "./serverPacketInGameDataCustomEvent";
+
+export { ServerPacketInGameDataEvent } from "./serverPacketInGameDataEvent";
+
 export { ServerPacketInRpcCustomEvent } from "./serverPacketInRpcCustomEvent";
 
 export { ServerPacketInRpcEvent } from "./serverPacketInRpcEvent";
@@ -21,6 +25,10 @@ export { ServerPacketInRpcEvent } from "./serverPacketInRpcEvent";
 export { ServerPacketOutCustomEvent } from "./serverPacketOutCustomEvent";
 
 export { ServerPacketOutEvent } from "./serverPacketOutEvent";
+
+export { ServerPacketOutGameDataCustomEvent } from "./serverPacketOutGameDataCustomEvent";
+
+export { ServerPacketOutGameDataEvent } from "./serverPacketOutGameDataEvent";
 
 export { ServerPacketOutRpcCustomEvent } from "./serverPacketOutRpcCustomEvent";
 

@@ -1,4 +1,4 @@
-import { ServerLobbyDestroyedEvent, ServerLobbyJoinRefusedEvent, ServerPacketInRpcCustomEvent, ServerPacketInRpcEvent } from "../api/events/server";
+import { ServerLobbyDestroyedEvent, ServerLobbyJoinRefusedEvent, ServerPacketInGameDataCustomEvent, ServerPacketInGameDataEvent, ServerPacketInRpcCustomEvent, ServerPacketInRpcEvent } from "../api/events/server";
 import { BaseGameDataPacket, DataPacket, DespawnPacket, RpcPacket, SceneChangePacket } from "../protocol/packets/gameData";
 import { BaseEntityShipStatus } from "../protocol/entities/shipStatus/baseShipStatus/baseEntityShipStatus";
 import { BaseRpcPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
@@ -257,8 +257,7 @@ export class Lobby implements LobbyInstance {
     }
 
     for (let i = 0; i < this.players.length; i++) {
-      const player = this.players[i];
-      const objects = player.getEntity().getObjects();
+      const objects = this.players[i].getEntity().getObjects();
 
       for (let j = 0; j < objects.length; j++) {
         const object = objects[j];
@@ -934,6 +933,36 @@ export class Lobby implements LobbyInstance {
   protected async handleGameDataPacket(packet: BaseGameDataPacket, connection: Connection, sendTo?: Connection[]): Promise<void> {
     sendTo = ((sendTo !== undefined && sendTo.length > 0) ? sendTo : this.connections).filter(con => con.getId() != connection.getId());
 
+    if (packet.getType() in GameDataPacketType) {
+      if (this.server.listenerCount("server.packet.in.gamedata") > 0) {
+        const event = new ServerPacketInGameDataEvent(connection, packet);
+
+        await this.server.emit("server.packet.in.gamedata", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
+      }
+    } else {
+      const custom = GameDataPacket.getPacket(packet.getType());
+
+      if (custom !== undefined) {
+        if (this.server.listenerCount("server.packet.in.gamedata.custom") > 0) {
+          const event = new ServerPacketInGameDataCustomEvent(connection, packet);
+
+          await this.server.emit("server.packet.in.gamedata.custom", event);
+
+          if (event.isCancelled()) {
+            return;
+          }
+        }
+
+        custom.handle(connection, packet, this);
+
+        return;
+      }
+    }
+
     switch (packet.getType()) {
       case GameDataPacketType.Data:
         if (!this.ignoredNetIds.includes((packet as DataPacket).senderNetId)) {
@@ -950,8 +979,10 @@ export class Lobby implements LobbyInstance {
         }
 
         if (rpc.packet.getType() in RpcPacketType) {
+          const object = this.findInnerNetObject(rpc.senderNetId);
+
           if (this.server.listenerCount("server.packet.in.rpc") > 0) {
-            const event = new ServerPacketInRpcEvent(connection, rpc.senderNetId, this.findInnerNetObject(rpc.senderNetId), rpc.packet);
+            const event = new ServerPacketInRpcEvent(connection, rpc.senderNetId, object, rpc.packet);
 
             await this.server.emit("server.packet.in.rpc", event);
 
@@ -965,8 +996,6 @@ export class Lobby implements LobbyInstance {
 
             return;
           }
-
-          const object = this.findInnerNetObject(rpc.senderNetId);
 
           if (object === undefined) {
             throw new Error(`RPC packet sent from unknown InnerNetObject: ${rpc.senderNetId}`);

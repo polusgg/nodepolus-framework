@@ -35,6 +35,8 @@ import {
   ServerPacketInEvent,
   ServerPacketOutCustomEvent,
   ServerPacketOutEvent,
+  ServerPacketOutGameDataCustomEvent,
+  ServerPacketOutGameDataEvent,
   ServerPacketOutRpcCustomEvent,
   ServerPacketOutRpcEvent,
 } from "../api/events/server";
@@ -402,17 +404,19 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     this.connections.delete(connection.getConnectionInfo().toString());
   }
 
-  protected async emitRpcEvents(connection: Connection, event: ServerPacketOutEvent | ServerPacketOutCustomEvent): Promise<void> {
+  /**
+   * Emits events for RPC packets and all other GameData packets.
+   *
+   * @param connection - The connection to which the packet was sent
+   * @param event - The event containing the root packet which may or may not have a GameData packet
+   */
+  protected async emitGameDataEvents(connection: Connection, event: ServerPacketOutEvent | ServerPacketOutCustomEvent): Promise<void> {
     if (event.isCancelled()) {
       return;
     }
 
-    const rpcListeners = this.listenerCount("server.packet.out.rpc");
-    const rpcCustomListeners = this.listenerCount("server.packet.out.rpc.custom");
-
-    if (rpcListeners === 0 && rpcCustomListeners === 0) {
-      return;
-    }
+    const gameDataListeners = this.listenerCount("server.packet.out.gamedata");
+    const gameDataCustomListeners = this.listenerCount("server.packet.out.gamedata.custom");
 
     if (event.getPacket().getType() !== RootPacketType.GameData && event.getPacket().getType() !== RootPacketType.GameDataTo) {
       return;
@@ -422,28 +426,53 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     const filteredIndices: number[] = [];
 
     for (let i = 0; i < subpackets.length; i++) {
-      if (subpackets[i].getType() !== GameDataPacketType.RPC) {
-        continue;
-      }
+      const subpacket = subpackets[i];
 
-      const rpc = subpackets[i] as RpcPacket;
+      // Emit events for RPC packets
+      if (subpacket.getType() === GameDataPacketType.RPC) {
+        const rpc = subpacket as RpcPacket;
+        const rpcListeners = this.listenerCount("server.packet.out.rpc");
+        const rpcCustomListeners = this.listenerCount("server.packet.out.rpc.custom");
 
-      if (rpc.getType() in RpcPacketType) {
-        if (rpcListeners > 0) {
-          const rpcEvent = new ServerPacketOutRpcEvent(connection, rpc.senderNetId, rpc.packet);
+        // Emit events for base RPC packets
+        if (rpc.packet.getType() in RpcPacketType) {
+          if (rpcListeners > 0) {
+            const rpcEvent = new ServerPacketOutRpcEvent(connection, rpc.senderNetId, rpc.packet);
 
-          await this.emit("server.packet.out.rpc", rpcEvent);
+            await this.emit("server.packet.out.rpc", rpcEvent);
+
+            if (rpcEvent.isCancelled()) {
+              filteredIndices.push(i);
+            }
+          }
+        // Emit events for custom RPC packets
+        } else if (rpcCustomListeners > 0) {
+          const rpcEvent = new ServerPacketOutRpcCustomEvent(connection, rpc.senderNetId, rpc.packet);
+
+          await this.emit("server.packet.out.rpc.custom", rpcEvent);
 
           if (rpcEvent.isCancelled()) {
             filteredIndices.push(i);
           }
         }
-      } else if (rpcCustomListeners > 0) {
-        const rpcEvent = new ServerPacketOutRpcCustomEvent(connection, rpc.senderNetId, rpc.packet);
+      // Emit events for base GameData packets, excluding RPC as that is handled above
+      } else if (subpacket.getType() in GameDataPacketType) {
+        if (gameDataListeners > 0) {
+          const gameDataEvent = new ServerPacketOutGameDataEvent(connection, subpacket);
 
-        await this.emit("server.packet.out.rpc.custom", rpcEvent);
+          await this.emit("server.packet.out.gamedata", gameDataEvent);
 
-        if (rpcEvent.isCancelled()) {
+          if (gameDataEvent.isCancelled()) {
+            filteredIndices.push(i);
+          }
+        }
+      // Emit events for custom GameData packets
+      } else if (gameDataCustomListeners > 0) {
+        const gameDataEvent = new ServerPacketOutGameDataCustomEvent(connection, subpacket);
+
+        await this.emit("server.packet.out.gamedata.custom", gameDataEvent);
+
+        if (gameDataEvent.isCancelled()) {
           filteredIndices.push(i);
         }
       }
@@ -476,17 +505,29 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
       this.handlePacket(packet, connection);
     });
 
-    if (this.listenerCount("server.packet.out") > 0) {
-      connection.on("write", async event => {
-        await this.emit("server.packet.out", event);
-        await this.emitRpcEvents(connection, event);
-      });
-    }
-
     if (this.listenerCount("server.packet.out.custom") > 0) {
       connection.on("writeCustom", async event => {
         await this.emit("server.packet.out.custom", event);
-        await this.emitRpcEvents(connection, event);
+      });
+    }
+
+    if (this.listenerCount("server.packet.out") > 0) {
+      connection.on("write", async event => {
+        await this.emit("server.packet.out", event);
+      });
+    }
+
+    const gameDataCount = this.listenerCount("server.packet.out.gamedata.custom")
+                        + this.listenerCount("server.packet.out.gamedata")
+                        + this.listenerCount("server.packet.out.rpc.custom")
+                        + this.listenerCount("server.packet.out.rpc");
+
+    if (gameDataCount > 0) {
+      connection.on("writeCustom", async event => {
+        await this.emitGameDataEvents(connection, event);
+      });
+      connection.on("write", async event => {
+        await this.emitGameDataEvents(connection, event);
       });
     }
 

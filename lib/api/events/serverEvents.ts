@@ -88,10 +88,14 @@ import {
   ServerLobbyListEvent,
   ServerPacketInCustomEvent,
   ServerPacketInEvent,
+  ServerPacketInGameDataCustomEvent,
+  ServerPacketInGameDataEvent,
   ServerPacketInRpcCustomEvent,
   ServerPacketInRpcEvent,
   ServerPacketOutCustomEvent,
   ServerPacketOutEvent,
+  ServerPacketOutGameDataCustomEvent,
+  ServerPacketOutGameDataEvent,
   ServerPacketOutRpcCustomEvent,
   ServerPacketOutRpcEvent,
 } from "./server";
@@ -218,12 +222,16 @@ export type ServerEvents = {
   "server.lobby.join": ServerLobbyJoinEvent;
   "server.lobby.join.refused": ServerLobbyJoinRefusedEvent;
   "server.lobby.list": ServerLobbyListEvent;
-  "server.packet.in": ServerPacketInEvent;
   "server.packet.in.custom": ServerPacketInCustomEvent;
-  "server.packet.in.rpc": ServerPacketInRpcEvent;
+  "server.packet.in": ServerPacketInEvent;
+  "server.packet.in.gamedata.custom": ServerPacketInGameDataCustomEvent;
+  "server.packet.in.gamedata": ServerPacketInGameDataEvent;
   "server.packet.in.rpc.custom": ServerPacketInRpcCustomEvent;
-  "server.packet.out": ServerPacketOutEvent;
+  "server.packet.in.rpc": ServerPacketInRpcEvent;
   "server.packet.out.custom": ServerPacketOutCustomEvent;
-  "server.packet.out.rpc": ServerPacketOutRpcEvent;
+  "server.packet.out": ServerPacketOutEvent;
+  "server.packet.out.gamedata.custom": ServerPacketOutGameDataCustomEvent;
+  "server.packet.out.gamedata": ServerPacketOutGameDataEvent;
   "server.packet.out.rpc.custom": ServerPacketOutRpcCustomEvent;
+  "server.packet.out.rpc": ServerPacketOutRpcEvent;
 };
