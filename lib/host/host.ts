@@ -850,6 +850,7 @@ export class Host implements HostInstance {
       return;
     }
 
+    this.lobby.setOptions(event.getNewOptions());
     sender.syncSettings(event.getNewOptions(), this.lobby.getConnections());
   }
 
