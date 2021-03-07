@@ -957,7 +957,7 @@ export class Lobby implements LobbyInstance {
           }
         }
 
-        custom.handle(connection, packet, this);
+        custom.handle(connection, packet);
 
         return;
       }

@@ -3,7 +3,6 @@ import { GameDataPacketType, Level, RootPacketType } from "../../../types/enums"
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { CustomGameDataPacketContainer } from "../../../types";
 import { LobbyCode } from "../../../util/lobbyCode";
-import { LobbyInstance } from "../../../api/lobby";
 import { Connection } from "../../connection";
 import { BaseRootPacket } from "../root";
 
@@ -21,7 +20,7 @@ export class GameDataPacket extends BaseRootPacket {
     super(RootPacketType[targetClientId !== undefined ? "GameDataTo" : "GameData"]);
   }
 
-  static registerPacket<T extends BaseGameDataPacket>(id: number, deserializer: (reader: MessageReader) => T, handler: (connection: Connection, packet: T, lobby: LobbyInstance) => void): void {
+  static registerPacket<T extends BaseGameDataPacket>(id: number, deserializer: (reader: MessageReader) => T, handler: (connection: Connection, packet: T) => void): void {
     if (id in GameDataPacketType || GameDataPacket.customPackets.has(id)) {
       throw new Error(`Attempted to register a custom GameData packet using an ID that is already in use: ${id}`);
     }
