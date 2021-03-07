@@ -856,8 +856,15 @@ export class Host implements HostInstance {
       return;
     }
 
-    this.lobby.setOptions(event.getNewOptions());
-    sender.syncSettings(event.getNewOptions(), this.lobby.getConnections());
+    const newOptions = event.getNewOptions();
+    const sendTo = this.lobby.getConnections();
+
+    this.lobby.setOptions(newOptions);
+
+    sender.syncSettings(
+      newOptions,
+      options.equals(newOptions) ? sendTo.filter(con => con.getId() !== owner.getId()) : sendTo,
+    );
   }
 
   async handleCheckName(sender: InnerPlayerControl, name: string): Promise<void> {

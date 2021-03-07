@@ -1,6 +1,7 @@
 import { KillDistance, Language, Level, TaskBarMode } from "./enums";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { Bitfield, CanSerializeToHazel } from ".";
+import { isFloatEqual } from "../util/functions";
 
 const VERSIONS = [1, 2, 3, 4];
 
@@ -617,5 +618,36 @@ export class GameOptionsData implements CanSerializeToHazel {
       this.anonymousVoting,
       this.taskBarUpdates,
     );
+  }
+
+  equals(other: GameOptionsData): boolean {
+    if (this == other) {
+      return true;
+    }
+
+    return this.version == other.version
+        && this.maxPlayers == other.maxPlayers
+        && this.languages.length == other.languages.length
+        && this.languages.every((language, index) => language == other.languages[index])
+        && this.levels.length == other.levels.length
+        && this.levels.every((level, index) => level == other.levels[index])
+        && isFloatEqual(this.playerSpeedModifier, other.playerSpeedModifier)
+        && isFloatEqual(this.crewmateLightModifier, other.crewmateLightModifier)
+        && isFloatEqual(this.impostorLightModifier, other.impostorLightModifier)
+        && isFloatEqual(this.killCooldown, other.killCooldown)
+        && this.commonTaskCount == other.commonTaskCount
+        && this.longTaskCount == other.longTaskCount
+        && this.shortTaskCount == other.shortTaskCount
+        && this.emergencyMeetingCount == other.emergencyMeetingCount
+        && this.impostorCount == other.impostorCount
+        && this.killDistance == other.killDistance
+        && this.discussionTime == other.discussionTime
+        && this.votingTime == other.votingTime
+        && this.isDefault == other.isDefault
+        && this.emergencyCooldown == other.emergencyCooldown
+        && this.confirmEjects == other.confirmEjects
+        && this.visualTasks == other.visualTasks
+        && this.anonymousVoting == other.anonymousVoting
+        && this.taskBarUpdates == other.taskBarUpdates
   }
 }
