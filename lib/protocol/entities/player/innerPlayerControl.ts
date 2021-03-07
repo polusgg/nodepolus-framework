@@ -324,7 +324,9 @@ export class InnerPlayerControl extends BaseInnerNetObject {
         break;
       }
       case RpcPacketType.SyncSettings:
-        this.syncSettings((packet as SyncSettingsPacket).options, sendTo);
+        // TODO: InnerNetObject refactor
+        this.parent.getLobby().getHostInstance().handleSyncSettings(this, (packet as SyncSettingsPacket).options);
+        // this.syncSettings((packet as SyncSettingsPacket).options, sendTo);
         break;
       case RpcPacketType.SetInfected:
         this.parent.getLobby().getLogger().warn("Received SetInfected packet from connection %s in a server-as-host state", connection);

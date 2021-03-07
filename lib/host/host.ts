@@ -827,10 +827,17 @@ export class Host implements HostInstance {
   }
 
   async handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData): Promise<void> {
+    const oldOptions = this.lobby.getOptions();
     const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
 
     if (owner === undefined) {
       throw new Error("Received CheckName from an InnerPlayerControl without an owner");
+    }
+
+    if (!owner.isActingHost()) {
+      sender.syncSettings(oldOptions, [owner]);
+
+      return;
     }
 
     const player = this.lobby.findPlayerByConnection(owner);
@@ -839,7 +846,6 @@ export class Host implements HostInstance {
       throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
     }
 
-    const oldOptions = this.lobby.getOptions();
     const event = new LobbyOptionsUpdatedEvent(this.lobby, player, oldOptions.clone() as Immutable<GameOptionsData>, options);
 
     await this.lobby.getServer().emit("lobby.options.updated", event);
