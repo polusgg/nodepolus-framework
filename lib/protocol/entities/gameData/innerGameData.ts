@@ -44,7 +44,7 @@ export class InnerGameData extends BaseInnerNetObject {
   }
 
   /**
-   * Checks if the given name is already in use by another player.
+   * Gets whether or not the given name is already in use by another player.
    *
    * @param name - The name to be checked
    * @returns `true` if the name is already in use, `false` if not

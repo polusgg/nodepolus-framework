@@ -76,8 +76,8 @@ export function randomInRange(min: number, max: number): number {
 }
 
 /**
- * Checks if the given floating-point numbers are equal by comparing their
- * difference to the given epsilon value.
+ * Gets whether or not the given floating-point numbers are equal by comparing
+ * their difference to the given epsilon value.
  *
  * @param actual - The number to be checked
  * @param expected - The number that `actual` should be checked against

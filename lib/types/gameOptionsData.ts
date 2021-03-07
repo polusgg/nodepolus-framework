@@ -620,6 +620,13 @@ export class GameOptionsData implements CanSerializeToHazel {
     );
   }
 
+  /**
+   * Gets whether or not the GameOptionsData is equal to the given
+   * GameOptionsData by comparing each property.
+   *
+   * @param other - The GameOptionsData to be checked against
+   * @returns `true` if the two are equal, `false` if not
+   */
   equals(other: GameOptionsData): boolean {
     if (this == other) {
       return true;

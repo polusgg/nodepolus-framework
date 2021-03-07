@@ -47,7 +47,7 @@ export class FileAnnouncementDriver extends BaseAnnouncementDriver {
   }
 
   /**
-   * Checks if the given announcement contains all necessary data.
+   * Gets whether or not the given announcement contains all necessary data.
    *
    * @param data - The announcement to be checked
    * @returns `true` if the announcement data is valid, `false` if not
