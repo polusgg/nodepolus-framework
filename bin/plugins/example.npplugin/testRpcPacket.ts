@@ -5,7 +5,7 @@ export class TestRpcPacket extends BaseRpcPacket {
   constructor(
     public readonly message: string,
   ) {
-    super(0x50);
+    super(0x60);
   }
 
   static deserialize(reader: MessageReader): TestRpcPacket {

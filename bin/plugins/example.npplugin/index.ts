@@ -1,4 +1,3 @@
-import { ServerLobbyJoinEvent, ServerPacketInCustomEvent, ServerPacketInRpcCustomEvent } from "../../../lib/api/events/server";
 import { FileAnnouncementDriver } from "../../../lib/announcementServer/drivers";
 import { BaseInnerNetObject } from "../../../lib/protocol/entities/baseEntity";
 import { ConnectionInfo, DisconnectReason, Vector2 } from "../../../lib/types";
@@ -6,16 +5,24 @@ import { MessageReader, MessageWriter } from "../../../lib/util/hazelMessage";
 import { AddressFamily, InnerNetObjectType } from "../../../lib/types/enums";
 import { AnnouncementServer } from "../../../lib/announcementServer";
 import { BasePlugin, PluginMetadata } from "../../../lib/api/plugin";
+import { GameDataPacket } from "../../../lib/protocol/packets/root";
 import { RpcPacket } from "../../../lib/protocol/packets/gameData";
 import { PlayerJoinedEvent } from "../../../lib/api/events/player";
 import { RootPacket } from "../../../lib/protocol/packets/hazel";
 import { Connection } from "../../../lib/protocol/connection";
 import { shuffleArrayClone } from "../../../lib/util/shuffle";
+import { TestGameDataPacket } from "./testGameDataPacket";
 import { TestRpcPacket } from "./testRpcPacket";
 import { Hmac } from "../../../lib/util/hmac";
 import { Server } from "../../../lib/server";
 import { TestPacket } from "./testPacket";
 import path from "path";
+import {
+  ServerLobbyJoinEvent,
+  ServerPacketInCustomEvent,
+  ServerPacketInGameDataCustomEvent,
+  ServerPacketInRpcCustomEvent,
+} from "../../../lib/api/events/server";
 
 /**
  * Grab the server and announcement server from the global object.
@@ -84,22 +91,37 @@ export default class extends BasePlugin {
     );
 
     /**
-     * Registers a custom RPC packet with the ID 0x50 (80).
+     * Registers a custom GameData packet with the ID 0x50 (80).
+     */
+    GameDataPacket.registerPacket(
+      0x50,
+      TestGameDataPacket.deserialize,
+      this.handleTestGameDataPacket.bind(this),
+    );
+
+    /**
+     * Registers a custom RPC packet with the ID 0x60 (96).
      */
     RpcPacket.registerPacket(
-      0x50,
+      0x60,
       TestRpcPacket.deserialize,
       this.handleTestRpcPacket.bind(this),
     );
 
     // server.on("server.packet.out", event => {
-    //   if (event.getPacket().type === RootPacketType.GetGameList) {
+    //   if (event.getPacket().getType() === RootPacketType.GetGameList) {
+    //     event.cancel();
+    //   }
+    // });
+
+    // server.on("server.packet.out.gamedata", event => {
+    //   if (event.getPacket().getType() === GameDataPacketType.Spawn) {
     //     event.cancel();
     //   }
     // });
 
     // server.on("server.packet.out.rpc", event => {
-    //   if (event.getPacket().type === RpcPacketType.SendChat) {
+    //   if (event.getPacket().getType() === RpcPacketType.SendChat) {
     //     event.cancel();
     //   }
     // });
@@ -204,6 +226,21 @@ export default class extends BasePlugin {
     });
 
     /**
+     * Listens for custom GameData packets
+     */
+    server.on("server.packet.in.gamedata.custom", (event: ServerPacketInGameDataCustomEvent) => {
+      event.cancel();
+
+      const packet = event.getPacket();
+
+      server.getLogger("Custom GameData").debug(
+        "Received custom GameData packet from lobby %s: %s",
+        event.getConnection().getLobby(),
+        packet,
+      );
+    });
+
+    /**
      * Listens for custom RPC packets
      */
     server.on("server.packet.in.rpc.custom", (event: ServerPacketInRpcCustomEvent) => {
@@ -217,7 +254,7 @@ export default class extends BasePlugin {
       }
 
       server.getLogger("Custom RPC").debug(
-        "Received custom RPC packet from %s #%d: %s",
+        "Received custom RPC packet from %s object #%d: %s",
         InnerNetObjectType[sender.getType()],
         event.getNetId(),
         packet,
@@ -306,9 +343,14 @@ export default class extends BasePlugin {
     //   0x01, 0x00, 0x07, 0x06, 0x00, 0x40, 0x05, 0x68, 0x65, 0x6c, 0x6c, 0x6f,
     // ]));
 
+    // DEBUG: Simulates sending a TestGameDataPacket packet
+    // event.getPlayer().getConnection()?.emit("message", MessageReader.fromRawBytes([
+    //   0x01, 0x00, 0x08, 0x0d, 0x00, 0x05, 0x9a, 0xa0, 0xb6, 0x80, 0x06, 0x00, 0x50, 0x05, 0x77, 0x6f, 0x72, 0x6c, 0x64,
+    // ]));
+
     // DEBUG: Simulates sending a TestRpcPacket packet
     // event.getPlayer().getConnection()?.emit("message", MessageReader.fromRawBytes([
-    //   0x01, 0x00, 0x08, 0x0f, 0x00, 0x05, 0x9a, 0xa0, 0xb6, 0x80, 0x08, 0x00, 0x02, 0x04, 0x50, 0x05, 0x77, 0x6f, 0x72, 0x6c, 0x64,
+    //   0x01, 0x00, 0x08, 0x0f, 0x00, 0x05, 0x9a, 0xa0, 0xb6, 0x80, 0x08, 0x00, 0x02, 0x04, 0x60, 0x05, 0x61, 0x67, 0x61, 0x69, 0x6e,
     // ]));
   }
 
@@ -355,6 +397,19 @@ export default class extends BasePlugin {
 
   /**
    * This method will only be called if the `event.cancel()` call in the
+   * `server.packet.in.gamedata.custom` event handler is removed.
+   */
+  private handleTestGameDataPacket(connection: Connection, packet: TestGameDataPacket): void {
+    server.getLogger("TestGameDataPacket").debug(
+      "Received TestGameDataPacket from connection %s for lobby %s: %s",
+      connection,
+      connection.getLobby(),
+      packet.message,
+    );
+  }
+
+  /**
+   * This method will only be called if the `event.cancel()` call in the
    * `server.packet.in.rpc.custom` event handler is removed.
    */
   private handleTestRpcPacket(connection: Connection, packet: TestRpcPacket, sender?: BaseInnerNetObject): void {
@@ -367,11 +422,11 @@ export default class extends BasePlugin {
     }
 
     server.getLogger("TestRpcPacket").debug(
-      "Received TestRpcPacket from connection %s (%s #%d): %s",
+      "Received TestRpcPacket from connection %s (%s object #%d): %s",
       connection,
       InnerNetObjectType[sender.getType()],
       sender.getNetId(),
-      packet,
+      packet.message,
     );
 
     // (sender as InnerPlayerControl).setName(packet.message, connection.lobby?.getConnections() ?? []);
