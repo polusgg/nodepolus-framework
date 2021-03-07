@@ -29,14 +29,14 @@ export enum DisconnectReasonType {
    */
   Banned = 6,
   /**
-   * You were kicked from {code}/the room.
+   * You were kicked from \{code\}/the room.
    *
    * You can rejoin if the room hasn't started.
    */
   Kicked = 7,
   Custom = 8,
   /**
-   * Server refused username: {name}
+   * Server refused username: \{name\}
    */
   InvalidName = 9,
   /**
@@ -69,7 +69,7 @@ export enum DisconnectReasonType {
    */
   ServerFull = 20,
   /**
-   * You may not join another game for another {minutes} minutes after
+   * You may not join another game for another \{minutes\} minutes after
    * intentionally disconnecting.
    */
   IntentionalLeaving = 208,

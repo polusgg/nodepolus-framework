@@ -655,6 +655,6 @@ export class GameOptionsData implements CanSerializeToHazel {
         && this.confirmEjects == other.confirmEjects
         && this.visualTasks == other.visualTasks
         && this.anonymousVoting == other.anonymousVoting
-        && this.taskBarUpdates == other.taskBarUpdates
+        && this.taskBarUpdates == other.taskBarUpdates;
   }
 }
