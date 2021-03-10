@@ -1,7 +1,7 @@
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer } from "../../types";
+import { HazelPacketType, LimboState, PacketDestination, RootPacketType, RuntimePlatform } from "../../types/enums";
 import { BaseRootPacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
-import { HazelPacketType, LimboState, PacketDestination, RootPacketType } from "../../types/enums";
 import { ServerPacketOutCustomEvent, ServerPacketOutEvent } from "../../api/events/server";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
 import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
@@ -27,6 +27,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   protected hazelVersion?: number;
   protected clientVersion?: ClientVersion;
   protected name?: string;
+  protected platform?: RuntimePlatform;
   protected lastPingReceivedTime: number = Date.now();
   protected lobby?: Lobby;
   protected firstJoin = true;
@@ -204,6 +205,24 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    */
   getName(): string | undefined {
     return this.name;
+  }
+
+  /**
+   * Gets the platform on which this connection is playing.
+   */
+  getPlatform(): RuntimePlatform | undefined {
+    return this.platform;
+  }
+
+  /**
+   * Sets the platform on which this connection is playing.
+   *
+   * @param platform - The new platform on which this connection is playing
+   */
+  setPlatform(platform?: RuntimePlatform): this {
+    this.platform = platform;
+
+    return this;
   }
 
   /**

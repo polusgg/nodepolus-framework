@@ -1,5 +1,3 @@
-import { ServerLobbyDestroyedEvent, ServerLobbyJoinRefusedEvent, ServerPacketInGameDataCustomEvent, ServerPacketInGameDataEvent, ServerPacketInRpcCustomEvent, ServerPacketInRpcEvent } from "../api/events/server";
-import { BaseGameDataPacket, DataPacket, DespawnPacket, RpcPacket, SceneChangePacket } from "../protocol/packets/gameData";
 import { BaseEntityShipStatus } from "../protocol/entities/shipStatus/baseShipStatus/baseEntityShipStatus";
 import { BaseRpcPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/baseEntity";
@@ -27,6 +25,14 @@ import { Player } from "../player";
 import { Server } from "../server";
 import { Host } from "../host";
 import {
+  BaseGameDataPacket,
+  ClientInfoPacket,
+  DataPacket,
+  DespawnPacket,
+  RpcPacket,
+  SceneChangePacket,
+} from "../protocol/packets/gameData";
+import {
   AlterGameTagPacket,
   BaseRootPacket,
   GameDataPacket,
@@ -37,6 +43,14 @@ import {
   RemovePlayerPacket,
   RemoveGamePacket,
 } from "../protocol/packets/root";
+import {
+  ServerLobbyDestroyedEvent,
+  ServerLobbyJoinRefusedEvent,
+  ServerPacketInGameDataCustomEvent,
+  ServerPacketInGameDataEvent,
+  ServerPacketInRpcCustomEvent,
+  ServerPacketInRpcEvent,
+} from "../api/events/server";
 import {
   AlterGameTag,
   FakeClientId,
@@ -969,8 +983,6 @@ export class Lobby implements LobbyInstance {
           this.handleData((packet as DataPacket).senderNetId, (packet as DataPacket).data, sendTo);
         }
         break;
-      case GameDataPacketType.Despawn:
-        break;
       case GameDataPacketType.RPC: {
         const rpc = packet as RpcPacket;
 
@@ -1023,6 +1035,10 @@ export class Lobby implements LobbyInstance {
         }
         break;
       }
+      case GameDataPacketType.Spawn:
+        break;
+      case GameDataPacketType.Despawn:
+        break;
       case GameDataPacketType.Ready:
         this.hostInstance.handleReady(connection);
         break;
@@ -1040,7 +1056,8 @@ export class Lobby implements LobbyInstance {
         this.hostInstance.handleSceneChange(connectionChangingScene, (packet as SceneChangePacket).scene);
         break;
       }
-      case GameDataPacketType.Spawn:
+      case GameDataPacketType.ClientInfo:
+        connection.setPlatform((packet as ClientInfoPacket).platform);
         break;
       default:
         throw new Error(`Attempted to handle an unimplemented game data packet type: ${packet.getType() as number} (${GameDataPacketType[packet.getType()]})`);
