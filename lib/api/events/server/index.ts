@@ -2,6 +2,8 @@ export { ServerLobbyCreatedEvent } from "./serverLobbyCreatedEvent";
 
 export { ServerLobbyCreatedRefusedEvent } from "./serverLobbyCreatedRefusedEvent";
 
+export { ServerLobbyCreatingEvent } from "./serverLobbyCreatingEvent";
+
 export { ServerLobbyDestroyedEvent } from "./serverLobbyDestroyedEvent";
 
 export { ServerLobbyJoinEvent } from "./serverLobbyJoinEvent";

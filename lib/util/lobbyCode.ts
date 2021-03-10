@@ -60,11 +60,11 @@ export class LobbyCode {
   static encode(code: string): number {
     code = code.toUpperCase();
 
-    if (code.length == 4) {
+    if (LobbyCode.isValidV1(code)) {
       return LobbyCode.encodeV1(code);
     }
 
-    if (code.length == 6) {
+    if (LobbyCode.isValidV2(code)) {
       return LobbyCode.encodeV2(code);
     }
 
@@ -148,5 +148,23 @@ export class LobbyCode {
       CHAR_SET[Math.floor((b /= 26) % 26)],
       CHAR_SET[Math.floor((b / 26) % 26)],
     ].join("");
+  }
+
+  static isValid(code: string | undefined): boolean {
+    return LobbyCode.isValidV1(code) || LobbyCode.isValidV2(code);
+  }
+
+  static isValidV1(code: string | undefined): boolean {
+    return code?.length === 4;
+  }
+
+  static isValidV2(code: string | undefined): boolean {
+    code = code?.toUpperCase();
+
+    if (code?.length !== 6) {
+      return false;
+    }
+
+    return /^([A-Z]{6})$/.test(code);
   }
 }

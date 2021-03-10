@@ -28,6 +28,7 @@ import {
 import {
   ServerLobbyCreatedEvent,
   ServerLobbyCreatedRefusedEvent,
+  ServerLobbyCreatingEvent,
   ServerLobbyDestroyedEvent,
   ServerLobbyJoinEvent,
   ServerLobbyListEvent,
@@ -615,14 +616,14 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         this.getLogger().verbose("Connection %s trying to host lobby", connection);
 
         if (this.lobbies.length >= this.getMaxLobbies()) {
-          const event = new ServerLobbyCreatedRefusedEvent(connection);
+          const refusedEvent = new ServerLobbyCreatedRefusedEvent(connection);
 
-          await this.emit("server.lobby.created.refused", event);
+          await this.emit("server.lobby.created.refused", refusedEvent);
 
-          if (!event.isCancelled()) {
+          if (!refusedEvent.isCancelled()) {
             this.getLogger().verbose("Preventing connection %s from hosting lobby on full server", connection);
 
-            connection.writeReliable(new JoinGameErrorPacket(event.getDisconnectReason()));
+            connection.writeReliable(new JoinGameErrorPacket(refusedEvent.getDisconnectReason()));
 
             return;
           }
@@ -636,6 +637,18 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
           lobbyCode = LobbyCode.generate();
         }
 
+        const creatingEvent = new ServerLobbyCreatingEvent(connection, lobbyCode, (packet as HostGameRequestPacket).options);
+
+        await this.emit("server.lobby.creating", creatingEvent);
+
+        if (creatingEvent.isCancelled()) {
+          this.getLogger().verbose("Prevented connection %s from hosting lobby", connection);
+
+          connection.disconnect(creatingEvent.getDisconnectReason());
+
+          return;
+        }
+
         const newLobby = new Lobby(
           this,
           this.getDefaultLobbyAddress(),
@@ -643,23 +656,23 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
           this.getDefaultLobbyStartTimerDuration(),
           this.getDefaultLobbyTimeToJoinUntilClosed(),
           this.getDefaultLobbyTimeToStartUntilClosed(),
-          (packet as HostGameRequestPacket).options,
-          lobbyCode,
+          creatingEvent.getOptions(),
+          creatingEvent.getLobbyCode(),
         );
-        const event = new ServerLobbyCreatedEvent(connection, newLobby);
+        const createdEvent = new ServerLobbyCreatedEvent(connection, newLobby);
 
-        await this.emit("server.lobby.created", event);
+        await this.emit("server.lobby.created", createdEvent);
 
-        if (!event.isCancelled()) {
+        if (!createdEvent.isCancelled()) {
           this.getLogger().verbose("Connection %s hosting lobby %s", connection, newLobby);
 
           this.addLobby(newLobby);
 
           connection.sendReliable([new HostGameResponsePacket(newLobby.getCode())]);
         } else {
-          this.getLogger().verbose("Prevented connection %s from hosting lobby", connection);
+          this.getLogger().verbose("Prevented connection %s from hosting lobby %s", connection, newLobby);
 
-          connection.disconnect(event.getDisconnectReason());
+          connection.disconnect(createdEvent.getDisconnectReason());
         }
         break;
       }
