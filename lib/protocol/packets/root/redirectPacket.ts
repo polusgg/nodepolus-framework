@@ -14,7 +14,10 @@ export class RedirectPacket extends BaseRootPacket {
   }
 
   static deserialize(reader: MessageReader): RedirectPacket {
-    return new RedirectPacket(reader.readBytes(4).getBuffer().join("."), reader.readUInt16());
+    return new RedirectPacket(
+      reader.readBytes(4).getBuffer().join("."),
+      reader.readUInt16(),
+    );
   }
 
   clone(): RedirectPacket {

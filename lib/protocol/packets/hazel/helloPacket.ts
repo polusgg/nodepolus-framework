@@ -3,6 +3,9 @@ import { HazelPacketType } from "../../../types/enums";
 import { ClientVersion } from "../../../types";
 import { BaseHazelPacket } from ".";
 
+/**
+ * Hazel Packet ID: `0x08` (`8`)
+ */
 export class HelloPacket extends BaseHazelPacket {
   constructor(
     public hazelVersion: number,

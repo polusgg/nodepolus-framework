@@ -3,7 +3,7 @@ import { RpcPacketType, SystemType } from "../../../types/enums";
 import { BaseRpcPacket } from ".";
 
 /**
- * RPC Packet ID: `1b` (`27`)
+ * RPC Packet ID: `0x1b` (`27`)
  */
 export class CloseDoorsOfTypePacket extends BaseRpcPacket {
   constructor(

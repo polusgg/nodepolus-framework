@@ -4,7 +4,7 @@ import { BaseGameDataPacket } from ".";
 
 export class SpawnPacketObject extends BaseGameDataPacket {
   constructor(
-    public innerNetObjectID: number,
+    public spawnedNetId: number,
     public data: MessageWriter | MessageReader,
   ) {
     super(GameDataPacketType.Spawn);
@@ -18,11 +18,11 @@ export class SpawnPacketObject extends BaseGameDataPacket {
   }
 
   clone(): SpawnPacketObject {
-    return new SpawnPacketObject(this.innerNetObjectID, this.data.clone());
+    return new SpawnPacketObject(this.spawnedNetId, this.data.clone());
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writePackedUInt32(this.innerNetObjectID)
+    writer.writePackedUInt32(this.spawnedNetId)
       .startMessage(1)
       .writeBytes(this.data)
       .endMessage();

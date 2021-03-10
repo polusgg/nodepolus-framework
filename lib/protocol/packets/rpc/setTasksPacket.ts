@@ -3,7 +3,7 @@ import { RpcPacketType } from "../../../types/enums";
 import { BaseRpcPacket } from ".";
 
 /**
- * RPC Packet ID: `1d` (`29`)
+ * RPC Packet ID: `0x1d` (`29`)
  */
 export class SetTasksPacket extends BaseRpcPacket {
   constructor(
@@ -14,7 +14,10 @@ export class SetTasksPacket extends BaseRpcPacket {
   }
 
   static deserialize(reader: MessageReader): SetTasksPacket {
-    return new SetTasksPacket(reader.readByte(), reader.readList(tasks => tasks.readByte()));
+    return new SetTasksPacket(
+      reader.readByte(),
+      reader.readList(tasks => tasks.readByte()),
+    );
   }
 
   clone(): SetTasksPacket {

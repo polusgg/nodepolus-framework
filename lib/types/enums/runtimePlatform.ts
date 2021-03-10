@@ -1,0 +1,21 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+export enum RuntimePlatform {
+  OSXEditor,
+  OSXPlayer,
+  WindowsPlayer,
+  WindowsEditor,
+  iPhonePlayer,
+  Android,
+  LinuxPlayer,
+  LinuxEditor,
+  WebGLPlayer,
+  WSAPlayerX86,
+  WSAPlayerX64,
+  WSAPlayerARM,
+  PS4,
+  XboxOne,
+  tvOS,
+  Switch,
+  Stadia,
+  CloudRendering,
+}

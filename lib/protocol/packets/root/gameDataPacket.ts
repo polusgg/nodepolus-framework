@@ -1,10 +1,19 @@
-import { BaseGameDataPacket, DataPacket, DespawnPacket, ReadyPacket, RpcPacket, SceneChangePacket, SpawnPacket } from "../gameData";
 import { GameDataPacketType, Level, RootPacketType } from "../../../types/enums";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { CustomGameDataPacketContainer } from "../../../types";
 import { LobbyCode } from "../../../util/lobbyCode";
 import { Connection } from "../../connection";
 import { BaseRootPacket } from "../root";
+import {
+  BaseGameDataPacket,
+  ClientInfoPacket,
+  DataPacket,
+  DespawnPacket,
+  ReadyPacket,
+  RpcPacket,
+  SceneChangePacket,
+  SpawnPacket,
+} from "../gameData";
 
 /**
  * Root Packet ID: `0x05` (`5`)
@@ -67,6 +76,8 @@ export class GameDataPacket extends BaseRootPacket {
           return packets.push(SceneChangePacket.deserialize(child));
         case GameDataPacketType.Ready:
           return packets.push(ReadyPacket.deserialize(child));
+        case GameDataPacketType.ClientInfo:
+          return packets.push(ClientInfoPacket.deserialize(child));
         default: {
           const custom = GameDataPacket.customPackets.get(child.getTag());
 

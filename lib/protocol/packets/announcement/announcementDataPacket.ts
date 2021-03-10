@@ -14,10 +14,7 @@ export class AnnouncementDataPacket extends BaseAnnouncementPacket {
   }
 
   static deserialize(reader: MessageReader): AnnouncementDataPacket {
-    return new AnnouncementDataPacket(
-      reader.readPackedUInt32(),
-      reader.readString(),
-    );
+    return new AnnouncementDataPacket(reader.readPackedUInt32(), reader.readString());
   }
 
   clone(): AnnouncementDataPacket {
@@ -25,7 +22,6 @@ export class AnnouncementDataPacket extends BaseAnnouncementPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writePackedUInt32(this.announcementId)
-      .writeString(this.text);
+    writer.writePackedUInt32(this.announcementId).writeString(this.text);
   }
 }

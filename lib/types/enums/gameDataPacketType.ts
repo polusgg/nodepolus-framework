@@ -5,4 +5,5 @@ export enum GameDataPacketType {
   Despawn = 0x05,
   SceneChange = 0x06,
   Ready = 0x07,
+  ClientInfo = 0xcd,
 }

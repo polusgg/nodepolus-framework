@@ -23,7 +23,6 @@ export class WaitForHostPacket extends BaseRootPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writeInt32(LobbyCode.encode(this.lobbyCode))
-      .writeUInt32(this.waitingClientId);
+    writer.writeInt32(LobbyCode.encode(this.lobbyCode)).writeUInt32(this.waitingClientId);
   }
 }

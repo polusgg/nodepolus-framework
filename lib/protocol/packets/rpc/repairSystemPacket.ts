@@ -16,7 +16,7 @@ import {
 } from "./repairSystem/amounts";
 
 /**
- * RPC Packet ID: `1c` (`28`)
+ * RPC Packet ID: `0x1c` (`28`)
  */
 export class RepairSystemPacket extends BaseRpcPacket {
   protected amount: RepairAmount;

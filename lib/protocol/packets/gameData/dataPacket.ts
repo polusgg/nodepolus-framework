@@ -14,10 +14,7 @@ export class DataPacket extends BaseGameDataPacket {
   }
 
   static deserialize(reader: MessageReader): DataPacket {
-    return new DataPacket(
-      reader.readPackedUInt32(),
-      reader.readRemainingBytes(),
-    );
+    return new DataPacket(reader.readPackedUInt32(), reader.readRemainingBytes());
   }
 
   clone(): DataPacket {
@@ -25,7 +22,6 @@ export class DataPacket extends BaseGameDataPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writePackedUInt32(this.senderNetId)
-      .writeBytes(this.data);
+    writer.writePackedUInt32(this.senderNetId).writeBytes(this.data);
   }
 }

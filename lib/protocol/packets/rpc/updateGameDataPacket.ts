@@ -4,7 +4,7 @@ import { PlayerData } from "../../entities/gameData/types";
 import { BaseRpcPacket } from ".";
 
 /**
- * RPC Packet ID: `1e` (`30`)
+ * RPC Packet ID: `0x1e` (`30`)
  */
 export class UpdateGameDataPacket extends BaseRpcPacket {
   constructor(

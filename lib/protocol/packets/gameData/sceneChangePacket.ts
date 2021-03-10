@@ -22,7 +22,6 @@ export class SceneChangePacket extends BaseGameDataPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writePackedUInt32(this.clientId)
-      .writeString(this.scene);
+    writer.writePackedUInt32(this.clientId).writeString(this.scene);
   }
 }

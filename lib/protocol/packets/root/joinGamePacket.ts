@@ -15,9 +15,7 @@ export class JoinGameRequestPacket extends BaseRootPacket {
   }
 
   static deserialize(reader: MessageReader): JoinGameRequestPacket {
-    return new JoinGameRequestPacket(
-      LobbyCode.decode(reader.readInt32()),
-    );
+    return new JoinGameRequestPacket(LobbyCode.decode(reader.readInt32()));
   }
 
   clone(): JoinGameRequestPacket {
@@ -42,7 +40,11 @@ export class JoinGameResponsePacket extends BaseRootPacket {
   }
 
   static deserialize(reader: MessageReader): JoinGameResponsePacket {
-    return new JoinGameResponsePacket(LobbyCode.decode(reader.readInt32()), reader.readUInt32(), reader.readUInt32());
+    return new JoinGameResponsePacket(
+      LobbyCode.decode(reader.readInt32()),
+      reader.readUInt32(),
+      reader.readUInt32(),
+    );
   }
 
   clone(): JoinGameResponsePacket {

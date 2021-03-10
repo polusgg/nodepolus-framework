@@ -54,6 +54,8 @@ export { RootPacketType } from "./rootPacketType";
 
 export { RpcPacketType } from "./rpcPacketType";
 
+export { RuntimePlatform } from "./runtimePlatform";
+
 export { SpawnFlag } from "./spawnFlag";
 
 export { SpawnType } from "./spawnType";

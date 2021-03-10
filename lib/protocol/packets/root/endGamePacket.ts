@@ -16,7 +16,11 @@ export class EndGamePacket extends BaseRootPacket {
   }
 
   static deserialize(reader: MessageReader): EndGamePacket {
-    return new EndGamePacket(LobbyCode.decode(reader.readInt32()), reader.readByte(), reader.readBoolean());
+    return new EndGamePacket(
+      LobbyCode.decode(reader.readInt32()),
+      reader.readByte(),
+      reader.readBoolean(),
+    );
   }
 
   clone(): EndGamePacket {

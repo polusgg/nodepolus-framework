@@ -1,5 +1,7 @@
 export { BaseGameDataPacket } from "./baseGameDataPacket";
 
+export { ClientInfoPacket } from "./clientInfoPacket";
+
 export { DataPacket } from "./dataPacket";
 
 export { DespawnPacket } from "./despawnPacket";

@@ -22,7 +22,6 @@ export class SetScannerPacket extends BaseRpcPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writeBoolean(this.isScanning)
-      .writeByte(this.sequenceId);
+    writer.writeBoolean(this.isScanning).writeByte(this.sequenceId);
   }
 }

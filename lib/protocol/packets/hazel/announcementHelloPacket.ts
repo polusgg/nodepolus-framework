@@ -2,6 +2,9 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { ClientLanguage, HazelPacketType } from "../../../types/enums";
 import { BaseHazelPacket } from ".";
 
+/**
+ * Hazel Packet ID: `0x08` (`8`)
+ */
 export class AnnouncementHelloPacket extends BaseHazelPacket {
   constructor(
     public announcementVersion: number,

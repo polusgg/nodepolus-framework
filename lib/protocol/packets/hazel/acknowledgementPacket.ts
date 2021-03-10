@@ -3,6 +3,9 @@ import { HazelPacketType } from "../../../types/enums";
 import { Bitfield } from "../../../types";
 import { BaseHazelPacket } from ".";
 
+/**
+ * Hazel Packet ID: `0x0a` (`10`)
+ */
 export class AcknowledgementPacket extends BaseHazelPacket {
   constructor(
     public missingPackets: Bitfield,

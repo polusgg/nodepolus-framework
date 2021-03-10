@@ -7,7 +7,7 @@ import { GameDataPacketType } from "../../../types/enums";
  */
 export class ReadyPacket extends BaseGameDataPacket {
   constructor(
-    public playerClientID: number,
+    public clientId: number,
   ) {
     super(GameDataPacketType.Ready);
   }
@@ -17,10 +17,10 @@ export class ReadyPacket extends BaseGameDataPacket {
   }
 
   clone(): ReadyPacket {
-    return new ReadyPacket(this.playerClientID);
+    return new ReadyPacket(this.clientId);
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writePackedUInt32(this.playerClientID);
+    writer.writePackedUInt32(this.clientId);
   }
 }

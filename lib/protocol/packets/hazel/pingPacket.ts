@@ -2,6 +2,9 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { HazelPacketType } from "../../../types/enums";
 import { BaseHazelPacket } from ".";
 
+/**
+ * Hazel Packet ID: `0x0c` (`12`)
+ */
 export class PingPacket extends BaseHazelPacket {
   constructor() {
     super(HazelPacketType.Ping);

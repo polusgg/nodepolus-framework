@@ -7,7 +7,7 @@ import { GameDataPacketType } from "../../../types/enums";
  */
 export class DespawnPacket extends BaseGameDataPacket {
   constructor(
-    public innerNetObjectID: number,
+    public despawnedNetId: number,
   ) {
     super(GameDataPacketType.Despawn);
   }
@@ -17,10 +17,10 @@ export class DespawnPacket extends BaseGameDataPacket {
   }
 
   clone(): DespawnPacket {
-    return new DespawnPacket(this.innerNetObjectID);
+    return new DespawnPacket(this.despawnedNetId);
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writePackedUInt32(this.innerNetObjectID);
+    writer.writePackedUInt32(this.despawnedNetId);
   }
 }

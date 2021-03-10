@@ -16,7 +16,11 @@ export class AlterGameTagPacket extends BaseRootPacket {
   }
 
   static deserialize(reader: MessageReader): AlterGameTagPacket {
-    return new AlterGameTagPacket(LobbyCode.decode(reader.readInt32()), reader.readByte(), reader.readByte());
+    return new AlterGameTagPacket(
+      LobbyCode.decode(reader.readInt32()),
+      reader.readByte(),
+      reader.readByte(),
+    );
   }
 
   clone(): AlterGameTagPacket {

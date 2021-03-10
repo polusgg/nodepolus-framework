@@ -3,12 +3,15 @@ import { HazelPacketType } from "../../../types/enums";
 import { DisconnectReason } from "../../../types";
 import { BaseHazelPacket } from ".";
 
+/**
+ * Hazel Packet ID: `0x09` (`9`)
+ */
 export class DisconnectPacket extends BaseHazelPacket {
   constructor(
     public isForced?: boolean,
     public disconnectReason?: DisconnectReason,
   ) {
-    super(HazelPacketType.Acknowledgement);
+    super(HazelPacketType.Disconnect);
   }
 
   static deserialize(reader: MessageReader): DisconnectPacket {
