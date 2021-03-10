@@ -54,7 +54,7 @@ const SPAWN_POSITIONS_AIRSHIP: LevelSpawnPositions = {
   meetingTwo: new Vector2(0, 0),
 };
 
-const OFFSET: Vector2 = new Vector2(0, 0.3636);
+const WORLD_Y_AXIS_OFFSET: Vector2 = new Vector2(0, 0.3636);
 
 /**
  * A helper class for retrieving static data for level spawn positions.
@@ -135,6 +135,6 @@ export class SpawnPositions {
       .rotate((playerId - 1) * (360 / playerCount))
       .multiply(SpawnPositions.radiusForLevel(level));
 
-    return center.add(spawnPosition).add(OFFSET);
+    return center.add(spawnPosition).add(WORLD_Y_AXIS_OFFSET);
   }
 }
