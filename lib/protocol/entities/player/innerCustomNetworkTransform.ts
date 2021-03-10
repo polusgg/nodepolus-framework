@@ -3,10 +3,12 @@ import { InnerNetObjectType, RpcPacketType, TeleportReason } from "../../../type
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { BaseRpcPacket, SnapToPacket } from "../../packets/rpc";
+import { GameDataPacket } from "../../packets/root";
 import { BaseInnerNetObject } from "../baseEntity";
 import { MaxValue } from "../../../util/constants";
 import { Connection } from "../../connection";
 import { Vector2 } from "../../../types";
+import { Lobby } from "../../../lobby";
 import { EntityPlayer } from ".";
 
 export class InnerCustomNetworkTransform extends BaseInnerNetObject {
@@ -38,6 +40,15 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     this.velocity = velocity;
 
     return this;
+  }
+
+  walkTo(position: Vector2, velocity: Vector2 = Vector2.zero()): void {
+    this.setPosition(position);
+    this.setVelocity(velocity);
+    this.incrementSequenceId(1);
+    (this.parent.getLobby() as Lobby).sendRootGamePacket(new GameDataPacket([
+      this.serializeData(),
+    ], this.parent.getLobby().getCode()));
   }
 
   getSequenceId(): number {
