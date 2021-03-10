@@ -240,6 +240,7 @@ export class Lobby implements LobbyInstance {
 
   removePlayer(player: Player): void {
     this.players.splice(this.players.indexOf(player), 1);
+    this.gameData?.getGameData().removePlayer(player.getId());
   }
 
   findInnerNetObject(netId: number): BaseInnerNetObject | undefined {
