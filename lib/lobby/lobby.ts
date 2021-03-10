@@ -450,8 +450,7 @@ export class Lobby implements LobbyInstance {
     this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
 
     if (this.gameData !== undefined) {
-      this.gameData.getGameData().addPlayer(playerData);
-      this.sendRpcPacket(this.gameData.getGameData(), new UpdateGameDataPacket([playerData]));
+      this.gameData.getGameData().updateGameData([playerData]);
     }
 
     return playerInstance;
