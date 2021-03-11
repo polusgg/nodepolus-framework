@@ -109,9 +109,16 @@ export class InnerMeetingHud extends BaseInnerNetObject {
 
   serializeSpawn(): SpawnPacketObject {
     const writer = new MessageWriter();
+    const limit = Math.max(...this.playerStates.keys());
 
-    for (const [, state] of this.playerStates) {
-      writer.writeObject(state);
+    for (let i = 0; i <= limit; i++) {
+      const state = this.playerStates.get(i);
+
+      if (state === undefined) {
+        writer.writeByte(0x00);
+      } else {
+        writer.writeObject(state);
+      }
     }
 
     return new SpawnPacketObject(this.netId, writer);
