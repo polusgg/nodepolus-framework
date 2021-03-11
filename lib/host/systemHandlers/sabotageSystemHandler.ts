@@ -1,4 +1,5 @@
 import { GameOverReason, Level } from "../../types/enums";
+import { clamp } from "../../util/functions";
 import { Bitfield } from "../../types";
 import { Host } from "..";
 import {
@@ -73,7 +74,7 @@ export class SabotageSystemHandler {
 
     const startOfSabotage = Date.now();
     const sabotageCountdown = setInterval(() => {
-      system.setVisionModifier(Math.max(0xff - (((Date.now() - startOfSabotage) / 3000) * 0xff), 0x00));
+      system.setVisionModifier(clamp(Math.floor(0xff - (((Date.now() - startOfSabotage) / 3000) * 0xff)), 0x00, 0xff));
 
       if (system.getVisionModifier() == 0x00) {
         clearInterval(sabotageCountdown);

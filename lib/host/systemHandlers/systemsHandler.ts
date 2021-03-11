@@ -1,7 +1,7 @@
 import { BaseInnerShipStatus } from "../../protocol/entities/shipStatus/baseShipStatus";
 import { DecontaminationDoorState, SystemType } from "../../types/enums";
 import { GameDataPacket } from "../../protocol/packets/root";
-import { notUndefined } from "../../util/functions";
+import { clamp, notUndefined } from "../../util/functions";
 import { Player } from "../../player";
 import { Host } from "..";
 import {
@@ -277,15 +277,22 @@ export class SystemsHandler {
     system.getActualSwitches().toggle(amount.getSwitchIndex());
 
     if (system.getActualSwitches().equals(system.getExpectedSwitches())) {
-      // TODO: Count back up (like +85 every second)
-      setTimeout(() => {
-        // Don't fix the lights if they somehow get immediately sabotaged again
-        if (system.getActualSwitches().equals(system.getExpectedSwitches())) {
-          this.setOldShipStatus();
-          system.setVisionModifier(0xff);
-          this.sendDataUpdate();
+      const startOfRepair = Date.now();
+      const repairCountdown = setInterval(() => {
+        if (!system.getActualSwitches().equals(system.getExpectedSwitches())) {
+          clearInterval(repairCountdown);
+
+          return;
         }
-      }, 3000);
+
+        this.setOldShipStatus();
+        system.setVisionModifier(clamp(Math.ceil(((Date.now() - startOfRepair) / 3000) * 0xff), 0x00, 0xff));
+        this.sendDataUpdate();
+
+        if (system.getVisionModifier() == 0xff) {
+          clearInterval(repairCountdown);
+        }
+      }, 20);
     }
 
     this.sendDataUpdate();
