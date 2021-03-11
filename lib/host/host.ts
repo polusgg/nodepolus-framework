@@ -605,12 +605,7 @@ export class Host implements HostInstance {
       return;
     }
 
-    const playerData = gameData.getGameData().getPlayer(player.getId());
-
-    if (playerData === undefined) {
-      // TODO: Return or some other shit idk
-      return;
-    }
+    const playerData = player.getGameDataEntry();
 
     if (gameState == GameState.Started) {
       playerData.setDisconnected(true);
@@ -1076,8 +1071,7 @@ export class Host implements HostInstance {
     const id = event.getSuspect()?.getId();
 
     if (state === undefined) {
-      // TODO: Return or some other shit idk
-      return;
+      throw new Error(`Player ${votingPlayerId} does not have a VoteState instance on the MeetingHud instance`);
     }
 
     state.setVotedFor(id !== undefined ? id : -1).setVoted(true);

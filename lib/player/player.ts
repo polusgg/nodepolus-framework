@@ -178,7 +178,8 @@ export class Player implements PlayerInstance {
   }
 
   setCrewmate(): void {
-    throw new Error("TODO: Not yet implemented (is it even possible?)");
+    // TODO: Is this possible?
+    this.lobby.getLogger().warn("PlayerInstance#setCrewmate() is not yet implemented");
   }
 
   isDead(): boolean {
