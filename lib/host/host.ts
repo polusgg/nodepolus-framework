@@ -151,6 +151,7 @@ export class Host implements HostInstance {
       }
     };
 
+    this.lobby.disableActingHosts(true);
     countdownFunction();
 
     this.countdownInterval = setInterval(countdownFunction, 1000);
@@ -862,7 +863,6 @@ export class Host implements HostInstance {
     }
 
     if (timeRemaining == 5 && this.counterSequenceId != sequenceId) {
-      this.lobby.disableActingHosts(true);
       this.startCountdown(this.lobby.getStartTimerDuration(), player);
     }
   }
