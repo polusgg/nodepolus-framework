@@ -1,11 +1,24 @@
 import { BaseRpcPacket, CloseDoorsOfTypePacket, RepairSystemPacket } from "../../../packets/rpc";
 import { InnerNetObjectType, Level, RpcPacketType, SystemType } from "../../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../../packets/gameData";
-import { RepairAmount } from "../../../packets/rpc/repairSystem/amounts";
 import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseEntityShipStatus, InternalSystemType } from ".";
 import { BaseInnerNetObject } from "../../baseEntity";
 import { Connection } from "../../../connection";
+import { Lobby } from "../../../../lobby";
+import {
+  DecontaminationAmount,
+  ElectricalAmount,
+  MedbayAmount,
+  MiraCommunicationsAmount,
+  NormalCommunicationsAmount,
+  OxygenAmount,
+  PolusDoorsAmount,
+  ReactorAmount,
+  RepairAmount,
+  SabotageAmount,
+  SecurityAmount,
+} from "../../../packets/rpc/repairSystem/amounts";
 import {
   AirshipReactorSystem,
   AutoDoorsSystem,
@@ -85,30 +98,96 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     return this.systems;
   }
 
-  closeDoorsOfType(_systemId: SystemType, _sendTo?: Connection[]): void {
-    // TODO: InnerNetObject refactor
+  closeDoorsOfType(systemId: SystemType, _sendTo?: Connection[]): void {
+    const doorHandler = this.parent.getLobby().getHostInstance().getDoorHandler();
+
+    if (doorHandler === undefined) {
+      throw new Error("Received CloseDoorsOfType without a door handler");
+    }
+
+    doorHandler.closeDoor(doorHandler.getDoorsForSystem(systemId));
+    doorHandler.setSystemTimeout(systemId, 30);
   }
 
-  // TODO: Change amount to number and deserialize in the system itself
-  repairSystem(_systemId: SystemType, _playerControlNetId: number, _amount: RepairAmount, _sendTo?: Connection[]): void {
-    // TODO: InnerNetObject refactor
+  // TODO: Change amount to number and deserialize in the system itself?
+  repairSystem(systemId: SystemType, playerControlNetId: number, amount: RepairAmount, _sendTo?: Connection[]): void {
+    const lobby = this.parent.getLobby() as Lobby;
+    const shipStatus = lobby.getShipStatus();
+
+    if (shipStatus === undefined) {
+      throw new Error("Received RepairSystem without a ShipStatus instance");
+    }
+
+    const systemsHandler = lobby.getHostInstance().getSystemsHandler();
+
+    if (systemsHandler === undefined) {
+      throw new Error("Received RepairSystem without a SystemsHandler instance");
+    }
+
+    const system = shipStatus.getShipStatus().getSystemFromType(systemId);
+    const player = lobby.getPlayers().find(thePlayer => thePlayer.getEntity().getPlayerControl().getNetId() == playerControlNetId);
+    const level = lobby.getLevel();
+
+    if (player === undefined) {
+      throw new Error(`Received RepairSystem from a non-player InnerNetObject: ${playerControlNetId}`);
+    }
+
+    switch (system.getType()) {
+      case SystemType.Electrical:
+        systemsHandler.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
+        break;
+      case SystemType.Medbay:
+        systemsHandler.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
+        break;
+      case SystemType.Oxygen:
+        systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
+        break;
+      case SystemType.Reactor:
+        systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
+        break;
+      case SystemType.Laboratory:
+        systemsHandler.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
+        break;
+      case SystemType.Security:
+        systemsHandler.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
+        break;
+      case SystemType.Doors:
+        if (level == Level.Polus) {
+          systemsHandler.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
+        } else {
+          throw new Error(`Received RepairSystem for Doors on an unimplemented level: ${level as Level} (${Level[level]})`);
+        }
+        break;
+      case SystemType.Communications:
+        if (level == Level.MiraHq) {
+          systemsHandler.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
+        } else {
+          systemsHandler.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
+        }
+        break;
+      case SystemType.Decontamination:
+        systemsHandler.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
+        break;
+      case SystemType.Decontamination2:
+        systemsHandler.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
+        break;
+      case SystemType.Sabotage:
+        systemsHandler.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
+        break;
+      default:
+        throw new Error(`Received RepairSystem packet for an unimplemented SystemType: ${system.getType()} (${SystemType[system.getType()]})`);
+    }
   }
 
   handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, _sendTo: Connection[]): void {
     switch (type) {
       case RpcPacketType.CloseDoorsOfType: {
-        // TODO: InnerNetObject refactor
-        const data = packet as CloseDoorsOfTypePacket;
-
-        this.parent.getLobby().getHostInstance().handleCloseDoorsOfType(this, data.system);
-        this.closeDoorsOfType(data.system);
+        this.closeDoorsOfType((packet as CloseDoorsOfTypePacket).system);
         break;
       }
       case RpcPacketType.RepairSystem: {
-        // TODO: InnerNetObject refactor
         const data = packet as RepairSystemPacket;
 
-        this.parent.getLobby().getHostInstance().handleRepairSystem(this, data.system, data.playerControlNetId, data.getAmount());
         this.repairSystem(data.system, data.playerControlNetId, data.getAmount());
         break;
       }

@@ -1,8 +1,6 @@
-import { BaseInnerShipStatus } from "../../protocol/entities/shipStatus/baseShipStatus";
-import { RepairAmount } from "../../protocol/packets/rpc/repairSystem/amounts";
-import { GameOverReason, PlayerColor, SystemType } from "../../types/enums";
 import { DisconnectReason, GameOptionsData, LevelTask } from "../../types";
 import { InnerPlayerControl } from "../../protocol/entities/player";
+import { GameOverReason, PlayerColor } from "../../types/enums";
 import { Connection } from "../../protocol/connection";
 import { PlayerInstance } from "../player";
 import { LobbyInstance } from "../lobby";
@@ -211,24 +209,6 @@ export interface HostInstance {
    * @param suspectPlayerId - The ID of the player who is being voted to be exiled
    */
   handleCastVote(votingPlayerId: number, suspectPlayerId: number): void;
-
-  /**
-   * Called when a connection sends a CloseDoorsOfType RPC packet.
-   *
-   * @param sender - The ShipStatus that sent the packet
-   * @param systemId - The ID of the system whose doors will be closed
-   */
-  handleCloseDoorsOfType(sender: BaseInnerShipStatus, systemId: SystemType): void;
-
-  /**
-   * Called when a connection sends a RepairSystem RPC packet.
-   *
-   * @param sender - The ShipStatus that sent the packet
-   * @param systemId - The ID of the system that is being repaired
-   * @param playerControlNetId - The net ID of the PlayerControl for the player that is repairing the system
-   * @param amount - The amount by which the system is being repaired
-   */
-  handleRepairSystem(sender: BaseInnerShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void;
 
   /**
    * Called when a connection sends a UsePlatform RPC packet.

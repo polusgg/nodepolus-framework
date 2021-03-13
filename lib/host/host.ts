@@ -1,7 +1,7 @@
 import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent, LobbyOptionsUpdatedEvent } from "../api/events/lobby";
 import { DisconnectReason, GameOptionsData, Immutable, LevelTask, Vector2, VoteResult, VoteState } from "../types";
-import { BaseInnerShipStatus, InternalSystemType } from "../protocol/entities/shipStatus/baseShipStatus";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
+import { InternalSystemType } from "../protocol/entities/shipStatus/baseShipStatus";
 import { EntityPlayer, InnerPlayerControl } from "../protocol/entities/player";
 import { EntityAirshipStatus } from "../protocol/entities/shipStatus/airship";
 import { EntityDleksShipStatus } from "../protocol/entities/shipStatus/dleks";
@@ -22,32 +22,9 @@ import { Game } from "../api/game";
 import { Player } from "../player";
 import { Lobby } from "../lobby";
 import {
-  NormalCommunicationsAmount,
-  MiraCommunicationsAmount,
-  DecontaminationAmount,
-  ElectricalAmount,
-  PolusDoorsAmount,
-  SabotageAmount,
-  SecurityAmount,
-  ReactorAmount,
-  MedbayAmount,
-  OxygenAmount,
-  RepairAmount,
-} from "../protocol/packets/rpc/repairSystem/amounts";
-import {
   DeconSystem,
   DeconTwoSystem,
-  DoorsSystem,
-  HqHudSystem,
-  HudOverrideSystem,
-  LaboratorySystem,
-  LifeSuppSystem,
-  MedScanSystem,
   MovingPlatformSystem,
-  ReactorSystem,
-  SabotageSystem,
-  SecurityCameraSystem,
-  SwitchSystem,
 } from "../protocol/entities/shipStatus/systems";
 import {
   ClearVotePacket,
@@ -93,7 +70,6 @@ import {
   PlayerColor,
   PlayerRole,
   SpawnFlag,
-  SystemType,
   TaskLength,
   TaskType,
   TeleportReason,
@@ -1089,77 +1065,6 @@ export class Host implements HostInstance {
       this.endMeeting();
       clearInterval(this.meetingHudTimeout);
       delete this.meetingHudTimeout;
-    }
-  }
-
-  handleCloseDoorsOfType(_sender: BaseInnerShipStatus, systemId: SystemType): void {
-    if (this.doorHandler === undefined) {
-      throw new Error("Received CloseDoorsOfType without a door handler");
-    }
-
-    this.doorHandler.closeDoor(this.doorHandler.getDoorsForSystem(systemId));
-    this.doorHandler.setSystemTimeout(systemId, 30);
-  }
-
-  handleRepairSystem(_sender: BaseInnerShipStatus, systemId: SystemType, playerControlNetId: number, amount: RepairAmount): void {
-    const shipStatus = this.lobby.getShipStatus();
-
-    if (shipStatus === undefined) {
-      throw new Error("Received RepairSystem without a ShipStatus instance");
-    }
-
-    const system = shipStatus.getShipStatus().getSystemFromType(systemId);
-    const player = this.lobby.getPlayers().find(thePlayer => thePlayer.getEntity().getPlayerControl().getNetId() == playerControlNetId);
-    const level = this.lobby.getLevel();
-
-    if (player === undefined) {
-      throw new Error(`Received RepairSystem from a non-player InnerNetObject: ${playerControlNetId}`);
-    }
-
-    switch (system.getType()) {
-      case SystemType.Electrical:
-        this.systemsHandler!.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
-        break;
-      case SystemType.Medbay:
-        this.systemsHandler!.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
-        break;
-      case SystemType.Oxygen:
-        this.systemsHandler!.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
-        break;
-      case SystemType.Reactor:
-        this.systemsHandler!.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
-        break;
-      case SystemType.Laboratory:
-        this.systemsHandler!.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
-        break;
-      case SystemType.Security:
-        this.systemsHandler!.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
-        break;
-      case SystemType.Doors:
-        if (level == Level.Polus) {
-          this.systemsHandler!.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
-        } else {
-          throw new Error(`Received RepairSystem for Doors on an unimplemented level: ${level as Level} (${Level[level]})`);
-        }
-        break;
-      case SystemType.Communications:
-        if (level == Level.MiraHq) {
-          this.systemsHandler!.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
-        } else {
-          this.systemsHandler!.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
-        }
-        break;
-      case SystemType.Decontamination:
-        this.systemsHandler!.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
-        break;
-      case SystemType.Decontamination2:
-        this.systemsHandler!.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
-        break;
-      case SystemType.Sabotage:
-        this.systemsHandler!.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
-        break;
-      default:
-        throw new Error(`Received RepairSystem packet for an unimplemented SystemType: ${system.getType()} (${SystemType[system.getType()]})`);
     }
   }
 
