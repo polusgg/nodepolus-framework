@@ -737,7 +737,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
           const listing = lobby.getLobbyListing();
 
           if (!listing.isFull() && results.length < 10) {
-            results[i] = listing;
+            results.push(listing);
           }
         }
 
