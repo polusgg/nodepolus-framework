@@ -55,7 +55,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     return this.sequenceId;
   }
 
-  async snapTo(position: Vector2, reason: TeleportReason, sendTo?: Connection[]): Promise<void> {
+  async handleSnapTo(position: Vector2, reason: TeleportReason, sendTo?: Connection[]): Promise<void> {
     const player = this.parent.getLobby().findSafePlayerByNetId(this.netId);
 
     this.incrementSequenceId(5);
@@ -84,7 +84,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
   handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
     switch (type) {
       case RpcPacketType.SnapTo:
-        this.snapTo((packet as SnapToPacket).position, TeleportReason.Unknown, sendTo);
+        this.handleSnapTo((packet as SnapToPacket).position, TeleportReason.Unknown, sendTo);
         break;
       default:
         break;

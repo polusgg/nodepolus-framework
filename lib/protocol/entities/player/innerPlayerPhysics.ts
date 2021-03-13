@@ -24,7 +24,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     return this.vent;
   }
 
-  async enterVent(vent: LevelVent | undefined, sendTo?: Connection[]): Promise<void> {
+  async handleEnterVent(vent: LevelVent | undefined, sendTo?: Connection[]): Promise<void> {
     if (vent === undefined) {
       return;
     }
@@ -54,7 +54,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     this.sendRpcPacket(new EnterVentPacket(vent.getId()), sendTo);
   }
 
-  async exitVent(vent: LevelVent | undefined, sendTo?: Connection[]): Promise<void> {
+  async handleExitVent(vent: LevelVent | undefined, sendTo?: Connection[]): Promise<void> {
     if (vent === undefined) {
       return;
     }
@@ -84,22 +84,22 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     this.sendRpcPacket(new ExitVentPacket(vent.getId()), sendTo);
   }
 
-  climbLadder(ladderSize: LadderSize, ladderDirection: LadderDirection, sendTo?: Connection[]): void {
+  handleClimbLadder(ladderSize: LadderSize, ladderDirection: LadderDirection, sendTo?: Connection[]): void {
     this.sendRpcPacket(new ClimbLadderPacket(ladderSize, ladderDirection), sendTo);
   }
 
   handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
     switch (type) {
       case RpcPacketType.EnterVent:
-        this.enterVent(Vents.forLevelFromId(this.parent.getLobby().getLevel(), (packet as EnterVentPacket).ventId), sendTo);
+        this.handleEnterVent(Vents.forLevelFromId(this.parent.getLobby().getLevel(), (packet as EnterVentPacket).ventId), sendTo);
         break;
       case RpcPacketType.ExitVent:
-        this.exitVent(Vents.forLevelFromId(this.parent.getLobby().getLevel(), (packet as ExitVentPacket).ventId), sendTo);
+        this.handleExitVent(Vents.forLevelFromId(this.parent.getLobby().getLevel(), (packet as ExitVentPacket).ventId), sendTo);
         break;
       case RpcPacketType.ClimbLadder: {
         const data = packet as ClimbLadderPacket;
 
-        this.climbLadder(data.ladderSize, data.ladderDirection, sendTo);
+        this.handleClimbLadder(data.ladderSize, data.ladderDirection, sendTo);
         break;
       }
       default:

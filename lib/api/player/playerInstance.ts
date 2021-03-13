@@ -20,6 +20,12 @@ export interface PlayerInstance extends Metadatable {
   getConnection(): Connection | undefined;
 
   /**
+   * Gets the connection to which the player belongs, or throws an error if it
+   * is undefined.
+   */
+  getSafeConnection(): Connection;
+
+  /**
    * Gets the lobby in which the player exists.
    */
   getLobby(): LobbyInstance;

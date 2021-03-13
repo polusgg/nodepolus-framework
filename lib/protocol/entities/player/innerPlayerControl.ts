@@ -113,7 +113,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   async handlePlayAnimation(taskType: TaskType, sendTo?: Connection[]): Promise<void> {
-    const event = new PlayerTaskAnimationEvent(this.getPlayerInstance(), taskType);
+    const event = new PlayerTaskAnimationEvent(this.getPlayer(), taskType);
 
     await this.getLobby().getServer().emit("player.task.animation", event);
 
@@ -136,7 +136,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       throw new Error(`Player ${this.playerId} has fewer tasks (${taskCount}) than the requested index (${taskIndex})`);
     }
 
-    const event = new PlayerTaskCompletedEvent(this.getPlayerInstance(), taskIndex, playerData.getTasks()[taskIndex][0]);
+    const event = new PlayerTaskCompletedEvent(this.getPlayer(), taskIndex, playerData.getTasks()[taskIndex][0]);
 
     await this.getLobby().getServer().emit("player.task.completed", event);
 
@@ -199,7 +199,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   async exile(): Promise<void> {
-    const event = new PlayerDiedEvent(this.getPlayerInstance(), DeathReason.Unknown);
+    const event = new PlayerDiedEvent(this.getPlayer(), DeathReason.Unknown);
 
     await this.getLobby().getServer().emit("player.died", event);
 
@@ -235,7 +235,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   async setName(name: string, sendTo?: Connection[]): Promise<void> {
-    const player = this.getPlayerInstance();
+    const player = this.getPlayer();
     const event = new PlayerNameUpdatedEvent(player, player.getName(), TextComponent.from(name));
 
     await this.getLobby().getServer().emit("player.name.updated", event);
@@ -289,7 +289,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   async setColor(color: PlayerColor, sendTo?: Connection[]): Promise<void> {
-    const player = this.getPlayerInstance();
+    const player = this.getPlayer();
     const event = new PlayerColorUpdatedEvent(player, player.getColor(), color);
 
     await this.getLobby().getServer().emit("player.color.updated", event);
@@ -305,7 +305,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   async handleSetHat(hat: PlayerHat, sendTo?: Connection[]): Promise<void> {
-    const player = this.getPlayerInstance();
+    const player = this.getPlayer();
     const event = new PlayerHatUpdatedEvent(player, player.getHat(), hat);
 
     await this.getLobby().getServer().emit("player.hat.updated", event);
@@ -321,7 +321,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   async handleSetPet(pet: PlayerPet, sendTo?: Connection[]): Promise<void> {
-    const player = this.getPlayerInstance();
+    const player = this.getPlayer();
     const event = new PlayerPetUpdatedEvent(player, player.getPet(), pet);
 
     await this.getLobby().getServer().emit("player.pet.updated", event);
@@ -337,7 +337,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   async handleSetSkin(skin: PlayerSkin, sendTo?: Connection[]): Promise<void> {
-    const player = this.getPlayerInstance();
+    const player = this.getPlayer();
     const event = new PlayerSkinUpdatedEvent(player, player.getSkin(), skin);
 
     await this.getLobby().getServer().emit("player.skin.updated", event);
@@ -354,7 +354,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
   async handleMurderPlayer(victimPlayerControlNetId: number, sendTo?: Connection[]): Promise<void> {
     const victim = this.getLobby().findSafePlayerByNetId(victimPlayerControlNetId);
-    const event = new PlayerMurderedEvent(victim, this.getPlayerInstance());
+    const event = new PlayerMurderedEvent(victim, this.getPlayer());
 
     await this.getLobby().getServer().emit("player.died", event);
     await this.getLobby().getServer().emit("player.murdered", event);
@@ -369,7 +369,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   async handleSendChat(message: string, sendTo?: Connection[]): Promise<void> {
-    const event = new PlayerChatMessageEvent(this.getPlayerInstance(), TextComponent.from(message));
+    const event = new PlayerChatMessageEvent(this.getPlayer(), TextComponent.from(message));
 
     await this.getLobby().getServer().emit("player.chat.message", event);
 
@@ -391,7 +391,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   async handleSendChatNote(playerId: number, chatNoteType: ChatNoteType, sendTo?: Connection[]): Promise<void> {
-    const event = new PlayerChatNoteEvent(this.getPlayerInstance(), chatNoteType);
+    const event = new PlayerChatNoteEvent(this.getPlayer(), chatNoteType);
 
     await this.getLobby().getServer().emit("player.chat.note", event);
 
@@ -533,28 +533,15 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     return clone;
   }
 
-  protected getPlayerInstance(): PlayerInstance {
+  protected getPlayer(): PlayerInstance {
     return this.getLobby().findSafePlayerByPlayerId(this.playerId);
   }
 
   protected getConnection(): Connection {
-    const playerInstance = this.getPlayerInstance();
-    const playerConnection = playerInstance.getConnection();
-
-    if (playerConnection === undefined) {
-      throw new Error(`Player ${playerInstance.getId()} does not have a connection`);
-    }
-
-    return playerConnection;
+    return this.getPlayer().getSafeConnection();
   }
 
   protected getPlayerData(playerId: number = this.playerId): PlayerData {
-    const data = this.getLobby().getSafeGameData().getGameData().getPlayer(playerId);
-
-    if (data === undefined) {
-      throw new Error(`Player ${playerId} does not have a PlayerData instance in GameData`);
-    }
-
-    return data;
+    return this.getLobby().getSafeGameData().getGameData().getSafePlayer(playerId);
   }
 }

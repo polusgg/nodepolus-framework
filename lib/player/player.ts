@@ -47,6 +47,14 @@ export class Player implements PlayerInstance {
     return this.connection;
   }
 
+  getSafeConnection(): Connection {
+    if (this.connection === undefined) {
+      throw new Error(`Player ${this.getId()} does not have a connection`);
+    }
+
+    return this.connection;
+  }
+
   getLobby(): LobbyInstance {
     return this.lobby;
   }
@@ -284,7 +292,7 @@ export class Player implements PlayerInstance {
   }
 
   setPosition(position: Vector2, reason: TeleportReason = TeleportReason.Unknown): this {
-    this.entity.getCustomNetworkTransform().snapTo(position, reason, this.lobby.getConnections());
+    this.entity.getCustomNetworkTransform().handleSnapTo(position, reason, this.lobby.getConnections());
 
     return this;
   }
@@ -298,13 +306,13 @@ export class Player implements PlayerInstance {
   }
 
   enterVent(vent: LevelVent): this {
-    this.entity.getPlayerPhysics().enterVent(vent, this.lobby.getConnections());
+    this.entity.getPlayerPhysics().handleEnterVent(vent, this.lobby.getConnections());
 
     return this;
   }
 
   exitVent(vent: LevelVent): this {
-    this.entity.getPlayerPhysics().exitVent(vent, this.lobby.getConnections());
+    this.entity.getPlayerPhysics().handleExitVent(vent, this.lobby.getConnections());
 
     return this;
   }
@@ -484,13 +492,7 @@ export class Player implements PlayerInstance {
   }
 
   getGameDataEntry(): PlayerData {
-    const data = this.lobby.getSafeGameData().getGameData().getPlayer(this.getId());
-
-    if (data === undefined) {
-      throw new Error(`Player ${this.getId()} does not have a PlayerData instance in GameData`);
-    }
-
-    return data;
+    return this.lobby.getSafeGameData().getGameData().getSafePlayer(this.getId());
   }
 
   updateGameData(): void {

@@ -31,6 +31,16 @@ export class InnerGameData extends BaseInnerNetObject {
     return this.players.get(playerId);
   }
 
+  getSafePlayer(playerId: number): PlayerData {
+    const player = this.getPlayer(playerId);
+
+    if (player === undefined) {
+      throw new Error(`GameData does not have PlayerData for player ${playerId}`);
+    }
+
+    return player;
+  }
+
   addPlayer(playerData: PlayerData): this {
     this.players.set(playerData.getId(), playerData);
 
