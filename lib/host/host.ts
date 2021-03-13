@@ -183,7 +183,7 @@ export class Host implements HostInstance {
   async startGame(): Promise<void> {
     this.lobby.setGame(new Game(this.lobby));
 
-    const event = new GameStartingEvent(this.lobby.getGame()!);
+    const event = new GameStartingEvent(this.lobby.getSafeGame());
 
     await this.lobby.getServer().emit("game.starting", event);
 
@@ -198,12 +198,6 @@ export class Host implements HostInstance {
   }
 
   async setInfected(infectedCount: number): Promise<void> {
-    const gameData = this.lobby.getGameData();
-
-    if (gameData === undefined) {
-      throw new Error("GameData does not exist on the lobby instance");
-    }
-
     const players = this.lobby.getPlayers();
 
     infectedCount = Math.min(infectedCount, Math.max(0, Math.floor(players.length / 2) - 1));
@@ -236,7 +230,7 @@ export class Host implements HostInstance {
       }
     }
 
-    const event = new GameStartedEvent(this.lobby.getGame()!, impostors);
+    const event = new GameStartedEvent(this.lobby.getSafeGame(), impostors);
 
     await this.lobby.getServer().emit("game.started", event);
 
@@ -344,17 +338,7 @@ export class Host implements HostInstance {
   }
 
   async endMeeting(): Promise<void> {
-    const gameData = this.lobby.getGameData();
-    const meetingHud = this.lobby.getMeetingHud();
-
-    if (meetingHud === undefined) {
-      throw new Error("Attempted to end a meeting without a MeetingHud instance");
-    }
-
-    if (gameData === undefined) {
-      throw new Error("Attempted to end a meeting without a GameData instance");
-    }
-
+    const meetingHud = this.lobby.getSafeMeetingHud();
     const oldMeetingHud = meetingHud.getMeetingHud().clone();
     const voteResults: Map<number, VoteResult> = new Map();
     const playerInstanceCache: Map<number, PlayerInstance> = new Map();
@@ -413,7 +397,7 @@ export class Host implements HostInstance {
       }
     }
 
-    const concludedEvent = new MeetingConcludedEvent(this.lobby.getGame()!, [...voteResults.values()]);
+    const concludedEvent = new MeetingConcludedEvent(this.lobby.getSafeGame(), [...voteResults.values()]);
 
     await this.lobby.getServer().emit("meeting.concluded", concludedEvent);
 
@@ -457,7 +441,7 @@ export class Host implements HostInstance {
 
     setTimeout(async () => {
       const closedEvent = new MeetingClosedEvent(
-        this.lobby.getGame()!,
+        this.lobby.getSafeGame(),
         concludedEvent.getVotes(),
         isTied,
         exiledPlayer,
@@ -475,7 +459,7 @@ export class Host implements HostInstance {
 
       setTimeout(() => {
         this.lobby.getServer().emit("meeting.ended", new MeetingEndedEvent(
-          this.lobby.getGame()!,
+          this.lobby.getSafeGame(),
           concludedEvent.getVotes(),
           isTied,
           exiledPlayer,
@@ -495,12 +479,7 @@ export class Host implements HostInstance {
   }
 
   checkForTaskWin(): void {
-    const gameData = this.lobby.getGameData();
-
-    if (gameData === undefined) {
-      throw new Error("Received CompleteTask without a GameData instance");
-    }
-
+    const gameData = this.lobby.getSafeGameData();
     const crewmates = [...gameData.getGameData().getPlayers().values()].filter(playerData => !playerData.isImpostor());
 
     if (crewmates.every(crewmate => crewmate.isDoneWithTasks())) {
@@ -510,7 +489,7 @@ export class Host implements HostInstance {
 
   async endGame(reason: GameOverReason): Promise<void> {
     const oldState = this.lobby.getGameState();
-    const event = new GameEndedEvent(this.lobby.getGame()!, reason);
+    const event = new GameEndedEvent(this.lobby.getSafeGame(), reason);
 
     this.lobby.setGameState(GameState.NotStarted);
 
@@ -549,7 +528,7 @@ export class Host implements HostInstance {
   }
 
   ensurePlayerDataExists(player: PlayerInstance): void {
-    const gameData = this.getGameData();
+    const gameData = this.lobby.getSafeGameData();
 
     if (![...gameData.getGameData().getPlayers().values()].some(p => p.getId() == player.getId())) {
       const playerData = new PlayerData(
@@ -690,37 +669,33 @@ export class Host implements HostInstance {
     switch (this.lobby.getLevel()) {
       case Level.TheSkeld:
         this.decontaminationHandlers = [];
-        this.doorHandler = new AutoDoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
+        this.doorHandler = new AutoDoorsHandler(this, this.lobby.getSafeShipStatus().getShipStatus());
         break;
       case Level.AprilSkeld:
         this.decontaminationHandlers = [];
-        this.doorHandler = new AutoDoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
+        this.doorHandler = new AutoDoorsHandler(this, this.lobby.getSafeShipStatus().getShipStatus());
         break;
       case Level.MiraHq:
         this.decontaminationHandlers = [
-          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().getSystems()[InternalSystemType.Decon] as DeconSystem),
+          new DecontaminationHandler(this, this.lobby.getSafeShipStatus().getShipStatus().getSystems()[InternalSystemType.Decon] as DeconSystem),
         ];
         break;
       case Level.Polus:
         this.decontaminationHandlers = [
-          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().getSystems()[InternalSystemType.Decon] as DeconSystem),
-          new DecontaminationHandler(this, this.lobby.getShipStatus()!.getShipStatus().getSystems()[InternalSystemType.Decon2] as DeconTwoSystem),
+          new DecontaminationHandler(this, this.lobby.getSafeShipStatus().getShipStatus().getSystems()[InternalSystemType.Decon] as DeconSystem),
+          new DecontaminationHandler(this, this.lobby.getSafeShipStatus().getShipStatus().getSystems()[InternalSystemType.Decon2] as DeconTwoSystem),
         ];
         this.doorHandler = new DoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
         break;
       case Level.Airship:
         this.decontaminationHandlers = [];
-        this.doorHandler = new DoorsHandler(this, this.lobby.getShipStatus()!.getShipStatus());
+        this.doorHandler = new DoorsHandler(this, this.lobby.getSafeShipStatus().getShipStatus());
         break;
     }
 
-    const gameData = this.lobby.getGameData();
+    const gameData = this.lobby.getSafeGameData();
 
-    if (gameData === undefined) {
-      throw new Error("Attempted to start game without a GameData instance");
-    }
-
-    this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getShipStatus()!.serializeSpawn()], this.lobby.getCode()));
+    this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getSafeShipStatus().serializeSpawn()], this.lobby.getCode()));
     this.lobby.setGameState(GameState.Started);
     this.setInfected(this.lobby.getOptions().getImpostorCount());
     this.setTasks();
@@ -822,26 +797,11 @@ export class Host implements HostInstance {
       throw new Error("Received ReportDeadBody during a meeting");
     }
 
-    const gameData = this.lobby.getGameData();
-
-    if (gameData === undefined) {
-      throw new Error("Received ReportDeadBody without a GameData instance");
-    }
-
-    const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
-
-    if (owner === undefined) {
-      throw new Error("Received ReportDeadBody from an InnerPlayerControl without an owner");
-    }
-
-    const player = this.lobby.findPlayerByConnection(owner);
-
-    if (player === undefined) {
-      throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-    }
-
+    const gameData = this.lobby.getSafeGameData();
+    const owner = this.lobby.findSafeConnection(sender.getParent().getOwnerId());
+    const player = this.lobby.findSafePlayerByConnection(owner);
     const event = new MeetingStartedEvent(
-      this.lobby.getGame()!,
+      this.lobby.getSafeGame(),
       player,
       victimPlayerId !== undefined ? this.lobby.findPlayerByPlayerId(victimPlayerId) : undefined,
     );
@@ -908,20 +868,10 @@ export class Host implements HostInstance {
   }
 
   async handleCastVote(votingPlayerId: number, suspectPlayerId: number): Promise<void> {
-    const meetingHud = this.lobby.getMeetingHud();
-
-    if (meetingHud === undefined) {
-      throw new Error("Received CastVote without a MeetingHud instance");
-    }
-
-    const player = this.lobby.findPlayerByPlayerId(votingPlayerId);
-
-    if (player === undefined) {
-      throw new Error(`Player ${votingPlayerId} does not have a PlayerInstance on the lobby instance`);
-    }
-
+    const meetingHud = this.lobby.getSafeMeetingHud();
+    const player = this.lobby.findSafePlayerByPlayerId(votingPlayerId);
     const event = new MeetingVoteAddedEvent(
-      this.lobby.getGame()!,
+      this.lobby.getSafeGame(),
       player,
       suspectPlayerId !== -1 ? this.lobby.findPlayerByPlayerId(suspectPlayerId) : undefined,
     );
@@ -968,13 +918,7 @@ export class Host implements HostInstance {
    * @param tasks - The player's new tasks
    */
   updatePlayerTasks(player: PlayerInstance, tasks: LevelTask[]): this {
-    const gameData = this.lobby.getGameData();
-
-    if (gameData === undefined) {
-      throw new Error("Attempted to set tasks without a GameData instance");
-    }
-
-    gameData.getGameData().setTasks(player.getId(), tasks.map(task => task.id), this.lobby.getConnections());
+    this.lobby.getSafeGameData().getGameData().setTasks(player.getId(), tasks.map(task => task.id), this.lobby.getConnections());
 
     return this;
   }
@@ -1054,12 +998,7 @@ export class Host implements HostInstance {
       return false;
     }
 
-    const gameData = this.lobby.getGameData();
-
-    if (gameData === undefined) {
-      throw new Error("shouldEndGame called without a GameData instance");
-    }
-
+    const gameData = this.lobby.getSafeGameData();
     const aliveImpostors: PlayerData[] = [];
     const aliveCrewmates: PlayerData[] = [];
     const playerData = gameData.getGameData().getPlayers();
@@ -1077,15 +1016,5 @@ export class Host implements HostInstance {
     }
 
     return (aliveImpostors.length >= aliveCrewmates.length) || aliveImpostors.length == 0;
-  }
-
-  protected getGameData(): EntityGameData {
-    const gameData = this.lobby.getGameData();
-
-    if (gameData === undefined) {
-      throw new Error("getTakenColors called without a GameData instance");
-    }
-
-    return gameData;
   }
 }

@@ -10,7 +10,6 @@ import { BaseInnerNetObject } from "../baseEntity";
 import { TextComponent } from "../../../api/text";
 import { PlayerData } from "../gameData/types";
 import { Connection } from "../../connection";
-import { EntityGameData } from "../gameData";
 import { Lobby } from "../../../lobby";
 import { EntityPlayer } from ".";
 import {
@@ -169,11 +168,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   async handleSyncSettings(options: GameOptionsData, _sendTo?: Connection[]): Promise<void> {
     const lobby = this.getLobby() as Lobby;
     const oldOptions = lobby.getOptions();
-    const owner = lobby.findConnection(this.getOwnerId());
-
-    if (owner === undefined) {
-      throw new Error("Received CheckName from an InnerPlayerControl without an owner");
-    }
+    const owner = lobby.findSafeConnection(this.getOwnerId());
 
     if (!owner.isActingHost()) {
       this.sendRpcPacket(new SyncSettingsPacket(options), [owner]);
@@ -181,12 +176,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       return;
     }
 
-    const player = lobby.findPlayerByConnection(owner);
-
-    if (player === undefined) {
-      throw new Error(`Client ${this.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-    }
-
+    const player = lobby.findSafePlayerByConnection(owner);
     const event = new LobbyOptionsUpdatedEvent(lobby, player, oldOptions.clone() as Immutable<GameOptionsData>, options);
 
     await lobby.getServer().emit("lobby.options.updated", event);
@@ -226,21 +216,12 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     let index = 1;
 
     const lobby = this.getLobby() as Lobby;
-    const owner = lobby.findConnection(this.getOwnerId());
-
-    if (owner === undefined) {
-      throw new Error("Received CheckName from an InnerPlayerControl without an owner");
-    }
-
-    const player = lobby.findPlayerByConnection(owner);
-
-    if (player === undefined) {
-      throw new Error(`Client ${this.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-    }
+    const owner = lobby.findSafeConnection(this.getOwnerId());
+    const player = lobby.findSafePlayerByConnection(owner);
 
     lobby.getHostInstance().ensurePlayerDataExists(player);
 
-    while (this.getGameData().getGameData().isNameTaken(checkName)) {
+    while (this.getLobby().getSafeGameData().getGameData().isNameTaken(checkName)) {
       checkName = `${name} ${index++}`;
     }
 
@@ -270,20 +251,11 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   handleCheckColor(color: PlayerColor, _sendTo?: Connection[]): void {
-    const takenColors = this.getGameData().getGameData().getTakenColors(this.getPlayerId());
+    const takenColors = this.getLobby().getSafeGameData().getGameData().getTakenColors(this.getPlayerId());
     let setColor: PlayerColor = color;
 
-    const owner = this.getLobby().findConnection(this.getOwnerId());
-
-    if (owner === undefined) {
-      throw new Error("Received CheckColor from an InnerPlayerControl without an owner");
-    }
-
-    const player = this.getLobby().findPlayerByConnection(owner);
-
-    if (player === undefined) {
-      throw new Error(`Client ${this.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-    }
+    const owner = this.getLobby().findSafeConnection(this.getOwnerId());
+    const player = this.getLobby().findSafePlayerByConnection(owner);
 
     this.getLobby().getHostInstance().ensurePlayerDataExists(player);
 
@@ -303,17 +275,8 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   handleSetColor(color: PlayerColor, _sendTo?: Connection[]): void {
-    const owner = this.getLobby().findConnection(this.getOwnerId());
-
-    if (owner === undefined) {
-      throw new Error("Received SetColor from an InnerPlayerControl without an owner");
-    }
-
-    const player = this.getLobby().findPlayerByConnection(owner);
-
-    if (player === undefined) {
-      throw new Error(`Client ${this.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-    }
+    const owner = this.getLobby().findSafeConnection(this.getOwnerId());
+    const player = this.getLobby().findSafePlayerByConnection(owner);
 
     this.getLobby().getHostInstance().ensurePlayerDataExists(player);
 
@@ -390,12 +353,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   async handleMurderPlayer(victimPlayerControlNetId: number, sendTo?: Connection[]): Promise<void> {
-    const victim = this.getLobby().findPlayerByNetId(victimPlayerControlNetId);
-
-    if (victim === undefined) {
-      throw new Error("Victim does not have a PlayerInstance on the lobby instance");
-    }
-
+    const victim = this.getLobby().findSafePlayerByNetId(victimPlayerControlNetId);
     const event = new PlayerMurderedEvent(victim, this.getPlayerInstance());
 
     await this.getLobby().getServer().emit("player.died", event);
@@ -445,12 +403,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   handleUsePlatform(sender: InnerPlayerControl): void {
-    const shipStatus = this.getLobby().getShipStatus();
-
-    if (shipStatus === undefined) {
-      throw new Error("Received UsePlatform without a ShipStatus instance");
-    }
-
+    const shipStatus = this.getLobby().getSafeShipStatus();
     const oldData = shipStatus.getShipStatus().clone();
     const movingPlatform = shipStatus.getShipStatus().getSystems()[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
 
@@ -535,13 +488,12 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       case RpcPacketType.SetStartCounter: {
         // TODO: InnerNetObject refactor
         const data = packet as SetStartCounterPacket;
-        const player = this.getLobby().findPlayerByClientId(this.getOwnerId());
 
-        if (player === undefined) {
-          throw new Error(`Client ${this.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-        }
-
-        this.getLobby().getHostInstance().handleSetStartCounter(player, data.sequenceId, data.timeRemaining);
+        this.getLobby().getHostInstance().handleSetStartCounter(
+          this.getLobby().findSafePlayerByClientId(this.getOwnerId()),
+          data.sequenceId,
+          data.timeRemaining,
+        );
         break;
       }
       case RpcPacketType.UsePlatform:
@@ -582,13 +534,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   protected getPlayerInstance(): PlayerInstance {
-    const player = this.getLobby().findPlayerByPlayerId(this.playerId);
-
-    if (player === undefined) {
-      throw new Error(`Player ${this.playerId} does not have a PlayerInstance on the lobby instance`);
-    }
-
-    return player;
+    return this.getLobby().findSafePlayerByPlayerId(this.playerId);
   }
 
   protected getConnection(): Connection {
@@ -602,18 +548,8 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     return playerConnection;
   }
 
-  protected getGameData(): EntityGameData {
-    const gameData = this.getLobby().getGameData();
-
-    if (gameData === undefined) {
-      throw new Error("Lobby does not have a GameData instance");
-    }
-
-    return gameData;
-  }
-
   protected getPlayerData(playerId: number = this.playerId): PlayerData {
-    const data = this.getGameData().getGameData().getPlayer(playerId);
+    const data = this.getLobby().getSafeGameData().getGameData().getPlayer(playerId);
 
     if (data === undefined) {
       throw new Error(`Player ${playerId} does not have a PlayerData instance in GameData`);

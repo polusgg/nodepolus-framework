@@ -46,7 +46,7 @@ export class SwitchSystem extends BaseSystem {
   }
 
   async setSwitchState(switchIndex: number, switchState: boolean): Promise<void> {
-    const event = new RoomElectricalInteractedEvent(this.shipStatus.getParent().getLobby().getGame()!, switchIndex, switchState);
+    const event = new RoomElectricalInteractedEvent(this.shipStatus.getParent().getLobby().getSafeGame(), switchIndex, switchState);
 
     await this.shipStatus.getParent().getLobby().getServer().emit("room.electrical.interacted", event);
 

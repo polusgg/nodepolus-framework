@@ -164,6 +164,14 @@ export class Lobby implements LobbyInstance {
     return this.game;
   }
 
+  getSafeGame(): Game {
+    if (this.game === undefined) {
+      throw new Error("Lobby does not have a Game instance");
+    }
+
+    return this.game;
+  }
+
   /**
    * @internal
    */
@@ -284,35 +292,123 @@ export class Lobby implements LobbyInstance {
     }
   }
 
+  findSafeInnerNetObject(netId: number): BaseInnerNetObject {
+    const object = this.findInnerNetObject(netId);
+
+    if (object === undefined) {
+      throw new Error(`Lobby does not have an InnerNetObject with the ID ${netId}`);
+    }
+
+    return object;
+  }
+
   findPlayerByClientId(clientId: number): Player | undefined {
     return this.players.find(player => player.getEntity().getOwnerId() == clientId);
+  }
+
+  findSafePlayerByClientId(clientId: number): Player {
+    const player = this.findPlayerByClientId(clientId);
+
+    if (player === undefined) {
+      throw new Error(`Lobby does not have a player with the client ID ${clientId}`);
+    }
+
+    return player;
   }
 
   findPlayerByPlayerId(playerId: number): Player | undefined {
     return this.players.find(player => player.getId() == playerId);
   }
 
+  findSafePlayerByPlayerId(playerId: number): Player {
+    const player = this.findPlayerByPlayerId(playerId);
+
+    if (player === undefined) {
+      throw new Error(`Lobby does not have a player with the player ID ${playerId}`);
+    }
+
+    return player;
+  }
+
   findPlayerByNetId(netId: number): Player | undefined {
     return this.players.find(player => player.getEntity().getObjects().some(object => object.getNetId() == netId));
+  }
+
+  findSafePlayerByNetId(netId: number): Player {
+    const player = this.findPlayerByNetId(netId);
+
+    if (player === undefined) {
+      throw new Error(`Lobby does not have a player with the net ID ${netId}`);
+    }
+
+    return player;
   }
 
   findPlayerByConnection(connection: Connection): Player | undefined {
     return this.players.find(player => player.getEntity().getOwnerId() == connection.getId());
   }
 
+  findSafePlayerByConnection(connection: Connection): Player {
+    const player = this.findPlayerByConnection(connection);
+
+    if (player === undefined) {
+      throw new Error(`Lobby does not have a player for connection ${connection.getId()}`);
+    }
+
+    return player;
+  }
+
   findPlayerByEntity(entity: EntityPlayer): Player | undefined {
     return this.players.find(player => player.getEntity().getOwnerId() == entity.getOwnerId());
+  }
+
+  findSafePlayerByEntity(entity: EntityPlayer): Player {
+    const player = this.findPlayerByEntity(entity);
+
+    if (player === undefined) {
+      throw new Error(`Lobby does not have a player for entity ${entity.getOwnerId()}`);
+    }
+
+    return player;
   }
 
   findPlayerIndexByConnection(connection: Connection): number {
     return this.players.findIndex(player => player.getEntity().getOwnerId() == connection.getId());
   }
 
-  findConnection(id: number): Connection | undefined {
-    return this.connections.find(con => con.getId() == id);
+  findSafePlayerIndexByConnection(connection: Connection): number {
+    const index = this.findPlayerIndexByConnection(connection);
+
+    if (index === -1) {
+      throw new Error(`Lobby does not have a player for connection ${connection.getId()}`);
+    }
+
+    return index;
+  }
+
+  findConnection(clientId: number): Connection | undefined {
+    return this.connections.find(con => con.getId() == clientId);
+  }
+
+  findSafeConnection(clientId: number): Connection {
+    const connection = this.findConnection(clientId);
+
+    if (connection === undefined) {
+      throw new Error(`Lobby does not have a connection with the ID ${clientId}`);
+    }
+
+    return connection;
   }
 
   getGameData(): EntityGameData | undefined {
+    return this.gameData;
+  }
+
+  getSafeGameData(): EntityGameData {
+    if (this.gameData === undefined) {
+      throw new Error("Lobby does not have a GameData instance");
+    }
+
     return this.gameData;
   }
 
@@ -328,6 +424,14 @@ export class Lobby implements LobbyInstance {
     return this.lobbyBehaviour;
   }
 
+  getSafeLobbyBehaviour(): EntityLobbyBehaviour {
+    if (this.lobbyBehaviour === undefined) {
+      throw new Error("Lobby does not have a LobbyBehaviour instance");
+    }
+
+    return this.lobbyBehaviour;
+  }
+
   setLobbyBehaviour(lobbyBehaviour: EntityLobbyBehaviour): void {
     this.lobbyBehaviour = lobbyBehaviour;
   }
@@ -340,6 +444,14 @@ export class Lobby implements LobbyInstance {
     return this.shipStatus;
   }
 
+  getSafeShipStatus(): BaseEntityShipStatus {
+    if (this.shipStatus === undefined) {
+      throw new Error("Lobby does not have a ShipStatus instance");
+    }
+
+    return this.shipStatus;
+  }
+
   setShipStatus(shipStatus: BaseEntityShipStatus): void {
     this.shipStatus = shipStatus;
   }
@@ -349,6 +461,14 @@ export class Lobby implements LobbyInstance {
   }
 
   getMeetingHud(): EntityMeetingHud | undefined {
+    return this.meetingHud;
+  }
+
+  getSafeMeetingHud(): EntityMeetingHud {
+    if (this.meetingHud === undefined) {
+      throw new Error("Lobby does not have a MeetingHud instance");
+    }
+
     return this.meetingHud;
   }
 
@@ -1047,11 +1167,7 @@ export class Lobby implements LobbyInstance {
           return;
         }
 
-        const connectionChangingScene = this.findConnection((packet as SceneChangePacket).clientId);
-
-        if (connectionChangingScene === undefined) {
-          throw new Error(`SceneChange packet sent for unknown client: ${(packet as SceneChangePacket).clientId}`);
-        }
+        const connectionChangingScene = this.findSafeConnection((packet as SceneChangePacket).clientId);
 
         this.hostInstance.handleSceneChange(connectionChangingScene, (packet as SceneChangePacket).scene);
         break;
@@ -1072,17 +1188,13 @@ export class Lobby implements LobbyInstance {
    * @param sendTo - The connections to which the packet was intended to be sent
    */
   protected handleData(netId: number, data: MessageReader | MessageWriter, sendTo?: Connection[]): void {
-    const object = this.findInnerNetObject(netId);
+    const object = this.findSafeInnerNetObject(netId);
 
-    if (object !== undefined) {
-      if (object.getType() == InnerNetObjectType.CustomNetworkTransform) {
-        const oldNetObject = object.clone();
+    if (object.getType() == InnerNetObjectType.CustomNetworkTransform) {
+      const oldNetObject = object.clone();
 
-        (object as InnerCustomNetworkTransform).setData(data);
-        this.sendUnreliableRootGamePacket(new GameDataPacket([object.serializeData(oldNetObject)], this.code), sendTo ?? []);
-      }
-    } else {
-      throw new Error(`Data packet sent with unknown InnerNetObject ID: ${netId}`);
+      (object as InnerCustomNetworkTransform).setData(data);
+      this.sendUnreliableRootGamePacket(new GameDataPacket([object.serializeData(oldNetObject)], this.code), sendTo ?? []);
     }
   }
 

@@ -83,6 +83,12 @@ export interface LobbyInstance extends Metadatable {
   getGame(): Game | undefined;
 
   /**
+   * Gets the active game instance for the lobby, or throws an error if it is
+   * undefined.
+   */
+  getSafeGame(): Game;
+
+  /**
    * Gets the time at which the lobby was created.
    */
   getCreationTime(): number;
@@ -157,12 +163,28 @@ export interface LobbyInstance extends Metadatable {
   findInnerNetObject(netId: number): BaseInnerNetObject | undefined;
 
   /**
+   * Gets the first InnerNetObject whose ID matches the given ID, or throws an
+   * error if it is undefined.
+   *
+   * @param netId - The ID of the InnerNetObject
+   */
+  findSafeInnerNetObject(netId: number): BaseInnerNetObject;
+
+  /**
    * Gets the first player with the given client ID.
    *
    * @param clientId - The ID of the connection
    * @returns The player, or `undefined` if no players in the lobby belong to a connection with the ID `clientId`
    */
   findPlayerByClientId(clientId: number): PlayerInstance | undefined;
+
+  /**
+   * Gets the first player with the given client ID, or throws an error if it
+   * is undefined.
+   *
+   * @param clientId - The ID of the connection
+   */
+  findSafePlayerByClientId(clientId: number): PlayerInstance;
 
   /**
    * Gets the first player with the given player ID.
@@ -173,12 +195,28 @@ export interface LobbyInstance extends Metadatable {
   findPlayerByPlayerId(playerId: number): PlayerInstance | undefined;
 
   /**
+   * Gets the first player with the given player ID, or throws an error if it is
+   * undefined.
+   *
+   * @param playerId - The ID of the player
+   */
+  findSafePlayerByPlayerId(playerId: number): PlayerInstance;
+
+  /**
    * Gets the first player with the given net ID.
    *
    * @param netId - The ID of the InnerNetObject
    * @returns The player, or `undefined` if no players in the lobby have an InnerNetObject with the ID `netId`
    */
   findPlayerByNetId(netId: number): PlayerInstance | undefined;
+
+  /**
+   * Gets the first player with the given net ID, or throws an error if it is
+   * undefined.
+   *
+   * @param netId - The ID of the InnerNetObject
+   */
+  findSafePlayerByNetId(netId: number): PlayerInstance;
 
   /**
    * Gets the first player belonging to the given connection.
@@ -189,6 +227,14 @@ export interface LobbyInstance extends Metadatable {
   findPlayerByConnection(connection: Connection): PlayerInstance | undefined;
 
   /**
+   * Gets the first player belonging to the given connection, or throws an error
+   * if it is undefined.
+   *
+   * @param connection - The connection to which the player belongs
+   */
+  findSafePlayerByConnection(connection: Connection): PlayerInstance;
+
+  /**
    * Gets the first player that owns the given entity.
    *
    * @param entity - The entity that belongs to the player
@@ -197,11 +243,27 @@ export interface LobbyInstance extends Metadatable {
   findPlayerByEntity(entity: EntityPlayer): PlayerInstance | undefined;
 
   /**
+   * Gets the first player that owns the given entity, or throws an error if it
+   * is undefined.
+   *
+   * @param entity - The entity that belongs to the player
+   */
+  findSafePlayerByEntity(entity: EntityPlayer): PlayerInstance;
+
+  /**
    * Gets the index of the first player belonging to the given connection.
    *
    * @param connection - The connection to which the player belongs
    */
   findPlayerIndexByConnection(connection: Connection): number;
+
+  /**
+   * Gets the index of the first player belonging to the given connection, or
+   * throws an error if it is undefined.
+   *
+   * @param connection - The connection to which the player belongs
+   */
+  findSafePlayerIndexByConnection(connection: Connection): number;
 
   /**
    * Gets the connection with the given client ID.
@@ -212,9 +274,23 @@ export interface LobbyInstance extends Metadatable {
   findConnection(id: number): Connection | undefined;
 
   /**
+   * Gets the connection with the given client ID, or throws an error if it is
+   * undefined.
+   *
+   * @param clientId - The ID of the connection
+   */
+  findSafeConnection(id: number): Connection;
+
+  /**
    * Gets the GameData instance for the lobby.
    */
   getGameData(): EntityGameData | undefined;
+
+  /**
+   * Gets the GameData instance for the lobby, or throws an error if it is
+   * undefined.
+   */
+  getSafeGameData(): EntityGameData;
 
   /**
    * Sets the GameData instance for the lobby.
@@ -234,6 +310,12 @@ export interface LobbyInstance extends Metadatable {
   getLobbyBehaviour(): EntityLobbyBehaviour | undefined;
 
   /**
+   * Gets the LobbyBehaviour instance for the lobby, or throws an error if it is
+   * undefined.
+   */
+  getSafeLobbyBehaviour(): EntityLobbyBehaviour;
+
+  /**
    * Sets the LobbyBehaviour instance for the lobby.
    *
    * @param lobbyBehaviour - The lobby's new LobbyBehaviour instance
@@ -251,6 +333,12 @@ export interface LobbyInstance extends Metadatable {
   getShipStatus(): BaseEntityShipStatus | undefined;
 
   /**
+   * Gets the ShipStatus instance for the lobby, or throws an error if it is
+   * undefined.
+   */
+  getSafeShipStatus(): BaseEntityShipStatus;
+
+  /**
    * Sets the ShipStatus instance for the lobby.
    *
    * @param shipStatus - The lobby's new ShipStatus instance
@@ -266,6 +354,12 @@ export interface LobbyInstance extends Metadatable {
    * Gets the MeetingHud instance for the lobby.
    */
   getMeetingHud(): EntityMeetingHud | undefined;
+
+  /**
+   * Gets the MeetingHud instance for the lobby, or throws an error if it is
+   * undefined.
+   */
+  getSafeMeetingHud(): EntityMeetingHud;
 
   /**
    * Sets the MeetingHud instance for the lobby.

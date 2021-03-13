@@ -57,7 +57,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
 
   async clearVote(players: PlayerInstance[]): Promise<void> {
     const promises = (await Promise.all(players.map(async player => {
-      const event = new MeetingVoteRemovedEvent(this.parent.getLobby().getGame()!, player);
+      const event = new MeetingVoteRemovedEvent(this.parent.getLobby().getSafeGame(), player);
 
       await this.parent.getLobby().getServer().emit("meeting.vote.removed", event);
 

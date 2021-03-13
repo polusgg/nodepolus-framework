@@ -152,18 +152,12 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     switch (type) {
       case RpcPacketType.AddVote: {
         const data = packet as AddVotePacket;
-        const voter = this.parent.getLobby().findPlayerByClientId(data.votingClientId);
-        const target = this.parent.getLobby().findPlayerByClientId(data.targetClientId);
 
-        if (voter === undefined) {
-          throw new Error(`Voting client ${this.parent.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-        }
-
-        if (target === undefined) {
-          throw new Error(`Target client ${this.parent.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-        }
-
-        this.addVote(voter, target, sendTo);
+        this.addVote(
+          this.parent.getLobby().findSafePlayerByClientId(data.votingClientId),
+          this.parent.getLobby().findSafePlayerByClientId(data.targetClientId),
+          sendTo,
+        );
         break;
       }
       default:

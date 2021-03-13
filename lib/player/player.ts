@@ -2,7 +2,6 @@ import { PlayerSkin, PlayerPet, PlayerHat, PlayerColor, PlayerRole, TeleportReas
 import { RemovePlayerPacket, JoinGameResponsePacket, GameDataPacket } from "../protocol/packets/root";
 import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../types";
 import { PlayerData } from "../protocol/entities/gameData/types";
-import { EntityGameData } from "../protocol/entities/gameData";
 import { DespawnPacket } from "../protocol/packets/gameData";
 import { SetInfectedPacket } from "../protocol/packets/rpc";
 import { EntityPlayer } from "../protocol/entities/player";
@@ -315,7 +314,7 @@ export class Player implements PlayerInstance {
   }
 
   kill(): this {
-    const gameData = this.getGameData();
+    const gameData = this.lobby.getSafeGameData();
 
     this.entity.getPlayerControl().exile();
     gameData.getGameData().updateGameData([this.getGameDataEntry()], this.lobby.getConnections());
@@ -339,7 +338,7 @@ export class Player implements PlayerInstance {
   }
 
   async revive(): Promise<void> {
-    const gameData = this.getGameData();
+    const gameData = this.lobby.getSafeGameData();
 
     const event = new PlayerRevivedEvent(this);
 
@@ -441,25 +440,25 @@ export class Player implements PlayerInstance {
   }
 
   castVotekick(target: PlayerInstance): this {
-    this.getGameData().getVoteBanSystem().addVote(this, target as Player, this.lobby.getConnections());
+    this.lobby.getSafeGameData().getVoteBanSystem().addVote(this, target as Player, this.lobby.getConnections());
 
     return this;
   }
 
   clearVotekick(target: PlayerInstance): this {
-    this.getGameData().getVoteBanSystem().clearVote(this, target as Player, this.lobby.getConnections());
+    this.lobby.getSafeGameData().getVoteBanSystem().clearVote(this, target as Player, this.lobby.getConnections());
 
     return this;
   }
 
   clearVotekicksForMe(): this {
-    this.getGameData().getVoteBanSystem().clearVotesForPlayer(this, this.lobby.getConnections());
+    this.lobby.getSafeGameData().getVoteBanSystem().clearVotesForPlayer(this, this.lobby.getConnections());
 
     return this;
   }
 
   clearVotekicksFromMe(): this {
-    this.getGameData().getVoteBanSystem().clearVotesFromPlayer(this, this.lobby.getConnections());
+    this.lobby.getSafeGameData().getVoteBanSystem().clearVotesFromPlayer(this, this.lobby.getConnections());
 
     return this;
   }
@@ -485,7 +484,7 @@ export class Player implements PlayerInstance {
   }
 
   getGameDataEntry(): PlayerData {
-    const data = this.getGameData().getGameData().getPlayer(this.getId());
+    const data = this.lobby.getSafeGameData().getGameData().getPlayer(this.getId());
 
     if (data === undefined) {
       throw new Error(`Player ${this.getId()} does not have a PlayerData instance in GameData`);
@@ -495,7 +494,7 @@ export class Player implements PlayerInstance {
   }
 
   updateGameData(): void {
-    this.getGameData().getGameData().updateGameData([this.getGameDataEntry()], this.lobby.getConnections());
+    this.lobby.getSafeGameData().getGameData().updateGameData([this.getGameDataEntry()], this.lobby.getConnections());
   }
 
   /**
@@ -529,20 +528,5 @@ export class Player implements PlayerInstance {
     this.initialized = initialized;
 
     return this;
-  }
-
-  /**
-   * Gets the GameData instance from the player's lobby.
-   *
-   * @internal
-   */
-  protected getGameData(): EntityGameData {
-    const gameData = this.lobby.getGameData();
-
-    if (gameData === undefined) {
-      throw new Error("Lobby does not have a GameData instance");
-    }
-
-    return gameData;
   }
 }

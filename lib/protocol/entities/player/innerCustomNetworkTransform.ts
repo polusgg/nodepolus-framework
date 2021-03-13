@@ -56,11 +56,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
   }
 
   async snapTo(position: Vector2, reason: TeleportReason, sendTo?: Connection[]): Promise<void> {
-    const player = this.parent.getLobby().findPlayerByNetId(this.netId);
-
-    if (player === undefined) {
-      throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
-    }
+    const player = this.parent.getLobby().findSafePlayerByNetId(this.netId);
 
     this.incrementSequenceId(5);
 
@@ -110,12 +106,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
   }
 
   async setData(packet: MessageReader | MessageWriter): Promise<void> {
-    const player = this.parent.getLobby().findPlayerByNetId(this.netId);
-
-    if (player === undefined) {
-      throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
-    }
-
+    const player = this.parent.getLobby().findSafePlayerByNetId(this.netId);
     const reader = MessageReader.fromRawBytes(packet.getBuffer());
     const sequenceId = reader.readUInt16();
 

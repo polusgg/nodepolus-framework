@@ -46,7 +46,7 @@ import {
 } from "../../api/events/game";
 
 export class SystemsHandler {
-  protected oldShipStatus: BaseInnerShipStatus = this.host.getLobby().getShipStatus()!.getShipStatus();
+  protected oldShipStatus: BaseInnerShipStatus = this.host.getLobby().getSafeShipStatus().getShipStatus();
   protected sabotageCountdownInterval?: NodeJS.Timeout;
 
   constructor(
@@ -137,7 +137,7 @@ export class SystemsHandler {
   async repairMedbay<T extends MedScanSystem>(_repairer: Player, system: T, amount: MedbayAmount): Promise<void> {
     this.setOldShipStatus();
 
-    const game = this.host.getLobby().getGame()!;
+    const game = this.host.getLobby().getSafeGame();
     const player = this.host.getLobby().findPlayerByPlayerId(amount.getPlayerId())!;
 
     if (amount.getAction() == MedbayAction.EnteredQueue) {
@@ -260,11 +260,11 @@ export class SystemsHandler {
     this.setOldShipStatus();
 
     if (amount.isViewingCameras()) {
-      await this.host.getLobby().getServer().emit("game.cameras.opened", new GameCamerasOpenedEvent(this.host.getLobby().getGame()!, repairer));
+      await this.host.getLobby().getServer().emit("game.cameras.opened", new GameCamerasOpenedEvent(this.host.getLobby().getSafeGame(), repairer));
 
       system.addPlayerViewingCameras(repairer.getId());
     } else {
-      await this.host.getLobby().getServer().emit("game.cameras.closed", new GameCamerasClosedEvent(this.host.getLobby().getGame()!, repairer));
+      await this.host.getLobby().getServer().emit("game.cameras.closed", new GameCamerasClosedEvent(this.host.getLobby().getSafeGame(), repairer));
 
       system.removePlayerViewingCameras(repairer.getId());
     }
@@ -311,6 +311,6 @@ export class SystemsHandler {
   }
 
   protected getShipStatus(): BaseInnerShipStatus {
-    return this.host.getLobby().getShipStatus()!.getShipStatus();
+    return this.host.getLobby().getSafeShipStatus().getShipStatus();
   }
 }

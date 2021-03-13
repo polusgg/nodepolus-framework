@@ -112,12 +112,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   // TODO: Change amount to number and deserialize in the system itself?
   repairSystem(systemId: SystemType, playerControlNetId: number, amount: RepairAmount, _sendTo?: Connection[]): void {
     const lobby = this.parent.getLobby() as Lobby;
-    const shipStatus = lobby.getShipStatus();
-
-    if (shipStatus === undefined) {
-      throw new Error("Received RepairSystem without a ShipStatus instance");
-    }
-
+    const shipStatus = lobby.getSafeShipStatus();
     const systemsHandler = lobby.getHostInstance().getSystemsHandler();
 
     if (systemsHandler === undefined) {

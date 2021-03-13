@@ -29,14 +29,9 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
       return;
     }
 
-    const player = this.parent.getLobby().findPlayerByNetId(this.netId);
-
-    if (player === undefined) {
-      throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
-    }
-
+    const player = this.parent.getLobby().findSafePlayerByNetId(this.netId);
     const event = new GameVentEnteredEvent(
-      this.parent.getLobby().getGame()!,
+      this.parent.getLobby().getSafeGame(),
       player,
       vent,
     );
@@ -64,14 +59,9 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
       return;
     }
 
-    const player = this.parent.getLobby().findPlayerByNetId(this.netId);
-
-    if (player === undefined) {
-      throw new Error(`InnerNetObject ${this.netId} does not have a PlayerInstance on the lobby instance`);
-    }
-
+    const player = this.parent.getLobby().findSafePlayerByNetId(this.netId);
     const event = new GameVentExitedEvent(
-      this.parent.getLobby().getGame()!,
+      this.parent.getLobby().getSafeGame(),
       player,
       vent,
     );
