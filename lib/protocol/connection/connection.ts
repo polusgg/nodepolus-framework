@@ -4,6 +4,7 @@ import { BaseRootPacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPac
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { ServerPacketOutCustomEvent, ServerPacketOutEvent } from "../../api/events/server";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
+import { PlayerBannedEvent, PlayerKickedEvent } from "../../api/events/player";
 import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
 import { MessageWriter } from "../../util/hazelMessage";
 import { PlayerInstance } from "../../api/player";
@@ -514,9 +515,29 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * @param kickingPlayer - The player who kicked the connection, or `undefined` if the connection was kicked via the API
    * @param reason - The reason for why the connection was kicked
    */
-  sendKick(isBanned: boolean, kickingPlayer?: PlayerInstance, reason?: DisconnectReason): void {
+  async sendKick(isBanned: boolean, kickingPlayer?: PlayerInstance, reason?: DisconnectReason): Promise<void> {
     if (this.lobby === undefined) {
       throw new Error("Cannot kick a connection that is not in a lobby");
+    }
+
+    const player = this.lobby.findSafePlayerByConnection(this);
+
+    if (isBanned) {
+      const banEvent = new PlayerBannedEvent(this.lobby, player, kickingPlayer, reason);
+
+      await this.lobby.getServer().emit("player.banned", banEvent);
+
+      if (banEvent.isCancelled()) {
+        return;
+      }
+    } else {
+      const kickEvent = new PlayerKickedEvent(this.lobby, player, kickingPlayer, reason);
+
+      await this.lobby.getServer().emit("player.kicked", kickEvent);
+
+      if (kickEvent.isCancelled()) {
+        return;
+      }
     }
 
     this.writeReliable(new KickPlayerPacket(
@@ -525,12 +546,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
       isBanned,
       reason ?? (isBanned ? DisconnectReason.banned() : DisconnectReason.kicked()),
     ));
-
-    this.emit("kicked", {
-      isBanned,
-      kickingPlayer,
-      reason,
-    });
   }
 
   /**

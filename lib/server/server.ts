@@ -1,11 +1,11 @@
 import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, LobbyCount, LobbyListing, OutboundPacketTransformer } from "../types";
 import { FakeClientId, GameDataPacketType, PacketDestination, RootPacketType, RpcPacketType } from "../types/enums";
-import { PlayerBannedEvent, PlayerKickedEvent, PlayerLeftEvent } from "../api/events/player";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
 import { BasicServerEvents, ServerEvents } from "../api/events";
 import { DEFAULT_CONFIG, MaxValue } from "../util/constants";
 import { RpcPacket } from "../protocol/packets/gameData";
 import { RootPacket } from "../protocol/packets/hazel";
+import { PlayerLeftEvent } from "../api/events/player";
 import { MessageReader } from "../util/hazelMessage";
 import { Connection } from "../protocol/connection";
 import { LobbyCode } from "../util/lobbyCode";
@@ -535,26 +535,6 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
     connection.once("disconnected").then((reason?: DisconnectReason) => {
       this.emit("connection.closed", new ConnectionClosedEvent(connection, reason));
       this.handleDisconnect(connection, reason);
-    });
-
-    connection.once("kicked").then(({ isBanned, kickingPlayer, reason }) => {
-      const lobby = connection.getLobby();
-
-      if (lobby === undefined) {
-        return;
-      }
-
-      const player = lobby.findPlayerByConnection(connection);
-
-      if (player === undefined) {
-        return;
-      }
-
-      if (isBanned) {
-        this.emit("player.banned", new PlayerBannedEvent(lobby, player, kickingPlayer, reason));
-      } else {
-        this.emit("player.kicked", new PlayerKickedEvent(lobby, player, kickingPlayer, reason));
-      }
     });
 
     connection.once("hello").then(async () => {
