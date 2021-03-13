@@ -950,6 +950,10 @@ export class Host implements HostInstance {
   }
 
   async handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): Promise<void> {
+    if (this.lobby.getMeetingHud() !== undefined) {
+      throw new Error("Received ReportDeadBody during a meeting");
+    }
+
     const gameData = this.lobby.getGameData();
 
     if (gameData === undefined) {
