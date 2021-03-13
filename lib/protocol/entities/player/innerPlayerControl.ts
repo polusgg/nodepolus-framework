@@ -1,12 +1,17 @@
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
+import { LobbyOptionsUpdatedEvent } from "../../../api/events/lobby";
+import { InternalSystemType } from "../shipStatus/baseShipStatus";
+import { MovingPlatformSystem } from "../shipStatus/systems";
+import { GameOptionsData, Immutable } from "../../../types";
 import { MessageWriter } from "../../../util/hazelMessage";
 import { PlayerInstance } from "../../../api/player";
+import { GameDataPacket } from "../../packets/root";
 import { BaseInnerNetObject } from "../baseEntity";
 import { TextComponent } from "../../../api/text";
-import { GameOptionsData } from "../../../types";
 import { PlayerData } from "../gameData/types";
 import { Connection } from "../../connection";
 import { EntityGameData } from "../gameData";
+import { Lobby } from "../../../lobby";
 import { EntityPlayer } from ".";
 import {
   PlayerChatMessageEvent,
@@ -108,10 +113,10 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     return this;
   }
 
-  async playAnimation(taskType: TaskType, sendTo?: Connection[]): Promise<void> {
+  async handlePlayAnimation(taskType: TaskType, sendTo?: Connection[]): Promise<void> {
     const event = new PlayerTaskAnimationEvent(this.getPlayerInstance(), taskType);
 
-    await this.parent.getLobby().getServer().emit("player.task.animation", event);
+    await this.getLobby().getServer().emit("player.task.animation", event);
 
     if (event.isCancelled()) {
       return;
@@ -120,7 +125,11 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new PlayAnimationPacket(event.getTaskType()), sendTo);
   }
 
-  async completeTask(taskIndex: number, sendTo?: Connection[]): Promise<void> {
+  async handleCompleteTask(taskIndex: number, sendTo?: Connection[]): Promise<void> {
+    if (this.getLobby().getGameState() == GameState.Ended || this.getLobby().getGameState() == GameState.Destroyed) {
+      return;
+    }
+
     const playerData = this.getPlayerData();
     const taskCount = playerData.getTasks().length;
 
@@ -130,7 +139,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     const event = new PlayerTaskCompletedEvent(this.getPlayerInstance(), taskIndex, playerData.getTasks()[taskIndex][0]);
 
-    await this.parent.getLobby().getServer().emit("player.task.completed", event);
+    await this.getLobby().getServer().emit("player.task.completed", event);
 
     if (event.isCancelled()) {
       const connection = this.getConnection();
@@ -154,16 +163,55 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     playerData.completeTaskAtIndex(taskIndex);
     this.sendRpcPacket(new CompleteTaskPacket(taskIndex), sendTo);
+    this.getLobby().getHostInstance().checkForTaskWin();
   }
 
-  syncSettings(options: GameOptionsData, sendTo?: Connection[]): void {
+  async handleSyncSettings(options: GameOptionsData, _sendTo?: Connection[]): Promise<void> {
+    const lobby = this.getLobby() as Lobby;
+    const oldOptions = lobby.getOptions();
+    const owner = lobby.findConnection(this.getOwnerId());
+
+    if (owner === undefined) {
+      throw new Error("Received CheckName from an InnerPlayerControl without an owner");
+    }
+
+    if (!owner.isActingHost()) {
+      this.sendRpcPacket(new SyncSettingsPacket(options), [owner]);
+
+      return;
+    }
+
+    const player = lobby.findPlayerByConnection(owner);
+
+    if (player === undefined) {
+      throw new Error(`Client ${this.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    const event = new LobbyOptionsUpdatedEvent(lobby, player, oldOptions.clone() as Immutable<GameOptionsData>, options);
+
+    await lobby.getServer().emit("lobby.options.updated", event);
+
+    if (event.isCancelled()) {
+      this.sendRpcPacket(new SyncSettingsPacket(options), [owner]);
+
+      return;
+    }
+
+    const newOptions = event.getNewOptions();
+    const sendTo = lobby.getConnections();
+
+    lobby.setOptions(newOptions);
+    this.syncSettings(newOptions, options.equals(newOptions) ? sendTo.filter(con => con.getId() !== owner.getId()) : sendTo);
+  }
+
+  syncSettings(options: GameOptionsData, sendTo: Connection[]): void {
     this.sendRpcPacket(new SyncSettingsPacket(options), sendTo);
   }
 
   async exile(): Promise<void> {
     const event = new PlayerDiedEvent(this.getPlayerInstance(), DeathReason.Unknown);
 
-    await this.parent.getLobby().getServer().emit("player.died", event);
+    await this.getLobby().getServer().emit("player.died", event);
 
     if (event.isCancelled()) {
       return;
@@ -173,11 +221,43 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new ExiledPacket(), [this.getConnection()]);
   }
 
+  async handleCheckName(name: string, _sendTo?: Connection[]): Promise<void> {
+    let checkName: string = name;
+    let index = 1;
+
+    const lobby = this.getLobby() as Lobby;
+    const owner = lobby.findConnection(this.getOwnerId());
+
+    if (owner === undefined) {
+      throw new Error("Received CheckName from an InnerPlayerControl without an owner");
+    }
+
+    const player = lobby.findPlayerByConnection(owner);
+
+    if (player === undefined) {
+      throw new Error(`Client ${this.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    lobby.getHostInstance().ensurePlayerDataExists(player);
+
+    while (this.getGameData().getGameData().isNameTaken(checkName)) {
+      checkName = `${name} ${index++}`;
+    }
+
+    player.setName(checkName);
+
+    await lobby.finishedSpawningPlayer(owner);
+
+    if (!lobby.isSpawningPlayers()) {
+      lobby.enableActingHosts();
+    }
+  }
+
   async setName(name: string, sendTo?: Connection[]): Promise<void> {
     const player = this.getPlayerInstance();
     const event = new PlayerNameUpdatedEvent(player, player.getName(), TextComponent.from(name));
 
-    await this.parent.getLobby().getServer().emit("player.name.updated", event);
+    await this.getLobby().getServer().emit("player.name.updated", event);
 
     if (event.isCancelled()) {
       sendTo = [this.getConnection()];
@@ -189,11 +269,67 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetNamePacket(event.getNewName().toString()), sendTo);
   }
 
+  handleCheckColor(color: PlayerColor, _sendTo?: Connection[]): void {
+    const takenColors = this.getGameData().getGameData().getTakenColors(this.getPlayerId());
+    let setColor: PlayerColor = color;
+
+    const owner = this.getLobby().findConnection(this.getOwnerId());
+
+    if (owner === undefined) {
+      throw new Error("Received CheckColor from an InnerPlayerControl without an owner");
+    }
+
+    const player = this.getLobby().findPlayerByConnection(owner);
+
+    if (player === undefined) {
+      throw new Error(`Client ${this.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    this.getLobby().getHostInstance().ensurePlayerDataExists(player);
+
+    if (this.getLobby().getPlayers().length <= 12) {
+      while (takenColors.indexOf(setColor) > -1) {
+        for (let i = 0; i < 12; i++) {
+          if (takenColors.indexOf(i) == -1) {
+            setColor = i;
+          }
+        }
+      }
+    } else {
+      setColor = PlayerColor.ForteGreen;
+    }
+
+    this.setColor(setColor, this.getLobby().getConnections());
+  }
+
+  handleSetColor(color: PlayerColor, _sendTo?: Connection[]): void {
+    const owner = this.getLobby().findConnection(this.getOwnerId());
+
+    if (owner === undefined) {
+      throw new Error("Received SetColor from an InnerPlayerControl without an owner");
+    }
+
+    const player = this.getLobby().findPlayerByConnection(owner);
+
+    if (player === undefined) {
+      throw new Error(`Client ${this.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
+    }
+
+    this.getLobby().getHostInstance().ensurePlayerDataExists(player);
+
+    if (owner.isActingHost()) {
+      this.setColor(color, this.getLobby().getConnections());
+    } else {
+      // Fix desync
+      this.setColor(player.getColor(), this.getLobby().getConnections());
+    }
+  }
+
   async setColor(color: PlayerColor, sendTo?: Connection[]): Promise<void> {
     const player = this.getPlayerInstance();
     const event = new PlayerColorUpdatedEvent(player, player.getColor(), color);
 
-    await this.parent.getLobby().getServer().emit("player.color.updated", event);
+    await this.getLobby().getServer().emit("player.color.updated", event);
 
     if (event.isCancelled()) {
       sendTo = [this.getConnection()];
@@ -205,11 +341,11 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetColorPacket(event.getNewColor()), sendTo);
   }
 
-  async setHat(hat: PlayerHat, sendTo?: Connection[]): Promise<void> {
+  async handleSetHat(hat: PlayerHat, sendTo?: Connection[]): Promise<void> {
     const player = this.getPlayerInstance();
     const event = new PlayerHatUpdatedEvent(player, player.getHat(), hat);
 
-    await this.parent.getLobby().getServer().emit("player.hat.updated", event);
+    await this.getLobby().getServer().emit("player.hat.updated", event);
 
     if (event.isCancelled()) {
       sendTo = [this.getConnection()];
@@ -221,11 +357,11 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetHatPacket(event.getNewHat()), sendTo);
   }
 
-  async setPet(pet: PlayerPet, sendTo?: Connection[]): Promise<void> {
+  async handleSetPet(pet: PlayerPet, sendTo?: Connection[]): Promise<void> {
     const player = this.getPlayerInstance();
     const event = new PlayerPetUpdatedEvent(player, player.getPet(), pet);
 
-    await this.parent.getLobby().getServer().emit("player.pet.updated", event);
+    await this.getLobby().getServer().emit("player.pet.updated", event);
 
     if (event.isCancelled()) {
       sendTo = [this.getConnection()];
@@ -237,11 +373,11 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetPetPacket(event.getNewPet()), sendTo);
   }
 
-  async setSkin(skin: PlayerSkin, sendTo?: Connection[]): Promise<void> {
+  async handleSetSkin(skin: PlayerSkin, sendTo?: Connection[]): Promise<void> {
     const player = this.getPlayerInstance();
     const event = new PlayerSkinUpdatedEvent(player, player.getSkin(), skin);
 
-    await this.parent.getLobby().getServer().emit("player.skin.updated", event);
+    await this.getLobby().getServer().emit("player.skin.updated", event);
 
     if (event.isCancelled()) {
       sendTo = [this.getConnection()];
@@ -253,8 +389,8 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetSkinPacket(event.getNewSkin()), sendTo);
   }
 
-  async murderPlayer(victimPlayerControlNetId: number, sendTo?: Connection[]): Promise<void> {
-    const victim = this.parent.getLobby().findPlayerByNetId(victimPlayerControlNetId);
+  async handleMurderPlayer(victimPlayerControlNetId: number, sendTo?: Connection[]): Promise<void> {
+    const victim = this.getLobby().findPlayerByNetId(victimPlayerControlNetId);
 
     if (victim === undefined) {
       throw new Error("Victim does not have a PlayerInstance on the lobby instance");
@@ -262,8 +398,8 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     const event = new PlayerMurderedEvent(victim, this.getPlayerInstance());
 
-    await this.parent.getLobby().getServer().emit("player.died", event);
-    await this.parent.getLobby().getServer().emit("player.murdered", event);
+    await this.getLobby().getServer().emit("player.died", event);
+    await this.getLobby().getServer().emit("player.murdered", event);
 
     if (event.isCancelled()) {
       // TODO: Find way to despawn dead body
@@ -274,10 +410,10 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new MurderPlayerPacket(victimPlayerControlNetId), sendTo);
   }
 
-  async sendChat(message: string, sendTo?: Connection[]): Promise<void> {
+  async handleSendChat(message: string, sendTo?: Connection[]): Promise<void> {
     const event = new PlayerChatMessageEvent(this.getPlayerInstance(), TextComponent.from(message));
 
-    await this.parent.getLobby().getServer().emit("player.chat.message", event);
+    await this.getLobby().getServer().emit("player.chat.message", event);
 
     if (event.isCancelled()) {
       return;
@@ -286,7 +422,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SendChatPacket(message), sendTo);
   }
 
-  setScanner(isScanning: boolean, sequenceId: number, sendTo?: Connection[]): void {
+  handleSetScanner(isScanning: boolean, sequenceId: number, sendTo?: Connection[]): void {
     if (sequenceId < ++this.scannerSequenceId) {
       return;
     }
@@ -296,10 +432,10 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SetScannerPacket(isScanning, this.scannerSequenceId), sendTo);
   }
 
-  async sendChatNote(playerId: number, chatNoteType: ChatNoteType, sendTo?: Connection[]): Promise<void> {
+  async handleSendChatNote(playerId: number, chatNoteType: ChatNoteType, sendTo?: Connection[]): Promise<void> {
     const event = new PlayerChatNoteEvent(this.getPlayerInstance(), chatNoteType);
 
-    await this.parent.getLobby().getServer().emit("player.chat.note", event);
+    await this.getLobby().getServer().emit("player.chat.note", event);
 
     if (event.isCancelled()) {
       return;
@@ -308,102 +444,108 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     this.sendRpcPacket(new SendChatNotePacket(playerId, chatNoteType), sendTo);
   }
 
+  handleUsePlatform(sender: InnerPlayerControl): void {
+    const shipStatus = this.getLobby().getShipStatus();
+
+    if (shipStatus === undefined) {
+      throw new Error("Received UsePlatform without a ShipStatus instance");
+    }
+
+    const oldData = shipStatus.getShipStatus().clone();
+    const movingPlatform = shipStatus.getShipStatus().getSystems()[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
+
+    movingPlatform.setInnerPlayerControlNetId(sender.getParent().getPlayerControl().getNetId());
+    movingPlatform.toggleSide();
+    movingPlatform.incrementSequenceId();
+    (this.getLobby() as Lobby).sendRootGamePacket(new GameDataPacket([
+      shipStatus.getShipStatus().serializeData(oldData),
+    ], this.getLobby().getCode()));
+  }
+
   async handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): Promise<void> {
     switch (type) {
       case RpcPacketType.PlayAnimation:
-        this.playAnimation((packet as PlayAnimationPacket).taskType, sendTo);
+        this.handlePlayAnimation((packet as PlayAnimationPacket).taskType, sendTo);
         break;
       case RpcPacketType.CompleteTask: {
-        if (this.parent.getLobby().getGameState() == GameState.Ended || this.parent.getLobby().getGameState() == GameState.Destroyed) {
-          return;
-        }
-
-        this.completeTask((packet as CompleteTaskPacket).taskIndex, sendTo);
-        // TODO: InnerNetObject refactor
-        this.parent.getLobby().getHostInstance().handleCompleteTask();
+        this.handleCompleteTask((packet as CompleteTaskPacket).taskIndex, sendTo);
         break;
       }
       case RpcPacketType.SyncSettings:
-        // TODO: InnerNetObject refactor
-        this.parent.getLobby().getHostInstance().handleSyncSettings(this, (packet as SyncSettingsPacket).options);
-        // this.syncSettings((packet as SyncSettingsPacket).options, sendTo);
+        this.handleSyncSettings((packet as SyncSettingsPacket).options, sendTo);
         break;
       case RpcPacketType.SetInfected:
-        this.parent.getLobby().getLogger().warn("Received SetInfected packet from connection %s in a server-as-host state", connection);
+        this.getLobby().getLogger().warn("Received SetInfected packet from connection %s in a server-as-host state", connection);
         break;
       case RpcPacketType.Exiled:
-        this.parent.getLobby().getLogger().warn("Received Exiled packet from connection %s in a server-as-host state", connection);
+        this.getLobby().getLogger().warn("Received Exiled packet from connection %s in a server-as-host state", connection);
         break;
       case RpcPacketType.CheckName:
-        // TODO: InnerNetObject refactor
-        this.parent.getLobby().getHostInstance().handleCheckName(this, (packet as CheckNamePacket).name);
+        this.handleCheckName((packet as CheckNamePacket).name);
         break;
       case RpcPacketType.SetName:
-        this.parent.getLobby().getLogger().warn("Received SetName packet from connection %s in a server-as-host state", connection);
+        this.getLobby().getLogger().warn("Received SetName packet from connection %s in a server-as-host state", connection);
         break;
       case RpcPacketType.CheckColor:
-        // TODO: InnerNetObject refactor
-        this.parent.getLobby().getHostInstance().handleCheckColor(this, (packet as CheckColorPacket).color);
+        this.handleCheckColor((packet as CheckColorPacket).color);
         break;
       case RpcPacketType.SetColor:
-        // TODO: InnerNetObject refactor
-        this.parent.getLobby().getHostInstance().handleSetColor(this, (packet as SetColorPacket).color);
+        this.handleSetColor((packet as SetColorPacket).color);
         break;
       case RpcPacketType.SetHat:
-        this.setHat((packet as SetHatPacket).hat, sendTo);
+        this.handleSetHat((packet as SetHatPacket).hat, sendTo);
         break;
       case RpcPacketType.SetSkin:
-        this.setSkin((packet as SetSkinPacket).skin, sendTo);
+        this.handleSetSkin((packet as SetSkinPacket).skin, sendTo);
         break;
       case RpcPacketType.ReportDeadBody:
         // TODO: InnerNetObject refactor
-        this.parent.getLobby().getHostInstance().handleReportDeadBody(this, (packet as ReportDeadBodyPacket).victimPlayerId);
+        this.getLobby().getHostInstance().handleReportDeadBody(this, (packet as ReportDeadBodyPacket).victimPlayerId);
         break;
       case RpcPacketType.MurderPlayer: {
         const data = packet as MurderPlayerPacket;
 
-        await this.murderPlayer(data.victimPlayerControlNetId, sendTo);
+        await this.handleMurderPlayer(data.victimPlayerControlNetId, sendTo);
 
         // TODO: InnerNetObject refactor
-        this.parent.getLobby().getHostInstance().handleMurderPlayer(this, data.victimPlayerControlNetId);
+        this.getLobby().getHostInstance().handleMurderPlayer(this, data.victimPlayerControlNetId);
         break;
       }
       case RpcPacketType.SendChat:
-        this.sendChat((packet as SendChatPacket).message, sendTo);
+        this.handleSendChat((packet as SendChatPacket).message, sendTo);
         break;
       case RpcPacketType.StartMeeting:
-        this.parent.getLobby().getLogger().warn("Received StartMeeting packet from connection %s in a server-as-host state", connection);
+        this.getLobby().getLogger().warn("Received StartMeeting packet from connection %s in a server-as-host state", connection);
         break;
       case RpcPacketType.SetScanner: {
         const data = packet as SetScannerPacket;
 
-        this.setScanner(data.isScanning, data.sequenceId, sendTo);
+        this.handleSetScanner(data.isScanning, data.sequenceId, sendTo);
         break;
       }
       case RpcPacketType.SendChatNote: {
         const data = packet as SendChatNotePacket;
 
-        this.sendChatNote(data.playerId, data.chatNoteType, sendTo);
+        this.handleSendChatNote(data.playerId, data.chatNoteType, sendTo);
         break;
       }
       case RpcPacketType.SetPet:
-        this.setPet((packet as SetPetPacket).pet, sendTo);
+        this.handleSetPet((packet as SetPetPacket).pet, sendTo);
         break;
       case RpcPacketType.SetStartCounter: {
         // TODO: InnerNetObject refactor
         const data = packet as SetStartCounterPacket;
-        const player = this.parent.getLobby().findPlayerByClientId(this.parent.getOwnerId());
+        const player = this.getLobby().findPlayerByClientId(this.getOwnerId());
 
         if (player === undefined) {
-          throw new Error(`Client ${this.parent.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
+          throw new Error(`Client ${this.getOwnerId()} does not have a PlayerInstance on the lobby instance`);
         }
 
-        this.parent.getLobby().getHostInstance().handleSetStartCounter(player, data.sequenceId, data.timeRemaining);
+        this.getLobby().getHostInstance().handleSetStartCounter(player, data.sequenceId, data.timeRemaining);
         break;
       }
       case RpcPacketType.UsePlatform:
-        // TODO: InnerNetObject refactor
-        this.parent.getLobby().getHostInstance().handleUsePlatform(this);
+        this.handleUsePlatform(this);
         break;
       default:
         break;
@@ -440,7 +582,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   protected getPlayerInstance(): PlayerInstance {
-    const player = this.parent.getLobby().findPlayerByPlayerId(this.playerId);
+    const player = this.getLobby().findPlayerByPlayerId(this.playerId);
 
     if (player === undefined) {
       throw new Error(`Player ${this.playerId} does not have a PlayerInstance on the lobby instance`);
@@ -461,7 +603,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   protected getGameData(): EntityGameData {
-    const gameData = this.parent.getLobby().getGameData();
+    const gameData = this.getLobby().getGameData();
 
     if (gameData === undefined) {
       throw new Error("Lobby does not have a GameData instance");

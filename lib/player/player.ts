@@ -113,7 +113,7 @@ export class Player implements PlayerInstance {
   }
 
   setHat(hat: PlayerHat): this {
-    this.entity.getPlayerControl().setHat(hat, this.lobby.getConnections());
+    this.entity.getPlayerControl().handleSetHat(hat, this.lobby.getConnections());
 
     return this;
   }
@@ -123,7 +123,7 @@ export class Player implements PlayerInstance {
   }
 
   setPet(pet: PlayerPet): this {
-    this.entity.getPlayerControl().setPet(pet, this.lobby.getConnections());
+    this.entity.getPlayerControl().handleSetPet(pet, this.lobby.getConnections());
 
     return this;
   }
@@ -133,7 +133,7 @@ export class Player implements PlayerInstance {
   }
 
   setSkin(skin: PlayerSkin): this {
-    this.entity.getPlayerControl().setSkin(skin, this.lobby.getConnections());
+    this.entity.getPlayerControl().handleSetSkin(skin, this.lobby.getConnections());
 
     return this;
   }
@@ -247,13 +247,13 @@ export class Player implements PlayerInstance {
   }
 
   completeTaskAtIndex(taskIndex: number): this {
-    this.entity.getPlayerControl().completeTask(taskIndex, this.lobby.getConnections());
+    this.entity.getPlayerControl().handleCompleteTask(taskIndex, this.lobby.getConnections());
 
     return this;
   }
 
   completeTask(task: LevelTask): this {
-    this.entity.getPlayerControl().completeTask(this.getTasks().findIndex(t => t[0] == task), this.lobby.getConnections());
+    this.entity.getPlayerControl().handleCompleteTask(this.getTasks().findIndex(t => t[0] == task), this.lobby.getConnections());
 
     return this;
   }
@@ -332,7 +332,7 @@ export class Player implements PlayerInstance {
   murder(player: PlayerInstance): this {
     const playerControl = this.entity.getPlayerControl();
 
-    playerControl.murderPlayer((player as Player).entity.getPlayerControl().getNetId(), this.lobby.getConnections());
+    playerControl.handleMurderPlayer((player as Player).entity.getPlayerControl().getNetId(), this.lobby.getConnections());
     this.lobby.getHostInstance().handleMurderPlayer(playerControl, 0);
 
     return this;
@@ -409,7 +409,7 @@ export class Player implements PlayerInstance {
   }
 
   sendChat(message: string): this {
-    this.entity.getPlayerControl().sendChat(message, this.lobby.getConnections());
+    this.entity.getPlayerControl().handleSendChat(message, this.lobby.getConnections());
 
     return this;
   }

@@ -1,7 +1,7 @@
-import { DisconnectReason, GameOptionsData, LevelTask } from "../../types";
 import { InnerPlayerControl } from "../../protocol/entities/player";
-import { GameOverReason, PlayerColor } from "../../types/enums";
+import { DisconnectReason, LevelTask } from "../../types";
 import { Connection } from "../../protocol/connection";
+import { GameOverReason } from "../../types/enums";
 import { PlayerInstance } from "../player";
 import { LobbyInstance } from "../lobby";
 import {
@@ -80,11 +80,25 @@ export interface HostInstance {
   endMeeting(): void;
 
   /**
+   * Ends the game if all tasks are completed.
+   */
+  checkForTaskWin(): void;
+
+  /**
    * Ends the game with the given reason.
    *
    * @param reason - The reason for why the game ended
    */
   endGame(reason: GameOverReason): void;
+
+  // TODO: Move to InnerPlayerControl
+  /**
+   * Creates a PlayerData instance for the given player if one does not already
+   * exist on the GameData instance.
+   *
+   * @param player - The player whose PlayerData will be checked
+   */
+  ensurePlayerDataExists(player: PlayerInstance): void;
 
   /**
    * Gets the ShipStatus system controller.
@@ -141,43 +155,6 @@ export interface HostInstance {
   handleSceneChange(connection: Connection, sceneName: string): Promise<void>;
 
   /**
-   * Called when a connection sends a CompleteTask RPC packet.
-   */
-  handleCompleteTask(): void;
-
-  /**
-   * Called when a player sends a SyncSettings RPC packet.
-   *
-   * @param sender - The connection that sent the packet
-   * @param options - The options that the player set
-   */
-  handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData): void;
-
-  /**
-   * Called when a connection sends a CheckName RPC packet.
-   *
-   * @param sender - The PlayerControl that sent the packet
-   * @param name - The name that the player is requesting to use
-   */
-  handleCheckName(sender: InnerPlayerControl, name: string): void;
-
-  /**
-   * Called when a connection sends a CheckColor RPC packet.
-   *
-   * @param sender - The PlayerControl that sent the packet
-   * @param color - The color that the player is requesting to use
-   */
-  handleCheckColor(sender: InnerPlayerControl, color: PlayerColor): void;
-
-  /**
-   * Called when a connection sends a SetColor RPC packet.
-   *
-   * @param sender - The PlayerControl that sent the packet
-   * @param color - The color that the player is requesting to use
-   */
-  handleSetColor(sender: InnerPlayerControl, color: PlayerColor): void;
-
-  /**
    * Called when a connection sends a ReportDeadBody RPC packet.
    *
    * @param sender - The PlayerControl that sent the packet
@@ -209,11 +186,4 @@ export interface HostInstance {
    * @param suspectPlayerId - The ID of the player who is being voted to be exiled
    */
   handleCastVote(votingPlayerId: number, suspectPlayerId: number): void;
-
-  /**
-   * Called when a connection sends a UsePlatform RPC packet.
-   *
-   * @param sender - The PlayerControl that sent the packet
-   */
-  handleUsePlatform(sender: InnerPlayerControl): void;
 }

@@ -1,6 +1,6 @@
-import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent, LobbyOptionsUpdatedEvent } from "../api/events/lobby";
-import { DisconnectReason, GameOptionsData, Immutable, LevelTask, Vector2, VoteResult, VoteState } from "../types";
+import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent } from "../api/events/lobby";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
+import { DisconnectReason, LevelTask, Vector2, VoteResult, VoteState } from "../types";
 import { InternalSystemType } from "../protocol/entities/shipStatus/baseShipStatus";
 import { EntityPlayer, InnerPlayerControl } from "../protocol/entities/player";
 import { EntityAirshipStatus } from "../protocol/entities/shipStatus/airship";
@@ -24,7 +24,6 @@ import { Lobby } from "../lobby";
 import {
   DeconSystem,
   DeconTwoSystem,
-  MovingPlatformSystem,
 } from "../protocol/entities/shipStatus/systems";
 import {
   ClearVotePacket,
@@ -495,6 +494,20 @@ export class Host implements HostInstance {
     }, 5000);
   }
 
+  checkForTaskWin(): void {
+    const gameData = this.lobby.getGameData();
+
+    if (gameData === undefined) {
+      throw new Error("Received CompleteTask without a GameData instance");
+    }
+
+    const crewmates = [...gameData.getGameData().getPlayers().values()].filter(playerData => !playerData.isImpostor());
+
+    if (crewmates.every(crewmate => crewmate.isDoneWithTasks())) {
+      this.endGame(GameOverReason.CrewmatesByTask);
+    }
+  }
+
   async endGame(reason: GameOverReason): Promise<void> {
     const oldState = this.lobby.getGameState();
     const event = new GameEndedEvent(this.lobby.getGame()!, reason);
@@ -533,6 +546,27 @@ export class Host implements HostInstance {
 
     this.lobby.setGameData(new EntityGameData(this.lobby));
     this.lobby.sendRootGamePacket(new EndGamePacket(this.lobby.getCode(), event.getReason(), false));
+  }
+
+  ensurePlayerDataExists(player: PlayerInstance): void {
+    const gameData = this.getGameData();
+
+    if (![...gameData.getGameData().getPlayers().values()].some(p => p.getId() == player.getId())) {
+      const playerData = new PlayerData(
+        player.getId(),
+        "",
+        PlayerColor.Red,
+        0,
+        0,
+        0,
+        false,
+        false,
+        false,
+        [],
+      );
+
+      gameData.getGameData().updateGameData([playerData], this.lobby.getConnections());
+    }
   }
 
   getSystemsHandler(): SystemsHandler | undefined {
@@ -774,155 +808,13 @@ export class Host implements HostInstance {
 
     await this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
 
-    player.getEntity().getPlayerControl().syncSettings(this.lobby.getOptions(), [connection]);
-    this.confirmPlayerData(player);
+    (this.lobby.getPlayers()[0] as Player).getEntity().getPlayerControl().syncSettings(this.lobby.getOptions(), [connection]);
+    this.ensurePlayerDataExists(player);
     player.getEntity().getPlayerControl().setNewPlayer(false);
 
     connection.flush(true);
 
     gameData.getGameData().updateAllGameData(this.lobby.getConnections());
-  }
-
-  handleCompleteTask(): void {
-    const gameData = this.lobby.getGameData();
-
-    if (gameData === undefined) {
-      throw new Error("Received CompleteTask without a GameData instance");
-    }
-
-    const crewmates = [...gameData.getGameData().getPlayers().values()].filter(playerData => !playerData.isImpostor());
-
-    if (crewmates.every(crewmate => crewmate.isDoneWithTasks())) {
-      this.endGame(GameOverReason.CrewmatesByTask);
-    }
-  }
-
-  async handleSyncSettings(sender: InnerPlayerControl, options: GameOptionsData): Promise<void> {
-    const oldOptions = this.lobby.getOptions();
-    const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
-
-    if (owner === undefined) {
-      throw new Error("Received CheckName from an InnerPlayerControl without an owner");
-    }
-
-    if (!owner.isActingHost()) {
-      sender.syncSettings(oldOptions, [owner]);
-
-      return;
-    }
-
-    const player = this.lobby.findPlayerByConnection(owner);
-
-    if (player === undefined) {
-      throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-    }
-
-    const event = new LobbyOptionsUpdatedEvent(this.lobby, player, oldOptions.clone() as Immutable<GameOptionsData>, options);
-
-    await this.lobby.getServer().emit("lobby.options.updated", event);
-
-    if (event.isCancelled()) {
-      sender.syncSettings(oldOptions, [owner]);
-
-      return;
-    }
-
-    const newOptions = event.getNewOptions();
-    const sendTo = this.lobby.getConnections();
-
-    this.lobby.setOptions(newOptions);
-
-    sender.syncSettings(
-      newOptions,
-      options.equals(newOptions) ? sendTo.filter(con => con.getId() !== owner.getId()) : sendTo,
-    );
-  }
-
-  async handleCheckName(sender: InnerPlayerControl, name: string): Promise<void> {
-    let checkName: string = name;
-    let index = 1;
-
-    const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
-
-    if (owner === undefined) {
-      throw new Error("Received CheckName from an InnerPlayerControl without an owner");
-    }
-
-    const player = this.lobby.findPlayerByConnection(owner);
-
-    if (player !== undefined) {
-      this.confirmPlayerData(player);
-    } else {
-      throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-    }
-
-    while (this.getGameData().getGameData().isNameTaken(checkName)) {
-      checkName = `${name} ${index++}`;
-    }
-
-    player.setName(checkName);
-
-    await this.lobby.finishedSpawningPlayer(owner);
-
-    if (!this.lobby.isSpawningPlayers()) {
-      this.lobby.enableActingHosts();
-    }
-  }
-
-  handleCheckColor(sender: InnerPlayerControl, color: PlayerColor): void {
-    const takenColors = this.getGameData().getGameData().getTakenColors(sender.getPlayerId());
-    let setColor: PlayerColor = color;
-
-    const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
-
-    if (owner === undefined) {
-      throw new Error("Received CheckColor from an InnerPlayerControl without an owner");
-    }
-
-    const player = this.lobby.findPlayerByConnection(owner);
-
-    if (player !== undefined) {
-      this.confirmPlayerData(player);
-    } else {
-      throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-    }
-
-    if (this.lobby.getPlayers().length <= 12) {
-      while (takenColors.indexOf(setColor) > -1) {
-        for (let i = 0; i < 12; i++) {
-          if (takenColors.indexOf(i) == -1) {
-            setColor = i;
-          }
-        }
-      }
-    } else {
-      setColor = PlayerColor.ForteGreen;
-    }
-
-    player.setColor(setColor);
-  }
-
-  handleSetColor(sender: InnerPlayerControl, color: PlayerColor): void {
-    const owner = this.lobby.findConnection(sender.getParent().getOwnerId());
-
-    if (owner === undefined) {
-      throw new Error("Received SetColor from an InnerPlayerControl without an owner");
-    }
-
-    const player = this.lobby.findPlayerByConnection(owner);
-
-    if (player !== undefined) {
-      this.confirmPlayerData(player);
-    } else {
-      throw new Error(`Client ${sender.getParent().getOwnerId()} does not have a PlayerInstance on the lobby instance`);
-    }
-
-    if (owner.isActingHost()) {
-      player.setColor(color);
-    } else {
-      // Fix desync
-      player.setColor(player.getColor());
-    }
   }
 
   async handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): Promise<void> {
@@ -1068,24 +960,6 @@ export class Host implements HostInstance {
     }
   }
 
-  handleUsePlatform(sender: InnerPlayerControl): void {
-    const shipStatus = this.lobby.getShipStatus();
-
-    if (shipStatus === undefined) {
-      throw new Error("Received UsePlatform without a ShipStatus instance");
-    }
-
-    const oldData = shipStatus.getShipStatus().clone();
-    const movingPlatform = shipStatus.getShipStatus().getSystems()[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
-
-    movingPlatform.setInnerPlayerControlNetId(sender.getParent().getPlayerControl().getNetId());
-    movingPlatform.toggleSide();
-    movingPlatform.incrementSequenceId();
-    this.lobby.sendRootGamePacket(new GameDataPacket([
-      shipStatus.getShipStatus().serializeData(oldData),
-    ], this.lobby.getCode()));
-  }
-
   /**
    * Sets the give players task list.
    *
@@ -1203,36 +1077,6 @@ export class Host implements HostInstance {
     }
 
     return (aliveImpostors.length >= aliveCrewmates.length) || aliveImpostors.length == 0;
-  }
-
-  /**
-   * Creates a PlayerData instance for the given player if one does not already
-   * exist on the GameData instance.
-   *
-   * @internal
-   * @param player - The player whose PlayerData will be checked
-   */
-  protected confirmPlayerData(player: Player): this {
-    const gameData = this.getGameData();
-
-    if (![...gameData.getGameData().getPlayers().values()].some(p => p.getId() == player.getEntity().getPlayerControl().getPlayerId())) {
-      const playerData = new PlayerData(
-        player.getEntity().getPlayerControl().getPlayerId(),
-        "",
-        PlayerColor.Red,
-        0,
-        0,
-        0,
-        false,
-        false,
-        false,
-        [],
-      );
-
-      gameData.getGameData().updateGameData([playerData], this.lobby.getConnections());
-    }
-
-    return this;
   }
 
   protected getGameData(): EntityGameData {
