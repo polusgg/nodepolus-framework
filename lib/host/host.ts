@@ -866,6 +866,12 @@ export class Host implements HostInstance {
       return;
     }
 
+    if (player.getConnection()?.isActingHost()) {
+      this.stopCountdown();
+
+      return;
+    }
+
     if (this.counterSequenceId < sequenceId && this.countdownInterval !== undefined) {
       clearInterval(this.countdownInterval);
       delete this.countdownInterval;
