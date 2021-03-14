@@ -12,8 +12,15 @@ export class PlayerMurderedEvent extends PlayerDiedEvent {
    */
   constructor(
     player: PlayerInstance,
-    killer: PlayerInstance,
+    protected readonly killer: PlayerInstance,
   ) {
-    super(player, DeathReason.Murder, killer);
+    super(player, DeathReason.Murder);
+  }
+
+  /**
+   * Gets the player that killed the victim.
+   */
+  getKiller(): PlayerInstance {
+    return this.killer;
   }
 }

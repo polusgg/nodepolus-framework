@@ -9,12 +9,10 @@ export class PlayerDiedEvent extends CancellableEvent {
   /**
    * @param player - The player that died
    * @param reason - The reason for why the player died
-   * @param killer - The player that killed the victim
    */
   constructor(
     protected readonly player: PlayerInstance,
     protected readonly reason: DeathReason,
-    protected readonly killer?: PlayerInstance,
   ) {
     super();
   }
@@ -31,14 +29,5 @@ export class PlayerDiedEvent extends CancellableEvent {
    */
   getReason(): DeathReason {
     return this.reason;
-  }
-
-  /**
-   * Gets the player that killed the victim.
-   *
-   * @returns The murderer, or `undefined` if the player was killed via the API or exiled after a meeting
-   */
-  getKiller(): PlayerInstance | undefined {
-    return this.killer;
   }
 }
