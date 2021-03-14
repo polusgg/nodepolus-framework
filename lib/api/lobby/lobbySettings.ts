@@ -365,11 +365,7 @@ export class LobbySettings {
       throw new Error("Cannot call fromPov on a LobbySettings instance that is already used as a POV instance");
     }
 
-    const connection = player.getConnection();
-
-    if (connection === undefined) {
-      throw new Error(`Player ${player.getId()} does not have a connection on the lobby instance`);
-    }
+    const connection = player.getSafeConnection();
 
     if (LobbySettings.povCache.has(connection.getId())) {
       return LobbySettings.povCache.get(connection.getId())!;
