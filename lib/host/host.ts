@@ -126,6 +126,15 @@ export class Host implements HostInstance {
     await this.lobby.getServer().emit("lobby.countdown.started", event);
 
     if (event.isCancelled()) {
+      const connection = starter?.getConnection();
+
+      if (connection !== undefined) {
+        this.lobby.getPlayers()[0].getEntity().getPlayerControl().sendRpcPacket(
+          new SetStartCounterPacket(this.counterSequenceId += 5, -1),
+          [connection],
+        );
+      }
+
       return;
     }
 
