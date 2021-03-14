@@ -175,6 +175,13 @@ export class Host implements HostInstance {
       return;
     }
 
+    this.lobby.enableActingHosts(true);
+
+    if (this.countdownInterval !== undefined) {
+      clearInterval(this.countdownInterval);
+      delete this.countdownInterval;
+    }
+
     this.secondsUntilStart = -1;
 
     if (this.lobby.getPlayers().length > 0) {
@@ -182,11 +189,6 @@ export class Host implements HostInstance {
         new SetStartCounterPacket(this.counterSequenceId += 5, -1),
         this.lobby.getConnections(),
       );
-    }
-
-    if (this.countdownInterval !== undefined) {
-      clearInterval(this.countdownInterval);
-      delete this.countdownInterval;
     }
   }
 
@@ -877,7 +879,7 @@ export class Host implements HostInstance {
       delete this.countdownInterval;
     }
 
-    if (timeRemaining == 5 && this.counterSequenceId != sequenceId) {
+    if (timeRemaining == 5) {
       this.startCountdown(this.lobby.getStartTimerDuration(), player);
     }
   }
