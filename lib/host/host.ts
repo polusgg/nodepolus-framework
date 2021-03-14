@@ -866,7 +866,7 @@ export class Host implements HostInstance {
       return;
     }
 
-    if (player.getConnection()?.isActingHost()) {
+    if (!player.getConnection()?.isActingHost()) {
       this.stopCountdown();
 
       return;
