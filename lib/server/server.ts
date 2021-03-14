@@ -1,4 +1,4 @@
-import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, LobbyCount, LobbyListing, OutboundPacketTransformer } from "../types";
+import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, LobbyListing, OutboundPacketTransformer } from "../types";
 import { FakeClientId, GameDataPacketType, PacketDestination, RootPacketType, RpcPacketType } from "../types/enums";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
 import { BasicServerEvents, ServerEvents } from "../api/events";
@@ -694,11 +694,9 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         const levels = request.options.getLevels();
         const languages = request.options.getLanguages();
         const results: LobbyListing[] = [];
-        const counts = new LobbyCount();
 
         for (let i = 0; i < this.lobbies.length; i++) {
           const lobby = this.lobbies[i];
-          const level: number = lobby.getLevel();
 
           if (!lobby.isPublic()) {
             continue;
@@ -712,8 +710,6 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
             continue;
           }
 
-          counts.increment(level);
-
           const listing = lobby.getLobbyListing();
 
           if (!listing.isFull() && results.length < 10) {
@@ -723,14 +719,14 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
         results.sort((a, b) => b.getPlayerCount() - a.getPlayerCount());
 
-        const event = new ServerLobbyListEvent(connection, request.includePrivate, results, counts);
+        const event = new ServerLobbyListEvent(connection, request.includePrivate, results);
 
         await this.emit("server.lobby.list", event);
 
         if (!event.isCancelled()) {
           this.getLogger().verbose("Sending game list to connection %s", connection);
 
-          connection.sendReliable([new GetGameListResponsePacket(event.getLobbies(), event.getLobbyCounts())]);
+          connection.sendReliable([new GetGameListResponsePacket(event.getLobbies())]);
         } else {
           connection.disconnect(event.getDisconnectReason());
         }

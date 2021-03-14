@@ -1,4 +1,4 @@
-import { DisconnectReason, LobbyCount, LobbyListing } from "../../../types";
+import { DisconnectReason, LobbyListing } from "../../../types";
 import { Connection } from "../../../protocol/connection";
 import { DisconnectableEvent } from "../types";
 
@@ -10,13 +10,11 @@ export class ServerLobbyListEvent extends DisconnectableEvent {
    * @param connection - The connection that is requesting a list of games
    * @param includePrivateLobbies - `true` if the connection wants private games included in the results, `false` if not
    * @param lobbies - The lobbies that will be sent to the connection
-   * @param lobbyCounts - The lobby counts for each level that will be sent to the connection
    */
   constructor(
     protected readonly connection: Connection,
     protected readonly includePrivateLobbies: boolean,
     protected lobbies: LobbyListing[],
-    protected lobbyCounts?: LobbyCount,
   ) {
     super(DisconnectReason.custom("The server refused to list its public games"));
   }
@@ -51,26 +49,6 @@ export class ServerLobbyListEvent extends DisconnectableEvent {
    */
   setLobbies(lobbies: LobbyListing[]): this {
     this.lobbies = lobbies;
-
-    return this;
-  }
-
-  /**
-   * Gets the lobby counts for each level that will be sent to the connection.
-   *
-   * @returns The lobby counts for each level that will be sent to the connection, or `undefined` if no counts will be sent
-   */
-  getLobbyCounts(): LobbyCount | undefined {
-    return this.lobbyCounts;
-  }
-
-  /**
-   * Sets the lobby counts for each level that will be sent to the connection.
-   *
-   * @param lobbyCounts - The new lobby counts that will be sent to the connection, or `undefined` if no counts should be sent
-   */
-  setLobbyCounts(lobbyCounts?: LobbyCount): this {
-    this.lobbyCounts = lobbyCounts;
 
     return this;
   }

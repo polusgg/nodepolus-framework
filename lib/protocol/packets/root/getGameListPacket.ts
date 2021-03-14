@@ -1,5 +1,5 @@
-import { GameOptionsData, LobbyCount, LobbyListing } from "../../../types";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
+import { GameOptionsData, LobbyListing } from "../../../types";
 import { RootPacketType } from "../../../types/enums";
 import { BaseRootPacket } from "../root";
 
@@ -37,29 +37,22 @@ export class GetGameListRequestPacket extends BaseRootPacket {
 export class GetGameListResponsePacket extends BaseRootPacket {
   constructor(
     public lobbies: LobbyListing[],
-    public counts?: LobbyCount,
   ) {
     super(RootPacketType.GetGameList);
   }
 
   static deserialize(reader: MessageReader): GetGameListResponsePacket {
-    let counts: LobbyCount | undefined;
     const lobbies: LobbyListing[] = [];
 
     reader.readAllChildMessages(child => {
-      if (child.getTag() == 1) {
-        counts = LobbyCount.deserialize(child);
-      } else if (child.getTag() == 0) {
+      if (child.getTag() == 0) {
         child.readAllChildMessages(lobbyMessage => {
           lobbies.push(LobbyListing.deserialize(lobbyMessage));
         });
       }
     });
 
-    return new GetGameListResponsePacket(
-      lobbies,
-      counts,
-    );
+    return new GetGameListResponsePacket(lobbies);
   }
 
   clone(): GetGameListResponsePacket {
@@ -69,16 +62,10 @@ export class GetGameListResponsePacket extends BaseRootPacket {
       lobbies[i] = this.lobbies[i].clone();
     }
 
-    return new GetGameListResponsePacket(lobbies, this.counts?.clone());
+    return new GetGameListResponsePacket(lobbies);
   }
 
   serialize(writer: MessageWriter): void {
-    if (this.counts !== undefined) {
-      writer.startMessage(1)
-        .writeObject(this.counts)
-        .endMessage();
-    }
-
     writer.startMessage(0);
 
     for (let i = 0; i < this.lobbies.length; i++) {

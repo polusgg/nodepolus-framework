@@ -26,8 +26,6 @@ export { LevelTask } from "./levelTask";
 
 export { LevelVent } from "./levelVent";
 
-export { LobbyCount } from "./lobbyCount";
-
 export { LobbyListing } from "./lobbyListing";
 
 export { Metadatable } from "./metadatable";
