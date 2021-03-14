@@ -14,7 +14,7 @@ export class ClientInfoPacket extends BaseGameDataPacket {
   }
 
   static deserialize(reader: MessageReader): ClientInfoPacket {
-    return new ClientInfoPacket(reader.readUInt32(), reader.readByte());
+    return new ClientInfoPacket(reader.readPackedUInt32(), reader.readPackedUInt32());
   }
 
   clone(): ClientInfoPacket {
@@ -22,6 +22,6 @@ export class ClientInfoPacket extends BaseGameDataPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writeUInt32(this.clientId).writeByte(this.platform);
+    writer.writePackedUInt32(this.clientId).writePackedUInt32(this.platform);
   }
 }
