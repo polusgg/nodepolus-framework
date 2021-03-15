@@ -306,7 +306,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    *
    * @param actingHost - `true` to add the acting host host status to the connection, `false` to remove it
    */
-  updateActingHost(actingHost: boolean): this {
+  setActingHost(actingHost: boolean): this {
     this.actingHost = actingHost;
 
     return this;
@@ -318,7 +318,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * @param actingHost - `true` to add the acting host host status to the connection, `false` to remove it
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets
    */
-  async setActingHost(actingHost: boolean, sendImmediately: boolean = true): Promise<void> {
+  async syncActingHost(actingHost: boolean, sendImmediately: boolean = true): Promise<void> {
     if (this.lobby === undefined) {
       return;
     }

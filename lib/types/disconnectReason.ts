@@ -206,7 +206,7 @@ export class DisconnectReason implements CanSerializeToHazel {
   /**
    * Writes the DisconnectReason to the given MessageWriter
    *
-   * @param reader - The MessageWriter to write to
+   * @param writer - The MessageWriter to write to
    * @param asInt - `true` if the type should be written as a UInt32, `false` if it should be written as a byte (default `false`)
    */
   serialize(writer: MessageWriter, asInt: boolean = false): void {

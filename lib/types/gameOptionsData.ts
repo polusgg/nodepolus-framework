@@ -134,7 +134,7 @@ export class GameOptionsData implements CanSerializeToHazel {
   /**
    * Writes the GameOptionsData to the given MessageWriter
    *
-   * @param reader - The MessageWriter to write to
+   * @param writer - The MessageWriter to write to
    * @param isSearching - `true` if the data is from a lobby search, `false` if it is from creating a lobby (default `false`)
    */
   serialize(writer: MessageWriter, isSearching: boolean = false): void {

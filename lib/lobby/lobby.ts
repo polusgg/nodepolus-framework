@@ -175,8 +175,10 @@ export class Lobby implements LobbyInstance {
   /**
    * @internal
    */
-  setGame(game?: Game): void {
+  setGame(game?: Game): this {
     this.game = game;
+
+    return this;
   }
 
   getCreationTime(): number {
@@ -1213,7 +1215,7 @@ export class Lobby implements LobbyInstance {
       this.cancelJoinTimer();
       this.beginStartTimer();
 
-      connection.updateActingHost(true);
+      connection.setActingHost(true);
     }
 
     connection.setLimboState(LimboState.NotLimbo);
@@ -1250,7 +1252,7 @@ export class Lobby implements LobbyInstance {
       return;
     }
 
-    event.getNewHost().setActingHost(true);
+    event.getNewHost().syncActingHost(true);
   }
 
   /**

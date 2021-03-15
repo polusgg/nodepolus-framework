@@ -10,7 +10,7 @@ import { TextComponent } from "../text";
  */
 export interface PlayerInstance extends Metadatable {
   /**
-   * Gets the ID of the player character.
+   * Gets the ID of the player.
    */
   getId(): number;
 

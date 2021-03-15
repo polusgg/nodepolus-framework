@@ -124,7 +124,7 @@ export class LobbyListing implements CanSerializeToHazel {
   /**
    * Writes the LobbyListing to the given MessageWriter
    *
-   * @param reader - The MessageWriter to write to
+   * @param writer - The MessageWriter to write to
    */
   serialize(writer: MessageWriter): void {
     writer.writeBytes(this.ipAddress.split(".").map(octet => parseInt(octet, 10)))
