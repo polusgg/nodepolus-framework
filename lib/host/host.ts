@@ -206,6 +206,7 @@ export class Host implements HostInstance {
     }
 
     this.lobby.cancelStartTimer();
+    this.lobby.disableActingHosts(true);
     this.lobby.sendRootGamePacket(new StartGamePacket(this.lobby.getCode()));
   }
 
