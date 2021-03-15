@@ -423,7 +423,7 @@ export interface LobbyInstance extends Metadatable {
   setGameState(gameState: GameState): void;
 
   /**
-   * Sends the given packet as a reliable packet to the given connections.
+   * Sends the given packet (reliably) to the given connections.
    *
    * @param packet - The packet to be sent
    * @param sendTo - The connections to which the packet will be sent
