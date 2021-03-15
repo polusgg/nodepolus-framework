@@ -73,6 +73,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     }).filter(notUndefined);
 
     this.sendRpcPacket(new ClearVotePacket(), promises);
+    // TODO: Do we need to also send a data packet to set the DidVote and VotedFor fields back to empty?
   }
 
   handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {

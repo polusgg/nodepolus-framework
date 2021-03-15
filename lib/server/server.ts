@@ -317,6 +317,14 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   }
 
   /**
+   * Gets whether or not chat packets from dead players should be sent to
+   * players that are still alive.
+   */
+  shouldHideGhostChat(): boolean {
+    return this.config.lobby?.hideGhostChat ?? DEFAULT_CONFIG.lobby.hideGhostChat;
+  }
+
+  /**
    * Gets the next available client ID.
    */
   getNextConnectionId(): number {
@@ -636,6 +644,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
           this.getDefaultLobbyStartTimerDuration(),
           this.getDefaultLobbyTimeToJoinUntilClosed(),
           this.getDefaultLobbyTimeToStartUntilClosed(),
+          this.shouldHideGhostChat(),
           creatingEvent.getOptions(),
           creatingEvent.getLobbyCode(),
         );

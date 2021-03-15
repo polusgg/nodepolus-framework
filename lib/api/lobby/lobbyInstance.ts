@@ -47,6 +47,12 @@ export interface LobbyInstance extends Metadatable {
   getStartTimerDuration(): number;
 
   /**
+   * Gets whether or not chat packets from dead players should be sent to
+   * players that are still alive.
+   */
+  shouldHideGhostChat(): boolean;
+
+  /**
    * Gets the lobby code.
    */
   getCode(): string;

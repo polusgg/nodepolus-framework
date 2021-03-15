@@ -377,6 +377,24 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       return;
     }
 
+    if (sendTo !== undefined &&
+        sendTo.length > 0 &&
+        this.getLobby().shouldHideGhostChat() &&
+        this.getPlayerData().isDead()
+    ) {
+      const filteredIndices: number[] = [];
+
+      for (let i = 0; i < sendTo.length; i++) {
+        if (this.getLobby().findPlayerByConnection(sendTo[i])?.isDead() !== true) {
+          filteredIndices.push(i);
+        }
+      }
+
+      for (let i = filteredIndices.length - 1; i >= 0; i--) {
+        sendTo.splice(filteredIndices[i], 1);
+      }
+    }
+
     this.sendRpcPacket(new SendChatPacket(message), sendTo);
   }
 

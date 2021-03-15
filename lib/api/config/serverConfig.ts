@@ -77,6 +77,19 @@ export type ServerConfig = {
      * @defaultValue `10`
      */
     maxPlayers?: number;
+    /**
+     * Whether or not chat messages from dead players should be sent to players
+     * that are still alive.
+     *
+     * Chat messages from dead players will never be displayed in-game to
+     * players that are still alive. The Innersloth servers still relay chat
+     * packets from dead players to players that are still alive; this option
+     * is here to provide the ability to mirror the official servers (by setting
+     * it to `false`).
+     *
+     * @defaultValue `true`
+     */
+    hideGhostChat?: boolean;
   };
   /**
    * Logger configuration.

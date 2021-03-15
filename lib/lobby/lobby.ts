@@ -96,6 +96,7 @@ export class Lobby implements LobbyInstance {
     protected readonly startTimerDuration: number = server.getDefaultLobbyStartTimerDuration(),
     protected readonly timeToJoinUntilClosed: number = server.getDefaultLobbyTimeToJoinUntilClosed(),
     protected readonly timeToStartUntilClosed: number = server.getDefaultLobbyTimeToStartUntilClosed(),
+    protected readonly hideGhostChat: boolean = server.shouldHideGhostChat(),
     protected options: GameOptionsData = new GameOptionsData(),
     protected readonly code: string = LobbyCode.generate(),
   ) {
@@ -126,6 +127,10 @@ export class Lobby implements LobbyInstance {
 
   getStartTimerDuration(): number {
     return this.startTimerDuration;
+  }
+
+  shouldHideGhostChat(): boolean {
+    return this.hideGhostChat;
   }
 
   getCode(): string {
