@@ -138,6 +138,8 @@ export class Host implements HostInstance {
       return;
     }
 
+    this.lobby.enableActingHosts(true);
+
     this.secondsUntilStart = event.getSecondsUntilStart();
 
     const countdownFunction = (): void => {
@@ -174,8 +176,6 @@ export class Host implements HostInstance {
     if (event.isCancelled()) {
       return;
     }
-
-    this.lobby.enableActingHosts(true);
 
     if (this.countdownInterval !== undefined) {
       clearInterval(this.countdownInterval);
