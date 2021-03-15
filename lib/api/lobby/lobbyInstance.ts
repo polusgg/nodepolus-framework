@@ -7,6 +7,7 @@ import { EntityMeetingHud } from "../../protocol/entities/meetingHud";
 import { PlayerData } from "../../protocol/entities/gameData/types";
 import { EntityGameData } from "../../protocol/entities/gameData";
 import { EntityPlayer } from "../../protocol/entities/player";
+import { BaseRootPacket } from "../../protocol/packets/root";
 import { BaseRpcPacket } from "../../protocol/packets/rpc";
 import { Connection } from "../../protocol/connection";
 import { PlayerInstance } from "../player";
@@ -420,6 +421,14 @@ export interface LobbyInstance extends Metadatable {
    * @param gameState - The lobby's new game state
    */
   setGameState(gameState: GameState): void;
+
+  /**
+   * Sends the given packet as a reliable packet to the given connections.
+   *
+   * @param packet - The packet to be sent
+   * @param sendTo - The connections to which the packet will be sent
+   */
+  sendRootGamePacket(packet: BaseRootPacket, sendTo: Connection[]): Promise<PromiseSettledResult<void>[]>;
 
   /**
    * Sends the given RPC packet to the given connections.

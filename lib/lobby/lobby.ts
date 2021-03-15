@@ -541,6 +541,16 @@ export class Lobby implements LobbyInstance {
     this.gameState = gameState;
   }
 
+  async sendRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): Promise<PromiseSettledResult<void>[]> {
+    const promiseArray: Promise<void>[] = [];
+
+    for (let i = 0; i < sendTo.length; i++) {
+      promiseArray.push(sendTo[i].writeReliable(packet));
+    }
+
+    return Promise.allSettled(promiseArray);
+  }
+
   sendRpcPacket(from: BaseInnerNetObject, packet: BaseRpcPacket, sendTo?: Connection[]): void {
     this.sendRootGamePacket(new GameDataPacket([new RpcPacket(from.getNetId(), packet)], this.code), sendTo);
   }
@@ -570,7 +580,8 @@ export class Lobby implements LobbyInstance {
 
         return;
       default:
-        throw new Error(`Attempted to spawn an unsupported SpawnType: ${type as SpawnType} (${SpawnType[type]})`);
+        // TODO: Rethrow error once custom INO support is added
+        // throw new Error(`Attempted to spawn an unsupported SpawnType: ${type as SpawnType} (${SpawnType[type]})`);
     }
 
     this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), this.getConnections());
@@ -798,23 +809,6 @@ export class Lobby implements LobbyInstance {
     }
 
     return this;
-  }
-
-  /**
-   * Sends the given packet as a reliable packet to the given connections.
-   *
-   * @internal
-   * @param packet - The packet to be sent
-   * @param sendTo - The connections to which the packet will be send (default `this.connections`)
-   */
-  async sendRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): Promise<PromiseSettledResult<void>[]> {
-    const promiseArray: Promise<void>[] = [];
-
-    for (let i = 0; i < sendTo.length; i++) {
-      promiseArray.push(sendTo[i].writeReliable(packet));
-    }
-
-    return Promise.allSettled(promiseArray);
   }
 
   /**
