@@ -310,6 +310,13 @@ export class SystemsHandler {
     ], this.host.getLobby().getCode()));
   }
 
+  clearSabotageTimer(): void {
+    if (this.sabotageCountdownInterval) {
+      clearInterval(this.sabotageCountdownInterval);
+      delete this.sabotageCountdownInterval;
+    }
+  }
+
   protected getShipStatus(): BaseInnerShipStatus {
     return this.host.getLobby().getSafeShipStatus().getShipStatus();
   }

@@ -194,19 +194,26 @@ export class Lobby implements LobbyInstance {
     return (new Date().getTime() - this.createdAt) / 1000;
   }
 
-  async close(force: boolean = false): Promise<void> {
-    const event = new ServerLobbyDestroyedEvent(this);
-
-    await this.server.emit("server.lobby.destroyed", event);
-
-    if (!force && event.isCancelled()) {
-      return;
-    }
-
+  cleanup(): void {
     this.cancelJoinTimer();
     this.cancelStartTimer();
-    this.server.deleteLobby(this);
+    this.hostInstance.clearTimers();
     this.connections.forEach(async connection => connection.sendReliable([new RemoveGamePacket()]));
+  }
+
+  async close(force: boolean = false): Promise<void> {
+    if (!force && this.server.listenerCount("server.lobby.destroyed") > 0) {
+      const event = new ServerLobbyDestroyedEvent(this);
+
+      await this.server.emit("server.lobby.destroyed", event);
+
+      if (event.isCancelled()) {
+        return;
+      }
+    }
+
+    this.cleanup();
+    this.server.deleteLobby(this);
   }
 
   hasMeta(key: string): boolean {

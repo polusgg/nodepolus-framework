@@ -106,8 +106,14 @@ export interface LobbyInstance extends Metadatable {
   getAge(): number;
 
   /**
-   * Disconnects all connections from the lobby and removes the lobby from the
-   * server.
+   * Disconnects all connections from the lobby and stops all timers and
+   * intervals.
+   */
+  cleanup(): void;
+
+  /**
+   * Disconnects all connections from the lobby, stops all timers and
+   * intervals, and removes the lobby from the server.
    *
    * @param force - `true` to force close the lobby, `false` to fire a cancellable event
    */

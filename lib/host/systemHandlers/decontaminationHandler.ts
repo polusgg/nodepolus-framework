@@ -33,13 +33,7 @@ export class DecontaminationHandler {
       if ((state & DecontaminationDoorState.Exit) == DecontaminationDoorState.Exit) {
         this.system.setState(DecontaminationDoorState.Idle);
         this.system.setTimer(0);
-
-        if (this.timer !== undefined) {
-          clearInterval(this.timer);
-          delete this.timer;
-        } else {
-          throw new Error("Attempted to clear decontamination door timer that does not exist");
-        }
+        this.clearTimer();
       }
     }
   }
@@ -63,5 +57,12 @@ export class DecontaminationHandler {
     systemsHandler.setOldShipStatus();
     this.update();
     systemsHandler.sendDataUpdate();
+  }
+
+  clearTimer(): void {
+    if (this.timer !== undefined) {
+      clearInterval(this.timer);
+      delete this.timer;
+    }
   }
 }

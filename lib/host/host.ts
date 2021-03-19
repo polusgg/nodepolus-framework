@@ -120,6 +120,23 @@ export class Host implements HostInstance {
     return -1;
   }
 
+  clearTimers(): void {
+    this.doorHandler?.clearTimers();
+    this.decontaminationHandlers.forEach(handler => handler.clearTimer());
+    this.sabotageHandler?.clearTimer();
+    this.systemsHandler?.clearSabotageTimer();
+
+    if (this.countdownInterval !== undefined) {
+      clearInterval(this.countdownInterval);
+      delete this.countdownInterval;
+    }
+
+    if (this.meetingHudTimeout !== undefined) {
+      clearTimeout(this.meetingHudTimeout);
+      delete this.meetingHudTimeout;
+    }
+  }
+
   async startCountdown(count: number, starter?: PlayerInstance): Promise<void> {
     const event = new LobbyCountdownStartedEvent(this.lobby, count, starter);
 
@@ -525,7 +542,7 @@ export class Host implements HostInstance {
     }
 
     if (this.meetingHudTimeout !== undefined) {
-      clearInterval(this.meetingHudTimeout);
+      clearTimeout(this.meetingHudTimeout);
       delete this.meetingHudTimeout;
     }
 
@@ -923,7 +940,7 @@ export class Host implements HostInstance {
 
     if (this.meetingHudTimeout !== undefined && [...meetingHud.getMeetingHud().getPlayerStates().values()].every(p => p.didVote() || p.isDead())) {
       this.endMeeting();
-      clearInterval(this.meetingHudTimeout);
+      clearTimeout(this.meetingHudTimeout);
       delete this.meetingHudTimeout;
     }
   }

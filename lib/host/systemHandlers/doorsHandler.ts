@@ -79,4 +79,12 @@ export class DoorsHandler {
       this.shipStatus.serializeData(this.oldShipStatus),
     ], this.host.getLobby().getCode()));
   }
+
+  clearTimers(): void {
+    for (let i = 0; i < this.systemTimers.length; i++) {
+      clearInterval(this.systemTimers[i]);
+    }
+
+    this.systemTimers.splice(0, this.systemTimers.length);
+  }
 }

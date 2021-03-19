@@ -36,6 +36,9 @@ export interface HostInstance {
    */
   getNextPlayerId(): number;
 
+  // TODO: Remove once systems and handlers are refactored
+  clearTimers(): void;
+
   /**
    * Begins the start-game countdown.
    *
