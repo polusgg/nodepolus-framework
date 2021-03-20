@@ -690,6 +690,10 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         }
         break;
       }
+      case RootPacketType.GameData:
+        // fallthrough
+      case RootPacketType.GameDataTo:
+        break;
       case RootPacketType.GetGameList: {
         if (connection.getLobby() !== undefined) {
           return;

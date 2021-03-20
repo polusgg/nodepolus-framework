@@ -65,6 +65,7 @@ import {
   PlayerSkin,
   RootPacketType,
   RpcPacketType,
+  Scene,
   SpawnFlag,
   SpawnType,
 } from "../types/enums";
@@ -271,6 +272,10 @@ export class Lobby implements LobbyInstance {
   }
 
   clearPlayers(): void {
+    for (let i = 0; i < this.players.length; i++) {
+      this.players[i].getConnection()?.setLobby();
+    }
+
     this.players = [];
   }
 
@@ -1171,7 +1176,7 @@ export class Lobby implements LobbyInstance {
         this.hostInstance.handleReady(connection);
         break;
       case GameDataPacketType.SceneChange: {
-        if ((packet as SceneChangePacket).scene != "OnlineGame") {
+        if ((packet as SceneChangePacket).scene !== Scene.OnlineGame) {
           return;
         }
 

@@ -56,6 +56,8 @@ export { RpcPacketType } from "./rpcPacketType";
 
 export { RuntimePlatform } from "./runtimePlatform";
 
+export { Scene } from "./scene";
+
 export { SpawnFlag } from "./spawnFlag";
 
 export { SpawnType } from "./spawnType";

@@ -68,6 +68,7 @@ import {
   LimboState,
   PlayerColor,
   PlayerRole,
+  Scene,
   SpawnFlag,
   TaskLength,
   TaskType,
@@ -748,7 +749,7 @@ export class Host implements HostInstance {
       return;
     }
 
-    if (sceneName !== "OnlineGame") {
+    if (sceneName !== Scene.OnlineGame) {
       return;
     }
 
