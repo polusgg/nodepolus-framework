@@ -132,8 +132,8 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   }
 
   /**
-   * Gets the elapsed time, in milliseconds, since the Unix epoch at which the
-   * server was started.
+   * Gets the time (in milliseconds since the Unix epoch) at which the server
+   * was started.
    */
   getStartedAt(): number {
     return this.startedAt;

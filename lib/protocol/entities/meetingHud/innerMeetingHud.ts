@@ -99,7 +99,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   serializeData(old: InnerMeetingHud): DataPacket {
     const writer = new MessageWriter().writePackedUInt32(this.serializeStatesToDirtyBits(old.playerStates));
 
-    for (const [id, state] of [...this.playerStates.entries()].sort(([ida, _statea], [idb, _stateb]) => ida - idb)) {
+    for (const [id, state] of [...this.playerStates.entries()].sort(([idA], [idb]) => idA - idb)) {
       if (!shallowEqual(state, old.playerStates.get(id))) {
         writer.writeObject(state);
       }
@@ -110,23 +110,10 @@ export class InnerMeetingHud extends BaseInnerNetObject {
 
   serializeSpawn(): SpawnPacketObject {
     const writer = new MessageWriter();
-    // const limit = Math.max(...this.playerStates.keys());
-
-    // for (let i = 0; i <= limit; i++) {
-    //   const state = this.playerStates.get(i);
-
-    //   if (state === undefined) {
-    //     writer.writeByte(0x00);
-    //   } else {
-    //     writer.writeObject(state);
-    //   }
-    // }
-
-    const players = this.getLobby().getPlayers().sort((playera, playerb) => playera.getCreationTime() - playerb.getCreationTime());
+    const players = this.getLobby().getPlayers().sort((playerA, playerB) => playerA.getCreatedAt() - playerB.getCreatedAt());
 
     for (let i = 0; i < players.length; i++) {
-      const element = players[i];
-      const state = this.playerStates.get(element.getId());
+      const state = this.playerStates.get(players[i].getId());
 
       if (state === undefined) {
         writer.writeByte(0x00);
@@ -142,15 +129,15 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     return new InnerMeetingHud(this.parent, new Map(Array.from(this.playerStates, ([id, state]) => [id, state.clone()])), this.netId);
   }
 
-  protected serializeStatesToDirtyBits(statesToSerialize: Map<number, VoteState>): number {
+  protected serializeStatesToDirtyBits(states: Map<number, VoteState>): number {
     let dirtyBits = 0;
 
-    const states = [...this.playerStates.entries()].sort(([pida], [pidb]) => this.getLobby().findSafePlayerByPlayerId(pida).getCreationTime() - this.getLobby().findSafePlayerByPlayerId(pidb).getCreationTime());
+    const sortedStates = [...this.playerStates.entries()].sort(([idA], [idB]) => this.getLobby().findSafePlayerByPlayerId(idA).getCreatedAt() - this.getLobby().findSafePlayerByPlayerId(idB).getCreatedAt());
 
-    for (let i = 0; i < states.length; i++) {
-      const [id, state] = states[i];
+    for (let i = 0; i < sortedStates.length; i++) {
+      const [id, state] = sortedStates[i];
 
-      if (!shallowEqual(state, statesToSerialize.get(id))) {
+      if (!shallowEqual(state, states.get(id))) {
         dirtyBits |= 1 << i;
       }
     }

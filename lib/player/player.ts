@@ -20,12 +20,12 @@ import {
 } from "../api/events/player";
 
 export class Player implements PlayerInstance {
+  protected readonly createdAt = Date.now();
   protected readonly metadata: Map<string, unknown> = new Map();
 
   protected name: TextComponent;
   protected role: PlayerRole = PlayerRole.Crewmate;
   protected initialized = false;
-  protected creationTime = Date.now();
 
   /**
    * @param lobby - The lobby in which the player exists
@@ -40,8 +40,8 @@ export class Player implements PlayerInstance {
     this.name = TextComponent.from(connection?.getName() ?? "");
   }
 
-  getCreationTime(): number {
-    return this.creationTime;
+  getCreatedAt(): number {
+    return this.createdAt;
   }
 
   getId(): number {

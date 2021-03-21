@@ -465,13 +465,7 @@ export class Host implements HostInstance {
     const fullStates = new Array<VoteState>(length);
 
     for (let i = 0; i < length; i++) {
-      const state = states.get(i);
-
-      if (state) {
-        fullStates[i] = state;
-      } else {
-        fullStates[i] = new VoteState(false, false, false, -1);
-      }
+      fullStates[i] = states.get(i) ?? new VoteState(false, false, false, -1);
     }
 
     meetingHud.getMeetingHud().sendRpcPacket(new VotingCompletePacket(
