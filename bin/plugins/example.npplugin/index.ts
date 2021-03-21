@@ -108,24 +108,6 @@ export default class extends BasePlugin {
       this.handleTestRpcPacket.bind(this),
     );
 
-    // server.on("server.packet.out", event => {
-    //   if (event.getPacket().getType() === RootPacketType.GetGameList) {
-    //     event.cancel();
-    //   }
-    // });
-
-    // server.on("server.packet.out.gamedata", event => {
-    //   if (event.getPacket().getType() === GameDataPacketType.Spawn) {
-    //     event.cancel();
-    //   }
-    // });
-
-    // server.on("server.packet.out.rpc", event => {
-    //   if (event.getPacket().getType() === RpcPacketType.SendChat) {
-    //     event.cancel();
-    //   }
-    // });
-
     /**
      * Sets the inbound packet transformer to one that authenticates packets
      * prefixed with a marker byte, client ID, and packet HMAC.
@@ -298,7 +280,9 @@ export default class extends BasePlugin {
     this.getLogger().debug("Vector2: %s", new Vector2(1.234, 5.678));
 
     // DEBUG: Simulates sending a TestPacket packet from a connection not in a lobby
-    server.getConnection(new ConnectionInfo("127.0.0.1", 42069, AddressFamily.IPv4)).emit("message", MessageReader.fromRawBytes([
+    const connection = server.getConnection(new ConnectionInfo("127.0.0.1", 42069, AddressFamily.IPv4));
+
+    connection.emit("message", MessageReader.fromRawBytes([
       0x01, 0x00, 0x07, 0x06, 0x00, 0x40, 0x05, 0x68, 0x65, 0x6c, 0x6c, 0x6f,
     ]));
 
@@ -325,6 +309,8 @@ export default class extends BasePlugin {
         size: -1,
       },
     );
+
+    connection.disconnect(DisconnectReason.serverRequest());
   }
 
   /**

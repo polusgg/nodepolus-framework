@@ -21,7 +21,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   protected readonly flushResolveMap: Map<number, (value: void | PromiseLike<void>) => void> = new Map();
   protected readonly unacknowledgedPackets: Map<number, number> = new Map();
   protected readonly flushInterval: NodeJS.Timeout;
-  // protected readonly timeoutInterval: NodeJS.Timeout;
 
   protected id = -1;
   protected initialized = false;
@@ -40,7 +39,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   protected nonceIndex = 1;
   protected disconnectTimeout?: NodeJS.Timeout;
   protected requestedDisconnect = false;
-  // protected timeoutLength = 6000;
+  protected timeoutLength = 6000;
 
   /**
    * @param connectionInfo - The ConnectionInfo describing the connection
@@ -105,6 +104,10 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
       if (this.unreliablePacketBuffer.length > 0) {
         this.flush(false);
+      }
+
+      if ((Date.now() - this.lastPingReceivedTime) > this.timeoutLength) {
+        this.cleanup(DisconnectReason.custom(`Did not receive ping within ${this.timeoutLength}ms`));
       }
     }, 50);
 

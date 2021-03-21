@@ -880,7 +880,6 @@ export class Lobby implements LobbyInstance {
     }
 
     this.hostInstance.handleDisconnect(connection, reason);
-
     disconnectingPlayer?.getEntity().despawn();
 
     if (connection.isActingHost() && this.connections.length > 0) {
