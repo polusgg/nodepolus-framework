@@ -25,6 +25,7 @@ export class Player implements PlayerInstance {
   protected name: TextComponent;
   protected role: PlayerRole = PlayerRole.Crewmate;
   protected initialized = false;
+  protected creationTime = Date.now();
 
   /**
    * @param lobby - The lobby in which the player exists
@@ -37,6 +38,10 @@ export class Player implements PlayerInstance {
     protected readonly connection?: Connection,
   ) {
     this.name = TextComponent.from(connection?.getName() ?? "");
+  }
+
+  getCreationTime(): number {
+    return this.creationTime;
   }
 
   getId(): number {

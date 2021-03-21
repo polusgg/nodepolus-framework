@@ -10,6 +10,11 @@ import { TextComponent } from "../text";
  */
 export interface PlayerInstance extends Metadatable {
   /**
+   * Gets the time (in milliseconds since unix epoch) at which this player was created.
+   */
+  getCreationTime(): number;
+
+  /**
    * Gets the ID of the player.
    */
   getId(): number;

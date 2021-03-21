@@ -848,6 +848,7 @@ export class Lobby implements LobbyInstance {
 
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
     const disconnectingPlayerIndex = this.findPlayerIndexByConnection(connection);
+    const disconnectingPlayer = this.findPlayerByConnection(connection);
 
     if (disconnectingConnectionIndex > -1) {
       this.connections.splice(disconnectingConnectionIndex, 1);
@@ -882,9 +883,7 @@ export class Lobby implements LobbyInstance {
       this.meetingHud.getMeetingHud().clearVote(votesToClear);
     }
 
-    if (disconnectingPlayerIndex) {
-      this.players.splice(disconnectingPlayerIndex, 1);
-    }
+    disconnectingPlayer?.getEntity().despawn();
 
     if (connection.isActingHost() && this.connections.length > 0) {
       this.migrateHost(connection);

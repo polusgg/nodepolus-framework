@@ -460,8 +460,28 @@ export class Host implements HostInstance {
       }
     }
 
+    const states = meetingHud.getMeetingHud().getPlayerStates();
+    const length = Math.max(...meetingHud.getMeetingHud().getPlayerStates().keys()) + 1;
+    const fullStates = new Array<VoteState>(length);
+
+    console.log(states, length, fullStates);
+
+    for (let i = 0; i < length; i++) {
+      const state = states.get(i);
+
+      console.log(i, states.has(i), state);
+
+      if (state) {
+        fullStates[i] = state;
+      } else {
+        fullStates[i] = new VoteState(false, false, false, -1);
+      }
+    }
+
+    console.log(fullStates);
+
     meetingHud.getMeetingHud().sendRpcPacket(new VotingCompletePacket(
-      [...meetingHud.getMeetingHud().getPlayerStates().values()],
+      fullStates,
       isTied ? 0xff : (exiledPlayer?.getId() ?? 0xff),
       isTied,
     ), this.lobby.getConnections());
