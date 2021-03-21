@@ -1,5 +1,5 @@
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer } from "../../types";
-import { HazelPacketType, LimboState, PacketDestination, RootPacketType, RuntimePlatform } from "../../types/enums";
+import { HazelPacketType, LimboState, PacketDestination, RootPacketType, RuntimePlatform, Scene } from "../../types/enums";
 import { BaseRootPacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { ServerPacketOutCustomEvent, ServerPacketOutEvent } from "../../api/events/server";
@@ -33,6 +33,7 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   protected lobby?: Lobby;
   protected firstJoin = true;
   protected limboState = LimboState.PreSpawn;
+  protected currentScene: Scene = Scene.MMOnline;
   protected actingHost = false;
   protected packetBuffer: AwaitingPacket[] = [];
   protected unreliablePacketBuffer: BaseRootPacket[] = [];
@@ -288,6 +289,24 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    */
   setLimboState(limbState: LimboState): this {
     this.limboState = limbState;
+
+    return this;
+  }
+
+  /**
+   * Gets the scene that the connection is in.
+   */
+  getCurrentScene(): Scene {
+    return this.currentScene;
+  }
+
+  /**
+   * Sets the scene that the connection is in.
+   *
+   * @param scene - The new scene that the connection is in
+   */
+  setCurrentScene(scene: Scene): this {
+    this.currentScene = scene;
 
     return this;
   }

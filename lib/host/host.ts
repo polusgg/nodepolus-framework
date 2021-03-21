@@ -540,6 +540,12 @@ export class Host implements HostInstance {
       return;
     }
 
+    const connections = this.lobby.getConnections();
+
+    for (let i = 0; i < connections.length; i++) {
+      connections[i].setCurrentScene(Scene.EndGame);
+    }
+
     this.decontaminationHandlers = [];
     this.readyPlayerList = [];
 
@@ -751,6 +757,8 @@ export class Host implements HostInstance {
   }
 
   async handleSceneChange(connection: Connection, sceneName: string): Promise<void> {
+    connection.setCurrentScene(Scene[sceneName]);
+
     if (this.lobby.getConnections().length > this.lobby.getOptions().getMaxPlayers()) {
       connection.sendLateRejection(DisconnectReason.gameFull());
 

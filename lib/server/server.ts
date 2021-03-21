@@ -1,5 +1,5 @@
 import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, LobbyListing, OutboundPacketTransformer } from "../types";
-import { FakeClientId, GameDataPacketType, PacketDestination, RootPacketType, RpcPacketType } from "../types/enums";
+import { FakeClientId, GameDataPacketType, PacketDestination, RootPacketType, RpcPacketType, Scene } from "../types/enums";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
 import { BasicServerEvents, ServerEvents } from "../api/events";
 import { DEFAULT_CONFIG, MaxValue } from "../util/constants";
@@ -662,7 +662,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         break;
       }
       case RootPacketType.JoinGame: {
-        if (connection.getLobby() !== undefined) {
+        if (connection.getLobby() !== undefined && connection.getCurrentScene() !== Scene.EndGame) {
           return;
         }
 
@@ -698,6 +698,8 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         if (connection.getLobby() !== undefined) {
           return;
         }
+
+        connection.setCurrentScene(Scene.FindAGame);
 
         const request = packet as GetGameListRequestPacket;
         const levels = request.options.getLevels();

@@ -272,10 +272,6 @@ export class Lobby implements LobbyInstance {
   }
 
   clearPlayers(): void {
-    for (let i = 0; i < this.players.length; i++) {
-      this.players[i].getConnection()?.setLobby();
-    }
-
     this.players = [];
   }
 
