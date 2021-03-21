@@ -100,8 +100,6 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     const writer = new MessageWriter().writePackedUInt32(this.serializeStatesToDirtyBits(old.playerStates));
 
     for (const [id, state] of [...this.playerStates.entries()].sort(([ida, _statea], [idb, _stateb]) => ida - idb)) {
-      console.log(id);
-
       if (!shallowEqual(state, old.playerStates.get(id))) {
         writer.writeObject(state);
       }
