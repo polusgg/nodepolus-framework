@@ -14,7 +14,6 @@ import { shuffleArrayClone } from "../../../lib/util/shuffle";
 import { TestGameDataPacket } from "./testGameDataPacket";
 import { TestRpcPacket } from "./testRpcPacket";
 import { Hmac } from "../../../lib/util/hmac";
-import { Server } from "../../../lib/server";
 import { TestPacket } from "./testPacket";
 import path from "path";
 import {
@@ -27,7 +26,6 @@ import {
 /**
  * Grab the server and announcement server from the global object.
  */
-declare const server: Server;
 declare const announcementServer: AnnouncementServer;
 
 /**
@@ -79,7 +77,7 @@ const USERS: Map<string, User> = new Map([
  */
 export default class extends BasePlugin {
   constructor() {
-    super(server, pluginMeta);
+    super(pluginMeta);
 
     /**
      * Registers a custom root packet with the ID 0x40 (64).
@@ -108,19 +106,19 @@ export default class extends BasePlugin {
       this.handleTestRpcPacket.bind(this),
     );
 
-    // server.on("server.packet.out", event => {
+    // this.server.on("server.packet.out", event => {
     //   if (event.getPacket().getType() === RootPacketType.GetGameList) {
     //     event.cancel();
     //   }
     // });
 
-    // server.on("server.packet.out.gamedata", event => {
+    // this.server.on("server.packet.out.gamedata", event => {
     //   if (event.getPacket().getType() === GameDataPacketType.Spawn) {
     //     event.cancel();
     //   }
     // });
 
-    // server.on("server.packet.out.rpc", event => {
+    // this.server.on("server.packet.out.rpc", event => {
     //   if (event.getPacket().getType() === RpcPacketType.SendChat) {
     //     event.cancel();
     //   }
@@ -130,7 +128,7 @@ export default class extends BasePlugin {
      * Sets the inbound packet transformer to one that authenticates packets
      * prefixed with a marker byte, client ID, and packet HMAC.
      */
-    server.setInboundPacketTransformer((connection: Connection, reader: MessageReader): MessageReader => {
+    this.server.setInboundPacketTransformer((connection: Connection, reader: MessageReader): MessageReader => {
       if (reader.peek(0) != AUTHENTICATION_BYTE) {
         if (KICK_UNAUTHENTICATED) {
           connection.disconnect(DisconnectReason.custom("This server does not supported unauthenticated packets"));
@@ -196,28 +194,28 @@ export default class extends BasePlugin {
     /**
      * Register some event handlers.
      */
-    server.on("server.ready", this.demoLogger.bind(this));
-    server.on("player.joined", this.logPlayerJoins.bind(this));
-    server.on("server.lobby.join", this.joinRandomLobby.bind(this));
+    this.server.on("server.ready", this.demoLogger.bind(this));
+    this.server.on("player.joined", this.logPlayerJoins.bind(this));
+    this.server.on("server.lobby.join", this.joinRandomLobby.bind(this));
 
     /**
      * Listens for custom root packets
      */
-    server.on("server.packet.in.custom", (event: ServerPacketInCustomEvent) => {
+    this.server.on("server.packet.in.custom", (event: ServerPacketInCustomEvent) => {
       event.cancel();
 
       const packet = event.getPacket();
       const lobby = event.getConnection().getLobby();
 
       if (lobby !== undefined) {
-        server.getLogger("Custom Packet").debug(
+        this.server.getLogger("Custom Packet").debug(
           "Received custom root packet from connection %s in lobby %s: %s",
           event.getConnection(),
           lobby,
           packet,
         );
       } else {
-        server.getLogger("Custom Packet").debug(
+        this.server.getLogger("Custom Packet").debug(
           "Received custom root packet from connection %s: %s",
           event.getConnection(),
           packet,
@@ -228,12 +226,12 @@ export default class extends BasePlugin {
     /**
      * Listens for custom GameData packets
      */
-    server.on("server.packet.in.gamedata.custom", (event: ServerPacketInGameDataCustomEvent) => {
+    this.server.on("server.packet.in.gamedata.custom", (event: ServerPacketInGameDataCustomEvent) => {
       event.cancel();
 
       const packet = event.getPacket();
 
-      server.getLogger("Custom GameData").debug(
+      this.server.getLogger("Custom GameData").debug(
         "Received custom GameData packet from lobby %s: %s",
         event.getConnection().getLobby(),
         packet,
@@ -243,7 +241,7 @@ export default class extends BasePlugin {
     /**
      * Listens for custom RPC packets
      */
-    server.on("server.packet.in.rpc.custom", (event: ServerPacketInRpcCustomEvent) => {
+    this.server.on("server.packet.in.rpc.custom", (event: ServerPacketInRpcCustomEvent) => {
       event.cancel();
 
       const packet = event.getPacket();
@@ -253,7 +251,7 @@ export default class extends BasePlugin {
         return;
       }
 
-      server.getLogger("Custom RPC").debug(
+      this.server.getLogger("Custom RPC").debug(
         "Received custom RPC packet from %s object #%d: %s",
         InnerNetObjectType[sender.getType()],
         event.getNetId(),
@@ -312,7 +310,7 @@ export default class extends BasePlugin {
     };
 
     // DEBUG: Simulates sending a TestPacket packet from a connection
-    server.getSocket().emit(
+    this.server.getSocket().emit(
       "message",
       new MessageWriter()
         .writeByte(0x01)
@@ -325,7 +323,7 @@ export default class extends BasePlugin {
     );
 
     // DEBUG: Simulates sending an authenticated TestPacket packet from a connection
-    server.getSocket().emit(
+    this.server.getSocket().emit(
       "message",
       new MessageWriter()
         .writeByte(0x69)
@@ -336,7 +334,7 @@ export default class extends BasePlugin {
       info,
     );
 
-    server.getConnection(new ConnectionInfo("127.0.0.1", 42069, AddressFamily.IPv4)).disconnect(DisconnectReason.serverRequest(), true);
+    this.server.getConnection(new ConnectionInfo("127.0.0.1", 42069, AddressFamily.IPv4)).disconnect(DisconnectReason.serverRequest(), true);
   }
 
   /**
@@ -378,7 +376,7 @@ export default class extends BasePlugin {
      * Grab a random non-full public lobby.
      */
     const lobby = shuffleArrayClone(
-      server.getLobbies().filter(lob => !lob.isFull() && lob.isPublic()),
+      this.server.getLobbies().filter(lob => !lob.isFull() && lob.isPublic()),
     )[0];
 
     event.setLobby(lobby);
@@ -392,14 +390,14 @@ export default class extends BasePlugin {
     const lobby = connection.getLobby();
 
     if (lobby !== undefined) {
-      server.getLogger("TestPacket").debug(
+      this.server.getLogger("TestPacket").debug(
         "Received TestPacket from connection %s in lobby %s: %s",
         connection,
         lobby,
         packet.message,
       );
     } else {
-      server.getLogger("TestPacket").debug(
+      this.server.getLogger("TestPacket").debug(
         "Received TestPacket from connection %s: %s",
         connection,
         packet.message,
@@ -412,7 +410,7 @@ export default class extends BasePlugin {
    * `server.packet.in.gamedata.custom` event handler is removed.
    */
   private handleTestGameDataPacket(connection: Connection, packet: TestGameDataPacket): void {
-    server.getLogger("TestGameDataPacket").debug(
+    this.server.getLogger("TestGameDataPacket").debug(
       "Received TestGameDataPacket from connection %s for lobby %s: %s",
       connection,
       connection.getLobby(),
@@ -433,7 +431,7 @@ export default class extends BasePlugin {
       return;
     }
 
-    server.getLogger("TestRpcPacket").debug(
+    this.server.getLogger("TestRpcPacket").debug(
       "Received TestRpcPacket from connection %s (%s object #%d): %s",
       connection,
       InnerNetObjectType[sender.getType()],

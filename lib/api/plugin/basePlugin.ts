@@ -3,10 +3,13 @@ import { Logger } from "../../logger";
 import { Server } from "../../server";
 import { PluginAuthor } from ".";
 
+declare const server: Server;
+
 /**
  * The base class for a NodePolus plugin.
  */
 export abstract class BasePlugin {
+  protected readonly server: Server;
   protected readonly logger: Logger;
 
   /**
@@ -14,9 +17,9 @@ export abstract class BasePlugin {
    * @param pluginMetadata - The metadata for the plugin
    */
   constructor(
-    protected readonly server: Server,
     protected readonly pluginMetadata: PluginMetadata,
   ) {
+    this.server = server;
     this.logger = server.getLogger(this.pluginMetadata.name);
   }
 
