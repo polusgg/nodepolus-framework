@@ -108,6 +108,24 @@ export default class extends BasePlugin {
       this.handleTestRpcPacket.bind(this),
     );
 
+    // server.on("server.packet.out", event => {
+    //   if (event.getPacket().getType() === RootPacketType.GetGameList) {
+    //     event.cancel();
+    //   }
+    // });
+
+    // server.on("server.packet.out.gamedata", event => {
+    //   if (event.getPacket().getType() === GameDataPacketType.Spawn) {
+    //     event.cancel();
+    //   }
+    // });
+
+    // server.on("server.packet.out.rpc", event => {
+    //   if (event.getPacket().getType() === RpcPacketType.SendChat) {
+    //     event.cancel();
+    //   }
+    // });
+
     /**
      * Sets the inbound packet transformer to one that authenticates packets
      * prefixed with a marker byte, client ID, and packet HMAC.

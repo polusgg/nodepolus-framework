@@ -107,11 +107,10 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
       }
 
       if ((Date.now() - this.lastPingReceivedTime) > this.timeoutLength) {
-        this.cleanup(DisconnectReason.custom(`Did not receive ping within ${this.timeoutLength}ms`));
+        this.cleanup(DisconnectReason.custom(`Did not receive any pings for ${this.timeoutLength}ms`));
       }
     }, 50);
 
-    // TODO: Timeout clients and remove dead connections
     /**
      * TODO: Add max-connection-per-address logic
      * Use the value from `server.getMaxConnectionsPerAddress()`
@@ -734,9 +733,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    */
   protected cleanup(reason?: DisconnectReason): void {
     clearInterval(this.flushInterval);
-    // clearInterval(this.timeoutInterval);
-
-    // TODO: socket.close() or socket.disconnect()
 
     if (this.disconnectTimeout !== undefined) {
       clearTimeout(this.disconnectTimeout);
