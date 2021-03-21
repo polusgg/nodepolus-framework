@@ -81,14 +81,18 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
       const connection = this.getConnection(info);
 
       if (!this.connections.has(info.toString())) {
-        const connections = [...this.connections.values()];
-        let count = 0;
+        const maxConnectionsPerAddress = this.getMaxConnectionsPerAddress();
 
-        for (let i = 0; i < connections.length; i++) {
-          if (connections[i].getConnectionInfo().getAddress() === info.getAddress() &&
-              ++count >= this.getMaxConnectionsPerAddress()
-          ) {
-            return connection.disconnect(DisconnectReason.custom("Too many active connections from your IP address"));
+        if (maxConnectionsPerAddress > 0) {
+          const connections = [...this.connections.values()];
+          let count = 0;
+
+          for (let i = 0; i < connections.length; i++) {
+            if (connections[i].getConnectionInfo().getAddress() === info.getAddress() &&
+                ++count >= maxConnectionsPerAddress
+            ) {
+              return connection.disconnect(DisconnectReason.custom("Too many active connections from your IP address"));
+            }
           }
         }
 
