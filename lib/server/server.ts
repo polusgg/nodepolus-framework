@@ -77,7 +77,27 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
         return;
       }
 
-      const connection = this.getConnection(ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`));
+      const info = ConnectionInfo.fromString(`${remoteInfo.address}:${remoteInfo.port}`);
+      const connection = this.getConnection(info);
+
+      if (!this.connections.has(info.toString())) {
+        const connections = [...this.connections.values()];
+        let count = 0;
+
+        for (let i = 0; i < connections.length; i++) {
+          if (connections[i].getConnectionInfo().getAddress() === info.getAddress() &&
+              ++count >= this.getMaxConnectionsPerAddress()
+          ) {
+            return connection.disconnect(DisconnectReason.custom("Too many active connections from your IP address"));
+          }
+        }
+
+        this.connections.set(
+          info.toString(),
+          connection,
+        );
+      }
+
       const reader = MessageReader.fromRawBytes(buffer);
 
       connection.emit(
@@ -170,19 +190,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
    * @returns A connection described by `connectionInfo`
    */
   getConnection(connectionInfo: ConnectionInfo): Connection {
-    const identifier = connectionInfo.toString();
-    let connection = this.connections.get(identifier);
-
-    if (connection !== undefined) {
-      return connection;
-    }
-
-    this.connections.set(
-      identifier,
-      connection = this.initializeConnection(connectionInfo),
-    );
-
-    return connection;
+    return this.connections.get(connectionInfo.toString()) ?? this.initializeConnection(connectionInfo);
   }
 
   /**
@@ -353,7 +361,11 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   async close(): Promise<void> {
     this.listening = false;
 
-    this.connections.forEach(async connection => connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("The server is shutting down"))]));
+    const connections = [...this.connections.values()];
+
+    for (let i = 0; i < connections.length; i++) {
+      connections[i].sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("The server is shutting down"))]);
+    }
 
     for (let i = 0; i < this.lobbies.length; i++) {
       this.lobbies[i].close(true);

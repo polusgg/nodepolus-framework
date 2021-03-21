@@ -297,38 +297,46 @@ export default class extends BasePlugin {
     this.getLogger().debug("Symbol: %s", Symbol("test"));
     this.getLogger().debug("Vector2: %s", new Vector2(1.234, 5.678));
 
-    // DEBUG: Simulates sending a TestPacket packet from a connection not in a lobby
-    const connection = server.getConnection(new ConnectionInfo("127.0.0.1", 42069, AddressFamily.IPv4));
+    const [clientId, { token }] = [...USERS.entries()][0];
+    const message = new MessageWriter()
+      .writeByte(0x01)
+      .writeUInt16(0x08)
+      .startMessage(0x40)
+      .writeString("this is a signed message")
+      .endMessage();
+    const info = {
+      address: "127.0.0.1",
+      family: "IPv4",
+      port: 42069,
+      size: -1,
+    };
 
-    connection.emit("message", MessageReader.fromRawBytes([
-      0x01, 0x00, 0x07, 0x06, 0x00, 0x40, 0x05, 0x68, 0x65, 0x6c, 0x6c, 0x6f,
-    ]));
+    // DEBUG: Simulates sending a TestPacket packet from a connection
+    server.getSocket().emit(
+      "message",
+      new MessageWriter()
+        .writeByte(0x01)
+        .writeUInt16(0x07, true)
+        .startMessage(0x40)
+        .writeString("hello world")
+        .endMessage()
+        .getBuffer(),
+      info,
+    );
 
-    const user = [...USERS.entries()][0];
-    const message = MessageReader.fromRawBytes([
-      0x01, 0x00, 0x07, 0x19, 0x00, 0x40, 0x18, 0x74, 0x68, 0x69, 0x73, 0x20,
-      0x69, 0x73, 0x20, 0x61, 0x20, 0x73, 0x69, 0x67, 0x6e, 0x65, 0x64, 0x20,
-      0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65,
-    ]);
-
-    // DEBUG: Simulates sending an authenticated packet from a connection
+    // DEBUG: Simulates sending an authenticated TestPacket packet from a connection
     server.getSocket().emit(
       "message",
       new MessageWriter()
         .writeByte(0x69)
-        .writeBytes(Buffer.from(user[0], "hex"))
-        .writeBytes(Buffer.from(Hmac.sign(message.getBuffer().toString("hex"), user[1].token), "hex"))
+        .writeBytes(Buffer.from(clientId, "hex"))
+        .writeBytes(Buffer.from(Hmac.sign(message.getBuffer().toString("hex"), token), "hex"))
         .writeBytes(message)
         .getBuffer(),
-      {
-        address: "127.0.0.1",
-        family: "IPv4",
-        port: 42069,
-        size: -1,
-      },
+      info,
     );
 
-    connection.disconnect(DisconnectReason.serverRequest());
+    server.getConnection(new ConnectionInfo("127.0.0.1", 42069, AddressFamily.IPv4)).disconnect(DisconnectReason.serverRequest(), true);
   }
 
   /**

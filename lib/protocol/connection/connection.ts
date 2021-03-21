@@ -110,14 +110,6 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
         this.cleanup(DisconnectReason.custom(`Did not receive any pings for ${this.timeoutLength}ms`));
       }
     }, 50);
-
-    /**
-     * TODO: Add max-connection-per-address logic
-     * Use the value from `server.getMaxConnectionsPerAddress()`
-     * We need to make sure we disconnect and remove references to all
-     * connections when they die (client disconnects, server disconnects, client
-     * loses connection/times out)
-     */
   }
 
   hasMeta(key: string): boolean {
@@ -519,14 +511,19 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    * Disconnects the connection from the server.
    *
    * @param reason - The reason for why the connection was disconnected
+   * @param force - `true` to cleanup the connection immediately, `false` to wait for a client response (default `false`)
    */
-  disconnect(reason?: DisconnectReason): void {
+  disconnect(reason?: DisconnectReason, force: boolean = false): void {
     this.requestedDisconnect = true;
 
     this.send(new Packet(undefined, new RootPacket([new JoinGameErrorPacket(reason ?? DisconnectReason.exitGame())])));
     this.send(new Packet(undefined, new DisconnectPacket(true, reason ?? DisconnectReason.exitGame())));
 
-    this.disconnectTimeout = setTimeout(() => this.cleanup(reason), 6000);
+    if (force) {
+      this.cleanup(reason);
+    } else {
+      this.disconnectTimeout = setTimeout(() => this.cleanup(reason), 6000);
+    }
   }
 
   /**
