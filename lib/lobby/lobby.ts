@@ -840,7 +840,7 @@ export class Lobby implements LobbyInstance {
    * @param reason - The reason for why the connection was disconnected
    */
   handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
-    this.hostInstance.handleDisconnect(connection, reason);
+    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.getId(), 0, reason ?? DisconnectReason.exitGame()));
 
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
     const disconnectingPlayerIndex = this.findPlayerIndexByConnection(connection);
@@ -852,12 +852,12 @@ export class Lobby implements LobbyInstance {
 
     if (this.meetingHud !== undefined && disconnectingPlayerIndex) {
       const oldMeetingHud = this.meetingHud.getMeetingHud().clone();
-      const disconnectedId = this.players[disconnectingPlayerIndex].getId();
+      const disconnectedId = disconnectingPlayer?.getId();
       const votesToClear: Player[] = [];
       const states = this.meetingHud.getMeetingHud().getPlayerStates();
 
       for (const [id, state] of states) {
-        if (id == disconnectedId) {
+        if (id === disconnectedId) {
           state.setDead(true);
           state.setVotedFor(-1);
           state.setVoted(false);
@@ -879,13 +879,13 @@ export class Lobby implements LobbyInstance {
       this.meetingHud.getMeetingHud().clearVote(votesToClear);
     }
 
+    this.hostInstance.handleDisconnect(connection, reason);
+
     disconnectingPlayer?.getEntity().despawn();
 
     if (connection.isActingHost() && this.connections.length > 0) {
       this.migrateHost(connection);
     }
-
-    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.getId(), 0, reason ?? DisconnectReason.exitGame()));
   }
 
   /**

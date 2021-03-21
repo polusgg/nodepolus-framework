@@ -1,5 +1,5 @@
 import { InnerCustomNetworkTransform, InnerPlayerControl, InnerPlayerPhysics } from ".";
-import { SpawnFlag, SpawnType } from "../../../types/enums";
+import { GameState, SpawnFlag, SpawnType } from "../../../types/enums";
 import { BaseInnerNetEntity } from "../baseEntity";
 import { LobbyInstance } from "../../../api/lobby";
 import { Vector2 } from "../../../types";
@@ -47,7 +47,7 @@ export class EntityPlayer extends BaseInnerNetEntity {
 
     const player = (this.lobby as Lobby).findPlayerByEntity(this);
 
-    if (player !== undefined) {
+    if (player !== undefined && this.lobby.getGameState() !== GameState.Started) {
       this.lobby.removePlayer(player);
     }
   }

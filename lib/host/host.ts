@@ -656,14 +656,6 @@ export class Host implements HostInstance {
       } else {
         this.endGame(GameOverReason.CrewmateDisconnect);
       }
-
-      return;
-    }
-
-    const meetingHud = this.lobby.getMeetingHud();
-
-    if (meetingHud !== undefined) {
-      meetingHud.getMeetingHud().clearVote([player]);
     }
   }
 
@@ -841,7 +833,7 @@ export class Host implements HostInstance {
 
   async handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): Promise<void> {
     if (this.lobby.getMeetingHud() !== undefined) {
-      throw new Error("Received ReportDeadBody during a meeting");
+      this.getLobby().getLogger().warn("Received ReportDeadBody during a meeting");
     }
 
     const gameData = this.lobby.getSafeGameData();
