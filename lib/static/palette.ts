@@ -10,21 +10,21 @@ type PlayerColorValues = {
   [key in PlayerColor]: Readonly<ColorShades>;
 };
 
-const disabledGrey: Color = [76, 76, 76, 255] as const;
-const disabledColor: Color = [255, 255, 255, 76] as const;
-const enabledColor: Color = [255, 255, 255, 255] as const;
-const black: Color = [0, 0, 0, 255] as const;
-const clearWhite: Color = [255, 255, 255, 0] as const;
-const halfWhite: Color = [255, 255, 255, 127] as const;
-const white: Color = [255, 255, 255, 255] as const;
-const lightBlue: Color = [127, 127, 255, 255] as const;
-const blue: Color = [51, 51, 255, 255] as const;
-const orange: Color = [255, 153, 1, 255] as const;
-const purple: Color = [153, 25, 153, 255] as const;
-const brown: Color = [183, 109, 28, 255] as const;
-const crewmateBlue: Color = [140, 255, 255, 255] as const;
-const impostorRed: Color = [255, 25, 25, 255] as const;
-const playerVisor: Color = [149, 202, 220, 255] as const;
+const disabledGrey: Readonly<Color> = [76, 76, 76, 255] as const;
+const disabledColor: Readonly<Color> = [255, 255, 255, 76] as const;
+const enabledColor: Readonly<Color> = [255, 255, 255, 255] as const;
+const black: Readonly<Color> = [0, 0, 0, 255] as const;
+const clearWhite: Readonly<Color> = [255, 255, 255, 0] as const;
+const halfWhite: Readonly<Color> = [255, 255, 255, 127] as const;
+const white: Readonly<Color> = [255, 255, 255, 255] as const;
+const lightBlue: Readonly<Color> = [127, 127, 255, 255] as const;
+const blue: Readonly<Color> = [51, 51, 255, 255] as const;
+const orange: Readonly<Color> = [255, 153, 1, 255] as const;
+const purple: Readonly<Color> = [153, 25, 153, 255] as const;
+const brown: Readonly<Color> = [183, 109, 28, 255] as const;
+const crewmateBlue: Readonly<Color> = [140, 255, 255, 255] as const;
+const impostorRed: Readonly<Color> = [255, 25, 25, 255] as const;
+const playerVisor: Readonly<Color> = [149, 202, 220, 255] as const;
 const playerBody: Readonly<PlayerColorValues> = {
   [PlayerColor.Red]: { light: [198, 17, 17, 255], dark: [122, 8, 56, 255] },
   [PlayerColor.Blue]: { light: [19, 46, 210, 255], dark: [9, 21, 142, 255] },
