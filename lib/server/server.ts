@@ -198,6 +198,20 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
   }
 
   /**
+   * Gets the first Connection whose ID matches the given ID.
+   *
+   * @param clientId - The ID of the connection
+   * @returns The connection, or `undefined` if no connection in the server has the ID `clientId`
+   */
+  findConnectionById(clientId: number): Connection | undefined {
+    for (const [, connection] of this.connections) {
+      if (connection.getId() === clientId) {
+        return connection;
+      }
+    }
+  }
+
+  /**
    * Gets all lobbies hosted on the server.
    */
   getLobbies(): readonly LobbyInstance[] {
