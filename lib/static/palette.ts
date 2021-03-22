@@ -1,6 +1,5 @@
 import { PlayerColor } from "../types/enums";
-
-type Color = readonly [red: number, green: number, blue: number, alpha: number];
+import { Color } from "../types";
 
 type ColorShades = Readonly<{
   light: Readonly<Color>;

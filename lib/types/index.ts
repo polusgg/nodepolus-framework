@@ -6,6 +6,8 @@ export { CanSerializeToHazel } from "./canSerializeToHazel";
 
 export { ClientVersion } from "./clientVersion";
 
+export { Color } from "./color";
+
 export { ConnectionInfo } from "./connectionInfo";
 
 export { CustomGameDataPacketContainer } from "./customGameDataPacketContainer";

@@ -733,6 +733,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
             continue;
           }
 
+          // TODO: Intersect so lobbies can have multiple languages
           if (!languages.includes(lobby.getOptions().getLanguages()[0])) {
             continue;
           }
