@@ -10,7 +10,8 @@
     "start": "ts-node bin/polus",
     "lint": "eslint . --ext .ts",
     "lint-and-fix": "eslint . --ext .ts --fix",
-    "test": "ava"
+    "test": "ava",
+    "publish": "npm publish --registry https://npm.polus.gg"
   },
   "repository": {
     "type": "git",
