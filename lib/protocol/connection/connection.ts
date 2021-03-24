@@ -24,9 +24,9 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
 
   protected id = -1;
   protected initialized = false;
-  protected hazelVersion?: number;
-  protected clientVersion?: ClientVersion;
-  protected name?: string;
+  protected hazelVersion!: number;
+  protected clientVersion!: ClientVersion;
+  protected name!: string;
   protected platform?: RuntimePlatform;
   protected lastPingReceivedTime: number = Date.now();
   protected lobby?: Lobby;
@@ -185,21 +185,21 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   /**
    * Gets the version of Hazel that the connection is using.
    */
-  getHazelVersion(): number | undefined {
+  getHazelVersion(): number {
     return this.hazelVersion;
   }
 
   /**
    * Gets the version of the Among Us client that the connection is using.
    */
-  getClientVersion(): ClientVersion | undefined {
+  getClientVersion(): ClientVersion {
     return this.clientVersion;
   }
 
   /**
    * Gets the name that the connection requested for their player.
    */
-  getName(): string | undefined {
+  getName(): string {
     return this.name;
   }
 
