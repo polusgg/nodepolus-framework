@@ -1,9 +1,9 @@
 {
-  "name": "nodepolus",
+  "name": "@nodepolus/nodepolus",
   "version": "3.0.0",
   "description": "NodePolus is a JavaScript library containing multiple implementations of the Among Us network protocol.",
   "engines": {
-    "node": ">=15.0.1"
+    "node": ">=14"
   },
   "scripts": {
     "dev": "NP_LOG_LEVEL=trace npm start",
