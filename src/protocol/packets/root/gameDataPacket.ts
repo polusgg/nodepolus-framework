@@ -3,7 +3,7 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { CustomGameDataPacketContainer } from "../../../types";
 import { LobbyCode } from "../../../util/lobbyCode";
 import { Connection } from "../../connection";
-import { BaseRootPacket } from "../root";
+import { BaseRootPacket } from ".";
 import {
   BaseGameDataPacket,
   ClientInfoPacket,

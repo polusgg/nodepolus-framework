@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { RootPacketType } from "../../../types/enums";
 import { LobbyCode } from "../../../util/lobbyCode";
-import { BaseRootPacket } from "../root";
+import { BaseRootPacket } from ".";
 
 /**
  * Root Packet ID: `0x02` (`2`)

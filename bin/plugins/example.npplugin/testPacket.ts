@@ -1,5 +1,5 @@
-import { MessageReader, MessageWriter } from "../../../lib/util/hazelMessage";
-import { BaseRootPacket } from "../../../lib/protocol/packets/root";
+import { MessageReader, MessageWriter } from "../../../src/util/hazelMessage";
+import { BaseRootPacket } from "../../../src/protocol/packets/root";
 
 export class TestPacket extends BaseRootPacket {
   constructor(

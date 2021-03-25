@@ -1,4 +1,4 @@
-import { LobbyCode } from "../../lib/util/lobbyCode";
+import { LobbyCode } from "../../src/util/lobbyCode";
 import test from "ava";
 
 test("encodes a v1 code", t => {

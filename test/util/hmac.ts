@@ -1,4 +1,4 @@
-import { Hmac } from "../../lib/util/hmac";
+import { Hmac } from "../../src/util/hmac";
 import test from "ava";
 
 const message = "I like big butts and I cannot lie";

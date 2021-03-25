@@ -1,7 +1,7 @@
-import { KillDistance, Language, Level, TaskBarMode } from "../../lib/types/enums";
-import { MessageReader } from "../../lib/util/hazelMessage";
-import { isFloatEqual } from "../../lib/util/functions";
-import { GameOptionsData } from "../../lib/types";
+import { KillDistance, Language, Level, TaskBarMode } from "../../src/types/enums";
+import { MessageReader } from "../../src/util/hazelMessage";
+import { isFloatEqual } from "../../src/util/functions";
+import { GameOptionsData } from "../../src/types";
 import test from "ava";
 
 test("deserializes a valid object", t => {

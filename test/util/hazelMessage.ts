@@ -1,7 +1,7 @@
-import { MessageReader, MessageWriter } from "../../lib/util/hazelMessage";
-import { CanSerializeToHazel, Vector2 } from "../../lib/types";
-import { MaxValue, MinValue } from "../../lib/util/constants";
-import { isFloatEqual } from "../../lib/util/functions";
+import { MessageReader, MessageWriter } from "../../src/util/hazelMessage";
+import { CanSerializeToHazel, Vector2 } from "../../src/types";
+import { MaxValue, MinValue } from "../../src/util/constants";
+import { isFloatEqual } from "../../src/util/functions";
 import test from "ava";
 
 type Example = {

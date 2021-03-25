@@ -1,5 +1,5 @@
-import { AddressFamily } from "../../lib/types/enums";
-import { ConnectionInfo } from "../../lib/types";
+import { AddressFamily } from "../../src/types/enums";
+import { ConnectionInfo } from "../../src/types";
 import test from "ava";
 
 const addressV4 = "69.69.69.69";

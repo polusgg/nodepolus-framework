@@ -10,12 +10,12 @@
 
 Error.stackTraceLimit = 25;
 
-import { AnnouncementServer } from "../lib/announcementServer";
-import { ServerConfig } from "../lib/api/config/serverConfig";
-import { DEFAULT_CONFIG } from "../lib/util/constants";
-import { BasePlugin } from "../lib/api/plugin";
-import { Logger } from "../lib/logger";
-import { Server } from "../lib/server";
+import { AnnouncementServer } from "../src/announcementServer";
+import { ServerConfig } from "../src/api/config/serverConfig";
+import { DEFAULT_CONFIG } from "../src/util/constants";
+import { BasePlugin } from "../src/api/plugin";
+import { Logger } from "../src/logger";
+import { Server } from "../src/server";
 import meta from "../package.json";
 import fs from "fs/promises";
 import path from "path";

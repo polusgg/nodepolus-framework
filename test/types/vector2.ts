@@ -1,5 +1,5 @@
-import { isFloatEqual } from "../../lib/util/functions";
-import { Vector2 } from "../../lib/types";
+import { isFloatEqual } from "../../src/util/functions";
+import { Vector2 } from "../../src/types";
 import test from "ava";
 
 test("gets the x value", t => {

@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { GameOptionsData, LobbyListing } from "../../../types";
 import { RootPacketType } from "../../../types/enums";
-import { BaseRootPacket } from "../root";
+import { BaseRootPacket } from ".";
 
 /**
  * Root Packet ID: `0x10` (`16`)

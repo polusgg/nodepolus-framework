@@ -1,4 +1,4 @@
-import { TextComponent } from "../../lib/api/text";
+import { TextComponent } from "../../src/api/text";
 import test from "ava";
 
 test("encodes text", t => {

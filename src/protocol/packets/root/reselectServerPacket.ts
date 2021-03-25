@@ -1,7 +1,7 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { RootPacketType } from "../../../types/enums";
 import { CanSerializeToHazel } from "../../../types";
-import { BaseRootPacket } from "../root";
+import { BaseRootPacket } from ".";
 
 export class MasterServer implements CanSerializeToHazel {
   constructor(

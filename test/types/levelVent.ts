@@ -1,5 +1,5 @@
-import { Level, SystemType } from "../../lib/types/enums";
-import { LevelVent, Vector2 } from "../../lib/types";
+import { Level, SystemType } from "../../src/types/enums";
+import { LevelVent, Vector2 } from "../../src/types";
 import test from "ava";
 
 test("checks if vents are on the same level", t => {

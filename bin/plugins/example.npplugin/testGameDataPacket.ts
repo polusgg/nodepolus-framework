@@ -1,5 +1,5 @@
-import { MessageReader, MessageWriter } from "../../../lib/util/hazelMessage";
-import { BaseGameDataPacket } from "../../../lib/protocol/packets/gameData";
+import { MessageReader, MessageWriter } from "../../../src/util/hazelMessage";
+import { BaseGameDataPacket } from "../../../src/protocol/packets/gameData";
 
 export class TestGameDataPacket extends BaseGameDataPacket {
   constructor(

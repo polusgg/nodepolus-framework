@@ -1,4 +1,4 @@
-import { Bitfield } from "../../lib/types";
+import { Bitfield } from "../../src/types";
 import test from "ava";
 
 enum Color {
