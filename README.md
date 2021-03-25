@@ -18,7 +18,7 @@ NodePolus is an open-source Among Us server implementation written in Typescript
   Interact with all facets of a game: the players, their raw connections, ship systems, and more.
 - Events
 
-  Listen to, modify, and cancel multiple types of events--this enables server-side task selection, **force imppostor**, cancelling sabotages, and more.
+  Listen to, modify, and cancel multiple types of events--this enables server-side task selection, **force impostor**, cancelling sabotages, and more.
 - Command framework
 
   Define custom chat and console commands using a simple and intuitive API (_coming soon_).
