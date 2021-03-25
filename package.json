@@ -1,7 +1,7 @@
 {
-  "name": "@nodepolus/nodepolus",
+  "name": "@nodepolus/framework",
   "version": "3.0.0",
-  "description": "NodePolus is a JavaScript library containing multiple implementations of the Among Us network protocol.",
+  "description": "An open-source Among Us server implementation in TypeScript",
   "engines": {
     "node": ">=14"
   },
@@ -15,14 +15,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NodePolus/NodePolus.git"
+    "url": "git+https://github.com/NodePolus/framework.git"
   },
   "author": "",
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/NodePolus/NodePolus/issues"
+    "url": "https://github.com/NodePolus/framework/issues"
   },
-  "homepage": "https://github.com/NodePolus/NodePolus",
+  "homepage": "https://github.com/NodePolus/framework",
   "dependencies": {
     "commonjs": "^0.0.1",
     "emittery": "^0.7.2",
