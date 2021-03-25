@@ -4,8 +4,8 @@ import { BaseRootPacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPac
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { ServerPacketOutCustomEvent, ServerPacketOutEvent } from "../../api/events/server";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
+import { MAX_PACKET_BYTE_SIZE, SUPPORTED_VERSIONS } from "../../util/constants";
 import { PlayerBannedEvent, PlayerKickedEvent } from "../../api/events/player";
-import { MAX_PACKET_BYTE_SIZE } from "../../util/constants";
 import { MessageWriter } from "../../util/hazelMessage";
 import { PlayerInstance } from "../../api/player";
 import { AwaitingPacket } from "../packets/types";
@@ -236,9 +236,25 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
   }
 
   /**
-   * Gets the lboby in which this connection is located.
+   * Gets the lobby in which this connection is located.
+   *
+   * @returns The lobby in which this connection is located, or `undefined` if the connection is not in a lobby
    */
   getLobby(): Lobby | undefined {
+    return this.lobby;
+  }
+
+  /**
+   * Gets the lobby in which this connection is located, or throws an error if
+   * it is undefined.
+   *
+   * @returns The lobby in which this connection is located
+   */
+  getSafeLobby(): Lobby {
+    if (this.lobby === undefined) {
+      throw new Error(`Connection ${this.id} is not in a lobby`);
+    }
+
     return this.lobby;
   }
 
@@ -251,6 +267,35 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
     this.lobby = lobby;
 
     return this;
+  }
+
+  /**
+   * Gets the player being controlled by this connection in its current lobby.
+   *
+   * @returns The player being controlled by this connection in its current lobby, or `undefined` if the connection not yet have a player
+   */
+  getPlayer(): PlayerInstance | undefined {
+    if (this.lobby === undefined) {
+      return;
+    }
+
+    return this.lobby.findPlayerByConnection(this);
+  }
+
+  /**
+   * Gets the player being controlled by this connection in its current lobby,
+   * or throws an error if it is undefined.
+   *
+   * @returns The player being controlled by this connection in its current lobby
+   */
+  getSafePlayer(): PlayerInstance {
+    const player = this.getPlayer();
+
+    if (player === undefined) {
+      throw new Error(`Connection ${this.id} does not have a player`);
+    }
+
+    return player;
   }
 
   /**
@@ -699,6 +744,12 @@ export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implem
    */
   protected handleHello(helloPacket: HelloPacket): void {
     if (this.initialized) {
+      return;
+    }
+
+    if (!SUPPORTED_VERSIONS.some(version => version.equals(helloPacket.clientVersion, false))) {
+      this.disconnect(DisconnectReason.incorrectVersion());
+
       return;
     }
 

@@ -21,7 +21,7 @@ export enum DisconnectReasonType {
    *
    * Please update to play with others.
    */
-  IncorrectVersion = 4,
+  IncorrectVersion = 5,
   /**
    * You were banned from ABCDEF/the room.
    *

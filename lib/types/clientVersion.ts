@@ -6,13 +6,13 @@ export class ClientVersion {
    * @param year - The version's year part
    * @param month - The version's month part
    * @param day - The version's day part
-   * @param revision - The version's revision part
+   * @param revision - The version's revision part (default `0`)
    */
   constructor(
     protected readonly year: number,
     protected readonly month: number,
     protected readonly day: number,
-    protected readonly revision: number,
+    protected readonly revision: number = 0,
   ) {}
 
   /**
@@ -69,14 +69,15 @@ export class ClientVersion {
    * by comparing each property.
    *
    * @param other - The ClientVersion to be checked against
+   * @param checkRevision - `true` if the revision number should also be checked, `false` to disregard it
    * @returns `true` if the two are equal, `false` if not
    */
-  equals(other: ClientVersion): boolean {
+  equals(other: ClientVersion, checkRevision: boolean = true): boolean {
     return (
       this.year == other.year &&
       this.month == other.month &&
       this.day == other.day &&
-      this.revision == other.revision
+      (checkRevision ? this.revision == other.revision : true)
     );
   }
 

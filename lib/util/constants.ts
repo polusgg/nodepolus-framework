@@ -1,5 +1,12 @@
-import { AllRequired, Immutable } from "../types";
+import { AllRequired, ClientVersion, Immutable } from "../types";
 import { ServerConfig } from "../api/config";
+
+/**
+ * A list of all Among Us client versions supported by NodePolus.
+ */
+export const SUPPORTED_VERSIONS: readonly ClientVersion[] = [
+  new ClientVersion(2021, 3, 5),
+];
 
 /**
  * A mapping of integer types to their minimum values.

@@ -216,7 +216,7 @@ test("writes a vector2", t => {
   const buf = new MessageWriter();
 
   buf.writeVector2(new Vector2(0, 0));
-  buf.writeVector2(new Vector2(40, -40));
+  buf.writeVector2(new Vector2(50, -50));
 
   t.is(buf.getBuffer().toString("hex"), "ff7fff7fffff0000");
 });
@@ -229,8 +229,8 @@ test("reads a Vector2", t => {
   t.false(buf.hasBytesLeft());
   t.true(isFloatEqual(one.getX(), 0, 0.001));
   t.true(isFloatEqual(one.getY(), 0, 0.001));
-  t.true(isFloatEqual(two.getX(), 40, 0.001));
-  t.true(isFloatEqual(two.getY(), -40, 0.001));
+  t.true(isFloatEqual(two.getX(), 50, 0.001));
+  t.true(isFloatEqual(two.getY(), -50, 0.001));
 });
 
 test("writes a string", t => {
