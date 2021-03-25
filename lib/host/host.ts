@@ -513,6 +513,7 @@ export class Host implements HostInstance {
         }
       // This timing of 8.5 seconds is based on in-game observations and may be
       // slightly inaccurate due to network latency and fluctuating framerates.
+      // TODO: Too long of a delay?
       }, 8500);
     }, 5000);
   }
