@@ -1,10 +1,10 @@
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer } from "../../types";
 import { HazelPacketType, LimboState, PacketDestination, RootPacketType, RuntimePlatform, Scene } from "../../types/enums";
+import { CONNECTION_TIMEOUT_DURATION, MAX_PACKET_BYTE_SIZE, SUPPORTED_VERSIONS } from "../../util/constants";
 import { BaseRootPacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { ServerPacketOutCustomEvent, ServerPacketOutEvent } from "../../api/events/server";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
-import { MAX_PACKET_BYTE_SIZE, SUPPORTED_VERSIONS } from "../../util/constants";
 import { PlayerBannedEvent, PlayerKickedEvent } from "../../api/events/player";
 import { MessageWriter } from "../../util/hazelMessage";
 import { PlayerInstance } from "../../api/player";
@@ -20,7 +20,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   protected readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
   protected readonly flushResolveMap: Map<number, (value: void | PromiseLike<void>) => void> = new Map();
   protected readonly unacknowledgedPackets: Map<number, number> = new Map();
-  protected readonly flushInterval: NodeJS.Timeout;
 
   protected id = -1;
   protected initialized = false;
@@ -39,7 +38,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   protected nonceIndex = 1;
   protected disconnectTimeout?: NodeJS.Timeout;
   protected requestedDisconnect = false;
-  protected timeoutLength = 6000;
 
   /**
    * @param connectionInfo - The ConnectionInfo describing the connection
@@ -98,20 +96,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
           throw new Error(`Socket received an unimplemented packet type: ${parsed.getType()} (${HazelPacketType[parsed.getType()]})`);
       }
     });
-
-    this.flushInterval = setInterval(() => {
-      if (this.packetBuffer.length > 0) {
-        this.flush(true);
-      }
-
-      if (this.unreliablePacketBuffer.length > 0) {
-        this.flush(false);
-      }
-
-      if ((Date.now() - this.lastPingReceivedTime) > this.timeoutLength) {
-        this.cleanup(DisconnectReason.custom(`Did not receive any pings for ${this.timeoutLength}ms`));
-      }
-    }, 50);
   }
 
   hasMeta(key: string): boolean {
@@ -235,6 +219,16 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    */
   getTimeSinceLastPing(): number {
     return Date.now() - this.lastPingReceivedTime;
+  }
+
+  /**
+   * Gets whether or not the connection has timed out as a result of not
+   * responding to any packets after a while.
+   *
+   * @returns `true` if the connection is considered to be timed out, `false` if not
+   */
+  hasTimedOut(): boolean {
+    return (Date.now() - this.lastPingReceivedTime) > CONNECTION_TIMEOUT_DURATION;
   }
 
   /**
@@ -482,6 +476,24 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
     this.flush(false);
 
     this.unreliablePacketBuffer = temp;
+  }
+
+  /**
+   * Flushes reliable packets only if there are reliable packets to be sent.
+   */
+  async safeFlushReliable(): Promise<void> {
+    if (this.packetBuffer.length > 0) {
+      return this.flush(true);
+    }
+  }
+
+  /**
+   * Flushes unreliable packets only if there are unreliable packets to be sent.
+   */
+  async safeFlushUnreliable(): Promise<void> {
+    if (this.unreliablePacketBuffer.length > 0) {
+      return this.flush(false);
+    }
   }
 
   /**
@@ -782,8 +794,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param reason - The reason for why the connection was disconnected
    */
   protected cleanup(reason?: DisconnectReason): void {
-    clearInterval(this.flushInterval);
-
     if (this.disconnectTimeout !== undefined) {
       clearTimeout(this.disconnectTimeout);
       delete this.disconnectTimeout;

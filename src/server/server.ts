@@ -1,7 +1,7 @@
 import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, LobbyListing, OutboundPacketTransformer } from "../types";
 import { FakeClientId, GameDataPacketType, PacketDestination, RootPacketType, RpcPacketType, Scene } from "../types/enums";
+import { CONNECTION_TIMEOUT_DURATION, DEFAULT_CONFIG, MaxValue } from "../util/constants";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
-import { DEFAULT_CONFIG, MaxValue } from "../util/constants";
 import { RpcPacket } from "../protocol/packets/gameData";
 import { RootPacket } from "../protocol/packets/hazel";
 import { PlayerLeftEvent } from "../api/events/player";
@@ -55,6 +55,7 @@ export class Server extends Emittery<ServerEvents> {
   protected listening = false;
   protected inboundPacketTransformer?: InboundPacketTransformer;
   protected outboundPacketTransformer?: OutboundPacketTransformer;
+  protected connectionFlushInterval?: NodeJS.Timeout;
 
   /**
    * @param config - The server configuration
@@ -366,6 +367,7 @@ export class Server extends Emittery<ServerEvents> {
         this.listening = true;
 
         this.emit("server.ready");
+        this.startConnectionFlushInterval();
 
         resolve();
       });
@@ -378,6 +380,8 @@ export class Server extends Emittery<ServerEvents> {
    */
   async close(): Promise<void> {
     this.listening = false;
+
+    this.stopConnectionFlushInterval();
 
     const connections = [...this.connections.values()];
 
@@ -393,6 +397,38 @@ export class Server extends Emittery<ServerEvents> {
     this.lobbyMap.clear();
 
     await this.emit("server.close");
+  }
+
+  protected startConnectionFlushInterval(): void {
+    if (this.connectionFlushInterval !== undefined) {
+      return;
+    }
+
+    this.connectionFlushInterval = setInterval(() => {
+      const connections = [...this.connections.values()];
+
+      for (let i = 0; i < connections.length; i++) {
+        const connection = connections[i];
+
+        if (connection.hasTimedOut()) {
+          connection.disconnect(DisconnectReason.custom(`Did not receive any pings for ${CONNECTION_TIMEOUT_DURATION}ms`), true);
+
+          return;
+        }
+
+        connection.safeFlushReliable();
+        connection.safeFlushUnreliable();
+      }
+    }, 50);
+  }
+
+  protected stopConnectionFlushInterval(): void {
+    if (this.connectionFlushInterval === undefined) {
+      return;
+    }
+
+    clearInterval(this.connectionFlushInterval);
+    delete this.connectionFlushInterval;
   }
 
   /**

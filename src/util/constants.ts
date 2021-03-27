@@ -74,6 +74,12 @@ export const MAX_PACKET_BYTE_SIZE = 508;
 export const GLOBAL_OWNER = -2;
 
 /**
+ * How much time (in milliseconds) a connection has to respond to a packet from
+ * the server before it is timed out.
+ */
+export const CONNECTION_TIMEOUT_DURATION = 6000 as const;
+
+/**
  * The default in-game chat languages.
  */
 export const DEFAULT_LANGUAGES: ReadonlyMap<number, string> = new Map([
