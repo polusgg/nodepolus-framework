@@ -629,7 +629,7 @@ export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
 
         this.getLogger().verbose("Connection %s trying to host lobby", connection);
 
-        if (this.lobbies.length >= this.getMaxLobbies()) {
+        if (this.getMaxLobbies() > 0 && this.lobbies.length >= this.getMaxLobbies()) {
           const refusedEvent = new ServerLobbyCreatedRefusedEvent(connection);
 
           await this.emit("server.lobby.created.refused", refusedEvent);
