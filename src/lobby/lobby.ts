@@ -1147,6 +1147,10 @@ export class Lobby implements LobbyInstance {
           if (custom !== undefined) {
             const object = this.findInnerNetObject(rpc.senderNetId);
 
+            if (object === undefined) {
+              throw new Error(`RPC packet sent from unknown InnerNetObject: ${rpc.senderNetId}`);
+            }
+
             if (this.server.listenerCount("server.packet.in.rpc.custom") > 0) {
               const event = new ServerPacketInRpcCustomEvent(connection, rpc.senderNetId, object, rpc.packet);
 

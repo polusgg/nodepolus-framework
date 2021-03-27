@@ -6,5 +6,5 @@ import { Connection } from "../protocol/connection";
 export type CustomRpcPacketContainer = {
   deserialize(reader: MessageReader): BaseRpcPacket;
 
-  handle(connection: Connection, packet: BaseRpcPacket, sender?: BaseInnerNetObject): void;
+  handle(connection: Connection, packet: BaseRpcPacket, sender: BaseInnerNetObject): void;
 };
