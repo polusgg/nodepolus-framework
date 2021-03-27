@@ -1,6 +1,6 @@
 {
   "name": "@nodepolus/framework",
-  "version": "3.0.0",
+  "version": "3.0.1-0",
   "description": "An open-source Among Us server implementation in TypeScript",
   "type": "module",
   "engines": {
