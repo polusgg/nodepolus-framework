@@ -1,5 +1,7 @@
-test/*
-logs/*
+.vscode/
+bin/
+test/
+logs/
 *.md
 .editorconfig
 .eslintignore
