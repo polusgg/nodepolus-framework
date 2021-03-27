@@ -15,7 +15,7 @@ import { Packet } from "../packets";
 import Emittery from "emittery";
 import dgram from "dgram";
 
-export class Connection extends Emittery.Typed<ConnectionEvents, "hello"> implements Metadatable, NetworkAccessible {
+export class Connection extends Emittery<ConnectionEvents> implements Metadatable, NetworkAccessible {
   protected readonly metadata: Map<string, unknown> = new Map();
   protected readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
   protected readonly flushResolveMap: Map<number, (value: void | PromiseLike<void>) => void> = new Map();

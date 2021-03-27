@@ -2,7 +2,6 @@
   "name": "@nodepolus/framework",
   "version": "3.0.1-1",
   "description": "An open-source Among Us server implementation in TypeScript",
-  "type": "module",
   "engines": {
     "node": ">=14"
   },
@@ -24,7 +23,7 @@
   "homepage": "https://github.com/NodePolus/framework",
   "dependencies": {
     "commonjs": "^0.0.1",
-    "emittery": "^0.7.2",
+    "emittery": "^0.8.0",
     "ipaddr.js": "^2.0.0",
     "winston": "^3.3.3"
   },
@@ -34,7 +33,6 @@
     "@typescript-eslint/parser": "^4.8.2",
     "ava": "^3.14.0",
     "eslint": "^7.14.0",
-    "eslint-config-recommended": "^4.1.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-tsdoc": "^0.2.11",
     "tsconfig-paths": "^3.9.0",

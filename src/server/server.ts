@@ -1,7 +1,6 @@
 import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, LobbyListing, OutboundPacketTransformer } from "../types";
 import { FakeClientId, GameDataPacketType, PacketDestination, RootPacketType, RpcPacketType, Scene } from "../types/enums";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
-import { BasicServerEvents, ServerEvents } from "../api/events";
 import { DEFAULT_CONFIG, MaxValue } from "../util/constants";
 import { RpcPacket } from "../protocol/packets/gameData";
 import { RootPacket } from "../protocol/packets/hazel";
@@ -10,6 +9,7 @@ import { MessageReader } from "../util/hazelMessage";
 import { Connection } from "../protocol/connection";
 import { LobbyCode } from "../util/lobbyCode";
 import { ServerConfig } from "../api/config";
+import { ServerEvents } from "../api/events";
 import { LobbyInstance } from "../api/lobby";
 import { Logger } from "../logger";
 import { Lobby } from "../lobby";
@@ -42,7 +42,7 @@ import {
   ServerPacketOutRpcEvent,
 } from "../api/events/server";
 
-export class Server extends Emittery.Typed<ServerEvents, BasicServerEvents> {
+export class Server extends Emittery<ServerEvents> {
   protected readonly startedAt = Date.now();
   protected readonly socket = dgram.createSocket("udp4");
   protected readonly logger: Logger;

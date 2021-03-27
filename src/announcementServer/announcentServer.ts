@@ -1,8 +1,8 @@
 import { CacheDataPacket, AnnouncementDataPacket, BaseAnnouncementPacket, SetLanguagesPacket } from "../protocol/packets/announcement";
 import { AnnouncementHelloPacket, RootAnnouncementPacket } from "../protocol/packets/hazel";
-import { AnnouncementServerEvents, BasicAnnouncementServerEvents } from "../api/events";
 import { ANNOUNCEMENT_SERVER_PORT, DEFAULT_LANGUAGES } from "../util/constants";
 import { ClientLanguage, HazelPacketType } from "../types/enums";
+import { AnnouncementServerEvents } from "../api/events";
 import { AnnouncementPacket } from "../protocol/packets";
 import { MessageReader } from "../util/hazelMessage";
 import { BaseAnnouncementDriver } from "./drivers";
@@ -12,7 +12,7 @@ import { Logger } from "../logger";
 import Emittery from "emittery";
 import dgram from "dgram";
 
-export class AnnouncementServer extends Emittery.Typed<AnnouncementServerEvents, BasicAnnouncementServerEvents> {
+export class AnnouncementServer extends Emittery<AnnouncementServerEvents> {
   protected readonly announcementServerSocket = dgram.createSocket("udp4");
 
   protected driver?: BaseAnnouncementDriver;

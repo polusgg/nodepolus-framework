@@ -1,9 +1,3 @@
-export {
-  AnnouncementServerEvents,
-  BasicAnnouncementServerEvents,
-} from "./announcementServerEvents";
+export { AnnouncementServerEvents } from "./announcementServerEvents";
 
-export {
-  BasicServerEvents,
-  ServerEvents,
-} from "./serverEvents";
+export { ServerEvents } from "./serverEvents";

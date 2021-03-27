@@ -101,26 +101,19 @@ import {
   ServerPacketOutRpcEvent,
 } from "./server";
 
-const basicServerEvents = [
+/**
+ * All Server events.
+ */
+export type ServerEvents = {
   /**
    * Fired when the Server successfully binds to the network address and port.
    */
-  "server.ready",
+  "server.ready": undefined;
   /**
    * Fired when the Server shuts down.
    */
-  "server.close",
-];
+  "server.close": undefined;
 
-/**
- * All Server events that have no associated data.
- */
-export type BasicServerEvents = typeof basicServerEvents[number];
-
-/**
- * All Server events that have associated data.
- */
-export type ServerEvents = {
   /**
    * Connection Events
    */
