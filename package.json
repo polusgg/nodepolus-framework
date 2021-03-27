@@ -8,8 +8,7 @@
   "scripts": {
     "lint": "eslint . --ext .ts",
     "lint-and-fix": "eslint . --ext .ts --fix",
-    "test": "ava",
-    "publish": "npm publish --registry https://npm.polus.gg"
+    "test": "ava"
   },
   "repository": {
     "type": "git",
