@@ -73,6 +73,8 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
           // Hazel currently treats Fragment packets as Unreliable
           // fallthrough
         case HazelPacketType.Unreliable: {
+          this.handlePing();
+
           const packets = (parsed.data as RootPacket).packets;
 
           for (let i = 0; i < packets.length; i++) {
