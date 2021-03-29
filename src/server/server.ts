@@ -1,5 +1,5 @@
+import { FakeClientId, GameDataPacketType, GameState, PacketDestination, RootPacketType, RpcPacketType, Scene } from "../types/enums";
 import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, LobbyListing, OutboundPacketTransformer } from "../types";
-import { FakeClientId, GameDataPacketType, PacketDestination, RootPacketType, RpcPacketType, Scene } from "../types/enums";
 import { CONNECTION_TIMEOUT_DURATION, DEFAULT_CONFIG, MaxValue } from "../util/constants";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
 import { RpcPacket } from "../protocol/packets/gameData";
@@ -775,7 +775,9 @@ export class Server extends Emittery<ServerEvents> {
         for (let i = 0; i < this.lobbies.length; i++) {
           const lobby = this.lobbies[i];
 
-          // TODO: Check if game started
+          if (lobby.getGameState() !== GameState.NotStarted) {
+            continue;
+          }
 
           if (!lobby.isPublic()) {
             continue;
