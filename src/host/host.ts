@@ -156,7 +156,7 @@ export class Host implements HostInstance {
       return;
     }
 
-    this.lobby.enableActingHosts(true);
+    this.lobby.disableActingHosts(true);
 
     this.secondsUntilStart = event.getSecondsUntilStart();
 
@@ -622,6 +622,7 @@ export class Host implements HostInstance {
 
     if (gameState == GameState.NotStarted) {
       this.stopCountdown();
+      this.lobby.enableActingHosts(true);
     }
 
     if (gameData === undefined) {

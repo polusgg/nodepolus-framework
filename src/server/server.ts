@@ -775,6 +775,8 @@ export class Server extends Emittery<ServerEvents> {
         for (let i = 0; i < this.lobbies.length; i++) {
           const lobby = this.lobbies[i];
 
+          // TODO: Check if game started
+
           if (!lobby.isPublic()) {
             continue;
           }
