@@ -101,11 +101,11 @@ export class Lobby implements LobbyInstance {
     protected options: GameOptionsData = new GameOptionsData(),
     protected readonly code: string = LobbyCode.generate(),
   ) {
-    if (this.timeToJoinUntilClosed > 0) {
-      this.joinTimer = setTimeout(() => {
-        this.close();
-      }, this.timeToJoinUntilClosed * 1000);
-    }
+    // if (this.timeToJoinUntilClosed > 0) {
+    //   this.joinTimer = setTimeout(() => {
+    //     this.close();
+    //   }, this.timeToJoinUntilClosed * 1000);
+    // }
 
     this.logger = this.server.getLogger(`Lobby ${this.code}`);
   }
@@ -1222,7 +1222,7 @@ export class Lobby implements LobbyInstance {
 
     if (this.connections.length == 1) {
       this.cancelJoinTimer();
-      this.beginStartTimer();
+      // this.beginStartTimer();
 
       connection.setActingHost(true);
     }

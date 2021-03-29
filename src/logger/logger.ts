@@ -147,7 +147,7 @@ export class Logger {
         }),
       ];
 
-      if (filename !== undefined) {
+      if (filename !== undefined && (filename = filename.trim()).length > 0) {
         transports.push(new winston.transports.File({
           filename: filename,
           dirname: "logs",
