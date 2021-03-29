@@ -897,8 +897,15 @@ export class Host implements HostInstance {
       return;
     }
 
-    if (!player.getConnection()?.isActingHost()) {
-      this.stopCountdown();
+    const connection = player.getConnection();
+
+    if (!(connection?.isActingHost() ?? false)) {
+      if (connection !== undefined) {
+        (player as Player).getEntity().getPlayerControl().sendRpcPacket(
+          new SetStartCounterPacket(this.counterSequenceId += 5, -1),
+          [connection],
+        );
+      }
 
       return;
     }
