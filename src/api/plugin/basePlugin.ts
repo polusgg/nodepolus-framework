@@ -8,16 +8,47 @@ declare const server: Server;
 /**
  * The base class for a NodePolus plugin.
  */
-export abstract class BasePlugin {
+export abstract class BasePlugin<ConfigSchema = Record<string, unknown>> {
   protected readonly server: Server;
   protected readonly logger: Logger;
 
   /**
-   * @param server - The NodePolus server instance
+   * If your plugin allows customization via config values, you can access the
+   * config by adding a constructor paramater and passing it into the `super`
+   * constructor.
+   *
+   * @example
+   * ```
+   * type MyPluginConfigSchema = {
+   *   "someNumber": number,
+   * };
+   *
+   * const defaultConfig: MyPluginConfigSchema = {
+   *   "someNumber": 42,
+   * }
+   *
+   * class MyPlugin extends BasePlugin<MyPluginConfigSchema> {
+   *   constructor(config: MyPluginConfigSchema) {
+   *     super(
+   *       {
+   *         name: "My Plugin",
+   *         version: [1, 0, 0],
+   *       },
+   *       defaultConfig,
+   *       config,
+   *     );
+   *   }
+   * }
+   * ```
+   *
    * @param pluginMetadata - The metadata for the plugin
+   * @param defaultConfig - The default config for the plugin
+   * @param config - The config for the plugin
    */
   constructor(
     protected readonly pluginMetadata: PluginMetadata,
+    protected readonly defaultConfig?: ConfigSchema,
+    protected readonly config?: ConfigSchema,
   ) {
     this.server = server;
     this.logger = server.getLogger(this.pluginMetadata.name);

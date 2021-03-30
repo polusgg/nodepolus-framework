@@ -123,4 +123,31 @@ export type ServerConfig = {
      */
     maxFiles?: number;
   };
+  /**
+   * Plugin configurations.
+   *
+   * For plugins installed via NPM packages, use the package name for the key.
+   *
+   * @example
+   * ```
+   * "plugins": {
+   *   "nodepolus-simple-anticheat": {
+   *     "prevent-killing-as-crewmate": true
+   *   }
+   * }
+   * ```
+   *
+   * For plugins installed in the `bin/plugins` folder, use the folder name for
+   * the key.
+   *
+   * @example
+   * ```
+   * "plugins": {
+   *   "simpleAnticheat.npplugin": {
+   *     "prevent-killing-as-crewmate": true
+   *   }
+   * }
+   * ```
+   */
+  plugins?: Record<string, unknown>;
 };
