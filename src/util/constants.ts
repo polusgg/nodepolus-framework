@@ -56,6 +56,7 @@ export const DEFAULT_CONFIG: Immutable<AllRequired<ServerConfig>> = {
     maxFileSizeInBytes: 104857600,
     maxFiles: 10,
   },
+  plugins: {},
 };
 
 /**
