@@ -149,5 +149,5 @@ export type ServerConfig = {
    * }
    * ```
    */
-  plugins?: Record<string, unknown>;
+  plugins?: Record<string, Record<string, unknown>>;
 };

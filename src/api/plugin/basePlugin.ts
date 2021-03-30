@@ -20,14 +20,14 @@ export abstract class BasePlugin<ConfigSchema = Record<string, unknown>> {
    * @example
    * ```
    * type MyPluginConfigSchema = {
-   *   "someNumber": number,
+   *   "someNumber": number;
    * };
    *
    * const defaultConfig: MyPluginConfigSchema = {
    *   "someNumber": 42,
-   * }
+   * };
    *
-   * class MyPlugin extends BasePlugin<MyPluginConfigSchema> {
+   * export default class extends BasePlugin<MyPluginConfigSchema> {
    *   constructor(config: MyPluginConfigSchema) {
    *     super(
    *       {
