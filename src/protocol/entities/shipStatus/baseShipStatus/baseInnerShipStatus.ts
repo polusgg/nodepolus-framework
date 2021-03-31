@@ -206,13 +206,9 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
       return -1;
     }).filter(systemType => systemType > -1);
 
-    const writer = new MessageWriter()
-      .writePackedUInt32(this.serializeSystemsToDirtyBits(changedSystemTypes))
-      .writeBytes(this.serializeSystems(old, changedSystemTypes));
-
     return new DataPacket(
       this.netId,
-      writer,
+      this.serializeSystems(old, changedSystemTypes),
     );
   }
 
@@ -340,18 +336,15 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   }
 
   protected serializeSystems(old: BaseInnerShipStatus | undefined, systems: SystemType[]): MessageWriter {
-    const writers: MessageWriter[] = new Array(systems.length);
+    const writer: MessageWriter = new MessageWriter();
 
     for (let i = 0; i < systems.length; i++) {
       const system = this.getSystemFromType(systems[i]);
-
-      if (old !== undefined) {
-        writers[i] = system.serializeData(old.getSystemFromType(systems[i]));
-      } else {
-        writers[i] = system.serializeSpawn();
-      }
+      writer.startMessage(systems[i])
+        .writeBytes(old === undefined ? system.serializeSpawn() : system.serializeData(old.getSystemFromType(systems[i])))
+        .endMessage()
     }
 
-    return MessageWriter.concat(...writers);
+    return writer;
   }
 }
