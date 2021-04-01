@@ -36,7 +36,6 @@ import {
   SnapToPacket,
   StartMeetingPacket,
   SyncSettingsPacket,
-  UpdateGameDataPacket,
   UsePlatformPacket,
   VotingCompletePacket,
 } from "../rpc";
@@ -142,8 +141,6 @@ export class RpcPacket extends BaseGameDataPacket {
         return new RpcPacket(senderNetId, RepairSystemPacket.deserialize(reader, level));
       case RpcPacketType.SetTasks:
         return new RpcPacket(senderNetId, SetTasksPacket.deserialize(reader));
-      case RpcPacketType.UpdateGameData:
-        return new RpcPacket(senderNetId, UpdateGameDataPacket.deserialize(reader, level));
       case RpcPacketType.ClimbLadder:
         return new RpcPacket(senderNetId, ClimbLadderPacket.deserialize(reader));
       case RpcPacketType.UsePlatform:

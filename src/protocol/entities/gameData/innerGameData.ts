@@ -1,4 +1,4 @@
-import { BaseRpcPacket, SetTasksPacket, UpdateGameDataPacket } from "../../packets/rpc";
+import { BaseRpcPacket, SetTasksPacket } from "../../packets/rpc";
 import { InnerNetObjectType, PlayerColor, RpcPacketType } from "../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MessageWriter } from "../../../util/hazelMessage";
@@ -7,6 +7,7 @@ import { Connection } from "../../connection";
 import { Tasks } from "../../../static";
 import { PlayerData } from "./types";
 import { EntityGameData } from ".";
+import { GameDataPacket } from "../../packets/root";
 
 export class InnerGameData extends BaseInnerNetObject {
   constructor(
@@ -110,6 +111,8 @@ export class InnerGameData extends BaseInnerNetObject {
   }
 
   updateGameData(playerData?: PlayerData[], sendTo?: Connection[]): this {
+    const old = this.clone();
+
     playerData ??= [...this.players.values()];
 
     for (let i = 0; i < playerData.length; i++) {
@@ -118,7 +121,17 @@ export class InnerGameData extends BaseInnerNetObject {
       this.players.set(player.getId(), player);
     }
 
-    this.sendRpcPacket(new UpdateGameDataPacket(playerData), sendTo);
+    const data = this.serializeData(old);
+
+    if (!sendTo) {
+      sendTo = this.getLobby().getConnections();
+    }
+
+    for (let i = 0; i < sendTo.length; i++) {
+      const connection = sendTo[i];
+
+      connection.writeReliable(new GameDataPacket([data], this.getLobby().getCode()));
+    }
 
     return this;
   }
@@ -127,8 +140,6 @@ export class InnerGameData extends BaseInnerNetObject {
     switch (type) {
       case RpcPacketType.SetTasks:
         this.parent.getLobby().getLogger().warn("Received SetTasks packet from connection %s in a server-as-host state", connection);
-        break;
-      case RpcPacketType.UpdateGameData:
         break;
       default:
         break;
@@ -140,10 +151,18 @@ export class InnerGameData extends BaseInnerNetObject {
   }
 
   // TODO: compare players and only send those that have updated
-  serializeData(): DataPacket {
+  serializeData(_old: InnerGameData): DataPacket {
+    const writer = new MessageWriter();
+
+    [...this.players.values()].forEach(player => {
+      writer.startMessage(player.getId());
+      player.serialize(writer, false);
+      writer.endMessage();
+    });
+
     return new DataPacket(
       this.netId,
-      new MessageWriter().writeList(this.players.values(), (sub, player) => sub.writeObject(player), false),
+      writer,
     );
   }
 
