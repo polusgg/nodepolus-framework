@@ -4,6 +4,10 @@ type DoorList = {
   [key in SystemType]?: readonly number[];
 };
 
+export type StaticRoomList = {
+  [key: string]: readonly number[];
+};
+
 const DOORS_THE_SKELD: Readonly<DoorList> = {
   [SystemType.Electrical]: [9],
   [SystemType.LowerEngine]: [4, 11],
@@ -25,6 +29,31 @@ const DOORS_POLUS: Readonly<DoorList> = {
 };
 const DOORS_AIRSHIP: Readonly<DoorList> = {
   // TODO
+};
+
+export enum StaticDoorsAirship {
+  BottomRightHorizontal,
+  BottomHorizontal,
+  TopRightHorizontal,
+  TopCenterHorizontal,
+  TopLeftHorizontal,
+  LeftVertical,
+  RightVertical,
+  TopRightVertical,
+  TopLeftVertical,
+  BottomRightVertical,
+  LeftDoorTop,
+  LeftDoorBottom,
+}
+
+const STATIC_ROOMS_AIRSHIP: Readonly<StaticRoomList> = {
+  topLeft: [StaticDoorsAirship.TopLeftVertical, StaticDoorsAirship.TopLeftHorizontal],
+  topCenter: [StaticDoorsAirship.TopLeftVertical, StaticDoorsAirship.TopCenterHorizontal, StaticDoorsAirship.TopRightVertical],
+  topRight: [StaticDoorsAirship.TopRightVertical, StaticDoorsAirship.TopRightHorizontal],
+  right: [StaticDoorsAirship.TopRightHorizontal, StaticDoorsAirship.RightVertical, StaticDoorsAirship.BottomRightHorizontal],
+  center: [StaticDoorsAirship.RightVertical, StaticDoorsAirship.TopCenterHorizontal, StaticDoorsAirship.LeftVertical, StaticDoorsAirship.BottomHorizontal],
+  bottomRight: [StaticDoorsAirship.BottomRightHorizontal, StaticDoorsAirship.BottomRightVertical],
+  bottomLeft: [StaticDoorsAirship.BottomRightVertical, StaticDoorsAirship.BottomHorizontal, StaticDoorsAirship.LeftVertical, StaticDoorsAirship.TopLeftHorizontal],
 };
 
 const DOOR_NAMES_THE_SKELD: readonly string[] = [
@@ -124,6 +153,35 @@ export class Doors {
         return DOOR_COUNT_POLUS;
       case Level.Airship:
         return DOOR_COUNT_AIRSHIP;
+    }
+  }
+}
+
+type StaticDoorsFromLevel<T extends Level> =
+  T extends Level.Airship ? StaticDoorsAirship :
+    undefined;
+
+export class StaticDoors {
+  static forLevel<T extends Level>(level: T): StaticDoorsFromLevel<T> {
+    switch (level) {
+      case Level.Airship:
+        return StaticDoorsAirship as unknown as StaticDoorsFromLevel<T>;
+      default:
+        return undefined as unknown as StaticDoorsFromLevel<T>;
+    }
+  }
+}
+
+export class StaticRooms {
+  static forLevel(level: Level): Readonly<StaticRoomList> {
+    switch (level) {
+      case Level.AprilSkeld:
+      case Level.TheSkeld:
+      case Level.MiraHq:
+      case Level.Polus:
+        return {};
+      case Level.Airship:
+        return STATIC_ROOMS_AIRSHIP;
     }
   }
 }

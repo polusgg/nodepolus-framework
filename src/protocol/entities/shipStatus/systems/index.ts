@@ -29,3 +29,5 @@ export { SabotageSystem } from "./sabotageSystem";
 export { SecurityCameraSystem } from "./securityCameraSystem";
 
 export { SwitchSystem } from "./switchSystem";
+
+export { ElectricalDoorsSystem } from "./electricalDoorsSystem";
