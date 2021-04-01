@@ -14,7 +14,6 @@ import { Lobby } from "../../lobby";
 import { Packet } from "../packets";
 import Emittery from "emittery";
 import dgram from "dgram";
-import { Server } from "../../server";
 
 export class Connection extends Emittery<ConnectionEvents> implements Metadatable, NetworkAccessible {
   protected readonly metadata: Map<string, unknown> = new Map();
@@ -50,7 +49,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
     protected readonly connectionInfo: ConnectionInfo,
     protected readonly socket: dgram.Socket,
     protected readonly packetDestination: PacketDestination,
-    protected readonly server: Server,
     protected readonly outboundPacketTransformerSupplier?: () => OutboundPacketTransformer | undefined,
   ) {
     super();
@@ -764,8 +762,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
     }
 
     if (!SUPPORTED_VERSIONS.some(version => version.equals(helloPacket.clientVersion, false))) {
-      this.server.getLogger().verbose(`Client ${this.getConnectionInfo().toString()} attempted to connect using an unsupported version ${helloPacket.clientVersion.getYear()}.${helloPacket.clientVersion.getMonth()}.${helloPacket.clientVersion.getDay()}.${helloPacket.clientVersion.getRevision()}`)
-
       this.disconnect(DisconnectReason.incorrectVersion());
 
       return;

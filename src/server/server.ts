@@ -565,7 +565,6 @@ export class Server extends Emittery<ServerEvents> {
       connectionInfo,
       this.socket,
       PacketDestination.Client,
-      this,
       (): OutboundPacketTransformer | undefined => this.getOutboundPacketTransformer(),
     );
 
