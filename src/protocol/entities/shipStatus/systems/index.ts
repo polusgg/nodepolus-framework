@@ -1,6 +1,6 @@
 export { BaseSystem } from "./baseSystem";
 
-export { AirshipReactorSystem } from "./airshipReactorSystem";
+export { HeliSabotageSystem } from "./heliSabotageSystem";
 
 export { AutoDoorsSystem } from "./autoDoorsSystem";
 
