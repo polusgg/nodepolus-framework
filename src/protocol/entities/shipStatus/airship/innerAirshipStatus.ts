@@ -7,14 +7,16 @@ export class InnerAirshipStatus extends BaseInnerShipStatus {
     protected readonly parent: EntityAirshipStatus,
     netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
-    super(InnerNetObjectType.DleksShipStatus, parent, [
-      SystemType.Reactor,
+    super(InnerNetObjectType.AirshipStatus, parent, [
       SystemType.Electrical,
-      SystemType.Security,
-      SystemType.Communications,
+      SystemType.Medbay,
       SystemType.Doors,
-      SystemType.Sabotage,
-      SystemType.Weapons,
+      SystemType.Communications,
+      SystemType.GapRoom,
+      SystemType.Reactor,
+      SystemType.Decontamination,
+      SystemType.Decontamination2,
+      SystemType.Security,
     ], undefined, netId);
   }
 
