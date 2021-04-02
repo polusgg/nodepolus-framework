@@ -38,18 +38,18 @@ const DOORS_AIRSHIP: Readonly<DoorList> = {
 };
 
 export enum StaticDoorsAirship {
-  BottomRightHorizontal,
-  BottomHorizontal,
-  TopRightHorizontal,
-  TopCenterHorizontal,
-  TopLeftHorizontal,
-  LeftVertical,
-  RightVertical,
-  TopRightVertical,
-  TopLeftVertical,
-  BottomRightVertical,
-  LeftDoorTop,
   LeftDoorBottom,
+  LeftDoorTop,
+  BottomRightVertical,
+  TopLeftVertical,
+  TopRightVertical,
+  RightVertical,
+  LeftVertical,
+  TopLeftHorizontal,
+  TopCenterHorizontal,
+  TopRightHorizontal,
+  BottomHorizontal,
+  BottomRightHorizontal,
 }
 
 const STATIC_ROOMS_AIRSHIP: Readonly<StaticRoomList> = {
