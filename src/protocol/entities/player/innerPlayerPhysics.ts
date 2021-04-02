@@ -1,6 +1,5 @@
 import { BaseRpcPacket, ClimbLadderPacket, EnterVentPacket, ExitVentPacket } from "../../packets/rpc";
 import { GameVentEnteredEvent, GameVentExitedEvent } from "../../../api/events/game";
-import { LadderSize, LadderDirection } from "../../packets/rpc/climbLadderPacket";
 import { InnerNetObjectType, RpcPacketType } from "../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MessageWriter } from "../../../util/hazelMessage";
@@ -12,6 +11,7 @@ import { EntityPlayer } from ".";
 
 export class InnerPlayerPhysics extends BaseInnerNetObject {
   protected vent?: LevelVent;
+  protected lastClimbLadderSequenceId = -1;
 
   constructor(
     protected readonly parent: EntityPlayer,
@@ -22,6 +22,23 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
 
   getVent(): LevelVent | undefined {
     return this.vent;
+  }
+
+  handleClimbLadder(ladder: number, sequenceId: number, sendTo?: Connection[]): void {
+    let b = (this.lastClimbLadderSequenceId + 127) % 256;
+    let isOldSidGreaterThanSid = false;
+
+    if (this.lastClimbLadderSequenceId < b) {
+      isOldSidGreaterThanSid = sequenceId > this.lastClimbLadderSequenceId && sequenceId <= b;
+    } else {
+      isOldSidGreaterThanSid = sequenceId > this.lastClimbLadderSequenceId || sequenceId <= b;
+    }
+
+    if (!isOldSidGreaterThanSid) {
+      return;
+    };
+
+    this.sendRpcPacket(new ClimbLadderPacket(ladder, sequenceId), sendTo);
   }
 
   async handleEnterVent(vent: LevelVent | undefined, sendTo?: Connection[]): Promise<void> {
@@ -84,10 +101,6 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     this.sendRpcPacket(new ExitVentPacket(vent.getId()), sendTo);
   }
 
-  handleClimbLadder(ladderSize: LadderSize, ladderDirection: LadderDirection, sendTo?: Connection[]): void {
-    this.sendRpcPacket(new ClimbLadderPacket(ladderSize, ladderDirection), sendTo);
-  }
-
   handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
     switch (type) {
       case RpcPacketType.EnterVent:
@@ -99,7 +112,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
       case RpcPacketType.ClimbLadder: {
         const data = packet as ClimbLadderPacket;
 
-        this.handleClimbLadder(data.ladderSize, data.ladderDirection, sendTo);
+        this.handleClimbLadder(data.ladderId, data.ladderSequenceId, sendTo);
         break;
       }
       default:

@@ -28,7 +28,13 @@ const DOORS_POLUS: Readonly<DoorList> = {
   [SystemType.Storage]: [11],
 };
 const DOORS_AIRSHIP: Readonly<DoorList> = {
-  // TODO
+  [SystemType.Communications]: [0, 1, 2, 3],
+  [SystemType.Brig]: [4, 5, 6],
+  [SystemType.Kitchen]: [7, 8, 9],
+  [SystemType.MainHall]: [10, 11],
+  [SystemType.Records]: [12, 13, 14],
+  // [SystemType.Lounge]: [15, 16, 17, 18],
+  [SystemType.Medical]: [19, 20],
 };
 
 export enum StaticDoorsAirship {
