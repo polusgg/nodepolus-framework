@@ -14,6 +14,7 @@ import {
   SabotageAmount,
   SecurityAmount,
 } from "./repairSystem/amounts";
+import { HeliSabotageAmount } from "./repairSystem/amounts/heliSabotageAmount";
 
 /**
  * RPC Packet ID: `0x1c` (`28`)
@@ -49,6 +50,10 @@ export class RepairSystemPacket extends BaseRpcPacket {
     switch (this.system) {
       case SystemType.Reactor:
       case SystemType.Laboratory:
+        if (this.level == Level.Airship) {
+          return HeliSabotageAmount.deserialize(this.amountByte);
+        }
+
         return ReactorAmount.deserialize(this.amountByte);
       case SystemType.Electrical:
         return ElectricalAmount.deserialize(this.amountByte);

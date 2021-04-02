@@ -38,6 +38,7 @@ import {
   SwitchSystem,
   ElectricalDoorsSystem,
 } from "../systems";
+import { HeliSabotageAmount } from "../../../packets/rpc/repairSystem/amounts/heliSabotageAmount";
 
 export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   protected readonly spawnSystemTypes: SystemType[];
@@ -139,7 +140,11 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
         break;
       case SystemType.Reactor:
-        systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
+        if (level == Level.Airship) {
+          systemsHandler.repairHeliSystem(player, system as HeliSabotageSystem, amount as HeliSabotageAmount);
+        } else {
+          systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
+        }
         break;
       case SystemType.Laboratory:
         systemsHandler.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);

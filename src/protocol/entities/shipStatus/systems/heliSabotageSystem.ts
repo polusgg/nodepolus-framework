@@ -7,11 +7,41 @@ export class HeliSabotageSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
     protected countdown: number = 10000,
-    protected timer: number = 10,
+    protected timer: number = -1,
     protected activeConsoles: Map<number, number> = new Map(),
-    protected completedConsoles: Set<number> = new Set(),
+    protected completedConsoles: Set<number> = new Set([0, 1]),
   ) {
     super(shipStatus, SystemType.Reactor);
+  }
+
+  getTimer(): number {
+    return this.timer;
+  }
+
+  setTimer(seconds: number): this {
+    this.timer = seconds;
+
+    return this;
+  }
+
+  getCountdown(): number {
+    return this.countdown;
+  }
+
+  setCountdown(seconds: number): this {
+    this.countdown = seconds;
+
+    return this;
+  }
+
+  decrementCountdown(seconds: number = 1): this {
+    this.countdown -= Math.abs(seconds);
+
+    if (this.countdown < 0) {
+      this.countdown = 0;
+    }
+
+    return this;
   }
 
   getActiveConsoles(): Map<number, number> {
@@ -81,7 +111,7 @@ export class HeliSabotageSystem extends BaseSystem {
   serializeSpawn(): MessageWriter {
     return new MessageWriter().writeFloat32(this.countdown).writeFloat32(this.timer).writeList(this.activeConsoles, (writer, pair) => {
       writer.writeBytes(pair);
-    }).writeList(this.completedConsoles, (writer, con) => writer.writeByte(con));
+    }, true).writeList(this.completedConsoles, (writer, con) => writer.writeByte(con), true);
   }
 
   equals(old: HeliSabotageSystem): boolean {

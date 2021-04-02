@@ -6,27 +6,27 @@ import { BaseSystem } from ".";
 export class LaboratorySystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    protected timer: number = 10000,
+    protected countdown: number = 10000,
     protected userConsoles: Map<number, number> = new Map(),
   ) {
     super(shipStatus, SystemType.Laboratory);
   }
 
-  getTimer(): number {
-    return this.timer;
+  getCountdown(): number {
+    return this.countdown;
   }
 
-  setTimer(seconds: number): this {
-    this.timer = seconds;
+  setCountdown(seconds: number): this {
+    this.countdown = seconds;
 
     return this;
   }
 
-  decrementTimer(seconds: number = 1): this {
-    this.timer -= Math.abs(seconds);
+  decrementCountdown(seconds: number = 1): this {
+    this.countdown -= Math.abs(seconds);
 
-    if (this.timer < 0) {
-      this.timer = 0;
+    if (this.countdown < 0) {
+      this.countdown = 0;
     }
 
     return this;
@@ -70,7 +70,7 @@ export class LaboratorySystem extends BaseSystem {
 
   serializeSpawn(): MessageWriter {
     return new MessageWriter()
-      .writeFloat32(this.timer)
+      .writeFloat32(this.countdown)
       .writeList(this.userConsoles, (writer, pair) => {
         writer.writeByte(pair[0]);
         writer.writeByte(pair[1]);
@@ -78,7 +78,7 @@ export class LaboratorySystem extends BaseSystem {
   }
 
   equals(old: LaboratorySystem): boolean {
-    if (this.timer != old.timer) {
+    if (this.countdown != old.countdown) {
       return false;
     }
 
@@ -98,6 +98,6 @@ export class LaboratorySystem extends BaseSystem {
   }
 
   clone(): LaboratorySystem {
-    return new LaboratorySystem(this.shipStatus, this.timer, new Map(this.userConsoles));
+    return new LaboratorySystem(this.shipStatus, this.countdown, new Map(this.userConsoles));
   }
 }

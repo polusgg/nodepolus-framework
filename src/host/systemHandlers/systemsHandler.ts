@@ -1,10 +1,11 @@
 import { BaseInnerShipStatus } from "../../protocol/entities/shipStatus/baseShipStatus";
-import { DecontaminationDoorState, SystemType } from "../../types/enums";
+import { DecontaminationDoorState, Level, SystemType } from "../../types/enums";
 import { GameDataPacket } from "../../protocol/packets/root";
 import { clamp, notUndefined } from "../../util/functions";
 import { Player } from "../../player";
 import { Host } from "..";
 import {
+  HeliSabotageAction,
   MedbayAction,
   MiraCommunicationsAction,
   OxygenAction,
@@ -26,6 +27,7 @@ import {
   DeconSystem,
   DeconTwoSystem,
   DoorsSystem,
+  HeliSabotageSystem,
   HqHudSystem,
   HudOverrideSystem,
   LaboratorySystem,
@@ -44,6 +46,7 @@ import {
   GameCamerasOpenedEvent,
   GameCamerasClosedEvent,
 } from "../../api/events/game";
+import { HeliSabotageAmount } from "../../protocol/packets/rpc/repairSystem/amounts/heliSabotageAmount";
 
 export class SystemsHandler {
   protected oldShipStatus: BaseInnerShipStatus = this.host.getLobby().getSafeShipStatus().getShipStatus();
@@ -52,6 +55,32 @@ export class SystemsHandler {
   constructor(
     protected readonly host: Host,
   ) {}
+
+  repairHeliSystem<T extends HeliSabotageSystem>(repairer: Player, system: T, amount: HeliSabotageAmount): void {
+    this.setOldShipStatus();
+
+    if (amount.getTags().has(HeliSabotageAction.Deactivate)) {
+      system.removeActiveConsole(repairer.getId());
+    }
+
+    if (amount.getTags().has(HeliSabotageAction.Fix)) {
+      system.setTimer(10);
+      system.addCompletedConsole(amount.getConsole());
+    }
+
+    if (amount.getTags().has(HeliSabotageAction.Damage)) {
+      system.setTimer(-1);
+      system.setCountdown(90);
+      system.clearCompletedConsoles();
+      system.clearActiveConsoles();
+    }
+
+    if (amount.getTags().has(HeliSabotageAction.Active)) {
+      system.setActiveConsole(repairer.getId(), amount.getConsole());
+    }
+
+    this.sendDataUpdate();
+  }
 
   repairDecon<T extends DeconSystem | DeconTwoSystem>(_repairer: Player, system: T, amount: DecontaminationAmount): void {
     let state = 0;
@@ -189,7 +218,7 @@ export class SystemsHandler {
         system.setUserConsole(repairer.getId(), amount.getConsoleId());
 
         if (new Set(system.getUserConsoles().values()).size == 2) {
-          system.setTimer(10000);
+          system.setCountdown(10000);
 
           if (sabotageHandler.timer !== undefined) {
             clearInterval(sabotageHandler.timer);
@@ -201,7 +230,7 @@ export class SystemsHandler {
         system.removeUserConsole(repairer.getId());
         break;
       case ReactorAction.Repaired:
-        system.setTimer(10000);
+        system.setCountdown(10000);
 
         if (sabotageHandler.timer !== undefined) {
           clearInterval(sabotageHandler.timer);
@@ -238,7 +267,11 @@ export class SystemsHandler {
     switch (type) {
       case SystemType.Reactor:
       case SystemType.Laboratory:
-        sabotageHandler.sabotageReactor(ship.getSystemFromType(type) as ReactorSystem | LaboratorySystem);
+        if (this.host.getLobby().getLevel() == Level.Airship) {
+          sabotageHandler.sabotageHeliSystem(ship.getSystemFromType(type) as HeliSabotageSystem);
+        } else {
+          sabotageHandler.sabotageReactor(ship.getSystemFromType(type) as ReactorSystem | LaboratorySystem | HeliSabotageSystem);
+        }
         break;
       case SystemType.Oxygen:
         sabotageHandler.sabotageOxygen(ship.getSystemFromType(type) as LifeSuppSystem);
@@ -252,6 +285,9 @@ export class SystemsHandler {
       default:
         throw new Error(`Attempted to sabotage an unsupported SystemType: ${type} (${SystemType[type]})`);
     }
+
+    console.log(this.oldShipStatus);
+    console.log(this.getShipStatus());
 
     this.sendDataUpdate();
   }

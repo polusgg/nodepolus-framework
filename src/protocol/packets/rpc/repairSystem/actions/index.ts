@@ -5,3 +5,5 @@ export { MiraCommunicationsAction } from "./miraCommunicationsAction";
 export { OxygenAction } from "./oxygenAction";
 
 export { ReactorAction } from "./reactorAction";
+
+export { HeliSabotageAction } from "./heliSabotageAction";

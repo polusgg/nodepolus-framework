@@ -8,6 +8,7 @@ export class InnerAirshipStatus extends BaseInnerShipStatus {
     netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.AirshipStatus, parent, [
+      SystemType.Sabotage,
       SystemType.Electrical,
       SystemType.Medbay,
       SystemType.Doors,
