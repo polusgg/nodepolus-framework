@@ -1,13 +1,13 @@
 import { MessageWriter } from "../../../../util/hazelMessage";
-import { Level, SystemType } from "../../../../types/enums";
 import { BaseInnerShipStatus } from "../baseShipStatus";
+import { SystemType } from "../../../../types/enums";
 import { Doors } from "../../../../static";
 import { BaseSystem } from ".";
 
 export class AutoDoorsSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    protected doorStates: boolean[] = new Array(Doors.countForLevel(Level.TheSkeld)).fill(true),
+    protected doorStates: boolean[] = new Array(Doors.countForLevel(shipStatus.getLevel())).fill(true),
   ) {
     super(shipStatus, SystemType.Doors);
   }

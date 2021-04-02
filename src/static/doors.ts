@@ -33,7 +33,7 @@ const DOORS_AIRSHIP: Readonly<DoorList> = {
   [SystemType.Kitchen]: [7, 8, 9],
   [SystemType.MainHall]: [10, 11],
   [SystemType.Records]: [12, 13, 14],
-  // [SystemType.Lounge]: [15, 16, 17, 18],
+  [SystemType.Lounge]: [15, 16, 17, 18],
   [SystemType.Medical]: [19, 20],
 };
 
@@ -93,7 +93,27 @@ const DOOR_NAMES_POLUS: readonly string[] = [
   "Storage",
 ];
 const DOOR_NAMES_AIRSHIP: readonly string[] = [
-  // TODO
+  "Cockpit Door",
+  "Left Engine Room Door",
+  "Communications Door",
+  "Upper Armory Door",
+  "Upper Engine Room Door",
+  "Vault Room Door",
+  "Left Gap Room Door",
+  "Lower Armory Door",
+  "Viewing Deck Door",
+  "Left Portrait Hall Door",
+  "Right Engine Room Door",
+  "Left Showers Door",
+  "Right Gap Door",
+  "Left Lounge Room Door",
+  "Upper Showers Door",
+  "Left Bathroom Door",
+  "Center Left Bathroom Door",
+  "Center Right Bathroom Door",
+  "Right Bathroom Door",
+  "Left Medical Door",
+  "Upper Medical Door",
 ];
 
 const DOOR_COUNT_THE_SKELD: number = Object.values(DOORS_THE_SKELD).flat().length;
