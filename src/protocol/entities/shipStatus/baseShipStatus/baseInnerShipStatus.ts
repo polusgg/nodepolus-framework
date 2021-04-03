@@ -9,6 +9,7 @@ import { Lobby } from "../../../../lobby";
 import {
   DecontaminationAmount,
   ElectricalAmount,
+  HeliSabotageAmount,
   MedbayAmount,
   MiraCommunicationsAmount,
   NormalCommunicationsAmount,
@@ -20,12 +21,13 @@ import {
   SecurityAmount,
 } from "../../../packets/rpc/repairSystem/amounts";
 import {
-  HeliSabotageSystem,
   AutoDoorsSystem,
   BaseSystem,
   DeconSystem,
   DeconTwoSystem,
   DoorsSystem,
+  ElectricalDoorsSystem,
+  HeliSabotageSystem,
   HqHudSystem,
   HudOverrideSystem,
   LaboratorySystem,
@@ -36,9 +38,7 @@ import {
   SabotageSystem,
   SecurityCameraSystem,
   SwitchSystem,
-  ElectricalDoorsSystem,
 } from "../systems";
-import { HeliSabotageAmount } from "../../../packets/rpc/repairSystem/amounts/heliSabotageAmount";
 
 export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   protected readonly spawnSystemTypes: SystemType[];
@@ -343,18 +343,6 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     }
 
     return this;
-  }
-
-  protected serializeSystemsToDirtyBits(otherSystems: SystemType[]): number {
-    let dirtyBits = 0;
-
-    for (let i = 0; i < this.systemTypes.length; i++) {
-      if (otherSystems.indexOf(this.systemTypes[i]) > -1) {
-        dirtyBits |= 1 << this.systemTypes[i];
-      }
-    }
-
-    return dirtyBits;
   }
 
   protected serializeSystems(old: BaseInnerShipStatus | undefined, systems: SystemType[]): MessageWriter {

@@ -8,7 +8,7 @@ import { BaseRpcPacket } from ".";
 export class ClimbLadderPacket extends BaseRpcPacket {
   constructor(
     public ladderId: number,
-    public ladderSequenceId: number,
+    public sequenceId: number,
   ) {
     super(RpcPacketType.ClimbLadder);
   }
@@ -18,11 +18,10 @@ export class ClimbLadderPacket extends BaseRpcPacket {
   }
 
   clone(): ClimbLadderPacket {
-    return new ClimbLadderPacket(this.ladderId, this.ladderSequenceId);
+    return new ClimbLadderPacket(this.ladderId, this.sequenceId);
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writeByte(this.ladderId);
-    writer.writeByte(this.ladderSequenceId);
+    writer.writeByte(this.ladderId).writeByte(this.sequenceId);
   }
 }

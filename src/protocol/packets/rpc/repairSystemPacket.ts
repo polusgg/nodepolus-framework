@@ -4,6 +4,7 @@ import { BaseRpcPacket } from ".";
 import {
   DecontaminationAmount,
   ElectricalAmount,
+  HeliSabotageAmount,
   MedbayAmount,
   MiraCommunicationsAmount,
   NormalCommunicationsAmount,
@@ -14,7 +15,6 @@ import {
   SabotageAmount,
   SecurityAmount,
 } from "./repairSystem/amounts";
-import { HeliSabotageAmount } from "./repairSystem/amounts/heliSabotageAmount";
 
 /**
  * RPC Packet ID: `0x1c` (`28`)

@@ -4,6 +4,8 @@ export { DecontaminationAmount } from "./decontaminationAmount";
 
 export { ElectricalAmount } from "./electricalAmount";
 
+export { HeliSabotageAmount } from "./heliSabotageAmount";
+
 export { MedbayAmount } from "./medbayAmount";
 
 export { MiraCommunicationsAmount } from "./miraCommunicationsAmount";

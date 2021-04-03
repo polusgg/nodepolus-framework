@@ -24,6 +24,7 @@
     "commonjs": "^0.0.1",
     "emittery": "^0.8.0",
     "ipaddr.js": "^2.0.0",
+    "ts-node": "^9.1.0",
     "winston": "^3.3.3"
   },
   "devDependencies": {

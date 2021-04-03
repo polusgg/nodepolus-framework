@@ -56,7 +56,13 @@ export class Bitfield {
       return false;
     }
 
-    return this.bits.every((bit, index) => bit == other.has(index));
+    for (let i = 0; i < this.bits.length; i++) {
+      if (this.bits[i] != other.bits[i]) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**

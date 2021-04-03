@@ -1,13 +1,13 @@
-import { BaseRpcPacket, SetTasksPacket } from "../../packets/rpc";
 import { InnerNetObjectType, PlayerColor, RpcPacketType } from "../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
+import { BaseRpcPacket, SetTasksPacket } from "../../packets/rpc";
 import { MessageWriter } from "../../../util/hazelMessage";
+import { GameDataPacket } from "../../packets/root";
 import { BaseInnerNetObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { Tasks } from "../../../static";
 import { PlayerData } from "./types";
 import { EntityGameData } from ".";
-import { GameDataPacket } from "../../packets/root";
 
 export class InnerGameData extends BaseInnerNetObject {
   constructor(
@@ -111,8 +111,6 @@ export class InnerGameData extends BaseInnerNetObject {
   }
 
   updateGameData(playerData?: PlayerData[], sendTo?: Connection[]): this {
-    const old = this.clone();
-
     playerData ??= [...this.players.values()];
 
     for (let i = 0; i < playerData.length; i++) {
@@ -121,16 +119,14 @@ export class InnerGameData extends BaseInnerNetObject {
       this.players.set(player.getId(), player);
     }
 
-    const data = this.serializeData(old);
+    const data = this.serializeData();
 
-    if (!sendTo) {
+    if (sendTo === undefined) {
       sendTo = this.getLobby().getConnections();
     }
 
     for (let i = 0; i < sendTo.length; i++) {
-      const connection = sendTo[i];
-
-      connection.writeReliable(new GameDataPacket([data], this.getLobby().getCode()));
+      sendTo[i].writeReliable(new GameDataPacket([data], this.getLobby().getCode()));
     }
 
     return this;
@@ -151,7 +147,7 @@ export class InnerGameData extends BaseInnerNetObject {
   }
 
   // TODO: compare players and only send those that have updated
-  serializeData(_old: InnerGameData): DataPacket {
+  serializeData(): DataPacket {
     const writer = new MessageWriter();
 
     [...this.players.values()].forEach(player => {
@@ -160,10 +156,7 @@ export class InnerGameData extends BaseInnerNetObject {
       writer.endMessage();
     });
 
-    return new DataPacket(
-      this.netId,
-      writer,
-    );
+    return new DataPacket(this.netId, writer);
   }
 
   serializeSpawn(): SpawnPacketObject {

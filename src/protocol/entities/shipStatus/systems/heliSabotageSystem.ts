@@ -1,7 +1,7 @@
-import { SystemType } from "../../../../types/enums";
 import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseInnerShipStatus } from "../baseShipStatus";
-import { BaseSystem } from "./baseSystem";
+import { SystemType } from "../../../../types/enums";
+import { BaseSystem } from ".";
 
 export class HeliSabotageSystem extends BaseSystem {
   constructor(
@@ -109,9 +109,11 @@ export class HeliSabotageSystem extends BaseSystem {
   }
 
   serializeSpawn(): MessageWriter {
-    return new MessageWriter().writeFloat32(this.countdown).writeFloat32(this.timer).writeList(this.activeConsoles, (writer, pair) => {
-      writer.writeBytes(pair);
-    }, true).writeList(this.completedConsoles, (writer, con) => writer.writeByte(con), true);
+    return new MessageWriter()
+      .writeFloat32(this.countdown)
+      .writeFloat32(this.timer)
+      .writeList(this.activeConsoles, (writer, pair) => writer.writeBytes(pair), true)
+      .writeList(this.completedConsoles, (writer, con) => writer.writeByte(con), true);
   }
 
   equals(old: HeliSabotageSystem): boolean {

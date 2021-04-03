@@ -1,43 +1,51 @@
-import { Bitfield } from "../../../../../types";
-import { RepairAmount } from "./repairAmount";
+import { HeliSabotageAction } from "../actions";
+import { RepairAmount } from ".";
 
 export class HeliSabotageAmount extends RepairAmount {
   constructor(
-    protected console: number,
-    protected tags: Bitfield,
+    protected consoleId: number,
+    protected action: HeliSabotageAction,
   ) {
     super();
   }
 
   static deserialize(amount: number): HeliSabotageAmount {
-    return new HeliSabotageAmount(amount & 15, Bitfield.fromNumber(amount >> 4, 4));
+    let action = HeliSabotageAction.OpenedConsole;
+
+    if ((amount & HeliSabotageAction.ClosedConsole) == HeliSabotageAction.ClosedConsole) {
+      action = HeliSabotageAction.ClosedConsole;
+    } else if ((amount & HeliSabotageAction.EnteredCode) == HeliSabotageAction.EnteredCode) {
+      action = HeliSabotageAction.EnteredCode;
+    }
+
+    return new HeliSabotageAmount(amount & 0xf, action);
   }
 
-  getConsole(): number {
-    return this.console;
+  getConsoleId(): number {
+    return this.consoleId;
   }
 
-  setConsole(console: number): this {
-    this.console = console;
+  setConsoleId(consoleId: number): this {
+    this.consoleId = consoleId;
 
     return this;
   }
 
-  getTags(): Bitfield {
-    return this.tags;
+  getAction(): HeliSabotageAction {
+    return this.action;
   }
 
-  setTags(bitfield: Bitfield): this {
-    this.tags = bitfield;
+  setAction(action: HeliSabotageAction): this {
+    this.action = action;
 
     return this;
   }
 
   clone(): HeliSabotageAmount {
-    return new HeliSabotageAmount(this.console, this.tags.clone());
+    return new HeliSabotageAmount(this.consoleId, this.action);
   }
 
   getValue(): number {
-    return this.console | (this.tags.toNumber() << 4);
+    return this.consoleId | this.action;
   }
 }

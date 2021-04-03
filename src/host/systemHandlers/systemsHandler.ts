@@ -14,6 +14,7 @@ import {
 import {
   DecontaminationAmount,
   ElectricalAmount,
+  HeliSabotageAmount,
   MedbayAmount,
   MiraCommunicationsAmount,
   NormalCommunicationsAmount,
@@ -46,7 +47,6 @@ import {
   GameCamerasOpenedEvent,
   GameCamerasClosedEvent,
 } from "../../api/events/game";
-import { HeliSabotageAmount } from "../../protocol/packets/rpc/repairSystem/amounts/heliSabotageAmount";
 
 export class SystemsHandler {
   protected oldShipStatus: BaseInnerShipStatus = this.host.getLobby().getSafeShipStatus().getShipStatus();
@@ -59,24 +59,17 @@ export class SystemsHandler {
   repairHeliSystem<T extends HeliSabotageSystem>(repairer: Player, system: T, amount: HeliSabotageAmount): void {
     this.setOldShipStatus();
 
-    if (amount.getTags().has(HeliSabotageAction.Deactivate)) {
-      system.removeActiveConsole(repairer.getId());
-    }
-
-    if (amount.getTags().has(HeliSabotageAction.Fix)) {
-      system.setTimer(10);
-      system.addCompletedConsole(amount.getConsole());
-    }
-
-    if (amount.getTags().has(HeliSabotageAction.Damage)) {
-      system.setTimer(-1);
-      system.setCountdown(90);
-      system.clearCompletedConsoles();
-      system.clearActiveConsoles();
-    }
-
-    if (amount.getTags().has(HeliSabotageAction.Active)) {
-      system.setActiveConsole(repairer.getId(), amount.getConsole());
+    switch (amount.getAction()) {
+      case HeliSabotageAction.OpenedConsole:
+        system.setActiveConsole(repairer.getId(), amount.getConsoleId());
+        break;
+      case HeliSabotageAction.ClosedConsole:
+        system.removeActiveConsole(repairer.getId());
+        break;
+      case HeliSabotageAction.EnteredCode:
+        system.setTimer(10);
+        system.addCompletedConsole(amount.getConsoleId());
+        break;
     }
 
     this.sendDataUpdate();
@@ -285,9 +278,6 @@ export class SystemsHandler {
       default:
         throw new Error(`Attempted to sabotage an unsupported SystemType: ${type} (${SystemType[type]})`);
     }
-
-    console.log(this.oldShipStatus);
-    console.log(this.getShipStatus());
 
     this.sendDataUpdate();
   }

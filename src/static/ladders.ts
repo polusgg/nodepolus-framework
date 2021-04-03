@@ -23,64 +23,65 @@ const LADDERS_AIRSHIP = [
   { id: 5, name: "Electrical to Main Hall", from: SystemType.Electrical, to: SystemType.MainHall, direction: LadderDirection.Up, counterpart: 4 },
 ] as const;
 
-const LADDER_NAMES_AIRSHIP = LADDERS_AIRSHIP.map(l => l.name);
+const LADDER_NAMES_AIRSHIP = LADDERS_AIRSHIP.map(ladder => ladder.name);
+
 const LADDER_COUNT_AIRSHIP = LADDERS_AIRSHIP.length;
 
+type LaddersFromLevel<T extends Level> =
+  T extends Level.Airship ? typeof LADDERS_AIRSHIP
+    : [];
+
+type LadderNamesFromLevel<T extends Level> =
+  T extends Level.Airship ? typeof LADDER_NAMES_AIRSHIP
+    : [];
+
+type LadderCountsFromLevel<T extends Level> =
+  T extends Level.Airship ? typeof LADDER_COUNT_AIRSHIP
+    : 0;
+
+/**
+ * A helper class for retrieving static data for ladders.
+ */
 export class Ladders {
   /**
-   * Gets each system and their respective doors for the given level.
+   * Gets all static ladder data for the given level.
    *
-   * @param level - The level whose systems and corresponding doors should be returned
+   * @param level - The level whose ladders should be returned
    */
-  static forLevel<T extends Level>(level: T): readonly Ladder[] {
+  static forLevel<T extends Level>(level: T): LaddersFromLevel<T> {
     switch (level) {
-      case Level.TheSkeld:
-      case Level.AprilSkeld:
-      case Level.MiraHq:
-      case Level.Polus:
-        return [];
       case Level.Airship:
-        return LADDERS_AIRSHIP;
+        return LADDERS_AIRSHIP as LaddersFromLevel<T>;
+      default:
+        return [] as LaddersFromLevel<T>;
     }
-
-    throw new Error("Invalid Level.");
   }
 
   /**
-   * Gets the display names for the doors on the given level.
+   * Gets the display names for the ladders on the given level.
    *
-   * @param level - The level whose door display names should be returned
+   * @param level - The level whose ladder display names should be returned
    */
-  static namesForLevel<T extends Level>(level: T): readonly string[] {
+  static namesForLevel<T extends Level>(level: T): LadderNamesFromLevel<T> {
     switch (level) {
-      case Level.TheSkeld:
-      case Level.AprilSkeld:
-      case Level.MiraHq:
-      case Level.Polus:
-        return [];
       case Level.Airship:
-        return LADDER_NAMES_AIRSHIP;
+        return LADDER_NAMES_AIRSHIP as LadderNamesFromLevel<T>;
+      default:
+        return [] as LadderNamesFromLevel<T>;
     }
-
-    throw new Error("Invalid Level.");
   }
 
   /**
-   * Gets the number of doors on the given level.
+   * Gets the number of ladders on the given level.
    *
-   * @param level - The level whose number of doors should be returned
+   * @param level - The level whose number of ladders should be returned
    */
-  static countForLevel<T extends Level>(level: T): number {
+  static countForLevel<T extends Level>(level: T): LadderCountsFromLevel<T> {
     switch (level) {
-      case Level.TheSkeld:
-      case Level.AprilSkeld:
-      case Level.MiraHq:
-      case Level.Polus:
-        return 0;
       case Level.Airship:
-        return LADDER_COUNT_AIRSHIP;
+        return LADDER_COUNT_AIRSHIP as LadderCountsFromLevel<T>;
+      default:
+        return 0 as LadderCountsFromLevel<T>;
     }
-
-    throw new Error("Invalid Level.");
   }
 }

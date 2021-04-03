@@ -1,6 +1,5 @@
 export enum HeliSabotageAction {
-  Damage = 1 << 3,
-  Active = 1 << 2,
-  Deactivate = 1 << 1,
-  Fix = 1 << 0,
+  EnteredCode = 0x10,
+  ClosedConsole = 0x20,
+  OpenedConsole = 0x40,
 }
