@@ -71,7 +71,7 @@ const DOOR_NAMES_AIRSHIP: readonly string[] = [
   "Communications",
   "Armory (Top)",
   "Engine (Top)",
-  "Vault",
+  "Vault Room",
   "Gap Room (Left)",
   "Armory (Bottom)",
   "Viewing Deck",

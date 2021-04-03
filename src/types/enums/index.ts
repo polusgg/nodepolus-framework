@@ -50,6 +50,12 @@ export { PlayerSkin } from "./playerSkin";
 
 export { PlayerState } from "./playerState";
 
+export { QuickChatMode } from "./quickChatMode";
+
+export { ReportOutcome } from "./reportOutcome";
+
+export { ReportReason } from "./reportReason";
+
 export { RootPacketType } from "./rootPacketType";
 
 export { RpcPacketType } from "./rpcPacketType";

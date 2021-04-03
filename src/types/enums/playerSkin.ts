@@ -15,4 +15,7 @@ export enum PlayerSkin {
   Miner = 13,
   Winter = 14,
   Archaeologist = 15,
+  Prisoner = 16,
+  CCC = 17,
+  RightHandManReborn = 18,
 }

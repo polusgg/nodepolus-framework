@@ -99,6 +99,7 @@ import {
   ServerPacketOutGameDataEvent,
   ServerPacketOutRpcCustomEvent,
   ServerPacketOutRpcEvent,
+  ServerPlayerReportedEvent,
 } from "./server";
 
 /**
@@ -229,4 +230,5 @@ export type ServerEvents = {
   "server.packet.out.gamedata": ServerPacketOutGameDataEvent;
   "server.packet.out.rpc.custom": ServerPacketOutRpcCustomEvent;
   "server.packet.out.rpc": ServerPacketOutRpcEvent;
+  "server.player.reported": ServerPlayerReportedEvent;
 };

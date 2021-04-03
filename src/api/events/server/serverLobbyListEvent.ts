@@ -8,12 +8,10 @@ import { DisconnectableEvent } from "../types";
 export class ServerLobbyListEvent extends DisconnectableEvent {
   /**
    * @param connection - The connection that is requesting a list of games
-   * @param includePrivateLobbies - `true` if the connection wants private games included in the results, `false` if not
    * @param lobbies - The lobbies that will be sent to the connection
    */
   constructor(
     protected readonly connection: Connection,
-    protected readonly includePrivateLobbies: boolean,
     protected lobbies: LobbyListing[],
   ) {
     super(DisconnectReason.custom("The server refused to list its public games"));
@@ -24,15 +22,6 @@ export class ServerLobbyListEvent extends DisconnectableEvent {
    */
   getConnection(): Connection {
     return this.connection;
-  }
-
-  /**
-   * Gets whether or not the connection wants private games included in the results.
-   *
-   * @returns `true` if private games were requested, `false` if not
-   */
-  wantsPrivateLobbies(): boolean {
-    return this.includePrivateLobbies;
   }
 
   /**

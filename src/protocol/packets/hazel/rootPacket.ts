@@ -3,6 +3,7 @@ import { Level, RootPacketType } from "../../../types/enums";
 import { CustomRootPacketContainer } from "../../../types";
 import { Connection } from "../../connection";
 import {
+  BaseRootPacket,
   AlterGameTagPacket,
   EndGamePacket,
   GameDataPacket,
@@ -19,10 +20,11 @@ import {
   RedirectPacket,
   RemoveGamePacket,
   RemovePlayerPacket,
+  ReportPlayerRequestPacket,
+  ReportPlayerResponsePacket,
   ReselectServerPacket,
   StartGamePacket,
   WaitForHostPacket,
-  BaseRootPacket,
 } from "../root";
 
 export class RootPacket {
@@ -109,6 +111,12 @@ export class RootPacket {
           }
 
           return packets.push(GetGameListRequestPacket.deserialize(child));
+        case RootPacketType.ReportPlayer:
+          if (clientBound) {
+            return packets.push(ReportPlayerResponsePacket.deserialize(child));
+          }
+
+          return packets.push(ReportPlayerRequestPacket.deserialize(child));
         default: {
           const custom = RootPacket.customPackets.get(child.getTag());
 

@@ -105,6 +105,13 @@ export class DisconnectReason implements CanSerializeToHazel {
   }
 
   /**
+   * Gets a new DisconnectReason whose type is `DisconnectReasonType.NotAuthorized`
+   */
+  static notAuthorized(): DisconnectReason {
+    return new DisconnectReason(DisconnectReasonType.NotAuthorized);
+  }
+
+  /**
    * Gets a new DisconnectReason whose type is `DisconnectReasonType.Destroy`
    */
   static destroy(): DisconnectReason {

@@ -45,6 +45,12 @@ export enum DisconnectReasonType {
    * Please stop.
    */
   Hacking = 10,
+  /**
+   * The Among Us servers could not authenticate you.
+   *
+   * You must have an Among Us account to play online. (Guest account is okay!)
+   */
+  NotAuthorized = 11,
   Destroy = 16,
   /**
    * You disconnected from the server.

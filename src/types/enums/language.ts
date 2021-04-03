@@ -8,4 +8,5 @@ export enum Language {
   Filipino = 6,
   Polish = 7,
   English = 8,
+  Japanese = 9,
 }
