@@ -53,7 +53,7 @@ export class RemovePlayerPacket extends BaseRootPacket {
       LobbyCode.decode(reader.readInt32()),
       reader.readUInt32(),
       reader.readUInt32(),
-      reader.hasBytesLeft() ? new DisconnectReason(reader.readByte()) : DisconnectReason.destroy(),
+      new DisconnectReason(reader.readByte()),
     );
   }
 
