@@ -13,40 +13,38 @@ export class ElectricalDoorsSystem extends BaseSystem {
   }
 
   static initializeDoors(rooms: Readonly<StaticRoomList>): boolean[] {
-    const exits = [StaticDoorsAirship.LeftDoorTop, StaticDoorsAirship.LeftDoorBottom];
-    const doors: boolean[] = [];
+    const doorStates: boolean[] = [];
     const hashSet = new Set<[string, readonly number[]]>();
     const doorIds: number[] = [...new Set(Object.values(rooms).flat())];
 
+    // Close all doors
     for (let i = 0; i < doorIds.length; i++) {
-      doors[doorIds[i]] = false;
+      doorStates[doorIds[i]] = false;
     }
 
-    let num = 0;
     let room: [string, readonly number[]] = [Object.keys(rooms)[0], rooms[Object.keys(rooms)[0]]];
 
-    while (hashSet.size < Object.keys(rooms).length && num++ < 10000) {
+    while (hashSet.size < Object.keys(rooms).length) {
       const door = room[1][Math.floor(Math.random() * room.length)];
       // eslint-disable-next-line @typescript-eslint/no-loop-func
       const doorSet = Object.entries(rooms).find(([name, roomDoors]) => name != room[0] && roomDoors.includes(door))!;
 
-      if (hashSet.has(doorSet)) {
+      if (!hashSet.has(doorSet)) {
         hashSet.add(doorSet);
-        doors[door] = true;
+        doorStates[door] = true;
       }
 
       if (Math.random() > 0.5) {
-        hashSet.add(room);
         room = doorSet;
       }
     }
 
     const flag = Math.random() > 0.5;
 
-    doors[exits[0]] = flag;
-    doors[exits[1]] = flag;
+    doorStates[StaticDoorsAirship.LeftDoorTop] = flag;
+    doorStates[StaticDoorsAirship.LeftDoorBottom] = !flag;
 
-    return doors;
+    return doorStates;
   }
 
   serializeData(): MessageWriter {
