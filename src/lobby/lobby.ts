@@ -640,7 +640,6 @@ export class Lobby implements LobbyInstance {
 
     if (onLeft) {
       const playerId = this.hostInstance.getNextPlayerId();
-
       const fakePlayer = new EntityPlayer(
         this,
         FakeClientId.ServerChat,
