@@ -9,7 +9,7 @@ export enum MovingPlatformSide {
 }
 
 export class MovingPlatformSystem extends BaseSystem {
-  private inUse = false;
+  protected inUse = false;
 
   constructor(
     shipStatus: BaseInnerShipStatus,
@@ -20,14 +20,17 @@ export class MovingPlatformSystem extends BaseSystem {
     super(shipStatus, SystemType.GapRoom);
   }
 
-  ride(netId: number): void {
-    this.setInnerPlayerControlNetId(netId);
+  ride(innerPlayerControlNetId: number): void {
+    this.inUse = true;
+
+    this.setInnerPlayerControlNetId(innerPlayerControlNetId);
     this.toggleSide();
     this.incrementSequenceId();
-    this.inUse = true;
 
     setTimeout(() => {
       this.inUse = false;
+
+      this.setInnerPlayerControlNetId();
     }, 5000);
   }
 

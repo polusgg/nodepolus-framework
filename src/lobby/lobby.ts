@@ -1204,7 +1204,10 @@ export class Lobby implements LobbyInstance {
 
     if (object.getType() == InnerNetObjectType.CustomNetworkTransform) {
       await (object as InnerCustomNetworkTransform).setData(data);
-      this.sendUnreliableRootGamePacket(new GameDataPacket([object.serializeData(undefined as unknown as BaseInnerNetObject)], this.code), sendTo ?? []);
+      this.sendUnreliableRootGamePacket(
+        new GameDataPacket([(object as InnerCustomNetworkTransform).serializeData()], this.code),
+        sendTo ?? [],
+      );
     }
   }
 

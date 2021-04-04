@@ -1,6 +1,6 @@
 import { MessageWriter } from "../../../../util/hazelMessage";
-import { BaseInnerShipStatus } from "../baseShipStatus";
 import { Level, SystemType } from "../../../../types/enums";
+import { BaseInnerShipStatus } from "../baseShipStatus";
 import { Doors } from "../../../../static";
 import { BaseSystem } from ".";
 
