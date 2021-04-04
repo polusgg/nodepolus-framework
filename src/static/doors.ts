@@ -355,25 +355,3 @@ export class StaticRooms {
     return doors;
   }
 }
-
-// const states = StaticRooms.generatePathForLevel(Level.Airship);
-
-// const h = (door: number): string => states[door] ? "[   ]" : "-----";
-// const v = (door: number): string => states[door] ? " " : "|";
-
-// console.log(states);
-// console.log("\n" +
-//   `/-----------+-----------+           \\\n` +
-//   `|           |           |           |\n` +
-//   `${v(10)}           ${v(8)}           ${v(7)}           |\n` +
-//   `|           |           |           |\n` +
-//   `+---${h(4)}---+---${h(3)}---+---${h(2)}---+\n` +
-//   `|           |           |            \n` +
-//   `${v(11)}           ${v(5)}           ${v(6)}            \n` +
-//   `|           |           |            \n` +
-//   `+          -+---${h(1)}---+---${h(0)}---+\n` +
-//   `|           |           |           |\n` +
-//   `|                       ${v(9)}           |\n` +
-//   `|                       |           |\n` +
-//   `\\-----------\\-----------+-----------/\n`,
-// );
