@@ -44,9 +44,7 @@ export class SecurityCameraSystem extends BaseSystem {
   }
 
   serializeSpawn(): MessageWriter {
-    return new MessageWriter().writeList(this.playersViewingCameras, (writer, player) => {
-      writer.writeByte(player);
-    });
+    return new MessageWriter().writeList(this.playersViewingCameras, (writer, player) => writer.writeByte(player));
   }
 
   equals(old: SecurityCameraSystem): boolean {

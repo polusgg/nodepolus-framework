@@ -44,9 +44,7 @@ export class MedScanSystem extends BaseSystem {
   }
 
   serializeSpawn(): MessageWriter {
-    return new MessageWriter().writeList(this.playersInQueue, (writer, player) => {
-      writer.writeByte(player);
-    });
+    return new MessageWriter().writeList(this.playersInQueue, (writer, player) => writer.writeByte(player));
   }
 
   equals(old: MedScanSystem): boolean {

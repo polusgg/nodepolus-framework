@@ -71,10 +71,7 @@ export class ReactorSystem extends BaseSystem {
   serializeSpawn(): MessageWriter {
     return new MessageWriter()
       .writeFloat32(this.countdown)
-      .writeList(this.userConsoles, (writer, pair) => {
-        writer.writeByte(pair[0]);
-        writer.writeByte(pair[1]);
-      });
+      .writeList(this.userConsoles, (writer, pair) => writer.writeBytes(pair));
   }
 
   equals(old: ReactorSystem): boolean {

@@ -143,10 +143,10 @@ export class RootPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    for (let i = 0; i < this.packets.length; i++) {
-      writer.startMessage(this.packets[i].getType())
-        .writeObject(this.packets[i])
+    writer.writeListWithoutLength(this.packets, (sub, packet) => {
+      sub.startMessage(packet.getType())
+        .writeObject(packet)
         .endMessage();
-    }
+    });
   }
 }

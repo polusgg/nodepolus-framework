@@ -110,12 +110,10 @@ export class GameDataPacket extends BaseRootPacket {
       writer.writePackedUInt32(this.targetClientId);
     }
 
-    for (let i = 0; i < this.packets.length; i++) {
-      const packet = this.packets[i];
-
-      writer.startMessage(packet.getType())
+    writer.writeListWithoutLength(this.packets, (sub, packet) => {
+      sub.startMessage(packet.getType())
         .writeObject(packet)
         .endMessage();
-    }
+    });
   }
 }

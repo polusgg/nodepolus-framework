@@ -69,6 +69,11 @@ export class SystemsHandler {
       case HeliSabotageAction.EnteredCode:
         system.setTimer(10);
         system.addCompletedConsole(amount.getConsoleId());
+
+        if (system.getCompletedConsoles().size == 2) {
+          system.setCountdown(10000);
+          this.host.getSabotageHandler()?.clearTimer();
+        }
         break;
     }
 
@@ -109,6 +114,10 @@ export class SystemsHandler {
         break;
       case MiraCommunicationsAction.EnteredCode:
         system.addCompletedConsole(amount.getConsoleId());
+
+        if (system.getCompletedConsoles().size == 2) {
+          this.host.getSabotageHandler()?.clearTimer();
+        }
         break;
     }
 
@@ -136,20 +145,12 @@ export class SystemsHandler {
 
         if (system.getCompletedConsoles().size == 2) {
           system.setTimer(10000);
-
-          if (sabotageHandler.timer !== undefined) {
-            clearInterval(sabotageHandler.timer);
-            delete sabotageHandler.timer;
-          }
+          sabotageHandler.clearTimer();
         }
         break;
       case OxygenAction.Repaired:
         system.setTimer(10000);
-
-        if (sabotageHandler.timer !== undefined) {
-          clearInterval(sabotageHandler.timer);
-          delete sabotageHandler.timer;
-        }
+        sabotageHandler.clearTimer();
         break;
     }
 
@@ -212,11 +213,7 @@ export class SystemsHandler {
 
         if (new Set(system.getUserConsoles().values()).size == 2) {
           system.setCountdown(10000);
-
-          if (sabotageHandler.timer !== undefined) {
-            clearInterval(sabotageHandler.timer);
-            delete sabotageHandler.timer;
-          }
+          sabotageHandler.clearTimer();
         }
         break;
       case ReactorAction.RemovedHand:
@@ -224,11 +221,7 @@ export class SystemsHandler {
         break;
       case ReactorAction.Repaired:
         system.setCountdown(10000);
-
-        if (sabotageHandler.timer !== undefined) {
-          clearInterval(sabotageHandler.timer);
-          delete sabotageHandler.timer;
-        }
+        sabotageHandler.clearTimer();
         break;
     }
 
@@ -251,9 +244,8 @@ export class SystemsHandler {
     this.sabotageCountdownInterval = setInterval(() => {
       system.decrementCooldown();
 
-      if (system.getCooldown() == 0 && this.sabotageCountdownInterval !== undefined) {
-        clearInterval(this.sabotageCountdownInterval);
-        delete this.sabotageCountdownInterval;
+      if (system.getCooldown() == 0) {
+        this.clearSabotageTimer();
       }
     }, 1000);
 
@@ -305,7 +297,7 @@ export class SystemsHandler {
     if (system.getActualSwitches().equals(system.getExpectedSwitches())) {
       const startOfRepair = Date.now();
       const repairCountdown = setInterval(() => {
-        if (!system.getActualSwitches().equals(system.getExpectedSwitches())) {
+        if (!system.getActualSwitches().equals(system.getExpectedSwitches()) || this.host.getLobby().getShipStatus() === undefined) {
           clearInterval(repairCountdown);
 
           return;
@@ -337,7 +329,7 @@ export class SystemsHandler {
   }
 
   clearSabotageTimer(): void {
-    if (this.sabotageCountdownInterval) {
+    if (this.sabotageCountdownInterval !== undefined) {
       clearInterval(this.sabotageCountdownInterval);
       delete this.sabotageCountdownInterval;
     }
