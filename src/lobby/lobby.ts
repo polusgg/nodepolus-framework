@@ -33,15 +33,14 @@ import {
   SceneChangePacket,
 } from "../protocol/packets/gameData";
 import {
-  AlterGameTagPacket,
   BaseRootPacket,
+  AlterGameTagPacket,
   GameDataPacket,
   JoinGameErrorPacket,
   JoinGameResponsePacket,
   JoinedGamePacket,
   KickPlayerPacket,
   RemovePlayerPacket,
-  RemoveGamePacket,
 } from "../protocol/packets/root";
 import {
   ServerLobbyDestroyedEvent,
@@ -195,14 +194,19 @@ export class Lobby implements LobbyInstance {
     return (new Date().getTime() - this.createdAt) / 1000;
   }
 
-  cleanup(): void {
+  cleanup(reason?: DisconnectReason): void {
     this.cancelJoinTimer();
     this.cancelStartTimer();
     this.hostInstance.clearTimers();
-    this.connections.forEach(async connection => connection.sendReliable([new RemoveGamePacket()]));
+
+    const connections = [...this.connections];
+
+    for (let i = 0; i < this.connections.length; i++) {
+      connections[i].disconnect(reason ?? DisconnectReason.custom("The lobby was closed by the server"), true);
+    }
   }
 
-  async close(force: boolean = false): Promise<void> {
+  async close(reason?: DisconnectReason, force: boolean = false): Promise<void> {
     if (!force && this.server.listenerCount("server.lobby.destroyed") > 0) {
       const event = new ServerLobbyDestroyedEvent(this);
 
@@ -213,7 +217,7 @@ export class Lobby implements LobbyInstance {
       }
     }
 
-    this.cleanup();
+    this.cleanup(reason);
     this.server.deleteLobby(this);
   }
 

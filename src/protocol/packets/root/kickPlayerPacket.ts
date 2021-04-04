@@ -40,6 +40,6 @@ export class KickPlayerPacket extends BaseRootPacket {
     writer.writeInt32(LobbyCode.encode(this.lobbyCode))
       .writePackedUInt32(this.kickedClientId)
       .writeBoolean(this.banned)
-      .writeObject(this.disconnectReason);
+      .writeObject(this.disconnectReason, { includeCustomString: false });
   }
 }

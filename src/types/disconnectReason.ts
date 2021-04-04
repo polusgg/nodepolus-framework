@@ -5,11 +5,19 @@ import { CanSerializeToHazel } from ".";
 type DisconnectReasonSerializationOptions = {
   /**
    * Whether or not the disconnect reason type should be written as a UInt32
-   * (when `true`), or as a byte (when `false`)
+   * (when `true`), or as a byte (when `false`).
    *
    * @defaultValue `false`
    */
   asInt?: boolean;
+  /**
+   * Whether or not the custom disconnect message string, if provided, should be
+   * included. Since some packets ignore custom disconnect messages, including
+   * them everywhere could lead to unexpected behavior.
+   *
+   * @defaultValue `true`
+   */
+  includeCustomString?: boolean;
 };
 
 /**
@@ -229,7 +237,10 @@ export class DisconnectReason implements CanSerializeToHazel<DisconnectReasonSer
   serialize(writer: MessageWriter, options?: DisconnectReasonSerializationOptions): void {
     writer[options?.asInt ?? false ? "writeUInt32" : "writeByte"](this.type);
 
-    if (this.type == DisconnectReasonType.Custom && this.message.length > 0) {
+    if ((options?.includeCustomString ?? true) &&
+        this.type === DisconnectReasonType.Custom &&
+        this.message.length > 0
+    ) {
       writer.writeString(this.message);
     }
   }

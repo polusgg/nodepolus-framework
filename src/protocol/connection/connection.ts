@@ -1,7 +1,7 @@
+import { GameOverReason, GameState, HazelPacketType, LimboState, PacketDestination, RootPacketType, RuntimePlatform, Scene } from "../../types/enums";
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer } from "../../types";
-import { HazelPacketType, LimboState, PacketDestination, RootPacketType, RuntimePlatform, Scene } from "../../types/enums";
+import { BaseRootPacket, EndGamePacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { CONNECTION_TIMEOUT_DURATION, MAX_PACKET_BYTE_SIZE, SUPPORTED_VERSIONS } from "../../util/constants";
-import { BaseRootPacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { ServerPacketOutCustomEvent, ServerPacketOutEvent } from "../../api/events/server";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
@@ -573,10 +573,22 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param force - `true` to cleanup the connection immediately, `false` to wait for a client response (default `false`)
    */
   disconnect(reason?: DisconnectReason, force: boolean = false): void {
+    if (this.requestedDisconnect) {
+      return;
+    }
+
     this.requestedDisconnect = true;
 
-    this.send(new Packet(undefined, new RootPacket([new JoinGameErrorPacket(reason ?? DisconnectReason.exitGame())])));
-    this.send(new Packet(undefined, new DisconnectPacket(true, reason ?? DisconnectReason.exitGame())));
+    const disconnectPacket = new JoinGameErrorPacket(reason ?? DisconnectReason.exitGame());
+
+    if (this.lobby !== undefined && this.lobby.getGameState() == GameState.Started) {
+      this.send(new Packet(undefined, new RootPacket([
+        new EndGamePacket(this.lobby.getCode(), GameOverReason.CrewmatesByTask, false),
+        disconnectPacket,
+      ])));
+    } else {
+      this.send(new Packet(undefined, new RootPacket([disconnectPacket])));
+    }
 
     if (force) {
       this.cleanup(reason);

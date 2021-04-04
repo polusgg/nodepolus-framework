@@ -31,7 +31,7 @@ export class LateRejectionPacket extends BaseRootPacket {
   serialize(writer: MessageWriter): void {
     writer.writeInt32(LobbyCode.encode(this.lobbyCode))
       .writePackedUInt32(this.removedClientId)
-      .writeObject(this.disconnectReason);
+      .writeObject(this.disconnectReason, { includeCustomString: false });
   }
 }
 
@@ -65,6 +65,6 @@ export class RemovePlayerPacket extends BaseRootPacket {
     writer.writeInt32(LobbyCode.encode(this.lobbyCode))
       .writeUInt32(this.removedClientId)
       .writeUInt32(this.hostClientId)
-      .writeObject(this.disconnectReason);
+      .writeObject(this.disconnectReason, { includeCustomString: false });
   }
 }

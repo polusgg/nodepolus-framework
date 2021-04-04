@@ -1,8 +1,8 @@
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../../protocol/entities/baseEntity";
+import { DisconnectReason, GameOptionsData, LobbyListing, Metadatable } from "../../types";
 import { BaseEntityShipStatus } from "../../protocol/entities/shipStatus/baseShipStatus";
 import { GameState, AlterGameTag, Level, PlayerColor } from "../../types/enums";
 import { EntityLobbyBehaviour } from "../../protocol/entities/lobbyBehaviour";
-import { GameOptionsData, LobbyListing, Metadatable } from "../../types";
 import { EntityMeetingHud } from "../../protocol/entities/meetingHud";
 import { PlayerData } from "../../protocol/entities/gameData/types";
 import { EntityGameData } from "../../protocol/entities/gameData";
@@ -108,16 +108,19 @@ export interface LobbyInstance extends Metadatable {
   /**
    * Disconnects all connections from the lobby and stops all timers and
    * intervals.
+   *
+   * @param reason - The reason for why the connections were disconnected
    */
-  cleanup(): void;
+  cleanup(reason?: DisconnectReason): void;
 
   /**
    * Disconnects all connections from the lobby, stops all timers and
    * intervals, and removes the lobby from the server.
    *
+   * @param reason - The reason for why the lobby was closed
    * @param force - `true` to force close the lobby, `false` to fire a cancellable event
    */
-  close(force: boolean): void;
+  close(reason?: DisconnectReason, force?: boolean): void;
 
   /**
    * Gets the host controller for the lobby.

@@ -1,4 +1,3 @@
-import { FakeClientId, GameDataPacketType, GameState, PacketDestination, ReportOutcome, RootPacketType, RpcPacketType, Scene } from "../types/enums";
 import { ConnectionInfo, DisconnectReason, InboundPacketTransformer, LobbyListing, OutboundPacketTransformer } from "../types";
 import { CONNECTION_TIMEOUT_DURATION, DEFAULT_CONFIG, MaxValue } from "../util/constants";
 import { ConnectionClosedEvent, ConnectionOpenedEvent } from "../api/events/connection";
@@ -44,6 +43,16 @@ import {
   ServerPacketOutRpcEvent,
   ServerPlayerReportedEvent,
 } from "../api/events/server";
+import {
+  FakeClientId,
+  GameDataPacketType,
+  GameState,
+  PacketDestination,
+  ReportOutcome,
+  RootPacketType,
+  RpcPacketType,
+  Scene,
+} from "../types/enums";
 
 export class Server extends Emittery<ServerEvents> {
   protected readonly startedAt = Date.now();
@@ -386,14 +395,16 @@ export class Server extends Emittery<ServerEvents> {
 
     this.stopConnectionFlushInterval();
 
+    const disconnectReason = DisconnectReason.custom("The server is shutting down");
+
+    for (let i = 0; i < this.lobbies.length; i++) {
+      this.lobbies[i].close(disconnectReason, true);
+    }
+
     const connections = [...this.connections.values()];
 
     for (let i = 0; i < connections.length; i++) {
-      connections[i].sendReliable([new JoinGameErrorPacket(DisconnectReason.custom("The server is shutting down"))]);
-    }
-
-    for (let i = 0; i < this.lobbies.length; i++) {
-      this.lobbies[i].close(true);
+      connections[i].disconnect(disconnectReason, true);
     }
 
     this.lobbies.splice(0, this.lobbies.length);
