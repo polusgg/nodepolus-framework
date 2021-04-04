@@ -353,6 +353,17 @@ test("writes a list", t => {
   t.is(buf.getBuffer().toString("hex"), "0d000103010000000200000003000000");
 });
 
+test("writes a list without length", t => {
+  const buf = new MessageWriter();
+  const list = [1, 2, 3];
+
+  buf.startMessage(1);
+  buf.writeListWithoutLength(list, (writer, item) => writer.writeInt32(item));
+  buf.endMessage();
+
+  t.is(buf.getBuffer().toString("hex"), "0c0001010000000200000003000000");
+});
+
 test("writes a list of custom messages", t => {
   const buf = new MessageWriter();
   const items: Example[] = [

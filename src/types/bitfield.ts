@@ -56,7 +56,13 @@ export class Bitfield {
       return false;
     }
 
-    return this.bits.every((bit, index) => bit == other.has(index));
+    for (let i = 0; i < this.bits.length; i++) {
+      if (this.bits[i] != other.bits[i]) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -102,7 +108,7 @@ export class Bitfield {
    * bits.asNumbers<Color>() === [Red, Blue, Green, Purple, Black];
    * ```
    *
-   * @typeParam T - The type of numbers that will be returned
+   * @typeParam T - The type of the numbers that will be returned
    * @param modifier - The value that will be added to each item in the resulting array (default `0`)
    * @returns An array of all indices whose bit is set in the Bitfield, with `modifier` added to each index
    */

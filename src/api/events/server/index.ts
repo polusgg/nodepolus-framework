@@ -35,3 +35,5 @@ export { ServerPacketOutGameDataEvent } from "./serverPacketOutGameDataEvent";
 export { ServerPacketOutRpcCustomEvent } from "./serverPacketOutRpcCustomEvent";
 
 export { ServerPacketOutRpcEvent } from "./serverPacketOutRpcEvent";
+
+export { ServerPlayerReportedEvent } from "./serverPlayerReportedEvent";

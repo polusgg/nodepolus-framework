@@ -9,6 +9,7 @@ import { Lobby } from "../../../../lobby";
 import {
   DecontaminationAmount,
   ElectricalAmount,
+  HeliSabotageAmount,
   MedbayAmount,
   MiraCommunicationsAmount,
   NormalCommunicationsAmount,
@@ -20,12 +21,13 @@ import {
   SecurityAmount,
 } from "../../../packets/rpc/repairSystem/amounts";
 import {
-  AirshipReactorSystem,
   AutoDoorsSystem,
   BaseSystem,
   DeconSystem,
   DeconTwoSystem,
   DoorsSystem,
+  ElectricalDoorsSystem,
+  HeliSabotageSystem,
   HqHudSystem,
   HudOverrideSystem,
   LaboratorySystem,
@@ -138,7 +140,11 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
         break;
       case SystemType.Reactor:
-        systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
+        if (level == Level.Airship) {
+          systemsHandler.repairHeliSystem(player, system as HeliSabotageSystem, amount as HeliSabotageAmount);
+        } else {
+          systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
+        }
         break;
       case SystemType.Laboratory:
         systemsHandler.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
@@ -147,7 +153,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         systemsHandler.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
         break;
       case SystemType.Doors:
-        if (level == Level.Polus) {
+        if (level == Level.Polus || level == Level.Airship) {
           systemsHandler.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
         } else {
           throw new Error(`Received RepairSystem for Doors on an unimplemented level: ${level as Level} (${Level[level]})`);
@@ -234,8 +240,16 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
 
         return this.systems[InternalSystemType.HudOverride];
       case SystemType.Decontamination:
+        if (this.level == Level.Airship) {
+          return this.systems[InternalSystemType.ElectricalDoors];
+        }
+
         return this.systems[InternalSystemType.Decon];
       case SystemType.Decontamination2:
+        if (this.level == Level.Airship) {
+          return this.systems[InternalSystemType.AutoDoors];
+        }
+
         return this.systems[InternalSystemType.Decon2];
       case SystemType.Electrical:
         return this.systems[InternalSystemType.Switch];
@@ -243,7 +257,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         return this.systems[InternalSystemType.Laboratory];
       case SystemType.Reactor:
         if (this.level == Level.Airship) {
-          return this.systems[InternalSystemType.AirshipReactor];
+          return this.systems[InternalSystemType.HeliSabotageSystem];
         }
 
         return this.systems[InternalSystemType.Reactor];
@@ -255,7 +269,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         return this.systems[InternalSystemType.MedScan];
       case SystemType.Oxygen:
         return this.systems[InternalSystemType.Oxygen];
-      case SystemType.Weapons:
+      case SystemType.GapRoom:
         return this.systems[InternalSystemType.MovingPlatform];
       default:
         throw new Error(`Tried to get unimplemented SystemType: ${systemType} (${SystemType[systemType]})`);
@@ -282,10 +296,18 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
           }
           break;
         case SystemType.Decontamination:
-          this.systems[InternalSystemType.Decon] = new DeconSystem(this);
+          if (this.level == Level.Airship) {
+            this.systems[InternalSystemType.ElectricalDoors] = new ElectricalDoorsSystem(this);
+          } else {
+            this.systems[InternalSystemType.Decon] = new DeconSystem(this);
+          }
           break;
         case SystemType.Decontamination2:
-          this.systems[InternalSystemType.Decon2] = new DeconTwoSystem(this);
+          if (this.level == Level.Airship) {
+            this.systems[InternalSystemType.AutoDoors] = new AutoDoorsSystem(this);
+          } else {
+            this.systems[InternalSystemType.Decon2] = new DeconTwoSystem(this);
+          }
           break;
         case SystemType.Electrical:
           this.systems[InternalSystemType.Switch] = new SwitchSystem(this);
@@ -295,7 +317,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
           break;
         case SystemType.Reactor:
           if (this.level == Level.Airship) {
-            this.systems[InternalSystemType.AirshipReactor] = new AirshipReactorSystem(this);
+            this.systems[InternalSystemType.HeliSabotageSystem] = new HeliSabotageSystem(this);
           } else {
             this.systems[InternalSystemType.Reactor] = new ReactorSystem(this);
           }
@@ -312,7 +334,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         case SystemType.Oxygen:
           this.systems[InternalSystemType.Oxygen] = new LifeSuppSystem(this);
           break;
-        case SystemType.Weapons:
+        case SystemType.GapRoom:
           this.systems[InternalSystemType.MovingPlatform] = new MovingPlatformSystem(this);
           break;
         default:
@@ -323,26 +345,15 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     return this;
   }
 
-  protected serializeSystemsToDirtyBits(otherSystems: SystemType[]): number {
-    let dirtyBits = 0;
-
-    for (let i = 0; i < this.systemTypes.length; i++) {
-      if (otherSystems.indexOf(this.systemTypes[i]) > -1) {
-        dirtyBits |= 1 << this.systemTypes[i];
-      }
-    }
-
-    return dirtyBits;
-  }
-
   protected serializeSystems(old: BaseInnerShipStatus | undefined, systems: SystemType[]): MessageWriter {
     const writer: MessageWriter = new MessageWriter();
 
     for (let i = 0; i < systems.length; i++) {
       const system = this.getSystemFromType(systems[i]);
+
       writer.startMessage(systems[i])
         .writeBytes(old === undefined ? system.serializeSpawn() : system.serializeData(old.getSystemFromType(systems[i])))
-        .endMessage()
+        .endMessage();
     }
 
     return writer;

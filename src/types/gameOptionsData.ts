@@ -7,11 +7,21 @@ const VERSIONS = [1, 2, 3, 4];
 
 const LENGTHS = [41, 42, 44, 46];
 
+type GameOptionsDataSerializationOptions = {
+  /**
+   * Whether or not the levels should be written as a bitfield for multiple
+   * levels (when `true`), or as a byte for a single level (when `false`).
+   *
+   * @defaultValue `false`
+   */
+  isSearching?: boolean;
+};
+
 /**
  * A class used to store, serialize, and deserialize the options when creating
  * or searching for a lobby.
  */
-export class GameOptionsData implements CanSerializeToHazel {
+export class GameOptionsData implements CanSerializeToHazel<GameOptionsDataSerializationOptions> {
   /**
    * @param version - The version of the GameOptionsData (default `4`)
    * @param maxPlayers - The maximum number of players (default `10`)
@@ -135,14 +145,14 @@ export class GameOptionsData implements CanSerializeToHazel {
    * Writes the GameOptionsData to the given MessageWriter
    *
    * @param writer - The MessageWriter to write to
-   * @param isSearching - `true` if the data is from a lobby search, `false` if it is from creating a lobby (default `false`)
+   * @param options - The options used to serialize the GameOptionsData
    */
-  serialize(writer: MessageWriter, isSearching: boolean = false): void {
+  serialize(writer: MessageWriter, options?: GameOptionsDataSerializationOptions): void {
     writer.writePackedUInt32(LENGTHS[this.version - 1])
       .writeByte(this.version)
       .writeByte(this.maxPlayers)
       .writeUInt32(this.languages.reduce((a, b) => a | b, 0))
-      .writeByte(isSearching ? this.levels.reduce((a, b) => a | b) : this.levels[0])
+      .writeByte(options?.isSearching ?? false ? this.levels.reduce((a, b) => a | b) : this.levels[0])
       .writeFloat32(this.playerSpeedModifier)
       .writeFloat32(this.crewmateLightModifier)
       .writeFloat32(this.impostorLightModifier)

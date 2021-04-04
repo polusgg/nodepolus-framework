@@ -1,7 +1,8 @@
-import { BaseRpcPacket, SetTasksPacket, UpdateGameDataPacket } from "../../packets/rpc";
 import { InnerNetObjectType, PlayerColor, RpcPacketType } from "../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
+import { BaseRpcPacket, SetTasksPacket } from "../../packets/rpc";
 import { MessageWriter } from "../../../util/hazelMessage";
+import { GameDataPacket } from "../../packets/root";
 import { BaseInnerNetObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { Tasks } from "../../../static";
@@ -118,7 +119,10 @@ export class InnerGameData extends BaseInnerNetObject {
       this.players.set(player.getId(), player);
     }
 
-    this.sendRpcPacket(new UpdateGameDataPacket(playerData), sendTo);
+    this.getLobby().sendRootGamePacket(
+      new GameDataPacket([this.serializeData()], this.getLobby().getCode()),
+      sendTo ?? this.getLobby().getConnections(),
+    );
 
     return this;
   }
@@ -127,8 +131,6 @@ export class InnerGameData extends BaseInnerNetObject {
     switch (type) {
       case RpcPacketType.SetTasks:
         this.parent.getLobby().getLogger().warn("Received SetTasks packet from connection %s in a server-as-host state", connection);
-        break;
-      case RpcPacketType.UpdateGameData:
         break;
       default:
         break;
@@ -143,14 +145,18 @@ export class InnerGameData extends BaseInnerNetObject {
   serializeData(): DataPacket {
     return new DataPacket(
       this.netId,
-      new MessageWriter().writeList(this.players.values(), (sub, player) => sub.writeObject(player), false),
+      new MessageWriter().writeListWithoutLength(this.players.values(), (sub, player) => {
+        sub.startMessage(player.getId()).writeObject(player).endMessage();
+      }),
     );
   }
 
   serializeSpawn(): SpawnPacketObject {
     return new SpawnPacketObject(
       this.netId,
-      new MessageWriter().writeList(this.players.values(), (sub, player) => sub.writeObject(player)),
+      new MessageWriter().writeList(this.players.values(), (sub, player) => {
+        sub.writeByte(player.getId()).writeObject(player);
+      }),
     );
   }
 

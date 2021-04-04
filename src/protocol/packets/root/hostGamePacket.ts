@@ -1,5 +1,5 @@
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
-import { RootPacketType } from "../../../types/enums";
+import { QuickChatMode, RootPacketType } from "../../../types/enums";
 import { LobbyCode } from "../../../util/lobbyCode";
 import { GameOptionsData } from "../../../types";
 import { BaseRootPacket } from ".";
@@ -10,20 +10,21 @@ import { BaseRootPacket } from ".";
 export class HostGameRequestPacket extends BaseRootPacket {
   constructor(
     public options: GameOptionsData,
+    public quickChatMode: QuickChatMode,
   ) {
     super(RootPacketType.HostGame);
   }
 
   static deserialize(reader: MessageReader): HostGameRequestPacket {
-    return new HostGameRequestPacket(GameOptionsData.deserialize(reader));
+    return new HostGameRequestPacket(GameOptionsData.deserialize(reader), reader.readByte());
   }
 
   clone(): HostGameRequestPacket {
-    return new HostGameRequestPacket(this.options.clone());
+    return new HostGameRequestPacket(this.options.clone(), this.quickChatMode);
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writeObject(this.options);
+    writer.writeObject(this.options).writeByte(this.quickChatMode);
   }
 }
 

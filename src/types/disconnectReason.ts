@@ -2,10 +2,20 @@ import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { DisconnectReasonType } from "./enums";
 import { CanSerializeToHazel } from ".";
 
+type DisconnectReasonSerializationOptions = {
+  /**
+   * Whether or not the disconnect reason type should be written as a UInt32
+   * (when `true`), or as a byte (when `false`)
+   *
+   * @defaultValue `false`
+   */
+  asInt?: boolean;
+};
+
 /**
  * A class used to store, serialize, and deserialize a disconnect reason.
  */
-export class DisconnectReason implements CanSerializeToHazel {
+export class DisconnectReason implements CanSerializeToHazel<DisconnectReasonSerializationOptions> {
   /**
    * @param type - The disconnect reason
    * @param message - The custom message to be displayed to the player when `type` is `DisconnectReasonType.Custom`
@@ -102,6 +112,13 @@ export class DisconnectReason implements CanSerializeToHazel {
    */
   static hacking(): DisconnectReason {
     return new DisconnectReason(DisconnectReasonType.Hacking);
+  }
+
+  /**
+   * Gets a new DisconnectReason whose type is `DisconnectReasonType.NotAuthorized`
+   */
+  static notAuthorized(): DisconnectReason {
+    return new DisconnectReason(DisconnectReasonType.NotAuthorized);
   }
 
   /**
@@ -207,10 +224,10 @@ export class DisconnectReason implements CanSerializeToHazel {
    * Writes the DisconnectReason to the given MessageWriter
    *
    * @param writer - The MessageWriter to write to
-   * @param asInt - `true` if the type should be written as a UInt32, `false` if it should be written as a byte (default `false`)
+   * @param options - The options used to serialize the DisconnectReason
    */
-  serialize(writer: MessageWriter, asInt: boolean = false): void {
-    writer[asInt ? "writeUInt32" : "writeByte"](this.type);
+  serialize(writer: MessageWriter, options?: DisconnectReasonSerializationOptions): void {
+    writer[options?.asInt ?? false ? "writeUInt32" : "writeByte"](this.type);
 
     if (this.type == DisconnectReasonType.Custom && this.message.length > 0) {
       writer.writeString(this.message);

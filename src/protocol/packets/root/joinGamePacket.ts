@@ -77,6 +77,6 @@ export class JoinGameErrorPacket extends BaseRootPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    this.disconnectReason.serialize(writer, true);
+    writer.writeObject(this.disconnectReason, { asInt: true });
   }
 }

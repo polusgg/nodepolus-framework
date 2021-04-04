@@ -1,10 +1,11 @@
 import { BaseInnerShipStatus } from "../../protocol/entities/shipStatus/baseShipStatus";
-import { DecontaminationDoorState, SystemType } from "../../types/enums";
+import { DecontaminationDoorState, Level, SystemType } from "../../types/enums";
 import { GameDataPacket } from "../../protocol/packets/root";
 import { clamp, notUndefined } from "../../util/functions";
 import { Player } from "../../player";
 import { Host } from "..";
 import {
+  HeliSabotageAction,
   MedbayAction,
   MiraCommunicationsAction,
   OxygenAction,
@@ -13,6 +14,7 @@ import {
 import {
   DecontaminationAmount,
   ElectricalAmount,
+  HeliSabotageAmount,
   MedbayAmount,
   MiraCommunicationsAmount,
   NormalCommunicationsAmount,
@@ -26,6 +28,7 @@ import {
   DeconSystem,
   DeconTwoSystem,
   DoorsSystem,
+  HeliSabotageSystem,
   HqHudSystem,
   HudOverrideSystem,
   LaboratorySystem,
@@ -52,6 +55,30 @@ export class SystemsHandler {
   constructor(
     protected readonly host: Host,
   ) {}
+
+  repairHeliSystem<T extends HeliSabotageSystem>(repairer: Player, system: T, amount: HeliSabotageAmount): void {
+    this.setOldShipStatus();
+
+    switch (amount.getAction()) {
+      case HeliSabotageAction.OpenedConsole:
+        system.setActiveConsole(repairer.getId(), amount.getConsoleId());
+        break;
+      case HeliSabotageAction.ClosedConsole:
+        system.removeActiveConsole(repairer.getId());
+        break;
+      case HeliSabotageAction.EnteredCode:
+        system.setTimer(10);
+        system.addCompletedConsole(amount.getConsoleId());
+
+        if (system.getCompletedConsoles().size == 2) {
+          system.setCountdown(10000);
+          this.host.getSabotageHandler()?.clearTimer();
+        }
+        break;
+    }
+
+    this.sendDataUpdate();
+  }
 
   repairDecon<T extends DeconSystem | DeconTwoSystem>(_repairer: Player, system: T, amount: DecontaminationAmount): void {
     let state = 0;
@@ -87,6 +114,10 @@ export class SystemsHandler {
         break;
       case MiraCommunicationsAction.EnteredCode:
         system.addCompletedConsole(amount.getConsoleId());
+
+        if (system.getCompletedConsoles().size == 2) {
+          this.host.getSabotageHandler()?.clearTimer();
+        }
         break;
     }
 
@@ -114,20 +145,12 @@ export class SystemsHandler {
 
         if (system.getCompletedConsoles().size == 2) {
           system.setTimer(10000);
-
-          if (sabotageHandler.timer !== undefined) {
-            clearInterval(sabotageHandler.timer);
-            delete sabotageHandler.timer;
-          }
+          sabotageHandler.clearTimer();
         }
         break;
       case OxygenAction.Repaired:
         system.setTimer(10000);
-
-        if (sabotageHandler.timer !== undefined) {
-          clearInterval(sabotageHandler.timer);
-          delete sabotageHandler.timer;
-        }
+        sabotageHandler.clearTimer();
         break;
     }
 
@@ -189,24 +212,16 @@ export class SystemsHandler {
         system.setUserConsole(repairer.getId(), amount.getConsoleId());
 
         if (new Set(system.getUserConsoles().values()).size == 2) {
-          system.setTimer(10000);
-
-          if (sabotageHandler.timer !== undefined) {
-            clearInterval(sabotageHandler.timer);
-            delete sabotageHandler.timer;
-          }
+          system.setCountdown(10000);
+          sabotageHandler.clearTimer();
         }
         break;
       case ReactorAction.RemovedHand:
         system.removeUserConsole(repairer.getId());
         break;
       case ReactorAction.Repaired:
-        system.setTimer(10000);
-
-        if (sabotageHandler.timer !== undefined) {
-          clearInterval(sabotageHandler.timer);
-          delete sabotageHandler.timer;
-        }
+        system.setCountdown(10000);
+        sabotageHandler.clearTimer();
         break;
     }
 
@@ -229,16 +244,19 @@ export class SystemsHandler {
     this.sabotageCountdownInterval = setInterval(() => {
       system.decrementCooldown();
 
-      if (system.getCooldown() == 0 && this.sabotageCountdownInterval !== undefined) {
-        clearInterval(this.sabotageCountdownInterval);
-        delete this.sabotageCountdownInterval;
+      if (system.getCooldown() == 0) {
+        this.clearSabotageTimer();
       }
     }, 1000);
 
     switch (type) {
       case SystemType.Reactor:
       case SystemType.Laboratory:
-        sabotageHandler.sabotageReactor(ship.getSystemFromType(type) as ReactorSystem | LaboratorySystem);
+        if (this.host.getLobby().getLevel() == Level.Airship) {
+          sabotageHandler.sabotageHeliSystem(ship.getSystemFromType(type) as HeliSabotageSystem);
+        } else {
+          sabotageHandler.sabotageReactor(ship.getSystemFromType(type) as ReactorSystem | LaboratorySystem | HeliSabotageSystem);
+        }
         break;
       case SystemType.Oxygen:
         sabotageHandler.sabotageOxygen(ship.getSystemFromType(type) as LifeSuppSystem);
@@ -279,7 +297,7 @@ export class SystemsHandler {
     if (system.getActualSwitches().equals(system.getExpectedSwitches())) {
       const startOfRepair = Date.now();
       const repairCountdown = setInterval(() => {
-        if (!system.getActualSwitches().equals(system.getExpectedSwitches())) {
+        if (!system.getActualSwitches().equals(system.getExpectedSwitches()) || this.host.getLobby().getShipStatus() === undefined) {
           clearInterval(repairCountdown);
 
           return;
@@ -311,7 +329,7 @@ export class SystemsHandler {
   }
 
   clearSabotageTimer(): void {
-    if (this.sabotageCountdownInterval) {
+    if (this.sabotageCountdownInterval !== undefined) {
       clearInterval(this.sabotageCountdownInterval);
       delete this.sabotageCountdownInterval;
     }

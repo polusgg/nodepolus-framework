@@ -7,6 +7,7 @@ When checking if a variable is undefined, always use `===` or `!==` in `if` stat
 Always `delete` a timeout/interval after clearing it
 Use `instanceof Array` over `Array.isArray`
 Be explicit when checking for undefined variables (`if (obj !== undefined)` vs `if (obj)`)
+BE FUCKING CONSISTENT
 
 
 

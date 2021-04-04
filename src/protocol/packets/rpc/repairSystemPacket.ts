@@ -4,6 +4,7 @@ import { BaseRpcPacket } from ".";
 import {
   DecontaminationAmount,
   ElectricalAmount,
+  HeliSabotageAmount,
   MedbayAmount,
   MiraCommunicationsAmount,
   NormalCommunicationsAmount,
@@ -49,6 +50,10 @@ export class RepairSystemPacket extends BaseRpcPacket {
     switch (this.system) {
       case SystemType.Reactor:
       case SystemType.Laboratory:
+        if (this.level == Level.Airship) {
+          return HeliSabotageAmount.deserialize(this.amountByte);
+        }
+
         return ReactorAmount.deserialize(this.amountByte);
       case SystemType.Electrical:
         return ElectricalAmount.deserialize(this.amountByte);
@@ -63,7 +68,7 @@ export class RepairSystemPacket extends BaseRpcPacket {
           ? MiraCommunicationsAmount.deserialize(this.amountByte)
           : NormalCommunicationsAmount.deserialize(this.amountByte);
       case SystemType.Doors:
-        if (this.level == Level.Polus) {
+        if (this.level == Level.Polus || this.level == Level.Airship) {
           return PolusDoorsAmount.deserialize(this.amountByte);
         }
 

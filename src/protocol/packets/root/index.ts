@@ -22,6 +22,8 @@ export { RemoveGamePacket } from "./removeGamePacket";
 
 export { LateRejectionPacket, RemovePlayerPacket } from "./removePlayerPacket";
 
+export { ReportPlayerRequestPacket, ReportPlayerResponsePacket } from "./reportPlayerPacket";
+
 export { ReselectServerPacket } from "./reselectServerPacket";
 
 export { StartGamePacket } from "./startGamePacket";

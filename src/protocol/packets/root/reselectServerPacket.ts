@@ -62,8 +62,6 @@ export class ReselectServerPacket extends BaseRootPacket {
 
   serialize(writer: MessageWriter): void {
     writer.writeByte(this.unknown)
-      .writeMessageList(this.servers, (sub, item) => {
-        sub.writeObject(item);
-      });
+      .writeMessageList(this.servers, (sub, item) => sub.writeObject(item));
   }
 }

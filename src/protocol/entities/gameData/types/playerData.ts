@@ -331,11 +331,7 @@ export class PlayerData implements CanSerializeToHazel {
    *
    * @param writer - The MessageWriter to write to
    */
-  serialize(writer: MessageWriter, includeId: boolean = true): void {
-    if (includeId) {
-      writer.writeByte(this.id);
-    }
-
+  serialize(writer: MessageWriter): void {
     writer.writeString(this.name)
       .writePackedUInt32(this.color)
       .writePackedUInt32(this.hat)

@@ -15,4 +15,5 @@ export enum RootPacketType {
   Redirect = 0x0d,
   ReselectServer = 0x0e,
   GetGameList = 0x10,
+  ReportPlayer = 0x11,
 }

@@ -4,8 +4,8 @@ import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
 export enum MovingPlatformSide {
-  Left = 0x00,
-  Right = 0x01,
+  Right = 0x00,
+  Left = 0x01,
 }
 
 export class MovingPlatformSystem extends BaseSystem {

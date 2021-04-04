@@ -57,7 +57,7 @@ const SPAWN_POSITIONS_AIRSHIP: LevelSpawnPositions = {
 const WORLD_Y_AXIS_OFFSET: Vector2 = new Vector2(0, 0.3636);
 
 /**
- * A helper class for retrieving static data for level spawn positions.
+ * A helper class for retrieving static data for spawn positions.
  */
 export class SpawnPositions {
   /**

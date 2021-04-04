@@ -3,13 +3,55 @@ import { BaseInnerShipStatus } from "../baseShipStatus";
 import { SystemType } from "../../../../types/enums";
 import { BaseSystem } from ".";
 
-export class AirshipReactorSystem extends BaseSystem {
+export class HeliSabotageSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
+    protected countdown: number = 10000,
+    protected timer: number = -1,
     protected activeConsoles: Map<number, number> = new Map(),
     protected completedConsoles: Set<number> = new Set([0, 1]),
   ) {
     super(shipStatus, SystemType.Reactor);
+  }
+
+  getCountdown(): number {
+    return this.countdown;
+  }
+
+  setCountdown(seconds: number): this {
+    this.countdown = seconds;
+
+    return this;
+  }
+
+  decrementCountdown(seconds: number = 1): this {
+    this.countdown -= Math.abs(seconds);
+
+    if (this.countdown < 0) {
+      this.countdown = 0;
+    }
+
+    return this;
+  }
+
+  getTimer(): number {
+    return this.timer;
+  }
+
+  setTimer(seconds: number): this {
+    this.timer = seconds;
+
+    return this;
+  }
+
+  decrementTimer(seconds: number = 1): this {
+    this.timer -= Math.abs(seconds);
+
+    if (this.timer < 0) {
+      this.timer = 0;
+    }
+
+    return this;
   }
 
   getActiveConsoles(): Map<number, number> {
@@ -78,13 +120,21 @@ export class AirshipReactorSystem extends BaseSystem {
 
   serializeSpawn(): MessageWriter {
     return new MessageWriter()
-      .writeList(this.activeConsoles, (writer, pair) => {
-        writer.writeByte(pair[0]);
-        writer.writeByte(pair[1]);
-      }).writeList(this.completedConsoles, (writer, con) => writer.writeByte(con));
+      .writeFloat32(this.countdown)
+      .writeFloat32(this.timer)
+      .writeList(this.activeConsoles, (writer, pair) => writer.writeBytes(pair))
+      .writeList(this.completedConsoles, (writer, con) => writer.writeByte(con));
   }
 
-  equals(old: AirshipReactorSystem): boolean {
+  equals(old: HeliSabotageSystem): boolean {
+    if (this.timer != old.timer) {
+      return false;
+    }
+
+    if (this.countdown != old.countdown) {
+      return false;
+    }
+
     if (this.activeConsoles.size != old.activeConsoles.size) {
       return false;
     }
@@ -112,7 +162,7 @@ export class AirshipReactorSystem extends BaseSystem {
     return true;
   }
 
-  clone(): AirshipReactorSystem {
-    return new AirshipReactorSystem(this.shipStatus, new Map(this.activeConsoles), new Set(this.completedConsoles));
+  clone(): HeliSabotageSystem {
+    return new HeliSabotageSystem(this.shipStatus, this.countdown, this.timer, new Map(this.activeConsoles), new Set(this.completedConsoles));
   }
 }

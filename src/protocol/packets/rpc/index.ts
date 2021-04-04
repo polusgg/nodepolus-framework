@@ -60,8 +60,6 @@ export { StartMeetingPacket } from "./startMeetingPacket";
 
 export { SyncSettingsPacket } from "./syncSettingsPacket";
 
-export { UpdateGameDataPacket } from "./updateGameDataPacket";
-
 export { UsePlatformPacket } from "./usePlatformPacket";
 
 export { VotingCompletePacket } from "./votingCompletePacket";

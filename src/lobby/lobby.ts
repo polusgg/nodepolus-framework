@@ -1,10 +1,10 @@
 import { BaseEntityShipStatus } from "../protocol/entities/shipStatus/baseShipStatus/baseEntityShipStatus";
-import { BaseRpcPacket, SendChatPacket, UpdateGameDataPacket } from "../protocol/packets/rpc";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/baseEntity";
 import { EntityPlayer, InnerCustomNetworkTransform } from "../protocol/entities/player";
 import { LobbyHostMigratedEvent, LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
 import { DisconnectReason, GameOptionsData, LobbyListing, Vector2 } from "../types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
+import { BaseRpcPacket, SendChatPacket } from "../protocol/packets/rpc";
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
 import { PlayerData } from "../protocol/entities/gameData/types";
@@ -674,18 +674,15 @@ export class Lobby implements LobbyInstance {
 
           playerData.setColor(color);
           playerData.setName(name);
+          player.updateGameData();
 
           connection.writeReliable(new GameDataPacket([
-            new RpcPacket(this.gameData.getGameData().getNetId(), new UpdateGameDataPacket([playerData])),
             new RpcPacket(player.getEntity().getPlayerControl().getNetId(), new SendChatPacket(message.toString())),
           ], this.code));
 
           playerData.setColor(oldColor);
           playerData.setName(oldName);
-
-          connection.writeReliable(new GameDataPacket([
-            new RpcPacket(this.gameData.getGameData().getNetId(), new UpdateGameDataPacket([playerData])),
-          ], this.code));
+          player.updateGameData();
         }
       }
     }

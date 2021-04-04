@@ -31,7 +31,7 @@ export function clamp(value: number, min: number, max: number): number {
 /**
  * Gets whether or not the given value is undefined.
  *
- * @typeParam T - The type of object being checked
+ * @typeParam T - The type of `value`
  * @param value - The possibly-undefined value
  * @returns `true` if `value` is not `undefined`
  */
@@ -42,7 +42,7 @@ export function notUndefined<T>(value: T | undefined): value is T {
 /**
  * Gets whether or not the given objects are equal at their top level.
  *
- * @typeParam T - The type of objects being compared
+ * @typeParam T - The type of `one` and `two`
  * @param one - The first object
  * @param two - The second object
  * @returns `true` if the two objects have the same length and keys.
@@ -65,6 +65,15 @@ export function shallowEqual<T>(one: T, two: T): boolean {
 }
 
 /**
+ * Gets a random boolean with the given odds of getting `true`.
+ *
+ * @param odds - The percent chance of getting `true` (default `0.5` or 50%)
+ */
+export function randomBoolean(odds: number = 0.5): boolean {
+  return Math.random() < clamp(odds, 0, 1);
+}
+
+/**
  * Gets a random number in an inclusive range of integers.
  *
  * @param min - The minimum integer value
@@ -73,6 +82,26 @@ export function shallowEqual<T>(one: T, two: T): boolean {
  */
 export function randomInRange(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Gets a random element from the given array.
+ *
+ * @param items - The array from which a random element will be returned
+ * @returns A random element from `items`
+ */
+export function randomFromArray<T>(items: T[]): T {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+/**
+ * Gets a random element from the given iterable.
+ *
+ * @param items - The iterable from which a random element will be returned
+ * @returns A random element from `items`
+ */
+export function randomFromIterable<T>(items: Iterable<T>): T {
+  return randomFromArray([...items]);
 }
 
 /**

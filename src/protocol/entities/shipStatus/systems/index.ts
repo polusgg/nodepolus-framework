@@ -1,7 +1,5 @@
 export { BaseSystem } from "./baseSystem";
 
-export { AirshipReactorSystem } from "./airshipReactorSystem";
-
 export { AutoDoorsSystem } from "./autoDoorsSystem";
 
 export { DeconSystem } from "./deconSystem";
@@ -9,6 +7,10 @@ export { DeconSystem } from "./deconSystem";
 export { DeconTwoSystem } from "./deconTwoSystem";
 
 export { DoorsSystem } from "./doorsSystem";
+
+export { ElectricalDoorsSystem } from "./electricalDoorsSystem";
+
+export { HeliSabotageSystem } from "./heliSabotageSystem";
 
 export { HqHudSystem } from "./hqHudSystem";
 

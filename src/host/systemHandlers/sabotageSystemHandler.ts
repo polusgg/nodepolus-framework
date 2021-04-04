@@ -3,6 +3,7 @@ import { clamp } from "../../util/functions";
 import { Bitfield } from "../../types";
 import { Host } from "..";
 import {
+  HeliSabotageSystem,
   HqHudSystem,
   HudOverrideSystem,
   LaboratorySystem,
@@ -19,27 +20,52 @@ export class SabotageSystemHandler {
     protected host: Host,
   ) {}
 
-  sabotageReactor(system: ReactorSystem | LaboratorySystem): void {
+  sabotageHeliSystem(system: HeliSabotageSystem): void {
+    system.setCountdown(90);
+    system.clearCompletedConsoles();
+
+    let i = 0;
+
+    this.timer = setInterval(() => {
+      system.decrementCountdown();
+      system.decrementTimer();
+
+      if (system.getCountdown() <= 0) {
+        this.host.endGame(GameOverReason.ImpostorsBySabotage);
+        this.clearTimer();
+
+        return;
+      }
+
+      if (i % 10 === 0) {
+        system.clearActiveConsoles();
+        system.setTimer(10);
+      }
+
+      i++;
+    }, 1000);
+  }
+
+  sabotageReactor(system: ReactorSystem | LaboratorySystem | HeliSabotageSystem): void {
     switch (this.host.getLobby().getLevel()) {
       case Level.TheSkeld:
       case Level.AprilSkeld:
-        system.setTimer(30);
+        system.setCountdown(30);
         break;
       case Level.MiraHq:
-        system.setTimer(45);
+        system.setCountdown(45);
         break;
       case Level.Polus:
-        system.setTimer(60);
+        system.setCountdown(60);
         break;
-      case Level.Airship:
-        system.setTimer(100);
-        break;
+      default:
+        throw new Error("Attempted to sabotage reactor on a map without reactor.");
     }
 
     this.timer = setInterval(() => {
-      system.decrementTimer();
+      system.decrementCountdown();
 
-      if (system.getTimer() <= 0) {
+      if (system.getCountdown() <= 0) {
         this.host.endGame(GameOverReason.ImpostorsBySabotage);
         this.clearTimer();
       }

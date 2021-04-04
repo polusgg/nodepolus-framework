@@ -48,19 +48,18 @@ const VENTS_POLUS: readonly LevelVent[] = [
 ];
 
 const VENTS_AIRSHIP: readonly LevelVent[] = [
-  // TODO
-  new LevelVent(Level.Airship, 0, "", SystemType.VaultRoom, new Vector2(0, 0), []),
-  new LevelVent(Level.Airship, 1, "", SystemType.Cockpit, new Vector2(0, 0), []),
-  new LevelVent(Level.Airship, 2, "", SystemType.ViewingDeck, new Vector2(0, 0), []),
-  new LevelVent(Level.Airship, 3, "", SystemType.Engine, new Vector2(0, 0), []),
-  new LevelVent(Level.Airship, 4, "", SystemType.Kitchen, new Vector2(0, 0), []),
-  new LevelVent(Level.Airship, 5, "", SystemType.MainHall, new Vector2(0, 0), []),
-  new LevelVent(Level.Airship, 6, "", SystemType.MainHall, new Vector2(0, 0), []),
-  new LevelVent(Level.Airship, 7, "", SystemType.GapRoom, new Vector2(0, 0), []),
-  new LevelVent(Level.Airship, 8, "", SystemType.GapRoom, new Vector2(0, 0), []),
-  new LevelVent(Level.Airship, 9, "", SystemType.Showers, new Vector2(0, 0), []),
-  new LevelVent(Level.Airship, 10, "", SystemType.Records, new Vector2(0, 0), []),
-  new LevelVent(Level.Airship, 11, "", SystemType.Storage, new Vector2(0, 0), []),
+  new LevelVent(Level.Airship, 0, "In the Vault Room", SystemType.VaultRoom, new Vector2(-12.6322, 8.4735), [1]),
+  new LevelVent(Level.Airship, 1, "In the Cockpit", SystemType.Cockpit, new Vector2(-22.099, -1.512), [0, 2]),
+  new LevelVent(Level.Airship, 2, "In the Viewing Deck", SystemType.ViewingDeck, new Vector2(-15.659, -11.6991), [1]),
+  new LevelVent(Level.Airship, 3, "In the Engine", SystemType.Engine, new Vector2(0.203, -2.5361), [4, 5]),
+  new LevelVent(Level.Airship, 4, "In the Kitchen", SystemType.Kitchen, new Vector2(-2.6019, -9.338), [3, 5]),
+  new LevelVent(Level.Airship, 5, "In the Upper Main Hall", SystemType.MainHall, new Vector2(7.021, -3.730999), [3, 4]),
+  new LevelVent(Level.Airship, 6, "In the Lower Main Hall", SystemType.MainHall, new Vector2(9.814, 3.206), [8, 7]),
+  new LevelVent(Level.Airship, 7, "On the right side of the Gap Room", SystemType.GapRoom, new Vector2(12.663, 5.922), [8, 6]),
+  new LevelVent(Level.Airship, 8, "On the left side of the Gap Room", SystemType.GapRoom, new Vector2(3.605, 6.923), [7, 6]),
+  new LevelVent(Level.Airship, 9, "In the Showers", SystemType.Showers, new Vector2(23.9869, -1.386), [10, 11]),
+  new LevelVent(Level.Airship, 10, "In the Records", SystemType.Records, new Vector2(23.2799, 8.259998), [9, 11]),
+  new LevelVent(Level.Airship, 11, "In the Cargo Bay", SystemType.CargoBay, new Vector2(30.4409, -3.577), [9, 10]),
 ];
 
 const VENT_COUNT_THE_SKELD: number = VENTS_THE_SKELD.length;
