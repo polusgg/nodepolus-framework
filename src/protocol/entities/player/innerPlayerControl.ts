@@ -268,7 +268,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
         }
       }
     } else {
-      setColor = PlayerColor.ForteGreen;
+      setColor = color;
     }
 
     this.setColor(setColor, this.getLobby().getConnections());
@@ -425,9 +425,10 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     const oldData = shipStatus.getShipStatus().clone();
     const movingPlatform = shipStatus.getShipStatus().getSystems()[InternalSystemType.MovingPlatform] as MovingPlatformSystem;
 
-    movingPlatform.setInnerPlayerControlNetId(sender.getParent().getPlayerControl().getNetId());
-    movingPlatform.toggleSide();
-    movingPlatform.incrementSequenceId();
+    if (!movingPlatform.isInUse()) {
+      movingPlatform.ride(sender.getParent().getPlayerControl().getNetId());
+    }
+
     (this.getLobby() as Lobby).sendRootGamePacket(new GameDataPacket([
       shipStatus.getShipStatus().serializeData(oldData),
     ], this.getLobby().getCode()));

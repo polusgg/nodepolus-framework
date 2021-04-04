@@ -9,6 +9,8 @@ export enum MovingPlatformSide {
 }
 
 export class MovingPlatformSystem extends BaseSystem {
+  private inUse = false;
+
   constructor(
     shipStatus: BaseInnerShipStatus,
     protected sequenceId: number = 0,
@@ -16,6 +18,21 @@ export class MovingPlatformSystem extends BaseSystem {
     protected side: MovingPlatformSide = MovingPlatformSide.Left,
   ) {
     super(shipStatus, SystemType.GapRoom);
+  }
+
+  ride(netId: number): void {
+    this.setInnerPlayerControlNetId(netId);
+    this.toggleSide();
+    this.incrementSequenceId();
+    this.inUse = true;
+
+    setTimeout(() => {
+      this.inUse = false;
+    }, 5000);
+  }
+
+  isInUse(): boolean {
+    return this.inUse;
   }
 
   getSequenceId(): number {

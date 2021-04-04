@@ -1199,14 +1199,12 @@ export class Lobby implements LobbyInstance {
    * @param data - The packet's data
    * @param sendTo - The connections to which the packet was intended to be sent
    */
-  protected handleData(netId: number, data: MessageReader | MessageWriter, sendTo?: Connection[]): void {
+  protected async handleData(netId: number, data: MessageReader | MessageWriter, sendTo?: Connection[]): Promise<void> {
     const object = this.findSafeInnerNetObject(netId);
 
     if (object.getType() == InnerNetObjectType.CustomNetworkTransform) {
-      const oldNetObject = object.clone();
-
-      (object as InnerCustomNetworkTransform).setData(data);
-      this.sendUnreliableRootGamePacket(new GameDataPacket([object.serializeData(oldNetObject)], this.code), sendTo ?? []);
+      await (object as InnerCustomNetworkTransform).setData(data);
+      this.sendUnreliableRootGamePacket(new GameDataPacket([object.serializeData(undefined as unknown as BaseInnerNetObject)], this.code), sendTo ?? []);
     }
   }
 
