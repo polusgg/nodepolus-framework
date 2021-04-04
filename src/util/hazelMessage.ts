@@ -1,4 +1,4 @@
-import { CanSerializeToHazel, Vector2 } from "../types";
+import { CanSerializeToHazel, SerializationOptions, Vector2 } from "../types";
 import { MaxValue, MinValue } from "./constants";
 import { clamp } from "./functions";
 
@@ -324,7 +324,7 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes a packed 32-bit integer (int).
    *
-   * @param value - The packet int32 to write
+   * @param value - The packed int32 to write
    */
   writePackedInt32(value: number): this {
     if (value > MaxValue.Int32 || value < MinValue.Int32) {
@@ -337,7 +337,7 @@ export class MessageWriter extends HazelMessage {
   /**
    * Writes a packed unsigned 32-bit integer (uint).
    *
-   * @param value - The packet uint32 to write
+   * @param value - The packed uint32 to write
    */
   writePackedUInt32(value: number): this {
     if (value > MaxValue.UInt32 || value < MinValue.UInt32) {
@@ -403,10 +403,13 @@ export class MessageWriter extends HazelMessage {
    * Writes the given object by passing this MessageWriter into the `serialize`
    * method on the given object.
    *
-   * @param object - The object whose data will be written to this MessageWriter
+   * @typeParam T - The type of `object`
+   * @typeParam U - The type of `options`
+   * @param object - The object to write
+   * @param options - The options used to modify how `object` is written
    */
-  writeObject(object: CanSerializeToHazel): this {
-    object.serialize(this);
+  writeObject<T extends CanSerializeToHazel<U>, U extends Record<string, unknown>>(object: T, options?: SerializationOptions<T>): this {
+    object.serialize(this, options);
 
     return this;
   }
@@ -415,9 +418,9 @@ export class MessageWriter extends HazelMessage {
    * Writes the given items inside the given `writer` function with a prefixed
    * length.
    *
-   * @typeParam T - The type of items that will be written
+   * @typeParam T - The type of each item in `items`
    * @param items - The items to write
-   * @param writer - The function used to serialize each item
+   * @param writer - The function used to write each item in `items`
    * @param lengthIsPacked - `true` if the length prefixing the list should be a packed uint32, `false` if it should be a byte
    */
   writeList<T>(
@@ -440,9 +443,9 @@ export class MessageWriter extends HazelMessage {
    * Writes the given items inside the given `writer` function without a
    * prefixed length.
    *
-   * @typeParam T - The type of items that will be written
+   * @typeParam T - The type of each item in `items`
    * @param items - The items to write
-   * @param writer - The function used to serialize each item
+   * @param writer - The function used to write each item in `items`
    */
   writeListWithoutLength<T>(
     items: Iterable<T>,
@@ -464,9 +467,9 @@ export class MessageWriter extends HazelMessage {
    * If each nested MessageWriter should have a unique or variable tag, then use
    * `writeList` instead and create a new message inside the writer function.
    *
-   * @typeParam T - The type of items that will be written
+   * @typeParam T - The type of each item in `items`
    * @param items - The items to write
-   * @param writer - The function used to serialize each item
+   * @param writer - The function used to write each item in `items`
    * @param lengthIsPacked - `true` if the length prefixing the list should be a packed uint32, `false` if it should be a byte
    * @param defaultTag - The tag to be used for each nested MessageWriter (default `0`)
    */
@@ -782,8 +785,8 @@ export class MessageReader extends HazelMessage {
    * Gets an array of items read from the MessageReader in the given `reader`
    * function.
    *
-   * @typeParam T - The type of items that will be returned
-   * @param reader - The function used to deserialize each item
+   * @typeParam T - The type of each item that will be returned
+   * @param reader - The function used to read each item
    * @param lengthIsPacked - `true` if the length prefixing the list is a packed uint32, `false` if it is a byte
    */
   readList<T>(reader: (subReader: MessageReader) => T, lengthIsPacked: boolean = true): T[] {
@@ -801,8 +804,8 @@ export class MessageReader extends HazelMessage {
    * Gets an array of items read from the MessageReader in the given `reader`
    * function, where each item is inside a nested MessageReader.
    *
-   * @typeParam T - The type of items that will be returned
-   * @param reader - The function used to deserialize each item
+   * @typeParam T - The type of each item that will be returned
+   * @param reader - The function used to read each item
    * @param lengthIsPacked - `true` if the length prefixing the list is a packed uint32, `false` if it is a byte
    */
   readMessageList<T>(reader: (subReader: MessageReader) => T, lengthIsPacked: boolean = true): T[] {
@@ -835,8 +838,8 @@ export class MessageReader extends HazelMessage {
    * Gets an array of items read from the MessageReader in the given `reader`
    * function, where each item is inside a nested MessageReader.
    *
-   * @typeParam T - The type of items that will be returned
-   * @param reader - The function used to deserialize each item
+   * @typeParam T - The type of each item that will be returned
+   * @param reader - The function used to read each item
    */
   readAllChildMessages<T>(reader: (child: MessageReader, index: number) => T): T[] {
     const children = this.getAllChildMessages();

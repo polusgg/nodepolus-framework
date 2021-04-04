@@ -31,7 +31,7 @@ export function clamp(value: number, min: number, max: number): number {
 /**
  * Gets whether or not the given value is undefined.
  *
- * @typeParam T - The type of object being checked
+ * @typeParam T - The type of `value`
  * @param value - The possibly-undefined value
  * @returns `true` if `value` is not `undefined`
  */
@@ -42,7 +42,7 @@ export function notUndefined<T>(value: T | undefined): value is T {
 /**
  * Gets whether or not the given objects are equal at their top level.
  *
- * @typeParam T - The type of objects being compared
+ * @typeParam T - The type of `one` and `two`
  * @param one - The first object
  * @param two - The second object
  * @returns `true` if the two objects have the same length and keys.

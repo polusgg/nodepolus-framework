@@ -28,9 +28,9 @@ export class GetGameListRequestPacket extends BaseRootPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writePackedInt32(this.unknown);
-    this.options.serialize(writer, true);
-    writer.writeByte(this.quickChatMode);
+    writer.writePackedInt32(this.unknown)
+      .writeObject(this.options, { isSearching: true })
+      .writeByte(this.quickChatMode);
   }
 }
 

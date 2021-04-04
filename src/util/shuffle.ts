@@ -4,7 +4,7 @@
  * This *does* modify the source array.
  *
  * @see Source: {@link https://basarat.gitbook.io/algorithms/shuffling}
- * @typeParam T - The type of items that `items` contains
+ * @typeParam T - The type of each item in `items`
  * @param items - The array whose items will be shuffled in place
  */
 const shuffleArray = <T>(items: T[]): void => {
@@ -26,7 +26,7 @@ const shuffleArray = <T>(items: T[]): void => {
  * This *does not* modify the source array.
  *
  * @see Source: {@link https://basarat.gitbook.io/algorithms/shuffling}
- * @typeParam T - The type of items that `items` contains
+ * @typeParam T - The type of each item in `items`
  * @param items - The array whose items will be shuffled and returned
  */
 const shuffleArrayClone = <T>(items: T[]): T[] => {

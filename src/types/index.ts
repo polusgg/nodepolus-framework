@@ -38,6 +38,8 @@ export { NetworkAccessible } from "./networkAccessible";
 
 export { OutboundPacketTransformer } from "./outboundPacketTransformer";
 
+export { SerializationOptions } from "./serializationOptions";
+
 export { Vector2 } from "./vector2";
 
 export { VoteResult } from "./voteResult";

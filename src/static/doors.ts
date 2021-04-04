@@ -244,7 +244,7 @@ export class StaticDoors {
   /**
    * Gets all static door data for the given level.
    *
-   * @typeParam T - The level whose static doors should be returned
+   * @typeParam T - The type of `level`
    * @param level - The level whose static doors should be returned
    */
   static forLevel<T extends Level>(level: T): StaticDoorsFromLevel<T> {
@@ -259,7 +259,7 @@ export class StaticDoors {
   /**
    * Gets all static exit doors data for the given level.
    *
-   * @typeParam T - The level whose static exit doors should be returned
+   * @typeParam T - The type of `level`
    * @param level - The level whose static exit doors should be returned
    */
   static exitsForLevel<T extends Level>(level: T): StaticDoorExitsFromLevel<T> {
@@ -279,7 +279,7 @@ export class StaticRooms {
   /**
    * Gets all static door room data for the given level.
    *
-   * @typeParam T - The level whose static door rooms should be returned
+   * @typeParam T - The type of `level`
    * @param level - The level whose static door rooms should be returned
    */
   static forLevel<T extends Level>(level: T): StaticRoomsFromLevel<T> {
