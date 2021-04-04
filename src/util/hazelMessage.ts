@@ -412,7 +412,8 @@ export class MessageWriter extends HazelMessage {
   }
 
   /**
-   * Writes the given items inside the given `writer` function.
+   * Writes the given items inside the given `writer` function with a prefixed
+   * length.
    *
    * @typeParam T - The type of items that will be written
    * @param items - The items to write
@@ -431,6 +432,23 @@ export class MessageWriter extends HazelMessage {
     } else {
       this.writeByte(arr.length);
     }
+
+    return this.writeListWithoutLength(items, writer);
+  }
+
+  /**
+   * Writes the given items inside the given `writer` function without a
+   * prefixed length.
+   *
+   * @typeParam T - The type of items that will be written
+   * @param items - The items to write
+   * @param writer - The function used to serialize each item
+   */
+  writeListWithoutLength<T>(
+    items: Iterable<T>,
+    writer: (subWriter: MessageWriter, item: T, index: number) => void,
+  ): this {
+    const arr = [...items];
 
     for (let i = 0; i < arr.length; i++) {
       writer(this, arr[i], i);

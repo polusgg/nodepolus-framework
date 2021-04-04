@@ -54,7 +54,7 @@ const VENTS_AIRSHIP: readonly LevelVent[] = [
   new LevelVent(Level.Airship, 3, "In the Engine", SystemType.Engine, new Vector2(0.203, -2.5361), [4, 5]),
   new LevelVent(Level.Airship, 4, "In the Kitchen", SystemType.Kitchen, new Vector2(-2.6019, -9.338), [3, 5]),
   new LevelVent(Level.Airship, 5, "In the Upper Main Hall", SystemType.MainHall, new Vector2(7.021, -3.730999), [3, 4]),
-  new LevelVent(Level.Airship, 6, "In theLower Main Hall", SystemType.MainHall, new Vector2(9.814, 3.206), [8, 7]),
+  new LevelVent(Level.Airship, 6, "In the Lower Main Hall", SystemType.MainHall, new Vector2(9.814, 3.206), [8, 7]),
   new LevelVent(Level.Airship, 7, "On the right side of the Gap Room", SystemType.GapRoom, new Vector2(12.663, 5.922), [8, 6]),
   new LevelVent(Level.Airship, 8, "On the left side of the Gap Room", SystemType.GapRoom, new Vector2(3.605, 6.923), [7, 6]),
   new LevelVent(Level.Airship, 9, "In the Showers", SystemType.Showers, new Vector2(23.9869, -1.386), [10, 11]),

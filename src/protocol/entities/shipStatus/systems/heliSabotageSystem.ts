@@ -14,16 +14,6 @@ export class HeliSabotageSystem extends BaseSystem {
     super(shipStatus, SystemType.Reactor);
   }
 
-  getTimer(): number {
-    return this.timer;
-  }
-
-  setTimer(seconds: number): this {
-    this.timer = seconds;
-
-    return this;
-  }
-
   getCountdown(): number {
     return this.countdown;
   }
@@ -39,6 +29,26 @@ export class HeliSabotageSystem extends BaseSystem {
 
     if (this.countdown < 0) {
       this.countdown = 0;
+    }
+
+    return this;
+  }
+
+  getTimer(): number {
+    return this.timer;
+  }
+
+  setTimer(seconds: number): this {
+    this.timer = seconds;
+
+    return this;
+  }
+
+  decrementTimer(seconds: number = 1): this {
+    this.timer -= Math.abs(seconds);
+
+    if (this.timer < 0) {
+      this.timer = 0;
     }
 
     return this;
@@ -112,8 +122,8 @@ export class HeliSabotageSystem extends BaseSystem {
     return new MessageWriter()
       .writeFloat32(this.countdown)
       .writeFloat32(this.timer)
-      .writeList(this.activeConsoles, (writer, pair) => writer.writeBytes(pair), true)
-      .writeList(this.completedConsoles, (writer, con) => writer.writeByte(con), true);
+      .writeList(this.activeConsoles, (writer, pair) => writer.writeBytes(pair))
+      .writeList(this.completedConsoles, (writer, con) => writer.writeByte(con));
   }
 
   equals(old: HeliSabotageSystem): boolean {

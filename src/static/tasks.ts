@@ -120,7 +120,7 @@ const TASKS_AIRSHIP: readonly Readonly<LevelTask>[] = [
   { id: 18, name: "Cockpit: Stabilize Steering", isVisual: false, length: TaskLength.Short, type: TaskType.StabilizeSteering },
   { id: 19, name: "Armory: Download Data", isVisual: false, length: TaskLength.Long, type: TaskType.UploadData },
   { id: 20, name: "Cockpit: Download Data", isVisual: false, length: TaskLength.Long, type: TaskType.UploadData },
-  { id: 21, name: "Comms: Download Data", isVisual: false, length: TaskLength.Long, type: TaskType.UploadData },
+  { id: 21, name: "Communications: Download Data", isVisual: false, length: TaskLength.Long, type: TaskType.UploadData },
   { id: 22, name: "Medical: Download Data", isVisual: false, length: TaskLength.Long, type: TaskType.UploadData },
   { id: 23, name: "Viewing Deck: Download Data", isVisual: false, length: TaskLength.Long, type: TaskType.UploadData },
   { id: 24, name: "Electrical: Divert Power to Armory", isVisual: false, length: TaskLength.Short, type: TaskType.DivertPower },

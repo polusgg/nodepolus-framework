@@ -1,5 +1,5 @@
-import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { ReportOutcome, ReportReason, RootPacketType } from "../../../types/enums";
+import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { LobbyCode } from "../../../util/lobbyCode";
 import { BaseRootPacket } from ".";
 

@@ -119,15 +119,10 @@ export class InnerGameData extends BaseInnerNetObject {
       this.players.set(player.getId(), player);
     }
 
-    const data = this.serializeData();
-
-    if (sendTo === undefined) {
-      sendTo = this.getLobby().getConnections();
-    }
-
-    for (let i = 0; i < sendTo.length; i++) {
-      sendTo[i].writeReliable(new GameDataPacket([data], this.getLobby().getCode()));
-    }
+    this.getLobby().sendRootGamePacket(
+      new GameDataPacket([this.serializeData()], this.getLobby().getCode()),
+      sendTo ?? this.getLobby().getConnections(),
+    );
 
     return this;
   }
@@ -148,21 +143,20 @@ export class InnerGameData extends BaseInnerNetObject {
 
   // TODO: compare players and only send those that have updated
   serializeData(): DataPacket {
-    const writer = new MessageWriter();
-
-    [...this.players.values()].forEach(player => {
-      writer.startMessage(player.getId());
-      player.serialize(writer, false);
-      writer.endMessage();
-    });
-
-    return new DataPacket(this.netId, writer);
+    return new DataPacket(
+      this.netId,
+      new MessageWriter().writeListWithoutLength(this.players.values(), (sub, player) => {
+        sub.startMessage(player.getId()).writeObject(player).endMessage();
+      }),
+    );
   }
 
   serializeSpawn(): SpawnPacketObject {
     return new SpawnPacketObject(
       this.netId,
-      new MessageWriter().writeList(this.players.values(), (sub, player) => sub.writeObject(player)),
+      new MessageWriter().writeList(this.players.values(), (sub, player) => {
+        sub.writeByte(player.getId()).writeObject(player);
+      }),
     );
   }
 

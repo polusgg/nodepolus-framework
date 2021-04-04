@@ -28,11 +28,13 @@ export class SabotageSystemHandler {
 
     this.timer = setInterval(() => {
       system.decrementCountdown();
-      system.setTimer(system.getTimer() - 1);
+      system.decrementTimer();
 
       if (system.getCountdown() <= 0) {
         this.host.endGame(GameOverReason.ImpostorsBySabotage);
         this.clearTimer();
+
+        return;
       }
 
       if (i % 10 === 0) {
