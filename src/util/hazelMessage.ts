@@ -404,11 +404,10 @@ export class MessageWriter extends HazelMessage {
    * method on the given object.
    *
    * @typeParam T - The type of `object`
-   * @typeParam U - The type of `options`
    * @param object - The object to write
    * @param options - The options used to modify how `object` is written
    */
-  writeObject<T extends CanSerializeToHazel<U>, U extends Record<string, unknown>>(object: T, options?: SerializationOptions<T>): this {
+  writeObject<T extends CanSerializeToHazel>(object: T, options?: SerializationOptions<T>): this {
     object.serialize(this, options);
 
     return this;
