@@ -773,14 +773,19 @@ export class Host implements HostInstance {
     this.playersInScene.set(connection.getId(), sceneName);
 
     let lobbyBehaviour = this.lobby.getLobbyBehaviour();
+    const shipStatus = this.lobby.getShipStatus();
 
-    if (lobbyBehaviour === undefined) {
+    if (lobbyBehaviour === undefined && shipStatus === undefined) {
       lobbyBehaviour = new EntityLobbyBehaviour(this.lobby);
 
       this.lobby.setLobbyBehaviour(lobbyBehaviour);
     }
 
-    connection.writeReliable(new GameDataPacket([lobbyBehaviour.serializeSpawn()], this.lobby.getCode()));
+    if (lobbyBehaviour !== undefined) {
+      connection.writeReliable(new GameDataPacket([lobbyBehaviour.serializeSpawn()], this.lobby.getCode()));
+    } else {
+      connection.writeReliable(new GameDataPacket([shipStatus!.serializeSpawn()], this.lobby.getCode()));
+    }
 
     let gameData = this.lobby.getGameData();
 
