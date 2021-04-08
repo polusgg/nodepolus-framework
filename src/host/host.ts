@@ -802,31 +802,33 @@ export class Host implements HostInstance {
 
     await this.lobby.getServer().emit("player.spawned", event);
 
-    const entity = new EntityPlayer(
-      this.lobby,
-      connection.getId(),
-      event.getPosition(),
-      Vector2.zero(),
-      newPlayerId,
-      true,
-      SpawnFlag.IsClientCharacter,
-    );
+    if (!event.isCancelled()) {
+      const entity = new EntityPlayer(
+        this.lobby,
+        connection.getId(),
+        event.getPosition(),
+        Vector2.zero(),
+        newPlayerId,
+        true,
+        SpawnFlag.IsClientCharacter,
+      );
 
-    entity.getPlayerControl().setNewPlayer(event.isNew());
+      entity.getPlayerControl().setNewPlayer(event.isNew());
 
-    const player = new Player(this.lobby, entity, connection);
+      const player = new Player(this.lobby, entity, connection);
+
+      this.lobby.addPlayer(player);
+
+      await this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
+      this.ensurePlayerDataExists(player);
+      player.getEntity().getPlayerControl().setNewPlayer(false);
+    }
 
     for (let i = 0; i < this.lobby.getPlayers().length; i++) {
       connection.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].getEntity().serializeSpawn()], this.lobby.getCode()));
     }
 
-    this.lobby.addPlayer(player);
-
-    await this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
-
     (this.lobby.getPlayers()[0] as Player).getEntity().getPlayerControl().syncSettings(this.lobby.getOptions(), [connection]);
-    this.ensurePlayerDataExists(player);
-    player.getEntity().getPlayerControl().setNewPlayer(false);
 
     connection.flush(true);
 

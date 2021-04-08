@@ -1,11 +1,12 @@
 import { Connection } from "../../../protocol/connection";
 import { LobbyInstance } from "../../lobby";
 import { Vector2 } from "../../../types";
+import { CancellableEvent } from "../types";
 
 /**
  * Fired when a player is being spawned in a lobby.
  */
-export class PlayerSpawnedEvent {
+export class PlayerSpawnedEvent extends CancellableEvent {
   /**
    * @param connection - The connection that the player belongs to
    * @param lobby - The lobby in which the player is being spawned
@@ -19,7 +20,9 @@ export class PlayerSpawnedEvent {
     protected readonly playerId: number,
     protected newPlayer: boolean,
     protected position: Vector2,
-  ) {}
+  ) {
+    super();
+  }
 
   /**
    * Gets the connection that the player belongs to.
