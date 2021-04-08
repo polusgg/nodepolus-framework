@@ -682,6 +682,7 @@ export class Host implements HostInstance {
 
     if (lobbyBehaviour !== undefined) {
       this.lobby.despawn(lobbyBehaviour.getLobbyBehaviour());
+      this.lobby.deleteLobbyBehaviour();
     }
 
     switch (this.lobby.getLevel()) {
