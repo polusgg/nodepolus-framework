@@ -753,12 +753,6 @@ export class Host implements HostInstance {
   async handleSceneChange(connection: Connection, sceneName: string): Promise<void> {
     connection.setCurrentScene(Scene[sceneName]);
 
-    if (this.lobby.getConnections().length > this.lobby.getOptions().getMaxPlayers()) {
-      connection.sendLateRejection(DisconnectReason.gameFull());
-
-      return;
-    }
-
     if (sceneName !== Scene.OnlineGame) {
       return;
     }
