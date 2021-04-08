@@ -946,8 +946,10 @@ export class Lobby implements LobbyInstance {
     if (this.connections.indexOf(connection) == -1) {
       const count = this.connections.length;
 
-      if (count >= this.options.getMaxPlayers() || count >= this.server.getMaxPlayersPerLobby()) {
-        const event = new ServerLobbyJoinRefusedEvent(connection, this);
+      const gameStarted = !(this.gameState == GameState.NotStarted || this.gameState == GameState.Ended);
+
+      if (count >= this.options.getMaxPlayers() || count >= this.server.getMaxPlayersPerLobby() || gameStarted) {
+        const event = new ServerLobbyJoinRefusedEvent(connection, this, gameStarted ? DisconnectReason.gameStarted() : DisconnectReason.gameFull());
 
         await this.server.emit("server.lobby.join.refused", event);
 
@@ -971,17 +973,13 @@ export class Lobby implements LobbyInstance {
       connection.on("packet", (packet: BaseRootPacket) => this.handlePacket(packet, connection));
     }
 
-    switch (this.gameState) {
-      case GameState.NotStarted:
-        this.handleNewJoin(connection);
-        break;
-      case GameState.Ended:
-        // TODO: Dead code, Host#endGame sets gameState to NotStarted
-        this.handleRejoin(connection);
-        break;
-      default:
-        connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameStarted())]);
+    if (this.gameState == GameState.Ended) {
+      // TODO: Dead code, Host#endGame sets gameState to NotStarted
+      this.handleRejoin(connection);
+      return;
     }
+
+    this.handleNewJoin(connection);
   }
 
   /**
