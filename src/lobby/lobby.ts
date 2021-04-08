@@ -976,6 +976,7 @@ export class Lobby implements LobbyInstance {
     if (this.gameState == GameState.Ended) {
       // TODO: Dead code, Host#endGame sets gameState to NotStarted
       this.handleRejoin(connection);
+
       return;
     }
 
