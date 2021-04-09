@@ -661,7 +661,7 @@ export class Host implements HostInstance {
     }
   }
 
-  handleReady(connection: Connection): void {
+  async handleReady(connection: Connection): Promise<void> {
     this.readyPlayerList.push(connection.getId());
 
     /**
@@ -737,7 +737,7 @@ export class Host implements HostInstance {
 
     this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getSafeShipStatus().serializeSpawn()], this.lobby.getCode()));
     this.lobby.setGameState(GameState.Started);
-    this.setInfected(this.lobby.getOptions().getImpostorCount());
+    await this.setInfected(this.lobby.getOptions().getImpostorCount());
     this.setTasks();
     gameData.getGameData().updateAllGameData(connections);
 
