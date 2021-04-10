@@ -22,8 +22,10 @@ import { Game } from "../api/game";
 import { Player } from "../player";
 import { Lobby } from "../lobby";
 import {
+  AutoDoorsSystem,
   DeconSystem,
   DeconTwoSystem,
+  DoorsSystem,
 } from "../protocol/entities/shipStatus/systems";
 import {
   ClearVotePacket,
@@ -70,6 +72,7 @@ import {
   PlayerRole,
   Scene,
   SpawnFlag,
+  SystemType,
   TaskLength,
   TaskType,
   TeleportReason,
@@ -661,7 +664,7 @@ export class Host implements HostInstance {
     }
   }
 
-  handleReady(connection: Connection): void {
+  async handleReady(connection: Connection): Promise<void> {
     this.readyPlayerList.push(connection.getId());
 
     /**
@@ -698,9 +701,19 @@ export class Host implements HostInstance {
       case Level.Polus:
         this.lobby.setShipStatus(new EntityPolusShipStatus(this.lobby));
         break;
-      case Level.Airship:
-        this.lobby.setShipStatus(new EntityAirshipStatus(this.lobby));
+      case Level.Airship: {
+        const airshipStatus = new EntityAirshipStatus(this.lobby);
+        const autoDoorsSystem = (airshipStatus.getShipStatus().getSystemFromType(SystemType.Doors) as AutoDoorsSystem);
+        const doorsSystem = (airshipStatus.getShipStatus().getSystemFromType(SystemType.Decontamination2) as DoorsSystem);
+
+        for (let i = 15; i <= 18; i++) {
+          autoDoorsSystem.setDoorState(i, false);
+          doorsSystem.setDoorState(i, false);
+        }
+
+        this.lobby.setShipStatus(airshipStatus);
         break;
+      }
     }
 
     this.systemsHandler = new SystemsHandler(this);
@@ -737,7 +750,7 @@ export class Host implements HostInstance {
 
     this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getSafeShipStatus().serializeSpawn()], this.lobby.getCode()));
     this.lobby.setGameState(GameState.Started);
-    this.setInfected(this.lobby.getOptions().getImpostorCount());
+    await this.setInfected(this.lobby.getOptions().getImpostorCount());
     this.setTasks();
     gameData.getGameData().updateAllGameData(connections);
 

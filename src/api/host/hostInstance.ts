@@ -147,7 +147,7 @@ export interface HostInstance {
    *
    * @param connection - The connection that sent the packet
    */
-  handleReady(connection: Connection): void;
+  handleReady(connection: Connection): Promise<void>;
 
   /**
    * Called when a connection sends a SceneChange GameData packet.
