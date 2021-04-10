@@ -703,8 +703,8 @@ export class Host implements HostInstance {
         break;
       case Level.Airship: {
         const airshipStatus = new EntityAirshipStatus(this.lobby);
-        const autoDoorsSystem = (airshipStatus.getShipStatus().getSystemFromType(SystemType.Doors) as AutoDoorsSystem);
-        const doorsSystem = (airshipStatus.getShipStatus().getSystemFromType(SystemType.Decontamination2) as DoorsSystem);
+        const autoDoorsSystem = airshipStatus.getShipStatus().getSystemFromType(SystemType.Doors) as AutoDoorsSystem;
+        const doorsSystem = airshipStatus.getShipStatus().getSystemFromType(SystemType.Decontamination2) as DoorsSystem;
 
         for (let i = 15; i <= 18; i++) {
           autoDoorsSystem.setDoorState(i, false);
