@@ -1,7 +1,7 @@
 import { Connection } from "../../../protocol/connection";
 import { LobbyInstance } from "../../lobby";
-import { Vector2 } from "../../../types";
 import { CancellableEvent } from "../types";
+import { Vector2 } from "../../../types";
 
 /**
  * Fired when a player is being spawned in a lobby.

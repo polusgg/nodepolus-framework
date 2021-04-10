@@ -945,11 +945,17 @@ export class Lobby implements LobbyInstance {
 
     if (this.connections.indexOf(connection) == -1) {
       const count = this.connections.length;
+      const isGameStarted = this.gameState == GameState.Started;
 
-      const gameStarted = !(this.gameState == GameState.NotStarted || this.gameState == GameState.Ended);
-
-      if (count >= this.options.getMaxPlayers() || count >= this.server.getMaxPlayersPerLobby() || gameStarted) {
-        const event = new ServerLobbyJoinRefusedEvent(connection, this, gameStarted ? DisconnectReason.gameStarted() : DisconnectReason.gameFull());
+      if (count >= this.options.getMaxPlayers() ||
+          count >= this.server.getMaxPlayersPerLobby() ||
+          isGameStarted
+      ) {
+        const event = new ServerLobbyJoinRefusedEvent(
+          connection,
+          this,
+          isGameStarted ? DisconnectReason.gameStarted() : DisconnectReason.gameFull(),
+        );
 
         await this.server.emit("server.lobby.join.refused", event);
 

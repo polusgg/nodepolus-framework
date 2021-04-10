@@ -784,8 +784,10 @@ export class Host implements HostInstance {
 
     if (lobbyBehaviour !== undefined) {
       connection.writeReliable(new GameDataPacket([lobbyBehaviour.serializeSpawn()], this.lobby.getCode()));
+    } else if (shipStatus !== undefined) {
+      connection.writeReliable(new GameDataPacket([shipStatus.serializeSpawn()], this.lobby.getCode()));
     } else {
-      connection.writeReliable(new GameDataPacket([shipStatus!.serializeSpawn()], this.lobby.getCode()));
+      throw new Error("Received SceneChange without a LobbyBehaviour or ShipStatus instance");
     }
 
     let gameData = this.lobby.getGameData();
@@ -818,7 +820,6 @@ export class Host implements HostInstance {
       const player = new Player(this.lobby, entity, connection);
 
       this.lobby.addPlayer(player);
-
       await this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
       this.ensurePlayerDataExists(player);
       player.getEntity().getPlayerControl().setNewPlayer(false);
@@ -829,9 +830,7 @@ export class Host implements HostInstance {
     }
 
     (this.lobby.getPlayers()[0] as Player).getEntity().getPlayerControl().syncSettings(this.lobby.getOptions(), [connection]);
-
     connection.flush(true);
-
     gameData.getGameData().updateAllGameData(this.lobby.getConnections());
   }
 
