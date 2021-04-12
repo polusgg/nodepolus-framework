@@ -159,8 +159,6 @@ export class Host implements HostInstance {
       return;
     }
 
-    this.lobby.disableActingHosts(true);
-
     this.secondsUntilStart = event.getSecondsUntilStart();
 
     const countdownFunction = (): void => {
@@ -915,6 +913,7 @@ export class Host implements HostInstance {
 
     const connection = player.getConnection();
 
+    // TODO: Add an event for plugins to allow non-hosts to start games
     if (!(connection?.isActingHost() ?? false)) {
       if (connection !== undefined) {
         (player as Player).getEntity().getPlayerControl().sendRpcPacket(

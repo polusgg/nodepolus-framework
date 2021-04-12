@@ -971,8 +971,6 @@ export class Lobby implements LobbyInstance {
       }
     }
 
-    this.disableActingHosts();
-
     if (connection.getLobby() === undefined) {
       connection.setLobby(this);
 
@@ -1229,8 +1227,6 @@ export class Lobby implements LobbyInstance {
     if (this.connections.length == 1) {
       this.cancelJoinTimer();
       // this.beginStartTimer();
-
-      connection.setActingHost(true);
     }
 
     connection.setLimboState(LimboState.NotLimbo);
@@ -1278,16 +1274,21 @@ export class Lobby implements LobbyInstance {
    * @param connection - The connection that joined the lobby
    */
   protected broadcastJoinMessage(connection: Connection): void {
-    this.sendRootGamePacket(
-      new JoinGameResponsePacket(
-        this.code,
-        connection.getId(),
-        this.hostInstance.getId(),
-      ),
-      this.connections
-        .filter(con => con.getId() != connection.getId())
-        .filter(con => con.getLimboState() == LimboState.NotLimbo),
-    );
+    for (let i = 0; i < this.connections.length; i++) {
+      const writeConnection = this.connections[i];
+
+      if (writeConnection.getId() === connection.getId() || connection.getLimboState() === LimboState.NotLimbo) {
+        continue;
+      }
+
+      writeConnection.sendReliable([
+        new JoinGameResponsePacket(
+          this.code,
+          connection.getId(),
+          writeConnection.isActingHost() ? writeConnection.getId() : this.hostInstance.getId(),
+        ),
+      ]);
+    }
   }
 
   /**
