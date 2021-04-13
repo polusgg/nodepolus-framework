@@ -1277,7 +1277,7 @@ export class Lobby implements LobbyInstance {
     for (let i = 0; i < this.connections.length; i++) {
       const writeConnection = this.connections[i];
 
-      if (writeConnection.getId() === connection.getId() || connection.getLimboState() === LimboState.NotLimbo) {
+      if (writeConnection.getId() === connection.getId()) {
         continue;
       }
 
