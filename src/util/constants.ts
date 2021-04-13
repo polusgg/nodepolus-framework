@@ -6,6 +6,7 @@ import { ServerConfig } from "../api/config";
  */
 export const SUPPORTED_VERSIONS: readonly ClientVersion[] = [
   new ClientVersion(2021, 3, 25),
+  new ClientVersion(2021, 4, 2),
 ];
 
 /**
