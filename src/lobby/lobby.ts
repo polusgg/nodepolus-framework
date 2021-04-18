@@ -78,7 +78,6 @@ export class Lobby implements LobbyInstance {
   protected readonly metadata: Map<string, unknown> = new Map();
   protected readonly logger: Logger;
   protected readonly ignoredNetIds: number[] = [];
-  // protected readonly customInnerNetObjects: Map<number, BaseInnerNetObject> = new Map();
   protected readonly customEntities: Set<BaseInnerNetEntity> = new Set();
 
   protected joinTimer?: NodeJS.Timeout;
@@ -289,18 +288,6 @@ export class Lobby implements LobbyInstance {
   removeCustomEntity(entity: BaseInnerNetEntity): void {
     this.customEntities.delete(entity);
   }
-
-  // addCustomInnerNetObject(netId: number, object: BaseInnerNetObject): void {
-  //   this.customInnerNetObjects.set(netId, object);
-  // }
-
-  // removeCustomInnerNetObject(netId: number): void {
-  //   this.customInnerNetObjects.delete(netId);
-  // }
-
-  // clearCustomInnerNetObjects(): void {
-  //   this.customInnerNetObjects.clear();
-  // }
 
   findInnerNetObject(netId: number): BaseInnerNetObject | undefined {
     switch (netId) {

@@ -177,26 +177,6 @@ export interface LobbyInstance extends Metadatable {
    */
   removeCustomEntity(entity: BaseInnerNetEntity): void;
 
-  // /**
-  //  * Adds the given custom InnetNetObject to the lobby.
-  //  *
-  //  * @param netId - The ID of the InnerNetObject
-  //  * @param object - The InnerNetObject
-  //  */
-  // addCustomInnerNetObject(netId: number, object: BaseInnerNetObject): void;
-
-  // /**
-  //  * Removes the custom InnerNetObject with the given ID from the lobby.
-  //  *
-  //  * @param netId - The ID of the InnerNetObject
-  //  */
-  // removeCustomInnerNetObject(netId: number): void;
-
-  // /**
-  //  * Removes all custom InnerNetObjects from the lobby.
-  //  */
-  // clearCustomInnerNetObjects(): void;
-
   /**
    * Gets the first InnerNetObject whose ID matches the given ID.
    *
