@@ -171,6 +171,33 @@ export interface LobbyInstance extends Metadatable {
   removePlayer(player: PlayerInstance): void;
 
   /**
+   * Removes the given custom InnerNetEntity from the lobby.
+   *
+   * @param entity - The entity to be removed from the lobby
+   */
+  removeCustomEntity(entity: BaseInnerNetEntity): void;
+
+  // /**
+  //  * Adds the given custom InnetNetObject to the lobby.
+  //  *
+  //  * @param netId - The ID of the InnerNetObject
+  //  * @param object - The InnerNetObject
+  //  */
+  // addCustomInnerNetObject(netId: number, object: BaseInnerNetObject): void;
+
+  // /**
+  //  * Removes the custom InnerNetObject with the given ID from the lobby.
+  //  *
+  //  * @param netId - The ID of the InnerNetObject
+  //  */
+  // removeCustomInnerNetObject(netId: number): void;
+
+  // /**
+  //  * Removes all custom InnerNetObjects from the lobby.
+  //  */
+  // clearCustomInnerNetObjects(): void;
+
+  /**
    * Gets the first InnerNetObject whose ID matches the given ID.
    *
    * @param netId - The ID of the InnerNetObject
@@ -453,7 +480,7 @@ export interface LobbyInstance extends Metadatable {
    *
    * @param entity - The lobby to nbe spawned
    */
-  spawn(entity: BaseInnerNetEntity): void;
+  spawn(entity: BaseInnerNetEntity, sendTo?: Connection[]): void;
 
   /**
    * Spawns a player in the lobby.
@@ -469,7 +496,7 @@ export interface LobbyInstance extends Metadatable {
    *
    * @param innerNetObject - The InnerNetObject to be despawned
    */
-  despawn(innerNetObject: BaseInnerNetObject): void;
+  despawn(innerNetObject: BaseInnerNetObject, sendTo?: Connection[]): void;
 
   /**
    * Gets all players that are acting hosts of the lobby.

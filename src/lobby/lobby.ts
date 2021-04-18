@@ -78,6 +78,8 @@ export class Lobby implements LobbyInstance {
   protected readonly metadata: Map<string, unknown> = new Map();
   protected readonly logger: Logger;
   protected readonly ignoredNetIds: number[] = [];
+  // protected readonly customInnerNetObjects: Map<number, BaseInnerNetObject> = new Map();
+  protected readonly customEntities: Set<BaseInnerNetEntity> = new Set();
 
   protected joinTimer?: NodeJS.Timeout;
   protected startTimer?: NodeJS.Timeout;
@@ -284,6 +286,22 @@ export class Lobby implements LobbyInstance {
     this.gameData?.getGameData().removePlayer(player.getId());
   }
 
+  removeCustomEntity(entity: BaseInnerNetEntity): void {
+    this.customEntities.delete(entity);
+  }
+
+  // addCustomInnerNetObject(netId: number, object: BaseInnerNetObject): void {
+  //   this.customInnerNetObjects.set(netId, object);
+  // }
+
+  // removeCustomInnerNetObject(netId: number): void {
+  //   this.customInnerNetObjects.delete(netId);
+  // }
+
+  // clearCustomInnerNetObjects(): void {
+  //   this.customInnerNetObjects.clear();
+  // }
+
   findInnerNetObject(netId: number): BaseInnerNetObject | undefined {
     switch (netId) {
       case this.lobbyBehaviour?.getLobbyBehaviour().getNetId():
@@ -300,6 +318,18 @@ export class Lobby implements LobbyInstance {
 
     for (let i = 0; i < this.players.length; i++) {
       const objects = this.players[i].getEntity().getObjects();
+
+      for (let j = 0; j < objects.length; j++) {
+        const object = objects[j];
+
+        if (notUndefined(object) && object.getNetId() == netId) {
+          return object;
+        }
+      }
+    }
+
+    for (const entity of this.customEntities) {
+      const objects = entity.getObjects();
 
       for (let j = 0; j < objects.length; j++) {
         const object = objects[j];
@@ -567,7 +597,7 @@ export class Lobby implements LobbyInstance {
     this.sendRootGamePacket(new GameDataPacket([new RpcPacket(from.getNetId(), packet)], this.code), sendTo);
   }
 
-  spawn(entity: BaseInnerNetEntity): void {
+  spawn(entity: BaseInnerNetEntity, sendTo: Connection[] = this.connections): void {
     const type = entity.getType();
 
     switch (type) {
@@ -592,11 +622,10 @@ export class Lobby implements LobbyInstance {
 
         return;
       default:
-        // TODO: Rethrow error once custom INO support is added
-        // throw new Error(`Attempted to spawn an unsupported SpawnType: ${type as SpawnType} (${SpawnType[type]})`);
+        this.customEntities.add(entity);
     }
 
-    this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), this.getConnections());
+    this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), sendTo);
   }
 
   spawnPlayer(player: EntityPlayer, playerData: PlayerData): PlayerInstance {
@@ -621,12 +650,12 @@ export class Lobby implements LobbyInstance {
     return playerInstance;
   }
 
-  despawn(innerNetObject: BaseInnerNetObject): void {
+  despawn(innerNetObject: BaseInnerNetObject, sendTo: Connection[] = this.connections): void {
     if (innerNetObject.getParent().getLobby().getCode() != this.code) {
       throw new Error(`Attempted to despawn an InnerNetObject from a lobby other than its own`);
     }
 
-    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.getNetId())], this.code));
+    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.getNetId())], this.code), sendTo);
   }
 
   getActingHosts(): Connection[] {
