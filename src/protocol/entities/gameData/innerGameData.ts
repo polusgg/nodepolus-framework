@@ -61,7 +61,15 @@ export class InnerGameData extends BaseInnerNetObject {
    * @returns `true` if the name is already in use, `false` if not
    */
   isNameTaken(name: string): boolean {
-    return [...this.players.values()].find(player => player.getName() == name) !== undefined;
+    const players = [...this.players.values()];
+
+    for (let i = 0; i < players.length; i++) {
+      if (players[i].getName().toLocaleLowerCase() === name.toLocaleLowerCase()) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -70,18 +78,26 @@ export class InnerGameData extends BaseInnerNetObject {
    * @param excludePlayerId - The ID of a player whose color will be excluded from the results
    * @returns The colors that are already in use
    */
-  getTakenColors(excludePlayerId: number): PlayerColor[] {
-    return [...this.players.values()].filter(player => {
+  getTakenColors(excludePlayerId: number): Set<PlayerColor> {
+    const players = new Set(this.parent.getLobby().getRealPlayers().map(p => p.getId()));
+    const playerData = [...this.players.values()];
+    const takenColors: Set<PlayerColor> = new Set();
+
+    for (let i = 0; i < playerData.length; i++) {
+      const player = playerData[i];
+
       if (player.getId() === excludePlayerId) {
-        return false;
+        continue;
       }
 
-      if (this.parent.getLobby().getPlayers().find(p => p.getId() == player.getId())?.getConnection() === undefined) {
-        return false;
+      if (!players.has(player.getId())) {
+        continue;
       }
 
-      return true;
-    }).map(player => player.getColor());
+      takenColors.add(player.getColor());
+    }
+
+    return takenColors;
   }
 
   setTasks(playerId: number, taskIds: number[], sendTo?: Connection[]): this {

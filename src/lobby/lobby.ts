@@ -271,6 +271,22 @@ export class Lobby implements LobbyInstance {
     return this.players;
   }
 
+  getRealPlayers(): Player[] {
+    const realPlayers: Player[] = [];
+
+    for (let i = 0; i < this.players.length; i++) {
+      const player = this.players[i];
+
+      if (player.getConnection() === undefined) {
+        continue;
+      }
+
+      realPlayers.push(player);
+    }
+
+    return realPlayers;
+  }
+
   addPlayer(player: Player): void {
     this.players.push(player);
   }

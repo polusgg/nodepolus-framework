@@ -251,24 +251,17 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   handleCheckColor(color: PlayerColor, _sendTo?: Connection[]): void {
+    const player = this.getLobby().findSafePlayerByClientId(this.getOwnerId());
+    const numberOfColors = (Object.keys(PlayerColor).length / 2) - 1;
     const takenColors = this.getLobby().getSafeGameData().getGameData().getTakenColors(this.getPlayerId());
     let setColor: PlayerColor = color;
 
-    const owner = this.getLobby().findSafeConnection(this.getOwnerId());
-    const player = this.getLobby().findSafePlayerByConnection(owner);
-
     this.getLobby().getHostInstance().ensurePlayerDataExists(player);
 
-    if (this.getLobby().getPlayers().length <= 12) {
-      while (takenColors.indexOf(setColor) > -1) {
-        for (let i = 0; i < 12; i++) {
-          if (takenColors.indexOf(i) == -1) {
-            setColor = i;
-          }
-        }
+    if (takenColors.size <= numberOfColors) {
+      while (takenColors.has(setColor)) {
+        setColor = (setColor + 1) % numberOfColors;
       }
-    } else {
-      setColor = color;
     }
 
     this.setColor(setColor, this.getLobby().getConnections());

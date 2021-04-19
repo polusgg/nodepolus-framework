@@ -152,6 +152,11 @@ export interface LobbyInstance extends Metadatable {
   getPlayers(): PlayerInstance[];
 
   /**
+   * Gets all of the spawened players in the lobby that belong to a connection.
+   */
+  getRealPlayers(): PlayerInstance[];
+
+  /**
    * Adds the given player to the lobby.
    *
    * @param player - The player to be added to the lobby
