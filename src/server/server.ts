@@ -262,8 +262,8 @@ export class Server extends Emittery<ServerEvents> {
    *
    * @param lobby - The lobby to be removed
    */
-  deleteLobby(lobby: LobbyInstance): this {
-    lobby.cleanup();
+  deleteLobby(lobby: LobbyInstance, reason?: DisconnectReason): this {
+    lobby.cleanup(reason);
     this.lobbies.splice(this.lobbies.indexOf(lobby), 1);
     this.lobbyMap.delete(lobby.getCode());
 

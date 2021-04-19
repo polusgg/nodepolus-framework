@@ -10,6 +10,7 @@ export class ServerLobbyDestroyedEvent extends CancellableEvent {
    */
   constructor(
     protected readonly lobby: LobbyInstance,
+    protected readonly force: boolean,
   ) {
     super();
   }
@@ -19,5 +20,12 @@ export class ServerLobbyDestroyedEvent extends CancellableEvent {
    */
   getLobby(): LobbyInstance {
     return this.lobby;
+  }
+
+  /**
+   * Checks if this event is forced
+   */
+  isForced(): boolean {
+    return this.force;
   }
 }

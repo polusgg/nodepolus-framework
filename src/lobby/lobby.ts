@@ -208,18 +208,17 @@ export class Lobby implements LobbyInstance {
   }
 
   async close(reason?: DisconnectReason, force: boolean = false): Promise<void> {
-    if (!force && this.server.listenerCount("server.lobby.destroyed") > 0) {
-      const event = new ServerLobbyDestroyedEvent(this);
+    if (this.server.listenerCount("server.lobby.destroyed") > 0) {
+      const event = new ServerLobbyDestroyedEvent(this, force);
 
       await this.server.emit("server.lobby.destroyed", event);
 
-      if (event.isCancelled()) {
+      if (!force && event.isCancelled()) {
         return;
       }
     }
 
-    this.cleanup(reason);
-    this.server.deleteLobby(this);
+    this.server.deleteLobby(this, reason);
   }
 
   hasMeta(key: string): boolean {
