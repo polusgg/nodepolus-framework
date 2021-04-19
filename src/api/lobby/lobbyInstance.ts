@@ -120,7 +120,7 @@ export interface LobbyInstance extends Metadatable {
    * @param reason - The reason for why the lobby was closed
    * @param force - `true` to force close the lobby, `false` to fire a cancellable event
    */
-  close(reason?: DisconnectReason, force?: boolean): void;
+  close(reason?: DisconnectReason, force?: boolean): Promise<void>;
 
   /**
    * Gets the host controller for the lobby.

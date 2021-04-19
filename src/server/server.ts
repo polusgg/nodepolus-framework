@@ -398,7 +398,7 @@ export class Server extends Emittery<ServerEvents> {
     const disconnectReason = DisconnectReason.custom("The server is shutting down");
 
     for (let i = 0; i < this.lobbies.length; i++) {
-      this.lobbies[i].close(disconnectReason, true);
+      await this.lobbies[i].close(disconnectReason, true);
     }
 
     const connections = [...this.connections.values()];
