@@ -506,7 +506,7 @@ export class Host implements HostInstance {
         ));
 
         if (this.shouldEndGame()) {
-          if (exiledPlayerData!.isImpostor()) {
+          if (exiledPlayerData?.isImpostor()) {
             this.endGame(GameOverReason.CrewmatesByVote);
           } else {
             this.endGame(GameOverReason.ImpostorsByVote);
