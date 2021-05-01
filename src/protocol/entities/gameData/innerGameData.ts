@@ -58,13 +58,25 @@ export class InnerGameData extends BaseInnerNetObject {
    * Gets whether or not the given name is already in use by another player.
    *
    * @param name - The name to be checked
+   * @param excludePlayerId - The ID of the player whose name will be excluded from the check
    * @returns `true` if the name is already in use, `false` if not
    */
-  isNameTaken(name: string): boolean {
-    const players = [...this.players.values()];
+  isNameTaken(name: string, excludePlayerId?: number): boolean {
+    const players = new Set(this.parent.getLobby().getRealPlayers().map(p => p.getId()));
+    const playerData = [...this.players.values()];
 
-    for (let i = 0; i < players.length; i++) {
-      if (players[i].getName().toLocaleLowerCase() === name.toLocaleLowerCase()) {
+    for (let i = 0; i < playerData.length; i++) {
+      const player = playerData[i];
+
+      if (player.getId() === excludePlayerId) {
+        continue;
+      }
+
+      if (!players.has(player.getId())) {
+        continue;
+      }
+
+      if (player.getName().toLocaleLowerCase() === name.toLocaleLowerCase()) {
         return true;
       }
     }
@@ -75,10 +87,10 @@ export class InnerGameData extends BaseInnerNetObject {
   /**
    * Gets all colors that are already in use by other players.
    *
-   * @param excludePlayerId - The ID of a player whose color will be excluded from the results
+   * @param excludePlayerId - The ID of the player whose color will be excluded from the results
    * @returns The colors that are already in use
    */
-  getTakenColors(excludePlayerId: number): Set<PlayerColor> {
+  getTakenColors(excludePlayerId?: number): Set<PlayerColor> {
     const players = new Set(this.parent.getLobby().getRealPlayers().map(p => p.getId()));
     const playerData = [...this.players.values()];
     const takenColors: Set<PlayerColor> = new Set();

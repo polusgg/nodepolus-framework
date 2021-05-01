@@ -221,7 +221,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     lobby.getHostInstance().ensurePlayerDataExists(player);
 
-    while (this.getLobby().getSafeGameData().getGameData().isNameTaken(checkName)) {
+    while (this.getLobby().getSafeGameData().getGameData().isNameTaken(checkName, this.getPlayerId())) {
       checkName = `${name} ${index++}`;
     }
 
