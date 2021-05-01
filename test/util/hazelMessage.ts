@@ -342,6 +342,23 @@ test("reads bytes", t => {
   t.is(buf.readBytes(2).getBuffer().toString("hex"), "0a0b");
 });
 
+test("reads bytes as a string", t => {
+  const one = MessageReader.fromRawBytes("68656c6c6f2c20776f726c64");
+  const two = MessageReader.fromRawBytes("680065006c006c006f002c00200077006f0072006c006400");
+
+  t.is(one.readBytesAsString(2, "ascii"), "he");
+  t.is(one.readBytesAsString(2, "utf8"), "ll");
+  t.is(one.readBytesAsString(2, "utf-8"), "o,");
+  t.is(one.readBytesAsString(2, "latin1"), " w");
+  t.is(one.readBytesAsString(2, "binary"), "or");
+  t.is(one.readBytesAsString(2, "hex"), "6c64");
+
+  t.is(two.readBytesAsString(6, "utf16le"), "hel");
+  t.is(two.readBytesAsString(6, "ucs2"), "lo,");
+  t.is(two.readBytesAsString(6, "ucs-2"), " wo");
+  t.is(two.readBytesAsString(6, "hex"), "72006c006400");
+});
+
 test("writes a list", t => {
   const buf = new MessageWriter();
   const list = [1, 2, 3];
@@ -646,4 +663,43 @@ test("clones itself as a MessageWriter", t => {
   t.is(clone.getCursor(), 21);
   t.is(buf.getLength(), 22);
   t.is(clone.getLength(), 21);
+});
+
+test("converts to a string", t => {
+  const one = MessageReader.fromRawBytes("68656c6c6f2c20776f726c64");
+  const two = MessageReader.fromRawBytes("680065006c006c006f002c00200077006f0072006c006400");
+
+  t.is(one.toString(), "hello, world");
+  t.is(one.toString("ascii"), "hello, world");
+  t.is(one.toString("ascii", 7), "world");
+  t.is(one.toString("ascii", 7, 9), "wo");
+  t.is(one.toString("utf8"), "hello, world");
+  t.is(one.toString("utf8", 7), "world");
+  t.is(one.toString("utf8", 7, 9), "wo");
+  t.is(one.toString("utf-8"), "hello, world");
+  t.is(one.toString("utf-8", 7), "world");
+  t.is(one.toString("utf-8", 7, 9), "wo");
+  t.is(one.toString("latin1"), "hello, world");
+  t.is(one.toString("latin1", 7), "world");
+  t.is(one.toString("latin1", 7, 9), "wo");
+  t.is(one.toString("binary"), "hello, world");
+  t.is(one.toString("binary", 7), "world");
+  t.is(one.toString("binary", 7, 9), "wo");
+  t.is(one.toString("base64"), "aGVsbG8sIHdvcmxk");
+  t.is(one.toString("hex"), "68656c6c6f2c20776f726c64");
+  t.is(one.toString("hex", 1), "656c6c6f2c20776f726c64");
+  t.is(one.toString("hex", 1, 4), "656c6c");
+
+  t.is(two.toString("utf16le"), "hello, world");
+  t.is(two.toString("utf16le", 14), "world");
+  t.is(two.toString("utf16le", 14, 18), "wo");
+  t.is(two.toString("ucs2"), "hello, world");
+  t.is(two.toString("ucs2", 14), "world");
+  t.is(two.toString("ucs2", 14, 18), "wo");
+  t.is(two.toString("ucs-2"), "hello, world");
+  t.is(two.toString("ucs-2", 14), "world");
+  t.is(two.toString("ucs-2", 14, 18), "wo");
+  t.is(two.toString("hex"), "680065006c006c006f002c00200077006f0072006c006400");
+  t.is(two.toString("hex", 2), "65006c006c006f002c00200077006f0072006c006400");
+  t.is(two.toString("hex", 2, 8), "65006c006c00");
 });

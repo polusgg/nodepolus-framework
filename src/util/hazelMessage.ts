@@ -38,6 +38,12 @@ function unlerp(min: number, max: number, value: number): number {
 export type BuildFrom = number | Buffer | string | number[] | HazelMessage;
 
 /**
+ * A union type describing the possible encoding types when converting a
+ * MessageWriter or MessageReader to a string.
+ */
+export type BufferEncoding = "ascii" | "utf8" | "utf-8" | "utf16le" | "ucs2" | "ucs-2" | "base64" | "latin1" | "binary" | "hex";
+
+/**
  * The base class for MessageReader and MessageWriter
  */
 export abstract class HazelMessage {
@@ -84,6 +90,17 @@ export abstract class HazelMessage {
    */
   getCursor(): number {
     return this.cursor;
+  }
+
+  /**
+   * Gets a string representation of the HazelMessage.
+   *
+   * @param encoding - The character encoding to use (default `utf8`)
+   * @param start - The byte offset to start decoding at (default `0`)
+   * @param end - The (exclusive) byte offset to stop decoding at (default `length`)
+   */
+  toString(encoding?: BufferEncoding, start?: number, end?: number): string {
+    return this.buffer.toString(encoding, start, end);
   }
 }
 
@@ -760,6 +777,16 @@ export class MessageReader extends HazelMessage {
     this.cursor += length;
 
     return reader;
+  }
+
+  /**
+   * Gets a string representation of the given number of read bytes..
+   *
+   * @param length - The number of bytes to read
+   * @param encoding - The character encoding to use (default `utf8`)
+   */
+  readBytesAsString(length: number, encoding?: BufferEncoding): string {
+    return this.readBytes(length).toString(encoding);
   }
 
   /**
