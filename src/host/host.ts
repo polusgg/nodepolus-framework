@@ -859,13 +859,25 @@ export class Host implements HostInstance {
       this.lobby.getSafeGame(),
       player,
       victimPlayerId !== undefined ? this.lobby.findPlayerByPlayerId(victimPlayerId) : undefined,
+      this.systemsHandler?.isSabotaged() ?? false,
+      true,
     );
+
+    // A player somehow pressed the meeting button during a sabotage, so we will
+    // cancel the event by default but still allow plugins to change it.
+    if (event.getVictim() === undefined && event.hasActiveSabotage()) {
+      event.cancel();
+    }
 
     await this.lobby.getServer().emit("meeting.started", event);
 
     if (event.isCancelled()) {
       // TODO: Try to remove "Waiting for host" text on emergency meeting button window
       return;
+    }
+
+    if (event.hasActiveSabotage() && event.shouldRepairSabotage()) {
+      this.systemsHandler?.repairAll();
     }
 
     sender.sendRpcPacket(new StartMeetingPacket(event.getVictim()?.getId() ?? 0xff), this.lobby.getConnections());

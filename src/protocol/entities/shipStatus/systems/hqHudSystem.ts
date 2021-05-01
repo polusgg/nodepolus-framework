@@ -12,6 +12,15 @@ export class HqHudSystem extends BaseSystem {
     super(shipStatus, SystemType.Communications);
   }
 
+  isSabotaged(): boolean {
+    return this.completedConsoles.size < 2;
+  }
+
+  repair(): void {
+    this.activeConsoles.clear();
+    this.completedConsoles.clear();
+  }
+
   getActiveConsoles(): Map<number, number> {
     return this.activeConsoles;
   }

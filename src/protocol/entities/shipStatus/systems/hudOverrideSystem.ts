@@ -15,6 +15,10 @@ export class HudOverrideSystem extends BaseSystem {
     return this.sabotaged;
   }
 
+  repair(): void {
+    this.sabotaged = false;
+  }
+
   setSabotaged(sabotaged: boolean): this {
     this.sabotaged = sabotaged;
 

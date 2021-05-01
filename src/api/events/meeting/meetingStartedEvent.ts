@@ -15,7 +15,9 @@ export class MeetingStartedEvent extends CancellableEvent {
   constructor(
     protected readonly game: Game,
     protected caller: PlayerInstance,
-    protected victim?: PlayerInstance,
+    protected victim: PlayerInstance | undefined,
+    protected activeSabotage: boolean,
+    protected repairSabotage: boolean = true,
   ) {
     super();
   }
@@ -61,6 +63,37 @@ export class MeetingStartedEvent extends CancellableEvent {
    */
   setVictim(victim?: PlayerInstance): this {
     this.victim = victim;
+
+    return this;
+  }
+
+  /**
+   * Gets whether or not a critical system is currently sabotaged.
+   *
+   * @returns `true` if a critical system is sabotaged, `false` if not
+   */
+  hasActiveSabotage(): boolean {
+    return this.activeSabotage;
+  }
+
+  /**
+   * Gets whether or not the sabotaged critical system should be repaired when
+   * the meeting is started.
+   *
+   * @returns `true` to repair the critical system, `false` to leave it be
+   */
+  shouldRepairSabotage(): boolean {
+    return this.repairSabotage;
+  }
+
+  /**
+   * Sets whether or not the sabotaged critical system should be repaired when
+   * the meeting is started.
+   *
+   * @param repairSabotage - `true` to repair the critical system, `false` to leave it be
+   */
+  setRepairSabotage(repairSabotage: boolean): this {
+    this.repairSabotage = repairSabotage;
 
     return this;
   }

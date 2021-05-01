@@ -57,6 +57,12 @@ export class SystemsHandler {
   ) {}
 
   repairHeliSystem<T extends HeliSabotageSystem>(repairer: Player, system: T, amount: HeliSabotageAmount): void {
+    const sabotageHandler = this.host.getSabotageHandler();
+
+    if (sabotageHandler === undefined) {
+      throw new Error("Attempted to repair reactor without a SabotageHandler instance");
+    }
+
     this.setOldShipStatus();
 
     switch (amount.getAction()) {
@@ -72,7 +78,7 @@ export class SystemsHandler {
 
         if (system.getCompletedConsoles().size == 2) {
           system.setCountdown(10000);
-          this.host.getSabotageHandler()?.clearTimer();
+          sabotageHandler.clearTimer();
         }
         break;
     }
@@ -103,6 +109,12 @@ export class SystemsHandler {
   }
 
   repairHqHud<T extends HqHudSystem>(repairer: Player, system: T, amount: MiraCommunicationsAmount): void {
+    const sabotageHandler = this.host.getSabotageHandler();
+
+    if (sabotageHandler === undefined) {
+      throw new Error("Attempted to repair reactor without a SabotageHandler instance");
+    }
+
     this.setOldShipStatus();
 
     switch (amount.getAction()) {
@@ -116,7 +128,7 @@ export class SystemsHandler {
         system.addCompletedConsole(amount.getConsoleId());
 
         if (system.getCompletedConsoles().size == 2) {
-          this.host.getSabotageHandler()?.clearTimer();
+          sabotageHandler.clearTimer();
         }
         break;
     }
@@ -131,13 +143,13 @@ export class SystemsHandler {
   }
 
   repairOxygen<T extends LifeSuppSystem>(_repairer: Player, system: T, amount: OxygenAmount): void {
-    this.setOldShipStatus();
-
     const sabotageHandler = this.host.getSabotageHandler();
 
     if (sabotageHandler === undefined) {
       throw new Error("Attempted to repair oxygen without a SabotageHandler instance");
     }
+
+    this.setOldShipStatus();
 
     switch (amount.getAction()) {
       case OxygenAction.Completed:
@@ -199,13 +211,13 @@ export class SystemsHandler {
   }
 
   repairReactor<T extends ReactorSystem | LaboratorySystem>(repairer: Player, system: T, amount: ReactorAmount): void {
-    this.setOldShipStatus();
-
     const sabotageHandler = this.host.getSabotageHandler();
 
     if (sabotageHandler === undefined) {
       throw new Error("Attempted to repair reactor without a SabotageHandler instance");
     }
+
+    this.setOldShipStatus();
 
     switch (amount.getAction()) {
       case ReactorAction.PlacedHand:
@@ -228,16 +240,128 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairSabotage<T extends SabotageSystem>(_repairer: Player, system: T, amount: SabotageAmount): void {
-    this.setOldShipStatus();
-
+  isSabotaged(checkNonCritical: boolean = false): boolean {
+    const level = this.host.getLobby().getLevel();
     const ship = this.getShipStatus();
-    const type = amount.getSystemType();
+
+    switch (level) {
+      case Level.TheSkeld:
+      case Level.AprilSkeld:
+      case Level.MiraHq:
+        if ((ship.getSystemFromType(SystemType.Reactor) as ReactorSystem).isSabotaged() ||
+            (ship.getSystemFromType(SystemType.Oxygen) as LifeSuppSystem).isSabotaged()
+        ) {
+          return true;
+        }
+
+        if (checkNonCritical) {
+          if ((ship.getSystemFromType(SystemType.Electrical) as SwitchSystem).isSabotaged()) {
+            return true;
+          }
+
+          if (level === Level.MiraHq) {
+            if ((ship.getSystemFromType(SystemType.Communications) as HqHudSystem).isSabotaged()) {
+              return true;
+            }
+          } else if ((ship.getSystemFromType(SystemType.Communications) as HudOverrideSystem).isSabotaged()) {
+            return true;
+          }
+        }
+
+        return false;
+      case Level.Polus:
+        if ((ship.getSystemFromType(SystemType.Laboratory) as LaboratorySystem).isSabotaged()) {
+          return true;
+        }
+
+        if (checkNonCritical) {
+          if ((ship.getSystemFromType(SystemType.Electrical) as SwitchSystem).isSabotaged() ||
+              (ship.getSystemFromType(SystemType.Communications) as HudOverrideSystem).isSabotaged()
+          ) {
+            return true;
+          }
+        }
+
+        return false;
+      case Level.Airship:
+        if ((ship.getSystemFromType(SystemType.Reactor) as HeliSabotageSystem).isSabotaged()) {
+          return true;
+        }
+
+        if (checkNonCritical) {
+          if ((ship.getSystemFromType(SystemType.Electrical) as SwitchSystem).isSabotaged() ||
+              (ship.getSystemFromType(SystemType.Communications) as HudOverrideSystem).isSabotaged()
+          ) {
+            return true;
+          }
+        }
+
+        return false;
+    }
+  }
+
+  repairAll(repairNonCritical: boolean = false): void {
+    const sabotageHandler = this.host.getSabotageHandler();
+
+    if (sabotageHandler === undefined) {
+      throw new Error("Attempted to repair reactor without a SabotageHandler instance");
+    }
+
+    const level = this.host.getLobby().getLevel();
+    const ship = this.getShipStatus();
+
+    this.setOldShipStatus();
+    sabotageHandler.clearTimer();
+
+    switch (level) {
+      case Level.TheSkeld:
+      case Level.AprilSkeld:
+      case Level.MiraHq:
+        (ship.getSystemFromType(SystemType.Reactor) as ReactorSystem).repair();
+        (ship.getSystemFromType(SystemType.Oxygen) as LifeSuppSystem).repair();
+
+        if (repairNonCritical) {
+          (ship.getSystemFromType(SystemType.Electrical) as SwitchSystem).repair();
+
+          if (level === Level.MiraHq) {
+            (ship.getSystemFromType(SystemType.Communications) as HqHudSystem).repair();
+          } else {
+            (ship.getSystemFromType(SystemType.Communications) as HudOverrideSystem).repair();
+          }
+        }
+        break;
+      case Level.Polus:
+        (ship.getSystemFromType(SystemType.Laboratory) as LaboratorySystem).repair();
+
+        if (repairNonCritical) {
+          (ship.getSystemFromType(SystemType.Electrical) as SwitchSystem).repair();
+          (ship.getSystemFromType(SystemType.Communications) as HudOverrideSystem).repair();
+        }
+        break;
+      case Level.Airship:
+        (ship.getSystemFromType(SystemType.Reactor) as HeliSabotageSystem).repair();
+
+        if (repairNonCritical) {
+          (ship.getSystemFromType(SystemType.Electrical) as SwitchSystem).repair();
+          (ship.getSystemFromType(SystemType.Communications) as HudOverrideSystem).repair();
+        }
+        break;
+    }
+
+    this.sendDataUpdate();
+  }
+
+  repairSabotage<T extends SabotageSystem>(_repairer: Player, system: T, amount: SabotageAmount): void {
     const sabotageHandler = this.host.getSabotageHandler();
 
     if (sabotageHandler === undefined) {
       throw new Error("Attempted to sabotage without a SabotageHandler instance");
     }
+
+    this.setOldShipStatus();
+
+    const ship = this.getShipStatus();
+    const type = amount.getSystemType();
 
     system.setCooldown(30);
 

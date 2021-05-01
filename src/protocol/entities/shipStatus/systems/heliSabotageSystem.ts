@@ -14,6 +14,18 @@ export class HeliSabotageSystem extends BaseSystem {
     super(shipStatus, SystemType.Reactor);
   }
 
+  isSabotaged(): boolean {
+    return this.getCountdown() < 10000;
+  }
+
+  repair(): void {
+    this.countdown = 10000;
+    this.timer = -1;
+
+    this.activeConsoles.clear();
+    this.completedConsoles.clear();
+  }
+
   getCountdown(): number {
     return this.countdown;
   }

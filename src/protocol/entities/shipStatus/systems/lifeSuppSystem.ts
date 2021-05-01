@@ -12,6 +12,16 @@ export class LifeSuppSystem extends BaseSystem {
     super(shipStatus, SystemType.Oxygen);
   }
 
+  isSabotaged(): boolean {
+    return this.getTimer() < 10000;
+  }
+
+  repair(): void {
+    this.timer = 10000;
+
+    this.completedConsoles.clear();
+  }
+
   getTimer(): number {
     return this.timer;
   }

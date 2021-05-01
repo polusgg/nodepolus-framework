@@ -15,6 +15,15 @@ export class SwitchSystem extends BaseSystem {
     super(shipStatus, SystemType.Electrical);
   }
 
+  isSabotaged(): boolean {
+    return !this.expectedSwitches.equals(this.actualSwitches);
+  }
+
+  repair(): void {
+    this.actualSwitches = this.expectedSwitches.clone();
+    this.visionModifier = 0xff;
+  }
+
   getExpectedSwitches(): Bitfield {
     return this.expectedSwitches;
   }

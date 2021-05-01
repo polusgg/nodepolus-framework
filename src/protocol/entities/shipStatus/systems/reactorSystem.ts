@@ -12,6 +12,16 @@ export class ReactorSystem extends BaseSystem {
     super(shipStatus, SystemType.Reactor);
   }
 
+  isSabotaged(): boolean {
+    return this.countdown < 10000;
+  }
+
+  repair(): void {
+    this.countdown = 10000;
+
+    this.userConsoles.clear();
+  }
+
   getCountdown(): number {
     return this.countdown;
   }

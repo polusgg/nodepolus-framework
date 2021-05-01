@@ -12,6 +12,16 @@ export class LaboratorySystem extends BaseSystem {
     super(shipStatus, SystemType.Laboratory);
   }
 
+  isSabotaged(): boolean {
+    return this.getCountdown() < 10000;
+  }
+
+  repair(): void {
+    this.countdown = 10000;
+
+    this.userConsoles.clear();
+  }
+
   getCountdown(): number {
     return this.countdown;
   }
