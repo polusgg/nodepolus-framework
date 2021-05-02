@@ -18,8 +18,7 @@ export class LifeSuppSystem extends BaseSystem {
 
   repair(): void {
     this.timer = 10000;
-
-    this.completedConsoles.clear();
+    this.completedConsoles = new Set([0, 1]);
   }
 
   getTimer(): number {

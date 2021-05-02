@@ -18,7 +18,8 @@ export class HqHudSystem extends BaseSystem {
 
   repair(): void {
     this.activeConsoles.clear();
-    this.completedConsoles.clear();
+
+    this.completedConsoles = new Set([0, 1]);
   }
 
   getActiveConsoles(): Map<number, number> {

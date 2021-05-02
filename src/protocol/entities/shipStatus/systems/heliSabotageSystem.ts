@@ -21,9 +21,9 @@ export class HeliSabotageSystem extends BaseSystem {
   repair(): void {
     this.countdown = 10000;
     this.timer = -1;
+    this.completedConsoles = new Set([0, 1]);
 
     this.activeConsoles.clear();
-    this.completedConsoles.clear();
   }
 
   getCountdown(): number {
