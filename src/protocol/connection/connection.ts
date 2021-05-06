@@ -369,8 +369,8 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   /**
    * Sets whether or not the connection is an acting host in their lobby.
    *
-   * @param actingHost - `true` to add the acting host host status to the connection, `false` to remove it
-   * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets
+   * @param actingHost - `true` to add the acting host status to the connection, `false` to remove it
+   * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
   async syncActingHost(actingHost: boolean, sendImmediately: boolean = true): Promise<void> {
     if (this.lobby === undefined) {

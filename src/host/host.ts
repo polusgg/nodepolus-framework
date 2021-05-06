@@ -211,6 +211,10 @@ export class Host implements HostInstance {
     }
   }
 
+  isCountingDown(): boolean {
+    return this.secondsUntilStart > -1;
+  }
+
   async startGame(): Promise<void> {
     this.lobby.setGame(new Game(this.lobby));
 

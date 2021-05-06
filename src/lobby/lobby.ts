@@ -870,7 +870,7 @@ export class Lobby implements LobbyInstance {
    * @param connection - The connection that was disconnected
    * @param reason - The reason for why the connection was disconnected
    */
-  handleDisconnect(connection: Connection, reason?: DisconnectReason): void {
+  async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
     this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.getId(), 0, reason ?? DisconnectReason.exitGame()));
 
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
@@ -910,12 +910,12 @@ export class Lobby implements LobbyInstance {
       this.meetingHud.getMeetingHud().clearVote(votesToClear);
     }
 
+    if (connection.isActingHost() && this.connections.length > 0) {
+      await this.migrateHost(connection);
+    }
+
     this.hostInstance.handleDisconnect(connection, reason);
     disconnectingPlayer?.getEntity().despawn();
-
-    if (connection.isActingHost() && this.connections.length > 0) {
-      this.migrateHost(connection);
-    }
   }
 
   /**
@@ -1294,7 +1294,11 @@ export class Lobby implements LobbyInstance {
       return;
     }
 
-    event.getNewHost().syncActingHost(true);
+    if (this.getHostInstance().isCountingDown()) {
+      event.getNewHost().setActingHost(true);
+    } else {
+      event.getNewHost().syncActingHost(true, true);
+    }
   }
 
   /**

@@ -53,6 +53,11 @@ export interface HostInstance {
   stopCountdown(): void;
 
   /**
+   * Gets whether or not the start-game countdown is active.
+   */
+  isCountingDown(): boolean;
+
+  /**
    * Starts the game.
    */
   startGame(): void;
