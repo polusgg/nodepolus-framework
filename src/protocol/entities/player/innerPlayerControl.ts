@@ -218,6 +218,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     const lobby = this.getLobby() as Lobby;
     const owner = lobby.findSafeConnection(this.getOwnerId());
     const player = lobby.findSafePlayerByConnection(owner);
+    const connection = this.getConnection();
 
     lobby.getHostInstance().ensurePlayerDataExists(player);
 
@@ -230,7 +231,9 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     await lobby.finishedSpawningPlayer(owner);
 
     if (lobby.getActingHosts().length === 0) {
-      this.getConnection().syncActingHost(true);
+      connection.syncActingHost(true);
+    } else if (connection.isActingHost()) {
+      (this.getLobby() as Lobby).sendEnableHost(connection, true);
     }
   }
 
