@@ -559,6 +559,7 @@ export class Host implements HostInstance {
     this.decontaminationHandlers = [];
     this.readyPlayerList.clear();
 
+    this.lobby.setGame();
     this.lobby.clearPlayers();
     this.playersInScene.clear();
 
