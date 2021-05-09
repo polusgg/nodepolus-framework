@@ -636,6 +636,8 @@ export class Host implements HostInstance {
 
       if (this.lobby.getGame() === undefined) {
         this.lobby.enableActingHosts(true);
+      } else {
+        this.handleReady();
       }
     }
 
@@ -675,8 +677,10 @@ export class Host implements HostInstance {
     }
   }
 
-  async handleReady(connection: Connection): Promise<void> {
-    this.readyPlayerList.add(connection.getId());
+  async handleReady(connection?: Connection): Promise<void> {
+    if (connection !== undefined) {
+      this.readyPlayerList.add(connection.getId());
+    }
 
     /**
      * TODO:
