@@ -1294,7 +1294,7 @@ export class Lobby implements LobbyInstance {
       return;
     }
 
-    if (this.getHostInstance().isCountingDown()) {
+    if (this.getHostInstance().isCountingDown() || this.gameState === GameState.Started) {
       event.getNewHost().setActingHost(true);
     } else {
       event.getNewHost().syncActingHost(true, true);

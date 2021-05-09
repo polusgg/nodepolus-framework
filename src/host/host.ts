@@ -82,7 +82,7 @@ export class Host implements HostInstance {
   protected readonly id: number = FakeClientId.ServerAsHost;
   protected readonly playersInScene: Map<number, string> = new Map();
 
-  protected readyPlayerList: number[] = [];
+  protected readyPlayerList: Set<number> = new Set();
   protected netIdIndex = 1;
   protected counterSequenceId = 0;
   protected secondsUntilStart = -1;
@@ -188,6 +188,10 @@ export class Host implements HostInstance {
   }
 
   async stopCountdown(): Promise<void> {
+    if (this.secondsUntilStart === -1 && this.countdownInterval === undefined) {
+      return;
+    }
+
     const event = new LobbyCountdownStoppedEvent(this.lobby, this.secondsUntilStart);
 
     await this.lobby.getServer().emit("lobby.countdown.stopped", event);
@@ -553,7 +557,7 @@ export class Host implements HostInstance {
     }
 
     this.decontaminationHandlers = [];
-    this.readyPlayerList = [];
+    this.readyPlayerList.clear();
 
     this.lobby.clearPlayers();
     this.playersInScene.clear();
@@ -625,9 +629,14 @@ export class Host implements HostInstance {
     const gameState = this.lobby.getGameState();
     const gameData = this.lobby.getGameData();
 
+    this.readyPlayerList.delete(connection.getId());
+
     if (gameState == GameState.NotStarted) {
       this.stopCountdown();
-      this.lobby.enableActingHosts(true);
+
+      if (this.lobby.getGame() === undefined) {
+        this.lobby.enableActingHosts(true);
+      }
     }
 
     if (gameData === undefined) {
@@ -667,7 +676,7 @@ export class Host implements HostInstance {
   }
 
   async handleReady(connection: Connection): Promise<void> {
-    this.readyPlayerList.push(connection.getId());
+    this.readyPlayerList.add(connection.getId());
 
     /**
      * TODO:
@@ -679,7 +688,7 @@ export class Host implements HostInstance {
 
     const connections = this.lobby.getConnections();
 
-    if (this.readyPlayerList.length != connections.length) {
+    if (this.readyPlayerList.size != connections.length) {
       return;
     }
 
