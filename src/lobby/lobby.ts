@@ -33,12 +33,12 @@ import {
   SceneChangePacket,
 } from "../protocol/packets/gameData";
 import {
-  BaseRootPacket,
   AlterGameTagPacket,
+  BaseRootPacket,
   GameDataPacket,
+  JoinedGamePacket,
   JoinGameErrorPacket,
   JoinGameResponsePacket,
-  JoinedGamePacket,
   KickPlayerPacket,
   RemovePlayerPacket,
 } from "../protocol/packets/root";
@@ -889,18 +889,13 @@ export class Lobby implements LobbyInstance {
 
       for (const [id, state] of states) {
         if (id === disconnectedId) {
-          state.setDead(true);
-          state.setVotedFor(-1);
-          state.setVoted(false);
+          this.meetingHud.getMeetingHud().removePlayerState(id);
         } else if (state.getVotedFor() == disconnectedId) {
           const votingPlayer = this.findPlayerByPlayerId(id);
 
           if (votingPlayer !== undefined) {
             votesToClear.push(votingPlayer);
           }
-
-          state.setVotedFor(-1);
-          state.setVoted(false);
         }
       }
 

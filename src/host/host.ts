@@ -10,7 +10,7 @@ import { EntitySkeldShipStatus } from "../protocol/entities/shipStatus/skeld";
 import { EntityMiraShipStatus } from "../protocol/entities/shipStatus/mira";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
-import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
+import { shuffleArray, shuffleArrayClone } from "../util/shuffle";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { RpcPacket } from "../protocol/packets/gameData";
@@ -76,6 +76,7 @@ import {
   TaskLength,
   TaskType,
   TeleportReason,
+  VoteStateConstants,
 } from "../types/enums";
 
 export class Host implements HostInstance {
@@ -426,7 +427,7 @@ export class Host implements HostInstance {
         const votedFor = fetchPlayerById(state.getVotedFor());
 
         if (votedFor === undefined) {
-          if (state.getVotedFor() == -1) {
+          if (state.getVotedFor() === VoteStateConstants.SkippedVote) {
             vote.setSkipping();
           } else {
             voteResults.delete(player.getId());
@@ -474,12 +475,12 @@ export class Host implements HostInstance {
     const fullStates = new Array<VoteState>(length);
 
     for (let i = 0; i < length; i++) {
-      fullStates[i] = states.get(i) ?? new VoteState(false, false, false, -1);
+      fullStates[i] = states.get(i) ?? new VoteState(VoteStateConstants.MissedVote, false);
     }
 
     meetingHud.getMeetingHud().sendRpcPacket(new VotingCompletePacket(
       fullStates,
-      isTied ? 0xff : (exiledPlayer?.getId() ?? 0xff),
+      isTied || exiledPlayer === undefined ? 0xff : exiledPlayer.getId(),
       isTied,
     ), this.lobby.getConnections());
 
@@ -912,10 +913,8 @@ export class Host implements HostInstance {
 
     for (const [id, data] of playerData) {
       meetingHud!.getMeetingHud().setPlayerState(id, new VoteState(
+        data.isDead() ? VoteStateConstants.DeadVote : VoteStateConstants.HasNotVoted,
         id == event.getCaller().getId(),
-        false,
-        data.isDead() || data.isDisconnected(),
-        -1,
       ));
     }
 
@@ -999,7 +998,7 @@ export class Host implements HostInstance {
       throw new Error(`Player ${votingPlayerId} does not have a VoteState instance on the MeetingHud instance`);
     }
 
-    state.setVotedFor(id !== undefined ? id : -1).setVoted(true);
+    state.setVotedFor(id !== undefined ? id : VoteStateConstants.HasNotVoted);
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.getMeetingHud().serializeData(oldMeetingHud),

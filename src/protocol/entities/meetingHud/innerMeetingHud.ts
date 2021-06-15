@@ -1,5 +1,5 @@
 import { BaseRpcPacket, CastVotePacket, ClearVotePacket } from "../../packets/rpc";
-import { InnerNetObjectType, RpcPacketType } from "../../../types/enums";
+import { InnerNetObjectType, RpcPacketType, VoteStateConstants } from "../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MeetingVoteRemovedEvent } from "../../../api/events/meeting";
 import { notUndefined, shallowEqual } from "../../../util/functions";
@@ -9,6 +9,7 @@ import { BaseInnerNetObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { VoteState } from "../../../types";
 import { EntityMeetingHud } from ".";
+import { GameDataPacket } from "../../packets/root";
 
 export class InnerMeetingHud extends BaseInnerNetObject {
   constructor(
@@ -64,16 +65,17 @@ export class InnerMeetingHud extends BaseInnerNetObject {
       return event;
     }))).filter(event => !event.isCancelled()).map(event => {
       const connection = event.getPlayer().getConnection();
-      const state = this.playerStates[event.getPlayer().getId()];
+      const state = this.playerStates.get(event.getPlayer().getId())!;
 
-      state.setVoted(false);
-      state.setVotedFor(-1);
+      state.setVotedFor(VoteStateConstants.HasNotVoted);
 
       return connection;
     }).filter(notUndefined);
 
     this.sendRpcPacket(new ClearVotePacket(), promises);
-    // TODO: Do we need to also send a data packet to set the DidVote and VotedFor fields back to empty?
+    await this.getLobby().sendRootGamePacket(new GameDataPacket([
+      this.serializeData(this.clone()),
+    ], this.getLobby().getCode()), promises);
   }
 
   handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
@@ -102,9 +104,11 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   serializeData(old: InnerMeetingHud): DataPacket {
     const writer = new MessageWriter().writePackedUInt32(this.playerStates.size);
 
-    for (const [id, state] of [...this.playerStates.entries()].sort(([idA], [idb]) => idA - idb)) {
+    for (const [id, state] of this.playerStates.entries()) {
       if (!shallowEqual(state, old.playerStates.get(id))) {
+        writer.startMessage(id);
         writer.writeObject(state);
+        writer.endMessage();
       }
     }
 
@@ -113,10 +117,12 @@ export class InnerMeetingHud extends BaseInnerNetObject {
 
   serializeSpawn(): SpawnPacketObject {
     const writer = new MessageWriter();
-    const players = this.getLobby().getPlayers().sort((playerA, playerB) => playerA.getCreatedAt() - playerB.getCreatedAt());
+    // const players = this.getLobby().getPlayers().sort((playerA, playerB) => playerA.getCreatedAt() - playerB.getCreatedAt());
 
-    for (let i = 0; i < players.length; i++) {
-      writer.writeObject();
+    for (const [id, state] of this.playerStates.entries()) {
+      writer.startMessage(id);
+      writer.writeObject(state);
+      writer.endMessage();
     }
 
     return new SpawnPacketObject(this.netId, writer);
