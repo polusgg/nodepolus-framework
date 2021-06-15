@@ -87,6 +87,9 @@ export class InnerMeetingHud extends BaseInnerNetObject {
       case RpcPacketType.ClearVote:
         this.parent.getLobby().getLogger().warn("Received ClearVote packet from connection %s in a server-as-host state", connection);
         break;
+      case RpcPacketType.Close:
+        this.parent.getLobby().getLogger().warn("Received Close packet from connection %s in a server-as-host state", connection);
+        break;
       default:
         break;
     }
@@ -97,7 +100,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   }
 
   serializeData(old: InnerMeetingHud): DataPacket {
-    const writer = new MessageWriter().writePackedUInt32(this.serializeStatesToDirtyBits(old.playerStates));
+    const writer = new MessageWriter().writePackedUInt32(this.playerStates.size);
 
     for (const [id, state] of [...this.playerStates.entries()].sort(([idA], [idb]) => idA - idb)) {
       if (!shallowEqual(state, old.playerStates.get(id))) {
@@ -113,13 +116,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     const players = this.getLobby().getPlayers().sort((playerA, playerB) => playerA.getCreatedAt() - playerB.getCreatedAt());
 
     for (let i = 0; i < players.length; i++) {
-      const state = this.playerStates.get(players[i].getId());
-
-      if (state === undefined) {
-        writer.writeByte(0x00);
-      } else {
-        writer.writeObject(state);
-      }
+      writer.writeObject();
     }
 
     return new SpawnPacketObject(this.netId, writer);
@@ -127,21 +124,5 @@ export class InnerMeetingHud extends BaseInnerNetObject {
 
   clone(): InnerMeetingHud {
     return new InnerMeetingHud(this.parent, new Map(Array.from(this.playerStates, ([id, state]) => [id, state.clone()])), this.netId);
-  }
-
-  protected serializeStatesToDirtyBits(states: Map<number, VoteState>): number {
-    let dirtyBits = 0;
-
-    const sortedStates = [...this.playerStates.entries()].sort(([idA], [idB]) => this.getLobby().findSafePlayerByPlayerId(idA).getCreatedAt() - this.getLobby().findSafePlayerByPlayerId(idB).getCreatedAt());
-
-    for (let i = 0; i < sortedStates.length; i++) {
-      const [id, state] = sortedStates[i];
-
-      if (!shallowEqual(state, states.get(id))) {
-        dirtyBits |= 1 << i;
-      }
-    }
-
-    return dirtyBits;
   }
 }

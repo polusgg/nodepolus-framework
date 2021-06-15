@@ -78,4 +78,4 @@ export { TaskType } from "./taskType";
 
 export { TeleportReason } from "./teleportReason";
 
-export { VoteStateMask } from "./voteStateMask";
+export { VoteStateConstants } from "./voteStateConstants";

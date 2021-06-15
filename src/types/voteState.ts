@@ -1,6 +1,7 @@
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
 import { CanSerializeToHazel } from ".";
-import { VoteStateMask } from "./enums";
+import { VoteStateConstants } from "./enums";
+import { PlayerData } from "../protocol/entities/gameData/types";
 
 /**
  * A class used to store and modify a player's vote in a meeting.
@@ -8,15 +9,11 @@ import { VoteStateMask } from "./enums";
 export class VoteState implements CanSerializeToHazel {
   /**
    * @param reported - `true` if the player reported the body or called the meeting, `false` if not
-   * @param voted - `true` if the player has voted, `false` if not
-   * @param dead - `true` if the player is dead, `false` if not
    * @param votedFor - The ID of the player that was voted for
    */
   constructor(
+    protected votedFor: number | VoteStateConstants,
     protected reported: boolean,
-    protected voted: boolean,
-    protected dead: boolean,
-    protected votedFor: number,
   ) {}
 
   /**
@@ -25,13 +22,12 @@ export class VoteState implements CanSerializeToHazel {
    * @param reader - The MessageReader to read from
    */
   static deserialize(reader: MessageReader): VoteState {
-    const state = reader.readByte();
+    const votedFor = reader.readByte();
+    const reported = reader.readBoolean();
 
     return new VoteState(
-      (state & VoteStateMask.DidReport) == VoteStateMask.DidReport,
-      (state & VoteStateMask.DidVote) == VoteStateMask.DidVote,
-      (state & VoteStateMask.IsDead) == VoteStateMask.IsDead,
-      (state & VoteStateMask.DidVote) == VoteStateMask.DidVote ? (state & VoteStateMask.VotedFor) - 1 : 14,
+      votedFor,
+      reported,
     );
   }
 
@@ -41,12 +37,8 @@ export class VoteState implements CanSerializeToHazel {
    * @param writer - The MessageWriter to write to
    */
   serialize(writer: MessageWriter): void {
-    writer.writeByte(
-      (this.reported ? VoteStateMask.DidReport : 0) |
-      (this.voted ? VoteStateMask.DidVote : 0) |
-      (this.dead ? VoteStateMask.IsDead : 0) |
-      (this.voted ? ((this.votedFor + 1) & VoteStateMask.VotedFor) : 15),
-    );
+    writer.writeByte(this.votedFor);
+    writer.writeBoolean(this.reported);
   }
 
   /**
@@ -75,18 +67,9 @@ export class VoteState implements CanSerializeToHazel {
    * @returns `true` if the player has voted, `false` if not
    */
   didVote(): boolean {
-    return this.voted;
-  }
-
-  /**
-   * Sets whether or not the player has voted.
-   *
-   * @param voted - `true` if the player has voted, `false` if not
-   */
-  setVoted(voted: boolean): this {
-    this.voted = voted;
-
-    return this;
+    return this.votedFor !== VoteStateConstants.HasNotVoted &&
+      this.votedFor !== VoteStateConstants.MissedVote &&
+      this.votedFor !== VoteStateConstants.HasNotVoted;
   }
 
   /**
@@ -95,18 +78,7 @@ export class VoteState implements CanSerializeToHazel {
    * @returns `true` if the player is dead, `false` if not
    */
   isDead(): boolean {
-    return this.dead;
-  }
-
-  /**
-   * Sets whether or not the player is dead.
-   *
-   * @param dead - `true` if the player is dead, `false` if not
-   */
-  setDead(dead: boolean): this {
-    this.dead = dead;
-
-    return this;
+    return this.votedFor === VoteStateConstants.DeadVote;
   }
 
   /**
@@ -121,7 +93,7 @@ export class VoteState implements CanSerializeToHazel {
    *
    * @param votedFor - The new ID of the player that was voted for
    */
-  setVotedFor(votedFor: number): this {
+  setVotedFor(votedFor: number | VoteStateConstants): this {
     this.votedFor = votedFor;
 
     return this;
@@ -131,6 +103,6 @@ export class VoteState implements CanSerializeToHazel {
    * Gets a clone of the VoteState instance.
    */
   clone(): VoteState {
-    return new VoteState(this.reported, this.voted, this.dead, this.votedFor);
+    return new VoteState(this.votedFor, this.reported);
   }
 }
