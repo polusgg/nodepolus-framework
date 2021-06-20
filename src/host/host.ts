@@ -384,7 +384,7 @@ export class Host implements HostInstance {
     const voteResults: Map<number, VoteResult> = new Map();
     const playerInstanceCache: Map<number, PlayerInstance> = new Map();
     const fetchPlayerById = (playerId: number): PlayerInstance | undefined => {
-      if (playerId == -1) {
+      if (playerId >= VoteStateConstants.DeadVote) {
         return;
       }
 
@@ -395,6 +395,7 @@ export class Host implements HostInstance {
       const player = this.lobby.findPlayerByPlayerId(playerId);
 
       if (player === undefined) {
+
         return;
       }
 
@@ -470,16 +471,8 @@ export class Host implements HostInstance {
       }
     }
 
-    const states = meetingHud.getMeetingHud().getPlayerStates();
-    const length = Math.max(...meetingHud.getMeetingHud().getPlayerStates().keys()) + 1;
-    const fullStates = new Array<VoteState>(length);
-
-    for (let i = 0; i < length; i++) {
-      fullStates[i] = states.get(i) ?? new VoteState(VoteStateConstants.MissedVote, false);
-    }
-
     meetingHud.getMeetingHud().sendRpcPacket(new VotingCompletePacket(
-      fullStates,
+      meetingHud.getMeetingHud().getPlayerStates(),
       isTied || exiledPlayer === undefined ? 0xff : exiledPlayer.getId(),
       isTied,
     ), this.lobby.getConnections());
@@ -975,7 +968,7 @@ export class Host implements HostInstance {
     const event = new MeetingVoteAddedEvent(
       this.lobby.getSafeGame(),
       player,
-      suspectPlayerId !== -1 ? this.lobby.findPlayerByPlayerId(suspectPlayerId) : undefined,
+      suspectPlayerId < VoteStateConstants.DeadVote ? this.lobby.findPlayerByPlayerId(suspectPlayerId) : undefined,
     );
 
     await this.lobby.getServer().emit("meeting.vote.added", event);
@@ -992,13 +985,12 @@ export class Host implements HostInstance {
 
     const oldMeetingHud = meetingHud.getMeetingHud().clone();
     const state = meetingHud.getMeetingHud().getPlayerState(event.getVoter().getId());
-    const id = event.getSuspect()?.getId();
 
     if (state === undefined) {
       throw new Error(`Player ${votingPlayerId} does not have a VoteState instance on the MeetingHud instance`);
     }
 
-    state.setVotedFor(id !== undefined ? id : VoteStateConstants.HasNotVoted);
+    state.setVotedFor(suspectPlayerId);
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.getMeetingHud().serializeData(oldMeetingHud),

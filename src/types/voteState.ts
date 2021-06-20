@@ -19,10 +19,11 @@ export class VoteState implements CanSerializeToHazel {
    * Gets a new VoteState by reading from the given MessageReader.
    *
    * @param reader - The MessageReader to read from
+   * @param isComplete - Whether the message is from VotingComplete
    */
-  static deserialize(reader: MessageReader): VoteState {
+  static deserialize(reader: MessageReader, isComplete: boolean = false): VoteState {
     const votedFor = reader.readByte();
-    const reported = reader.readBoolean();
+    const reported = isComplete ? false : reader.readBoolean();
 
     return new VoteState(
       votedFor,
@@ -34,10 +35,15 @@ export class VoteState implements CanSerializeToHazel {
    * Writes the VoteState to the given MessageWriter
    *
    * @param writer - The MessageWriter to write to
+   * @param options - Whether the message is for VotingComplete
    */
-  serialize(writer: MessageWriter): void {
+  // TODO TYPE THIS PROPERLY
+  serialize(writer: MessageWriter, options?: Record<"isComplete", boolean>): void {
     writer.writeByte(this.votedFor);
-    writer.writeBoolean(this.reported);
+
+    if (options === undefined || !options.isComplete) {
+      writer.writeBoolean(this.reported);
+    }
   }
 
   /**
