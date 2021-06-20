@@ -1,6 +1,6 @@
 import { MessageReader, MessageWriter } from "../util/hazelMessage";
-import { CanSerializeToHazel } from ".";
 import { VoteStateConstants } from "./enums";
+import { CanSerializeToHazel } from ".";
 
 /**
  * A class used to store and modify a player's vote in a meeting.

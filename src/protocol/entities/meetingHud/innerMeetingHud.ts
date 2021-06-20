@@ -1,15 +1,15 @@
-import { BaseRpcPacket, CastVotePacket, ClearVotePacket } from "../../packets/rpc";
 import { InnerNetObjectType, RpcPacketType, VoteStateConstants } from "../../../types/enums";
+import { BaseRpcPacket, CastVotePacket, ClearVotePacket } from "../../packets/rpc";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
 import { MeetingVoteRemovedEvent } from "../../../api/events/meeting";
 import { notUndefined, shallowEqual } from "../../../util/functions";
 import { MessageWriter } from "../../../util/hazelMessage";
 import { PlayerInstance } from "../../../api/player";
+import { GameDataPacket } from "../../packets/root";
 import { BaseInnerNetObject } from "../baseEntity";
 import { Connection } from "../../connection";
 import { VoteState } from "../../../types";
 import { EntityMeetingHud } from ".";
-import { GameDataPacket } from "../../packets/root";
 
 export class InnerMeetingHud extends BaseInnerNetObject {
   constructor(

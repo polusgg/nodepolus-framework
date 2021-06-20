@@ -33,12 +33,12 @@ import {
   SceneChangePacket,
 } from "../protocol/packets/gameData";
 import {
-  AlterGameTagPacket,
   BaseRootPacket,
+  AlterGameTagPacket,
   GameDataPacket,
-  JoinedGamePacket,
   JoinGameErrorPacket,
   JoinGameResponsePacket,
+  JoinedGamePacket,
   KickPlayerPacket,
   RemovePlayerPacket,
 } from "../protocol/packets/root";
@@ -66,7 +66,8 @@ import {
   RpcPacketType,
   Scene,
   SpawnFlag,
-  SpawnType, VoteStateConstants,
+  SpawnType,
+  VoteStateConstants,
 } from "../types/enums";
 
 export class Lobby implements LobbyInstance {
