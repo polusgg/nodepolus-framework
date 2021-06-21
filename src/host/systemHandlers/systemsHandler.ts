@@ -47,6 +47,19 @@ import {
   GameCamerasOpenedEvent,
   GameCamerasClosedEvent,
 } from "../../api/events/game";
+import {
+  RoomCommunicationsConsoleClosedEvent,
+  RoomCommunicationsConsoleOpenedEvent,
+  RoomCommunicationsConsoleRepairedEvent,
+  RoomHeliConsoleClosedEvent,
+  RoomHeliConsoleOpenedEvent,
+  RoomHeliConsoleRepairedEvent,
+  RoomOxygenConsoleRepairedEvent,
+  RoomReactorConsoleClearedEvent,
+  RoomReactorConsoleRepairedEvent,
+  RoomRepairedEvent,
+  RoomSabotagedEvent,
+} from "../../api/events/room";
 
 export class SystemsHandler {
   protected oldShipStatus: BaseInnerShipStatus = this.host.getLobby().getSafeShipStatus().getShipStatus();
@@ -66,21 +79,37 @@ export class SystemsHandler {
     this.setOldShipStatus();
 
     switch (amount.getAction()) {
-      case HeliSabotageAction.OpenedConsole:
+      case HeliSabotageAction.OpenedConsole: {
+        const event = new RoomHeliConsoleOpenedEvent(this.host.getLobby().getSafeGame(), repairer, amount.getConsoleId());
+
+        this.host.getLobby().getServer().emit("room.heli.console.opened", event);
         system.setActiveConsole(repairer.getId(), amount.getConsoleId());
         break;
-      case HeliSabotageAction.ClosedConsole:
+      }
+      case HeliSabotageAction.ClosedConsole: {
+        const event = new RoomHeliConsoleClosedEvent(this.host.getLobby().getSafeGame(), repairer, amount.getConsoleId());
+
+        this.host.getLobby().getServer().emit("room.heli.console.closed", event);
         system.removeActiveConsole(repairer.getId());
         break;
-      case HeliSabotageAction.EnteredCode:
+      }
+      case HeliSabotageAction.EnteredCode: {
         system.setTimer(10);
         system.addCompletedConsole(amount.getConsoleId());
 
         if (system.getCompletedConsoles().size == 2) {
+          const event = new RoomHeliConsoleRepairedEvent(this.host.getLobby().getSafeGame(), repairer, amount.getConsoleId());
+
+          this.host.getLobby().getServer().emit("room.heli.console.repaired", event);
+
+          if (event.isCancelled()) {
+            return;
+          }
           system.setCountdown(10000);
           sabotageHandler.clearTimer();
         }
         break;
+      }
     }
 
     this.sendDataUpdate();
@@ -118,19 +147,42 @@ export class SystemsHandler {
     this.setOldShipStatus();
 
     switch (amount.getAction()) {
-      case MiraCommunicationsAction.OpenedConsole:
+      case MiraCommunicationsAction.OpenedConsole: {
+        const event = new RoomCommunicationsConsoleOpenedEvent(this.host.getLobby().getSafeGame(), repairer, amount.getConsoleId());
+
+        this.host.getLobby().getServer().emit("room.communications.console.opened", event);
         system.setActiveConsole(repairer.getId(), amount.getConsoleId());
         break;
-      case MiraCommunicationsAction.ClosedConsole:
+      }
+      case MiraCommunicationsAction.ClosedConsole: {
+        const event = new RoomCommunicationsConsoleClosedEvent(this.host.getLobby().getSafeGame(), repairer, amount.getConsoleId());
+
+        this.host.getLobby().getServer().emit("room.communications.console.closed", event);
         system.removeActiveConsole(repairer.getId());
         break;
-      case MiraCommunicationsAction.EnteredCode:
+      }
+      case MiraCommunicationsAction.EnteredCode: {
+        const event = new RoomCommunicationsConsoleRepairedEvent(this.host.getLobby().getSafeGame(), repairer, amount.getConsoleId());
+
+        this.host.getLobby().getServer().emit("room.communications.console.repaired", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
         system.addCompletedConsole(amount.getConsoleId());
 
         if (system.getCompletedConsoles().size == 2) {
+          const eventTwo = new RoomRepairedEvent(this.host.getLobby().getSafeGame(), system, repairer);
+
+          this.host.getLobby().getServer().emit("room.repaired", eventTwo);
+
+          if (eventTwo.isCancelled()) {
+            return;
+          }
           sabotageHandler.clearTimer();
         }
         break;
+      }
     }
 
     this.sendDataUpdate();
@@ -138,7 +190,28 @@ export class SystemsHandler {
 
   repairHudOverride<T extends HudOverrideSystem>(_repairer: Player, system: T, amount: NormalCommunicationsAmount): void {
     this.setOldShipStatus();
-    system.setSabotaged(!amount.isRepaired());
+
+    if (amount.isRepaired()) {
+      const event = new RoomCommunicationsConsoleRepairedEvent(this.host.getLobby().getSafeGame(), _repairer);
+      const eventTwo = new RoomRepairedEvent(this.host.getLobby().getSafeGame(), system, _repairer);
+
+      this.host.getLobby().getServer().emit("room.communications.console.repaired", event);
+      this.host.getLobby().getServer().emit("room.repaired", eventTwo);
+
+      if (event.isCancelled() || eventTwo.isCancelled()) {
+        return;
+      }
+      system.setSabotaged(false);
+    } else {
+      const event = new RoomSabotagedEvent(this.host.getLobby().getSafeGame(), system, _repairer);
+
+      this.host.getLobby().getServer().emit("room.sabotaged", event);
+
+      if (event.isCancelled()) {
+        return;
+      }
+      system.setSabotaged(true);
+    }
     this.sendDataUpdate();
   }
 
@@ -152,18 +225,41 @@ export class SystemsHandler {
     this.setOldShipStatus();
 
     switch (amount.getAction()) {
-      case OxygenAction.Completed:
+      case OxygenAction.Completed: {
+        const event = new RoomOxygenConsoleRepairedEvent(this.host.getLobby().getSafeGame(), amount.getConsoleId());
+
+        this.host.getLobby().getServer().emit("room.oxygen.console.repaired", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
         system.addCompletedConsole(amount.getConsoleId());
 
         if (system.getCompletedConsoles().size == 2) {
+          const eventTwo = new RoomRepairedEvent(this.host.getLobby().getSafeGame(), system);
+
+          this.host.getLobby().getServer().emit("room.repaired", eventTwo);
+
+          if (event.isCancelled()) {
+            return;
+          }
           system.setTimer(10000);
           sabotageHandler.clearTimer();
         }
         break;
-      case OxygenAction.Repaired:
+      }
+      case OxygenAction.Repaired: {
+        const event = new RoomRepairedEvent(this.host.getLobby().getSafeGame(), system);
+
+        this.host.getLobby().getServer().emit("room.repaired", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
         system.setTimer(10000);
         sabotageHandler.clearTimer();
         break;
+      }
     }
 
     this.sendDataUpdate();
@@ -220,21 +316,52 @@ export class SystemsHandler {
     this.setOldShipStatus();
 
     switch (amount.getAction()) {
-      case ReactorAction.PlacedHand:
+      case ReactorAction.PlacedHand: {
+        const event = new RoomReactorConsoleRepairedEvent(this.host.getLobby().getSafeGame(), amount.getConsoleId());
+
+        this.host.getLobby().getServer().emit("room.reactor.console.repaired", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
         system.setUserConsole(repairer.getId(), amount.getConsoleId());
 
         if (new Set(system.getUserConsoles().values()).size == 2) {
+          const eventTwo = new RoomRepairedEvent(this.host.getLobby().getSafeGame(), system, repairer);
+
+          this.host.getLobby().getServer().emit("room.repaired", eventTwo);
+
+          if (eventTwo.isCancelled()) {
+            return;
+          }
           system.setCountdown(10000);
           sabotageHandler.clearTimer();
         }
         break;
-      case ReactorAction.RemovedHand:
+      }
+      case ReactorAction.RemovedHand: {
+        const event = new RoomReactorConsoleClearedEvent(this.host.getLobby().getSafeGame(), amount.getConsoleId(), repairer);
+
+        this.host.getLobby().getServer().emit("room.reactor.console.cleared", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
         system.removeUserConsole(repairer.getId());
         break;
-      case ReactorAction.Repaired:
+      }
+      case ReactorAction.Repaired: {
+        const event = new RoomRepairedEvent(this.host.getLobby().getSafeGame(), system, repairer);
+
+        this.host.getLobby().getServer().emit("room.repaired", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
         system.setCountdown(10000);
         sabotageHandler.clearTimer();
         break;
+      }
     }
 
     this.sendDataUpdate();
@@ -351,7 +478,7 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairSabotage<T extends SabotageSystem>(_repairer: Player, system: T, amount: SabotageAmount): void {
+  async repairSabotage<T extends SabotageSystem>(_repairer: Player, system: T, amount: SabotageAmount): Promise<void> {
     const sabotageHandler = this.host.getSabotageHandler();
 
     if (sabotageHandler === undefined) {
@@ -362,7 +489,14 @@ export class SystemsHandler {
 
     const ship = this.getShipStatus();
     const type = amount.getSystemType();
+    const game = this.host.getLobby().getSafeGame();
+    const event = new RoomSabotagedEvent(game, system, _repairer);
 
+    await this.host.getLobby().getServer().emit("room.sabotaged", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
     system.setCooldown(30);
 
     this.sabotageCountdownInterval = setInterval(() => {
