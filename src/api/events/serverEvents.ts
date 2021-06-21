@@ -62,7 +62,6 @@ import {
   PlayerVotekickRemovedEvent,
 } from "./player";
 import {
-  RoomCommunicationsConsoleClearedEvent,
   RoomCommunicationsConsoleClosedEvent,
   RoomCommunicationsConsoleOpenedEvent,
   RoomCommunicationsConsoleRepairedEvent,
@@ -72,10 +71,12 @@ import {
   RoomDoorsClosedEvent,
   RoomDoorsOpenedEvent,
   RoomElectricalInteractedEvent,
-  RoomOxygenConsoleClearedEvent,
   RoomOxygenConsoleRepairedEvent,
   RoomReactorConsoleClearedEvent,
   RoomReactorConsoleRepairedEvent,
+  RoomHeliConsoleClosedEvent,
+  RoomHeliConsoleOpenedEvent,
+  RoomHeliConsoleRepairedEvent,
   RoomRepairedEvent,
   RoomSabotagedEvent,
 } from "./room";
@@ -191,7 +192,6 @@ export type ServerEvents = {
   /**
    * Room Events
    */
-  "room.communications.console.cleared": RoomCommunicationsConsoleClearedEvent;
   "room.communications.console.closed": RoomCommunicationsConsoleClosedEvent;
   "room.communications.console.opened": RoomCommunicationsConsoleOpenedEvent;
   "room.communications.console.repaired": RoomCommunicationsConsoleRepairedEvent;
@@ -201,10 +201,12 @@ export type ServerEvents = {
   "room.doors.closed": RoomDoorsClosedEvent;
   "room.doors.opened": RoomDoorsOpenedEvent;
   "room.electrical.interacted": RoomElectricalInteractedEvent;
-  "room.oxygen.console.cleared": RoomOxygenConsoleClearedEvent;
   "room.oxygen.console.repaired": RoomOxygenConsoleRepairedEvent;
   "room.reactor.console.cleared": RoomReactorConsoleClearedEvent;
   "room.reactor.console.repaired": RoomReactorConsoleRepairedEvent;
+  "room.heli.console.closed": RoomHeliConsoleClosedEvent;
+  "room.heli.console.opened": RoomHeliConsoleOpenedEvent;
+  "room.heli.console.repaired": RoomHeliConsoleRepairedEvent;
   "room.repaired": RoomRepairedEvent;
   "room.sabotaged": RoomSabotagedEvent;
 
