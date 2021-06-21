@@ -342,7 +342,7 @@ export class PlayerData implements CanSerializeToHazel {
         (this.impostor ? PlayerFlagMask.IsImpostor : 0) |
         (this.dead ? PlayerFlagMask.IsDead : 0),
       )
-      .writeList(this.tasks, (sub, task, i) => sub.writePackedUInt32(i).writeBoolean(task[1]));
+      .writeList(this.tasks, (sub, task, i) => sub.writePackedUInt32(i).writeBoolean(task[1]), false);
   }
 
   /**

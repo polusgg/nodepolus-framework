@@ -67,6 +67,7 @@ import {
   Scene,
   SpawnFlag,
   SpawnType,
+  VoteStateConstants,
 } from "../types/enums";
 
 export class Lobby implements LobbyInstance {
@@ -874,24 +875,21 @@ export class Lobby implements LobbyInstance {
     this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.getId(), 0, reason ?? DisconnectReason.exitGame()));
 
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
-    const disconnectingPlayerIndex = this.findPlayerIndexByConnection(connection);
     const disconnectingPlayer = this.findPlayerByConnection(connection);
 
     if (disconnectingConnectionIndex > -1) {
       this.connections.splice(disconnectingConnectionIndex, 1);
     }
 
-    if (this.meetingHud !== undefined && disconnectingPlayerIndex) {
+    if (this.meetingHud !== undefined && disconnectingPlayer) {
       const oldMeetingHud = this.meetingHud.getMeetingHud().clone();
-      const disconnectedId = disconnectingPlayer?.getId();
+      const disconnectedId = disconnectingPlayer.getId();
       const votesToClear: Player[] = [];
       const states = this.meetingHud.getMeetingHud().getPlayerStates();
 
       for (const [id, state] of states) {
         if (id === disconnectedId) {
-          state.setDead(true);
-          state.setVotedFor(-1);
-          state.setVoted(false);
+          this.meetingHud.getMeetingHud().removePlayerState(id);
         } else if (state.getVotedFor() == disconnectedId) {
           const votingPlayer = this.findPlayerByPlayerId(id);
 
@@ -899,8 +897,7 @@ export class Lobby implements LobbyInstance {
             votesToClear.push(votingPlayer);
           }
 
-          state.setVotedFor(-1);
-          state.setVoted(false);
+          state.setVotedFor(VoteStateConstants.HasNotVoted);
         }
       }
 

@@ -127,8 +127,8 @@ export class Server extends Emittery<ServerEvents> {
       this.logger.catch(error);
     });
 
-    if (this.getMaxPlayersPerLobby() > 10) {
-      this.logger.warn("Lobbies with more than 10 players is experimental");
+    if (this.getMaxPlayersPerLobby() > 15) {
+      this.logger.warn("Lobbies with more than 15 players is experimental");
     }
   }
 

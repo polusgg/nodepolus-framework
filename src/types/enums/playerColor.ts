@@ -11,5 +11,11 @@ export enum PlayerColor {
   Brown = 9,
   Cyan = 10,
   Lime = 11,
-  ForteGreen = 12,
+  Maroon = 12,
+  Rose = 13,
+  Banana = 14,
+  Gray = 15,
+  Tan = 16,
+  Coral = 17,
+  ForteGreen = 18,
 }

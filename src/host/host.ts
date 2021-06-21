@@ -10,7 +10,7 @@ import { EntitySkeldShipStatus } from "../protocol/entities/shipStatus/skeld";
 import { EntityMiraShipStatus } from "../protocol/entities/shipStatus/mira";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { EntityMeetingHud } from "../protocol/entities/meetingHud";
-import { shuffleArrayClone, shuffleArray } from "../util/shuffle";
+import { shuffleArray, shuffleArrayClone } from "../util/shuffle";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { EntityGameData } from "../protocol/entities/gameData";
 import { RpcPacket } from "../protocol/packets/gameData";
@@ -76,6 +76,7 @@ import {
   TaskLength,
   TaskType,
   TeleportReason,
+  VoteStateConstants,
 } from "../types/enums";
 
 export class Host implements HostInstance {
@@ -383,7 +384,7 @@ export class Host implements HostInstance {
     const voteResults: Map<number, VoteResult> = new Map();
     const playerInstanceCache: Map<number, PlayerInstance> = new Map();
     const fetchPlayerById = (playerId: number): PlayerInstance | undefined => {
-      if (playerId == -1) {
+      if (playerId >= VoteStateConstants.DeadVote) {
         return;
       }
 
@@ -394,6 +395,7 @@ export class Host implements HostInstance {
       const player = this.lobby.findPlayerByPlayerId(playerId);
 
       if (player === undefined) {
+
         return;
       }
 
@@ -426,7 +428,7 @@ export class Host implements HostInstance {
         const votedFor = fetchPlayerById(state.getVotedFor());
 
         if (votedFor === undefined) {
-          if (state.getVotedFor() == -1) {
+          if (state.getVotedFor() === VoteStateConstants.SkippedVote) {
             vote.setSkipping();
           } else {
             voteResults.delete(player.getId());
@@ -469,17 +471,9 @@ export class Host implements HostInstance {
       }
     }
 
-    const states = meetingHud.getMeetingHud().getPlayerStates();
-    const length = Math.max(...meetingHud.getMeetingHud().getPlayerStates().keys()) + 1;
-    const fullStates = new Array<VoteState>(length);
-
-    for (let i = 0; i < length; i++) {
-      fullStates[i] = states.get(i) ?? new VoteState(false, false, false, -1);
-    }
-
     meetingHud.getMeetingHud().sendRpcPacket(new VotingCompletePacket(
-      fullStates,
-      isTied ? 0xff : (exiledPlayer?.getId() ?? 0xff),
+      meetingHud.getMeetingHud().getPlayerStates(),
+      isTied || exiledPlayer === undefined ? 0xff : exiledPlayer.getId(),
       isTied,
     ), this.lobby.getConnections());
 
@@ -912,10 +906,8 @@ export class Host implements HostInstance {
 
     for (const [id, data] of playerData) {
       meetingHud!.getMeetingHud().setPlayerState(id, new VoteState(
+        data.isDead() ? VoteStateConstants.DeadVote : VoteStateConstants.HasNotVoted,
         id == event.getCaller().getId(),
-        false,
-        data.isDead() || data.isDisconnected(),
-        -1,
       ));
     }
 
@@ -976,7 +968,7 @@ export class Host implements HostInstance {
     const event = new MeetingVoteAddedEvent(
       this.lobby.getSafeGame(),
       player,
-      suspectPlayerId !== -1 ? this.lobby.findPlayerByPlayerId(suspectPlayerId) : undefined,
+      suspectPlayerId < VoteStateConstants.DeadVote ? this.lobby.findPlayerByPlayerId(suspectPlayerId) : undefined,
     );
 
     await this.lobby.getServer().emit("meeting.vote.added", event);
@@ -993,13 +985,12 @@ export class Host implements HostInstance {
 
     const oldMeetingHud = meetingHud.getMeetingHud().clone();
     const state = meetingHud.getMeetingHud().getPlayerState(event.getVoter().getId());
-    const id = event.getSuspect()?.getId();
 
     if (state === undefined) {
       throw new Error(`Player ${votingPlayerId} does not have a VoteState instance on the MeetingHud instance`);
     }
 
-    state.setVotedFor(id !== undefined ? id : -1).setVoted(true);
+    state.setVotedFor(suspectPlayerId);
 
     this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.getMeetingHud().serializeData(oldMeetingHud),
