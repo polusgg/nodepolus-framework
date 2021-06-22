@@ -8,4 +8,5 @@ export enum SpawnType {
   PolusShipStatus = 6,
   DleksShipStatus = 7,
   AirshipStatus = 8,
+  SubmergedStatus = 9,
 }

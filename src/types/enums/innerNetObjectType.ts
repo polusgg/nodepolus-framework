@@ -11,4 +11,5 @@ export enum InnerNetObjectType {
   MiraShipStatus,
   PolusShipStatus,
   AirshipStatus,
+  SubmergedStatus,
 }
