@@ -14,7 +14,7 @@ const SPAWN_RADIUS_MIRA_HQ = 1.55 as const;
 const SPAWN_RADIUS_POLUS = 1 as const;
 
 // TODO
-const SPAWN_RADIUS_AIRSHIP = 1 as const;
+const SPAWN_RADIUS_AIRSHIP = 0 as const;
 
 const SPAWN_POSITIONS_DROPSHIP: readonly Vector2[] = [
   new Vector2(-1.6, 2.4),
@@ -49,8 +49,8 @@ const SPAWN_POSITIONS_POLUS: LevelSpawnPositions = {
 
 const SPAWN_POSITIONS_AIRSHIP: LevelSpawnPositions = {
   // TODO
-  initial: new Vector2(0, 0),
-  meetingOne: new Vector2(0, 0),
+  initial: new Vector2(50, 50),
+  meetingOne: new Vector2(50, 50),
   meetingTwo: new Vector2(0, 0),
 };
 
