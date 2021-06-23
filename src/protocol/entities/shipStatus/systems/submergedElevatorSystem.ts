@@ -17,11 +17,11 @@ export enum SubmergedElevatorMovementStage {
 export class SubmergedElevatorSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    elevatorSystem: SystemType.ElevatorEastLeft | SystemType.ElevatorEastRight | SystemType.ElevatorWestLeft | SystemType.ElevatorWestRight | SystemType.ElevatorService,
-    protected readonly tandom: SubmergedElevatorSystem,
+    elevatorSystem: SystemType.SubmergedElevatorEastLeft | SystemType.SubmergedElevatorEastRight | SystemType.SubmergedElevatorWestLeft | SystemType.SubmergedElevatorWestRight | SystemType.SubmergedElevatorService,
     protected upperDeckIsTargetFloor: boolean,
-    protected moving: boolean,
-    protected stage: SubmergedElevatorMovementStage,
+    protected moving: boolean = false,
+    protected stage: SubmergedElevatorMovementStage = SubmergedElevatorMovementStage.Complete,
+    protected tandom?: SubmergedElevatorSystem,
   ) {
     super(shipStatus, elevatorSystem);
   }
@@ -38,7 +38,7 @@ export class SubmergedElevatorSystem extends BaseSystem {
   }
 
   clone(): SubmergedElevatorSystem {
-    return new SubmergedElevatorSystem(this.shipStatus, this.getType() as SystemType.ElevatorWestLeft | SystemType.ElevatorWestRight | SystemType.ElevatorEastLeft | SystemType.ElevatorEastRight | SystemType.ElevatorService, this.tandom, this.upperDeckIsTargetFloor, this.moving, this.stage);
+    return new SubmergedElevatorSystem(this.shipStatus, this.getType() as SystemType.SubmergedElevatorWestLeft | SystemType.SubmergedElevatorWestRight | SystemType.SubmergedElevatorEastLeft | SystemType.SubmergedElevatorEastRight | SystemType.SubmergedElevatorService, this.upperDeckIsTargetFloor, this.moving, this.stage, this.tandom);
   }
 
   equals(old: SubmergedElevatorSystem): boolean {
@@ -55,5 +55,11 @@ export class SubmergedElevatorSystem extends BaseSystem {
     }
 
     return true;
+  }
+
+  setTandom<T extends SubmergedElevatorSystem>(elevator: T): T {
+    this.tandom = elevator;
+
+    return elevator;
   }
 }

@@ -39,6 +39,11 @@ import {
   SecurityCameraSystem,
   SwitchSystem,
 } from "../systems";
+import { SubmergedOxygenSystem } from "../systems/submergedOxygenSystem";
+import { SubmergedElevatorSystem } from "../systems/submergedElevatorSystem";
+import { SubmergedPlayerFloorSystem } from "../systems/submergedPlayerFloorSystem";
+import { SubmergedSecuritySabotageSystem } from "../systems/submergedSecuritySabotageSystem";
+import { SubmergedSpawnInSystem } from "../systems/submergedSpawnInSystem";
 
 export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   protected readonly spawnSystemTypes: SystemType[];
@@ -72,6 +77,9 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         break;
       case InnerNetObjectType.DleksShipStatus:
         this.level = Level.AprilSkeld;
+        break;
+      case InnerNetObjectType.SubmergedStatus:
+        this.level = Level.Submerged;
         break;
       default:
         throw new Error(`Unsupported ShipStatus type: ${type} (${InnerNetObjectType[type]})`);
@@ -268,9 +276,25 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
       case SystemType.Medbay:
         return this.systems[InternalSystemType.MedScan];
       case SystemType.Oxygen:
+        if (this.level === Level.Submerged) {
+          return this.systems[InternalSystemType.SubmergedOxygen];
+        }
+
         return this.systems[InternalSystemType.Oxygen];
       case SystemType.GapRoom:
         return this.systems[InternalSystemType.MovingPlatform];
+      case SystemType.SubmergedElevatorEastLeft:
+      case SystemType.SubmergedElevatorEastRight:
+      case SystemType.SubmergedElevatorService:
+      case SystemType.SubmergedElevatorWestLeft:
+      case SystemType.SubmergedElevatorWestRight:
+        return this.systems[InternalSystemType[SystemType[systemType]]];
+      case SystemType.SubmergedFloor:
+        return this.systems[InternalSystemType.SubmergedFloor];
+      case SystemType.SubmergedSpawnIn:
+        return this.systems[InternalSystemType.SubmergedSpawnIn];
+      case SystemType.SubmergedSecuritySabotage:
+        return this.systems[InternalSystemType.SubmergedSecuritySabotage];
       default:
         throw new Error(`Tried to get unimplemented SystemType: ${systemType} (${SystemType[systemType]})`);
     }
@@ -332,10 +356,38 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
           this.systems[InternalSystemType.MedScan] = new MedScanSystem(this);
           break;
         case SystemType.Oxygen:
-          this.systems[InternalSystemType.Oxygen] = new LifeSuppSystem(this);
+          if (this.level === Level.Submerged) {
+            this.systems[InternalSystemType.SubmergedOxygen] = new SubmergedOxygenSystem(this);
+          } else {
+            this.systems[InternalSystemType.Oxygen] = new LifeSuppSystem(this);
+          }
           break;
         case SystemType.GapRoom:
           this.systems[InternalSystemType.MovingPlatform] = new MovingPlatformSystem(this);
+          break;
+        case SystemType.SubmergedElevatorEastLeft:
+          this.systems[InternalSystemType[SystemType[type]]] = new SubmergedElevatorSystem(this, type, true);
+          break;
+        case SystemType.SubmergedElevatorEastRight:
+          this.systems[InternalSystemType[SystemType[type]]] = new SubmergedElevatorSystem(this, type, false);
+          break;
+        case SystemType.SubmergedElevatorService:
+          this.systems[InternalSystemType[SystemType[type]]] = new SubmergedElevatorSystem(this, type, true);
+          break;
+        case SystemType.SubmergedElevatorWestLeft:
+          this.systems[InternalSystemType[SystemType[type]]] = new SubmergedElevatorSystem(this, type, false);
+          break;
+        case SystemType.SubmergedElevatorWestRight:
+          this.systems[InternalSystemType[SystemType[type]]] = new SubmergedElevatorSystem(this, type, true);
+          break;
+        case SystemType.SubmergedFloor:
+          this.systems[InternalSystemType.SubmergedFloor] = new SubmergedPlayerFloorSystem(this);
+          break;
+        case SystemType.SubmergedSecuritySabotage:
+          this.systems[InternalSystemType.SubmergedSecuritySabotage] = new SubmergedSecuritySabotageSystem(this);
+          break;
+        case SystemType.SubmergedSpawnIn:
+          this.systems[InternalSystemType.SubmergedSpawnIn] = new SubmergedSpawnInSystem(this);
           break;
         default:
           throw new Error(`Tried to get unimplemented SystemType: ${type} (${SystemType[type]})`);

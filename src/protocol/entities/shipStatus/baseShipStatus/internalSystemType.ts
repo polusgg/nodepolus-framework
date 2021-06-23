@@ -15,4 +15,13 @@ export enum InternalSystemType {
   MovingPlatform,
   HeliSabotageSystem,
   ElectricalDoors,
+  SubmergedOxygen,
+  SubmergedElevatorEastLeft,
+  SubmergedElevatorEastRight,
+  SubmergedElevatorService,
+  SubmergedElevatorWestLeft,
+  SubmergedElevatorWestRight,
+  SubmergedFloor,
+  SubmergedSecuritySabotage,
+  SubmergedSpawnIn,
 }
