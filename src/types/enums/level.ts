@@ -4,4 +4,5 @@ export enum Level {
   Polus = 2,
   AprilSkeld = 3,
   Airship = 4,
+  Submerged = 5,
 }
