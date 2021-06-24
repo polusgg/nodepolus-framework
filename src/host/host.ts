@@ -77,6 +77,8 @@ import {
   TaskType,
   TeleportReason,
 } from "../types/enums";
+import { EntitySubmarineShipStatus as EntitySubmergedShipStatus } from "../protocol/entities/shipStatus/submerged/entitySubmarineShipStatus";
+import { SubmergedElevatorSystem } from "../protocol/entities/shipStatus/systems/submergedElevatorSystem";
 
 export class Host implements HostInstance {
   protected readonly id: number = FakeClientId.ServerAsHost;
@@ -731,6 +733,19 @@ export class Host implements HostInstance {
         this.lobby.setShipStatus(airshipStatus);
         break;
       }
+      case Level.Submerged: {
+        const submergedShipStatus = new EntitySubmergedShipStatus(this.lobby);
+
+        const el = submergedShipStatus.getShipStatus().getSystemFromType(SystemType.SubmergedElevatorEastLeft) as SubmergedElevatorSystem;
+        const er = submergedShipStatus.getShipStatus().getSystemFromType(SystemType.SubmergedElevatorEastRight) as SubmergedElevatorSystem;
+        const wl = submergedShipStatus.getShipStatus().getSystemFromType(SystemType.SubmergedElevatorWestLeft) as SubmergedElevatorSystem;
+        const wr = submergedShipStatus.getShipStatus().getSystemFromType(SystemType.SubmergedElevatorWestRight) as SubmergedElevatorSystem;
+
+        el.setTandom(er).setTandom(el);
+        wl.setTandom(wr).setTandom(wl);
+
+        this.lobby.setShipStatus(submergedShipStatus);
+      }
     }
 
     this.systemsHandler = new SystemsHandler(this);
@@ -759,6 +774,13 @@ export class Host implements HostInstance {
         break;
       case Level.Airship:
         this.decontaminationHandlers = [];
+        this.doorHandler = new DoorsHandler(this, this.lobby.getSafeShipStatus().getShipStatus());
+        break;
+      case Level.Submerged:
+        this.decontaminationHandlers = [
+          new DecontaminationHandler(this, this.lobby.getSafeShipStatus().getShipStatus().getSystems()[InternalSystemType.Decon] as DeconSystem),
+          new DecontaminationHandler(this, this.lobby.getSafeShipStatus().getShipStatus().getSystems()[InternalSystemType.Decon2] as DeconTwoSystem),
+        ];
         this.doorHandler = new DoorsHandler(this, this.lobby.getSafeShipStatus().getShipStatus());
         break;
     }

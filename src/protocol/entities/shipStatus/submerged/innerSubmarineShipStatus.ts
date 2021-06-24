@@ -8,6 +8,7 @@ export class InnerSubmarineShipStatus extends BaseInnerShipStatus {
     netId: number = parent.getLobby().getHostInstance().getNextNetId(),
   ) {
     super(InnerNetObjectType.SubmergedStatus, parent, [
+      SystemType.Sabotage,
       SystemType.Communications,
       SystemType.Doors,
       SystemType.Electrical,
@@ -15,14 +16,16 @@ export class InnerSubmarineShipStatus extends BaseInnerShipStatus {
       SystemType.Reactor,
       SystemType.Security,
       SystemType.Oxygen,
-      SystemType.ElevatorWestLeft,
-      SystemType.ElevatorWestRight,
-      SystemType.ElevatorEastLeft,
-      SystemType.ElevatorEastRight,
-      SystemType.ElevatorService,
-      SystemType.SubmarineFloor,
-      SystemType.SurveillanceSabotage,
-      SystemType.SpawnIn,
+      SystemType.SubmergedElevatorWestLeft,
+      SystemType.SubmergedElevatorWestRight,
+      SystemType.SubmergedElevatorEastLeft,
+      SystemType.SubmergedElevatorEastRight,
+      SystemType.SubmergedElevatorService,
+      SystemType.SubmergedFloor,
+      SystemType.SubmergedSecuritySabotage,
+      SystemType.SubmergedSpawnIn,
+      SystemType.Decontamination,
+      SystemType.Decontamination2,
     ], undefined, netId);
   }
 

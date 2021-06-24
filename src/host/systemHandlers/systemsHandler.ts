@@ -23,6 +23,7 @@ import {
   ReactorAmount,
   SabotageAmount,
   SecurityAmount,
+  SubmergedSecurityAmount,
 } from "../../protocol/packets/rpc/repairSystem/amounts";
 import {
   DeconSystem,
@@ -47,14 +48,47 @@ import {
   GameCamerasOpenedEvent,
   GameCamerasClosedEvent,
 } from "../../api/events/game";
+import { SubmergedOxygenSystem } from "../../protocol/entities/shipStatus/systems/submergedOxygenSystem";
+import { SubmergedSpawnInSystem } from "../../protocol/entities/shipStatus/systems/submergedSpawnInSystem";
+import { SubmergedSpawnInAmount } from "../../protocol/packets/rpc/repairSystem/amounts/submergedSpawnInAmount";
+import { SpawnPositions } from "../../static";
+import { SubmergedPlayerFloorSystem } from "../../protocol/entities/shipStatus/systems/submergedPlayerFloorSystem";
+import { SubmergedElevatorMovementStage, SubmergedElevatorSystem } from "../../protocol/entities/shipStatus/systems/submergedElevatorSystem";
+import { SubmergedElevatorAmount } from "../../protocol/packets/rpc/repairSystem/amounts/submergedElevatorAmount";
+import { SubmergedSecuritySabotageSystem } from "../../protocol/entities/shipStatus/systems/submergedSecuritySabotageSystem";
 
 export class SystemsHandler {
-  protected oldShipStatus: BaseInnerShipStatus = this.host.getLobby().getSafeShipStatus().getShipStatus();
+  protected oldShipStatus: BaseInnerShipStatus;
   protected sabotageCountdownInterval?: NodeJS.Timeout;
 
   constructor(
     protected readonly host: Host,
-  ) {}
+  ) {
+    this.oldShipStatus = this.host.getLobby().getSafeShipStatus().getShipStatus();
+  }
+
+  repairCamera(player: Player, system: SubmergedSecuritySabotageSystem, amount: SubmergedSecurityAmount): void {
+    this.setOldShipStatus();
+
+    if (amount.isBroken()) {
+      system.fix(amount.getCamera());
+    } else {
+      system.break(amount.getCamera());
+    }
+
+    this.sendDataUpdate();
+  }
+
+  repairSpawnIn(player: Player, system: SubmergedSpawnInSystem, amount: SubmergedSpawnInAmount): void {
+    this.setOldShipStatus();
+
+    console.log("Player spawning in!", player.getName(), amount);
+
+    player.setPosition(SpawnPositions.forPlayerOnLevel(Level.Submerged, player.getId(), player.getLobby().getPlayers().length, true).addY(amount.isUpperSelected() ? 48.119 : 0));
+    (this.getShipStatus().getSystemFromType(SystemType.SubmergedFloor) as SubmergedPlayerFloorSystem).setPlayerFloor(player.getId(), amount.isUpperSelected());
+    system.setPlayerReady(player.getId());
+    this.sendDataUpdate();
+  }
 
   repairHeliSystem<T extends HeliSabotageSystem>(repairer: Player, system: T, amount: HeliSabotageAmount): void {
     const sabotageHandler = this.host.getSabotageHandler();
@@ -163,6 +197,27 @@ export class SystemsHandler {
       case OxygenAction.Repaired:
         system.setTimer(10000);
         sabotageHandler.clearTimer();
+        break;
+    }
+
+    this.sendDataUpdate();
+  }
+
+  repairSubmergedOxygen(repairer: Player, system: SubmergedOxygenSystem, amount: OxygenAmount): void {
+    this.setOldShipStatus();
+
+    switch (amount.getAction()) {
+      case OxygenAction.Completed:
+        system.addPlayerWithMask(repairer.getId());
+
+        if (system.getPlayersWithMask().length === this.host.getLobby().getPlayers().filter(p => !p.isDead()).length) {
+          system.setDuration(10000);
+          system.clearPlayersWithMasks();
+        }
+        break;
+      case OxygenAction.Repaired:
+        system.setDuration(10000);
+        system.clearPlayersWithMasks();
         break;
     }
 
@@ -297,6 +352,26 @@ export class SystemsHandler {
         }
 
         return false;
+      case Level.Submerged:
+        if ((ship.getSystemFromType(SystemType.Reactor) as ReactorSystem).isSabotaged()) {
+          return true;
+        }
+
+        if ((ship.getSystemFromType(SystemType.Oxygen) as SubmergedOxygenSystem).isSabotaged()) {
+          return true;
+        }
+
+        if (checkNonCritical) {
+          if ((ship.getSystemFromType(SystemType.Communications) as HudOverrideSystem).isSabotaged()) {
+            return true;
+          }
+
+          if ((ship.getSystemFromType(SystemType.Electrical) as SwitchSystem).isSabotaged()) {
+            return true;
+          }
+        }
+
+        return false;
     }
   }
 
@@ -346,6 +421,14 @@ export class SystemsHandler {
           (ship.getSystemFromType(SystemType.Communications) as HudOverrideSystem).repair();
         }
         break;
+      case Level.Submerged:
+        (ship.getSystemFromType(SystemType.Oxygen) as SubmergedOxygenSystem).repair();
+        (ship.getSystemFromType(SystemType.Reactor) as ReactorSystem).repair();
+
+        if (repairNonCritical) {
+          (ship.getSystemFromType(SystemType.Electrical) as SwitchSystem).repair();
+          (ship.getSystemFromType(SystemType.Communications) as HqHudSystem).repair();
+        }
     }
 
     this.sendDataUpdate();
@@ -383,7 +466,11 @@ export class SystemsHandler {
         }
         break;
       case SystemType.Oxygen:
-        sabotageHandler.sabotageOxygen(ship.getSystemFromType(type) as LifeSuppSystem);
+        if (this.host.getLobby().getLevel() === Level.Submerged) {
+          sabotageHandler.sabotageSubmergedOxygen(ship.getSystemFromType(type) as SubmergedOxygenSystem);
+        } else {
+          sabotageHandler.sabotageOxygen(ship.getSystemFromType(type) as LifeSuppSystem);
+        }
         break;
       case SystemType.Communications:
         sabotageHandler.sabotageCommunications(ship.getSystemFromType(type) as HudOverrideSystem | HqHudSystem);
@@ -457,6 +544,91 @@ export class SystemsHandler {
       clearInterval(this.sabotageCountdownInterval);
       delete this.sabotageCountdownInterval;
     }
+  }
+
+  setPlayerFloor(player: Player, floor: number): void {
+    const system = this.getShipStatus().getSystemFromType(SystemType.SubmergedFloor) as SubmergedPlayerFloorSystem;
+
+    this.setOldShipStatus();
+    system.setPlayerFloor(player.getId(), floor === 1);
+    this.sendDataUpdate();
+  }
+
+  // TODO: Due to the use of a setInterval here, if the game ends or the shipstatus is otherwise despawned after a elevator
+  //       starts moving, the elevator will continue to send updates & critically, try to change player floors
+
+  repairElevator(player: Player, system: SubmergedElevatorSystem, _amount: SubmergedElevatorAmount, moveTandom: boolean = true): void {
+    this.setOldShipStatus();
+
+    if (system.isMoving()) {
+      return;
+    }
+
+    system.startMoving();
+    system.flipTargetFloor();
+    system.setStage(SubmergedElevatorMovementStage.Complete);
+
+    if (moveTandom && system.hasTandom()) {
+      this.repairElevator(player, system.getSafeTandom(), new SubmergedElevatorAmount(), false);
+    }
+
+    this.sendDataUpdate();
+
+    setTimeout(() => {
+      this.setOldShipStatus();
+      system.setStage(SubmergedElevatorMovementStage.DoorsClosing);
+      this.sendDataUpdate();
+
+      setTimeout(() => {
+        this.setOldShipStatus();
+        system.setStage(SubmergedElevatorMovementStage.FadingToBlack);
+        this.sendDataUpdate();
+
+        setTimeout(() => {
+          this.setOldShipStatus();
+          system.setStage(SubmergedElevatorMovementStage.ElevatorMovingOut);
+          this.sendDataUpdate();
+
+          setTimeout(() => {
+            this.setOldShipStatus();
+            system.setStage(SubmergedElevatorMovementStage.Wait);
+            this.sendDataUpdate();
+
+            setTimeout(() => {
+              this.setOldShipStatus();
+              system.setStage(SubmergedElevatorMovementStage.ElevatorMovingIn);
+              this.sendDataUpdate();
+
+              setTimeout(() => {
+                this.setOldShipStatus();
+                system.setStage(SubmergedElevatorMovementStage.FadingToClear);
+
+                const floorSystem = this.getShipStatus().getSystemFromType(SystemType.SubmergedFloor) as SubmergedPlayerFloorSystem;
+
+                system.getPlayersInsideElevator().forEach(teleportingPlayer => {
+                  floorSystem.setPlayerFloor(teleportingPlayer.getId(), system.isUpperDeckTargetFloor());
+                });
+
+                this.sendDataUpdate();
+
+                setTimeout(() => {
+                  this.setOldShipStatus();
+                  system.setStage(SubmergedElevatorMovementStage.DoorsOpening);
+                  this.sendDataUpdate();
+
+                  setTimeout(() => {
+                    this.setOldShipStatus();
+                    system.stopMoving();
+                    system.setStage(SubmergedElevatorMovementStage.Complete);
+                    this.sendDataUpdate();
+                  }, 200);
+                }, 500);
+              }, 1250);
+            }, 250);
+          }, 1250);
+        }, 500);
+      }, 400);
+    }, 200);
   }
 
   protected getShipStatus(): BaseInnerShipStatus {

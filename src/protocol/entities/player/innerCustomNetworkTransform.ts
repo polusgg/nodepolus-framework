@@ -151,7 +151,7 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     return new InnerCustomNetworkTransform(this.parent, this.position, this.velocity, this.sequenceId, this.netId);
   }
 
-  protected incrementSequenceId(amount: number): number {
+  incrementSequenceId(amount: number): number {
     this.sequenceId = (this.sequenceId + Math.abs(amount)) % (MaxValue.UInt16 + 1);
 
     return this.sequenceId;

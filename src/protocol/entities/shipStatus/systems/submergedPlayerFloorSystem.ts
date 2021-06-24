@@ -49,4 +49,16 @@ export class SubmergedPlayerFloorSystem extends BaseSystem {
 
     return writer;
   }
+
+  setPlayerFloor(player: number, isOnUpper: boolean): void {
+    this.playerFloors.set(player, isOnUpper);
+  }
+
+  isPlayerOnUpperFloor(player: number): boolean {
+    if (!this.playerFloors.has(player)) {
+      throw new Error("Player not in PlayerFloorSystem");
+    }
+
+    return this.playerFloors.get(player)!;
+  }
 }

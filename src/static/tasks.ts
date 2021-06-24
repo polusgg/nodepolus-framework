@@ -141,6 +141,39 @@ const TASKS_AIRSHIP: readonly Readonly<LevelTask>[] = [
   { id: 40, name: "Showers: Fix Shower", isVisual: false, length: TaskLength.Short, type: TaskType.FixShower },
 ];
 
+const TASKS_SUBMERGED: readonly Readonly<LevelTask>[] = [
+  { id: 0, name: "Electrical: Fix Wiring", isVisual: false, length: TaskLength.Common, type: TaskType.FixWiring },
+  { id: 1, name: "Hallway: Plug Leaks", isVisual: false, length: TaskLength.Common, type: TaskType.PlugLeaks },
+  { id: 2, name: "Observatory: Spot Whale Shark", isVisual: false, length: TaskLength.Common, type: TaskType.WhaleShark },
+  { id: 3, name: "Admin: Upload Data", isVisual: false, length: TaskLength.Long, type: TaskType.UploadData },
+  { id: 4, name: "Engine Room: Upload Data", isVisual: false, length: TaskLength.Long, type: TaskType.UploadData },
+  { id: 5, name: "Medical: Upload Data", isVisual: false, length: TaskLength.Long, type: TaskType.UploadData },
+  { id: 6, name: "Security: Shoot Depth Charges", isVisual: false, length: TaskLength.Long, type: TaskType.ShootDepthCharges },
+  { id: 7, name: "Cafeteria: Microwave Lunch", isVisual: false, length: TaskLength.Long, type: TaskType.MicrowaveLunch },
+  { id: 8, name: "Lounge: Reshelve Books", isVisual: false, length: TaskLength.Long, type: TaskType.ReshelveBooks },
+  { id: 9, name: "Research: Set Navigation Beacon", isVisual: false, length: TaskLength.Long, type: TaskType.SetNavBeacon },
+  { id: 10, name: "Medical: Submit Scan", isVisual: true, length: TaskLength.Long, type: TaskType.SubmitScan },
+  { id: 11, name: "Hallway: Mop Puddles", isVisual: false, length: TaskLength.Long, type: TaskType.MopPuddles },
+  { id: 12, name: "Lower Central: Oxygenate Sea Plants", isVisual: false, length: TaskLength.Long, type: TaskType.OxygenateCoral },
+  { id: 13, name: "Engine Room: Clear Urchins", isVisual: false, length: TaskLength.Long, type: TaskType.ClearUrchins },
+  { id: 14, name: "Hallway: Diagnose Elevators", isVisual: false, length: TaskLength.Long, type: TaskType.DiagnoseElevators },
+  { id: 15, name: "Observatory: Align Telescope", isVisual: false, length: TaskLength.Short, type: TaskType.AlignTelescope },
+  { id: 16, name: "Upper Central: Clean Glass", isVisual: false, length: TaskLength.Short, type: TaskType.CleanGlass },
+  { id: 17, name: "Filtration: Dispense Water", isVisual: false, length: TaskLength.Short, type: TaskType.DispenseWater },
+  { id: 18, name: "Meeting Room: Feed Pet Fish", isVisual: false, length: TaskLength.Short, type: TaskType.FeedPetFish },
+  { id: 19, name: "Research: Identify Specimen", isVisual: false, length: TaskLength.Short, type: TaskType.IdentifySpecimen },
+  { id: 20, name: "Observatory: Locate Volcanic Activity", isVisual: false, length: TaskLength.Short, type: TaskType.LocateVolcanicActivity },
+  { id: 21, name: "Cafeteria: Purchase Breakfast", isVisual: false, length: TaskLength.Short, type: TaskType.PurchaseBreakfast },
+  { id: 22, name: "Filtration: Reconnect Piping", isVisual: false, length: TaskLength.Short, type: TaskType.ReconnectPiping },
+  { id: 23, name: "Electrical: Reset Breakers", isVisual: false, length: TaskLength.Short, type: TaskType.RestartBreakers },
+  { id: 24, name: "Ballast: Start Submersible", isVisual: false, length: TaskLength.Short, type: TaskType.StartSubmersible },
+  { id: 25, name: "Medical: Steady Heartbeat", isVisual: false, length: TaskLength.Short, type: TaskType.SteadyHeartbeat },
+  { id: 26, name: "Meeting Room: Track Manta Ray", isVisual: false, length: TaskLength.Short, type: TaskType.TrackManta },
+  { id: 27, name: "Engine Room: Unlock Manifolds", isVisual: false, length: TaskLength.Short, type: TaskType.UnlockManifolds },
+  { id: 28, name: "Storage: Sort Scuba Gear", isVisual: false, length: TaskLength.Short, type: TaskType.SortScubaGear },
+  { id: 29, name: "Engine Room: Cycle Reactor", isVisual: false, length: TaskLength.Short, type: TaskType.CycleReactor },
+];
+
 /**
  * A helper class for retrieving static data for tasks.
  */
@@ -161,6 +194,8 @@ export class Tasks {
         return TASKS_POLUS;
       case Level.Airship:
         return TASKS_AIRSHIP;
+      case Level.Submerged:
+        return TASKS_SUBMERGED;
     }
   }
 
@@ -182,6 +217,8 @@ export class Tasks {
         return Tasks.forLevel(Level.Polus).filter(t => ids.includes(t.id));
       case Level.Airship:
         return Tasks.forLevel(Level.Airship).filter(t => ids.includes(t.id));
+      case Level.Submerged:
+        return Tasks.forLevel(Level.Submerged).filter(t => ids.includes(t.id));
     }
   }
 }

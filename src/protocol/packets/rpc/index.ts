@@ -63,3 +63,5 @@ export { SyncSettingsPacket } from "./syncSettingsPacket";
 export { UsePlatformPacket } from "./usePlatformPacket";
 
 export { VotingCompletePacket } from "./votingCompletePacket";
+
+export { SubmergedRequestChangeFloorPacket } from "./submergedRequestChangeFloorPacket";

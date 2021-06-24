@@ -16,6 +16,8 @@ const SPAWN_RADIUS_POLUS = 1 as const;
 // TODO
 const SPAWN_RADIUS_AIRSHIP = 0 as const;
 
+const SPAWN_RADIUS_SUBMERGED = 1.55 as const;
+
 const SPAWN_POSITIONS_DROPSHIP: readonly Vector2[] = [
   new Vector2(-1.6, 2.4),
   new Vector2(-1.3, 2.5),
@@ -54,6 +56,12 @@ const SPAWN_POSITIONS_AIRSHIP: LevelSpawnPositions = {
   meetingTwo: new Vector2(0, 0),
 };
 
+const SPAWN_POSITIONS_SUBMERGED: LevelSpawnPositions = {
+  initial: new Vector2(3.52237, -30.262),
+  meetingOne: new Vector2(3.52237, -30.262),
+  meetingTwo: new Vector2(3.52237, -30.262),
+};
+
 const PLAYER_TRUE_POSITION_OFFSET: Vector2 = new Vector2(0, 0.3636);
 
 /**
@@ -74,6 +82,8 @@ export class SpawnPositions {
         return SPAWN_RADIUS_POLUS;
       case Level.Airship:
         return SPAWN_RADIUS_AIRSHIP;
+      case Level.Submerged:
+        return SPAWN_RADIUS_SUBMERGED;
     }
   }
 
@@ -100,6 +110,8 @@ export class SpawnPositions {
         return SPAWN_POSITIONS_POLUS;
       case Level.Airship:
         return SPAWN_POSITIONS_AIRSHIP;
+      case Level.Submerged:
+        return SPAWN_POSITIONS_SUBMERGED;
     }
   }
 

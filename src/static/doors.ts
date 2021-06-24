@@ -34,6 +34,7 @@ const DOORS_AIRSHIP: Readonly<DoorList> = {
   [SystemType.Lounge]: [15, 16, 17, 18],
   [SystemType.Medical]: [19, 20],
 } as const;
+const DOORS_SUBMERGED: Readonly<DoorList> = {} as const;
 
 const DOOR_NAMES_THE_SKELD: readonly string[] = [
   "Cafeteria",
@@ -88,11 +89,13 @@ const DOOR_NAMES_AIRSHIP: readonly string[] = [
   "Medical (Left)",
   "Medical (Top)",
 ] as const;
+const DOOR_NAMES_SUBMERGED: readonly string[] = [] as const;
 
 const DOOR_COUNT_THE_SKELD: number = Object.values(DOORS_THE_SKELD).flat().length;
 const DOOR_COUNT_MIRA_HQ: number = Object.values(DOORS_MIRA_HQ).flat().length;
 const DOOR_COUNT_POLUS: number = Object.values(DOORS_POLUS).flat().length;
 const DOOR_COUNT_AIRSHIP: number = Object.values(DOORS_AIRSHIP).flat().length;
+const DOOR_COUNT_SUBMERGED: number = Object.values(DOORS_AIRSHIP).flat().length;
 
 /**
  * A helper class for retrieving static data for doors.
@@ -114,6 +117,8 @@ export class Doors {
         return DOORS_POLUS;
       case Level.Airship:
         return DOORS_AIRSHIP;
+      case Level.Submerged:
+        return DOORS_SUBMERGED;
     }
   }
 
@@ -133,6 +138,8 @@ export class Doors {
         return DOOR_NAMES_POLUS;
       case Level.Airship:
         return DOOR_NAMES_AIRSHIP;
+      case Level.Submerged:
+        return DOOR_NAMES_SUBMERGED;
     }
   }
 
@@ -152,6 +159,8 @@ export class Doors {
         return DOOR_COUNT_POLUS;
       case Level.Airship:
         return DOOR_COUNT_AIRSHIP;
+      case Level.Submerged:
+        return DOOR_COUNT_SUBMERGED;
     }
   }
 }

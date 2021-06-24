@@ -12,6 +12,14 @@ export class SubmergedSpawnInSystem extends BaseSystem {
     super(shipStatus, SystemType.SubmergedSpawnIn);
   }
 
+  setPlayerReady(p: number): this {
+    this.readyPlayers.add(p);
+
+    this.readyToSpawnIn = this.shipStatus.getLobby().getRealPlayers().length === this.readyPlayers.size;
+
+    return this;
+  }
+
   serializeData(): MessageWriter {
     return this.serializeSpawn();
   }

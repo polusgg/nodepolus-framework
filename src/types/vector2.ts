@@ -467,4 +467,26 @@ export class Vector2 {
   verticalAngleDegrees(): number {
     return radiansToDegrees(this.verticalAngle());
   }
+
+  inside(boundingPoint0: Vector2, boundingPoint1: Vector2): boolean {
+    let minX: number, minY: number, maxX: number, maxY: number;
+
+    if (boundingPoint0.getX() < boundingPoint1.getX()) {
+      minX = boundingPoint0.getX();
+      maxX = boundingPoint1.getX();
+    } else {
+      minX = boundingPoint1.getX();
+      maxX = boundingPoint0.getX();
+    }
+
+    if (boundingPoint0.getY() < boundingPoint1.getY()) {
+      minY = boundingPoint0.getY();
+      maxY = boundingPoint1.getY();
+    } else {
+      minY = boundingPoint1.getY();
+      maxY = boundingPoint0.getY();
+    }
+
+    return this.getX() > minX && this.getX() < maxX && this.getY() > minY && this.getY() < maxY;
+  }
 }

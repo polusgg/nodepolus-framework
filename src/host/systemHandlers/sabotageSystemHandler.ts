@@ -11,6 +11,7 @@ import {
   ReactorSystem,
   SwitchSystem,
 } from "../../protocol/entities/shipStatus/systems";
+import { SubmergedOxygenSystem } from "../../protocol/entities/shipStatus/systems/submergedOxygenSystem";
 
 export class SabotageSystemHandler {
   // TODO: Make protected with getter/setter
@@ -126,6 +127,36 @@ export class SabotageSystemHandler {
       if (system.getTimer() <= 0) {
         this.host.endGame(GameOverReason.ImpostorsBySabotage);
         this.clearTimer();
+      }
+    }, 1000);
+  }
+
+  sabotageSubmergedOxygen(system: SubmergedOxygenSystem): void {
+    system.clearPlayersWithMasks();
+    system.setDuration(30);
+
+    this.timer = setInterval(() => {
+      system.decrementTimer();
+
+      if (system.getDuration() <= 0) {
+        this.host.getLobby().getPlayers().forEach(p => {
+          if (!system.playerHasMask(p.getId())) {
+            p.murder(p);
+          }
+        });
+
+        this.clearTimer();
+
+        if (this.host.getLobby().getGame() === undefined) {
+          return;
+        }
+
+        this.host.getSystemsHandler()?.setOldShipStatus();
+
+        system.setDuration(10000);
+        system.clearPlayersWithMasks();
+
+        this.host.getSystemsHandler()?.sendDataUpdate();
       }
     }, 1000);
   }

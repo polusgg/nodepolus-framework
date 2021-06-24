@@ -62,6 +62,27 @@ const VENTS_AIRSHIP: readonly LevelVent[] = [
   new LevelVent(Level.Airship, 11, "In the Cargo Bay", SystemType.CargoBay, new Vector2(30.4409, -3.577), [9, 10]),
 ];
 
+const VENTS_SUBMERGED: readonly LevelVent[] = [
+  new LevelVent(Level.Submerged, 0, "In Upper Central", SystemType.SubmergedUpperCentral, new Vector2(5.825, -0.962), [13]),
+  new LevelVent(Level.Submerged, 1, "In Upper Lobby", SystemType.SubmergedUpperLobby, new Vector2(-3.310862, -4.584094), [2, 3]),
+  new LevelVent(Level.Submerged, 2, "In Communications", SystemType.Communications, new Vector2(-1.12277, 5.22954), [1, 3]),
+  new LevelVent(Level.Submerged, 3, "In Medical", SystemType.Medical, new Vector2(12.443, 0.168), [1, 2]),
+  new LevelVent(Level.Submerged, 4, "In the Cafeteria Room", SystemType.Cafeteria, new Vector2(-12.9318, -1.458), [5, 7]),
+  new LevelVent(Level.Submerged, 5, "In the Meeting Room", SystemType.MeetingRoom, new Vector2(10.52075, -3.629281), [4, 7]),
+  new LevelVent(Level.Submerged, 6, "In Admin", SystemType.Admin, new Vector2(-5.429, -4.004), [9]),
+  new LevelVent(Level.Submerged, 7, "In the Observatory Room", SystemType.SubmergedObservatory, new Vector2(-12.9318, -1.458), [4, 5]),
+  new LevelVent(Level.Submerged, 8, "Normal Vent In Engines", SystemType.Engine, new Vector2(-9.16, -1.21), [10]),
+  new LevelVent(Level.Submerged, 9, "Open Vent In Engines", SystemType.Engine, new Vector2(-4.89, -5.65), []),
+  new LevelVent(Level.Submerged, 10, "In Security", SystemType.Security, new Vector2(5.317, -3.823), [11, 8]),
+  new LevelVent(Level.Submerged, 11, "In Storage", SystemType.Storage, new Vector2(-6.23, 1.57), [10]),
+  new LevelVent(Level.Submerged, 12, "In Lower Lobby", SystemType.SubmergedLowerLobby, new Vector2(5.72, -1.64), [15]),
+  new LevelVent(Level.Submerged, 13, "In the Filtration Hallway", SystemType.SubmergedFiltration, new Vector2(-2.93, 6.81), [16]),
+  new LevelVent(Level.Submerged, 13, "In Lower Central", SystemType.SubmergedLowerCentral, new Vector2(2.681, -1.721), [0]),
+  new LevelVent(Level.Submerged, 15, "In Electrical", SystemType.Electrical, new Vector2(4.78, -4.01), [16, 12]),
+  new LevelVent(Level.Submerged, 16, "In Filtration", SystemType.SubmergedFiltration, new Vector2(-0.97, 1.09), [13, 15]),
+
+];
+
 const VENT_COUNT_THE_SKELD: number = VENTS_THE_SKELD.length;
 
 const VENT_COUNT_MIRA_HQ: number = VENTS_MIRA_HQ.length;
@@ -69,6 +90,8 @@ const VENT_COUNT_MIRA_HQ: number = VENTS_MIRA_HQ.length;
 const VENT_COUNT_POLUS: number = VENTS_POLUS.length;
 
 const VENT_COUNT_AIRSHIP: number = VENTS_AIRSHIP.length;
+
+const VENT_COUNT_SUBMERGED: number = VENTS_SUBMERGED.length;
 
 /**
  * A helper class for retrieving static data for vents.
@@ -90,6 +113,8 @@ export class Vents {
         return VENTS_POLUS;
       case Level.Airship:
         return VENTS_AIRSHIP;
+      case Level.Submerged:
+        return VENTS_SUBMERGED;
     }
   }
 
@@ -150,6 +175,8 @@ export class Vents {
         return VENT_COUNT_POLUS;
       case Level.Airship:
         return VENT_COUNT_AIRSHIP;
+      case Level.Submerged:
+        return VENT_COUNT_SUBMERGED;
     }
   }
 }

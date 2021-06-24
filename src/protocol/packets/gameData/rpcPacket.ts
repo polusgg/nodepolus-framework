@@ -38,6 +38,7 @@ import {
   SyncSettingsPacket,
   UsePlatformPacket,
   VotingCompletePacket,
+  SubmergedRequestChangeFloorPacket,
 } from "../rpc";
 
 /**
@@ -145,6 +146,8 @@ export class RpcPacket extends BaseGameDataPacket {
         return new RpcPacket(senderNetId, ClimbLadderPacket.deserialize(reader));
       case RpcPacketType.UsePlatform:
         return new RpcPacket(senderNetId, UsePlatformPacket.deserialize(reader));
+      case RpcPacketType.SubmergedRequestChangeFloor:
+        return new RpcPacket(senderNetId, SubmergedRequestChangeFloorPacket.deserialize(reader));
       default: {
         const custom = RpcPacket.customPackets.get(type);
 

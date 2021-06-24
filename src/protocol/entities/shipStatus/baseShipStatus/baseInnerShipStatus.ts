@@ -19,6 +19,7 @@ import {
   RepairAmount,
   SabotageAmount,
   SecurityAmount,
+  SubmergedSecurityAmount,
 } from "../../../packets/rpc/repairSystem/amounts";
 import {
   AutoDoorsSystem,
@@ -44,6 +45,8 @@ import { SubmergedElevatorSystem } from "../systems/submergedElevatorSystem";
 import { SubmergedPlayerFloorSystem } from "../systems/submergedPlayerFloorSystem";
 import { SubmergedSecuritySabotageSystem } from "../systems/submergedSecuritySabotageSystem";
 import { SubmergedSpawnInSystem } from "../systems/submergedSpawnInSystem";
+import { SubmergedSpawnInAmount } from "../../../packets/rpc/repairSystem/amounts/submergedSpawnInAmount";
+import { SubmergedElevatorAmount } from "../../../packets/rpc/repairSystem/amounts/submergedElevatorAmount";
 
 export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   protected readonly spawnSystemTypes: SystemType[];
@@ -145,7 +148,11 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         systemsHandler.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
         break;
       case SystemType.Oxygen:
-        systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
+        if (level === Level.Submerged) {
+          systemsHandler.repairSubmergedOxygen(player, system as SubmergedOxygenSystem, amount as OxygenAmount);
+        } else {
+          systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
+        }
         break;
       case SystemType.Reactor:
         if (level == Level.Airship) {
@@ -182,6 +189,19 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         break;
       case SystemType.Sabotage:
         systemsHandler.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
+        break;
+      case SystemType.SubmergedSpawnIn:
+        systemsHandler.repairSpawnIn(player, system as SubmergedSpawnInSystem, amount as SubmergedSpawnInAmount);
+        break;
+      case SystemType.SubmergedElevatorEastLeft:
+      case SystemType.SubmergedElevatorEastRight:
+      case SystemType.SubmergedElevatorWestLeft:
+      case SystemType.SubmergedElevatorWestRight:
+      case SystemType.SubmergedElevatorService:
+        systemsHandler.repairElevator(player, system as SubmergedElevatorSystem, amount as SubmergedElevatorAmount);
+        break;
+      case SystemType.SubmergedSecuritySabotage:
+        systemsHandler.repairCamera(player, system as SubmergedSecuritySabotageSystem, amount as SubmergedSecurityAmount);
         break;
       default:
         throw new Error(`Received RepairSystem packet for an unimplemented SystemType: ${system.getType()} (${SystemType[system.getType()]})`);

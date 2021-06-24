@@ -21,3 +21,5 @@ export { ReactorAmount } from "./reactorAmount";
 export { SabotageAmount } from "./sabotageAmount";
 
 export { SecurityAmount } from "./securityAmount";
+
+export { SubmergedSecurityAmount } from "./submergedSecurityAmount";

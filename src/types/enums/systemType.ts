@@ -60,6 +60,6 @@ export enum SystemType {
   SubmergedElevatorEastRight = 0x8b,
   SubmergedElevatorService = 0x8c,
   SubmergedFloor = 0x8d,
-  SubmergedSurveillanceSabotage = 0x8e,
+  SubmergedSecuritySabotage = 0x8e,
   SubmergedSpawnIn = 0x8f,
 }

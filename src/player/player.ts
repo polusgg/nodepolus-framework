@@ -3,7 +3,7 @@ import { RemovePlayerPacket, JoinGameResponsePacket, GameDataPacket } from "../p
 import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../types";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { DespawnPacket } from "../protocol/packets/gameData";
-import { SetInfectedPacket } from "../protocol/packets/rpc";
+import { SetInfectedPacket, SnapToPacket } from "../protocol/packets/rpc";
 import { EntityPlayer } from "../protocol/entities/player";
 import { Connection } from "../protocol/connection";
 import { PlayerInstance } from "../api/player";
@@ -297,6 +297,7 @@ export class Player implements PlayerInstance {
   }
 
   setPosition(position: Vector2, reason: TeleportReason = TeleportReason.Unknown): this {
+    this.entity.getCustomNetworkTransform().sendRpcPacket(new SnapToPacket(position, this.entity.getCustomNetworkTransform().incrementSequenceId(1)));
     this.entity.getCustomNetworkTransform().handleSnapTo(position, reason, this.lobby.getConnections());
 
     return this;

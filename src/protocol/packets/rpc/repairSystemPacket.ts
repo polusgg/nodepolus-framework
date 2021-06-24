@@ -14,7 +14,10 @@ import {
   RepairAmount,
   SabotageAmount,
   SecurityAmount,
+  SubmergedSecurityAmount,
 } from "./repairSystem/amounts";
+import { SubmergedSpawnInAmount } from "./repairSystem/amounts/submergedSpawnInAmount";
+import { SubmergedElevatorAmount } from "./repairSystem/amounts/submergedElevatorAmount";
 
 /**
  * RPC Packet ID: `0x1c` (`28`)
@@ -78,6 +81,16 @@ export class RepairSystemPacket extends BaseRpcPacket {
       case SystemType.Decontamination:
       case SystemType.Decontamination2:
         return DecontaminationAmount.deserialize(this.amountByte);
+      case SystemType.SubmergedSpawnIn:
+        return SubmergedSpawnInAmount.deserialize(this.amountByte);
+      case SystemType.SubmergedElevatorEastLeft:
+      case SystemType.SubmergedElevatorEastRight:
+      case SystemType.SubmergedElevatorWestLeft:
+      case SystemType.SubmergedElevatorWestRight:
+      case SystemType.SubmergedElevatorService:
+        return SubmergedElevatorAmount.deserialize();
+      case SystemType.SubmergedSecuritySabotage:
+        return SubmergedSecurityAmount.deserialize(this.amountByte);
       default:
         throw new Error(`Attempted to parse RepairSystem amount for unimplemented SystemType ${this.system} (${SystemType[this.system]}) on level ${this.level} (${Level[this.level]})`);
     }

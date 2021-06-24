@@ -1,4 +1,4 @@
-import { BaseRpcPacket, ClimbLadderPacket, EnterVentPacket, ExitVentPacket } from "../../packets/rpc";
+import { BaseRpcPacket, ClimbLadderPacket, EnterVentPacket, ExitVentPacket, SubmergedRequestChangeFloorPacket } from "../../packets/rpc";
 import { GameVentEnteredEvent, GameVentExitedEvent } from "../../../api/events/game";
 import { InnerNetObjectType, RpcPacketType } from "../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
@@ -8,10 +8,13 @@ import { Connection } from "../../connection";
 import { LevelVent } from "../../../types";
 import { Vents } from "../../../static";
 import { EntityPlayer } from ".";
+import { Player } from "../../../player";
+import { SubmergedAcknowledgeChangeFloorPacket } from "../../packets/rpc/submergedAcknowledgeChangeFloor";
 
 export class InnerPlayerPhysics extends BaseInnerNetObject {
   protected vent?: LevelVent;
   protected lastLadderSequenceId = -1;
+  protected largestChangeFloorSidReceived = -1;
 
   constructor(
     protected readonly parent: EntityPlayer,
@@ -115,6 +118,17 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
         this.handleClimbLadder(data.ladderId, data.sequenceId, sendTo);
         break;
       }
+      case RpcPacketType.SubmergedRequestChangeFloor:
+        this.sendRpcPacket(new SubmergedAcknowledgeChangeFloorPacket());
+
+        if ((packet as SubmergedRequestChangeFloorPacket).lastSid < this.largestChangeFloorSidReceived) {
+          break;
+        }
+
+        this.largestChangeFloorSidReceived = (packet as SubmergedRequestChangeFloorPacket).lastSid;
+
+        this.getLobby().getHostInstance().getSystemsHandler()!.setPlayerFloor(this.getLobby().findSafePlayerByEntity(this.getParent()) as Player, (packet as SubmergedRequestChangeFloorPacket).toUpper ? 1 : 0);
+        break;
       default:
         break;
     }

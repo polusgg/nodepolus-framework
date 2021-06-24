@@ -32,7 +32,7 @@ export abstract class BaseInnerNetObject {
 
   sendRpcPacket(packet: BaseRpcPacket, sendTo?: Connection[]): void {
     if (sendTo === undefined || sendTo.length == 0) {
-      return;
+      sendTo = this.parent.getLobby().getConnections();
     }
 
     this.parent.getLobby().sendRpcPacket(this, packet, sendTo);
