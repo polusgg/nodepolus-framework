@@ -4,6 +4,7 @@ import { GameDataPacket } from "../../protocol/packets/root";
 import { SystemType } from "../../types/enums";
 import { Doors } from "../../static";
 import { Host } from "..";
+import { RoomDoorsOpenedEvent } from "../../api/events/room";
 
 export class AutoDoorsHandler {
   protected readonly systemTimers: NodeJS.Timeout[] = [];
@@ -35,7 +36,16 @@ export class AutoDoorsHandler {
     this.sendDataUpdate();
   }
 
-  openDoor(doorIds: number | number[]): void {
+  async openDoor(doorIds: number | number[]): Promise<void> {
+    if (!(doorIds instanceof Array)) { doorIds = [doorIds] }
+
+    const event = new RoomDoorsOpenedEvent(this.host.getLobby().getSafeGame(), doorIds);
+
+    await this.host.getLobby().getServer().emit("room.doors.opened", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
     this.closeDoor(doorIds, true);
   }
 

@@ -39,6 +39,8 @@ import {
   SecurityCameraSystem,
   SwitchSystem,
 } from "../systems";
+import { PlayerInstance } from "../../../../api/player";
+import { RoomDoorsClosedEvent } from "../../../../api/events/room";
 
 export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   protected readonly spawnSystemTypes: SystemType[];
@@ -100,13 +102,21 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     return this.systems;
   }
 
-  closeDoorsOfType(systemId: SystemType, _sendTo?: Connection[]): void {
+  async closeDoorsOfType(systemId: SystemType, _player?: PlayerInstance, _sendTo?: Connection[]): Promise<void> {
     const doorHandler = this.parent.getLobby().getHostInstance().getDoorHandler();
 
     if (doorHandler === undefined) {
       throw new Error("Received CloseDoorsOfType without a door handler");
     }
 
+    const doors = doorHandler.getDoorsForSystem(systemId);
+    const event = new RoomDoorsClosedEvent(this.parent.getLobby().getSafeGame(), doors, _player);
+
+    await this.parent.getLobby().getServer().emit("room.doors.closed", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
     doorHandler.closeDoor(doorHandler.getDoorsForSystem(systemId));
     doorHandler.setSystemTimeout(systemId, 30);
   }

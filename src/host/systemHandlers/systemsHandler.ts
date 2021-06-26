@@ -51,6 +51,9 @@ import {
   RoomCommunicationsConsoleClosedEvent,
   RoomCommunicationsConsoleOpenedEvent,
   RoomCommunicationsConsoleRepairedEvent,
+  RoomDecontaminationEnteredEvent,
+  RoomDecontaminationExitedEvent,
+  RoomDoorsOpenedEvent,
   RoomHeliConsoleClosedEvent,
   RoomHeliConsoleOpenedEvent,
   RoomHeliConsoleRepairedEvent,
@@ -115,12 +118,26 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
-  repairDecon<T extends DeconSystem | DeconTwoSystem>(_repairer: Player, system: T, amount: DecontaminationAmount): void {
+  async repairDecon<T extends DeconSystem | DeconTwoSystem>(_repairer: Player, system: T, amount: DecontaminationAmount): Promise<void> {
     let state = 0;
 
     if (amount.isEntering()) {
+      const event = new RoomDecontaminationEnteredEvent(this.host.getLobby().getSafeGame(), system instanceof DeconSystem ? 1 : 2, amount.getValue(), _repairer);
+
+      await this.host.getLobby().getServer().emit("room.decontamination.entered", event);
+
+      if (event.isCancelled()) {
+        return;
+      }
       state |= DecontaminationDoorState.Enter;
     } else {
+      const event = new RoomDecontaminationExitedEvent(this.host.getLobby().getSafeGame(), system instanceof DeconSystem ? 1 : 2, amount.getValue());
+
+      await this.host.getLobby().getServer().emit("room.decontamination.exited", event);
+
+      if (event.isCancelled()) {
+        return;
+      }
       state |= DecontaminationDoorState.Exit;
     }
 
@@ -131,7 +148,14 @@ export class SystemsHandler {
     this.host.getDecontaminationHandlers()[system instanceof DeconSystem ? 0 : 1].start(state);
   }
 
-  repairPolusDoors<T extends DoorsSystem>(_repairer: Player, system: T, amount: PolusDoorsAmount): void {
+  async repairPolusDoors<T extends DoorsSystem>(_repairer: Player, system: T, amount: PolusDoorsAmount): Promise<void> {
+    const event = new RoomDoorsOpenedEvent(this.host.getLobby().getSafeGame(), [amount.getDoorId()], _repairer);
+
+    await this.host.getLobby().getServer().emit("room.doors.opened", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
     this.setOldShipStatus();
     system.setDoorState(amount.getDoorId(), true);
     this.sendDataUpdate();
