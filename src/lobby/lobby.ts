@@ -1,7 +1,7 @@
-import { BaseEntityShipStatus } from "../protocol/entities/shipStatus/baseShipStatus/baseEntityShipStatus";
 import { BaseInnerNetEntity, BaseInnerNetObject } from "../protocol/entities/baseEntity";
 import { EntityPlayer, InnerCustomNetworkTransform } from "../protocol/entities/player";
 import { LobbyHostMigratedEvent, LobbyPrivacyUpdatedEvent } from "../api/events/lobby";
+import { BaseEntityShipStatus } from "../protocol/entities/shipStatus/baseShipStatus";
 import { DisconnectReason, GameOptionsData, LobbyListing, Vector2 } from "../types";
 import { EntityLobbyBehaviour } from "../protocol/entities/lobbyBehaviour";
 import { BaseRpcPacket, SendChatPacket } from "../protocol/packets/rpc";
@@ -196,16 +196,24 @@ export class Lobby implements LobbyInstance {
     return (new Date().getTime() - this.createdAt) / 1000;
   }
 
-  cleanup(reason?: DisconnectReason): void {
+  async cleanup(reason?: DisconnectReason): Promise<void> {
     this.cancelJoinTimer();
     this.cancelStartTimer();
     this.hostInstance.clearTimers();
 
     const connections = [...this.connections];
+    const disconnects: Promise<void>[] = [];
 
     for (let i = 0; i < this.connections.length; i++) {
-      connections[i].disconnect(reason ?? DisconnectReason.custom("The lobby was closed by the server"), true);
+      disconnects.push(
+        connections[i].disconnect(
+          reason ?? DisconnectReason.custom("The lobby was closed by the server"),
+          true,
+        ),
+      );
     }
+
+    await Promise.allSettled(disconnects);
   }
 
   async close(reason?: DisconnectReason, force: boolean = false): Promise<void> {
@@ -575,7 +583,7 @@ export class Lobby implements LobbyInstance {
     }
 
     this.gameTags.set(gameTag, value);
-    this.sendRootGamePacket(new AlterGameTagPacket(this.code, gameTag, value));
+    await this.sendRootGamePacket(new AlterGameTagPacket(this.code, gameTag, value));
   }
 
   getGameState(): GameState {
@@ -586,7 +594,11 @@ export class Lobby implements LobbyInstance {
     this.gameState = gameState;
   }
 
-  async sendRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): Promise<PromiseSettledResult<void>[]> {
+  async sendRootGamePacket(packet: BaseRootPacket, sendTo?: Connection[]): Promise<PromiseSettledResult<void>[]> {
+    if (sendTo === undefined) {
+      sendTo = this.connections;
+    }
+
     const promiseArray: Promise<void>[] = [];
 
     for (let i = 0; i < sendTo.length; i++) {
@@ -596,11 +608,11 @@ export class Lobby implements LobbyInstance {
     return Promise.allSettled(promiseArray);
   }
 
-  sendRpcPacket(from: BaseInnerNetObject, packet: BaseRpcPacket, sendTo?: Connection[]): void {
-    this.sendRootGamePacket(new GameDataPacket([new RpcPacket(from.getNetId(), packet)], this.code), sendTo);
+  async sendRpcPacket(from: BaseInnerNetObject, packet: BaseRpcPacket, sendTo?: Connection[]): Promise<void> {
+    await this.sendRootGamePacket(new GameDataPacket([new RpcPacket(from.getNetId(), packet)], this.code), sendTo);
   }
 
-  spawn(entity: BaseInnerNetEntity, sendTo: Connection[] = this.connections): void {
+  async spawn(entity: BaseInnerNetEntity, sendTo?: Connection[]): Promise<void> {
     const type = entity.getType();
 
     switch (type) {
@@ -628,10 +640,10 @@ export class Lobby implements LobbyInstance {
         this.customEntities.add(entity);
     }
 
-    this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), sendTo);
+    await this.sendRootGamePacket(new GameDataPacket([entity.serializeSpawn()], this.code), sendTo);
   }
 
-  spawnPlayer(player: EntityPlayer, playerData: PlayerData): PlayerInstance {
+  async spawnPlayer(player: EntityPlayer, playerData: PlayerData): Promise<PlayerInstance> {
     if (player.getPlayerControl().getPlayerId() != playerData.getId()) {
       throw new Error(`Attempted to spawn a player with mismatched player IDs: PlayerControl(${player.getPlayerControl().getPlayerId()}) != PlayerData(${playerData.getId()})`);
     }
@@ -641,31 +653,31 @@ export class Lobby implements LobbyInstance {
     this.addPlayer(playerInstance);
 
     if (this.findPlayerByClientId(player.getOwnerId()) === undefined) {
-      this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.getOwnerId(), this.hostInstance.getId()));
+      await this.sendRootGamePacket(new JoinGameResponsePacket(this.code, player.getOwnerId(), this.hostInstance.getId()));
     }
 
-    this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
+    await this.sendRootGamePacket(new GameDataPacket([player.serializeSpawn()], this.code), this.getConnections());
 
     if (this.gameData !== undefined) {
-      this.gameData.getGameData().updateGameData([playerData]);
+      await this.gameData.getGameData().updateGameData([playerData]);
     }
 
     return playerInstance;
   }
 
-  despawn(innerNetObject: BaseInnerNetObject, sendTo: Connection[] = this.connections): void {
+  async despawn(innerNetObject: BaseInnerNetObject, sendTo?: Connection[]): Promise<void> {
     if (innerNetObject.getParent().getLobby().getCode() != this.code) {
       throw new Error(`Attempted to despawn an InnerNetObject from a lobby other than its own`);
     }
 
-    this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.getNetId())], this.code), sendTo);
+    await this.sendRootGamePacket(new GameDataPacket([new DespawnPacket(innerNetObject.getNetId())], this.code), sendTo);
   }
 
   getActingHosts(): Connection[] {
     return this.connections.filter(con => con.isActingHost());
   }
 
-  sendChat(name: string, color: PlayerColor, message: string | TextComponent, onLeft: boolean): void {
+  async sendChat(name: string, color: PlayerColor, message: string | TextComponent, onLeft: boolean): Promise<void> {
     if (this.gameData === undefined) {
       throw new Error("sendChat called without a GameData instance");
     }
@@ -682,7 +694,7 @@ export class Lobby implements LobbyInstance {
         SpawnFlag.None,
       );
 
-      this.spawnPlayer(fakePlayer, new PlayerData(
+      await this.spawnPlayer(fakePlayer, new PlayerData(
         playerId,
         name,
         color,
@@ -695,7 +707,7 @@ export class Lobby implements LobbyInstance {
         [],
       ));
 
-      this.sendRpcPacket(fakePlayer.getPlayerControl(), new SendChatPacket(message.toString()));
+      await this.sendRpcPacket(fakePlayer.getPlayerControl(), new SendChatPacket(message.toString()));
       fakePlayer.despawn();
     } else {
       for (let i = 0; i < this.players.length; i++) {
@@ -709,15 +721,15 @@ export class Lobby implements LobbyInstance {
 
           playerData.setColor(color);
           playerData.setName(name);
-          player.updateGameData();
+          await player.updateGameData();
 
-          connection.writeReliable(new GameDataPacket([
+          await connection.writeReliable(new GameDataPacket([
             new RpcPacket(player.getEntity().getPlayerControl().getNetId(), new SendChatPacket(message.toString())),
           ], this.code));
 
           playerData.setColor(oldColor);
           playerData.setName(oldName);
-          player.updateGameData();
+          await player.updateGameData();
         }
       }
     }
@@ -729,10 +741,8 @@ export class Lobby implements LobbyInstance {
    * @internal
    * @param ids - The net IDs to be ignored
    */
-  ignoreNetIds(...ids: number[]): this {
+  ignoreNetIds(...ids: number[]): void {
     this.ignoredNetIds.push(...ids);
-
-    return this;
   }
 
   /**
@@ -771,10 +781,8 @@ export class Lobby implements LobbyInstance {
    * @internal
    * @param connection - The connection to be marked as spawning
    */
-  startedSpawningPlayer(connection: Connection): this {
+  startedSpawningPlayer(connection: Connection): void {
     this.spawningPlayers.add(connection);
-
-    return this;
   }
 
   /**
@@ -783,16 +791,14 @@ export class Lobby implements LobbyInstance {
    * @internal
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  disableActingHosts(sendImmediately: boolean = true): this {
+  async disableActingHosts(sendImmediately: boolean = true): Promise<void> {
     const actingHosts = this.getActingHosts();
 
     for (let i = 0; i < actingHosts.length; i++) {
       if (actingHosts[i].getLimboState() == LimboState.NotLimbo) {
-        this.sendDisableHost(actingHosts[i], sendImmediately);
+        await this.sendDisableHost(actingHosts[i], sendImmediately);
       }
     }
-
-    return this;
   }
 
   /**
@@ -801,16 +807,14 @@ export class Lobby implements LobbyInstance {
    * @internal
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  enableActingHosts(sendImmediately: boolean = true): this {
+  async enableActingHosts(sendImmediately: boolean = true): Promise<void> {
     const actingHosts = this.getActingHosts();
 
     for (let i = 0; i < actingHosts.length; i++) {
       if (actingHosts[i].getLimboState() == LimboState.NotLimbo) {
-        this.sendEnableHost(actingHosts[i], sendImmediately);
+        await this.sendEnableHost(actingHosts[i], sendImmediately);
       }
     }
-
-    return this;
   }
 
   /**
@@ -820,16 +824,14 @@ export class Lobby implements LobbyInstance {
    * @param connection - The connection whose host abilities will be enabled
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  sendEnableHost(connection: Connection, sendImmediately: boolean = true): this {
+  async sendEnableHost(connection: Connection, sendImmediately: boolean = true): Promise<void> {
     if (connection.getLimboState() == LimboState.NotLimbo) {
       if (sendImmediately) {
-        connection.sendReliable([new JoinGameResponsePacket(this.code, connection.getId(), connection.getId())]);
+        await connection.sendReliable([new JoinGameResponsePacket(this.code, connection.getId(), connection.getId())]);
       } else {
-        connection.writeReliable(new JoinGameResponsePacket(this.code, connection.getId(), connection.getId()));
+        await connection.writeReliable(new JoinGameResponsePacket(this.code, connection.getId(), connection.getId()));
       }
     }
-
-    return this;
   }
 
   /**
@@ -839,16 +841,14 @@ export class Lobby implements LobbyInstance {
    * @param connection - The connection whose host abilities will be disabled
    * @param sendImmediately - `true` to send the packet immediately, `false` to send it with the next batch of packets (default `true`)
    */
-  sendDisableHost(connection: Connection, sendImmediately: boolean = true): this {
+  async sendDisableHost(connection: Connection, sendImmediately: boolean = true): Promise<void> {
     if (connection.getLimboState() == LimboState.NotLimbo) {
       if (sendImmediately) {
-        connection.sendReliable([new JoinGameResponsePacket(this.code, connection.getId(), this.hostInstance.getId())]);
+        await connection.sendReliable([new JoinGameResponsePacket(this.code, connection.getId(), this.hostInstance.getId())]);
       } else {
-        connection.writeReliable(new JoinGameResponsePacket(this.code, connection.getId(), this.hostInstance.getId()));
+        await connection.writeReliable(new JoinGameResponsePacket(this.code, connection.getId(), this.hostInstance.getId()));
       }
     }
-
-    return this;
   }
 
   /**
@@ -858,7 +858,11 @@ export class Lobby implements LobbyInstance {
    * @param packet - The packet to be sent
    * @param sendTo - The connections to which the packet will be send (default `this.connections`)
    */
-  sendUnreliableRootGamePacket(packet: BaseRootPacket, sendTo: Connection[] = this.connections): void {
+  sendUnreliableRootGamePacket(packet: BaseRootPacket, sendTo?: Connection[]): void {
+    if (sendTo === undefined) {
+      sendTo = this.connections;
+    }
+
     for (let i = 0; i < sendTo.length; i++) {
       sendTo[i].writeUnreliable(packet);
     }
@@ -872,14 +876,14 @@ export class Lobby implements LobbyInstance {
    * @param reason - The reason for why the connection was disconnected
    */
   async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
-    this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.getId(), 0, reason ?? DisconnectReason.exitGame()));
-
     const disconnectingConnectionIndex = this.connections.indexOf(connection);
     const disconnectingPlayer = this.findPlayerByConnection(connection);
 
     if (disconnectingConnectionIndex > -1) {
       this.connections.splice(disconnectingConnectionIndex, 1);
     }
+
+    await this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.getId(), 0, reason ?? DisconnectReason.exitGame()));
 
     if (this.meetingHud !== undefined && disconnectingPlayer) {
       const oldMeetingHud = this.meetingHud.getMeetingHud().clone();
@@ -901,17 +905,17 @@ export class Lobby implements LobbyInstance {
         }
       }
 
-      this.sendRootGamePacket(new GameDataPacket([
+      await this.sendRootGamePacket(new GameDataPacket([
         this.meetingHud.getMeetingHud().serializeData(oldMeetingHud),
       ], this.code));
-      this.meetingHud.getMeetingHud().clearVote(votesToClear);
+      await this.meetingHud.getMeetingHud().clearVote(votesToClear);
     }
 
     if (connection.isActingHost() && this.connections.length > 0) {
       await this.migrateHost(connection);
     }
 
-    this.hostInstance.handleDisconnect(connection, reason);
+    await this.hostInstance.handleDisconnect(connection, reason);
     disconnectingPlayer?.getEntity().despawn();
   }
 
@@ -921,13 +925,11 @@ export class Lobby implements LobbyInstance {
    *
    * @internal
    */
-  cancelJoinTimer(): this {
+  cancelJoinTimer(): void {
     if (this.joinTimer !== undefined) {
       clearTimeout(this.joinTimer);
       delete this.joinTimer;
     }
-
-    return this;
   }
 
   /**
@@ -936,14 +938,12 @@ export class Lobby implements LobbyInstance {
    *
    * @internal
    */
-  beginStartTimer(): this {
+  beginStartTimer(): void {
     if (this.startTimer === undefined && this.timeToStartUntilClosed > 0) {
       this.startTimer = setTimeout(() => {
         this.close();
       }, this.timeToStartUntilClosed * 1000);
     }
-
-    return this;
   }
 
   /**
@@ -952,14 +952,12 @@ export class Lobby implements LobbyInstance {
    *
    * @internal
    */
-  cancelStartTimer(): this {
+  cancelStartTimer(): void {
     if (this.startTimer !== undefined) {
       clearTimeout(this.startTimer);
 
       delete this.startTimer;
     }
-
-    return this;
   }
 
   /**
@@ -990,7 +988,7 @@ export class Lobby implements LobbyInstance {
         if (!event.isCancelled()) {
           this.logger.verbose("Preventing connection %s from joining full lobby", connection);
 
-          connection.writeReliable(new JoinGameErrorPacket(event.getDisconnectReason()));
+          await connection.writeReliable(new JoinGameErrorPacket(event.getDisconnectReason()));
 
           return;
         }
@@ -1002,24 +1000,17 @@ export class Lobby implements LobbyInstance {
     if (connection.getLobby() === undefined) {
       connection.setLobby(this);
 
-      connection.on("packet", (packet: BaseRootPacket) => this.handlePacket(packet, connection));
+      connection.on("packet", async (packet: BaseRootPacket) => await this.handlePacket(packet, connection));
     }
 
     if (this.gameState == GameState.Ended) {
       // TODO: Dead code, Host#endGame sets gameState to NotStarted
-      this.handleRejoin(connection);
+      await this.handleRejoin(connection);
 
       return;
     }
 
-    this.handleNewJoin(connection);
-  }
-
-  /**
-   * @internal
-   */
-  clearMessage(): void {
-    // TODO: Find out how, or bug Forte some more about those custom RPC messages
+    await this.handleNewJoin(connection);
   }
 
   /**
@@ -1029,12 +1020,12 @@ export class Lobby implements LobbyInstance {
    * @param packet - The packet that was sent to the lobby
    * @param connection - The connection that sent the packet
    */
-  protected handlePacket(packet: BaseRootPacket, connection: Connection): void {
+  protected async handlePacket(packet: BaseRootPacket, connection: Connection): Promise<void> {
     switch (packet.getType()) {
       case RootPacketType.AlterGameTag: {
         const data = packet as AlterGameTagPacket;
 
-        this.setGameTag(data.tag, data.value);
+        await this.setGameTag(data.tag, data.value);
         break;
       }
       case RootPacketType.GameData:
@@ -1052,7 +1043,7 @@ export class Lobby implements LobbyInstance {
         }
 
         for (let i = 0; i < gameData.packets.length; i++) {
-          this.handleGameDataPacket(gameData.packets[i], connection, target !== undefined ? [target] : undefined);
+          await this.handleGameDataPacket(gameData.packets[i], connection, target !== undefined ? [target] : undefined);
         }
         break;
       }
@@ -1068,7 +1059,7 @@ export class Lobby implements LobbyInstance {
         }
 
         if (connection.isActingHost()) {
-          connectionToKick.sendKick(data.banned, this.findPlayerByConnection(connection), data.disconnectReason);
+          await connectionToKick.sendKick(data.banned, this.findPlayerByConnection(connection), data.disconnectReason);
         }
         break;
       }
@@ -1138,7 +1129,7 @@ export class Lobby implements LobbyInstance {
     switch (packet.getType()) {
       case GameDataPacketType.Data:
         if (!this.ignoredNetIds.includes((packet as DataPacket).senderNetId)) {
-          this.handleData((packet as DataPacket).senderNetId, (packet as DataPacket).data, sendTo);
+          await this.handleData((packet as DataPacket).senderNetId, (packet as DataPacket).data, sendTo);
         }
         break;
       case GameDataPacketType.RPC: {
@@ -1202,7 +1193,7 @@ export class Lobby implements LobbyInstance {
       case GameDataPacketType.Despawn:
         break;
       case GameDataPacketType.Ready:
-        this.hostInstance.handleReady(connection);
+        await this.hostInstance.handleReady(connection);
         break;
       case GameDataPacketType.SceneChange: {
         if ((packet as SceneChangePacket).scene !== Scene.OnlineGame) {
@@ -1211,7 +1202,7 @@ export class Lobby implements LobbyInstance {
 
         const connectionChangingScene = this.findSafeConnection((packet as SceneChangePacket).clientId);
 
-        this.hostInstance.handleSceneChange(connectionChangingScene, (packet as SceneChangePacket).scene);
+        await this.hostInstance.handleSceneChange(connectionChangingScene, (packet as SceneChangePacket).scene);
         break;
       }
       case GameDataPacketType.ClientInfo:
@@ -1247,7 +1238,7 @@ export class Lobby implements LobbyInstance {
    * @internal
    * @param connection - The connection that joined the lobby
    */
-  protected handleNewJoin(connection: Connection): void {
+  protected async handleNewJoin(connection: Connection): Promise<void> {
     if (this.connections.indexOf(connection) == -1) {
       this.connections.push(connection);
     }
@@ -1260,8 +1251,8 @@ export class Lobby implements LobbyInstance {
     connection.setLimboState(LimboState.NotLimbo);
 
     this.startedSpawningPlayer(connection);
-    this.sendJoinedMessage(connection);
-    this.broadcastJoinMessage(connection);
+    await this.sendJoinedMessage(connection);
+    await this.broadcastJoinMessage(connection);
   }
 
   /**
@@ -1270,9 +1261,9 @@ export class Lobby implements LobbyInstance {
    * @internal
    * @param connection - The connection that rejoined the lobby
    */
-  protected handleRejoin(connection: Connection): void {
+  protected async handleRejoin(connection: Connection): Promise<void> {
     if (connection.getLobby()?.code != this.code) {
-      connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameStarted())]);
+      await connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameStarted())]);
     }
   }
 
@@ -1294,7 +1285,7 @@ export class Lobby implements LobbyInstance {
     if (this.getHostInstance().isCountingDown() || this.game !== undefined) {
       event.getNewHost().setActingHost(true);
     } else {
-      event.getNewHost().syncActingHost(true, true);
+      await event.getNewHost().syncActingHost(true, true);
     }
   }
 
@@ -1305,7 +1296,7 @@ export class Lobby implements LobbyInstance {
    * @internal
    * @param connection - The connection that joined the lobby
    */
-  protected broadcastJoinMessage(connection: Connection): void {
+  protected async broadcastJoinMessage(connection: Connection): Promise<void> {
     for (let i = 0; i < this.connections.length; i++) {
       const writeConnection = this.connections[i];
 
@@ -1313,7 +1304,7 @@ export class Lobby implements LobbyInstance {
         continue;
       }
 
-      writeConnection.sendReliable([
+      await writeConnection.sendReliable([
         new JoinGameResponsePacket(
           this.code,
           connection.getId(),
@@ -1329,8 +1320,8 @@ export class Lobby implements LobbyInstance {
    * @internal
    * @param connection - The connection that joined the lobby
    */
-  protected sendJoinedMessage(connection: Connection): void {
-    connection.sendReliable([
+  protected async sendJoinedMessage(connection: Connection): Promise<void> {
+    await connection.sendReliable([
       new JoinedGamePacket(
         this.code,
         connection.getId(),

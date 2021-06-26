@@ -18,7 +18,7 @@ export class AutoDoorsHandler {
     this.oldShipStatus = shipStatus.clone();
   }
 
-  closeDoor(doorIds: number | number[], state: boolean = false): void {
+  async closeDoor(doorIds: number | number[], state: boolean = false): Promise<void> {
     this.setOldShipStatus();
 
     const autoDoorsSystem = this.shipStatus.getSystemFromType(SystemType.Doors) as AutoDoorsSystem;
@@ -33,7 +33,7 @@ export class AutoDoorsHandler {
       autoDoorsSystem.setDoorState(doorIds, state);
     }
 
-    this.sendDataUpdate();
+    await this.sendDataUpdate();
   }
 
   async openDoor(doorIds: number | number[]): Promise<void> {
@@ -46,7 +46,7 @@ export class AutoDoorsHandler {
     if (event.isCancelled()) {
       return;
     }
-    this.closeDoor(doorIds, true);
+    await this.closeDoor(doorIds, true);
   }
 
   getDoorsForSystem(systemId: SystemType): number[] {
@@ -59,16 +59,14 @@ export class AutoDoorsHandler {
     return doors as number[];
   }
 
-  setSystemTimeout(systemId: SystemType, time: number): this {
+  async setSystemTimeout(systemId: SystemType, time: number): Promise<void> {
     this.setOldShipStatus();
 
     this.systemTimers[systemId] = setInterval(() => {
       this.openDoor(this.getDoorsForSystem(systemId));
     }, time * 1000);
 
-    this.sendDataUpdate();
-
-    return this;
+    await this.sendDataUpdate();
   }
 
   setOldShipStatus(): this {
@@ -77,8 +75,8 @@ export class AutoDoorsHandler {
     return this;
   }
 
-  sendDataUpdate(): void {
-    this.host.getLobby().sendRootGamePacket(new GameDataPacket([
+  async sendDataUpdate(): Promise<void> {
+    await this.host.getLobby().sendRootGamePacket(new GameDataPacket([
       this.shipStatus.serializeData(this.oldShipStatus),
     ], this.host.getLobby().getCode()));
   }
