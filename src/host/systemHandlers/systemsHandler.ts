@@ -108,6 +108,7 @@ export class SystemsHandler {
           if (event.isCancelled()) {
             return;
           }
+
           system.setCountdown(10000);
           sabotageHandler.clearTimer();
         }
@@ -118,17 +119,18 @@ export class SystemsHandler {
     await this.sendDataUpdate();
   }
 
-  async repairDecon<T extends DeconSystem | DeconTwoSystem>(_repairer: Player, system: T, amount: DecontaminationAmount): Promise<void> {
+  async repairDecon<T extends DeconSystem | DeconTwoSystem>(repairer: Player, system: T, amount: DecontaminationAmount): Promise<void> {
     let state = 0;
 
     if (amount.isEntering()) {
-      const event = new RoomDecontaminationEnteredEvent(this.host.getLobby().getSafeGame(), system instanceof DeconSystem ? 1 : 2, amount.getValue(), _repairer);
+      const event = new RoomDecontaminationEnteredEvent(this.host.getLobby().getSafeGame(), system instanceof DeconSystem ? 1 : 2, amount.getValue(), repairer);
 
       await this.host.getLobby().getServer().emit("room.decontamination.entered", event);
 
       if (event.isCancelled()) {
         return;
       }
+
       state |= DecontaminationDoorState.Enter;
     } else {
       const event = new RoomDecontaminationExitedEvent(this.host.getLobby().getSafeGame(), system instanceof DeconSystem ? 1 : 2, amount.getValue());
@@ -138,6 +140,7 @@ export class SystemsHandler {
       if (event.isCancelled()) {
         return;
       }
+
       state |= DecontaminationDoorState.Exit;
     }
 
@@ -148,8 +151,8 @@ export class SystemsHandler {
     await this.host.getDecontaminationHandlers()[system instanceof DeconSystem ? 0 : 1].start(state);
   }
 
-  async repairPolusDoors<T extends DoorsSystem>(_repairer: Player, system: T, amount: PolusDoorsAmount): Promise<void> {
-    const event = new RoomDoorsOpenedEvent(this.host.getLobby().getSafeGame(), [amount.getDoorId()], _repairer);
+  async repairPolusDoors<T extends DoorsSystem>(repairer: Player, system: T, amount: PolusDoorsAmount): Promise<void> {
+    const event = new RoomDoorsOpenedEvent(this.host.getLobby().getSafeGame(), [amount.getDoorId()], repairer);
 
     await this.host.getLobby().getServer().emit("room.doors.opened", event);
 
@@ -173,9 +176,7 @@ export class SystemsHandler {
 
     switch (amount.getAction()) {
       case MiraCommunicationsAction.OpenedConsole: {
-        const event = new RoomCommunicationsConsoleOpenedEvent(this.host.getLobby().getSafeGame(), repairer, amount.getConsoleId());
-
-        this.host.getLobby().getServer().emit("room.communications.console.opened", event);
+        this.host.getLobby().getServer().emit("room.communications.console.opened", new RoomCommunicationsConsoleOpenedEvent(this.host.getLobby().getSafeGame(), repairer, amount.getConsoleId()));
         system.setActiveConsole(repairer.getId(), amount.getConsoleId());
         break;
       }
@@ -194,6 +195,7 @@ export class SystemsHandler {
         if (event.isCancelled()) {
           return;
         }
+
         system.addCompletedConsole(amount.getConsoleId());
 
         if (system.getCompletedConsoles().size == 2) {
@@ -204,6 +206,7 @@ export class SystemsHandler {
           if (eventTwo.isCancelled()) {
             return;
           }
+
           sabotageHandler.clearTimer();
         }
         break;
@@ -213,28 +216,30 @@ export class SystemsHandler {
     await this.sendDataUpdate();
   }
 
-  async repairHudOverride<T extends HudOverrideSystem>(_repairer: Player, system: T, amount: NormalCommunicationsAmount): Promise<void> {
+  async repairHudOverride<T extends HudOverrideSystem>(repairer: Player, system: T, amount: NormalCommunicationsAmount): Promise<void> {
     this.setOldShipStatus();
 
     if (amount.isRepaired()) {
-      const event = new RoomCommunicationsConsoleRepairedEvent(this.host.getLobby().getSafeGame(), _repairer);
-      const eventTwo = new RoomRepairedEvent(this.host.getLobby().getSafeGame(), system, _repairer);
+      const consoleRepairedEvent = new RoomCommunicationsConsoleRepairedEvent(this.host.getLobby().getSafeGame(), repairer);
+      const roomRepairedEvent = new RoomRepairedEvent(this.host.getLobby().getSafeGame(), system, repairer);
 
-      this.host.getLobby().getServer().emit("room.communications.console.repaired", event);
-      this.host.getLobby().getServer().emit("room.repaired", eventTwo);
+      this.host.getLobby().getServer().emit("room.communications.console.repaired", consoleRepairedEvent);
+      this.host.getLobby().getServer().emit("room.repaired", roomRepairedEvent);
 
-      if (event.isCancelled() || eventTwo.isCancelled()) {
+      if (consoleRepairedEvent.isCancelled() || roomRepairedEvent.isCancelled()) {
         return;
       }
+
       system.setSabotaged(false);
     } else {
-      const event = new RoomSabotagedEvent(this.host.getLobby().getSafeGame(), system, _repairer);
+      const event = new RoomSabotagedEvent(this.host.getLobby().getSafeGame(), system, repairer);
 
       this.host.getLobby().getServer().emit("room.sabotaged", event);
 
       if (event.isCancelled()) {
         return;
       }
+
       system.setSabotaged(true);
     }
     await this.sendDataUpdate();
@@ -258,6 +263,7 @@ export class SystemsHandler {
         if (event.isCancelled()) {
           return;
         }
+
         system.addCompletedConsole(amount.getConsoleId());
 
         if (system.getCompletedConsoles().size == 2) {
@@ -268,6 +274,7 @@ export class SystemsHandler {
           if (event.isCancelled()) {
             return;
           }
+
           system.setTimer(10000);
           sabotageHandler.clearTimer();
         }
@@ -281,6 +288,7 @@ export class SystemsHandler {
         if (event.isCancelled()) {
           return;
         }
+
         system.setTimer(10000);
         sabotageHandler.clearTimer();
         break;
@@ -342,23 +350,25 @@ export class SystemsHandler {
 
     switch (amount.getAction()) {
       case ReactorAction.PlacedHand: {
-        const event = new RoomReactorConsoleRepairedEvent(this.host.getLobby().getSafeGame(), amount.getConsoleId());
+        const consoleRepairedEvent = new RoomReactorConsoleRepairedEvent(this.host.getLobby().getSafeGame(), amount.getConsoleId());
 
-        this.host.getLobby().getServer().emit("room.reactor.console.repaired", event);
+        this.host.getLobby().getServer().emit("room.reactor.console.repaired", consoleRepairedEvent);
 
-        if (event.isCancelled()) {
+        if (consoleRepairedEvent.isCancelled()) {
           return;
         }
+
         system.setUserConsole(repairer.getId(), amount.getConsoleId());
 
         if (new Set(system.getUserConsoles().values()).size == 2) {
-          const eventTwo = new RoomRepairedEvent(this.host.getLobby().getSafeGame(), system, repairer);
+          const roomRepairedEvent = new RoomRepairedEvent(this.host.getLobby().getSafeGame(), system, repairer);
 
-          this.host.getLobby().getServer().emit("room.repaired", eventTwo);
+          this.host.getLobby().getServer().emit("room.repaired", roomRepairedEvent);
 
-          if (eventTwo.isCancelled()) {
+          if (roomRepairedEvent.isCancelled()) {
             return;
           }
+
           system.setCountdown(10000);
           sabotageHandler.clearTimer();
         }
@@ -372,6 +382,7 @@ export class SystemsHandler {
         if (event.isCancelled()) {
           return;
         }
+
         system.removeUserConsole(repairer.getId());
         break;
       }
@@ -383,6 +394,7 @@ export class SystemsHandler {
         if (event.isCancelled()) {
           return;
         }
+
         system.setCountdown(10000);
         sabotageHandler.clearTimer();
         break;
@@ -503,7 +515,7 @@ export class SystemsHandler {
     await this.sendDataUpdate();
   }
 
-  async repairSabotage<T extends SabotageSystem>(_repairer: Player, system: T, amount: SabotageAmount): Promise<void> {
+  async repairSabotage<T extends SabotageSystem>(repairer: Player, system: T, amount: SabotageAmount): Promise<void> {
     const sabotageHandler = this.host.getSabotageHandler();
 
     if (sabotageHandler === undefined) {
@@ -514,14 +526,14 @@ export class SystemsHandler {
 
     const ship = this.getShipStatus();
     const type = amount.getSystemType();
-    const game = this.host.getLobby().getSafeGame();
-    const event = new RoomSabotagedEvent(game, system, _repairer);
+    const event = new RoomSabotagedEvent(this.host.getLobby().getSafeGame(), system, repairer);
 
     await this.host.getLobby().getServer().emit("room.sabotaged", event);
 
     if (event.isCancelled()) {
       return;
     }
+
     system.setCooldown(30);
 
     this.sabotageCountdownInterval = setInterval(() => {

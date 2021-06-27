@@ -71,12 +71,12 @@ import {
   RoomDoorsClosedEvent,
   RoomDoorsOpenedEvent,
   RoomElectricalInteractedEvent,
-  RoomOxygenConsoleRepairedEvent,
-  RoomReactorConsoleClearedEvent,
-  RoomReactorConsoleRepairedEvent,
   RoomHeliConsoleClosedEvent,
   RoomHeliConsoleOpenedEvent,
   RoomHeliConsoleRepairedEvent,
+  RoomOxygenConsoleRepairedEvent,
+  RoomReactorConsoleClearedEvent,
+  RoomReactorConsoleRepairedEvent,
   RoomRepairedEvent,
   RoomSabotagedEvent,
 } from "./room";
@@ -201,12 +201,12 @@ export type ServerEvents = {
   "room.doors.closed": RoomDoorsClosedEvent;
   "room.doors.opened": RoomDoorsOpenedEvent;
   "room.electrical.interacted": RoomElectricalInteractedEvent;
-  "room.oxygen.console.repaired": RoomOxygenConsoleRepairedEvent;
-  "room.reactor.console.cleared": RoomReactorConsoleClearedEvent;
-  "room.reactor.console.repaired": RoomReactorConsoleRepairedEvent;
   "room.heli.console.closed": RoomHeliConsoleClosedEvent;
   "room.heli.console.opened": RoomHeliConsoleOpenedEvent;
   "room.heli.console.repaired": RoomHeliConsoleRepairedEvent;
+  "room.oxygen.console.repaired": RoomOxygenConsoleRepairedEvent;
+  "room.reactor.console.cleared": RoomReactorConsoleClearedEvent;
+  "room.reactor.console.repaired": RoomReactorConsoleRepairedEvent;
   "room.repaired": RoomRepairedEvent;
   "room.sabotaged": RoomSabotagedEvent;
 

@@ -1,8 +1,10 @@
 import { BaseRpcPacket, CloseDoorsOfTypePacket, RepairSystemPacket } from "../../../packets/rpc";
 import { InnerNetObjectType, Level, RpcPacketType, SystemType } from "../../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../../packets/gameData";
+import { RoomDoorsClosedEvent } from "../../../../api/events/room";
 import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseEntityShipStatus, InternalSystemType } from ".";
+import { PlayerInstance } from "../../../../api/player";
 import { BaseInnerNetObject } from "../../baseEntity";
 import { Connection } from "../../../connection";
 import { Lobby } from "../../../../lobby";
@@ -39,8 +41,6 @@ import {
   SecurityCameraSystem,
   SwitchSystem,
 } from "../systems";
-import { PlayerInstance } from "../../../../api/player";
-import { RoomDoorsClosedEvent } from "../../../../api/events/room";
 
 export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   protected readonly spawnSystemTypes: SystemType[];
@@ -102,21 +102,21 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     return this.systems;
   }
 
-  async closeDoorsOfType(systemId: SystemType, _player?: PlayerInstance, _sendTo?: Connection[]): Promise<void> {
+  async closeDoorsOfType(systemId: SystemType, player?: PlayerInstance, _sendTo?: Connection[]): Promise<void> {
     const doorHandler = this.parent.getLobby().getHostInstance().getDoorHandler();
 
     if (doorHandler === undefined) {
       throw new Error("Received CloseDoorsOfType without a door handler");
     }
 
-    const doors = doorHandler.getDoorsForSystem(systemId);
-    const event = new RoomDoorsClosedEvent(this.parent.getLobby().getSafeGame(), doors, _player);
+    const event = new RoomDoorsClosedEvent(this.parent.getLobby().getSafeGame(), doorHandler.getDoorsForSystem(systemId), player);
 
     await this.parent.getLobby().getServer().emit("room.doors.closed", event);
 
     if (event.isCancelled()) {
       return;
     }
+
     await doorHandler.closeDoor(doorHandler.getDoorsForSystem(systemId));
     await doorHandler.setSystemTimeout(systemId, 30);
   }
