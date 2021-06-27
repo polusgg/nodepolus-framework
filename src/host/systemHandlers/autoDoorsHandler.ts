@@ -1,6 +1,7 @@
 import { BaseInnerShipStatus } from "../../protocol/entities/shipStatus/baseShipStatus";
 import { AutoDoorsSystem } from "../../protocol/entities/shipStatus/systems";
 import { GameDataPacket } from "../../protocol/packets/root";
+import { RoomDoorsOpenedEvent } from "../../api/events/room";
 import { SystemType } from "../../types/enums";
 import { Doors } from "../../static";
 import { Host } from "..";
@@ -36,6 +37,18 @@ export class AutoDoorsHandler {
   }
 
   async openDoor(doorIds: number | number[]): Promise<void> {
+    if (!(doorIds instanceof Array)) {
+      doorIds = [doorIds];
+    }
+
+    const event = new RoomDoorsOpenedEvent(this.host.getLobby().getSafeGame(), doorIds);
+
+    await this.host.getLobby().getServer().emit("room.doors.opened", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
     await this.closeDoor(doorIds, true);
   }
 
