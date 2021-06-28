@@ -1000,7 +1000,9 @@ export class Lobby implements LobbyInstance {
     if (connection.getLobby() === undefined) {
       connection.setLobby(this);
 
-      connection.on("packet", async (packet: BaseRootPacket) => await this.handlePacket(packet, connection));
+      connection.on("packet", (packet: BaseRootPacket) => {
+        this.handlePacket(packet, connection);
+      });
     }
 
     if (this.gameState == GameState.Ended) {

@@ -799,7 +799,7 @@ export class Host implements HostInstance {
     const newPlayerId = this.getNextPlayerId();
 
     if (newPlayerId == -1) {
-      connection.sendLateRejection(DisconnectReason.gameFull());
+      await connection.sendLateRejection(DisconnectReason.gameFull());
 
       return;
     }
@@ -855,7 +855,7 @@ export class Host implements HostInstance {
 
       this.lobby.addPlayer(player);
       await this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
-      this.ensurePlayerDataExists(player);
+      await this.ensurePlayerDataExists(player);
       player.getEntity().getPlayerControl().setNewPlayer(false);
     }
 
