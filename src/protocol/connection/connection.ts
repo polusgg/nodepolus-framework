@@ -548,6 +548,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
 
               reject(new Error(`Connection ${this.id} did not acknowledge packet ${nonce} after 10 attempts`));
             } else {
+              this.unacknowledgedPackets.set(nonce!, this.unacknowledgedPackets.get(nonce!)! + 1);
               this.send(packet);
             }
           } else {
