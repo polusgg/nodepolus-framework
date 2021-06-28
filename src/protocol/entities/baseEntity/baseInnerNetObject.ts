@@ -30,12 +30,12 @@ export abstract class BaseInnerNetObject {
     return this.netId;
   }
 
-  sendRpcPacket(packet: BaseRpcPacket, sendTo?: Connection[]): void {
-    if (sendTo === undefined || sendTo.length == 0) {
-      sendTo = this.parent.getLobby().getConnections();
+  async sendRpcPacket(packet: BaseRpcPacket, sendTo?: Connection[]): Promise<void> {
+    if (sendTo === undefined) {
+      return;
     }
 
-    this.parent.getLobby().sendRpcPacket(this, packet, sendTo);
+    await this.parent.getLobby().sendRpcPacket(this, packet, sendTo);
   }
 
   getLobby(): LobbyInstance {

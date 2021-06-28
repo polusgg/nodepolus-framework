@@ -47,7 +47,7 @@ export const DEFAULT_CONFIG: Immutable<AllRequired<ServerConfig>> = {
     defaultStartTimerDuration: 5,
     defaultTimeToJoinUntilClosed: 5,
     defaultTimeToStartUntilClosed: 600,
-    maxPlayers: 10,
+    maxPlayers: 15,
     hideGhostChat: true,
   },
   logging: {

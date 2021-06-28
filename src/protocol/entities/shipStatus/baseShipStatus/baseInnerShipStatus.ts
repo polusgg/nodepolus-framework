@@ -1,8 +1,10 @@
 import { BaseRpcPacket, CloseDoorsOfTypePacket, RepairSystemPacket } from "../../../packets/rpc";
 import { InnerNetObjectType, Level, RpcPacketType, SystemType } from "../../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../../packets/gameData";
+import { RoomDoorsClosedEvent } from "../../../../api/events/room";
 import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseEntityShipStatus, InternalSystemType } from ".";
+import { PlayerInstance } from "../../../../api/player";
 import { BaseInnerNetObject } from "../../baseEntity";
 import { Connection } from "../../../connection";
 import { Lobby } from "../../../../lobby";
@@ -111,19 +113,27 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     return this.systems;
   }
 
-  closeDoorsOfType(systemId: SystemType, _sendTo?: Connection[]): void {
+  async closeDoorsOfType(systemId: SystemType, player?: PlayerInstance, _sendTo?: Connection[]): Promise<void> {
     const doorHandler = this.parent.getLobby().getHostInstance().getDoorHandler();
 
     if (doorHandler === undefined) {
       throw new Error("Received CloseDoorsOfType without a door handler");
     }
 
-    doorHandler.closeDoor(doorHandler.getDoorsForSystem(systemId));
-    doorHandler.setSystemTimeout(systemId, 30);
+    const event = new RoomDoorsClosedEvent(this.parent.getLobby().getSafeGame(), doorHandler.getDoorsForSystem(systemId), player);
+
+    await this.parent.getLobby().getServer().emit("room.doors.closed", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
+    await doorHandler.closeDoor(doorHandler.getDoorsForSystem(systemId));
+    await doorHandler.setSystemTimeout(systemId, 30);
   }
 
   // TODO: Change amount to number and deserialize in the system itself?
-  repairSystem(systemId: SystemType, playerControlNetId: number, amount: RepairAmount, _sendTo?: Connection[]): void {
+  async repairSystem(systemId: SystemType, playerControlNetId: number, amount: RepairAmount, _sendTo?: Connection[]): Promise<void> {
     const lobby = this.parent.getLobby() as Lobby;
     const shipStatus = lobby.getSafeShipStatus();
     const systemsHandler = lobby.getHostInstance().getSystemsHandler();
@@ -142,53 +152,53 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
 
     switch (system.getType()) {
       case SystemType.Electrical:
-        systemsHandler.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
+        await systemsHandler.repairSwitch(player, system as SwitchSystem, amount as ElectricalAmount);
         break;
       case SystemType.Medbay:
-        systemsHandler.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
+        await systemsHandler.repairMedbay(player, system as MedScanSystem, amount as MedbayAmount);
         break;
       case SystemType.Oxygen:
         if (level === Level.Submerged) {
           systemsHandler.repairSubmergedOxygen(player, system as SubmergedOxygenSystem, amount as OxygenAmount);
         } else {
-          systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
+          await systemsHandler.repairOxygen(player, system as LifeSuppSystem, amount as OxygenAmount);
         }
         break;
       case SystemType.Reactor:
         if (level == Level.Airship) {
-          systemsHandler.repairHeliSystem(player, system as HeliSabotageSystem, amount as HeliSabotageAmount);
+          await systemsHandler.repairHeliSystem(player, system as HeliSabotageSystem, amount as HeliSabotageAmount);
         } else {
-          systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
+          await systemsHandler.repairReactor(player, system as ReactorSystem, amount as ReactorAmount);
         }
         break;
       case SystemType.Laboratory:
-        systemsHandler.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
+        await systemsHandler.repairReactor(player, system as LaboratorySystem, amount as ReactorAmount);
         break;
       case SystemType.Security:
-        systemsHandler.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
+        await systemsHandler.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
         break;
       case SystemType.Doors:
         if (level == Level.Polus || level == Level.Airship) {
-          systemsHandler.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
+          await systemsHandler.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
         } else {
           throw new Error(`Received RepairSystem for Doors on an unimplemented level: ${level as Level} (${Level[level]})`);
         }
         break;
       case SystemType.Communications:
         if (level == Level.MiraHq) {
-          systemsHandler.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
+          await systemsHandler.repairHqHud(player, system as HqHudSystem, amount as MiraCommunicationsAmount);
         } else {
-          systemsHandler.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
+          await systemsHandler.repairHudOverride(player, system as HudOverrideSystem, amount as NormalCommunicationsAmount);
         }
         break;
       case SystemType.Decontamination:
-        systemsHandler.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
+        await systemsHandler.repairDecon(player, system as DeconSystem, amount as DecontaminationAmount);
         break;
       case SystemType.Decontamination2:
-        systemsHandler.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
+        await systemsHandler.repairDecon(player, system as DeconTwoSystem, amount as DecontaminationAmount);
         break;
       case SystemType.Sabotage:
-        systemsHandler.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
+        await systemsHandler.repairSabotage(player, system as SabotageSystem, amount as SabotageAmount);
         break;
       case SystemType.SubmergedSpawnIn:
         systemsHandler.repairSpawnIn(player, system as SubmergedSpawnInSystem, amount as SubmergedSpawnInAmount);

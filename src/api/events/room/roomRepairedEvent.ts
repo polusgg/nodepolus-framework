@@ -2,6 +2,7 @@
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
 import { Game } from "../../game";
+import { BaseSystem } from "../../../protocol/entities/shipStatus/systems";
 
 /**
  * Fired when a sabotaged room has been repaired.
@@ -15,6 +16,7 @@ export class RoomRepairedEvent extends CancellableEvent {
   constructor(
     protected readonly game: Game,
     // protected readonly room: BaseGameRoom,
+    protected readonly system: BaseSystem,
     protected readonly player?: PlayerInstance,
   ) {
     super();
@@ -33,6 +35,15 @@ export class RoomRepairedEvent extends CancellableEvent {
   // getRoom(): BaseGameRoom {
   //   return this.room;
   // }
+
+  /**
+   * Gets the SabotagSystem that was sabotaged.
+   *
+   * @returns Sabotaged SabotageSystem
+   */
+  getSystem(): BaseSystem {
+    return this.system;
+  }
 
   /**
    * Gets the player that repaired the room.

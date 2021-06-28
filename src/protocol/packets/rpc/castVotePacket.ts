@@ -14,7 +14,7 @@ export class CastVotePacket extends BaseRpcPacket {
   }
 
   static deserialize(reader: MessageReader): CastVotePacket {
-    return new CastVotePacket(reader.readByte(), reader.readSByte());
+    return new CastVotePacket(reader.readByte(), reader.readByte());
   }
 
   clone(): CastVotePacket {
@@ -22,7 +22,7 @@ export class CastVotePacket extends BaseRpcPacket {
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writeByte(this.votingPlayerId).writeSByte(this.suspectPlayerId);
+    writer.writeByte(this.votingPlayerId).writeByte(this.suspectPlayerId);
   }
 
   didSkip(): boolean {

@@ -10,6 +10,7 @@ type PlayerColorValues = {
   [key in PlayerColor]: Readonly<ColorShades>;
 };
 
+const acceptedGreen: Readonly<Color> = [0, 255, 42, 255] as const;
 const disabledGrey: Readonly<Color> = [76, 76, 76, 255] as const;
 const disabledColor: Readonly<Color> = [255, 255, 255, 76] as const;
 const enabledColor: Readonly<Color> = [255, 255, 255, 255] as const;
@@ -38,6 +39,12 @@ const playerBody: Readonly<PlayerColorValues> = {
   [PlayerColor.Brown]: { light: [113, 73, 30, 255], dark: [94, 38, 21, 255] },
   [PlayerColor.Cyan]: { light: [56, 255, 221, 255], dark: [36, 169, 191, 255] },
   [PlayerColor.Lime]: { light: [80, 240, 57, 255], dark: [21, 168, 66, 255] },
+  [PlayerColor.Maroon]: { light: [95, 29, 46, 255], dark: [65, 15, 26, 255] },
+  [PlayerColor.Rose]: { light: [236, 192, 211, 255], dark: [222, 146, 179, 255] },
+  [PlayerColor.Banana]: { light: [240, 231, 168, 255], dark: [210, 188, 137, 255] },
+  [PlayerColor.Gray]: { light: [117, 133, 147, 255], dark: [70, 86, 100, 255] },
+  [PlayerColor.Tan]: { light: [145, 136, 119, 255], dark: [81, 65, 62, 255] },
+  [PlayerColor.Coral]: { light: [80, 240, 57, 255], dark: [180, 67, 98, 255] },
   [PlayerColor.ForteGreen]: { light: [29, 152, 83, 255], dark: [18, 63, 27, 255] },
 } as const;
 
@@ -45,6 +52,10 @@ const playerBody: Readonly<PlayerColorValues> = {
  * A helper class for retrieving static data about various colors used in-game.
  */
 export class Palette {
+  static acceptedGreen(): Readonly<Color> {
+    return acceptedGreen;
+  }
+
   static disabledGrey(): Readonly<Color> {
     return disabledGrey;
   }

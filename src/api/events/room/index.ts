@@ -1,5 +1,3 @@
-export { RoomCommunicationsConsoleClearedEvent } from "./roomCommunicationsConsoleClearedEvent";
-
 export { RoomCommunicationsConsoleClosedEvent } from "./roomCommunicationsConsoleClosedEvent";
 
 export { RoomCommunicationsConsoleOpenedEvent } from "./roomCommunicationsConsoleOpenedEvent";
@@ -18,7 +16,11 @@ export { RoomDoorsOpenedEvent } from "./roomDoorsOpenedEvent";
 
 export { RoomElectricalInteractedEvent } from "./roomElectricalInteractedEvent";
 
-export { RoomOxygenConsoleClearedEvent } from "./roomOxygenConsoleClearedEvent";
+export { RoomHeliConsoleClosedEvent } from "./roomHeliConsoleClosedEvent";
+
+export { RoomHeliConsoleOpenedEvent } from "./roomHeliConsoleOpenedEvent";
+
+export { RoomHeliConsoleRepairedEvent } from "./roomHeliConsoleRepairedEvent";
 
 export { RoomOxygenConsoleRepairedEvent } from "./roomOxygenConsoleRepairedEvent";
 

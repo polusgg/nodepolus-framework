@@ -127,8 +127,8 @@ export class Server extends Emittery<ServerEvents> {
       this.logger.catch(error);
     });
 
-    if (this.getMaxPlayersPerLobby() > 10) {
-      this.logger.warn("Lobbies with more than 10 players is experimental");
+    if (this.getMaxPlayersPerLobby() > 15) {
+      this.logger.warn("Lobbies with more than 15 players is experimental");
     }
   }
 
@@ -733,7 +733,7 @@ export class Server extends Emittery<ServerEvents> {
 
           this.addLobby(newLobby);
 
-          connection.sendReliable([new HostGameResponsePacket(newLobby.getCode())]);
+          await connection.sendReliable([new HostGameResponsePacket(newLobby.getCode())]);
         } else {
           this.getLogger().verbose("Prevented connection %s from hosting lobby %s", connection, newLobby);
 
@@ -758,15 +758,15 @@ export class Server extends Emittery<ServerEvents> {
             const code = lobby.getCode();
 
             if (lobbyCode !== code) {
-              connection.sendReliable([new HostGameResponsePacket(code)]);
+              await connection.sendReliable([new HostGameResponsePacket(code)]);
             }
 
-            (lobby as Lobby).handleJoin(connection);
+            await (lobby as Lobby).handleJoin(connection);
           } else {
-            connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameNotFound())]);
+            await connection.sendReliable([new JoinGameErrorPacket(DisconnectReason.gameNotFound())]);
           }
         } else {
-          connection.sendReliable([new JoinGameErrorPacket(event.getDisconnectReason())]);
+          await connection.sendReliable([new JoinGameErrorPacket(event.getDisconnectReason())]);
         }
         break;
       }
