@@ -503,6 +503,10 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    */
   async flush(reliable: boolean = true): Promise<void> {
     return new Promise((resolve, reject) => {
+      if (this.requestedDisconnect) {
+        return;
+      }
+
       if (this.unreliablePacketBuffer.length == 0 && this.packetBuffer.length == 0) {
         return;
       }
@@ -542,11 +546,11 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
         const resendInterval = setInterval(() => {
           if (this.unacknowledgedPackets.has(nonce!)) {
             if (this.unacknowledgedPackets.get(nonce!)! > 10) {
-              this.disconnect(DisconnectReason.custom(`Failed to acknowledge packet ${nonce} after 10 attempts`));
-
               clearInterval(resendInterval);
 
               reject(new Error(`Connection ${this.id} did not acknowledge packet ${nonce} after 10 attempts`));
+
+              this.disconnect(DisconnectReason.custom(`Failed to acknowledge packet ${nonce} after 10 attempts`));
             } else {
               this.unacknowledgedPackets.set(nonce!, this.unacknowledgedPackets.get(nonce!)! + 1);
               this.send(packet);

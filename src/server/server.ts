@@ -427,7 +427,7 @@ export class Server extends Emittery<ServerEvents> {
         if (connection.hasTimedOut()) {
           connection.disconnect(DisconnectReason.custom(`Did not receive any pings for ${CONNECTION_TIMEOUT_DURATION}ms`), true);
 
-          return;
+          continue;
         }
 
         connection.safeFlushReliable();
@@ -822,9 +822,9 @@ export class Server extends Emittery<ServerEvents> {
         if (!event.isCancelled()) {
           this.getLogger().verbose("Sending game list to connection %s", connection);
 
-          connection.sendReliable([new GetGameListResponsePacket(event.getLobbies())]);
+          await connection.sendReliable([new GetGameListResponsePacket(event.getLobbies())]);
         } else {
-          connection.disconnect(event.getDisconnectReason());
+          await connection.disconnect(event.getDisconnectReason());
         }
         break;
       }

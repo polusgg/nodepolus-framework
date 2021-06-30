@@ -834,7 +834,7 @@ export class Host implements HostInstance {
 
     await connection.writeReliable(new GameDataPacket([gameData.serializeSpawn()], this.lobby.getCode()));
 
-    const event = new PlayerSpawnedEvent(connection, this.lobby, newPlayerId, true, SpawnPositions.forPlayerInDropship(newPlayerId));
+    const event = new PlayerSpawnedEvent(connection, this.lobby, newPlayerId, true, shipStatus === undefined ? SpawnPositions.forPlayerInDropship(newPlayerId) : SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), newPlayerId, this.lobby.getPlayers().length + 1, true));
 
     await this.lobby.getServer().emit("player.spawned", event);
 
@@ -854,8 +854,8 @@ export class Host implements HostInstance {
       const player = new Player(this.lobby, entity, connection);
 
       this.lobby.addPlayer(player);
-      await this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
       await this.ensurePlayerDataExists(player);
+      await this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
       player.getEntity().getPlayerControl().setNewPlayer(false);
     }
 
