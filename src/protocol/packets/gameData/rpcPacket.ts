@@ -39,6 +39,8 @@ import {
   UsePlatformPacket,
   VotingCompletePacket,
   SubmergedRequestChangeFloorPacket,
+  SetAliveStatePacket,
+  DisplayKillAnimationPacket,
 } from "../rpc";
 
 /**
@@ -148,6 +150,10 @@ export class RpcPacket extends BaseGameDataPacket {
         return new RpcPacket(senderNetId, UsePlatformPacket.deserialize(reader));
       case RpcPacketType.SubmergedRequestChangeFloor:
         return new RpcPacket(senderNetId, SubmergedRequestChangeFloorPacket.deserialize(reader));
+      case RpcPacketType.PolusSetAliveState:
+        return new RpcPacket(senderNetId, SetAliveStatePacket.deserialize(reader));
+      case RpcPacketType.PolusDisplayKillAnimation:
+        return new RpcPacket(senderNetId, DisplayKillAnimationPacket.deserialize(reader));
       default: {
         const custom = RpcPacket.customPackets.get(type);
 
