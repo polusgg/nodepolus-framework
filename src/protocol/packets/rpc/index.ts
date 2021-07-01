@@ -65,3 +65,7 @@ export { UsePlatformPacket } from "./usePlatformPacket";
 export { VotingCompletePacket } from "./votingCompletePacket";
 
 export { SubmergedRequestChangeFloorPacket } from "./submergedRequestChangeFloorPacket";
+
+export { DisplayKillAnimationPacket } from "./polus/displayKillAnimationPacket";
+
+export { SetAliveStatePacket } from "./polus/setAliveStatePacket";

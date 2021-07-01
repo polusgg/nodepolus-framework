@@ -36,4 +36,7 @@ export enum RpcPacketType {
   SubmergedRequestChangeFloor = 0x70,
   SubmergedAcknowledgeChangeFloor = 0x71,
   SubmergedEngineVent = 0x72,
+
+  PolusSetAliveState = 0x92,
+  PolusDisplayKillAnimation = 0x93,
 }
