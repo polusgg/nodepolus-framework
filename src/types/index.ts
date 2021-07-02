@@ -1,5 +1,7 @@
 export { AllRequired } from "./allRequired";
 
+export { Attachable } from "./attachable";
+
 export { Bitfield } from "./bitfield";
 
 export { CanSerializeToHazel } from "./canSerializeToHazel";

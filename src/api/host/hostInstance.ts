@@ -11,6 +11,7 @@ import {
   SabotageSystemHandler,
   SystemsHandler,
 } from "../../host/systemHandlers";
+import { EntityButton } from "../../protocol/polus/entities";
 
 /**
  * An interface describing the public API of the host controller for a LobbyInstance.
@@ -194,4 +195,12 @@ export interface HostInstance {
    * @param suspectPlayerId - The ID of the player who is being voted to be exiled
    */
   handleCastVote(votingPlayerId: number, suspectPlayerId: number): Promise<void>;
+
+  /**
+   * Called when a connection clicks a button.
+   *
+   * @param clicker - Connection that clicked the button
+   * @param button - Button that was clicked
+   */
+  handleButtonClicked(clicker: Connection, button: EntityButton): Promise<void>;
 }

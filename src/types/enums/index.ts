@@ -4,6 +4,8 @@ export { AlterGameTag } from "./alterGameTag";
 
 export { AnnouncementPacketType } from "./announcementPacketType";
 
+export { BodyDirection } from "./bodyDirection";
+
 export { ChatNoteType } from "./chatNoteType";
 
 export { ClientLanguage } from "./clientLanguage";
@@ -13,6 +15,8 @@ export { DeathReason } from "./deathReason";
 export { DecontaminationDoorState } from "./decontaminationDoorState";
 
 export { DisconnectReasonType } from "./disconnectReasonType";
+
+export { EdgeAlignments } from "./edgeAlignment";
 
 export { FakeClientId } from "./fakeClientId";
 
@@ -63,6 +67,8 @@ export { RpcPacketType } from "./rpcPacketType";
 export { RuntimePlatform } from "./runtimePlatform";
 
 export { Scene } from "./scene";
+
+export { SoundType } from "./soundType"
 
 export { SpawnFlag } from "./spawnFlag";
 

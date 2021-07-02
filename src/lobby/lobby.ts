@@ -69,6 +69,7 @@ import {
   SpawnType,
   VoteStateConstants,
 } from "../types/enums";
+import { EntityButton, EntityDeadBody } from "../protocol/polus/entities";
 
 export class Lobby implements LobbyInstance {
   protected readonly createdAt: number = Date.now();
@@ -81,6 +82,8 @@ export class Lobby implements LobbyInstance {
   protected readonly ignoredNetIds: number[] = [];
   protected readonly customEntities: Set<BaseInnerNetEntity> = new Set();
 
+  protected buttonMap: Map<number, EntityButton> = new Map();
+  protected deadBodyMap: Map<number, EntityDeadBody> = new Map();
   protected joinTimer?: NodeJS.Timeout;
   protected startTimer?: NodeJS.Timeout;
   protected game?: Game;
@@ -446,6 +449,20 @@ export class Lobby implements LobbyInstance {
     return index;
   }
 
+  findEntityButtonByNetId(netId: number): EntityButton | undefined {
+    return this.buttonMap.get(netId);
+  }
+
+  findSafeEntityButtonByNetId(netId: number): EntityButton {
+    const button = this.findEntityButtonByNetId(netId);
+
+    if (button === undefined) {
+      throw new Error(`Lobby does not have a button with the net ID ${netId}`);
+    }
+
+    return button;
+  }
+
   findConnection(clientId: number): Connection | undefined {
     return this.connections.find(con => con.getId() == clientId);
   }
@@ -636,6 +653,14 @@ export class Lobby implements LobbyInstance {
         this.logger.warn("Use LobbyInstance#spawnPlayer() to spawn a player");
 
         return;
+      case SpawnType.PolusButton:
+        (entity as EntityButton).getObjects().forEach(object => {
+          this.buttonMap.set(object.getNetId(), entity as EntityButton);
+        });
+        break;
+      case SpawnType.PolusDeadBody:
+        this.deadBodyMap.set((entity as EntityDeadBody).getDeadBody().getNetId(), entity as EntityDeadBody);
+        break;
       default:
         this.customEntities.add(entity);
     }

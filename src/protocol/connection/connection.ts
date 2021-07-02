@@ -14,6 +14,7 @@ import { Lobby } from "../../lobby";
 import { Packet } from "../packets";
 import Emittery from "emittery";
 import dgram from "dgram";
+import { EntityButton } from "../polus/entities";
 
 export class Connection extends Emittery<ConnectionEvents> implements Metadatable, NetworkAccessible {
   protected readonly metadata: Map<string, unknown> = new Map();
@@ -690,6 +691,29 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
 
       this.on("packet", packetHandler);
     });
+  }
+
+  getLoadedAssetBundlesForThisConnection(): AssetBundle[] {
+    if (!this.loadedBundlesMap.has(this)) {
+      this.getLobby()?.getServer().loadedBund.set(this, []);
+    }
+
+    return this.loadedBundlesMap.get(connection)!;
+  }
+
+  async assertLoaded(connection: Connection, asset: Asset): Promise<void> {
+    const assetIds = this.getLoadedAssetBundlesForConnection(connection)
+      .map(bundle => bundle.getContents())
+      .flat()
+      .map(singleAsset => singleAsset.getId());
+
+    if (assetIds.includes(asset.getId())) {
+      return;
+    }
+
+    server.getLogger("Polus.gg Resource Service").warn(`Asset "${asset.getPath().join("/")}" (${asset.getId()}) from assetBundle "${asset.getBundle().getAddress()}" (${asset.getBundle().getId()}) was asserted to be loaded, but did not exist on the connection's LoadedBundles array`);
+
+    await this.load(connection, asset.getBundle());
   }
 
   /**

@@ -9,4 +9,13 @@ export enum SpawnType {
   DleksShipStatus = 7,
   AirshipStatus = 8,
   SubmergedStatus = 9,
+  PolusButton = 10,
+  PolusCameraController = 11,
+  PolusConsole = 12,
+  PolusDeadBody = 13,
+  PolusImage = 14,
+  PolusLightSource = 15,
+  PolusPointOfInterest = 16,
+  PolusSoundSource = 17,
+  PolusVent = 18,
 }

@@ -24,6 +24,7 @@ import {
   LobbyOptionsUpdatedEvent,
   LobbyPrivacyUpdatedEvent,
 } from "./lobby";
+import { LobbyButtonClickedEvent } from "./lobby/lobbyButtonClickedEvent";
 import {
   MeetingClosedEvent,
   MeetingConcludedEvent,
@@ -115,6 +116,11 @@ export type ServerEvents = {
    * Fired when the Server shuts down.
    */
   "server.close": undefined;
+
+  /**
+   * Button events
+   */
+  "button.clicked": LobbyButtonClickedEvent;
 
   /**
    * Connection Events
