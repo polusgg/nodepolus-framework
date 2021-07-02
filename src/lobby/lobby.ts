@@ -611,7 +611,7 @@ export class Lobby implements LobbyInstance {
     this.gameState = gameState;
   }
 
-  async sendRootGamePacket(packet: BaseRootPacket, sendTo?: Connection[]): Promise<PromiseSettledResult<void>[]> {
+  async sendRootGamePacket(packet: BaseRootPacket, sendTo?: Connection[]): Promise<void> {
     if (sendTo === undefined) {
       sendTo = this.connections;
     }
@@ -622,7 +622,7 @@ export class Lobby implements LobbyInstance {
       promiseArray.push(sendTo[i].writeReliable(packet));
     }
 
-    return Promise.allSettled(promiseArray);
+    await Promise.all(promiseArray);
   }
 
   async sendRpcPacket(from: BaseInnerNetObject, packet: BaseRpcPacket, sendTo?: Connection[]): Promise<void> {
@@ -1025,7 +1025,9 @@ export class Lobby implements LobbyInstance {
     if (connection.getLobby() === undefined) {
       connection.setLobby(this);
 
-      connection.on("packet", async (packet: BaseRootPacket) => await this.handlePacket(packet, connection));
+      connection.on("packet", (packet: BaseRootPacket) => {
+        this.handlePacket(packet, connection);
+      });
     }
 
     if (this.gameState == GameState.Ended) {
