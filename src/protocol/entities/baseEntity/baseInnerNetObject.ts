@@ -31,10 +31,6 @@ export abstract class BaseInnerNetObject {
   }
 
   async sendRpcPacket(packet: BaseRpcPacket, sendTo?: Connection[]): Promise<void> {
-    if (sendTo === undefined) {
-      return;
-    }
-
     await this.parent.getLobby().sendRpcPacket(this, packet, sendTo);
   }
 

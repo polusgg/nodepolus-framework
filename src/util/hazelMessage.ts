@@ -452,7 +452,7 @@ export class MessageWriter extends HazelMessage {
       this.writeByte(arr.length);
     }
 
-    return this.writeListWithoutLength(items, writer);
+    return this.writeListWithoutLength(arr, writer);
   }
 
   /**

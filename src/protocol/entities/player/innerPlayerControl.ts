@@ -237,8 +237,6 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     await this.getLobby().getServer().emit("player.name.updated", event);
 
     if (event.isCancelled()) {
-      sendTo = [this.getConnection()];
-
       event.setNewName(event.getOldName());
     }
 
