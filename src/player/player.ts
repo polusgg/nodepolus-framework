@@ -99,10 +99,8 @@ export class Player implements PlayerInstance {
   }
 
   async setName(name: TextComponent | string): Promise<void> {
-    if (name instanceof TextComponent) {
-      this.name = name;
-    } else {
-      this.name = TextComponent.from(name);
+    if (!(name instanceof TextComponent)) {
+      name = TextComponent.from(name);
     }
 
     await this.entity.getPlayerControl().setName(name.toString(), this.lobby.getConnections());
