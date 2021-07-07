@@ -5,7 +5,12 @@ import { CanSerializeToHazel } from ".";
 /**
  * A class used to store and modify a player's vote in a meeting.
  */
-export class VoteState implements CanSerializeToHazel {
+
+export type VoteStateSerialiazationOptions = {
+  isComplete: boolean;
+};
+
+export class VoteState implements CanSerializeToHazel<VoteStateSerialiazationOptions> {
   /**
    * @param reported - `true` if the player reported the body or called the meeting, `false` if not
    * @param votedFor - The ID of the player that was voted for
@@ -37,8 +42,7 @@ export class VoteState implements CanSerializeToHazel {
    * @param writer - The MessageWriter to write to
    * @param options - Whether the message is for VotingComplete
    */
-  // TODO TYPE THIS PROPERLY
-  serialize(writer: MessageWriter, options?: Record<"isComplete", boolean>): void {
+  serialize(writer: MessageWriter, options?: VoteStateSerialiazationOptions): void {
     writer.writeByte(this.votedFor);
 
     if (options === undefined || !options.isComplete) {
