@@ -85,6 +85,7 @@ export class Host implements HostInstance {
   protected readonly id: number = FakeClientId.ServerAsHost;
   protected readonly playersInScene: Map<number, string> = new Map();
 
+  protected reservedPlayerIds: Set<number> = new Set();
   protected readyPlayerList: Set<number> = new Set();
   protected netIdIndex = 1;
   protected counterSequenceId = 0;
@@ -119,7 +120,7 @@ export class Host implements HostInstance {
     const taken = this.lobby.getPlayers().map(player => player.getId());
 
     for (let i = 0; i < (this.lobby.getPlayers().length >= 10 ? 128 : 10); i++) {
-      if (taken.indexOf(i) == -1) {
+      if (taken.indexOf(i) == -1 && !this.reservedPlayerIds.has(i)) {
         return i;
       }
     }
@@ -826,6 +827,9 @@ export class Host implements HostInstance {
       return;
     }
 
+    this.reservedPlayerIds.add(newPlayerId);
+
+
     await this.stopCountdown();
     this.playersInScene.set(connection.getId(), sceneName);
 
@@ -856,8 +860,11 @@ export class Host implements HostInstance {
 
     await connection.writeReliable(new GameDataPacket([gameData.serializeSpawn()], this.lobby.getCode()));
 
-    const event = new PlayerSpawnedEvent(connection, this.lobby, newPlayerId, true, shipStatus === undefined ? SpawnPositions.forPlayerInDropship(newPlayerId) : SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), newPlayerId, this.lobby.getPlayers().length + 1, true));
+    for (let i = 0; i < this.lobby.getPlayers().length; i++) {
+      await connection.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].getEntity().serializeSpawn()], this.lobby.getCode()));
+    }
 
+    const event = new PlayerSpawnedEvent(connection, this.lobby, newPlayerId, true, shipStatus === undefined ? SpawnPositions.forPlayerInDropship(newPlayerId) : SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), newPlayerId, this.lobby.getPlayers().length + 1, true));
     await this.lobby.getServer().emit("player.spawned", event);
 
     if (!event.isCancelled()) {
@@ -876,14 +883,11 @@ export class Host implements HostInstance {
       const player = new Player(this.lobby, entity, connection);
 
       this.lobby.addPlayer(player);
-      await this.ensurePlayerDataExists(player);
       await this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
+      await this.ensurePlayerDataExists(player);
       player.getEntity().getPlayerControl().setNewPlayer(false);
     }
-
-    for (let i = 0; i < this.lobby.getPlayers().length; i++) {
-      await connection.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].getEntity().serializeSpawn()], this.lobby.getCode()));
-    }
+    this.reservedPlayerIds.delete(newPlayerId);
 
     await (this.lobby.getPlayers()[0] as Player).getEntity().getPlayerControl().syncSettings(this.lobby.getOptions(), [connection]);
     await connection.flush(true);
