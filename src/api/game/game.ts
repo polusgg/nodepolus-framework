@@ -15,6 +15,8 @@ export class Game {
         break;
       case Level.Airship:
         break;
+      case Level.Submerged:
+        break;
     }
   }
 

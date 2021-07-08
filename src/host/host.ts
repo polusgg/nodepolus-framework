@@ -829,7 +829,6 @@ export class Host implements HostInstance {
 
     this.reservedPlayerIds.add(newPlayerId);
 
-
     await this.stopCountdown();
     this.playersInScene.set(connection.getId(), sceneName);
 
@@ -865,6 +864,7 @@ export class Host implements HostInstance {
     }
 
     const event = new PlayerSpawnedEvent(connection, this.lobby, newPlayerId, true, shipStatus === undefined ? SpawnPositions.forPlayerInDropship(newPlayerId) : SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), newPlayerId, this.lobby.getPlayers().length + 1, true));
+
     await this.lobby.getServer().emit("player.spawned", event);
 
     if (!event.isCancelled()) {

@@ -152,7 +152,7 @@ export interface PlayerInstance extends Metadatable {
    *
    * @param tasks - The tasks to be added
    */
-  addTasks(tasks: Set<LevelTask>): Promise<void>
+  addTasks(tasks: Set<LevelTask>): Promise<void>;
 
   /**
    * Removes the given tasks from the player's tasks.
