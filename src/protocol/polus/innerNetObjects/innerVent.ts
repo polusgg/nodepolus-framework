@@ -49,7 +49,8 @@ export class InnerVent extends BaseInnerNetObject {
     return this.parent as EntityVent;
   }
 
-  handleRpc(_connection: Connection, _type: RpcPacketType, _packet: BaseRpcPacket, _sendTo: Connection[]): void {
-    throw new Error("Unexpected RPC on InnerSoundSource");
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async handleRpc(_connection: Connection, _type: RpcPacketType, _packet: BaseRpcPacket, _sendTo: Connection[]): Promise<void> {
+    throw new Error("Unexpected RPC on InnerVent");
   }
 }

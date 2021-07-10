@@ -156,7 +156,8 @@ export class InnerSoundSource extends BaseInnerNetObject {
     return new SpawnPacketObject(this.netId, this.serializeData().data);
   }
 
-  handleRpc(_connection: Connection, _type: RpcPacketType, _packet: BaseRpcPacket, _sendTo: Connection[]): void {
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async handleRpc(_connection: Connection, _type: RpcPacketType, _packet: BaseRpcPacket, _sendTo: Connection[]): Promise<void> {
     throw new Error("Unexpected RPC on InnerSoundSource");
   }
 

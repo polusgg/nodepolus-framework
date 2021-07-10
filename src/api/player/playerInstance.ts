@@ -110,6 +110,13 @@ export interface PlayerInstance extends Metadatable {
   setRole(role: PlayerRole): void;
 
   /**
+   * Sets the player's body.
+   *
+   * @experimental
+   * @param body - The player's new body
+   */
+
+  /**
    * Gets whether or not the player is an Impostor.
    *
    * @returns `true` if the player is an Impostor

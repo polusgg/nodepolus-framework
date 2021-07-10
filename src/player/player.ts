@@ -18,6 +18,7 @@ import {
   PlayerTaskRemovedEvent,
   PlayerTaskUncompletedEvent,
 } from "../api/events/player";
+import { SetPlayerBodyPacket } from "../protocol/polus/packets/rpc/playerControl/setPlayerBody";
 
 export class Player implements PlayerInstance {
   protected readonly createdAt = Date.now();
@@ -146,6 +147,10 @@ export class Player implements PlayerInstance {
     this.role = role;
 
     this.getGameDataEntry().setImpostor(role == PlayerRole.Impostor);
+  }
+
+  setBody(player: Player, body: number): void {
+    player.getEntity().getPlayerControl().sendRpcPacket(new SetPlayerBodyPacket(body), player.getLobby().getConnections());
   }
 
   isImpostor(): boolean {

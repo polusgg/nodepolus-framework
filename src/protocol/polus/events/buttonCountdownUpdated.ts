@@ -1,3 +1,3 @@
-import { CancellableEvent } from "@nodepolus/framework/src/api/events/types";
+import { CancellableEvent } from "../../../api/events/types";
 
 export class ButtonCountdownUpdated extends CancellableEvent {}

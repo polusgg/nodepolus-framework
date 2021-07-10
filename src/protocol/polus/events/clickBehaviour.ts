@@ -1,4 +1,4 @@
-import { Connection } from "@nodepolus/framework/src/protocol/connection";
+import { Connection } from "../../connection";
 import { ClickPacket } from "../packets/rpc/clickBehaviour";
 
 export type ClickBehaviourEvents = {

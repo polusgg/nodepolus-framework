@@ -5,7 +5,7 @@ import { EdgeAlignments, SpawnFlag } from "../../../types/enums";
 import { Attachable, Vector2 } from "../../../types";
 import { GameDataPacket } from "../../packets/root";
 import { RpcPacket } from "../../packets/gameData";
-import { SnapToPacket } from "../../packets/rpc/polus/snapToPacket";
+import { CNTSnapToPacket } from "../packets/rpc/customNetworkTransform";
 
 export class EntityPointOfInterest extends BaseInnerNetEntity {
   constructor(
@@ -45,7 +45,7 @@ export class EntityPointOfInterest extends BaseInnerNetEntity {
     return this.getLobby().findSafeConnection(this.getOwnerId()).writeReliable(new GameDataPacket([
       new RpcPacket(
         this.getCustomNetworkTransform().getNetId(),
-        new SnapToPacket(position),
+        new CNTSnapToPacket(position),
       ),
     ], this.getLobby().getCode()));
   }

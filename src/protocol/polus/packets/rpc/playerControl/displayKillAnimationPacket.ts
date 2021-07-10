@@ -1,7 +1,7 @@
-import { Vector2 } from "../../../../types";
-import { RpcPacketType } from "../../../../types/enums";
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { BaseRpcPacket } from "../baseRpcPacket";
+import { Vector2 } from "../../../../../types";
+import { RpcPacketType } from "../../../../../types/enums";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
+import { BaseRpcPacket } from "../../../../packets/rpc";
 
 export class DisplayKillAnimationPacket extends BaseRpcPacket {
   constructor(

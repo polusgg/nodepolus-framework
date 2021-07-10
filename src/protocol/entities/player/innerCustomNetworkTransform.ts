@@ -81,10 +81,10 @@ export class InnerCustomNetworkTransform extends BaseInnerNetObject {
     await this.sendRpcPacket(new SnapToPacket(this.position, this.sequenceId), sendTo);
   }
 
-  handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
+  async handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): Promise<void> {
     switch (type) {
       case RpcPacketType.SnapTo:
-        this.handleSnapTo((packet as SnapToPacket).position, TeleportReason.Unknown, sendTo);
+        await this.handleSnapTo((packet as SnapToPacket).position, TeleportReason.Unknown, sendTo);
         break;
       default:
         break;

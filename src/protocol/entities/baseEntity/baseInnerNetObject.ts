@@ -12,7 +12,7 @@ export abstract class BaseInnerNetObject {
     protected readonly netId: number,
   ) {}
 
-  abstract handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void;
+  abstract handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): Promise<void>;
 
   abstract getParent(): BaseInnerNetEntity;
 

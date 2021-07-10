@@ -38,5 +38,5 @@ export class InnerLightSource extends BaseInnerNetObject {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  handleRpc(_connection: Connection, _type: RpcPacketType, _packet: BaseRpcPacket, _sendTo?: Connection[]): void { }
+  async handleRpc(_connection: Connection, _type: RpcPacketType, _packet: BaseRpcPacket, _sendTo?: Connection[]): Promise<void> { }
 }

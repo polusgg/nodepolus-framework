@@ -4,6 +4,8 @@ import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { BaseRpcPacket } from "../../packets/rpc";
 import { Connection } from "../../connection";
 import { RpcPacketType } from "../../../types/enums";
+import { ButtonCountdownUpdated } from "../events/buttonCountdownUpdated";
+import { SetCountingDownPacket } from "../packets/rpc/clickBehaviour";
 
 export class InnerClickBehaviour extends BaseInnerNetObject {
   private lastCurrentTimeSet: number;
@@ -125,12 +127,34 @@ export class InnerClickBehaviour extends BaseInnerNetObject {
     return this.parent;
   }
 
-  handleRpc(connection: Connection, type: RpcPacketType, _packet: BaseRpcPacket, _sendTo: Connection[]): void {
+  async handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, _sendTo: Connection[]): Promise<void> {
     switch (type as number) {
-      case 0x86: {
-        const button = connection.getSafeLobby().findSafeEntityButtonByNetId(this.getNetId());
+      case 0x83: {
+        const button = connection.getSafeLobby().findSafeButtonByNetId(this.getNetId());
 
-        connection.getLobby()?.getHostInstance().handleButtonClicked(connection, button);
+        if (button.isDestroyed()) {
+          throw new Error("HandleClickButton sent on a destroyed Button");
+        } else {
+          button.emit("clicked", {
+            connection,
+            packet,
+          });
+        }
+        break;
+      }
+      case 0x90: {
+        const button = connection.getSafeLobby().findSafeButtonByNetId(this.getNetId());
+        const event = new ButtonCountdownUpdated();
+        const countingDownPacket = packet as SetCountingDownPacket;
+
+        await button.emit(countingDownPacket.requestCounting ? "button.countdown.started" : "button.countdown.stopped", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
+
+        await button.setCurrentTime(countingDownPacket.currentTimer);
+        await button.setCountingDown(countingDownPacket.requestCounting);
         break;
       }
       default:

@@ -195,12 +195,4 @@ export interface HostInstance {
    * @param suspectPlayerId - The ID of the player who is being voted to be exiled
    */
   handleCastVote(votingPlayerId: number, suspectPlayerId: number): Promise<void>;
-
-  /**
-   * Called when a connection clicks a button.
-   *
-   * @param clicker - Connection that clicked the button
-   * @param button - Button that was clicked
-   */
-  handleButtonClicked(clicker: Connection, button: EntityButton): Promise<void>;
 }

@@ -80,8 +80,6 @@ import {
 } from "../types/enums";
 import { EntitySubmarineShipStatus as EntitySubmergedShipStatus } from "../protocol/entities/shipStatus/submerged/entitySubmarineShipStatus";
 import { SubmergedElevatorSystem } from "../protocol/entities/shipStatus/systems/submergedElevatorSystem";
-import { EntityButton } from "../protocol/polus/entities";
-import { LobbyButtonClickedEvent } from "../api/events/lobby/lobbyButtonClickedEvent";
 
 export class Host implements HostInstance {
   protected readonly id: number = FakeClientId.ServerAsHost;
@@ -1041,13 +1039,6 @@ export class Host implements HostInstance {
       delete this.meetingHudTimeout;
       await this.endMeeting();
     }
-  }
-
-  /**
-   * Emits a new LobbyButtonClickedEvent ("button.clicked") with the given EntityButton.
-  */
-  async handleButtonClicked(clicker: Connection, button: EntityButton): Promise<void> {
-    await this.lobby.getServer().emit("button.clicked", new LobbyButtonClickedEvent(this.lobby, clicker, button));
   }
 
   /**

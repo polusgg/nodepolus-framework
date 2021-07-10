@@ -78,12 +78,12 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     ], this.getLobby().getCode()), promises);
   }
 
-  handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
+  async handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): Promise<void> {
     switch (type) {
       case RpcPacketType.CastVote: {
         const data = packet as CastVotePacket;
 
-        this.castVote(data.votingPlayerId, data.suspectPlayerId, sendTo);
+        await this.castVote(data.votingPlayerId, data.suspectPlayerId, sendTo);
         break;
       }
       case RpcPacketType.ClearVote:
