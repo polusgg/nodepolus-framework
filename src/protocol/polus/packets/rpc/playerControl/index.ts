@@ -1,4 +1,4 @@
-export { BeginCameraAnimation } from "./beginAnimationPacket";
+export { BeginPlayerAnimation } from "./beginAnimation";
 
 export { ClickPacket } from "./clickPacket";
 
