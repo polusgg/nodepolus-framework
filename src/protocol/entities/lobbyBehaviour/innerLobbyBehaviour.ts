@@ -15,7 +15,7 @@ export class InnerLobbyBehaviour extends BaseInnerNetObject {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {}
+  async handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): Promise<void> {}
 
   getParent(): EntityLobbyBehaviour {
     return this.parent;

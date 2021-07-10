@@ -145,10 +145,10 @@ export class InnerGameData extends BaseInnerNetObject {
     );
   }
 
-  handleRpc(connection: Connection, type: RpcPacketType, _packet: BaseRpcPacket, _sendTo: Connection[]): void {
+  async handleRpc(connection: Connection, type: RpcPacketType, _packet: BaseRpcPacket, _sendTo: Connection[]): Promise<void> {
     switch (type) {
       case RpcPacketType.SetTasks:
-        this.parent.getLobby().getLogger().warn("Received SetTasks packet from connection %s in a server-as-host state", connection);
+        await this.parent.getLobby().getLogger().warn("Received SetTasks packet from connection %s in a server-as-host state", connection);
         break;
       default:
         break;

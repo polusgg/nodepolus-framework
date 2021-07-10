@@ -40,6 +40,8 @@ export { NetworkAccessible } from "./networkAccessible";
 
 export { OutboundPacketTransformer } from "./outboundPacketTransformer";
 
+export { ResourceResponse } from "./polus/polusResourceResponse";
+
 export { SerializationOptions } from "./serializationOptions";
 
 export { Vector2 } from "./vector2";

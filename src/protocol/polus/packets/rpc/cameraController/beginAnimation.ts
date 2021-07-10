@@ -1,6 +1,6 @@
-import { BaseRpcPacket } from "../baseRpcPacket";
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { CameraAnimationKeyframe } from "../../../polus/animation/camera";
+import { BaseRpcPacket } from "../../../../packets/rpc";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
+import { CameraAnimationKeyframe } from "../../../animation/camera";
 
 export class BeginCameraAnimation extends BaseRpcPacket {
   constructor(

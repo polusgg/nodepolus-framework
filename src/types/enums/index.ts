@@ -10,11 +10,15 @@ export { ChatNoteType } from "./chatNoteType";
 
 export { ClientLanguage } from "./clientLanguage";
 
+export { CustomRootPacketType } from "./polus/polusCustomRootPacketType";
+
 export { DeathReason } from "./deathReason";
 
 export { DecontaminationDoorState } from "./decontaminationDoorState";
 
 export { DisconnectReasonType } from "./disconnectReasonType";
+
+export { DownloadFailureReason } from "./polus/polusDownloadFailureReason";
 
 export { EdgeAlignments } from "./edgeAlignment";
 
@@ -27,6 +31,8 @@ export { GameOverReason } from "./gameOverReason";
 export { GameState } from "./gameState";
 
 export { HazelPacketType } from "./hazelPacketType";
+
+export { HudItem } from "./polus/polusHudItem";
 
 export { InnerNetObjectType } from "./innerNetObjectType";
 
@@ -54,6 +60,8 @@ export { PlayerSkin } from "./playerSkin";
 
 export { PlayerState } from "./playerState";
 
+export { ResourceType } from "./polus/polusResourceType";
+
 export { QuickChatMode } from "./quickChatMode";
 
 export { ReportOutcome } from "./reportOutcome";
@@ -68,11 +76,13 @@ export { RuntimePlatform } from "./runtimePlatform";
 
 export { Scene } from "./scene";
 
-export { SoundType } from "./soundType"
+export { SoundType } from "./soundType";
 
 export { SpawnFlag } from "./spawnFlag";
 
 export { SpawnType } from "./spawnType";
+
+export { StringLocation } from "./polus/polusStringLocation";
 
 export { SystemType } from "./systemType";
 

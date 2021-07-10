@@ -78,12 +78,12 @@ export class InnerMeetingHud extends BaseInnerNetObject {
     ], this.getLobby().getCode()), promises);
   }
 
-  handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
+  async handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): Promise<void> {
     switch (type) {
       case RpcPacketType.CastVote: {
         const data = packet as CastVotePacket;
 
-        this.castVote(data.votingPlayerId, data.suspectPlayerId, sendTo);
+        await this.castVote(data.votingPlayerId, data.suspectPlayerId, sendTo);
         break;
       }
       case RpcPacketType.ClearVote:
@@ -102,7 +102,7 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   }
 
   serializeData(old: InnerMeetingHud): DataPacket {
-    const updatedStates = [...this.playerStates.entries()].filter(state => !shallowEqual(state[1], old.playerStates.get(state[0])))
+    const updatedStates = [...this.playerStates.entries()].filter(state => !shallowEqual(state[1], old.playerStates.get(state[0])));
     const writer = new MessageWriter().writePackedUInt32(updatedStates.length);
 
     for (const [id, state] of updatedStates) {

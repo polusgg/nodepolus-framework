@@ -144,12 +144,12 @@ export class InnerVoteBanSystem extends BaseInnerNetObject {
     }
   }
 
-  handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
+  async handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): Promise<void> {
     switch (type) {
       case RpcPacketType.AddVote: {
         const data = packet as AddVotePacket;
 
-        this.addVote(
+        await this.addVote(
           this.parent.getLobby().findSafePlayerByClientId(data.votingClientId),
           this.parent.getLobby().findSafePlayerByClientId(data.targetClientId),
           sendTo,

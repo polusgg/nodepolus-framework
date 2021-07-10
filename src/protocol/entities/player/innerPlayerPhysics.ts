@@ -104,22 +104,22 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
     await this.sendRpcPacket(new ClimbLadderPacket(ladder, sequenceId), sendTo);
   }
 
-  handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
+  async handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): Promise<void> {
     switch (type) {
       case RpcPacketType.EnterVent:
-        this.handleEnterVent(Vents.forLevelFromId(this.parent.getLobby().getLevel(), (packet as EnterVentPacket).ventId), sendTo);
+        await this.handleEnterVent(Vents.forLevelFromId(this.parent.getLobby().getLevel(), (packet as EnterVentPacket).ventId), sendTo);
         break;
       case RpcPacketType.ExitVent:
-        this.handleExitVent(Vents.forLevelFromId(this.parent.getLobby().getLevel(), (packet as ExitVentPacket).ventId), sendTo);
+        await this.handleExitVent(Vents.forLevelFromId(this.parent.getLobby().getLevel(), (packet as ExitVentPacket).ventId), sendTo);
         break;
       case RpcPacketType.ClimbLadder: {
         const data = packet as ClimbLadderPacket;
 
-        this.handleClimbLadder(data.ladderId, data.sequenceId, sendTo);
+        await this.handleClimbLadder(data.ladderId, data.sequenceId, sendTo);
         break;
       }
       case RpcPacketType.SubmergedRequestChangeFloor:
-        this.sendRpcPacket(new SubmergedAcknowledgeChangeFloorPacket());
+        await this.sendRpcPacket(new SubmergedAcknowledgeChangeFloorPacket());
 
         if ((packet as SubmergedRequestChangeFloorPacket).lastSid < this.largestChangeFloorSidReceived) {
           break;

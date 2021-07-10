@@ -70,6 +70,10 @@ import {
   VoteStateConstants,
 } from "../types/enums";
 import { EntityButton, EntityDeadBody } from "../protocol/polus/entities";
+import { Button } from "../protocol/polus/entityWrappers/button";
+import { ButtonFields } from "../types/polus/buttonFields";
+import { DeadBodyFields } from "../types/polus/deadBodyFields";
+import { DeadBody } from "../protocol/polus/entityWrappers/deadBody";
 
 export class Lobby implements LobbyInstance {
   protected readonly createdAt: number = Date.now();
@@ -82,8 +86,9 @@ export class Lobby implements LobbyInstance {
   protected readonly ignoredNetIds: number[] = [];
   protected readonly customEntities: Set<BaseInnerNetEntity> = new Set();
 
-  protected buttonMap: Map<number, EntityButton> = new Map();
-  protected deadBodyMap: Map<number, EntityDeadBody> = new Map();
+  protected buttonMap: Map<number, Button> = new Map();
+  protected deadBodyMap: Map<number, DeadBody> = new Map();
+
   protected joinTimer?: NodeJS.Timeout;
   protected startTimer?: NodeJS.Timeout;
   protected game?: Game;
@@ -449,12 +454,12 @@ export class Lobby implements LobbyInstance {
     return index;
   }
 
-  findEntityButtonByNetId(netId: number): EntityButton | undefined {
+  findButtonByNetId(netId: number): Button | undefined {
     return this.buttonMap.get(netId);
   }
 
-  findSafeEntityButtonByNetId(netId: number): EntityButton {
-    const button = this.findEntityButtonByNetId(netId);
+  findSafeButtonByNetId(netId: number): Button {
+    const button = this.findButtonByNetId(netId);
 
     if (button === undefined) {
       throw new Error(`Lobby does not have a button with the net ID ${netId}`);
@@ -653,14 +658,6 @@ export class Lobby implements LobbyInstance {
         this.logger.warn("Use LobbyInstance#spawnPlayer() to spawn a player");
 
         return;
-      case SpawnType.PolusButton:
-        (entity as EntityButton).getObjects().forEach(object => {
-          this.buttonMap.set(object.getNetId(), entity as EntityButton);
-        });
-        break;
-      case SpawnType.PolusDeadBody:
-        this.deadBodyMap.set((entity as EntityDeadBody).getDeadBody().getNetId(), entity as EntityDeadBody);
-        break;
       default:
         this.customEntities.add(entity);
     }
@@ -688,6 +685,46 @@ export class Lobby implements LobbyInstance {
     }
 
     return playerInstance;
+  }
+
+  async spawnButton(connection: Connection, { asset, position, maxTimer, currentTime, saturated, color, isCountingDown, alignment }: ButtonFields, sendTo: Connection[] = [connection]): Promise<Button> {
+    await connection.assertLoaded(asset);
+
+    const button = new EntityButton(connection, asset.getId(), maxTimer, position, alignment, currentTime, saturated, color, isCountingDown);
+
+    await this.spawn(button, sendTo);
+
+    const buttonInstance = new Button(button, sendTo);
+
+    buttonInstance.getEntity().getObjects().forEach(object => {
+      this.buttonMap.set(object.getNetId(), buttonInstance);
+    });
+
+    return buttonInstance;
+  }
+
+  async spawnDeadBodyFor(connection: Connection, { color, shadowColor, position, hasFallen, bodyFacing, alignment, z, attachedTo }: DeadBodyFields, sendTo: Connection[] = [connection]): Promise<DeadBody> {
+    const entity = new EntityDeadBody(this, color as [number, number, number, number], shadowColor as [number, number, number, number], position, hasFallen, bodyFacing, alignment, z, attachedTo);
+
+    await this.spawn(entity, sendTo);
+
+    const body = new DeadBody(entity);
+
+    this.deadBodyMap.set(entity.getDeadBody().getNetId(), body);
+
+    return body;
+  }
+
+  async spawnDeadBody({ color, shadowColor, position, hasFallen, bodyFacing, alignment, z, attachedTo }: DeadBodyFields, sendTo: Connection[] = this.getConnections()): Promise<DeadBody> {
+    const entity = new EntityDeadBody(this, color as [number, number, number, number], shadowColor as [number, number, number, number], position, hasFallen, bodyFacing, alignment, z, attachedTo);
+
+    await this.spawn(entity, sendTo);
+
+    const body = new DeadBody(entity);
+
+    this.deadBodyMap.set(entity.getDeadBody().getNetId(), body);
+
+    return body;
   }
 
   async despawn(innerNetObject: BaseInnerNetObject, sendTo?: Connection[]): Promise<void> {
@@ -1187,7 +1224,7 @@ export class Lobby implements LobbyInstance {
             throw new Error(`RPC packet sent from unknown InnerNetObject: ${rpc.senderNetId}`);
           }
 
-          object.handleRpc(connection, rpc.packet.getType(), rpc.packet, sendTo);
+          await object.handleRpc(connection, rpc.packet.getType(), rpc.packet, sendTo);
         } else {
           const custom = RpcPacket.getPacket(rpc.packet.getType());
 

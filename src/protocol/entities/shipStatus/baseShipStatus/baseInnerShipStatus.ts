@@ -218,16 +218,16 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
     }
   }
 
-  handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, _sendTo: Connection[]): void {
+  async handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, _sendTo: Connection[]): Promise<void> {
     switch (type) {
       case RpcPacketType.CloseDoorsOfType: {
-        this.closeDoorsOfType((packet as CloseDoorsOfTypePacket).system);
+        await this.closeDoorsOfType((packet as CloseDoorsOfTypePacket).system);
         break;
       }
       case RpcPacketType.RepairSystem: {
         const data = packet as RepairSystemPacket;
 
-        this.repairSystem(data.system, data.playerControlNetId, data.getAmount());
+        await this.repairSystem(data.system, data.playerControlNetId, data.getAmount());
         break;
       }
       default:

@@ -1,5 +1,5 @@
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { BaseRpcPacket } from "../baseRpcPacket";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
+import { BaseRpcPacket } from "../../../../packets/rpc";
 
 export class ClickPacket extends BaseRpcPacket {
   constructor() {

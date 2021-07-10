@@ -1,9 +1,11 @@
-import { GameOverReason, GameState, HazelPacketType, LimboState, PacketDestination, RootPacketType, RuntimePlatform, Scene } from "../../types/enums";
-import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer } from "../../types";
+import { CustomRootPacketType, GameOverReason, GameState, HazelPacketType, LimboState, PacketDestination, ResourceType, RootPacketType, RuntimePlatform, Scene, StringLocation } from "../../types/enums";
+import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer, ResourceResponse } from "../../types";
 import { BaseRootPacket, EndGamePacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
+import { FetchResourceResponseEndedPacket, FetchResourceResponseFailedPacket } from "../polus/packets/root/fetchResource";
 import { CONNECTION_TIMEOUT_DURATION, MAX_PACKET_BYTE_SIZE, SUPPORTED_VERSIONS } from "../../util/constants";
 import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
 import { ServerPacketOutCustomEvent, ServerPacketOutEvent } from "../../api/events/server";
+import { FetchResourcePacket, FetchResourceResponsePacket, SetStringPacket } from "../polus/packets/root";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
 import { PlayerBannedEvent, PlayerKickedEvent } from "../../api/events/player";
 import { MessageWriter } from "../../util/hazelMessage";
@@ -14,7 +16,9 @@ import { Lobby } from "../../lobby";
 import { Packet } from "../packets";
 import Emittery from "emittery";
 import dgram from "dgram";
-import { EntityButton } from "../polus/entities";
+import { Asset, AssetBundle } from "../polus/assets";
+import { HudItem } from "../../types/enums/polus/polusHudItem";
+import { SetHudVisibilityPacket } from "../polus/packets/root/setHudVisibilityPacket";
 
 export class Connection extends Emittery<ConnectionEvents> implements Metadatable, NetworkAccessible {
   protected readonly metadata: Map<string, unknown> = new Map();
@@ -39,6 +43,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   protected nonceIndex = 1;
   protected disconnectTimeout?: NodeJS.Timeout;
   protected requestedDisconnect = false;
+  protected loadedBundles: AssetBundle[] = [];
 
   /**
    * @param connectionInfo - The ConnectionInfo describing the connection
@@ -693,16 +698,37 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
     });
   }
 
-  getLoadedAssetBundlesForThisConnection(): AssetBundle[] {
-    if (!this.loadedBundlesMap.has(this)) {
-      this.getLobby()?.getServer().loadedBund.set(this, []);
+  async loadBundle(assetBundle: AssetBundle): Promise<ResourceResponse> {
+    this.writeReliable(new FetchResourcePacket(
+      assetBundle.getId(),
+      assetBundle.getAddress(),
+      Buffer.from(assetBundle.getHash(), "hex"),
+      ResourceType.AssetBundle,
+    ));
+
+    const { response } = await this.awaitPacket(p => p.getType() === CustomRootPacketType.FetchResource as number
+      && (p as FetchResourceResponsePacket).resourceId == assetBundle.getId()
+      && (p as FetchResourceResponsePacket).response.getType() !== 0x00,
+    ) as FetchResourceResponsePacket;
+
+    if (response.getType() == 0x01) {
+      this.getLoadedBundles().push(assetBundle);
+
+      return {
+        isCached: (response as FetchResourceResponseEndedPacket).didCache,
+        resourceId: assetBundle.getId(),
+      };
     }
 
-    return this.loadedBundlesMap.get(connection)!;
+    throw new Error(`Client sent Error: ${(response as FetchResourceResponseFailedPacket).reason.toString()}`);
   }
 
-  async assertLoaded(connection: Connection, asset: Asset): Promise<void> {
-    const assetIds = this.getLoadedAssetBundlesForConnection(connection)
+  getLoadedBundles(): AssetBundle[] {
+    return this.loadedBundles;
+  }
+
+  async assertLoaded(asset: Asset): Promise<void> {
+    const assetIds = this.getLoadedBundles()
       .map(bundle => bundle.getContents())
       .flat()
       .map(singleAsset => singleAsset.getId());
@@ -711,9 +737,17 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
       return;
     }
 
-    server.getLogger("Polus.gg Resource Service").warn(`Asset "${asset.getPath().join("/")}" (${asset.getId()}) from assetBundle "${asset.getBundle().getAddress()}" (${asset.getBundle().getId()}) was asserted to be loaded, but did not exist on the connection's LoadedBundles array`);
+    this.getLobby()?.getServer().getLogger("Polus.gg Resource Service").warn(`Asset "${asset.getPath().join("/")}" (${asset.getId()}) from assetBundle "${asset.getBundle().getAddress()}" (${asset.getBundle().getId()}) was asserted to be loaded, but did not exist on the connection's LoadedBundles array`);
 
-    await this.load(connection, asset.getBundle());
+    await this.loadBundle(asset.getBundle());
+  }
+
+  async setHudString(location: StringLocation, text: string): Promise<void> {
+    await this.writeReliable(new SetStringPacket(text, location));
+  }
+
+  async setHudVisibility(item: HudItem, enabled: boolean): Promise<void> {
+    await this.writeReliable(new SetHudVisibilityPacket(item, enabled));
   }
 
   /**

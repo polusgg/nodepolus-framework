@@ -16,6 +16,9 @@ import { HostInstance } from "../host";
 import { Logger } from "../../logger";
 import { Server } from "../../server";
 import { Game } from "../game";
+import { ButtonFields } from "../../types/polus/buttonFields";
+import { Button, DeadBody } from "../../protocol/polus/entityWrappers";
+import { DeadBodyFields } from "../../types/polus/deadBodyFields";
 
 /**
  * An interface describing the public API of lobbies hosted on a server.
@@ -477,6 +480,14 @@ export interface LobbyInstance extends Metadatable {
    */
   spawnPlayer(player: EntityPlayer, playerData: PlayerData): Promise<PlayerInstance>;
 
+  /**
+   * Spawns a button on given connection.
+  */
+  spawnButton(connection: Connection, { asset, position, maxTimer, currentTime, saturated, color, isCountingDown, alignment }: ButtonFields, sendTo?: Connection[]): Promise<Button>;
+
+  spawnDeadBodyFor(connection: Connection, { color, shadowColor, position, hasFallen, bodyFacing, alignment, z, attachedTo }: DeadBodyFields, sendTo?: Connection[]): Promise<DeadBody>;
+
+  spawnDeadBody({ color, shadowColor, position, hasFallen, bodyFacing, alignment, z, attachedTo }: DeadBodyFields, sendTo?: Connection[]): Promise<DeadBody>;
   /**
    * Despawns the given InnerNetObject.
    *

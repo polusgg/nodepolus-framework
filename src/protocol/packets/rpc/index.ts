@@ -54,8 +54,6 @@ export { SetStartCounterPacket } from "./setStartCounterPacket";
 
 export { SetTasksPacket } from "./setTasksPacket";
 
-export { SnapToPacket } from "./snapToPacket";
-
 export { StartMeetingPacket } from "./startMeetingPacket";
 
 export { SyncSettingsPacket } from "./syncSettingsPacket";
@@ -66,6 +64,12 @@ export { VotingCompletePacket } from "./votingCompletePacket";
 
 export { SubmergedRequestChangeFloorPacket } from "./submergedRequestChangeFloorPacket";
 
-export { DisplayKillAnimationPacket } from "./polus/displayKillAnimationPacket";
+export { DisplayKillAnimationPacket } from "../../polus/packets/rpc/playerControl/displayKillAnimationPacket";
 
-export { SetAliveStatePacket } from "./polus/setAliveStatePacket";
+export { SetAliveStatePacket } from "../../polus/packets/rpc/playerControl/setAliveStatePacket";
+
+export { PolusSnapToPacket } from "../../polus/packets/rpc/playerControl/snapToPacket";
+
+export { CNTSnapToPacket } from "../../polus/packets/rpc/customNetworkTransform/snapTo";
+
+export { SnapToPacket } from "../../packets/rpc/snapToPacket";

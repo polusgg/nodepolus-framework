@@ -53,6 +53,8 @@ import {
   RpcPacketType,
   Scene,
 } from "../types/enums";
+import { AssetBundle } from "../protocol/polus/assets";
+import { DisplaySystemAlertPacket } from "../protocol/polus/packets/root/displaySystemAlert";
 
 export class Server extends Emittery<ServerEvents> {
   protected readonly startedAt = Date.now();
@@ -61,6 +63,7 @@ export class Server extends Emittery<ServerEvents> {
   protected readonly connections: Map<string, Connection> = new Map();
   protected readonly lobbies: LobbyInstance[] = [];
   protected readonly lobbyMap: Map<string, LobbyInstance> = new Map();
+  protected globalAssetBundle!: AssetBundle;
 
   // Reserve the fake client IDs
   protected connectionIndex = Object.keys(FakeClientId).length / 2;
@@ -130,6 +133,12 @@ export class Server extends Emittery<ServerEvents> {
     if (this.getMaxPlayersPerLobby() > 15) {
       this.logger.warn("Lobbies with more than 15 players is experimental");
     }
+
+    AssetBundle.load("Global").then(bundle => {
+      this.globalAssetBundle = bundle;
+
+      this.getLogger("ResourceService").info("Global AssetBundle loaded.");
+    });
   }
 
   /**
@@ -413,6 +422,15 @@ export class Server extends Emittery<ServerEvents> {
     await this.emit("server.close");
   }
 
+  /**
+   * Sends a `DisplaySystemAlert` packet with given string to all connections.
+   * `DisplaySystemAlert` should display a notification on the client ("Toast" prefab).
+   * @param notification - The notification to be displayed
+  */
+  async displayNotification(notification: string): Promise<void> {
+    await Promise.allSettled([...this.getConnections().values()].map(async connection => connection.writeReliable(new DisplaySystemAlertPacket(notification))));
+  }
+
   protected startConnectionFlushInterval(): void {
     if (this.connectionFlushInterval !== undefined) {
       return;
@@ -629,6 +647,8 @@ export class Server extends Emittery<ServerEvents> {
       if (event.isCancelled()) {
         connection.disconnect(event.getDisconnectReason());
       }
+
+      connection.loadBundle(this.globalAssetBundle);
     });
 
     return connection;

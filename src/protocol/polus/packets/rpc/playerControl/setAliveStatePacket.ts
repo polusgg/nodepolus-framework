@@ -1,6 +1,6 @@
-import { RpcPacketType } from "../../../../types/enums";
-import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { BaseRpcPacket } from "../baseRpcPacket";
+import { RpcPacketType } from "../../../../../types/enums";
+import { MessageReader, MessageWriter } from "../../../../../util/hazelMessage";
+import { BaseRpcPacket } from "../../../../packets/rpc";
 
 export class SetAliveStatePacket extends BaseRpcPacket {
   constructor(

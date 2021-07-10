@@ -4,7 +4,8 @@ import { InnerCustomNetworkTransform } from "../../entities/player";
 import { MessageReader, MessageWriter } from "../../../util/hazelMessage";
 import { InnerNetObjectType, RpcPacketType } from "../../../types/enums";
 import { Connection } from "../../connection";
-import { BaseRpcPacket, SnapToPacket } from "../../packets/rpc";
+import { BaseRpcPacket } from "../../packets/rpc";
+import { CNTSnapToPacket } from "../packets/rpc/customNetworkTransform";
 import { EdgeAlignments } from "../../../types/enums/edgeAlignment";
 import { Player } from "../../../player";
 import { Attachable, Vector2 } from "../../../types";
@@ -53,13 +54,13 @@ export class InnerCustomNetworkTransformGeneric extends BaseInnerNetObject {
 
   snapTo(position: Vector2, sendTo?: Connection[]): void {
     this.position = position;
-    this.sendRpcPacket(new SnapToPacket(position), sendTo);
+    this.sendRpcPacket(new CNTSnapToPacket(position), sendTo);
   }
 
-  handleRpc(_connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): void {
+  async handleRpc(_connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, sendTo: Connection[]): Promise<void> {
     switch (type) {
       case RpcPacketType.SnapTo:
-        this.snapTo((packet as SnapToPacket).position, sendTo);
+        await this.snapTo((packet as CNTSnapToPacket).position, sendTo);
         break;
       default:
         break;
@@ -118,9 +119,9 @@ export class InnerCustomNetworkTransformGeneric extends BaseInnerNetObject {
       return object.getEntity().getCustomNetworkTransform().getNetId();
     }
 
-    if (object instanceof BaseInnerNetEntity) {
+    /*if (object instanceof BaseInnerNetEntity) {
       return object.getCustomNetworkTransform().getNetId();
-    }
+    }*/
 
     if (object instanceof InnerCustomNetworkTransform || object instanceof InnerCustomNetworkTransformGeneric) {
       return object.getNetId();

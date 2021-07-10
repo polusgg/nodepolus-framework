@@ -6,7 +6,7 @@ import { Vector2 } from "../../../types";
 import { RpcPacketType } from "../../../types/enums";
 import { MessageWriter } from "../../../util/hazelMessage";
 import { EntityCameraController } from "../entities";
-import { BeginCameraAnimation } from "../../packets/rpc/polus/beginAnimationPacket";
+import { BeginCameraAnimation } from "../packets/rpc/cameraController/beginAnimation";
 import { CameraAnimationKeyframe } from "../animation/camera";
 
 export class InnerCameraController extends BaseInnerNetObject {
@@ -41,7 +41,7 @@ export class InnerCameraController extends BaseInnerNetObject {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  handleRpc(_connection: Connection, _type: RpcPacketType, _packet: BaseRpcPacket, _sendTo?: Connection[]): void { }
+  async handleRpc(_connection: Connection, _type: RpcPacketType, _packet: BaseRpcPacket, _sendTo?: Connection[]): Promise<void> { }
 
   async beginAnimation(connection: Connection, keyframes: CameraAnimationKeyframe[], reset: boolean): Promise<void> {
     await this.sendRpcPacket(new BeginCameraAnimation(keyframes, reset), [connection]);
