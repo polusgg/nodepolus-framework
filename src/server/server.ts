@@ -616,9 +616,9 @@ export class Server extends Emittery<ServerEvents> {
       });
     }
 
-    connection.once("disconnected").then((reason?: DisconnectReason) => {
-      this.emit("connection.closed", new ConnectionClosedEvent(connection, reason));
-      this.handleDisconnect(connection, reason);
+    connection.on("disconnected", async (reason?: DisconnectReason) => {
+      await this.emit("connection.closed", new ConnectionClosedEvent(connection, reason));
+      await this.handleDisconnect(connection, reason);
     });
 
     connection.once("hello").then(async () => {
