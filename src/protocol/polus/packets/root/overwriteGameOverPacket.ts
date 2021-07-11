@@ -1,8 +1,8 @@
 import { BaseRootPacket } from "../../../packets/root";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { CustomRootPacketType } from "../../../../types/enums";
 import { WinSound, WinSoundType } from "../../../../types/enums/polus/polusWinSound";
 import { Asset } from "../../assets";
+import { RootPacketType } from "../../../../types/enums";
 
 export class OverwriteGameOver extends BaseRootPacket {
   constructor(
@@ -14,7 +14,7 @@ export class OverwriteGameOver extends BaseRootPacket {
     public readonly displayPlayAgain: boolean,
     public readonly winSound: WinSound,
   ) {
-    super(CustomRootPacketType.OverwriteGameOver as number);
+    super(RootPacketType.PolusOverwriteGameOver as number);
   }
 
   static deserialize(reader: MessageReader): OverwriteGameOver {

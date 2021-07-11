@@ -1,4 +1,4 @@
-import { CustomRootPacketType, GameOverReason, GameState, HazelPacketType, LimboState, PacketDestination, ResourceType, RootPacketType, RuntimePlatform, Scene, StringLocation } from "../../types/enums";
+import { GameOverReason, GameState, HazelPacketType, LimboState, PacketDestination, ResourceType, RootPacketType, RuntimePlatform, Scene, StringLocation } from "../../types/enums";
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer, ResourceResponse } from "../../types";
 import { BaseRootPacket, EndGamePacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { FetchResourceResponseEndedPacket, FetchResourceResponseFailedPacket } from "../polus/packets/root/fetchResource";
@@ -711,7 +711,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
       ResourceType.AssetBundle,
     ));
 
-    const { response } = await this.awaitPacket(p => p.getType() === CustomRootPacketType.FetchResource as number
+    const { response } = await this.awaitPacket(p => p.getType() === RootPacketType.PolusFetchResource as number
       && (p as FetchResourceResponsePacket).resourceId == assetBundle.getId()
       && (p as FetchResourceResponsePacket).response.getType() !== 0x00,
     ) as FetchResourceResponsePacket;

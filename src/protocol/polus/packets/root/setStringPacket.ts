@@ -1,13 +1,13 @@
 import { BaseRootPacket } from "../../../packets/root";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { StringLocation } from "../../../../types/enums";
+import { RootPacketType, StringLocation } from "../../../../types/enums";
 
 export class SetStringPacket extends BaseRootPacket {
   constructor(
     public content: string,
     public location: StringLocation,
   ) {
-    super(0x84);
+    super(RootPacketType.PolusSetString);
   }
 
   static deserialize(reader: MessageReader): SetStringPacket {

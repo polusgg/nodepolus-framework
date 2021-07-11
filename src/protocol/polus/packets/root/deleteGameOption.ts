@@ -1,12 +1,13 @@
 import { BaseRootPacket } from "../../../packets/root";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { RootPacketType } from "../../../../types/enums";
 
 export class DeleteGameOptionPacket extends BaseRootPacket {
   constructor(
     public sequenceId: number,
     public name: string,
   ) {
-    super(0x8A);
+    super(RootPacketType.PolusDeleteGameOption);
   }
 
   static deserialize(reader: MessageReader): DeleteGameOptionPacket {

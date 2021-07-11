@@ -7,6 +7,27 @@ export enum GameOptionType {
   EnumValue = 2,
 }
 
+export type EnumOptionValueJson = {
+  type: "ENUM";
+  index: number;
+  options: string[];
+};
+
+export type BooleanOptionValueJson = {
+  type: "BOOLEAN";
+  value: boolean;
+};
+
+export type NumberOptionValueJson = {
+  type: "NUMBER";
+  value: number;
+  step: number;
+  lower: number;
+  upper: number;
+  zeroIsInfinity: boolean;
+  suffix: string;
+};
+
 export class NumberValue {
   constructor(
     public value: number,
@@ -15,13 +36,32 @@ export class NumberValue {
     public upper: number,
     public zeroIsInfinity: boolean,
     public suffix: string,
-  ) {}
+  ) { }
+
+  toJson(): NumberOptionValueJson {
+    return {
+      lower: this.lower,
+      upper: this.upper,
+      value: this.value,
+      step: this.step,
+      zeroIsInfinity: this.zeroIsInfinity,
+      suffix: this.suffix,
+      type: "NUMBER",
+    };
+  }
 }
 
 export class BooleanValue {
   constructor(
     public value: boolean,
-  ) {}
+  ) { }
+
+  toJson(): BooleanOptionValueJson {
+    return {
+      value: this.value,
+      type: "BOOLEAN",
+    };
+  }
 }
 
 export class EnumValue {
@@ -32,6 +72,14 @@ export class EnumValue {
 
   getSelected(): string {
     return this.options[this.index];
+  }
+
+  toJson(): EnumOptionValueJson {
+    return {
+      index: this.index,
+      options: this.options,
+      type: "ENUM",
+    };
   }
 }
 

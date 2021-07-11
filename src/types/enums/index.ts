@@ -10,8 +10,6 @@ export { ChatNoteType } from "./chatNoteType";
 
 export { ClientLanguage } from "./clientLanguage";
 
-export { CustomRootPacketType } from "./polus/polusCustomRootPacketType";
-
 export { DeathReason } from "./deathReason";
 
 export { DecontaminationDoorState } from "./decontaminationDoorState";

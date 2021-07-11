@@ -1,12 +1,13 @@
 import { BaseRootPacket } from "../../../packets/root";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { RootPacketType } from "../../../../types/enums";
 
 export class ResizePacket extends BaseRootPacket {
   constructor(
     public readonly width: number,
     public readonly height: number,
   ) {
-    super(0x81);
+    super(RootPacketType.PolusResize);
   }
 
   static deserialize(reader: MessageReader): ResizePacket {

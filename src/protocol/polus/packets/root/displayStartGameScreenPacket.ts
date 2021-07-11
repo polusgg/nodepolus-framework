@@ -1,5 +1,6 @@
 import { BaseRootPacket } from "../../../packets/root";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { RootPacketType } from "../../../../types/enums";
 
 export class DisplayStartGameScreenPacket extends BaseRootPacket {
   constructor(
@@ -8,7 +9,7 @@ export class DisplayStartGameScreenPacket extends BaseRootPacket {
     public readonly backgroundColor: readonly [number, number, number, number],
     public readonly yourTeam: number[],
   ) {
-    super(0x82);
+    super(RootPacketType.PolusDisplayStartGameScreen);
   }
 
   static deserialize(reader: MessageReader): DisplayStartGameScreenPacket {

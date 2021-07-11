@@ -1,13 +1,13 @@
 import { BaseRootPacket } from "../../../packets/root";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { HudItem } from "../../../../types/enums";
+import { HudItem, RootPacketType } from "../../../../types/enums";
 
 export class SetHudVisibilityPacket extends BaseRootPacket {
   constructor(
     public item: HudItem,
     public enabled: boolean,
   ) {
-    super(0x8c);
+    super(RootPacketType.PolusSetHudVisibility);
   }
 
   static deserialize(reader: MessageReader): SetHudVisibilityPacket {

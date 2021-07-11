@@ -879,6 +879,8 @@ export class Server extends Emittery<ServerEvents> {
         )]);
         break;
       }
+      case RootPacketType.PolusFetchResource:
+        break;
       default: {
         if (connection.getLobby() === undefined) {
           throw new Error(`Client ${connection.getId()} sent root game packet type ${packet.getType()} (${RootPacketType[packet.getType()]}) while not in a lobby`);

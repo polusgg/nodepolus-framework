@@ -1,11 +1,12 @@
 import { BaseRootPacket } from "../../../packets/root";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
+import { RootPacketType } from "../../../../types/enums";
 
 export class DisplaySystemAlertPacket extends BaseRootPacket {
   constructor(
     public content: string,
   ) {
-    super(0xFA);
+    super(RootPacketType.PolusDisplaySystemAlert);
   }
 
   static deserialize(reader: MessageReader): DisplaySystemAlertPacket {
