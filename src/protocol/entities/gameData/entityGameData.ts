@@ -30,7 +30,7 @@ export class EntityGameData extends BaseInnerNetEntity {
   }
 
   despawn(): void {
-    this.lobby.despawn(this.getGameData());
     this.lobby.deleteGameData();
+    this.lobby.despawn(this.getGameData());
   }
 }

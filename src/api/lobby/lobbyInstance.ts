@@ -449,7 +449,7 @@ export interface LobbyInstance extends Metadatable {
    * @param packet - The packet to be sent
    * @param sendTo - The connections to which the packet will be sent
    */
-  sendRootGamePacket(packet: BaseRootPacket, sendTo?: Connection[]): Promise<PromiseSettledResult<void>[]>;
+  sendRootGamePacket(packet: BaseRootPacket, sendTo?: Connection[]): Promise<void>;
 
   /**
    * Sends the given RPC packet to the given connections.
