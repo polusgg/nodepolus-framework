@@ -102,8 +102,10 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   }
 
   serializeData(old: InnerMeetingHud): DataPacket {
-    const updatedStates = [...this.playerStates.entries()].filter(state => !shallowEqual(state[1], old.playerStates.get(state[0])))
+    const updatedStates = [...this.playerStates.entries()].filter(state => !shallowEqual(state[1], old.playerStates.get(state[0])));
     const writer = new MessageWriter().writePackedUInt32(updatedStates.length);
+
+    console.log("SERIALIZE_DATA", this.playerStates);
 
     for (const [id, state] of updatedStates) {
       if (!shallowEqual(state, old.playerStates.get(id))) {
@@ -117,12 +119,12 @@ export class InnerMeetingHud extends BaseInnerNetObject {
   }
 
   serializeSpawn(): SpawnPacketObject {
-    const writer = new MessageWriter();
+    const writer = new MessageWriter().writePackedUInt32(this.playerStates.size);
+
+    console.log("SERIALIZE_SPAWN", this.playerStates);
 
     for (const [id, state] of this.playerStates.entries()) {
-      writer.startMessage(id);
-      writer.writeObject(state);
-      writer.endMessage();
+      writer.startMessage(id).writeObject(state).endMessage();
     }
 
     return new SpawnPacketObject(this.netId, writer);
