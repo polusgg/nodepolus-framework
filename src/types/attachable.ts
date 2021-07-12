@@ -1,12 +1,13 @@
-import { PlayerInstance } from "@nodepolus/framework/src/api/player";
-import { Player } from "@nodepolus/framework/src/player";
-import { EntityPlayer, InnerCustomNetworkTransform } from "@nodepolus/framework/src/protocol/entities/player";
-import { EntityDeadBody, EntityPointOfInterest } from "../entities";
-import { EntityConsole } from "../entities/entityConsole";
-import { EntityLightSource } from "../entities/entityLightSource";
-import { EntitySoundSource } from "../entities/entitySoundSource";
-import { EntityVent } from "../entities/entityVent";
-import { InnerCustomNetworkTransformGeneric } from "../innerNetObjects/innerCustomNetworkTransformGeneric";
+import { PlayerInstance } from "../api/player";
+import { Player } from "../player";
+import { EntityPlayer, InnerCustomNetworkTransform } from "../protocol/entities/player";
+import { EntityDeadBody } from "../protocol/polus/entities/entityDeadBody";
+import { EntityPointOfInterest } from "../protocol/polus/entities/entityPointOfInterest";
+import { EntityConsole } from "../protocol/polus/entities/entityConsole";
+import { EntityLightSource } from "../protocol/polus/entities/entityLightSource";
+import { EntitySoundSource } from "../protocol/polus/entities/entitySoundSource";
+import { EntityVent } from "../protocol/polus/entities/entityVent";
+import { InnerCustomNetworkTransformGeneric } from "../protocol/polus/innerNetObjects/innerCustomNetworkTransformGeneric";
 
 export type Attachable = Player
 | PlayerInstance

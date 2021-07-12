@@ -119,9 +119,9 @@ export class InnerCustomNetworkTransformGeneric extends BaseInnerNetObject {
       return object.getEntity().getCustomNetworkTransform().getNetId();
     }
 
-    /*if (object instanceof BaseInnerNetEntity) {
+    if (object instanceof BaseInnerNetEntity) {
       return object.getCustomNetworkTransform().getNetId();
-    }*/
+    }
 
     if (object instanceof InnerCustomNetworkTransform || object instanceof InnerCustomNetworkTransformGeneric) {
       return object.getNetId();
