@@ -879,7 +879,7 @@ export class Server extends Emittery<ServerEvents> {
         )]);
         break;
       }
-      case RootPacketType.PolusFetchResource:
+      case 0x80 as RootPacketType:
         break;
       default: {
         if (connection.getLobby() === undefined) {

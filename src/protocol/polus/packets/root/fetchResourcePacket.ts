@@ -1,6 +1,6 @@
 import { BaseRootPacket } from "../../../packets/root";
 import { MessageReader, MessageWriter } from "../../../../util/hazelMessage";
-import { ResourceType, RootPacketType } from "../../../../types/enums";
+import { ResourceType } from "../../../../types/enums";
 import {
   FetchResourceResponseEndedPacket,
   FetchResourceResponseFailedPacket,
@@ -14,7 +14,7 @@ export class FetchResourcePacket extends BaseRootPacket {
     public readonly hash: Buffer,
     public readonly resourceType: ResourceType,
   ) {
-    super(RootPacketType.PolusFetchResource);
+    super(0x80);
   }
 
   static deserialize(reader: MessageReader): FetchResourcePacket {
@@ -48,7 +48,7 @@ export class FetchResourceResponsePacket extends BaseRootPacket {
     public readonly resourceId: number,
     public readonly response: BaseRootPacket,
   ) {
-    super(RootPacketType.PolusFetchResource);
+    super(0x80);
   }
 
   static deserialize(reader: MessageReader): FetchResourceResponsePacket {

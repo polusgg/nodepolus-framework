@@ -26,7 +26,7 @@ import {
   StartGamePacket,
   WaitForHostPacket,
 } from "../root";
-import { DisplayStartGameScreenPacket, FetchResourcePacket, FetchResourceResponsePacket, OverwriteGameOver, ResizePacket, SetStringPacket } from "../../polus/packets/root";
+import { DisplayStartGameScreenPacket, OverwriteGameOver, SetStringPacket } from "../../polus/packets/root";
 import { DisplaySystemAlertPacket } from "../../polus/packets/root/displaySystemAlert";
 import { SetHudVisibilityPacket } from "../../polus/packets/root/setHudVisibilityPacket";
 
@@ -124,16 +124,8 @@ export class RootPacket {
           return packets.push(DisplayStartGameScreenPacket.deserialize(child));
         case RootPacketType.PolusDisplaySystemAlert:
           return packets.push(DisplaySystemAlertPacket.deserialize(child));
-        case RootPacketType.PolusFetchResource:
-          if (clientBound) {
-            return packets.push(FetchResourcePacket.deserialize(child));
-          }
-
-          return packets.push(FetchResourceResponsePacket.deserialize(child));
         case RootPacketType.PolusOverwriteGameOver:
           return packets.push(OverwriteGameOver.deserialize(child));
-        case RootPacketType.PolusResize:
-          return packets.push(ResizePacket.deserialize(child));
         case RootPacketType.PolusSetHudVisibility:
           return packets.push(SetHudVisibilityPacket.deserialize(child));
         case RootPacketType.PolusSetString:

@@ -711,7 +711,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
       ResourceType.AssetBundle,
     ));
 
-    const { response } = await this.awaitPacket(p => p.getType() === RootPacketType.PolusFetchResource as number
+    const { response } = await this.awaitPacket(p => p.getType() === 0x80 as number
       && (p as FetchResourceResponsePacket).resourceId == assetBundle.getId()
       && (p as FetchResourceResponsePacket).response.getType() !== 0x00,
     ) as FetchResourceResponsePacket;
