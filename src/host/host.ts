@@ -905,10 +905,6 @@ export class Host implements HostInstance {
     const owner = this.lobby.findSafeConnection(sender.getParent().getOwnerId());
     const player = this.lobby.findSafePlayerByConnection(owner);
 
-    if (player.getGameDataEntry().isDead()) {
-      return;
-    }
-
     const event = new MeetingStartedEvent(
       this.lobby.getSafeGame(),
       player,
@@ -916,6 +912,10 @@ export class Host implements HostInstance {
       this.systemsHandler?.isSabotaged() ?? false,
       true,
     );
+
+    if (player.isDead()) {
+      event.cancel();
+    }
 
     // A player somehow pressed the meeting button during a sabotage, so we will
     // cancel the event by default but still allow plugins to change it.
