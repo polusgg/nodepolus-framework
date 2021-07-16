@@ -904,6 +904,11 @@ export class Host implements HostInstance {
     const gameData = this.lobby.getSafeGameData();
     const owner = this.lobby.findSafeConnection(sender.getParent().getOwnerId());
     const player = this.lobby.findSafePlayerByConnection(owner);
+
+    if (player.getGameDataEntry().isDead()) {
+      return;
+    }
+
     const event = new MeetingStartedEvent(
       this.lobby.getSafeGame(),
       player,

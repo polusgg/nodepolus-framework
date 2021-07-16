@@ -66,6 +66,11 @@ export class SabotageSystemHandler {
     this.timer = setInterval(() => {
       system.decrementCountdown();
 
+      if (this.host.getLobby().getGame() === undefined && this.timer !== undefined) {
+        clearInterval(this.timer);
+        return;
+      }
+
       if (system.getCountdown() <= 0) {
         this.host.endGame(GameOverReason.ImpostorsBySabotage);
         this.clearTimer();
