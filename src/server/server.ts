@@ -7,6 +7,7 @@ import { PlayerLeftEvent } from "../api/events/player";
 import { MessageReader } from "../util/hazelMessage";
 import { Connection } from "../protocol/connection";
 import { LobbyCode } from "../util/lobbyCode";
+import packageJson from "../../package.json";
 import { ServerConfig } from "../api/config";
 import { ServerEvents } from "../api/events";
 import { LobbyInstance } from "../api/lobby";
@@ -368,6 +369,13 @@ export class Server extends Emittery<ServerEvents> {
     }
 
     return this.connectionIndex;
+  }
+
+  /**
+   * Gets the current NodePolus version.
+   */
+  getVersion(): string {
+    return packageJson.version;
   }
 
   /**
