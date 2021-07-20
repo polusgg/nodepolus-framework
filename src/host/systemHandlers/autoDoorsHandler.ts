@@ -66,6 +66,10 @@ export class AutoDoorsHandler {
     this.setOldShipStatus();
 
     this.systemTimers[systemId] = setInterval(() => {
+      if (this.host.getLobby().getGame() === undefined) {
+        this.clearTimers();
+      }
+
       this.openDoor(this.getDoorsForSystem(systemId));
     }, time * 1000);
 

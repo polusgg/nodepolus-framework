@@ -100,6 +100,7 @@ export class Lobby implements LobbyInstance {
     protected readonly timeToStartUntilClosed: number = server.getDefaultLobbyTimeToStartUntilClosed(),
     protected readonly hideGhostChat: boolean = server.shouldHideGhostChat(),
     protected options: GameOptionsData = new GameOptionsData(),
+    protected readonly creator?: Connection,
     protected readonly code: string = LobbyCode.generate(),
   ) {
     // if (this.timeToJoinUntilClosed > 0) {
@@ -109,6 +110,10 @@ export class Lobby implements LobbyInstance {
     // }
 
     this.logger = this.server.getLogger(`Lobby ${this.code}`);
+  }
+
+  getCreator(): Connection | undefined {
+    return this.creator;
   }
 
   getLogger(): Logger {

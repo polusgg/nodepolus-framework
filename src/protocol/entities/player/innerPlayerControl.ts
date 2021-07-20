@@ -58,10 +58,12 @@ import {
   SetTasksPacket,
   SyncSettingsPacket,
 } from "../../packets/rpc";
+import { Player } from "../../../player";
 
 export class InnerPlayerControl extends BaseInnerNetObject {
   protected scanning = false;
   protected scannerSequenceId = 1;
+  protected checkedColor = false;
 
   constructor(
     protected readonly parent: EntityPlayer,
@@ -221,7 +223,9 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     await player.setName(checkName);
 
-    await lobby.finishedSpawningPlayer(owner);
+    if (this.checkedColor) {
+      await lobby.finishedSpawningPlayer(owner);
+    }
 
     if (lobby.getActingHosts().length === 0) {
       await connection.syncActingHost(true);
@@ -250,6 +254,8 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     const takenColors = this.getLobby().getSafeGameData().getGameData().getTakenColors(this.getPlayerId());
     let setColor: PlayerColor = color;
 
+    this.checkedColor = true;
+
     await this.getLobby().getHostInstance().ensurePlayerDataExists(player);
 
     if (takenColors.size <= numberOfColors) {
@@ -259,6 +265,10 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     }
 
     await this.setColor(setColor, this.getLobby().getConnections());
+
+    if (!(player as Player).hasBeenInitialized()) {
+      (player.getLobby() as Lobby).finishedSpawningPlayer(player.getConnection()!);
+    }
   }
 
   async handleSetColor(color: PlayerColor, _sendTo?: Connection[]): Promise<void> {

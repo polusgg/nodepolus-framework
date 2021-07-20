@@ -21,6 +21,8 @@ import { Game } from "../game";
  * An interface describing the public API of lobbies hosted on a server.
  */
 export interface LobbyInstance extends Metadatable {
+  getCreator(): Connection | undefined;
+
   /**
    * Gets the lobby's named logger.
    */

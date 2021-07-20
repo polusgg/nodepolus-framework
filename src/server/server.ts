@@ -730,6 +730,7 @@ export class Server extends Emittery<ServerEvents> {
           this.getDefaultLobbyTimeToStartUntilClosed(),
           this.shouldHideGhostChat(),
           creatingEvent.getOptions(),
+          connection,
           creatingEvent.getLobbyCode(),
         );
         const createdEvent = new ServerLobbyCreatedEvent(connection, newLobby);

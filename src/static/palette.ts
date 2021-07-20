@@ -44,7 +44,7 @@ const playerBody: Readonly<PlayerColorValues> = {
   [PlayerColor.Banana]: { light: [240, 231, 168, 255], dark: [210, 188, 137, 255] },
   [PlayerColor.Gray]: { light: [117, 133, 147, 255], dark: [70, 86, 100, 255] },
   [PlayerColor.Tan]: { light: [145, 136, 119, 255], dark: [81, 65, 62, 255] },
-  [PlayerColor.Coral]: { light: [80, 240, 57, 255], dark: [180, 67, 98, 255] },
+  [PlayerColor.Coral]: { light: [236, 117, 120, 255], dark: [180, 67, 98, 255] },
   [PlayerColor.ForteGreen]: { light: [29, 152, 83, 255], dark: [18, 63, 27, 255] },
 } as const;
 
