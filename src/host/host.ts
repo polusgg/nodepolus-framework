@@ -943,7 +943,9 @@ export class Host implements HostInstance {
 
     for (const [id, data] of playerData) {
       meetingHud!.getMeetingHud().setPlayerState(id, new VoteState(
-        data.isDead() ? VoteStateConstants.DeadVote : VoteStateConstants.HasNotVoted,
+        VoteStateConstants.HasNotVoted,
+        data.isDead(),
+        data.isDead() || data.isDisconnected(),
         id == event.getCaller().getId(),
       ));
     }

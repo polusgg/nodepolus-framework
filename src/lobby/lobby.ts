@@ -906,6 +906,7 @@ export class Lobby implements LobbyInstance {
             votesToClear.push(votingPlayer);
           }
 
+          state.setDisabled(true)
           state.setVotedFor(VoteStateConstants.HasNotVoted);
         }
       }

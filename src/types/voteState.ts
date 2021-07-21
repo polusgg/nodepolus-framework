@@ -12,11 +12,15 @@ export type VoteStateSerialiazationOptions = {
 
 export class VoteState implements CanSerializeToHazel<VoteStateSerialiazationOptions> {
   /**
-   * @param reported - `true` if the player reported the body or called the meeting, `false` if not
    * @param votedFor - The ID of the player that was voted for
+   * @param dead - If the player was dead
+   * @param disabled - Whether the player's vote area has the disabled overlay
+   * @param reported - `true` if the player reported the body or called the meeting, `false` if not
    */
   constructor(
     protected votedFor: number | VoteStateConstants,
+    protected dead: boolean,
+    protected disabled: boolean,
     protected reported: boolean,
   ) {}
 
@@ -28,10 +32,14 @@ export class VoteState implements CanSerializeToHazel<VoteStateSerialiazationOpt
    */
   static deserialize(reader: MessageReader, isComplete: boolean = false): VoteState {
     const votedFor = reader.readByte();
+    const dead = reader.readBoolean();
+    const disabled = reader.readBoolean();
     const reported = isComplete ? false : reader.readBoolean();
 
     return new VoteState(
       votedFor,
+      dead,
+      disabled,
       reported,
     );
   }
@@ -44,8 +52,10 @@ export class VoteState implements CanSerializeToHazel<VoteStateSerialiazationOpt
    */
   serialize(writer: MessageWriter, options?: VoteStateSerialiazationOptions): void {
     writer.writeByte(this.votedFor);
-
-    if (options === undefined || !options.isComplete) {
+    const isData = options === undefined || !options.isComplete;
+    if (isData) {
+      writer.writeBoolean(this.isDead());
+      writer.writeBoolean(this.isDisabled());
       writer.writeBoolean(this.reported);
     }
   }
@@ -87,7 +97,28 @@ export class VoteState implements CanSerializeToHazel<VoteStateSerialiazationOpt
    * @returns `true` if the player is dead, `false` if not
    */
   isDead(): boolean {
-    return this.votedFor === VoteStateConstants.DeadVote;
+    return this.dead;
+  }
+
+  setDead(dead: boolean): this {
+    this.dead = dead;
+
+    return this;
+  }
+
+  /**
+   * Gets whether or not the player's vote area is disabled.
+   *
+   * @returns `true` if the vote area is disabled, `false` if not
+   */
+  isDisabled(): boolean {
+    return this.disabled;
+  }
+
+  setDisabled(disabled: boolean): this {
+    this.disabled = disabled;
+
+    return this;
   }
 
   /**
@@ -112,6 +143,6 @@ export class VoteState implements CanSerializeToHazel<VoteStateSerialiazationOpt
    * Gets a clone of the VoteState instance.
    */
   clone(): VoteState {
-    return new VoteState(this.votedFor, this.reported);
+    return new VoteState(this.votedFor, this.dead, this.disabled, this.reported);
   }
 }
