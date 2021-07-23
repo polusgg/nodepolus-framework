@@ -3,7 +3,7 @@ import { RemovePlayerPacket, JoinGameResponsePacket, GameDataPacket } from "../p
 import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../types";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { DespawnPacket } from "../protocol/packets/gameData";
-import { PolusSetSpeedModifierPacket, SetInfectedPacket, SnapToPacket } from "../protocol/packets/rpc";
+import { PolusSetSpeedModifierPacket, PolusSetVisionModifierPacket, SetInfectedPacket, SnapToPacket } from "../protocol/packets/rpc";
 import { EntityPlayer } from "../protocol/entities/player";
 import { Connection } from "../protocol/connection";
 import { PlayerInstance } from "../api/player";
@@ -27,6 +27,7 @@ export class Player implements PlayerInstance {
   protected role: PlayerRole = PlayerRole.Crewmate;
   protected initialized = false;
   protected speedModifier = 1;
+  protected visionModifier = 1;
 
   /**
    * @param lobby - The lobby in which the player exists
@@ -296,6 +297,16 @@ export class Player implements PlayerInstance {
 
   getSpeedModifier(): number {
     return this.speedModifier;
+  }
+
+  async setVisionModifier(visionModifier: number): Promise<void> {
+    await this.entity.getPlayerControl().sendRpcPacket(new PolusSetVisionModifierPacket(visionModifier));
+
+    this.visionModifier = visionModifier;
+  }
+
+  getVisionModifier(): number {
+    return this.visionModifier;
   }
 
   getVent(): LevelVent | undefined {

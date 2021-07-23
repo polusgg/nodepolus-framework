@@ -67,3 +67,5 @@ export { VotingCompletePacket } from "./votingCompletePacket";
 export { SubmergedRequestChangeFloorPacket } from "./submergedRequestChangeFloorPacket";
 
 export { PolusSetSpeedModifierPacket } from "./polusSetSpeedModifierPacket";
+
+export { PolusSetVisionModifierPacket } from "./polusSetVisionModifierPacket";

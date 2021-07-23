@@ -40,6 +40,7 @@ import {
   VotingCompletePacket,
   SubmergedRequestChangeFloorPacket,
   PolusSetSpeedModifierPacket,
+  PolusSetVisionModifierPacket,
 } from "../rpc";
 
 /**
@@ -155,6 +156,8 @@ export class RpcPacket extends BaseGameDataPacket {
         return new RpcPacket(senderNetId, SubmergedRequestChangeFloorPacket.deserialize(reader));
       case RpcPacketType.PolusSetSpeedModifier:
         return new RpcPacket(senderNetId, PolusSetSpeedModifierPacket.deserialize(reader));
+      case RpcPacketType.PolusSetVisionModifier:
+        return new RpcPacket(senderNetId, PolusSetVisionModifierPacket.deserialize(reader));
       default: {
         const custom = RpcPacket.customPackets.get(type);
 

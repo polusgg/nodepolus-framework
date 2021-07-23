@@ -41,4 +41,5 @@ export enum RpcPacketType {
   SubmergedEngineVent = 0x72,
 
   PolusSetSpeedModifier = 0x94,
+  PolusSetVisionModifier = 0x95,
 }
