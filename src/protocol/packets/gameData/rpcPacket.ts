@@ -146,6 +146,10 @@ export class RpcPacket extends BaseGameDataPacket {
         return new RpcPacket(senderNetId, ClimbLadderPacket.deserialize(reader));
       case RpcPacketType.UsePlatform:
         return new RpcPacket(senderNetId, UsePlatformPacket.deserialize(reader));
+      case RpcPacketType.BootFromVent:
+      case RpcPacketType.SendQuickChat:
+      case RpcPacketType.UpdateSystem:
+        return new RpcPacket(senderNetId, new ClosePacket());
       case RpcPacketType.SubmergedRequestChangeFloor:
         return new RpcPacket(senderNetId, SubmergedRequestChangeFloorPacket.deserialize(reader));
       default: {

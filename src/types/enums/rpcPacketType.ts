@@ -31,6 +31,9 @@ export enum RpcPacketType {
   SetTasks = 0x1d,
   ClimbLadder = 0x1f,
   UsePlatform = 0x20,
+  SendQuickChat = 0x21,
+  BootFromVent = 0x22,
+  UpdateSystem = 0x23,
 
   SubmergedSetPreloadData = 0x69,
   SubmergedRequestChangeFloor = 0x70,
