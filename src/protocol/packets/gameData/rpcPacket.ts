@@ -39,6 +39,7 @@ import {
   UsePlatformPacket,
   VotingCompletePacket,
   SubmergedRequestChangeFloorPacket,
+  PolusSetSpeedModifierPacket,
 } from "../rpc";
 
 /**
@@ -152,6 +153,8 @@ export class RpcPacket extends BaseGameDataPacket {
         return new RpcPacket(senderNetId, new ClosePacket());
       case RpcPacketType.SubmergedRequestChangeFloor:
         return new RpcPacket(senderNetId, SubmergedRequestChangeFloorPacket.deserialize(reader));
+      case RpcPacketType.PolusSetSpeedModifier:
+        return new RpcPacket(senderNetId, PolusSetSpeedModifierPacket.deserialize(reader));
       default: {
         const custom = RpcPacket.customPackets.get(type);
 

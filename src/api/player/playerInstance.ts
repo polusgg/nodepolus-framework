@@ -223,6 +223,10 @@ export interface PlayerInstance extends Metadatable {
    */
   getVelocity(): Vector2;
 
+  setSpeedModifier(speedModifier: number): Promise<void>;
+
+  getSpeedModifier(): number;
+
   /**
    * Gets the vent in which the player is hiding.
    *

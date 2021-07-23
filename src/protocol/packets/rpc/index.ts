@@ -65,3 +65,5 @@ export { UsePlatformPacket } from "./usePlatformPacket";
 export { VotingCompletePacket } from "./votingCompletePacket";
 
 export { SubmergedRequestChangeFloorPacket } from "./submergedRequestChangeFloorPacket";
+
+export { PolusSetSpeedModifierPacket } from "./polusSetSpeedModifierPacket";
