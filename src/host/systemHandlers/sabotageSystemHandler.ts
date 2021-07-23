@@ -68,6 +68,7 @@ export class SabotageSystemHandler {
 
       if (this.host.getLobby().getGame() === undefined && this.timer !== undefined) {
         clearInterval(this.timer);
+
         return;
       }
 

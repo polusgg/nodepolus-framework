@@ -52,7 +52,9 @@ export class VoteState implements CanSerializeToHazel<VoteStateSerialiazationOpt
    */
   serialize(writer: MessageWriter, options?: VoteStateSerialiazationOptions): void {
     writer.writeByte(this.votedFor);
+
     const isData = options === undefined || !options.isComplete;
+
     if (isData) {
       writer.writeBoolean(this.isDead());
       writer.writeBoolean(this.isDisabled());

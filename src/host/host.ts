@@ -21,7 +21,7 @@ import { HostInstance } from "../api/host";
 import { Game } from "../api/game";
 import { Player } from "../player";
 import { Lobby } from "../lobby";
-import { AutoDoorsSystem, DeconSystem, DeconTwoSystem, DoorsSystem, } from "../protocol/entities/shipStatus/systems";
+import { AutoDoorsSystem, DeconSystem, DeconTwoSystem, DoorsSystem } from "../protocol/entities/shipStatus/systems";
 import {
   ClearVotePacket,
   ClosePacket,
@@ -44,7 +44,7 @@ import {
   PlayerSpawnedEvent,
   PlayerTaskAddedEvent,
 } from "../api/events/player";
-import { GameEndedEvent, GameStartedEvent, GameStartingEvent, } from "../api/events/game";
+import { GameEndedEvent, GameStartedEvent, GameStartingEvent } from "../api/events/game";
 import {
   AutoDoorsHandler,
   DecontaminationHandler,

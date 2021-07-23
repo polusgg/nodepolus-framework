@@ -906,7 +906,7 @@ export class Lobby implements LobbyInstance {
             votesToClear.push(votingPlayer);
           }
 
-          state.setDisabled(true)
+          state.setDisabled(true);
           state.setVotedFor(VoteStateConstants.HasNotVoted);
         }
       }
@@ -1001,7 +1001,6 @@ export class Lobby implements LobbyInstance {
 
         this.logger.verbose("Allowing connection %s to join full lobby", connection);
       }
-
     }
 
     if (connection.isActingHost() && connection.getLimboState() == LimboState.PreSpawn && this.gameState == GameState.NotStarted) {
