@@ -21,12 +21,7 @@ import { HostInstance } from "../api/host";
 import { Game } from "../api/game";
 import { Player } from "../player";
 import { Lobby } from "../lobby";
-import {
-  AutoDoorsSystem,
-  DeconSystem,
-  DeconTwoSystem,
-  DoorsSystem,
-} from "../protocol/entities/shipStatus/systems";
+import { AutoDoorsSystem, DeconSystem, DeconTwoSystem, DoorsSystem, } from "../protocol/entities/shipStatus/systems";
 import {
   ClearVotePacket,
   ClosePacket,
@@ -49,11 +44,7 @@ import {
   PlayerSpawnedEvent,
   PlayerTaskAddedEvent,
 } from "../api/events/player";
-import {
-  GameEndedEvent,
-  GameStartedEvent,
-  GameStartingEvent,
-} from "../api/events/game";
+import { GameEndedEvent, GameStartedEvent, GameStartingEvent, } from "../api/events/game";
 import {
   AutoDoorsHandler,
   DecontaminationHandler,
@@ -811,12 +802,12 @@ export class Host implements HostInstance {
   async handleSceneChange(connection: Connection, sceneName: string): Promise<void> {
     connection.setCurrentScene(Scene[sceneName]);
 
-    if (sceneName !== Scene.OnlineGame) {
+    if (sceneName !== Scene.OnlineGame || connection.getLimboState() == LimboState.PreSpawn || this.getLobby().getGameState() == GameState.Started) {
       return;
     }
 
     if (this.playersInScene.has(connection.getId())) {
-      throw new Error("Sender has already changed scene");
+      throw new Error(`Sender ${connection.getId()} (${connection.getConnectionInfo().toString()}) has already changed scene`);
     }
 
     const newPlayerId = this.getNextPlayerId();
@@ -844,6 +835,7 @@ export class Host implements HostInstance {
     if (lobbyBehaviour !== undefined) {
       await connection.writeReliable(new GameDataPacket([lobbyBehaviour.serializeSpawn()], this.lobby.getCode()));
     } else if (shipStatus !== undefined) {
+      this.getLobby().getLogger().verbose("Lobby %s had a undefined lobbyBehaviour when connection %s sent scene change", this.getLobby(), connection);
       await connection.writeReliable(new GameDataPacket([shipStatus.serializeSpawn()], this.lobby.getCode()));
     } else {
       throw new Error("Received SceneChange without a LobbyBehaviour or ShipStatus instance");

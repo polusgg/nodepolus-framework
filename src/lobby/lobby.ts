@@ -33,12 +33,12 @@ import {
   SceneChangePacket,
 } from "../protocol/packets/gameData";
 import {
-  BaseRootPacket,
   AlterGameTagPacket,
+  BaseRootPacket,
   GameDataPacket,
+  JoinedGamePacket,
   JoinGameErrorPacket,
   JoinGameResponsePacket,
-  JoinedGamePacket,
   KickPlayerPacket,
   RemovePlayerPacket,
 } from "../protocol/packets/root";
@@ -1001,6 +1001,11 @@ export class Lobby implements LobbyInstance {
 
         this.logger.verbose("Allowing connection %s to join full lobby", connection);
       }
+
+    }
+
+    if (connection.isActingHost() && connection.getLimboState() == LimboState.PreSpawn && this.gameState == GameState.NotStarted) {
+      this.logger.verbose("Connection %s that was in limbo is joining as acting host", connection);
     }
 
     if (connection.getLobby() === undefined) {
@@ -1009,13 +1014,6 @@ export class Lobby implements LobbyInstance {
       connection.on("packet", (packet: BaseRootPacket) => {
         this.handlePacket(packet, connection);
       });
-    }
-
-    if (this.gameState == GameState.Ended) {
-      // TODO: Dead code, Host#endGame sets gameState to NotStarted
-      await this.handleRejoin(connection);
-
-      return;
     }
 
     await this.handleNewJoin(connection);
@@ -1316,7 +1314,9 @@ export class Lobby implements LobbyInstance {
         new JoinGameResponsePacket(
           this.code,
           connection.getId(),
-          writeConnection.isActingHost() ? writeConnection.getId() : this.hostInstance.getId(),
+          writeConnection.isActingHost() && !this.spawningPlayers.has(writeConnection)
+            ? writeConnection.getId()
+            : this.hostInstance.getId(),
         ),
       ]);
     }

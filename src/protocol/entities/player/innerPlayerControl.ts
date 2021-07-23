@@ -30,6 +30,7 @@ import {
   DeathReason,
   GameState,
   InnerNetObjectType,
+  LimboState,
   PlayerColor,
   PlayerHat,
   PlayerPet,
@@ -229,7 +230,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     if (lobby.getActingHosts().length === 0) {
       await connection.syncActingHost(true);
-    } else if (connection.isActingHost()) {
+    } else if (connection.isActingHost() && connection.getLimboState() == LimboState.NotLimbo) {
       await (this.getLobby() as Lobby).sendEnableHost(connection, true);
     }
   }
