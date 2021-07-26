@@ -221,7 +221,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
   handleRpc(connection: Connection, type: RpcPacketType, packet: BaseRpcPacket, _sendTo: Connection[]): void {
     switch (type) {
       case RpcPacketType.CloseDoorsOfType: {
-        this.closeDoorsOfType((packet as CloseDoorsOfTypePacket).system);
+        this.closeDoorsOfType((packet as CloseDoorsOfTypePacket).system, connection.getSafePlayer());
         break;
       }
       case RpcPacketType.RepairSystem: {
