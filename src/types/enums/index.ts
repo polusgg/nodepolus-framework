@@ -79,3 +79,5 @@ export { TaskType } from "./taskType";
 export { TeleportReason } from "./teleportReason";
 
 export { VoteStateConstants } from "./voteStateConstants";
+
+export { StringNames } from "./stringNames";

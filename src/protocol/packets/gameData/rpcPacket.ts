@@ -42,6 +42,7 @@ import {
   PolusSetSpeedModifierPacket,
   PolusSetVisionModifierPacket,
 } from "../rpc";
+import { SendQuickChatPacket } from "../rpc/sendQuickChatPacket";
 
 /**
  * Game Data Packet ID: `0x02` (`2`)
@@ -148,8 +149,9 @@ export class RpcPacket extends BaseGameDataPacket {
         return new RpcPacket(senderNetId, ClimbLadderPacket.deserialize(reader));
       case RpcPacketType.UsePlatform:
         return new RpcPacket(senderNetId, UsePlatformPacket.deserialize(reader));
-      case RpcPacketType.BootFromVent:
       case RpcPacketType.SendQuickChat:
+        return new RpcPacket(senderNetId, SendQuickChatPacket.deserialize(reader));
+      case RpcPacketType.BootFromVent:
       case RpcPacketType.UpdateSystem:
         return new RpcPacket(senderNetId, new ClosePacket());
       case RpcPacketType.SubmergedRequestChangeFloor:

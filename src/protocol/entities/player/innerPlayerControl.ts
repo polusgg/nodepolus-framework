@@ -58,6 +58,7 @@ import {
   SetStartCounterPacket,
   SetTasksPacket,
   SyncSettingsPacket,
+  SendQuickChatPacket
 } from "../../packets/rpc";
 import { Player } from "../../../player";
 
@@ -245,8 +246,10 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       event.setNewName(event.getOldName());
     }
 
-    this.getPlayerData().setName(event.getNewName().toString());
-    await this.sendRpcPacket(new SetNamePacket(event.getNewName().toString()), sendTo);
+    if (event.shouldSendResponse()) {
+      this.getPlayerData().setName(event.getNewName().toString());
+      await this.sendRpcPacket(new SetNamePacket(event.getNewName().toString()), sendTo);
+    }
   }
 
   async handleCheckColor(color: PlayerColor, _sendTo?: Connection[]): Promise<void> {
@@ -518,9 +521,33 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       case RpcPacketType.UsePlatform:
         await this.handleUsePlatform(this);
         break;
+      case RpcPacketType.SendQuickChat:
+        await this.handleSendQuickChat(packet as SendQuickChatPacket, sendTo);
       default:
         break;
     }
+  }
+
+  async handleSendQuickChat(packet: SendQuickChatPacket, sendTo?: Connection[]): Promise<void> {
+    if (sendTo !== undefined &&
+      sendTo.length > 0 &&
+      this.getLobby().shouldHideGhostChat() &&
+      this.getPlayerData().isDead()
+    ) {
+      const filteredIndices: number[] = [];
+
+      for (let i = 0; i < sendTo.length; i++) {
+        if (this.getLobby().findPlayerByConnection(sendTo[i])?.isDead() !== true) {
+          filteredIndices.push(i);
+        }
+      }
+
+      for (let i = filteredIndices.length - 1; i >= 0; i--) {
+        sendTo.splice(filteredIndices[i], 1);
+      }
+    }
+
+    await this.sendRpcPacket(new SendQuickChatPacket(packet.contentsType, packet.value), sendTo);
   }
 
   getParent(): EntityPlayer {

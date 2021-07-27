@@ -230,6 +230,21 @@ export class Host implements HostInstance {
     this.lobby.cancelStartTimer();
     await this.lobby.disableActingHosts(true);
     await this.lobby.sendRootGamePacket(new StartGamePacket(this.lobby.getCode()));
+
+    // 10s timeout to handle clients who never sent ready
+    // setTimeout(() => {
+    //   if (this.readyPlayerList.size < this.lobby.getPlayers().length && this.lobby.getGameState() !== GameState.Started) {
+    //     for (let i = 0; i < this.lobby.getPlayers().length; i++) {
+    //       const player = this.lobby.getPlayers()[i];
+
+    //       if (!this.readyPlayerList.has(player.getId())) {
+    //         player.getConnection()?.disconnect(DisconnectReason.custom("Did not send a ready."));
+    //       }
+    //     }
+
+    //     this.handleReady();
+    //   }
+    // }, 10000);
   }
 
   async setInfected(infectedCount: number): Promise<void> {
@@ -510,7 +525,7 @@ export class Host implements HostInstance {
       // This timing of 8.5 seconds is based on in-game observations and may be
       // slightly inaccurate due to network latency and fluctuating framerates.
       // TODO: Too long of a delay?
-      }, 8500);
+      }, 7000);
     }, 5000);
   }
 
@@ -665,6 +680,16 @@ export class Host implements HostInstance {
       } else {
         await this.endGame(GameOverReason.CrewmateDisconnect);
       }
+
+      return;
+    }
+
+    const meetingHud = this.lobby.getSafeMeetingHud();
+
+    if (this.meetingHudTimeout !== undefined && [...meetingHud.getMeetingHud().getPlayerStates().values()].every(p => p.didVote() || p.isDead() || p.isDisabled())) {
+      clearTimeout(this.meetingHudTimeout);
+      delete this.meetingHudTimeout;
+      await this.endMeeting();
     }
   }
 
@@ -960,7 +985,7 @@ export class Host implements HostInstance {
 
     await Promise.allSettled(promiseArray);
 
-    this.meetingHudTimeout = setTimeout(this.endMeeting.bind(this), (this.lobby.getOptions().getVotingTime() + this.lobby.getOptions().getDiscussionTime()) * 1000);
+    this.meetingHudTimeout = setTimeout(this.endMeeting.bind(this), ((this.lobby.getOptions().getVotingTime() + this.lobby.getOptions().getDiscussionTime()) * 1000) + 8500);
   }
 
   async handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): Promise<void> {
@@ -1033,7 +1058,7 @@ export class Host implements HostInstance {
       new RpcPacket(player.getEntity().getPlayerControl().getNetId(), new SendChatNotePacket(event.getVoter().getId(), ChatNoteType.DidVote)),
     ], this.lobby.getCode()));
 
-    if (this.meetingHudTimeout !== undefined && [...meetingHud.getMeetingHud().getPlayerStates().values()].every(p => p.didVote() || p.isDead())) {
+    if (this.meetingHudTimeout !== undefined && [...meetingHud.getMeetingHud().getPlayerStates().values()].every(p => p.didVote() || p.isDead() || p.isDisabled())) {
       clearTimeout(this.meetingHudTimeout);
       delete this.meetingHudTimeout;
       await this.endMeeting();

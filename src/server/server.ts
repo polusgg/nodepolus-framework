@@ -17,6 +17,7 @@ import Emittery from "emittery";
 import dgram from "dgram";
 import {
   BaseRootPacket,
+  EndGamePacket,
   GameDataPacket,
   GetGameListRequestPacket,
   GetGameListResponsePacket,
@@ -47,6 +48,7 @@ import {
 import {
   FakeClientId,
   GameDataPacketType,
+  GameOverReason,
   GameState,
   PacketDestination,
   ReportOutcome,
@@ -54,6 +56,7 @@ import {
   RpcPacketType,
   Scene,
 } from "../types/enums";
+import { Packet } from "../protocol/packets";
 
 export class Server extends Emittery<ServerEvents> {
   protected readonly startedAt = Date.now();
@@ -404,12 +407,26 @@ export class Server extends Emittery<ServerEvents> {
     this.stopConnectionFlushInterval();
 
     const disconnectReason = DisconnectReason.custom("The server is shutting down");
+    const disconnectPacket = new JoinGameErrorPacket(disconnectReason);
+
+    const connections = [...this.connections.values()];
+
+    for (let i = 0; i < connections.length; i++) {
+      const connection = connections[i];
+
+      if (connection.getLobby() !== undefined && connection.getSafeLobby().getGameState() == GameState.Started) {
+        (connection as any).send(new Packet(undefined, new RootPacket([
+          new EndGamePacket(connection.getSafeLobby().getCode(), GameOverReason.CrewmatesByTask, false),
+          disconnectPacket,
+        ])));
+      } else {
+        (connection as any).send(new Packet(undefined, new RootPacket([disconnectPacket])));
+      }
+    }
 
     for (let i = 0; i < this.lobbies.length; i++) {
       await this.lobbies[i].close(disconnectReason, true);
     }
-
-    const connections = [...this.connections.values()];
 
     for (let i = 0; i < connections.length; i++) {
       connections[i].disconnect(disconnectReason, true);

@@ -69,3 +69,4 @@ export { SubmergedRequestChangeFloorPacket } from "./submergedRequestChangeFloor
 export { PolusSetSpeedModifierPacket } from "./polusSetSpeedModifierPacket";
 
 export { PolusSetVisionModifierPacket } from "./polusSetVisionModifierPacket";
+export { SendQuickChatPacket } from "./sendQuickChatPacket";

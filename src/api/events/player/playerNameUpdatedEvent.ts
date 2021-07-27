@@ -15,6 +15,7 @@ export class PlayerNameUpdatedEvent extends CancellableEvent {
     protected readonly player: PlayerInstance,
     protected readonly oldName: TextComponent,
     protected newName: TextComponent,
+    protected sendResponse: boolean = true,
   ) {
     super();
   }
@@ -38,6 +39,14 @@ export class PlayerNameUpdatedEvent extends CancellableEvent {
    */
   getNewName(): TextComponent {
     return this.newName;
+  }
+
+  doSendResponse(doSendResponse: boolean): void {
+    this.sendResponse = doSendResponse;
+  }
+
+  shouldSendResponse(): boolean {
+    return this.sendResponse;
   }
 
   /**
