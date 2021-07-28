@@ -134,11 +134,14 @@ export class SpawnPositions {
    */
   static forPlayerOnLevel(level: Level, playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
     if (level == Level.Polus && !isSpawn) {
-      if (playerId < 5) {
-        return SpawnPositions.forLevel(Level.Polus).meetingOne.add(Vector2.right().multiply(playerId));
+      const halfCount = Math.floor(playerCount / 2);
+      const newPlayerId = (playerId % 15);
+
+      if (newPlayerId < halfCount) {
+        return SpawnPositions.forLevel(Level.Polus).meetingOne.add(Vector2.right().multiply(newPlayerId).multiply(0.6));
       }
 
-      return SpawnPositions.forLevel(Level.Polus).meetingTwo.add(Vector2.right().multiply(playerId - 5));
+      return SpawnPositions.forLevel(Level.Polus).meetingTwo.add(Vector2.right().multiply(newPlayerId - halfCount).multiply(0.6));
     }
 
     const positions = SpawnPositions.forLevel(level);
