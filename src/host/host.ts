@@ -684,12 +684,14 @@ export class Host implements HostInstance {
       return;
     }
 
-    const meetingHud = this.lobby.getSafeMeetingHud();
+    if (this.lobby.getMeetingHud() !== undefined) {
+      const meetingHud = this.lobby.getSafeMeetingHud();
 
-    if (this.meetingHudTimeout !== undefined && [...meetingHud.getMeetingHud().getPlayerStates().values()].every(p => p.didVote() || p.isDead() || p.isDisabled())) {
-      clearTimeout(this.meetingHudTimeout);
-      delete this.meetingHudTimeout;
-      await this.endMeeting();
+      if (this.meetingHudTimeout !== undefined && [...meetingHud.getMeetingHud().getPlayerStates().values()].every(p => p.didVote() || p.isDead() || p.isDisabled())) {
+        clearTimeout(this.meetingHudTimeout);
+        delete this.meetingHudTimeout;
+        await this.endMeeting();
+      }
     }
   }
 

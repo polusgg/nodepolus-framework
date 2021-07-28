@@ -98,8 +98,6 @@ export class SystemsHandler {
   repairSpawnIn(player: Player, system: SubmergedSpawnInSystem, amount: SubmergedSpawnInAmount): void {
     this.setOldShipStatus();
 
-    console.log("Player spawning in!", player.getName(), amount);
-
     player.setPosition(SpawnPositions.forPlayerOnLevel(Level.Submerged, player.getId(), player.getLobby().getPlayers().length, true).addY(amount.isUpperSelected() ? 48.119 : 0));
     (this.getShipStatus().getSystemFromType(SystemType.SubmergedFloor) as SubmergedPlayerFloorSystem).setPlayerFloor(player.getId(), amount.isUpperSelected());
     system.setPlayerReady(player.getId());
