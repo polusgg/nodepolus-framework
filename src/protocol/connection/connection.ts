@@ -427,7 +427,9 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
         const singlePacketSerialized = singlePacket.serialize();
 
         if (singlePacketSerialized.getLength() > MAX_PACKET_BYTE_SIZE) {
-          throw new Error(`Attempted to write a packet that is longer than the maximum byte size of ${MAX_PACKET_BYTE_SIZE}`);
+          this.getLobby()?.getLogger().warn(`Attempted to write a packet that is longer than the maximum byte size of ${MAX_PACKET_BYTE_SIZE}: ${singlePacketSerialized.getBuffer().toString("hex")}`);
+
+          this.sendReliable([packet]).then(resolve);
         } else {
           this.flush();
 
