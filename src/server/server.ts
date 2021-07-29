@@ -255,14 +255,6 @@ export class Server extends Emittery<ServerEvents> {
       throw new Error(`A lobby with the code ${lobby.getCode()} already exists`);
     }
 
-    const event = new ServerLobbyCreatedEvent(lobby.getCreator(), lobby);
-
-    this.emit("server.lobby.created", event);
-
-    if (event.isCancelled()) {
-      return this;
-    }
-
     this.lobbies.push(lobby);
     this.lobbyMap.set(lobby.getCode(), lobby);
 

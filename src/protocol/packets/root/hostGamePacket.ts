@@ -11,20 +11,21 @@ export class HostGameRequestPacket extends BaseRootPacket {
   constructor(
     public options: GameOptionsData,
     public quickChatMode: QuickChatMode,
+    public isMigrated: boolean,
   ) {
     super(RootPacketType.HostGame);
   }
 
   static deserialize(reader: MessageReader): HostGameRequestPacket {
-    return new HostGameRequestPacket(GameOptionsData.deserialize(reader), reader.readByte());
+    return new HostGameRequestPacket(GameOptionsData.deserialize(reader), reader.readByte(), reader.readBoolean());
   }
 
   clone(): HostGameRequestPacket {
-    return new HostGameRequestPacket(this.options.clone(), this.quickChatMode);
+    return new HostGameRequestPacket(this.options.clone(), this.quickChatMode, this.isMigrated);
   }
 
   serialize(writer: MessageWriter): void {
-    writer.writeObject(this.options).writeByte(this.quickChatMode);
+    writer.writeObject(this.options).writeByte(this.quickChatMode).writeBoolean(this.isMigrated);
   }
 }
 
