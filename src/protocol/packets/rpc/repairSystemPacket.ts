@@ -71,7 +71,7 @@ export class RepairSystemPacket extends BaseRpcPacket {
           ? MiraCommunicationsAmount.deserialize(this.amountByte)
           : NormalCommunicationsAmount.deserialize(this.amountByte);
       case SystemType.Doors:
-        if (this.level == Level.Polus || this.level == Level.Airship) {
+        if (this.level == Level.Polus || this.level == Level.Airship || this.level == Level.Submerged) {
           return PolusDoorsAmount.deserialize(this.amountByte);
         }
 

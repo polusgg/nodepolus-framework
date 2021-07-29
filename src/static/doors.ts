@@ -34,7 +34,21 @@ const DOORS_AIRSHIP: Readonly<DoorList> = {
   [SystemType.Lounge]: [15, 16, 17, 18],
   [SystemType.Medical]: [19, 20],
 } as const;
-const DOORS_SUBMERGED: Readonly<DoorList> = {} as const;
+const DOORS_SUBMERGED: Readonly<DoorList> = {
+  [SystemType.SubmergedUpperLobby]: [0, 1],
+  [SystemType.Communications]: [2],
+  [SystemType.SubmergedResearch]: [3],
+  [SystemType.Medical]: [4],
+  [SystemType.MeetingRoom]: [5, 6],
+  [SystemType.Admin]: [7],
+  [SystemType.SubmergedObservatory]: [8],
+  [SystemType.Security]: [9],
+  [SystemType.Engine]: [10],
+  [SystemType.Storage]: [11, 12],
+  [SystemType.Electrical]: [13, 14],
+  [SystemType.Decontamination]: [15, 16],
+  [SystemType.Decontamination2]: [17, 18],
+} as const;
 
 const DOOR_NAMES_THE_SKELD: readonly string[] = [
   "Cafeteria",
