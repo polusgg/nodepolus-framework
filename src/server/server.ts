@@ -726,7 +726,7 @@ export class Server extends Emittery<ServerEvents> {
           lobbyCode = LobbyCode.generate();
         }
 
-        const creatingEvent = new ServerLobbyCreatingEvent(connection, lobbyCode, (packet as HostGameRequestPacket).options);
+        const creatingEvent = new ServerLobbyCreatingEvent(connection, lobbyCode, (packet as HostGameRequestPacket).options, (packet as HostGameRequestPacket).isMigrated);
 
         await this.emit("server.lobby.creating", creatingEvent);
 

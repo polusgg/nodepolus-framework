@@ -16,6 +16,7 @@ export class ServerLobbyCreatingEvent extends DisconnectableEvent {
     protected readonly connection: Connection,
     protected lobbyCode: string,
     protected options: GameOptionsData,
+    protected _isMigrating: boolean,
   ) {
     super(DisconnectReason.custom("The server refused to create your game"));
   }
@@ -63,5 +64,12 @@ export class ServerLobbyCreatingEvent extends DisconnectableEvent {
     this.options = options;
 
     return this;
+  }
+
+  /**
+   * Gets if the lobby was migrated from a different server.
+   */
+  isMigrating(): boolean {
+    return this._isMigrating;
   }
 }
