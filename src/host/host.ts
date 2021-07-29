@@ -648,7 +648,7 @@ export class Host implements HostInstance {
     }
 
     if (gameData === undefined) {
-      if (gameState == GameState.NotStarted || gameState == GameState.Started) {
+      if (gameState == GameState.Started) {
         throw new Error("Received Disconnect without a GameData instance");
       }
 

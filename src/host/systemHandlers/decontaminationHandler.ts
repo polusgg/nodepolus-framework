@@ -49,13 +49,15 @@ export class DecontaminationHandler {
     this.system.setTimer(3);
 
     this.timer = setInterval(() => {
-      if (this.host.getLobby().getShipStatus() === undefined && this.timer) {
-        return clearInterval(this.timer);
+      try {
+        systemsHandler.setOldShipStatus();
+        this.update();
+        systemsHandler.sendDataUpdate();
+      } catch {
+        if (this.timer !== undefined) {
+          return clearInterval(this.timer);
+        }
       }
-
-      systemsHandler.setOldShipStatus();
-      this.update();
-      systemsHandler.sendDataUpdate();
     }, 1000);
 
     systemsHandler.setOldShipStatus();
