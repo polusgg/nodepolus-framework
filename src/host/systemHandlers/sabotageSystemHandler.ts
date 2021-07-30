@@ -73,6 +73,12 @@ export class SabotageSystemHandler {
       }
 
       if (system.getCountdown() <= 0) {
+        if (this.host.getLobby().getGame() === undefined) {
+          this.clearTimer();
+
+          return;
+        }
+
         this.host.endGame(GameOverReason.ImpostorsBySabotage);
         this.clearTimer();
       }

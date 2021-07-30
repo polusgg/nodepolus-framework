@@ -185,7 +185,12 @@ export class Player implements PlayerInstance {
   }
 
   isDead(): boolean {
-    return this.getGameDataEntry().isDead();
+    try {
+      return this.getGameDataEntry().isDead();
+    } catch {
+      console.log("Failed to get game data for player");
+      return false;
+    }
   }
 
   getTasks(): [LevelTask, boolean][] {

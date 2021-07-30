@@ -476,6 +476,7 @@ export class Host implements HostInstance {
         exiledPlayerData = exiledPlayer.getGameDataEntry();
 
         exiledPlayerData.setDead(true);
+        console.log(exiledPlayerData);
       }
     }
 
