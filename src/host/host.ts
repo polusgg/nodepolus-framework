@@ -715,6 +715,10 @@ export class Host implements HostInstance {
 
     const connections = this.lobby.getConnections();
 
+    if (connections.length == 0) {
+      return;
+    }
+
     if (this.readyPlayerList.size != connections.length) {
       return;
     }
