@@ -1,6 +1,7 @@
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
 import { Game } from "../../game";
+import { EntityMeetingHud } from "../../../protocol/entities/meetingHud";
 
 /**
  * Fired when a meeting has begun, either by pressing the button or reporting a
@@ -17,6 +18,7 @@ export class MeetingStartedEvent extends CancellableEvent {
     protected caller: PlayerInstance,
     protected victim: PlayerInstance | undefined,
     protected activeSabotage: boolean,
+    protected meetingHud: EntityMeetingHud,
     protected repairSabotage: boolean = true,
   ) {
     super();
@@ -54,6 +56,10 @@ export class MeetingStartedEvent extends CancellableEvent {
    */
   getVictim(): PlayerInstance | undefined {
     return this.victim;
+  }
+
+  getMeetingHud(): EntityMeetingHud {
+    return this.meetingHud;
   }
 
   /**

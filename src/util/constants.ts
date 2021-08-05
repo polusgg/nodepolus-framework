@@ -68,7 +68,7 @@ export const ANNOUNCEMENT_SERVER_PORT = 22024;
 /**
  * The maximum byte size of an outgoing packet.
  */
-export const MAX_PACKET_BYTE_SIZE = 508;
+export const MAX_PACKET_BYTE_SIZE = 999;
 
 /**
  * The owner ID of the global object for game objects not owned by players.

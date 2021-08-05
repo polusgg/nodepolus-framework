@@ -978,21 +978,23 @@ export class Lobby implements LobbyInstance {
     if (this.connections.indexOf(connection) == -1) {
       const count = this.connections.length;
       const isGameStarted = this.gameState == GameState.Started;
+      const isCountingDown = this.hostInstance.isCountingDown();
 
       if (count >= this.options.getMaxPlayers() ||
           count >= this.server.getMaxPlayersPerLobby() ||
-          isGameStarted
+          isGameStarted ||
+          isCountingDown
       ) {
         const event = new ServerLobbyJoinRefusedEvent(
           connection,
           this,
-          isGameStarted ? DisconnectReason.gameStarted() : DisconnectReason.gameFull(),
+          isGameStarted ? DisconnectReason.gameStarted() : isCountingDown ? DisconnectReason.custom("This game is starting") : DisconnectReason.gameFull(),
         );
 
         await this.server.emit("server.lobby.join.refused", event);
 
         if (!event.isCancelled()) {
-          this.logger.verbose("Preventing connection %s from joining full lobby", connection);
+          this.logger.verbose("Preventing connection %s from joining full or started lobby", connection);
 
           await connection.writeReliable(new JoinGameErrorPacket(event.getDisconnectReason()));
 

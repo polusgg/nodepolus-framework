@@ -1,6 +1,6 @@
 import { LobbyCountdownStartedEvent, LobbyCountdownStoppedEvent } from "../api/events/lobby";
 import { EndGamePacket, GameDataPacket, StartGamePacket } from "../protocol/packets/root";
-import { DisconnectReason, LevelTask, Vector2, VoteResult, VoteState } from "../types";
+import { DisconnectReason, LevelTask, Mutable, Vector2, VoteResult, VoteState } from "../types";
 import { InternalSystemType } from "../protocol/entities/shipStatus/baseShipStatus";
 import { EntityPlayer, InnerPlayerControl } from "../protocol/entities/player";
 import { EntityAirshipStatus } from "../protocol/entities/shipStatus/airship";
@@ -156,6 +156,8 @@ export class Host implements HostInstance {
 
     this.secondsUntilStart = event.getSecondsUntilStart();
 
+    let thisIsNotAGoodSolution;
+
     const countdownFunction = async (): Promise<void> => {
       const time = this.secondsUntilStart--;
 
@@ -167,19 +169,22 @@ export class Host implements HostInstance {
       }
 
       if (time <= 0) {
+        if (thisIsNotAGoodSolution !== undefined) {
+          clearInterval(thisIsNotAGoodSolution);
+        }
+
         if (this.countdownInterval !== undefined) {
           clearInterval(this.countdownInterval);
           delete this.countdownInterval;
+          await this.startGame();
         }
-
-        await this.startGame();
       }
     };
 
     await this.lobby.disableActingHosts(true);
     countdownFunction();
 
-    this.countdownInterval = setInterval(countdownFunction, 1000);
+    thisIsNotAGoodSolution = this.countdownInterval = setInterval(countdownFunction, 1000);
   }
 
   async stopCountdown(): Promise<void> {
@@ -228,6 +233,7 @@ export class Host implements HostInstance {
     }
 
     this.lobby.cancelStartTimer();
+    this.lobby.setGameState(GameState.Started);
     await this.lobby.disableActingHosts(true);
     await this.lobby.sendRootGamePacket(new StartGamePacket(this.lobby.getCode()));
 
@@ -307,7 +313,7 @@ export class Host implements HostInstance {
     const numLong = options.getLongTaskCount();
     // Minimum of 1 short task
     const numShort = numCommon + numLong + options.getShortTaskCount() > 0 ? options.getShortTaskCount() : 1;
-    const allTasks = Tasks.forLevel(level);
+    const allTasks = (Tasks.forLevel(level) as Mutable<any[]>).sort(() => Math.random() - 0.5);
     const allCommon: LevelTask[] = [];
     const allShort: LevelTask[] = [];
     const allLong: LevelTask[] = [];
@@ -327,6 +333,10 @@ export class Host implements HostInstance {
           break;
       }
     }
+
+    allCommon.sort(() => Math.random() - 0.5);
+    allShort.sort(() => Math.random() - 0.5);
+    allLong.sort(() => Math.random() - 0.5);
 
     // Used to store the currently assigned tasks to try to prevent
     // players from having the exact same tasks
@@ -354,7 +364,7 @@ export class Host implements HostInstance {
     const shortIndex = { val: 0 };
     const longIndex = { val: 0 };
 
-    for (let pid = 0; pid < this.lobby.getPlayers().length; pid++) {
+    for (let pid = 0; pid <= Math.max(...this.lobby.getPlayers().map(p => p.getId())); pid++) {
       // Clear the used task array
       used.clear();
 
@@ -476,7 +486,6 @@ export class Host implements HostInstance {
         exiledPlayerData = exiledPlayer.getGameDataEntry();
 
         exiledPlayerData.setDead(true);
-        console.log(exiledPlayerData);
       }
     }
 
@@ -811,7 +820,6 @@ export class Host implements HostInstance {
     const gameData = this.lobby.getSafeGameData();
 
     await this.lobby.sendRootGamePacket(new GameDataPacket([this.lobby.getSafeShipStatus().serializeSpawn()], this.lobby.getCode()));
-    this.lobby.setGameState(GameState.Started);
     await this.setInfected(this.lobby.getOptions().getImpostorCount());
     await this.setTasks();
     await gameData.getGameData().updateAllGameData(connections);
@@ -822,7 +830,7 @@ export class Host implements HostInstance {
     for (let i = 0; i < players.length; i++) {
       promiseArray.push(
         players[i].setPosition(
-          SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), players[i].getId(), players.length, true),
+          SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), i, players.length, true),
           TeleportReason.GameStart,
         ),
       );
@@ -929,11 +937,14 @@ export class Host implements HostInstance {
     const owner = this.lobby.findSafeConnection(sender.getParent().getOwnerId());
     const player = this.lobby.findSafePlayerByConnection(owner);
 
+    const meetingHud = new EntityMeetingHud(this.lobby);
+
     const event = new MeetingStartedEvent(
       this.lobby.getSafeGame(),
       player,
       victimPlayerId !== undefined ? this.lobby.findPlayerByPlayerId(victimPlayerId) : undefined,
       this.systemsHandler?.isSabotaged() ?? false,
+      meetingHud,
       true,
     );
 
@@ -960,7 +971,6 @@ export class Host implements HostInstance {
 
     await sender.sendRpcPacket(new StartMeetingPacket(event.getVictim()?.getId() ?? 0xff), this.lobby.getConnections());
 
-    const meetingHud = new EntityMeetingHud(this.lobby);
     const playerData = gameData.getGameData().getPlayers();
 
     this.lobby.setMeetingHud(meetingHud);
@@ -992,7 +1002,9 @@ export class Host implements HostInstance {
 
     await Promise.allSettled(promiseArray);
 
-    this.meetingHudTimeout = setTimeout(this.endMeeting.bind(this), ((this.lobby.getOptions().getVotingTime() + this.lobby.getOptions().getDiscussionTime()) * 1000) + 8500);
+    if (this.lobby.getOptions().getVotingTime() !== 0) {
+      this.meetingHudTimeout = setTimeout(this.endMeeting.bind(this), ((this.lobby.getOptions().getVotingTime() + this.lobby.getOptions().getDiscussionTime()) * 1000) + 8500);
+    }
   }
 
   async handleMurderPlayer(_sender: InnerPlayerControl, _victimPlayerControlNetId: number): Promise<void> {
@@ -1065,8 +1077,11 @@ export class Host implements HostInstance {
       new RpcPacket(player.getEntity().getPlayerControl().getNetId(), new SendChatNotePacket(event.getVoter().getId(), ChatNoteType.DidVote)),
     ], this.lobby.getCode()));
 
-    if (this.meetingHudTimeout !== undefined && [...meetingHud.getMeetingHud().getPlayerStates().values()].every(p => p.didVote() || p.isDead() || p.isDisabled())) {
-      clearTimeout(this.meetingHudTimeout);
+    if ((this.lobby.getOptions().getVotingTime() === 0 || this.meetingHudTimeout !== undefined) && [...meetingHud.getMeetingHud().getPlayerStates().values()].every(p => p.didVote() || p.isDead() || p.isDisabled())) {
+      if (this.meetingHudTimeout !== undefined) {
+        clearTimeout(this.meetingHudTimeout);
+      }
+
       delete this.meetingHudTimeout;
       await this.endMeeting();
     }

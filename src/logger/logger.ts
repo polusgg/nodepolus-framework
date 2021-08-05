@@ -71,7 +71,7 @@ const prettyPrint = winston.format((info: winston.Logform.TransformableInfo, _op
         } else if (item instanceof Connection) {
           const connection = item as Connection;
 
-          splat[i] = `${connection.getId()} (${connection.getConnectionInfo().toString()})`;
+          splat[i] = `${connection.getId()} (${connection.getConnectionInfo().toString()}})`;
         } else if (item instanceof Player) {
           const player = item as Player;
 

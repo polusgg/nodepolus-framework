@@ -189,6 +189,7 @@ export class Player implements PlayerInstance {
       return this.getGameDataEntry().isDead();
     } catch {
       console.log("Failed to get game data for player");
+
       return false;
     }
   }

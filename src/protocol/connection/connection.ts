@@ -21,6 +21,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   protected readonly flushResolveMap: Map<number, (value: void | PromiseLike<void>) => void> = new Map();
   protected readonly unacknowledgedPackets: Map<number, number> = new Map();
 
+  protected disconnected = false;
   protected id = -1;
   protected initialized = false;
   protected hazelVersion?: number;
@@ -38,6 +39,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   protected nonceIndex = 1;
   protected disconnectTimeout?: NodeJS.Timeout;
   protected requestedDisconnect = false;
+  protected readonly resendIntervals: Set<NodeJS.Timeout> = new Set();
 
   /**
    * @param connectionInfo - The ConnectionInfo describing the connection
@@ -54,6 +56,10 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
     super();
 
     this.on("message", reader => {
+      if (this.disconnected) {
+        throw new Error(`Got packet from disconnected client: ${this.getId()} - ${this.getName()}`);
+      }
+
       if (!reader.hasBytesLeft()) {
         return;
       }
@@ -550,17 +556,21 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
             if (this.unacknowledgedPackets.get(nonce!)! > 10) {
               clearInterval(resendInterval);
 
-              reject(new Error(`Connection ${this.id} did not acknowledge packet ${nonce} after 10 attempts`));
-
               this.disconnect(DisconnectReason.custom(`Failed to acknowledge packet ${nonce} after 10 attempts`));
+
+              reject(new Error(`Connection ${this.id} did not acknowledge packet ${nonce} after 10 attempts`));
             } else {
               this.unacknowledgedPackets.set(nonce!, this.unacknowledgedPackets.get(nonce!)! + 1);
               this.send(packet);
             }
           } else {
+            this.resendIntervals.delete(resendInterval);
+
             clearInterval(resendInterval);
           }
         }, 1000);
+
+        this.resendIntervals.add(resendInterval);
       }
 
       this.send(packet);
@@ -580,6 +590,10 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param force - `true` to cleanup the connection immediately, `false` to wait for a client response (default `false`)
    */
   async disconnect(reason?: DisconnectReason, force: boolean = false): Promise<void> {
+    this.resendIntervals.forEach(i => {
+      clearInterval(i);
+    });
+
     if (this.requestedDisconnect) {
       return;
     }
@@ -813,6 +827,8 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param reason - The reason for why the connection was disconnected
    */
   protected cleanup(reason?: DisconnectReason): void {
+    this.disconnected = true;
+
     if (this.disconnectTimeout !== undefined) {
       clearTimeout(this.disconnectTimeout);
       delete this.disconnectTimeout;
