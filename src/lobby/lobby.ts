@@ -1166,6 +1166,8 @@ export class Lobby implements LobbyInstance {
           }
 
           if (object === undefined) {
+            connection.disconnect(DisconnectReason.custom("GameError: RPC packet sent from unknown INO"));
+
             throw new Error(`RPC packet sent from unknown InnerNetObject: ${rpc.senderNetId}`);
           }
 

@@ -169,6 +169,10 @@ export class SabotageSystemHandler {
         system.clearPlayersWithMasks();
 
         this.host.getSystemsHandler()?.sendDataUpdate();
+
+        if (this.host.getLobby().getPlayers().filter(p => p.isImpostor() && !(p.isDead() || p.getGameDataEntry().isDisconnected())).length === 0) {
+          this.host.endGame(GameOverReason.CrewmatesBySabotage);
+        }
       }
     }, 1000);
   }

@@ -121,7 +121,7 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
       case RpcPacketType.SubmergedRequestChangeFloor:
         this.sendRpcPacket(new SubmergedAcknowledgeChangeFloorPacket());
 
-        if ((packet as SubmergedRequestChangeFloorPacket).lastSid < this.largestChangeFloorSidReceived) {
+        if ((packet as SubmergedRequestChangeFloorPacket).lastSid <= this.largestChangeFloorSidReceived) {
           break;
         }
 

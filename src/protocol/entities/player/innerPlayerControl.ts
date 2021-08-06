@@ -523,6 +523,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
         break;
       case RpcPacketType.SendQuickChat:
         await this.handleSendQuickChat(packet as SendQuickChatPacket, sendTo);
+        break;
       default:
         break;
     }

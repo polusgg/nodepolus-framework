@@ -220,6 +220,14 @@ export class Host implements HostInstance {
   }
 
   async startGame(): Promise<void> {
+    for (let i = 0; i < this.lobby.getConnections().length; i++) {
+      const con = this.lobby.getConnections()[i];
+
+      if (con.getLimboState() === LimboState.PreSpawn) {
+        con.disconnect(DisconnectReason.custom("This game has started"));
+      }
+    }
+
     this.lobby.setGame(new Game(this.lobby));
 
     const event = new GameStartingEvent(this.lobby.getSafeGame());
