@@ -42,4 +42,5 @@ export enum RpcPacketType {
 
   PolusSetSpeedModifier = 0x94,
   PolusSetVisionModifier = 0x95,
+  PolusSetRemainingEmergencies = 0x96,
 }

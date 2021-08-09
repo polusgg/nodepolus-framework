@@ -231,6 +231,8 @@ export interface PlayerInstance extends Metadatable {
 
   getVisionModifier(): number;
 
+  setRemainingEmergencies(count: number): Promise<void>;
+
   /**
    * Gets the vent in which the player is hiding.
    *

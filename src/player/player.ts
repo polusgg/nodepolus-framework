@@ -18,6 +18,7 @@ import {
   PlayerTaskRemovedEvent,
   PlayerTaskUncompletedEvent,
 } from "../api/events/player";
+import { PolusSetRemainingEmergenciesPacket } from "../protocol/packets/rpc/polusSetRemainingEmergencies";
 
 export class Player implements PlayerInstance {
   protected readonly createdAt = Date.now();
@@ -313,6 +314,10 @@ export class Player implements PlayerInstance {
 
   getVisionModifier(): number {
     return this.visionModifier;
+  }
+
+  async setRemainingEmergencies(count: number): Promise<void> {
+    await this.entity.getPlayerControl().sendRpcPacket(new PolusSetRemainingEmergenciesPacket(count));
   }
 
   getVent(): LevelVent | undefined {
