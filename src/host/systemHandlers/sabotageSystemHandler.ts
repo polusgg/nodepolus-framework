@@ -59,6 +59,9 @@ export class SabotageSystemHandler {
       case Level.Polus:
         system.setCountdown(60);
         break;
+      case Level.Submerged:
+        system.setCountdown(45);
+        break;
       default:
         throw new Error("Attempted to sabotage reactor on a map without reactor.");
     }
