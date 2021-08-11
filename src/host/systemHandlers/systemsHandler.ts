@@ -104,6 +104,12 @@ export class SystemsHandler {
     this.sendDataUpdate();
   }
 
+  repairSpawnInWithoutTeleport(player: Player, system: SubmergedSpawnInSystem, amount: SubmergedSpawnInAmount): void {
+    this.setOldShipStatus();
+    system.setPlayerReady(player.getId());
+    this.sendDataUpdate();
+  }
+
   async repairHeliSystem<T extends HeliSabotageSystem>(repairer: Player, system: T, amount: HeliSabotageAmount): Promise<void> {
     const sabotageHandler = this.host.getSabotageHandler();
 

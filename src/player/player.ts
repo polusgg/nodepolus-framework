@@ -3,7 +3,7 @@ import { RemovePlayerPacket, JoinGameResponsePacket, GameDataPacket } from "../p
 import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../types";
 import { PlayerData } from "../protocol/entities/gameData/types";
 import { DespawnPacket } from "../protocol/packets/gameData";
-import { PolusSetSpeedModifierPacket, PolusSetVisionModifierPacket, SetInfectedPacket, SnapToPacket } from "../protocol/packets/rpc";
+import { PolusSetSpeedModifierPacket, PolusSetVisionModifierPacket, SetInfectedPacket } from "../protocol/packets/rpc";
 import { EntityPlayer } from "../protocol/entities/player";
 import { Connection } from "../protocol/connection";
 import { PlayerInstance } from "../api/player";

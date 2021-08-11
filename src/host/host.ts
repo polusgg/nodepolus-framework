@@ -71,6 +71,8 @@ import {
 } from "../types/enums";
 import { EntitySubmarineShipStatus as EntitySubmergedShipStatus } from "../protocol/entities/shipStatus/submerged/entitySubmarineShipStatus";
 import { SubmergedElevatorSystem } from "../protocol/entities/shipStatus/systems/submergedElevatorSystem";
+import { SubmergedSpawnInAmount } from "../protocol/packets/rpc/repairSystem/amounts/submergedSpawnInAmount";
+import { SubmergedSpawnInSystem } from "../protocol/entities/shipStatus/systems/submergedSpawnInSystem";
 
 export class Host implements HostInstance {
   protected readonly id: number = FakeClientId.ServerAsHost;
@@ -679,6 +681,12 @@ export class Host implements HostInstance {
       this.lobby.getLogger().warn("Received Disconnect from connection without a player");
 
       return;
+    }
+
+    const shipStatus = this.getLobby().getShipStatus();
+
+    if (this.systemsHandler && shipStatus && shipStatus.getShipStatus().getLevel() === Level.Submerged) {
+      this.systemsHandler.repairSpawnInWithoutTeleport(player, shipStatus.getShipStatus().getSystemFromType(SystemType.SubmergedSpawnIn)! as SubmergedSpawnInSystem, new SubmergedSpawnInAmount(true));
     }
 
     const playerData = player.getGameDataEntry();

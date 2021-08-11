@@ -57,9 +57,9 @@ const SPAWN_POSITIONS_AIRSHIP: LevelSpawnPositions = {
 };
 
 const SPAWN_POSITIONS_SUBMERGED: LevelSpawnPositions = {
-  initial: new Vector2(3.52237, -30.262),
-  meetingOne: new Vector2(3.52237, -30.262),
-  meetingTwo: new Vector2(3.52237, -30.262),
+  initial: new Vector2(3.3, -28.75),
+  meetingOne: new Vector2(3.3, -28.75),
+  meetingTwo: new Vector2(3.3, -28.75),
 };
 
 const PLAYER_TRUE_POSITION_OFFSET: Vector2 = new Vector2(0, 0.3636);
