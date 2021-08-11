@@ -288,7 +288,6 @@ export class Player implements PlayerInstance {
   }
 
   async setPosition(position: Vector2, reason: TeleportReason = TeleportReason.Unknown): Promise<void> {
-    await this.entity.getCustomNetworkTransform().sendRpcPacket(new SnapToPacket(position, this.entity.getCustomNetworkTransform().incrementSequenceId(1)));
     await this.entity.getCustomNetworkTransform().handleSnapTo(position, reason, this.lobby.getConnections());
   }
 

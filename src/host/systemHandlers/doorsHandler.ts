@@ -45,7 +45,7 @@ export class DoorsHandler {
     this.systemTimers[systemId] = setInterval(() => {
       let currentTime = doorsSystem.getTimer(systemId);
 
-      if (currentTime !== undefined && currentTime != 0) {
+      if (currentTime !== undefined && currentTime > 0) {
         doorsSystem.setTimer(systemId, --currentTime);
       } else {
         clearInterval(this.systemTimers[systemId]);

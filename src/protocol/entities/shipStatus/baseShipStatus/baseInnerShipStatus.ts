@@ -178,7 +178,7 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
         await systemsHandler.repairSecurity(player, system as SecurityCameraSystem, amount as SecurityAmount);
         break;
       case SystemType.Doors:
-        if (level == Level.Polus || level == Level.Airship) {
+        if (level == Level.Polus || level == Level.Airship || level == Level.Submerged) {
           await systemsHandler.repairPolusDoors(player, system as DoorsSystem, amount as PolusDoorsAmount);
         } else {
           throw new Error(`Received RepairSystem for Doors on an unimplemented level: ${level as Level} (${Level[level]})`);

@@ -46,8 +46,6 @@ const DOORS_SUBMERGED: Readonly<DoorList> = {
   [SystemType.Engine]: [10],
   [SystemType.Storage]: [11, 12],
   [SystemType.Electrical]: [13, 14],
-  [SystemType.Decontamination]: [15, 16],
-  [SystemType.Decontamination2]: [17, 18],
 } as const;
 
 const DOOR_NAMES_THE_SKELD: readonly string[] = [
