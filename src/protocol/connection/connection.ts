@@ -56,8 +56,11 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
     super();
 
     this.on("message", reader => {
-      if (this.disconnected) {
-        throw new Error(`Got packet from disconnected client: ${this.getId()} - ${this.getName()}`);
+      if (this.disconnected && reader.getBuffer()[0] !== 0x8) {
+        //throw new Error(`Got packet from disconnected client: ${this.getId()} - ${this.getName()}`);
+        console.warn(`:marihehe: Got packet from disconnected client: ${this.getId()} - ${this.getName()}`);
+        console.warn(reader);
+        return;
       }
 
       if (!reader.hasBytesLeft()) {
