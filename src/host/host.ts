@@ -911,7 +911,7 @@ export class Host implements HostInstance {
       await connection.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].getEntity().serializeSpawn()], this.lobby.getCode()));
     }
 
-    const event = new PlayerSpawnedEvent(connection, this.lobby, newPlayerId, true, shipStatus === undefined ? SpawnPositions.forPlayerInDropship(newPlayerId) : SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), newPlayerId, this.lobby.getPlayers().length + 1, true));
+    const event = new PlayerSpawnedEvent(connection, this.lobby, newPlayerId, true, shipStatus === undefined ? SpawnPositions.forPlayerInDropship(newPlayerId) : SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), this.lobby.getPlayers().length, this.lobby.getPlayers().length + 1, true));
 
     await this.lobby.getServer().emit("player.spawned", event);
 
@@ -1010,7 +1010,7 @@ export class Host implements HostInstance {
     for (let i = 0; i < players.length; i++) {
       promiseArray.push(
         players[i].setPosition(
-          SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), players[i].getId(), players.length, false),
+          SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), i, players.length, false),
           TeleportReason.MeetingStart,
         ),
       );

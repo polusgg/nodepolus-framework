@@ -132,10 +132,10 @@ export class SpawnPositions {
    * @param playerCount - The number of players in the game
    * @param isSpawn - `true` if the position is for the initial spawn position, `false` if it is for a meeting position
    */
-  static forPlayerOnLevel(level: Level, playerId: number, playerCount: number, isSpawn: boolean): Vector2 {
+  static forPlayerOnLevel(level: Level, playerIdx: number, playerCount: number, isSpawn: boolean): Vector2 {
     if (level == Level.Polus && !isSpawn) {
       const halfCount = Math.floor(playerCount / 2);
-      const newPlayerId = (playerId % 15);
+      const newPlayerId = (playerIdx % 15);
 
       if (newPlayerId < halfCount) {
         return SpawnPositions.forLevel(Level.Polus).meetingOne.add(Vector2.right().multiply(newPlayerId).multiply(0.6));
@@ -147,7 +147,7 @@ export class SpawnPositions {
     const positions = SpawnPositions.forLevel(level);
     const center = isSpawn ? positions.initial : positions.meetingOne;
     const spawnPosition = Vector2.up()
-      .rotate(((playerId - 1) * (360 / playerCount)) * (Math.PI / 180))
+      .rotate(((playerIdx - 1) * (360 / playerCount)) * (Math.PI / 180))
       .multiply(SpawnPositions.radiusForLevel(level));
 
     return center.add(spawnPosition).add(PLAYER_TRUE_POSITION_OFFSET);
