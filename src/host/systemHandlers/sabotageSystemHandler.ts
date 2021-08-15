@@ -151,6 +151,12 @@ export class SabotageSystemHandler {
     system.setDuration(30);
 
     this.timer = setInterval(() => {
+      if (this.host.getLobby().getGame() === undefined) {
+        this.clearTimer();
+
+        return;
+      }
+
       system.decrementTimer();
 
       if (system.getDuration() <= 0) {
@@ -175,6 +181,10 @@ export class SabotageSystemHandler {
 
         if (this.host.getLobby().getPlayers().filter(p => p.isImpostor() && !(p.isDead() || p.getGameDataEntry().isDisconnected())).length === 0) {
           this.host.endGame(GameOverReason.CrewmatesBySabotage);
+        }
+
+        if (this.host.getLobby().getPlayers().filter(p => p.isImpostor() && !(p.isDead() || p.getGameDataEntry().isDisconnected())).length >= this.host.getLobby().getPlayers().filter(p => !p.isImpostor() && !(p.isDead() || p.getGameDataEntry().isDisconnected())).length) {
+          this.host.endGame(GameOverReason.ImpostorsBySabotage);
         }
       }
     }, 1000);
