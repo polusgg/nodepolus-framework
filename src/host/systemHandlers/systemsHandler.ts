@@ -72,6 +72,7 @@ import { SubmergedPlayerFloorSystem } from "../../protocol/entities/shipStatus/s
 import { SubmergedElevatorMovementStage, SubmergedElevatorSystem } from "../../protocol/entities/shipStatus/systems/submergedElevatorSystem";
 import { SubmergedElevatorAmount } from "../../protocol/packets/rpc/repairSystem/amounts/submergedElevatorAmount";
 import { SubmergedSecuritySabotageSystem } from "../../protocol/entities/shipStatus/systems/submergedSecuritySabotageSystem";
+import { SubmergedSpawnInEvent } from "../../api/events/submerged";
 
 export class SystemsHandler {
   protected oldShipStatus: BaseInnerShipStatus;
@@ -102,9 +103,13 @@ export class SystemsHandler {
     (this.getShipStatus().getSystemFromType(SystemType.SubmergedFloor) as SubmergedPlayerFloorSystem).setPlayerFloor(player.getId(), amount.isUpperSelected());
     system.setPlayerReady(player.getId());
     this.sendDataUpdate();
+
+    if (system.getReadyToSpawnIn()) {
+      this.host.getLobby().getServer().emit("submerged.spawnIn", new SubmergedSpawnInEvent(player.getLobby().getSafeGame()));
+    }
   }
 
-  repairSpawnInWithoutTeleport(player: Player, system: SubmergedSpawnInSystem, amount: SubmergedSpawnInAmount): void {
+  repairSpawnInWithoutTeleport(player: Player, system: SubmergedSpawnInSystem, _amount: SubmergedSpawnInAmount): void {
     this.setOldShipStatus();
     system.setPlayerReady(player.getId());
     this.sendDataUpdate();

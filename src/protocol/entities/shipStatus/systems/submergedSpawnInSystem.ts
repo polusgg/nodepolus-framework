@@ -51,4 +51,8 @@ export class SubmergedSpawnInSystem extends BaseSystem {
 
     return true;
   }
+
+  getReadyToSpawnIn(): boolean {
+    return this.readyToSpawnIn;
+  }
 }

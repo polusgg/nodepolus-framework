@@ -102,6 +102,7 @@ import {
   ServerPacketOutRpcEvent,
   ServerPlayerReportedEvent,
 } from "./server";
+import { SubmergedSpawnInEvent } from "./submerged";
 
 /**
  * All Server events.
@@ -233,4 +234,9 @@ export type ServerEvents = {
   "server.packet.out.rpc.custom": ServerPacketOutRpcCustomEvent;
   "server.packet.out.rpc": ServerPacketOutRpcEvent;
   "server.player.reported": ServerPlayerReportedEvent;
+
+  /**
+   * Submerged-specific Events
+   */
+  "submerged.spawnIn": SubmergedSpawnInEvent;
 };
