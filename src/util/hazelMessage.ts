@@ -299,6 +299,46 @@ export class MessageWriter extends HazelMessage {
   }
 
   /**
+   * Writes a 64-bit integer (long).
+   *
+   * @param value - The int64 to write
+   * @param isBigEndian - `true` if the int64 should be written in Big Endian byte order, `false` if not (default `false`)
+   */
+  writeInt64(value: bigint, isBigEndian: boolean = false): this {
+    this.resizeBuffer(8);
+
+    if (value > 9223372036854775807n || value < (-1n * 9223372036854775808n)) {
+      throw new RangeError(`Value outside of Int32 range: ${(-1n * 9223372036854775808n)} <= ${value} <= ${9223372036854775807n}`);
+    }
+
+    this.buffer[isBigEndian ? "writeBigInt64BE" : "writeBigInt64LE"](value, this.cursor);
+
+    this.cursor += 8;
+
+    return this;
+  }
+
+  /**
+   * Writes an unsigned 64-bit integer (ulong).
+   *
+   * @param value - The uint64 to write
+   * @param isBigEndian - `true` if the uint64 should be written in Big Endian byte order, `false` if not (default `false`)
+   */
+  writeUInt64(value: bigint, isBigEndian: boolean = false): this {
+    this.resizeBuffer(8);
+
+    if (value > 18446744073709551615n || value < 0n) {
+      throw new RangeError(`Value outside of UInt32 range: ${MinValue.UInt32} <= ${value} <= ${MaxValue.UInt32}`);
+    }
+
+    this.buffer[isBigEndian ? "writeBigUInt64BE" : "writeBigUInt64LE"](value, this.cursor);
+
+    this.cursor += 8;
+
+    return this;
+  }
+
+  /**
    * Writes a single-precision floating-point number (single).
    *
    * @param value - The float32 to write
@@ -685,6 +725,32 @@ export class MessageReader extends HazelMessage {
     const val = this.buffer[isBigEndian ? "readUInt32BE" : "readUInt32LE"](this.cursor);
 
     this.cursor += 4;
+
+    return val;
+  }
+
+  /**
+   * Reads a 64-bit integer (long).
+   *
+   * @param isBigEndian - `true` if the long should be read in Big Endian byte order, `false` if not (default `false`)
+   */
+  readInt64(isBigEndian: boolean = false): bigint {
+    const val = this.buffer[isBigEndian ? "readBigInt64BE" : "readBigInt64LE"](this.cursor);
+
+    this.cursor += 8;
+
+    return val;
+  }
+
+  /**
+   * Reads an unsigned 64-bit integer (ulong).
+   *
+   * @param isBigEndian - `true` if the ulong should be read in Big Endian byte order, `false` if not (default `false`)
+   */
+  readUInt64(isBigEndian: boolean = false): bigint {
+    const val = this.buffer[isBigEndian ? "readBigUInt64BE" : "readBigUInt64LE"](this.cursor);
+
+    this.cursor += 8;
 
     return val;
   }
