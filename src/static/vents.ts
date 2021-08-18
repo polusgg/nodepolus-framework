@@ -77,7 +77,7 @@ const VENTS_SUBMERGED: readonly LevelVent[] = [
   new LevelVent(Level.Submerged, 11, "In Storage", SystemType.Storage, new Vector2(-6.23, 1.57), [10]),
   new LevelVent(Level.Submerged, 12, "In Lower Lobby", SystemType.SubmergedLowerLobby, new Vector2(5.72, -1.64), [15]),
   new LevelVent(Level.Submerged, 13, "In the Filtration Hallway", SystemType.SubmergedFiltration, new Vector2(-2.93, 6.81), [16]),
-  new LevelVent(Level.Submerged, 13, "In Lower Central", SystemType.SubmergedLowerCentral, new Vector2(2.681, -1.721), [0]),
+  new LevelVent(Level.Submerged, 14, "In Lower Central", SystemType.SubmergedLowerCentral, new Vector2(2.681, -1.721), [0]),
   new LevelVent(Level.Submerged, 15, "In Electrical", SystemType.Electrical, new Vector2(4.78, -4.01), [16, 12]),
   new LevelVent(Level.Submerged, 16, "In Filtration", SystemType.SubmergedFiltration, new Vector2(-0.97, 1.09), [13, 15]),
 
