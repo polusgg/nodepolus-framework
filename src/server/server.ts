@@ -809,7 +809,7 @@ export class Server extends Emittery<ServerEvents> {
 
         const request = packet as GetGameListRequestPacket;
         const levels = request.options.getLevels();
-        const languages = request.options.getLanguages();
+        // const languages = request.options.getLanguages();
         const results: LobbyListing[] = [];
 
         for (let i = 0; i < this.lobbies.length; i++) {
@@ -828,9 +828,9 @@ export class Server extends Emittery<ServerEvents> {
           }
 
           // TODO: Intersect so lobbies can have multiple languages
-          if (!languages.includes(lobby.getOptions().getLanguages()[0])) {
-            continue;
-          }
+          // if (!languages.includes(lobby.getOptions().getLanguages()[0])) {
+          //   continue;
+          // }
 
           const listing = lobby.getLobbyListing();
 
