@@ -63,7 +63,7 @@ const VENTS_AIRSHIP: readonly LevelVent[] = [
 ];
 
 const VENTS_SUBMERGED: readonly LevelVent[] = [
-  new LevelVent(Level.Submerged, 0, "In Upper Central", SystemType.SubmergedUpperCentral, new Vector2(5.825, -0.962), [13]),
+  new LevelVent(Level.Submerged, 0, "In Upper Central", SystemType.SubmergedUpperCentral, new Vector2(5.825, -0.962), [14]),
   new LevelVent(Level.Submerged, 1, "In Upper Lobby", SystemType.SubmergedUpperLobby, new Vector2(-3.310862, -4.584094), [2, 3]),
   new LevelVent(Level.Submerged, 2, "In Communications", SystemType.Communications, new Vector2(-1.12277, 5.22954), [1, 3]),
   new LevelVent(Level.Submerged, 3, "In Medical", SystemType.Medical, new Vector2(12.443, 0.168), [1, 2]),
