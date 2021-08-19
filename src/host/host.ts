@@ -952,8 +952,17 @@ export class Host implements HostInstance {
     const gameData = this.lobby.getSafeGameData();
     const owner = this.lobby.findSafeConnection(sender.getParent().getOwnerId());
     const player = this.lobby.findSafePlayerByConnection(owner);
-
+    const playerData = gameData.getGameData().getPlayers();
     const meetingHud = new EntityMeetingHud(this.lobby);
+
+    for (const [id, data] of playerData) {
+      meetingHud.getMeetingHud().setPlayerState(id, new VoteState(
+        VoteStateConstants.HasNotVoted,
+        data.isDead(),
+        data.isDead() || data.isDisconnected(),
+        id == player.getId(),
+      ));
+    }
 
     const event = new MeetingStartedEvent(
       this.lobby.getSafeGame(),
@@ -987,18 +996,7 @@ export class Host implements HostInstance {
 
     await sender.sendRpcPacket(new StartMeetingPacket(event.getVictim()?.getId() ?? 0xff), this.lobby.getConnections());
 
-    const playerData = gameData.getGameData().getPlayers();
-
     this.lobby.setMeetingHud(meetingHud);
-
-    for (const [id, data] of playerData) {
-      meetingHud!.getMeetingHud().setPlayerState(id, new VoteState(
-        VoteStateConstants.HasNotVoted,
-        data.isDead(),
-        data.isDead() || data.isDisconnected(),
-        id == event.getCaller().getId(),
-      ));
-    }
 
     await this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.serializeSpawn(),
