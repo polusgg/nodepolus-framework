@@ -12,6 +12,9 @@ export class MeetingStartedEvent extends CancellableEvent {
    * @param game - The game from which this event was fired
    * @param caller - The player that called the meeting
    * @param victim - The player whose dead body was found
+   * @param activeSabotage - Whether a sabotage is active
+   * @param meetingHud - The meeting hud to be used
+   * @param repairSabotage - Whether to repair the sabotage
    */
   constructor(
     protected readonly game: Game,
