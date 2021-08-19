@@ -688,6 +688,10 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @returns A promise that resolves with the expected packet or rejects if the connection did not send the expected packet after `timeoutTime` milliseconds
    */
   async awaitPacket(packetValidator: (packet: BaseRootPacket) => boolean, timeoutTime: number = 6000): Promise<BaseRootPacket> {
+    if (this.disconnected) {
+      throw new Error("Cannot await a packet from a disconnected client");
+    }
+
     return new Promise((resolve, reject) => {
       // eslint-disable-next-line prefer-const
       let timeout: NodeJS.Timeout;
@@ -696,9 +700,14 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
         timeoutTime = 6000;
       }
 
+      const disconnectHandler = (): void => {
+        reject(new Error(`Connection ${this.id} disconnected while awaiting packet`));
+      };
+
       const packetHandler = (packet: BaseRootPacket): void => {
         if (packetValidator(packet)) {
           this.off("packet", packetHandler);
+          this.off("disconnected", disconnectHandler);
 
           clearTimeout(timeout);
 
@@ -708,11 +717,13 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
 
       timeout = setTimeout(() => {
         this.off("packet", packetHandler);
+        this.off("disconnected", disconnectHandler);
 
         reject(new Error(`Connection ${this.id} did not reply with the expected packet within ${timeoutTime}ms`));
       }, timeoutTime);
 
       this.on("packet", packetHandler);
+      this.on("disconnected", disconnectHandler);
     });
   }
 

@@ -477,6 +477,8 @@ export class Server extends Emittery<ServerEvents> {
    * @param reason - The reason for why the connection was disconnected
    */
   protected async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
+    this.connections.delete(connection.getConnectionInfo().toString());
+
     const lobby = connection.getLobby();
 
     if (lobby !== undefined) {
@@ -510,8 +512,6 @@ export class Server extends Emittery<ServerEvents> {
     } else {
       this.getLogger().verbose("Connection %s disconnected", connection);
     }
-
-    this.connections.delete(connection.getConnectionInfo().toString());
   }
 
   /**
