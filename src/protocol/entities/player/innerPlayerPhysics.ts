@@ -1,4 +1,10 @@
-import { BaseRpcPacket, ClimbLadderPacket, EnterVentPacket, ExitVentPacket, SubmergedRequestChangeFloorPacket } from "../../packets/rpc";
+import {
+  BaseRpcPacket,
+  ClimbLadderPacket,
+  EnterVentPacket,
+  ExitVentPacket,
+  SubmergedRequestChangeFloorPacket
+} from "../../packets/rpc";
 import { GameVentEnteredEvent, GameVentExitedEvent } from "../../../api/events/game";
 import { InnerNetObjectType, RpcPacketType } from "../../../types/enums";
 import { DataPacket, SpawnPacketObject } from "../../packets/gameData";
@@ -10,6 +16,7 @@ import { Vents } from "../../../static";
 import { EntityPlayer } from ".";
 import { Player } from "../../../player";
 import { SubmergedAcknowledgeChangeFloorPacket } from "../../packets/rpc/submergedAcknowledgeChangeFloor";
+import { SubmergedEngineVentPacket } from "../../packets/rpc/submergedEngineVentPacket";
 
 export class InnerPlayerPhysics extends BaseInnerNetObject {
   protected vent?: LevelVent;
@@ -118,6 +125,9 @@ export class InnerPlayerPhysics extends BaseInnerNetObject {
         this.handleClimbLadder(data.ladderId, data.sequenceId, sendTo);
         break;
       }
+      case RpcPacketType.SubmergedEngineVent:
+        this.sendRpcPacket(new SubmergedEngineVentPacket(), sendTo);
+        break;
       case RpcPacketType.SubmergedRequestChangeFloor:
         this.sendRpcPacket(new SubmergedAcknowledgeChangeFloorPacket());
 
