@@ -486,11 +486,11 @@ export class Server extends Emittery<ServerEvents> {
 
       const player = lobby.findPlayerByConnection(connection);
 
-      await lobby.handleDisconnect(connection, reason);
-
       if (player !== undefined) {
         await this.emit("player.left", new PlayerLeftEvent(lobby, player));
       }
+
+      await lobby.handleDisconnect(connection, reason);
 
       if (lobby.getConnections().length == 0) {
         this.getLogger().verbose("Destroying lobby %s", lobby);
