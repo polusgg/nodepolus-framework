@@ -107,7 +107,7 @@ const DOOR_COUNT_THE_SKELD: number = Object.values(DOORS_THE_SKELD).flat().lengt
 const DOOR_COUNT_MIRA_HQ: number = Object.values(DOORS_MIRA_HQ).flat().length;
 const DOOR_COUNT_POLUS: number = Object.values(DOORS_POLUS).flat().length;
 const DOOR_COUNT_AIRSHIP: number = Object.values(DOORS_AIRSHIP).flat().length;
-const DOOR_COUNT_SUBMERGED: number = Object.values(DOORS_AIRSHIP).flat().length;
+const DOOR_COUNT_SUBMERGED: number = Object.values(DOORS_SUBMERGED).flat().length;
 
 /**
  * A helper class for retrieving static data for doors.
