@@ -12,6 +12,7 @@ import {
   SwitchSystem,
 } from "../../protocol/entities/shipStatus/systems";
 import { SubmergedOxygenSystem } from "../../protocol/entities/shipStatus/systems/submergedOxygenSystem";
+import { Game } from "../../api/game";
 
 export class SabotageSystemHandler {
   // TODO: Make protected with getter/setter
@@ -19,6 +20,7 @@ export class SabotageSystemHandler {
 
   constructor(
     protected host: Host,
+    protected game: Game,
   ) {}
 
   sabotageHeliSystem(system: HeliSabotageSystem): void {
@@ -28,6 +30,10 @@ export class SabotageSystemHandler {
     let i = 0;
 
     this.timer = setInterval(() => {
+      if (this.clearIfGameEnded()) {
+        return;
+      }
+
       system.decrementCountdown();
       system.decrementTimer();
 
@@ -67,6 +73,10 @@ export class SabotageSystemHandler {
     }
 
     this.timer = setInterval(() => {
+      if (this.clearIfGameEnded()) {
+        return;
+      }
+
       system.decrementCountdown();
 
       if (this.host.getLobby().getGame() === undefined && this.timer !== undefined) {
@@ -111,11 +121,11 @@ export class SabotageSystemHandler {
     }
 
     const startOfSabotage = Date.now();
-    const sabotageCountdown = setInterval(() => {
+    this.timer = setInterval(() => {
       system.setVisionModifier(clamp(Math.floor(0xff - (((Date.now() - startOfSabotage) / 3000) * 0xff)), 0x00, 0xff));
 
       if (system.getVisionModifier() == 0x00) {
-        clearInterval(sabotageCountdown);
+        this.clearTimer();
       }
     }, 20);
   }
@@ -137,6 +147,10 @@ export class SabotageSystemHandler {
     }
 
     this.timer = setInterval(() => {
+      if (this.clearIfGameEnded()) {
+        return;
+      }
+
       system.decrementTimer();
 
       if (system.getTimer() <= 0) {
@@ -151,9 +165,7 @@ export class SabotageSystemHandler {
     system.setDuration(30);
 
     this.timer = setInterval(() => {
-      if (this.host.getLobby().getGame() === undefined) {
-        this.clearTimer();
-
+      if (this.clearIfGameEnded()) {
         return;
       }
 
@@ -168,7 +180,7 @@ export class SabotageSystemHandler {
 
         this.clearTimer();
 
-        if (this.host.getLobby().getGame() === undefined) {
+        if (this.clearIfGameEnded()) {
           return;
         }
 
@@ -188,6 +200,16 @@ export class SabotageSystemHandler {
         }
       }
     }, 1000);
+  }
+
+  clearIfGameEnded(): boolean {
+    if (this.host.getLobby().getGame() !== this.game || this.game === undefined) {
+      this.clearTimer();
+
+      return true;
+    }
+
+    return false;
   }
 
   clearTimer(): void {
