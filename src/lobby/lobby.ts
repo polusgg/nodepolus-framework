@@ -888,6 +888,7 @@ export class Lobby implements LobbyInstance {
       this.connections.splice(disconnectingConnectionIndex, 1);
     }
 
+    await this.hostInstance.stopCountdown();
     await this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.getId(), 0, reason ?? DisconnectReason.exitGame()));
 
     if (this.meetingHud !== undefined && disconnectingPlayer) {
