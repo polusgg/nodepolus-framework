@@ -595,6 +595,7 @@ export class Host implements HostInstance {
       delete this.meetingHudTimeout;
     }
 
+    this.clearTimers();
     this.lobby.deleteLobbyBehaviour();
     this.lobby.deleteShipStatus();
     this.lobby.deleteMeetingHud();
@@ -797,7 +798,7 @@ export class Host implements HostInstance {
     }
 
     this.systemsHandler = new SystemsHandler(this);
-    this.sabotageHandler = new SabotageSystemHandler(this);
+    this.sabotageHandler = new SabotageSystemHandler(this, this.getLobby().getSafeGame());
 
     switch (this.lobby.getLevel()) {
       case Level.TheSkeld:
