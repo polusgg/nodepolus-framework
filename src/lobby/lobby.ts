@@ -1169,7 +1169,16 @@ export class Lobby implements LobbyInstance {
           if (object === undefined) {
             connection.disconnect(DisconnectReason.custom("GameError: RPC packet sent from unknown INO"));
 
-            throw new Error(`RPC packet sent from unknown InnerNetObject: ${rpc.senderNetId}`);
+            throw new Error(`RPC packet sent from unknown InnerNetObject: ${JSON.stringify({
+              sentNetId: rpc.senderNetId,
+              lobbyState: {
+                meetingHud: this.getMeetingHud()?.getMeetingHud().getNetId(),
+                shipStatus: this.getShipStatus()?.getShipStatus().getNetId(),
+                gameData: this.getGameData()?.getGameData().getNetId(),
+                voteBan: this.getGameData()?.getVoteBanSystem().getNetId(),
+                players: this.getPlayers().map(p => p.getEntity().getObjects().map(o => o.getNetId())),
+              },
+            }, null, 2)}`);
           }
 
           object.handleRpc(connection, rpc.packet.getType(), rpc.packet, sendTo);
