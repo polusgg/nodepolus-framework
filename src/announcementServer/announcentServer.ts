@@ -38,7 +38,7 @@ export class AnnouncementServer extends Emittery<AnnouncementServerEvents> {
           this.handleHello(parsed.data as AnnouncementHelloPacket, connectionInfo);
         }
       } catch (error) {
-        logger.warn(error.message);
+        logger.warn((error as Error).message);
       }
     });
 
