@@ -487,7 +487,11 @@ export class Server extends Emittery<ServerEvents> {
       const player = lobby.findPlayerByConnection(connection);
 
       if (player !== undefined) {
-        await this.emit("player.left", new PlayerLeftEvent(lobby, player));
+        try {
+          await this.emit("player.left", new PlayerLeftEvent(lobby, player));
+        } catch (err) {
+          console.log("CRITICAL ERROR This is VERY IMPORTANT. Error in handling of player.left (server.ts handleDisconnect)", err);
+        }
       }
 
       await lobby.handleDisconnect(connection, reason);
