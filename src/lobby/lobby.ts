@@ -41,6 +41,8 @@ import {
   JoinGameResponsePacket,
   KickPlayerPacket,
   RemovePlayerPacket,
+  ReportPlayerRequestPacket,
+  ReportPlayerResponsePacket,
 } from "../protocol/packets/root";
 import {
   ServerLobbyDestroyedEvent,
@@ -49,6 +51,7 @@ import {
   ServerPacketInGameDataEvent,
   ServerPacketInRpcCustomEvent,
   ServerPacketInRpcEvent,
+  ServerPlayerReportedEvent,
 } from "../api/events/server";
 import {
   AlterGameTag,
@@ -62,6 +65,7 @@ import {
   PlayerHat,
   PlayerPet,
   PlayerSkin,
+  ReportOutcome,
   RootPacketType,
   RpcPacketType,
   Scene,
@@ -919,7 +923,9 @@ export class Lobby implements LobbyInstance {
       await this.sendRootGamePacket(new GameDataPacket([
         this.meetingHud.getMeetingHud().serializeData(oldMeetingHud),
       ], this.code));
-      await this.meetingHud.getMeetingHud().clearVote(votesToClear);
+
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      await this.meetingHud?.getMeetingHud().clearVote(votesToClear);
     }
 
     if (connection.isActingHost() && this.connections.length > 0) {
@@ -1034,6 +1040,37 @@ export class Lobby implements LobbyInstance {
    */
   protected async handlePacket(packet: BaseRootPacket, connection: Connection): Promise<void> {
     switch (packet.getType()) {
+      case RootPacketType.ReportPlayer: {
+        const request = packet as ReportPlayerRequestPacket;
+        const lobby = connection.getLobby();
+
+        if (lobby === undefined || lobby.getCode() !== request.lobbyCode) {
+          return;
+        }
+
+        const sender = connection.getPlayer();
+        const target = lobby.findPlayerByClientId(request.reportedClientId);
+
+        if (sender === undefined || target === undefined) {
+          return;
+        }
+
+        const event = new ServerPlayerReportedEvent(lobby, target, sender, request.reportReason);
+
+        await this.getServer().emit("server.player.reported", event);
+
+        if (event.isCancelled()) {
+          event.setReportOutcome(ReportOutcome.NotReportedUnknown);
+        }
+
+        connection.sendReliable([new ReportPlayerResponsePacket(
+          request.reportedClientId,
+          request.reportReason,
+          event.getReportOutcome(),
+          target.getName().toString(),
+        )]);
+        break;
+      }
       case RootPacketType.AlterGameTag: {
         const data = packet as AlterGameTagPacket;
 

@@ -25,8 +25,6 @@ import {
   HostGameResponsePacket,
   JoinGameErrorPacket,
   JoinGameRequestPacket,
-  ReportPlayerRequestPacket,
-  ReportPlayerResponsePacket,
 } from "../protocol/packets/root";
 import {
   ServerLobbyCreatedEvent,
@@ -43,7 +41,6 @@ import {
   ServerPacketOutGameDataEvent,
   ServerPacketOutRpcCustomEvent,
   ServerPacketOutRpcEvent,
-  ServerPlayerReportedEvent,
 } from "../api/events/server";
 import {
   FakeClientId,
@@ -51,7 +48,6 @@ import {
   GameOverReason,
   GameState,
   PacketDestination,
-  ReportOutcome,
   RootPacketType,
   RpcPacketType,
   Scene,
@@ -856,37 +852,6 @@ export class Server extends Emittery<ServerEvents> {
         } else {
           await connection.disconnect(event.getDisconnectReason());
         }
-        break;
-      }
-      case RootPacketType.ReportPlayer: {
-        const request = packet as ReportPlayerRequestPacket;
-        const lobby = connection.getLobby();
-
-        if (lobby === undefined || lobby.getCode() !== request.lobbyCode) {
-          return;
-        }
-
-        const sender = connection.getPlayer();
-        const target = lobby.findPlayerByClientId(request.reportedClientId);
-
-        if (sender === undefined || target === undefined) {
-          return;
-        }
-
-        const event = new ServerPlayerReportedEvent(lobby, target, sender, request.reportReason);
-
-        await this.emit("server.player.reported", event);
-
-        if (event.isCancelled()) {
-          event.setReportOutcome(ReportOutcome.NotReportedUnknown);
-        }
-
-        connection.sendReliable([new ReportPlayerResponsePacket(
-          request.reportedClientId,
-          request.reportReason,
-          event.getReportOutcome(),
-          target.getName().toString(),
-        )]);
         break;
       }
       default: {
