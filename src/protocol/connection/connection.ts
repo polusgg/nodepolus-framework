@@ -40,6 +40,8 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   protected disconnectTimeout?: NodeJS.Timeout;
   protected requestedDisconnect = false;
   protected readonly resendIntervals: Set<NodeJS.Timeout> = new Set();
+  protected lastRecvNonce = -1;
+  protected receivePacketQueue: Packet[] = [];
 
   /**
    * @param connectionInfo - The ConnectionInfo describing the connection
@@ -71,40 +73,67 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
 
       if (parsed.isReliable()) {
         this.acknowledgePacket(parsed.nonce!);
-      }
 
-      switch (parsed.getType()) {
-        case HazelPacketType.Reliable:
-          // fallthrough
-        case HazelPacketType.Fragment:
-          // Hazel currently treats Fragment packets as Unreliable
-          // fallthrough
-        case HazelPacketType.Unreliable: {
-          this.handlePing();
-
-          const packets = (parsed.data as RootPacket).packets;
-
-          for (let i = 0; i < packets.length; i++) {
-            this.emit("packet", packets[i]);
-          }
-          break;
+        if (parsed.nonce! <= this.lastRecvNonce) {
+          return;
         }
-        case HazelPacketType.Hello:
-          this.handleHello(parsed.data as HelloPacket);
-          break;
-        case HazelPacketType.Ping:
-          this.handlePing();
-          break;
-        case HazelPacketType.Disconnect:
-          this.handleDisconnect((parsed.data as DisconnectPacket).disconnectReason);
-          break;
-        case HazelPacketType.Acknowledgement:
-          this.handleAcknowledgement(parsed.nonce!);
-          break;
-        default:
-          throw new Error(`Socket received an unimplemented packet type: ${parsed.getType()} (${HazelPacketType[parsed.getType()]})`);
+
+        if (this.lastRecvNonce > -1) {
+          if (parsed.nonce !== this.lastRecvNonce + 1) {
+            this.receivePacketQueue.unshift(parsed);
+          } else {
+            this.handlePacket(parsed);
+            this.lastRecvNonce = parsed.nonce;
+            let nextPacket: Packet|undefined;
+            while (nextPacket = this.receivePacketQueue.pop()) {
+              if (nextPacket) {
+                if (nextPacket.nonce! !== this.lastRecvNonce + 1) {
+                  return;
+                }
+                this.handlePacket(nextPacket);
+                this.lastRecvNonce = nextPacket.nonce;
+              }
+            }
+          }
+        } else {
+          this.lastRecvNonce = 0;
+        }
       }
     });
+  }
+
+  protected handlePacket(packet: Packet) {
+    switch (packet.getType()) {
+      case HazelPacketType.Reliable:
+        // fallthrough
+      case HazelPacketType.Fragment:
+        // Hazel currently treats Fragment packets as Unreliable
+        // fallthrough
+      case HazelPacketType.Unreliable: {
+        this.handlePing();
+
+        const packets = (packet.data as RootPacket).packets;
+
+        for (let i = 0; i < packets.length; i++) {
+          this.emit("packet", packets[i]);
+        }
+        break;
+      }
+      case HazelPacketType.Hello:
+        this.handleHello(packet.data as HelloPacket);
+        break;
+      case HazelPacketType.Ping:
+        this.handlePing();
+        break;
+      case HazelPacketType.Disconnect:
+        this.handleDisconnect((packet.data as DisconnectPacket).disconnectReason);
+        break;
+      case HazelPacketType.Acknowledgement:
+        this.handleAcknowledgement(packet.nonce!);
+        break;
+      default:
+        throw new Error(`Socket received an unimplemented packet type: ${packet.getType()} (${HazelPacketType[packet.getType()]})`);
+    }
   }
 
   hasMeta(key: string): boolean {
@@ -842,6 +871,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    */
   protected cleanup(reason?: DisconnectReason): void {
     this.disconnected = true;
+    this.receivePacketQueue = [];
 
     if (this.disconnectTimeout !== undefined) {
       clearTimeout(this.disconnectTimeout);
