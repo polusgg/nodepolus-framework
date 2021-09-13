@@ -58,14 +58,14 @@ import {
   SetStartCounterPacket,
   SetTasksPacket,
   SyncSettingsPacket,
-  SendQuickChatPacket
+  SendQuickChatPacket,
 } from "../../packets/rpc";
-import { Player } from "../../../player";
 
 export class InnerPlayerControl extends BaseInnerNetObject {
   protected scanning = false;
   protected scannerSequenceId = 1;
   protected checkedColor = false;
+  protected checkedName = false;
 
   constructor(
     protected readonly parent: EntityPlayer,
@@ -225,6 +225,8 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     await player.setName(checkName);
 
+    this.checkedName = true;
+
     if (this.checkedColor) {
       await lobby.finishedSpawningPlayer(owner);
     }
@@ -258,8 +260,6 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     const takenColors = this.getLobby().getSafeGameData().getGameData().getTakenColors(this.getPlayerId());
     let setColor: PlayerColor = color;
 
-    this.checkedColor = true;
-
     await this.getLobby().getHostInstance().ensurePlayerDataExists(player);
 
     if (takenColors.size <= numberOfColors) {
@@ -270,7 +270,9 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     await this.setColor(setColor, this.getLobby().getConnections());
 
-    if (!(player as Player).hasBeenInitialized()) {
+    this.checkedColor = true;
+
+    if (this.checkedName) {
       (player.getLobby() as Lobby).finishedSpawningPlayer(player.getConnection()!);
     }
   }

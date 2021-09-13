@@ -610,7 +610,11 @@ export class Lobby implements LobbyInstance {
       promiseArray.push(sendTo[i].writeReliable(packet));
     }
 
-    await Promise.all(promiseArray);
+    try {
+      await Promise.all(promiseArray);
+    } catch {
+      console.log("Failed to write packet");
+    }
   }
 
   async sendRpcPacket(from: BaseInnerNetObject, packet: BaseRpcPacket, sendTo?: Connection[]): Promise<void> {
