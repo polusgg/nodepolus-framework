@@ -78,6 +78,7 @@ export class Host implements HostInstance {
   protected readonly id: number = FakeClientId.ServerAsHost;
   protected readonly playersInScene: Map<number, string> = new Map();
 
+  protected canStartMeeting = true;
   protected reservedPlayerIds: Set<number> = new Set();
   protected readyPlayerList: Set<number> = new Set();
   protected netIdIndex = 1;
@@ -944,11 +945,13 @@ export class Host implements HostInstance {
   }
 
   async handleReportDeadBody(sender: InnerPlayerControl, victimPlayerId?: number): Promise<void> {
-    if (this.lobby.getMeetingHud() !== undefined) {
+    if (this.lobby.getMeetingHud() !== undefined || !this.canStartMeeting) {
       this.getLobby().getLogger().warn("Received ReportDeadBody during a meeting");
 
       return;
     }
+
+    this.canStartMeeting = false;
 
     const gameData = this.lobby.getSafeGameData();
     const owner = this.lobby.findSafeConnection(sender.getParent().getOwnerId());
@@ -987,6 +990,8 @@ export class Host implements HostInstance {
     await this.lobby.getServer().emit("meeting.started", event);
 
     if (event.isCancelled()) {
+      this.canStartMeeting = true;
+
       // TODO: Try to remove "Waiting for host" text on emergency meeting button window
       return;
     }
@@ -998,6 +1003,8 @@ export class Host implements HostInstance {
     await sender.sendRpcPacket(new StartMeetingPacket(event.getVictim()?.getId() ?? 0xff), this.lobby.getConnections());
 
     this.lobby.setMeetingHud(meetingHud);
+
+    this.canStartMeeting = true;
 
     await this.lobby.sendRootGamePacket(new GameDataPacket([
       meetingHud.serializeSpawn(),
