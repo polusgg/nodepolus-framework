@@ -262,10 +262,11 @@ export class InnerPlayerControl extends BaseInnerNetObject {
 
     this.getLobby().getHostInstance().ensurePlayerDataExists(player);
 
-    if (takenColors.size <= numberOfColors) {
-      while (takenColors.has(setColor)) {
-        setColor = (setColor + 1) % numberOfColors;
-      }
+    let count = 0;
+
+    while (takenColors.has(setColor) && count < 20) {
+      setColor = (setColor + 1) % numberOfColors;
+      count++;
     }
 
     this.setColor(setColor, this.getLobby().getConnections());
