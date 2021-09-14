@@ -907,10 +907,10 @@ export class Host implements HostInstance {
       this.lobby.setGameData(gameData);
     }
 
-    await connection.writeReliable(new GameDataPacket([gameData.serializeSpawn()], this.lobby.getCode()));
+    connection.writeReliable(new GameDataPacket([gameData.serializeSpawn()], this.lobby.getCode()));
 
     for (let i = 0; i < this.lobby.getPlayers().length; i++) {
-      await connection.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].getEntity().serializeSpawn()], this.lobby.getCode()));
+      connection.writeReliable(new GameDataPacket([this.lobby.getPlayers()[i].getEntity().serializeSpawn()], this.lobby.getCode()));
     }
 
     const event = new PlayerSpawnedEvent(connection, this.lobby, newPlayerId, true, shipStatus === undefined ? SpawnPositions.forPlayerInDropship(newPlayerId) : SpawnPositions.forPlayerOnLevel(this.lobby.getLevel(), this.lobby.getPlayers().length, this.lobby.getPlayers().length + 1, true));
@@ -933,8 +933,8 @@ export class Host implements HostInstance {
       const player = new Player(this.lobby, entity, connection);
 
       this.lobby.addPlayer(player);
-      await this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
-      await this.ensurePlayerDataExists(player);
+      this.lobby.sendRootGamePacket(new GameDataPacket([player.getEntity().serializeSpawn()], this.lobby.getCode()));
+      this.ensurePlayerDataExists(player);
       player.getEntity().getPlayerControl().setNewPlayer(false);
     }
     this.reservedPlayerIds.delete(newPlayerId);

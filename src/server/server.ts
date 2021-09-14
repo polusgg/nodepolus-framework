@@ -768,14 +768,21 @@ export class Server extends Emittery<ServerEvents> {
         break;
       }
       case RootPacketType.JoinGame: {
+        console.log("JoinGameHandler");
+
         if (connection.getLobby() !== undefined && connection.getCurrentScene() !== Scene.EndGame) {
+          console.log("EarlyExit", Scene[connection.getCurrentScene()], connection.getLobby());
           return;
         }
 
         const lobbyCode = (packet as JoinGameRequestPacket).lobbyCode;
         const event = new ServerLobbyJoinEvent(connection, lobbyCode, this.lobbyMap.get(lobbyCode));
 
+        console.log("Emitting")
+
         await this.emit("server.lobby.join", event);
+
+        console.log("AfterEmit", event.isCancelled())
 
         if (!event.isCancelled()) {
           const lobby = event.getLobby();

@@ -217,24 +217,24 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     const player = lobby.findSafePlayerByConnection(owner);
     const connection = this.getConnection();
 
-    await lobby.getHostInstance().ensurePlayerDataExists(player);
+    lobby.getHostInstance().ensurePlayerDataExists(player);
 
     while (this.getLobby().getSafeGameData().getGameData().isNameTaken(checkName, this.getPlayerId())) {
       checkName = `${name} ${index++}`;
     }
 
-    await player.setName(checkName);
+    player.setName(checkName);
 
     this.checkedName = true;
 
     if (this.checkedColor) {
-      await lobby.finishedSpawningPlayer(owner);
+      lobby.finishedSpawningPlayer(owner);
     }
 
     if (lobby.getActingHosts().length === 0) {
-      await connection.syncActingHost(true);
+      connection.syncActingHost(true);
     } else if (connection.isActingHost() && connection.getLimboState() == LimboState.NotLimbo) {
-      await (this.getLobby() as Lobby).sendEnableHost(connection, true);
+      (this.getLobby() as Lobby).sendEnableHost(connection, true);
     }
   }
 
@@ -260,7 +260,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     const takenColors = this.getLobby().getSafeGameData().getGameData().getTakenColors(this.getPlayerId());
     let setColor: PlayerColor = color;
 
-    await this.getLobby().getHostInstance().ensurePlayerDataExists(player);
+    this.getLobby().getHostInstance().ensurePlayerDataExists(player);
 
     if (takenColors.size <= numberOfColors) {
       while (takenColors.has(setColor)) {
@@ -268,7 +268,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       }
     }
 
-    await this.setColor(setColor, this.getLobby().getConnections());
+    this.setColor(setColor, this.getLobby().getConnections());
 
     this.checkedColor = true;
 

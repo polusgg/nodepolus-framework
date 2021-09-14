@@ -41,7 +41,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   protected requestedDisconnect = false;
   protected readonly resendIntervals: Set<NodeJS.Timeout> = new Set();
   protected lastRecvNonce = -1;
-  protected receivePacketQueue: Packet[] = [];
+  protected receivePacketQueue: (Packet & { nonce: number })[] = [];
 
   /**
    * @param connectionInfo - The ConnectionInfo describing the connection
@@ -70,36 +70,39 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
       }
 
       const parsed = Packet.deserialize(reader, packetDestination == PacketDestination.Server, this.lobby?.getLevel());
-
-      if (!parsed.isReliable()) {
+      
+      if (parsed.nonce === undefined || !(parsed.getType() === HazelPacketType.Reliable || parsed.getType() === HazelPacketType.Ping || parsed.getType() === HazelPacketType.Hello)) {
         this.handlePacket(parsed);
         return;
       }
 
-      this.acknowledgePacket(parsed.nonce!); // acknowledge all packets regardless if they were sent out of order or not
-
-      if (parsed.nonce! <= this.lastRecvNonce) { // nonce already received
+      if (parsed.nonce <= this.lastRecvNonce) { // nonce already received
         return;
       }
 
       if (this.lastRecvNonce < 0) { // no data on last reliable message so just handle this as normal
         this.handlePacket(parsed);
-        this.lastRecvNonce = parsed.nonce!; // set this as the last received nonce starting point
+        this.lastRecvNonce = parsed.nonce; // set this as the last received nonce starting point
         return;
       }
 
       if (parsed.nonce !== this.lastRecvNonce + 1) { // if this message wasn't the expected nonce
-        this.receivePacketQueue.push(parsed); // add to queue of out-of-order nonces
+        this.receivePacketQueue.push(parsed as Packet & { nonce: number }); // add to queue of out-of-order nonces
         return;
       }
 
       this.handlePacket(parsed); // handle expected packet
       this.lastRecvNonce = parsed.nonce;
+
+      // sort receivePacketQueue by the nonce
+
+      this.receivePacketQueue.sort((p1, p2) => p1.nonce - p2.nonce);
+
       for (let i = 0; i < this.receivePacketQueue.length; i++) { // loop through out-of-order nonces
         const nextPacket = this.receivePacketQueue.shift(); // get first one
 
         if (!nextPacket) { // whatthefuck
-          return;
+          continue;
         }
 
         if (nextPacket.nonce! !== this.lastRecvNonce + 1) { // missing nonce in between the last and this
@@ -116,6 +119,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   protected handlePacket(packet: Packet) {
     switch (packet.getType()) {
       case HazelPacketType.Reliable:
+        this.acknowledgePacket(packet.nonce!);
         // fallthrough
       case HazelPacketType.Fragment:
         // Hazel currently treats Fragment packets as Unreliable
@@ -131,9 +135,11 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
         break;
       }
       case HazelPacketType.Hello:
+        this.acknowledgePacket(packet.nonce!);
         this.handleHello(packet.data as HelloPacket);
         break;
       case HazelPacketType.Ping:
+        this.acknowledgePacket(packet.nonce!);
         this.handlePing();
         break;
       case HazelPacketType.Disconnect:
@@ -809,16 +815,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   protected acknowledgePacket(nonce: number): void {
     this.send(new Packet(nonce, new AcknowledgementPacket(new Bitfield(this.getUnacknowledgedPacketArray()))));
 
-    const resolveFunArr = this.acknowledgementResolveMap.get(nonce);
-
-    if (resolveFunArr !== undefined) {
-      for (let i = 0; i < resolveFunArr.length; i++) {
-        resolveFunArr[i]();
-      }
-    }
-
-    this.acknowledgementResolveMap.delete(nonce);
-
     const resolve = this.flushResolveMap.get(nonce);
 
     this.flushResolveMap.delete(nonce);
@@ -836,6 +832,16 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    */
   protected handleAcknowledgement(nonce: number): void {
     this.unacknowledgedPackets.delete(nonce);
+
+    const resolveFunArr = this.acknowledgementResolveMap.get(nonce);
+
+    if (resolveFunArr !== undefined) {
+      for (let i = 0; i < resolveFunArr.length; i++) {
+        resolveFunArr[i]();
+      }
+    }
+
+    this.acknowledgementResolveMap.delete(nonce);
   }
 
   /**
