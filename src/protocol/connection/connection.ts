@@ -71,33 +71,44 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
 
       const parsed = Packet.deserialize(reader, packetDestination == PacketDestination.Server, this.lobby?.getLevel());
 
-      if (parsed.isReliable()) {
-        this.acknowledgePacket(parsed.nonce!);
+      if (!parsed.isReliable()) {
+        this.handlePacket(parsed);
+        return;
+      }
 
-        if (parsed.nonce! <= this.lastRecvNonce) {
+      this.acknowledgePacket(parsed.nonce!); // acknowledge all packets regardless if they were sent out of order or not
+
+      if (parsed.nonce! <= this.lastRecvNonce) { // nonce already received
+        return;
+      }
+
+      if (this.lastRecvNonce < 0) { // no data on last reliable message so just handle this as normal
+        this.handlePacket(parsed);
+        this.lastRecvNonce = parsed.nonce!; // set this as the last received nonce starting point
+        return;
+      }
+
+      if (parsed.nonce !== this.lastRecvNonce + 1) { // if this message wasn't the expected nonce
+        this.receivePacketQueue.push(parsed); // add to queue of out-of-order nonces
+        return;
+      }
+
+      this.handlePacket(parsed); // handle expected packet
+      this.lastRecvNonce = parsed.nonce;
+      for (let i = 0; i < this.receivePacketQueue.length; i++) { // loop through out-of-order nonces
+        const nextPacket = this.receivePacketQueue.shift(); // get first one
+
+        if (!nextPacket) { // whatthefuck
           return;
         }
 
-        if (this.lastRecvNonce > -1) {
-          if (parsed.nonce !== this.lastRecvNonce + 1) {
-            this.receivePacketQueue.unshift(parsed);
-          } else {
-            this.handlePacket(parsed);
-            this.lastRecvNonce = parsed.nonce;
-            let nextPacket: Packet|undefined;
-            while (nextPacket = this.receivePacketQueue.pop()) {
-              if (nextPacket) {
-                if (nextPacket.nonce! !== this.lastRecvNonce + 1) {
-                  return;
-                }
-                this.handlePacket(nextPacket);
-                this.lastRecvNonce = nextPacket.nonce;
-              }
-            }
-          }
-        } else {
-          this.lastRecvNonce = 0;
+        if (nextPacket.nonce! !== this.lastRecvNonce + 1) { // missing nonce in between the last and this
+          return; // so exit early and wait until next packet received
+          // no need to add it back to queue as it will be expected anyway so it will just be done on this.handlePacket(parsed)
         }
+
+        this.handlePacket(nextPacket); // handle this next packet that was received out of order
+        this.lastRecvNonce = nextPacket.nonce; // update this as the last received nonce
       }
     });
   }
