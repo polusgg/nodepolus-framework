@@ -856,7 +856,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
       return;
     }
 
-    if (!SUPPORTED_VERSIONS.some(version => version.equals(helloPacket.clientVersion, false))) {
+    if (!SUPPORTED_VERSIONS.some(version => version.equals(helloPacket.clientVersion))) {
       this.disconnect(DisconnectReason.incorrectVersion());
 
       return;
