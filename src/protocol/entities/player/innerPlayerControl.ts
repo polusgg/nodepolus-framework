@@ -260,21 +260,25 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     const takenColors = this.getLobby().getSafeGameData().getGameData().getTakenColors(this.getPlayerId());
     let setColor: PlayerColor = color;
 
-    this.getLobby().getHostInstance().ensurePlayerDataExists(player);
+    await this.getLobby().getHostInstance().ensurePlayerDataExists(player);
 
     let count = 0;
 
-    while (takenColors.has(setColor) && count < 20) {
+    while (takenColors.has(setColor)) {
       setColor = (setColor + 1) % numberOfColors;
       count++;
+      if (count < takenColors.size) {
+        setColor = color;
+        break;
+      }
     }
 
-    this.setColor(setColor, this.getLobby().getConnections());
+    await this.setColor(setColor, this.getLobby().getConnections());
 
     this.checkedColor = true;
 
     if (this.checkedName) {
-      (player.getLobby() as Lobby).finishedSpawningPlayer(player.getConnection()!);
+      await (player.getLobby() as Lobby).finishedSpawningPlayer(player.getConnection()!);
     }
   }
 
