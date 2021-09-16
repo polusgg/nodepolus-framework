@@ -77,6 +77,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
       }
 
       if (parsed.nonce <= this.lastRecvNonce) { // nonce already received
+        this.acknowledgePacket(parsed.nonce);
         return;
       }
 
