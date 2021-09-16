@@ -2,7 +2,7 @@ import { GameOverReason, GameState, HazelPacketType, LimboState, PacketDestinati
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer } from "../../types";
 import { BaseRootPacket, EndGamePacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { CONNECTION_TIMEOUT_DURATION, MAX_PACKET_BYTE_SIZE, SUPPORTED_VERSIONS } from "../../util/constants";
-import { AcknowledgementPacket, DisconnectPacket, HelloPacket, RootPacket } from "../packets/hazel";
+import { AcknowledgementPacket, DisconnectPacket, HelloPacket, PingPacket, RootPacket } from "../packets/hazel";
 import { ServerPacketOutCustomEvent, ServerPacketOutEvent } from "../../api/events/server";
 import { LobbyHostAddedEvent, LobbyHostRemovedEvent } from "../../api/events/lobby";
 import { PlayerBannedEvent, PlayerKickedEvent } from "../../api/events/player";
@@ -71,7 +71,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
 
       const parsed = Packet.deserialize(reader, packetDestination == PacketDestination.Server, this.lobby?.getLevel());
       
-      if (parsed.nonce === undefined || !(parsed.getType() === HazelPacketType.Reliable || parsed.getType() === HazelPacketType.Ping || parsed.getType() === HazelPacketType.Hello)) {
+      if (parsed.nonce === undefined || !(parsed.getType() === HazelPacketType.Reliable || parsed.getType() === HazelPacketType.Hello)) {
         this.handlePacket(parsed);
         return;
       }
@@ -139,7 +139,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
         this.handleHello(packet.data as HelloPacket);
         break;
       case HazelPacketType.Ping:
-        this.acknowledgePacket(packet.nonce!);
         this.handlePing();
         break;
       case HazelPacketType.Disconnect:
@@ -780,6 +779,8 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    */
   protected handlePing(): void {
     this.lastPingReceivedTime = Date.now();
+
+    this.send(new Packet(undefined, new PingPacket()));
   }
 
   /**

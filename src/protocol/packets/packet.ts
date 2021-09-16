@@ -35,7 +35,6 @@ export class Packet {
   static isReliable(type: HazelPacketType): boolean {
     return type == HazelPacketType.Reliable
         || type == HazelPacketType.Hello
-        || type == HazelPacketType.Ping
         || type == HazelPacketType.Acknowledgement;
   }
 
