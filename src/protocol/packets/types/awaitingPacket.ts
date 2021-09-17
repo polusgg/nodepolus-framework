@@ -9,4 +9,5 @@ export interface AwaitingPacket {
   packet: BaseRootPacket;
 
   resolve(value?: unknown): void;
+  reject(value?: Error): void;
 }
