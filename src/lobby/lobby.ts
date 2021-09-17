@@ -784,6 +784,10 @@ export class Lobby implements LobbyInstance {
       player.setInitialized(true);
 
       await this.getServer().emit("player.joined", new PlayerJoinedEvent(this, player, connection.isRejoining()));
+    } else if (player === undefined) {
+      console.log("Player for connection", connection, "is missing. skipping player.joined event.");
+    } else {
+      console.log("Player", player, "already initialized. skipping player.joined event.");
     }
   }
 
@@ -1311,8 +1315,11 @@ export class Lobby implements LobbyInstance {
     connection.setLimboState(LimboState.NotLimbo);
 
     this.startedSpawningPlayer(connection);
-    await this.sendJoinedMessage(connection);
-    await this.broadcastJoinMessage(connection);
+
+    await Promise.all([
+      this.sendJoinedMessage(connection),
+      this.broadcastJoinMessage(connection),
+    ])
   }
 
   /**
@@ -1357,6 +1364,8 @@ export class Lobby implements LobbyInstance {
    * @param connection - The connection that joined the lobby
    */
   protected async broadcastJoinMessage(connection: Connection): Promise<void> {
+    const proms: Promise<any>[] = [];
+
     for (let i = 0; i < this.connections.length; i++) {
       const writeConnection = this.connections[i];
 
@@ -1364,7 +1373,7 @@ export class Lobby implements LobbyInstance {
         continue;
       }
 
-      await writeConnection.sendReliable([
+      proms.push(writeConnection.sendReliable([
         new JoinGameResponsePacket(
           this.code,
           connection.getId(),
@@ -1372,8 +1381,10 @@ export class Lobby implements LobbyInstance {
             ? writeConnection.getId()
             : this.hostInstance.getId(),
         ),
-      ]);
+      ]));
     }
+
+    await Promise.all(proms);
   }
 
   /**
