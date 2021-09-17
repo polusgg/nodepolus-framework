@@ -18,7 +18,7 @@ import dgram from "dgram";
 export class Connection extends Emittery<ConnectionEvents> implements Metadatable, NetworkAccessible {
   protected readonly metadata: Map<string, unknown> = new Map();
   protected readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
-  protected readonly acknowledgementRejectMap: Map<number, ((value?: Error) => void)[]> = new Map();
+  protected readonly acknowledgementRejectMap: Map<number, ((value?: unknown) => void)[]> = new Map();
   protected readonly flushResolveMap: Map<number, (value: void | PromiseLike<void>) => void> = new Map();
   protected readonly unacknowledgedPackets: Map<number, number> = new Map();
 
@@ -118,6 +118,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   }
 
   protected handlePacket(packet: Packet) {
+    console.log("Recv Packet", packet);
     switch (packet.getType()) {
       case HazelPacketType.Reliable:
         this.acknowledgePacket(packet.nonce!);
@@ -136,6 +137,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
         break;
       }
       case HazelPacketType.Hello:
+        console.log("Recv Hello", packet);
         this.acknowledgePacket(packet.nonce!);
         this.handleHello(packet.data as HelloPacket);
         break;
@@ -892,14 +894,17 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param reason - The reason for why the connection was disconnected
    */
   protected cleanup(reason?: DisconnectReason): void {
+    console.log("Failed to send", this.packetBuffer, "to", this);
+    console.log("Rejecting all unresponded packets", this.acknowledgementRejectMap);
+
     for (let i = 0; i < this.packetBuffer.length; i++) {
       //DEBUG
-      this.packetBuffer[i].reject(new Error("Connection " + this.id + " disconnected."));
+      this.packetBuffer[i].reject("Connection " + this.id + " disconnected.");
     }
 
     for (const arr of this.acknowledgementRejectMap.values()) {
       for (let i = 0; i < arr.length; i++) {
-        arr[i](new Error("Connection " + this.id + " disconnected."));
+        arr[i]("Connection " + this.id + " disconnected.");
       }
     }
 

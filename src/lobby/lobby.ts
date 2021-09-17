@@ -614,11 +614,7 @@ export class Lobby implements LobbyInstance {
       promiseArray.push(sendTo[i].writeReliable(packet));
     }
 
-    try {
-      await Promise.all(promiseArray);
-    } catch {
-      console.log("Failed to write packet");
-    }
+    await Promise.allSettled(promiseArray);
   }
 
   async sendRpcPacket(from: BaseInnerNetObject, packet: BaseRpcPacket, sendTo?: Connection[]): Promise<void> {
@@ -736,9 +732,13 @@ export class Lobby implements LobbyInstance {
           playerData.setName(name);
           await player.updateGameData();
 
-          await connection.writeReliable(new GameDataPacket([
-            new RpcPacket(player.getEntity().getPlayerControl().getNetId(), new SendChatPacket(message.toString())),
-          ], this.code));
+          try {
+            await connection.writeReliable(new GameDataPacket([
+              new RpcPacket(player.getEntity().getPlayerControl().getNetId(), new SendChatPacket(message.toString())),
+            ], this.code));
+          } catch (e) {
+            console.log("Failed to send chat");
+          }
 
           playerData.setColor(oldColor);
           playerData.setName(oldName);
@@ -784,10 +784,6 @@ export class Lobby implements LobbyInstance {
       player.setInitialized(true);
 
       await this.getServer().emit("player.joined", new PlayerJoinedEvent(this, player, connection.isRejoining()));
-    } else if (player === undefined) {
-      console.log("Player for connection", connection, "is missing. skipping player.joined event.");
-    } else {
-      console.log("Player", player, "already initialized. skipping player.joined event.");
     }
   }
 
@@ -893,12 +889,17 @@ export class Lobby implements LobbyInstance {
    * @param reason - The reason for why the connection was disconnected
    */
   async handleDisconnect(connection: Connection, reason?: DisconnectReason): Promise<void> {
-    const disconnectingConnectionIndex = this.connections.indexOf(connection);
+    const disconnectingConnectionIndex = this.connections.findIndex(c => c.getId() === connection.getId());
     const disconnectingPlayer = this.findPlayerByConnection(connection);
 
-    if (disconnectingConnectionIndex > -1) {
-      this.connections.splice(disconnectingConnectionIndex, 1);
+    if (disconnectingConnectionIndex === -1) {
+      console.log("Connections in lobby", this.connections);
+      console.log("Disconnecting Connection", connection);
+
+      throw new Error("HandleDisconnect called with a connection not in the lobby");
     }
+
+    this.connections.splice(disconnectingConnectionIndex, 1);
 
     await this.hostInstance.stopCountdown();
     await this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.getId(), 0, reason ?? DisconnectReason.exitGame()));
@@ -996,9 +997,9 @@ export class Lobby implements LobbyInstance {
       const isCountingDown = this.hostInstance.isCountingDown();
 
       if (count >= this.options.getMaxPlayers() ||
-          count >= this.server.getMaxPlayersPerLobby() ||
-          isGameStarted ||
-          isCountingDown
+        count >= this.server.getMaxPlayersPerLobby() ||
+        isGameStarted ||
+        isCountingDown
       ) {
         const event = new ServerLobbyJoinRefusedEvent(
           connection,
@@ -1082,7 +1083,7 @@ export class Lobby implements LobbyInstance {
         break;
       }
       case RootPacketType.GameData:
-        // fallthrough
+      // fallthrough
       case RootPacketType.GameDataTo: {
         if (connection.getLimboState() == LimboState.PreSpawn) {
           return;
@@ -1315,11 +1316,8 @@ export class Lobby implements LobbyInstance {
     connection.setLimboState(LimboState.NotLimbo);
 
     this.startedSpawningPlayer(connection);
-
-    await Promise.all([
-      this.sendJoinedMessage(connection),
-      this.broadcastJoinMessage(connection),
-    ])
+    await this.sendJoinedMessage(connection);
+    await this.broadcastJoinMessage(connection);
   }
 
   /**
@@ -1364,8 +1362,6 @@ export class Lobby implements LobbyInstance {
    * @param connection - The connection that joined the lobby
    */
   protected async broadcastJoinMessage(connection: Connection): Promise<void> {
-    const proms: Promise<any>[] = [];
-
     for (let i = 0; i < this.connections.length; i++) {
       const writeConnection = this.connections[i];
 
@@ -1373,18 +1369,20 @@ export class Lobby implements LobbyInstance {
         continue;
       }
 
-      proms.push(writeConnection.sendReliable([
-        new JoinGameResponsePacket(
-          this.code,
-          connection.getId(),
-          writeConnection.isActingHost() && !this.spawningPlayers.has(writeConnection)
-            ? writeConnection.getId()
-            : this.hostInstance.getId(),
-        ),
-      ]));
+      try {
+        await writeConnection.sendReliable([
+          new JoinGameResponsePacket(
+            this.code,
+            connection.getId(),
+            writeConnection.isActingHost() && !this.spawningPlayers.has(writeConnection)
+              ? writeConnection.getId()
+              : this.hostInstance.getId(),
+          ),
+        ]);
+      } catch (er) {
+        console.log("Failed to broadcast join to disconnecting client");
+      }
     }
-
-    await Promise.all(proms);
   }
 
   /**
@@ -1394,18 +1392,22 @@ export class Lobby implements LobbyInstance {
    * @param connection - The connection that joined the lobby
    */
   protected async sendJoinedMessage(connection: Connection): Promise<void> {
-    await connection.sendReliable([
-      new JoinedGamePacket(
-        this.code,
-        connection.getId(),
-        this.hostInstance.getId(),
-        this.connections
-          .filter(con => con.getId() != connection.getId() && con.getLimboState() == LimboState.NotLimbo)
-          .map(con => con.getId())),
-      new AlterGameTagPacket(
-        this.code,
-        AlterGameTag.ChangePrivacy,
-        this.getGameTag(AlterGameTag.ChangePrivacy) ?? 0),
-    ]);
+    try {
+      await connection.sendReliable([
+        new JoinedGamePacket(
+          this.code,
+          connection.getId(),
+          this.hostInstance.getId(),
+          this.connections
+            .filter(con => con.getId() != connection.getId() && con.getLimboState() == LimboState.NotLimbo)
+            .map(con => con.getId())),
+        new AlterGameTagPacket(
+          this.code,
+          AlterGameTag.ChangePrivacy,
+          this.getGameTag(AlterGameTag.ChangePrivacy) ?? 0),
+      ]);
+    } catch (err) {
+      console.log("Failed to send joinedGame to dc'd connection");
+    }
   }
 }
