@@ -847,6 +847,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
     }
 
     this.acknowledgementResolveMap.delete(nonce);
+    this.acknowledgementRejectMap.delete(nonce);
   }
 
   /**
