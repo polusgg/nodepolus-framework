@@ -267,7 +267,8 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     while (takenColors.has(setColor)) {
       setColor = (setColor + 1) % numberOfColors;
       count++;
-      if (count < takenColors.size) {
+
+      if (count > numberOfColors) {
         setColor = color;
         break;
       }
