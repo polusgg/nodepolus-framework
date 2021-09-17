@@ -118,7 +118,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   }
 
   protected handlePacket(packet: Packet) {
-    console.log("Recv Packet", packet);
     switch (packet.getType()) {
       case HazelPacketType.Reliable:
         this.acknowledgePacket(packet.nonce!);
@@ -137,7 +136,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
         break;
       }
       case HazelPacketType.Hello:
-        console.log("Recv Hello", packet);
         this.acknowledgePacket(packet.nonce!);
         this.handleHello(packet.data as HelloPacket);
         break;
