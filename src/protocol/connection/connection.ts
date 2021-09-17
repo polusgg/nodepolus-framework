@@ -118,7 +118,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   }
 
   protected handlePacket(packet: Packet) {
-    console.log("Recv Packet", packet);
     switch (packet.getType()) {
       case HazelPacketType.Reliable:
         this.acknowledgePacket(packet.nonce!);
@@ -137,7 +136,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
         break;
       }
       case HazelPacketType.Hello:
-        console.log("Recv Hello", packet);
         this.acknowledgePacket(packet.nonce!);
         this.handleHello(packet.data as HelloPacket);
         break;
@@ -894,9 +892,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param reason - The reason for why the connection was disconnected
    */
   protected cleanup(reason?: DisconnectReason): void {
-    console.log("Failed to send", this.packetBuffer, "to", this);
-    console.log("Rejecting all unresponded packets", this.acknowledgementRejectMap);
-
     for (let i = 0; i < this.packetBuffer.length; i++) {
       //DEBUG
       this.packetBuffer[i].reject(new Error("Connection " + this.id + " disconnected."));
