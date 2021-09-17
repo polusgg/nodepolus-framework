@@ -18,6 +18,7 @@ import dgram from "dgram";
 export class Connection extends Emittery<ConnectionEvents> implements Metadatable, NetworkAccessible {
   protected readonly metadata: Map<string, unknown> = new Map();
   protected readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
+  protected readonly acknowledgementRejectMap: Map<number, ((value?: Error) => void)[]> = new Map();
   protected readonly flushResolveMap: Map<number, (value: void | PromiseLike<void>) => void> = new Map();
   protected readonly unacknowledgedPackets: Map<number, number> = new Map();
 
@@ -70,14 +71,13 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
       }
 
       const parsed = Packet.deserialize(reader, packetDestination == PacketDestination.Server, this.lobby?.getLevel());
-      
+
       if (parsed.nonce === undefined || !(parsed.getType() === HazelPacketType.Reliable || parsed.getType() === HazelPacketType.Hello)) {
         this.handlePacket(parsed);
         return;
       }
 
       if (parsed.nonce <= this.lastRecvNonce) { // nonce already received
-        this.acknowledgePacket(parsed.nonce);
         return;
       }
 
@@ -118,13 +118,14 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   }
 
   protected handlePacket(packet: Packet) {
+    console.log("Recv Packet", packet);
     switch (packet.getType()) {
       case HazelPacketType.Reliable:
         this.acknowledgePacket(packet.nonce!);
-        // fallthrough
+      // fallthrough
       case HazelPacketType.Fragment:
-        // Hazel currently treats Fragment packets as Unreliable
-        // fallthrough
+      // Hazel currently treats Fragment packets as Unreliable
+      // fallthrough
       case HazelPacketType.Unreliable: {
         this.handlePing();
 
@@ -136,6 +137,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
         break;
       }
       case HazelPacketType.Hello:
+        console.log("Recv Hello", packet);
         this.acknowledgePacket(packet.nonce!);
         this.handleHello(packet.data as HelloPacket);
         break;
@@ -463,8 +465,8 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param packet - The packet to be sent
    */
   async writeReliable(packet: BaseRootPacket): Promise<void> {
-    return new Promise(resolve => {
-      this.packetBuffer.push({ packet, resolve });
+    return new Promise((resolve, reject) => {
+      this.packetBuffer.push({ packet, resolve, reject });
 
       const currentPacket = new Packet(0, new RootPacket(this.packetBuffer.map(p => p.packet)));
 
@@ -488,7 +490,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
         } else {
           this.flush();
 
-          this.packetBuffer = [{ packet, resolve }];
+          this.packetBuffer = [{ packet, resolve, reject }];
         }
       }
     });
@@ -509,10 +511,10 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param packets - The packets to be sent
    */
   async sendReliable(packets: BaseRootPacket[]): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       const temp: AwaitingPacket[] = [...this.packetBuffer];
 
-      this.packetBuffer = packets.map(packet => ({ packet, resolve }));
+      this.packetBuffer = packets.map(packet => ({ packet, resolve, reject }));
 
       this.flush(true);
 
@@ -577,18 +579,21 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
 
         const packetArr = new Array(this.packetBuffer.length);
         const resolveFuncs = new Array(this.packetBuffer.length);
+        const rejectFuncs = new Array(this.packetBuffer.length);
 
         for (let i = 0; i < this.packetBuffer.length; i++) {
           const awaitingPacket = this.packetBuffer[i];
 
           packetArr[i] = awaitingPacket.packet;
           resolveFuncs[i] = awaitingPacket.resolve;
+          rejectFuncs[i] = awaitingPacket.reject;
         }
 
         packetBuffer = packetArr;
         packet = new Packet(nonce, new RootPacket(packetBuffer));
 
         this.acknowledgementResolveMap.set(nonce, resolveFuncs);
+        this.acknowledgementRejectMap.set(nonce, rejectFuncs);
       } else {
         packet = new Packet(nonce, new RootPacket(this.unreliablePacketBuffer));
         packetBuffer = this.unreliablePacketBuffer;
@@ -889,6 +894,20 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param reason - The reason for why the connection was disconnected
    */
   protected cleanup(reason?: DisconnectReason): void {
+    console.log("Failed to send", this.packetBuffer, "to", this);
+    console.log("Rejecting all unresponded packets", this.acknowledgementRejectMap);
+
+    for (let i = 0; i < this.packetBuffer.length; i++) {
+      //DEBUG
+      this.packetBuffer[i].reject(new Error("Connection " + this.id + " disconnected."));
+    }
+
+    for (const arr of this.acknowledgementRejectMap.values()) {
+      for (let i = 0; i < arr.length; i++) {
+        arr[i](new Error("Connection " + this.id + " disconnected."));
+      }
+    }
+
     this.disconnected = true;
     this.receivePacketQueue = [];
 
