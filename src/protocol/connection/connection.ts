@@ -464,6 +464,11 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    */
   async writeReliable(packet: BaseRootPacket): Promise<void> {
     return new Promise((resolve, reject) => {
+      if (this.disconnected) {
+        reject("Cannot send packets to a disconnected client");
+        return;
+      }
+
       this.packetBuffer.push({ packet, resolve, reject });
 
       const currentPacket = new Packet(0, new RootPacket(this.packetBuffer.map(p => p.packet)));
@@ -500,6 +505,10 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param packet - The packet to be sent
    */
   writeUnreliable(packet: BaseRootPacket): void {
+    if (this.disconnected) {
+      throw new Error("Cannot send packets to a disconnected client");
+    }
+
     this.unreliablePacketBuffer.push(packet);
   }
 
@@ -510,6 +519,11 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    */
   async sendReliable(packets: BaseRootPacket[]): Promise<void> {
     return new Promise((resolve, reject) => {
+      if (this.disconnected) {
+        reject("Cannot send packets to a disconnected client");
+        return;
+      }
+
       const temp: AwaitingPacket[] = [...this.packetBuffer];
 
       this.packetBuffer = packets.map(packet => ({ packet, resolve, reject }));
@@ -526,6 +540,10 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param packets - The packets to be sent
    */
   async sendUnreliable(packets: BaseRootPacket[]): Promise<void> {
+    if (this.disconnected) {
+      throw new Error("Cannot send packets to a disconnected client");
+    }
+
     const temp: BaseRootPacket[] = [...this.unreliablePacketBuffer];
 
     this.unreliablePacketBuffer = packets;
@@ -846,8 +864,15 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
       }
     }
 
+    const resolve = this.flushResolveMap.get(nonce);
+
+    if (resolve !== undefined) {
+      resolve();
+    }
+
     this.acknowledgementResolveMap.delete(nonce);
     this.acknowledgementRejectMap.delete(nonce);
+    this.flushResolveMap.delete(nonce);
   }
 
   /**

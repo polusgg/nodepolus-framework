@@ -314,7 +314,13 @@ export class Lobby implements LobbyInstance {
   }
 
   removePlayer(player: Player): void {
-    this.players.splice(this.players.indexOf(player), 1);
+    const playerIndex = this.players.indexOf(player);
+
+    if (playerIndex === -1) {
+      throw new Error("Removing player not in lobby");
+    }
+
+    this.players.splice(playerIndex, 1);
     this.gameData?.getGameData().removePlayer(player.getId());
   }
 
