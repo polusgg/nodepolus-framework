@@ -660,12 +660,16 @@ export class Host implements HostInstance {
     this.readyPlayerList.delete(connection.getId());
 
     if (gameState == GameState.NotStarted) {
-      await this.stopCountdown();
-
-      if (this.lobby.getGame() === undefined) {
-        await this.lobby.enableActingHosts(true);
-      } else {
-        await this.handleReady();
+      try {
+        await this.stopCountdown();
+  
+        if (this.lobby.getGame() === undefined) {
+          await this.lobby.enableActingHosts(true);
+        } else {
+          await this.handleReady();
+        }
+      } catch(err) {
+        console.log("!!! Failed to send proper host disconnect handle packets !!!");
       }
     }
 

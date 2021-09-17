@@ -908,7 +908,10 @@ export class Lobby implements LobbyInstance {
     this.connections.splice(disconnectingConnectionIndex, 1);
 
     await this.hostInstance.stopCountdown();
-    await this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.getId(), 0, reason ?? DisconnectReason.exitGame()));
+
+    try {
+      await this.sendRootGamePacket(new RemovePlayerPacket(this.code, connection.getId(), 0, reason ?? DisconnectReason.exitGame()));
+    } catch(err) {}
 
     if (this.meetingHud !== undefined && disconnectingPlayer) {
       const oldMeetingHud = this.meetingHud.getMeetingHud().clone();
@@ -931,16 +934,22 @@ export class Lobby implements LobbyInstance {
         }
       }
 
-      await this.sendRootGamePacket(new GameDataPacket([
-        this.meetingHud.getMeetingHud().serializeData(oldMeetingHud),
-      ], this.code));
-
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      await this.meetingHud?.getMeetingHud().clearVote(votesToClear);
+      try {
+        await this.sendRootGamePacket(new GameDataPacket([
+          this.meetingHud.getMeetingHud().serializeData(oldMeetingHud),
+        ], this.code));
+  
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        await this.meetingHud?.getMeetingHud().clearVote(votesToClear);
+      } catch(err) {}
     }
 
     if (connection.isActingHost() && this.connections.length > 0) {
-      await this.migrateHost(connection);
+      try {
+        await this.migrateHost(connection);
+      } catch(err) {
+        console.log("!!! FAILED TO MIGRATE HOST !!!");
+      }
     }
 
     await this.hostInstance.handleDisconnect(connection, reason);
