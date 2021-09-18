@@ -782,7 +782,11 @@ export class Server extends Emittery<ServerEvents> {
 
         await this.emit("server.lobby.join", event);
 
-        console.log("AfterEmit", event.isCancelled())
+        console.log("AfterEmit", event.isCancelled());
+
+        if (!connection.isConnected()) {
+          console.log("Failed to handle join for", connection.getId(), "as it was disconnected before handling join.")
+        }
 
         if (!event.isCancelled()) {
           const lobby = event.getLobby();

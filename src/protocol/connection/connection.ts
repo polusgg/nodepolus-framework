@@ -403,6 +403,13 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   }
 
   /**
+   * Returns true if the connection is connected to the client
+   */
+  isConnected(): boolean {
+    return !this.disconnected;
+  }
+
+  /**
    * Gets whether or not the connection is an acting host in their current
    * lobby.
    */
