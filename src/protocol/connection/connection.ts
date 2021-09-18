@@ -19,6 +19,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   protected readonly metadata: Map<string, unknown> = new Map();
   protected readonly acknowledgementResolveMap: Map<number, ((value?: unknown) => void)[]> = new Map();
   protected readonly acknowledgementRejectMap: Map<number, ((value?: unknown) => void)[]> = new Map();
+  protected readonly packetStackMap: Map<number, (string | undefined)[]> = new Map();
   protected readonly flushResolveMap: Map<number, (value: void | PromiseLike<void>) => void> = new Map();
   protected readonly unacknowledgedPackets: Map<number, number> = new Map();
 
@@ -463,13 +464,15 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param packet - The packet to be sent
    */
   async writeReliable(packet: BaseRootPacket): Promise<void> {
+    const stack = (new Error()).stack;
+
     return new Promise((resolve, reject) => {
       if (this.disconnected) {
         reject("Cannot send packets to a disconnected client");
         return;
       }
 
-      this.packetBuffer.push({ packet, resolve, reject });
+      this.packetBuffer.push({ packet, resolve, reject, stack });
 
       const currentPacket = new Packet(0, new RootPacket(this.packetBuffer.map(p => p.packet)));
 
@@ -518,6 +521,8 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param packets - The packets to be sent
    */
   async sendReliable(packets: BaseRootPacket[]): Promise<void> {
+    const { stack } = new Error();
+
     return new Promise((resolve, reject) => {
       if (this.disconnected) {
         reject("Cannot send packets to a disconnected client");
@@ -526,7 +531,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
 
       const temp: AwaitingPacket[] = [...this.packetBuffer];
 
-      this.packetBuffer = packets.map(packet => ({ packet, resolve, reject }));
+      this.packetBuffer = packets.map(packet => ({ packet, resolve, reject, stack }));
 
       this.flush(true);
 
@@ -596,6 +601,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
         const packetArr = new Array(this.packetBuffer.length);
         const resolveFuncs = new Array(this.packetBuffer.length);
         const rejectFuncs = new Array(this.packetBuffer.length);
+        const stackStrings = new Array<string | undefined>(this.packetBuffer.length);
 
         for (let i = 0; i < this.packetBuffer.length; i++) {
           const awaitingPacket = this.packetBuffer[i];
@@ -603,6 +609,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
           packetArr[i] = awaitingPacket.packet;
           resolveFuncs[i] = awaitingPacket.resolve;
           rejectFuncs[i] = awaitingPacket.reject;
+          stackStrings[i] = awaitingPacket.stack;
         }
 
         packetBuffer = packetArr;
@@ -610,6 +617,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
 
         this.acknowledgementResolveMap.set(nonce, resolveFuncs);
         this.acknowledgementRejectMap.set(nonce, rejectFuncs);
+        this.packetStackMap.set(nonce, stackStrings);
       } else {
         packet = new Packet(nonce, new RootPacket(this.unreliablePacketBuffer));
         packetBuffer = this.unreliablePacketBuffer;
@@ -923,13 +931,13 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
 
     for (let i = 0; i < this.packetBuffer.length; i++) {
       //DEBUG
-      this.packetBuffer[i].reject("Connection " + this.id + " disconnected.");
+      this.packetBuffer[i].reject("Connection " + this.id + " disconnected.\n" + this.packetBuffer[i].stack);
     }
 
-    for (const arr of this.acknowledgementRejectMap.values()) {
-      for (let i = 0; i < arr.length; i++) {
-        arr[i]("Connection " + this.id + " disconnected.");
-      }
+    for (const key of this.acknowledgementRejectMap.keys()) {
+      this.acknowledgementRejectMap.get(key)!.forEach((method, index) => {
+        method("Connection " + this.id + " disconnected.\n" + this.packetStackMap.get(key)![index])
+      });
     }
 
     this.disconnected = true;

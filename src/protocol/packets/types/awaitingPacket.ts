@@ -7,6 +7,7 @@ import { BaseRootPacket } from "../root";
 // TODO: Remove and wrap packets in a Promise
 export interface AwaitingPacket {
   packet: BaseRootPacket;
+  stack?: string;
 
   resolve(value?: unknown): void;
   reject(value?: unknown): void;
