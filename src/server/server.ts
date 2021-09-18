@@ -785,7 +785,8 @@ export class Server extends Emittery<ServerEvents> {
         console.log("AfterEmit", event.isCancelled());
 
         if (!connection.isConnected()) {
-          console.log("Failed to handle join for", connection.getId(), "as it was disconnected before handling join.")
+          console.log("Failed to handle join for", connection.getId(), "as it was disconnected before handling join.");
+          return;
         }
 
         if (!event.isCancelled()) {
