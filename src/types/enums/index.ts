@@ -81,3 +81,5 @@ export { TeleportReason } from "./teleportReason";
 export { VoteStateConstants } from "./voteStateConstants";
 
 export { StringNames } from "./stringNames";
+
+export { SetCosmeticReason } from "./setCosmeticReason";

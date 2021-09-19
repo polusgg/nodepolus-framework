@@ -1,4 +1,4 @@
-import { PlayerHat } from "../../../types/enums";
+import { PlayerHat, SetCosmeticReason } from "../../../types/enums";
 import { PlayerInstance } from "../../player";
 import { CancellableEvent } from "../types";
 
@@ -15,6 +15,7 @@ export class PlayerHatUpdatedEvent extends CancellableEvent {
     protected readonly player: PlayerInstance,
     protected readonly oldHat: PlayerHat,
     protected newHat: PlayerHat,
+    protected reason: SetCosmeticReason
   ) {
     super();
   }
@@ -31,6 +32,13 @@ export class PlayerHatUpdatedEvent extends CancellableEvent {
    */
   getOldHat(): PlayerHat {
     return this.oldHat;
+  }
+
+  /**
+   * Get the reason for why the player's hat is being updated.
+   */
+  getReason(): SetCosmeticReason {
+    return this.reason
   }
 
   /**

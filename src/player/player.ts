@@ -1,4 +1,4 @@
-import { PlayerSkin, PlayerPet, PlayerHat, PlayerColor, PlayerRole, TeleportReason, SpawnFlag } from "../types/enums";
+import { PlayerSkin, PlayerPet, PlayerHat, PlayerColor, PlayerRole, TeleportReason, SpawnFlag, SetCosmeticReason } from "../types/enums";
 import { RemovePlayerPacket, JoinGameResponsePacket, GameDataPacket } from "../protocol/packets/root";
 import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../types";
 import { PlayerData } from "../protocol/entities/gameData/types";
@@ -121,24 +121,24 @@ export class Player implements PlayerInstance {
     return this.getGameDataEntry().getHat();
   }
 
-  async setHat(hat: PlayerHat): Promise<void> {
-    await this.entity.getPlayerControl().handleSetHat(hat, this.lobby.getConnections());
+  async setHat(hat: PlayerHat, reason = SetCosmeticReason.ClientRequest): Promise<void> {
+    await this.entity.getPlayerControl().handleSetHat(hat, this.lobby.getConnections(), reason);
   }
 
   getPet(): PlayerPet {
     return this.getGameDataEntry().getPet();
   }
 
-  async setPet(pet: PlayerPet): Promise<void> {
-    await this.entity.getPlayerControl().handleSetPet(pet, this.lobby.getConnections());
+  async setPet(pet: PlayerPet, reason = SetCosmeticReason.ClientRequest): Promise<void> {
+    await this.entity.getPlayerControl().handleSetPet(pet, this.lobby.getConnections(), reason);
   }
 
   getSkin(): PlayerSkin {
     return this.getGameDataEntry().getSkin();
   }
 
-  async setSkin(skin: PlayerSkin): Promise<void> {
-    await this.entity.getPlayerControl().handleSetSkin(skin, this.lobby.getConnections());
+  async setSkin(skin: PlayerSkin, reason = SetCosmeticReason.ClientRequest): Promise<void> {
+    await this.entity.getPlayerControl().handleSetSkin(skin, this.lobby.getConnections(), reason);
   }
 
   getRole(): PlayerRole {

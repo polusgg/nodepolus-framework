@@ -1,4 +1,4 @@
-import { PlayerColor, PlayerHat, PlayerPet, PlayerRole, PlayerSkin, TeleportReason } from "../../types/enums";
+import { PlayerColor, PlayerHat, PlayerPet, PlayerRole, PlayerSkin, SetCosmeticReason, TeleportReason } from "../../types/enums";
 import { DisconnectReason, LevelTask, LevelVent, Metadatable, Vector2 } from "../../types";
 import { PlayerData } from "../../protocol/entities/gameData/types";
 import { Connection } from "../../protocol/connection";
@@ -70,7 +70,7 @@ export interface PlayerInstance extends Metadatable {
    *
    * @param hat - The player's new hat
    */
-  setHat(hat: PlayerHat): Promise<void>;
+  setHat(hat: PlayerHat, reason?: SetCosmeticReason): Promise<void>;
 
   /**
    * Gets the player's pet.
@@ -82,7 +82,7 @@ export interface PlayerInstance extends Metadatable {
    *
    * @param pet - The player's new pet
    */
-  setPet(pet: PlayerPet): Promise<void>;
+  setPet(pet: PlayerPet, reason?: SetCosmeticReason): Promise<void>;
 
   /**
    * Gets the player's skin.
@@ -94,7 +94,7 @@ export interface PlayerInstance extends Metadatable {
    *
    * @param skin - The player's new skin
    */
-  setSkin(skin: PlayerSkin): Promise<void>;
+  setSkin(skin: PlayerSkin, reason?: SetCosmeticReason): Promise<void>;
 
   /**
    * Gets the player's role.

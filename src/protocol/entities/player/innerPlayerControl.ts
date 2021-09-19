@@ -37,6 +37,7 @@ import {
   PlayerSkin,
   RpcPacketType,
   TaskType,
+  SetCosmeticReason
 } from "../../../types/enums";
 import {
   BaseRpcPacket,
@@ -283,7 +284,7 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     }
   }
 
-  async handleSetColor(color: PlayerColor, _sendTo?: Connection[]): Promise<void> {
+  async handleSetColor(color: PlayerColor, _sendTo?: Connection[], reason = SetCosmeticReason.ClientRequest): Promise<void> {
     const owner = this.getLobby().findSafeConnection(this.getOwnerId());
     const player = this.getLobby().findSafePlayerByConnection(owner);
 
@@ -313,9 +314,9 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     await this.sendRpcPacket(new SetColorPacket(event.getNewColor()), sendTo);
   }
 
-  async handleSetHat(hat: PlayerHat, sendTo?: Connection[]): Promise<void> {
+  async handleSetHat(hat: PlayerHat, sendTo?: Connection[], reason = SetCosmeticReason.ClientRequest): Promise<void> {
     const player = this.getPlayer();
-    const event = new PlayerHatUpdatedEvent(player, player.getHat(), hat);
+    const event = new PlayerHatUpdatedEvent(player, player.getHat(), hat, reason);
 
     await this.getLobby().getServer().emit("player.hat.updated", event);
 
@@ -329,9 +330,9 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     await this.sendRpcPacket(new SetHatPacket(event.getNewHat()), sendTo);
   }
 
-  async handleSetPet(pet: PlayerPet, sendTo?: Connection[]): Promise<void> {
+  async handleSetPet(pet: PlayerPet, sendTo?: Connection[], reason = SetCosmeticReason.ClientRequest): Promise<void> {
     const player = this.getPlayer();
-    const event = new PlayerPetUpdatedEvent(player, player.getPet(), pet);
+    const event = new PlayerPetUpdatedEvent(player, player.getPet(), pet, reason);
 
     await this.getLobby().getServer().emit("player.pet.updated", event);
 
@@ -345,9 +346,9 @@ export class InnerPlayerControl extends BaseInnerNetObject {
     await this.sendRpcPacket(new SetPetPacket(event.getNewPet()), sendTo);
   }
 
-  async handleSetSkin(skin: PlayerSkin, sendTo?: Connection[]): Promise<void> {
+  async handleSetSkin(skin: PlayerSkin, sendTo?: Connection[], reason = SetCosmeticReason.ClientRequest): Promise<void> {
     const player = this.getPlayer();
-    const event = new PlayerSkinUpdatedEvent(player, player.getSkin(), skin);
+    const event = new PlayerSkinUpdatedEvent(player, player.getSkin(), skin, reason);
 
     await this.getLobby().getServer().emit("player.skin.updated", event);
 
