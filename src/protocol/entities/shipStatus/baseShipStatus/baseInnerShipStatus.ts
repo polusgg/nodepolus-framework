@@ -142,6 +142,11 @@ export abstract class BaseInnerShipStatus extends BaseInnerNetObject {
       throw new Error("Received RepairSystem without a SystemsHandler instance");
     }
 
+    if (lobby.getMeetingHud() !== undefined && systemId === SystemType.Sabotage) {
+      console.log("RepairSystem called for Sabotage during a meeting. Rejecting.")
+      return;
+    }
+
     const system = shipStatus.getShipStatus().getSystemFromType(systemId);
     const player = lobby.getPlayers().find(thePlayer => thePlayer.getEntity().getPlayerControl().getNetId() == playerControlNetId);
     const level = lobby.getLevel();
