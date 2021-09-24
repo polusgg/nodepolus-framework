@@ -30,6 +30,8 @@ export { PlayerPositionUpdatedEvent } from "./playerPositionUpdatedEvent";
 
 export { PlayerPositionWalkedEvent } from "./playerPositionWalkedEvent";
 
+export { PlayerQuickChatMessageEvent } from "./playerQuickChatMessageEvent";
+
 export { PlayerRevivedEvent } from "./playerRevivedEvent";
 
 export { PlayerRoleUpdatedEvent } from "./playerRoleUpdatedEvent";

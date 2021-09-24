@@ -61,6 +61,8 @@ import {
   SyncSettingsPacket,
   SendQuickChatPacket,
 } from "../../packets/rpc";
+import { PlayerQuickChatMessageEvent } from "../../../api/events/player/playerQuickChatMessageEvent";
+import { QuickChatPacketType, QuickChatPhrase, QuickChatPlayer, QuickChatSentence } from "../../packets/rpc/sendQuickChatPacket";
 
 export class InnerPlayerControl extends BaseInnerNetObject {
   protected scanning = false;
@@ -539,6 +541,14 @@ export class InnerPlayerControl extends BaseInnerNetObject {
   }
 
   async handleSendQuickChat(packet: SendQuickChatPacket, sendTo?: Connection[]): Promise<void> {
+    const event = new PlayerQuickChatMessageEvent(this.getPlayer(), packet.value!);
+
+    await this.getLobby().getServer().emit("player.chat.message.quick", event);
+
+    if (event.isCancelled()) {
+      return;
+    }
+
     if (sendTo !== undefined &&
       sendTo.length > 0 &&
       this.getLobby().shouldHideGhostChat() &&
@@ -557,7 +567,17 @@ export class InnerPlayerControl extends BaseInnerNetObject {
       }
     }
 
-    await this.sendRpcPacket(new SendQuickChatPacket(packet.contentsType, packet.value), sendTo);
+    let contentsType = QuickChatPacketType.None;
+    const value = event.getMessage();
+    if (value instanceof QuickChatPlayer) {
+      contentsType = QuickChatPacketType.Player;
+    } else if (value instanceof QuickChatSentence) {
+      contentsType = QuickChatPacketType.Sentence;
+    } else if (value instanceof QuickChatPhrase) {
+      contentsType = QuickChatPacketType.Phrase;
+    }
+
+    await this.sendRpcPacket(new SendQuickChatPacket(contentsType, value), sendTo);
   }
 
   getParent(): EntityPlayer {

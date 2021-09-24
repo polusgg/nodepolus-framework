@@ -9,7 +9,7 @@ export enum QuickChatPacketType {
   None,
 }
 
-class QuickChatPlayer {
+export class QuickChatPlayer {
   constructor(
     public playerId: number,
   ) { }
@@ -27,7 +27,7 @@ class QuickChatPlayer {
   }
 }
 
-class QuickChatSentence {
+export class QuickChatSentence {
   constructor(
     public key: StringNames,
     public elements: (StringNames | QuickChatPlayer | string)[],
@@ -84,7 +84,7 @@ class QuickChatSentence {
   }
 }
 
-class QuickChatPhrase {
+export class QuickChatPhrase {
   constructor(
     public key: StringNames,
   ) {}

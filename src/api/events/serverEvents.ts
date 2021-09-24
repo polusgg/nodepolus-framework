@@ -49,6 +49,7 @@ import {
   PlayerPositionTeleportedEvent,
   PlayerPositionUpdatedEvent,
   PlayerPositionWalkedEvent,
+  PlayerQuickChatMessageEvent,
   PlayerRevivedEvent,
   PlayerRoleUpdatedEvent,
   PlayerSkinUpdatedEvent,
@@ -163,6 +164,7 @@ export type ServerEvents = {
    * Player Events
    */
   "player.banned": PlayerBannedEvent;
+  "player.chat.message.quick": PlayerQuickChatMessageEvent,
   "player.chat.message": PlayerChatMessageEvent;
   "player.chat.note": PlayerChatNoteEvent;
   "player.color.updated": PlayerColorUpdatedEvent;
