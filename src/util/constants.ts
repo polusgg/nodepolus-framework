@@ -5,7 +5,7 @@ import { ServerConfig } from "../api/config";
  * A list of all Among Us client versions supported by NodePolus.
  */
 export const SUPPORTED_VERSIONS: readonly ClientVersion[] = [
-  new ClientVersion(2021, 6, 30, 1),
+  new ClientVersion(2021, 6, 30, 0),
 ];
 
 /**
