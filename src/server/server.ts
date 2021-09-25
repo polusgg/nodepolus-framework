@@ -646,8 +646,8 @@ export class Server extends Emittery<ServerEvents> {
       this.handleDisconnect(connection, reason);
     });
 
-    connection.once("hello").then(async () => {
-      const event = new ConnectionOpenedEvent(connection);
+    connection.once("hello").then(async (message) => {
+      const event = new ConnectionOpenedEvent(connection, new MessageReader(message));
 
       await this.emit("connection.opened", event);
 

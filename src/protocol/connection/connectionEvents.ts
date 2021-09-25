@@ -1,10 +1,10 @@
 import { ServerPacketOutCustomEvent, ServerPacketOutEvent } from "../../api/events/server";
-import { MessageReader } from "../../util/hazelMessage";
+import { HazelMessage, MessageReader } from "../../util/hazelMessage";
 import { BaseRootPacket } from "../packets/root";
 import { DisconnectReason } from "../../types";
 
 export type ConnectionEvents = {
-  hello: undefined;
+  hello: HazelMessage;
   packet: BaseRootPacket;
   disconnected?: DisconnectReason;
   message: MessageReader;

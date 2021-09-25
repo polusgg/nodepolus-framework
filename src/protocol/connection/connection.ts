@@ -1,4 +1,4 @@
-import { GameOverReason, GameState, HazelPacketType, LimboState, PacketDestination, RootPacketType, RuntimePlatform, Scene } from "../../types/enums";
+import { GameOverReason, GameState, HazelPacketType, Language, LimboState, PacketDestination, QuickChatMode, RootPacketType, RuntimePlatform, Scene } from "../../types/enums";
 import { Bitfield, ClientVersion, ConnectionInfo, DisconnectReason, Metadatable, NetworkAccessible, OutboundPacketTransformer } from "../../types";
 import { BaseRootPacket, EndGamePacket, JoinGameErrorPacket, KickPlayerPacket, LateRejectionPacket } from "../packets/root";
 import { CONNECTION_TIMEOUT_DURATION, MAX_PACKET_BYTE_SIZE, SUPPORTED_VERSIONS } from "../../util/constants";
@@ -29,7 +29,9 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   protected hazelVersion?: number;
   protected clientVersion?: ClientVersion;
   protected name?: string;
+  protected language?: Language;
   protected platform?: RuntimePlatform;
+  protected chatMode?: QuickChatMode;
   protected lastPingReceivedTime: number = Date.now();
   protected lobby?: Lobby;
   protected firstJoin = true;
@@ -253,12 +255,37 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
   }
 
   /**
+   * Gets the platform on which this connection is playing.
+   */
+  getLanguage(): Language | undefined {
+    return this.language;
+  }
+
+  /**
+   * Gets the platform on which this connection is playing.
+   */
+  getChatMode(): QuickChatMode | undefined {
+    return this.chatMode;
+  }
+
+  /**
    * Sets the platform on which this connection is playing.
    *
    * @param platform - The new platform on which this connection is playing
    */
   setPlatform(platform?: RuntimePlatform): this {
     this.platform = platform;
+
+    return this;
+  }
+
+  /**
+   * Sets the quick chat mode on which this connection is playing.
+   *
+   * @param chatMode - The new platform on which this connection is playing
+   */
+  setChatMode(chatMode?: QuickChatMode): this {
+    this.chatMode = chatMode;
 
     return this;
   }
@@ -910,8 +937,10 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
     this.hazelVersion = helloPacket.hazelVersion;
     this.clientVersion = helloPacket.clientVersion;
     this.name = helloPacket.name;
+    this.language = helloPacket.language;
+    this.chatMode = helloPacket.chatMode;
 
-    this.emit("hello");
+    this.emit("hello", helloPacket.extraData);
   }
 
   /**
