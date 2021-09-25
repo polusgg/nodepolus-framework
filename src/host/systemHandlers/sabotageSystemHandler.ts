@@ -151,6 +151,11 @@ export class SabotageSystemHandler {
         return;
       }
 
+      if (system.getTimer() === 10000) {
+        this.clearTimer();
+        return;
+      }
+
       system.decrementTimer();
 
       if (system.getTimer() <= 0) {
@@ -166,6 +171,11 @@ export class SabotageSystemHandler {
 
     this.timer = setInterval(() => {
       if (this.clearIfGameEnded()) {
+        return;
+      }
+
+      if (system.getDuration() === 10000) {
+        this.clearTimer();
         return;
       }
 
