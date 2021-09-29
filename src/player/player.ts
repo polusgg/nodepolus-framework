@@ -1,4 +1,4 @@
-import { PlayerSkin, PlayerPet, PlayerHat, PlayerColor, PlayerRole, TeleportReason, SpawnFlag, SetCosmeticReason } from "../types/enums";
+import { PlayerSkin, PlayerPet, PlayerHat, PlayerColor, PlayerRole, TeleportReason, SpawnFlag, SetCosmeticReason, VoteStateConstants } from "../types/enums";
 import { RemovePlayerPacket, JoinGameResponsePacket, GameDataPacket } from "../protocol/packets/root";
 import { DisconnectReason, LevelTask, LevelVent, Vector2 } from "../types";
 import { PlayerData } from "../protocol/entities/gameData/types";
@@ -437,7 +437,7 @@ export class Player implements PlayerInstance {
     const meetingHud = this.lobby.getMeetingHud();
 
     if (meetingHud !== undefined) {
-      await meetingHud.getMeetingHud().castVote(this.getId(), suspect?.getId() ?? -1);
+      await meetingHud.getMeetingHud().castVote(this.getId(), suspect?.getId() ?? VoteStateConstants.SkippedVote);
     }
   }
 
