@@ -73,6 +73,7 @@ import { SubmergedElevatorMovementStage, SubmergedElevatorSystem } from "../../p
 import { SubmergedElevatorAmount } from "../../protocol/packets/rpc/repairSystem/amounts/submergedElevatorAmount";
 import { SubmergedSecuritySabotageSystem } from "../../protocol/entities/shipStatus/systems/submergedSecuritySabotageSystem";
 import { SubmergedSpawnInEvent } from "../../api/events/submerged";
+import { SubmergedRoomOxygenConsoleRepairedEvent } from "../../api/events/submerged/submergedRoomOxygenConsoleRepaired";
 
 export class SystemsHandler {
   protected oldShipStatus: BaseInnerShipStatus;
@@ -113,6 +114,10 @@ export class SystemsHandler {
     this.setOldShipStatus();
     system.setPlayerReady(player.getId());
     this.sendDataUpdate();
+
+    if (system.getReadyToSpawnIn()) {
+      this.host.getLobby().getServer().emit("submerged.spawnIn", new SubmergedSpawnInEvent(player.getLobby().getSafeGame()));
+    }
   }
 
   async repairHeliSystem<T extends HeliSabotageSystem>(repairer: Player, system: T, amount: HeliSabotageAmount): Promise<void> {
@@ -346,6 +351,14 @@ export class SystemsHandler {
 
     switch (amount.getAction()) {
       case OxygenAction.Completed:
+        const event = new SubmergedRoomOxygenConsoleRepairedEvent(this.host.getLobby().getSafeGame(), repairer);
+
+        this.host.getLobby().getServer().emit("submerged.room.oxygen.console.repaired", event);
+
+        if (event.isCancelled()) {
+          return;
+        }
+
         system.addPlayerWithMask(repairer.getId());
 
         if (system.getPlayersWithMask().length === this.host.getLobby().getPlayers().filter(p => !p.isDead()).length) {

@@ -104,6 +104,7 @@ import {
   ServerPlayerReportedEvent,
 } from "./server";
 import { SubmergedSpawnInEvent } from "./submerged";
+import { SubmergedRoomOxygenConsoleRepairedEvent } from "./submerged/submergedRoomOxygenConsoleRepaired";
 
 /**
  * All Server events.
@@ -241,4 +242,5 @@ export type ServerEvents = {
    * Submerged-specific Events
    */
   "submerged.spawnIn": SubmergedSpawnInEvent;
+  "submerged.room.oxygen.console.repaired": SubmergedRoomOxygenConsoleRepairedEvent
 };
