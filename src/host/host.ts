@@ -239,10 +239,13 @@ export class Host implements HostInstance {
 
     if (event.isCancelled()) {
       this.lobby.setGame();
-
+      await this.lobby.getPlayers()[0].getEntity().getPlayerControl().sendRpcPacket(
+        new SetStartCounterPacket(this.counterSequenceId += 5, -1),
+        this.lobby.getConnections(),
+      );
+      await this.lobby.enableActingHosts(true);
       return;
     }
-
     this.lobby.cancelStartTimer();
     this.lobby.setGameState(GameState.Started);
     await this.lobby.disableActingHosts(true);
