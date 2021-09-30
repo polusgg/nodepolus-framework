@@ -105,12 +105,12 @@ export class SystemsHandler {
     system.setPlayerReady(player.getId());
     this.sendDataUpdate();
 
-    if (system.getReadyToSpawnIn()) {
+    if (system.allPlayersReady()) {
       this.host.getLobby().getServer().emit("submerged.spawnIn", new SubmergedSpawnInEvent(player.getLobby().getSafeGame()));
     }
   }
 
-  repairSpawnInWithoutTeleport(player: Player, system: SubmergedSpawnInSystem, _amount: SubmergedSpawnInAmount): void {
+  repairSpawnInWithoutTeleport(player: Player, system: SubmergedSpawnInSystem): void {
     this.setOldShipStatus();
     system.setPlayerReady(player.getId());
     this.sendDataUpdate();
@@ -118,6 +118,12 @@ export class SystemsHandler {
     if (system.getReadyToSpawnIn()) {
       this.host.getLobby().getServer().emit("submerged.spawnIn", new SubmergedSpawnInEvent(player.getLobby().getSafeGame()));
     }
+  }
+
+  repairSpawnInRemoveAll(player: Player, system: SubmergedSpawnInSystem): void {
+    this.setOldShipStatus();
+    system.reset();
+    this.sendDataUpdate();
   }
 
   async repairHeliSystem<T extends HeliSabotageSystem>(repairer: Player, system: T, amount: HeliSabotageAmount): Promise<void> {
@@ -750,7 +756,7 @@ export class SystemsHandler {
   // TODO: Due to the use of a setInterval here, if the game ends or the shipstatus is otherwise despawned after a elevator
   //       starts moving, the elevator will continue to send updates & critically, try to change player floors
 
-  repairElevator(player: Player, system: SubmergedElevatorSystem, _amount: SubmergedElevatorAmount, moveTandom: boolean = true): void {
+  repairElevator(player: Player, system: SubmergedElevatorSystem, _amount: SubmergedElevatorAmount, moveTandem: boolean = true): void {
     this.setOldShipStatus();
 
     if (system.isMoving()) {
@@ -761,8 +767,8 @@ export class SystemsHandler {
     system.flipTargetFloor();
     system.setStage(SubmergedElevatorMovementStage.Complete);
 
-    if (moveTandom && system.hasTandom()) {
-      this.repairElevator(player, system.getSafeTandom(), new SubmergedElevatorAmount(), false);
+    if (moveTandem && system.hasTandem()) {
+      this.repairElevator(player, system.getSafeTandem(), new SubmergedElevatorAmount(), false);
     }
 
     this.sendDataUpdate();

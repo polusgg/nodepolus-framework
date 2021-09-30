@@ -23,7 +23,7 @@ export class SubmergedElevatorSystem extends BaseSystem {
     protected upperDeckIsTargetFloor: boolean,
     protected moving: boolean = false,
     protected stage: SubmergedElevatorMovementStage = SubmergedElevatorMovementStage.Complete,
-    protected tandom?: SubmergedElevatorSystem,
+    protected tandem?: SubmergedElevatorSystem,
   ) {
     super(shipStatus, elevatorSystem);
   }
@@ -52,12 +52,12 @@ export class SubmergedElevatorSystem extends BaseSystem {
     this.stage = stage;
   }
 
-  hasTandom(): boolean {
-    return this.tandom !== undefined;
+  hasTandem(): boolean {
+    return this.tandem !== undefined;
   }
 
-  getTandom(): SubmergedElevatorSystem | undefined {
-    return this.tandom;
+  getTandem(): SubmergedElevatorSystem | undefined {
+    return this.tandem;
   }
 
   getPlayersInsideElevator(): PlayerInstance[] {
@@ -66,14 +66,14 @@ export class SubmergedElevatorSystem extends BaseSystem {
     return this.getShipStatus().getLobby().getPlayers().filter(p => p.getPosition().inside(bounds.lower.a, bounds.lower.b) || p.getPosition().inside(bounds.upper.a, bounds.upper.b));
   }
 
-  getSafeTandom(): SubmergedElevatorSystem {
-    const tandom = this.getTandom();
+  getSafeTandem(): SubmergedElevatorSystem {
+    const tandem = this.getTandem();
 
-    if (tandom === undefined) {
-      throw new Error("Attempted safe get tandom, which failed");
+    if (tandem === undefined) {
+      throw new Error("Attempted safe get tandem, which failed");
     }
 
-    return tandom;
+    return tandem;
   }
 
   serializeData(): MessageWriter {
@@ -88,7 +88,7 @@ export class SubmergedElevatorSystem extends BaseSystem {
   }
 
   clone(): SubmergedElevatorSystem {
-    return new SubmergedElevatorSystem(this.shipStatus, this.getType() as SystemType.SubmergedElevatorWestLeft | SystemType.SubmergedElevatorWestRight | SystemType.SubmergedElevatorEastLeft | SystemType.SubmergedElevatorEastRight | SystemType.SubmergedElevatorService, this.upperDeckIsTargetFloor, this.moving, this.stage, this.tandom);
+    return new SubmergedElevatorSystem(this.shipStatus, this.getType() as SystemType.SubmergedElevatorWestLeft | SystemType.SubmergedElevatorWestRight | SystemType.SubmergedElevatorEastLeft | SystemType.SubmergedElevatorEastRight | SystemType.SubmergedElevatorService, this.upperDeckIsTargetFloor, this.moving, this.stage, this.tandem);
   }
 
   equals(old: SubmergedElevatorSystem): boolean {
@@ -107,8 +107,8 @@ export class SubmergedElevatorSystem extends BaseSystem {
     return true;
   }
 
-  setTandom<T extends SubmergedElevatorSystem>(elevator: T): T {
-    this.tandom = elevator;
+  setTandem<T extends SubmergedElevatorSystem>(elevator: T): T {
+    this.tandem = elevator;
 
     return elevator;
   }

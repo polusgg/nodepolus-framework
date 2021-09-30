@@ -1,23 +1,37 @@
-import { SystemType } from "../../../../types/enums";
+import { SystemType, SubmergedSpawnState } from "../../../../types/enums";
 import { MessageWriter } from "../../../../util/hazelMessage";
 import { BaseInnerShipStatus } from "../baseShipStatus";
 import { BaseSystem } from "./baseSystem";
+import { PlayerInstance } from "../../../../api/player";
 
 export class SubmergedSpawnInSystem extends BaseSystem {
   constructor(
     shipStatus: BaseInnerShipStatus,
-    protected readyPlayers: Set<number> = new Set(),
-    protected readyToSpawnIn: boolean = false,
+    protected state: SubmergedSpawnState = SubmergedSpawnState.Done,
+    protected players: Set<number> = new Set(),
+    protected timer: number = 10,
   ) {
     super(shipStatus, SystemType.SubmergedSpawnIn);
   }
 
   setPlayerReady(p: number): this {
-    this.readyPlayers.add(p);
-
-    this.readyToSpawnIn = this.shipStatus.getLobby().getRealPlayers().length === this.readyPlayers.size;
+    this.players.add(p);
 
     return this;
+  }
+
+  allPlayersReady(): boolean {
+    return this.getPlayers().length === this.players.size;
+  }
+
+  reset(): void {
+    this.state = SubmergedSpawnState.Waiting;
+    this.players = new Set<number>();
+    this.timer = 10;
+  }
+
+  getPlayers(): PlayerInstance[] {
+    return this.shipStatus.getLobby().getRealPlayers().filter(player => !player.isDead())
   }
 
   serializeData(): MessageWriter {
@@ -25,34 +39,30 @@ export class SubmergedSpawnInSystem extends BaseSystem {
   }
 
   serializeSpawn(): MessageWriter {
-    return new MessageWriter().writeBytesAndSize([...this.readyPlayers.values()]).writeBoolean(this.readyToSpawnIn);
+    return new MessageWriter().writeByte(this.state).writeBytesAndSize([...this.players.values()]).writeFloat32(this.timer);
   }
 
   clone(): SubmergedSpawnInSystem {
-    return new SubmergedSpawnInSystem(this.shipStatus, new Set(this.readyPlayers.values()));
+    return new SubmergedSpawnInSystem(this.shipStatus, this.state, new Set(this.players.values()), this.timer);
   }
 
   equals(old: SubmergedSpawnInSystem): boolean {
-    if (this.readyToSpawnIn !== old.readyToSpawnIn) {
+    if (this.allPlayersReady() !== old.allPlayersReady()) {
       return false;
     }
 
-    if (this.readyPlayers.size !== old.readyPlayers.size) {
+    if (this.players.size !== old.players.size) {
       return false;
     }
 
-    const values = this.readyPlayers.values();
+    const values = this.players.values();
 
     for (const value of values) {
-      if (!old.readyPlayers.has(value)) {
+      if (!old.players.has(value)) {
         return false;
       }
     }
 
     return true;
-  }
-
-  getReadyToSpawnIn(): boolean {
-    return this.readyToSpawnIn;
   }
 }

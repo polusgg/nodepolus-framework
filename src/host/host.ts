@@ -71,7 +71,6 @@ import {
 } from "../types/enums";
 import { EntitySubmarineShipStatus as EntitySubmergedShipStatus } from "../protocol/entities/shipStatus/submerged/entitySubmarineShipStatus";
 import { SubmergedElevatorSystem } from "../protocol/entities/shipStatus/systems/submergedElevatorSystem";
-import { SubmergedSpawnInAmount } from "../protocol/packets/rpc/repairSystem/amounts/submergedSpawnInAmount";
 import { SubmergedSpawnInSystem } from "../protocol/entities/shipStatus/systems/submergedSpawnInSystem";
 
 export class Host implements HostInstance {
@@ -695,7 +694,7 @@ export class Host implements HostInstance {
     const shipStatus = this.getLobby().getShipStatus();
 
     if (this.systemsHandler && shipStatus && shipStatus.getShipStatus().getLevel() === Level.Submerged) {
-      this.systemsHandler.repairSpawnInWithoutTeleport(player, shipStatus.getShipStatus().getSystemFromType(SystemType.SubmergedSpawnIn)! as SubmergedSpawnInSystem, new SubmergedSpawnInAmount(true));
+      this.systemsHandler.repairSpawnInWithoutTeleport(player, shipStatus.getShipStatus().getSystemFromType(SystemType.SubmergedSpawnIn)! as SubmergedSpawnInSystem);
     }
 
     const playerData = player.getGameDataEntry();
@@ -798,8 +797,8 @@ export class Host implements HostInstance {
         const wl = submergedShipStatus.getShipStatus().getSystemFromType(SystemType.SubmergedElevatorWestLeft) as SubmergedElevatorSystem;
         const wr = submergedShipStatus.getShipStatus().getSystemFromType(SystemType.SubmergedElevatorWestRight) as SubmergedElevatorSystem;
 
-        el.setTandom(er).setTandom(el);
-        wl.setTandom(wr).setTandom(wl);
+        el.setTandem(er).setTandem(el);
+        wl.setTandem(wr).setTandem(wl);
 
         this.lobby.setShipStatus(submergedShipStatus);
       }
@@ -1005,6 +1004,12 @@ export class Host implements HostInstance {
 
     if (event.hasActiveSabotage() && event.shouldRepairSabotage()) {
       this.systemsHandler?.repairAll();
+    }
+
+    const shipStatus = this.lobby.getShipStatus();
+
+    if (shipStatus !== undefined && shipStatus.getShipStatus().getLevel() === Level.Submerged) {
+      this.systemsHandler?.repairSpawnInRemoveAll(player, shipStatus.getShipStatus().getSystemFromType(SystemType.SubmergedSpawnIn)! as SubmergedSpawnInSystem);
     }
 
     await sender.sendRpcPacket(new StartMeetingPacket(event.getVictim()?.getId() ?? 0xff), this.lobby.getConnections());

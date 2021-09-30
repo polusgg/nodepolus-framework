@@ -24,4 +24,5 @@ export enum InternalSystemType {
   SubmergedFloor,
   SubmergedSecuritySabotage,
   SubmergedSpawnIn,
+  SubmergedWillsCat
 }

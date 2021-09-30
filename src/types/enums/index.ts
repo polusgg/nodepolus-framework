@@ -83,3 +83,5 @@ export { VoteStateConstants } from "./voteStateConstants";
 export { StringNames } from "./stringNames";
 
 export { SetCosmeticReason } from "./setCosmeticReason";
+
+export { SubmergedSpawnState } from "./submergedSpawnState";
