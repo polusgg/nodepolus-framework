@@ -107,11 +107,15 @@ export class Lobby implements LobbyInstance {
     protected readonly creator?: Connection,
     protected readonly code: string = LobbyCode.generate(),
   ) {
-    // if (this.timeToJoinUntilClosed > 0) {
-    //   this.joinTimer = setTimeout(() => {
-    //     this.close();
-    //   }, this.timeToJoinUntilClosed * 1000);
-    // }
+    if (this.timeToJoinUntilClosed > 0) {
+      this.joinTimer = setTimeout(() => {
+        this.close();
+
+        if (this.joinTimer !== undefined) {
+          clearInterval(this.joinTimer!)
+        }
+      }, this.timeToJoinUntilClosed * 1000);
+    }
 
     this.logger = this.server.getLogger(`Lobby ${this.code}`);
   }
@@ -938,7 +942,7 @@ export class Lobby implements LobbyInstance {
         await this.sendRootGamePacket(new GameDataPacket([
           this.meetingHud.getMeetingHud().serializeData(oldMeetingHud),
         ], this.code));
-  
+
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         await this.meetingHud?.getMeetingHud().clearVote(votesToClear);
       } catch(err) {}

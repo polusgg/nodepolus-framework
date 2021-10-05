@@ -45,7 +45,7 @@ export const DEFAULT_CONFIG: Immutable<AllRequired<ServerConfig>> = {
     defaultAddress: "0.0.0.0",
     defaultPort: 22023,
     defaultStartTimerDuration: 5,
-    defaultTimeToJoinUntilClosed: 5,
+    defaultTimeToJoinUntilClosed: 900,
     defaultTimeToStartUntilClosed: 600,
     maxPlayers: 15,
     hideGhostChat: true,
