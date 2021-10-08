@@ -924,17 +924,15 @@ export class Lobby implements LobbyInstance {
       const states = this.meetingHud.getMeetingHud().getPlayerStates();
 
       for (const [id, state] of states) {
+        state.setVotedFor(VoteStateConstants.HasNotVoted);
         if (id === disconnectedId) {
-          this.meetingHud.getMeetingHud().removePlayerState(id);
+          state.setDisabled(true);
         } else if (state.getVotedFor() == disconnectedId) {
           const votingPlayer = this.findPlayerByPlayerId(id);
 
           if (votingPlayer !== undefined) {
             votesToClear.push(votingPlayer);
           }
-
-          state.setDisabled(true);
-          state.setVotedFor(VoteStateConstants.HasNotVoted);
         }
       }
 
