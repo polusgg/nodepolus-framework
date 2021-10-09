@@ -225,7 +225,7 @@ export class SabotageSystemHandler {
   clearTimer(): void {
     if (this.timer !== undefined) {
       clearInterval(this.timer);
-      delete this.timer;
+      this.timer = undefined;
     }
   }
 }

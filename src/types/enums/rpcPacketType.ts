@@ -35,11 +35,10 @@ export enum RpcPacketType {
   BootFromVent = 0x22,
   UpdateSystem = 0x23,
 
-  SubmergedSetPreloadData = 0x22,
-  SubmergedRequestChangeFloor = 0x23,
-  SubmergedAcknowledgeChangeFloor = 0x24,
-  SubmergedEngineVent = 0x25,
-  SubmergedOxygenDeath = 0x26,
+  SubmergedRequestChangeFloor = 0x60,
+  SubmergedAcknowledgeChangeFloor = 0x61,
+  SubmergedEngineVent = 0x62,
+  SubmergedOxygenDeath = 0x63,
 
   PolusSetSpeedModifier = 0x94,
   PolusSetVisionModifier = 0x95,

@@ -1,5 +1,5 @@
 import { BaseInnerShipStatus } from "../../protocol/entities/shipStatus/baseShipStatus";
-import { DecontaminationDoorState, Level, SystemType } from "../../types/enums";
+import { DecontaminationDoorState, Level, SubmergedSpawnState, SystemType, TeleportReason } from "../../types/enums";
 import { GameDataPacket } from "../../protocol/packets/root";
 import { clamp, notUndefined } from "../../util/functions";
 import { Player } from "../../player";
@@ -41,12 +41,12 @@ import {
   SwitchSystem,
 } from "../../protocol/entities/shipStatus/systems";
 import {
+  GameCamerasClosedEvent,
+  GameCamerasOpenedEvent,
+  GameScannerDequeuedEvent,
   GameScannerQueuedEvent,
   GameScannerStartedEvent,
-  GameScannerDequeuedEvent,
   GameScannerStoppedEvent,
-  GameCamerasOpenedEvent,
-  GameCamerasClosedEvent,
 } from "../../api/events/game";
 import {
   RoomCommunicationsConsoleClosedEvent,
@@ -69,7 +69,10 @@ import { SubmergedSpawnInSystem } from "../../protocol/entities/shipStatus/syste
 import { SubmergedSpawnInAmount } from "../../protocol/packets/rpc/repairSystem/amounts/submergedSpawnInAmount";
 import { SpawnPositions } from "../../static";
 import { SubmergedPlayerFloorSystem } from "../../protocol/entities/shipStatus/systems/submergedPlayerFloorSystem";
-import { SubmergedElevatorMovementStage, SubmergedElevatorSystem } from "../../protocol/entities/shipStatus/systems/submergedElevatorSystem";
+import {
+  SubmergedElevatorMovementStage,
+  SubmergedElevatorSystem,
+} from "../../protocol/entities/shipStatus/systems/submergedElevatorSystem";
 import { SubmergedElevatorAmount } from "../../protocol/packets/rpc/repairSystem/amounts/submergedElevatorAmount";
 import { SubmergedSecuritySabotageSystem } from "../../protocol/entities/shipStatus/systems/submergedSecuritySabotageSystem";
 import { SubmergedSpawnInEvent } from "../../api/events/submerged";
@@ -78,6 +81,7 @@ import { SubmergedRoomOxygenConsoleRepairedEvent } from "../../api/events/submer
 export class SystemsHandler {
   protected oldShipStatus: BaseInnerShipStatus;
   protected sabotageCountdownInterval?: NodeJS.Timeout;
+  protected spawnInTimer?: NodeJS.Timeout;
 
   constructor(
     protected readonly host: Host,
@@ -98,31 +102,62 @@ export class SystemsHandler {
   }
 
   repairSpawnIn(player: Player, system: SubmergedSpawnInSystem, amount: SubmergedSpawnInAmount): void {
-    this.setOldShipStatus();
 
-    player.setPosition(SpawnPositions.forPlayerOnLevel(Level.Submerged, player.getLobby().getPlayers().findIndex(p => p.getId() === player.getId()), player.getLobby().getPlayers().length, true).addY(amount.isUpperSelected() ? 48.119 : 0));
-    (this.getShipStatus().getSystemFromType(SystemType.SubmergedFloor) as SubmergedPlayerFloorSystem).setPlayerFloor(player.getId(), amount.isUpperSelected());
-    system.setPlayerReady(player.getId());
-    this.sendDataUpdate();
+    switch (system.getState()) {
+      case SubmergedSpawnState.Waiting: {
+        this.setOldShipStatus();
+        system.setPlayerReady(player.getId());
 
-    if (system.allPlayersReady()) {
-      this.host.getLobby().getServer().emit("submerged.spawnIn", new SubmergedSpawnInEvent(player.getLobby().getSafeGame()));
+        if (system.allPlayersReady()) {
+          system.reset(SubmergedSpawnState.Spawning);
+
+          this.spawnInTimer = setTimeout(() => { // in case the spawning phase isn't completed in time
+            this.spawnInTimer = undefined;
+            this.setOldShipStatus();
+
+            const players = system.getUnreadyPlayers();
+            for (let i = 0; i < players.length; i++) {
+              const unreadyPlayer = players[i];
+              const isUpper = Math.random() > 0.5
+              unreadyPlayer.setPosition(SpawnPositions.forPlayerOnLevel(Level.Submerged, unreadyPlayer.getLobby().getPlayers().findIndex(p => p.getId() === unreadyPlayer.getId()), unreadyPlayer.getLobby().getPlayers().length, true).addY(isUpper ? 48.119 : 0), TeleportReason.GameStart);
+              (this.getShipStatus().getSystemFromType(SystemType.SubmergedFloor) as SubmergedPlayerFloorSystem).setPlayerFloor(unreadyPlayer.getId(), isUpper)
+              system.setPlayerReady(unreadyPlayer.getId());
+            }
+            system.setState(SubmergedSpawnState.Done); //timed out, fully marked everyone as ready, move to done state
+
+            this.sendDataUpdate();
+          }, system.getTimer() * 1000 + 5000);
+        }
+        break;
+      }
+      case SubmergedSpawnState.Spawning: {
+        this.setOldShipStatus();
+        player.setPosition(SpawnPositions.forPlayerOnLevel(Level.Submerged, player.getLobby().getPlayers().findIndex(p => p.getId() === player.getId()), player.getLobby().getPlayers().length, true).addY(amount.isUpperSelected() ? 48.119 : 0));
+        (this.getShipStatus().getSystemFromType(SystemType.SubmergedFloor) as SubmergedPlayerFloorSystem).setPlayerFloor(player.getId(), amount.isUpperSelected());
+        system.setPlayerReady(player.getId());
+
+        if (system.allPlayersReady()) {
+          clearTimeout(this.spawnInTimer!);
+          this.spawnInTimer = undefined;
+          this.host.getLobby().getServer().emit("submerged.spawnIn", new SubmergedSpawnInEvent(player.getLobby().getSafeGame()));
+          system.reset(SubmergedSpawnState.Done);
+        }
+        break;
+      }
+      default:
+        return;
     }
+
+    this.sendDataUpdate();
   }
 
   repairSpawnInWithoutTeleport(player: Player, system: SubmergedSpawnInSystem): void {
-    this.setOldShipStatus();
-    system.setPlayerReady(player.getId());
-    this.sendDataUpdate();
-
-    if (system.getReadyToSpawnIn()) {
-      this.host.getLobby().getServer().emit("submerged.spawnIn", new SubmergedSpawnInEvent(player.getLobby().getSafeGame()));
-    }
+    this.repairSpawnIn(player, system, new SubmergedSpawnInAmount(true));
   }
 
   repairSpawnInRemoveAll(player: Player, system: SubmergedSpawnInSystem): void {
     this.setOldShipStatus();
-    system.reset();
+    system.reset(SubmergedSpawnState.Waiting);
     this.sendDataUpdate();
   }
 
