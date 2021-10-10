@@ -325,7 +325,6 @@ export class Lobby implements LobbyInstance {
     }
 
     this.players.splice(playerIndex, 1);
-    this.gameData?.getGameData().removePlayer(player.getId());
   }
 
   removeCustomEntity(entity: BaseInnerNetEntity): void {
