@@ -118,7 +118,7 @@ export class SystemsHandler {
             const players = system.getUnreadyPlayers();
             for (let i = 0; i < players.length; i++) {
               const unreadyPlayer = players[i];
-              const isUpper = Math.random() > 0.5
+              const isUpper = Math.random() > 0.5;
               unreadyPlayer.setPosition(SpawnPositions.forPlayerOnLevel(Level.Submerged, unreadyPlayer.getLobby().getPlayers().findIndex(p => p.getId() === unreadyPlayer.getId()), unreadyPlayer.getLobby().getPlayers().length, true).addY(isUpper ? 48.119 : 0), TeleportReason.GameStart);
               (this.getShipStatus().getSystemFromType(SystemType.SubmergedFloor) as SubmergedPlayerFloorSystem).setPlayerFloor(unreadyPlayer.getId(), isUpper)
               system.setPlayerReady(unreadyPlayer.getId());
