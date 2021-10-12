@@ -915,6 +915,7 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
     this.acknowledgementResolveMap.delete(nonce);
     this.acknowledgementRejectMap.delete(nonce);
     this.flushResolveMap.delete(nonce);
+    this.packetStackMap.delete(nonce);
   }
 
   /**
@@ -962,9 +963,6 @@ export class Connection extends Emittery<ConnectionEvents> implements Metadatabl
    * @param reason - The reason for why the connection was disconnected
    */
   protected cleanup(reason?: DisconnectReason): void {
-    console.log("Failed to send", this.packetBuffer, "to", this);
-    console.log("Rejecting all unresponded packets", this.acknowledgementRejectMap);
-
     for (let i = 0; i < this.packetBuffer.length; i++) {
       //DEBUG
       this.packetBuffer[i].reject("Connection " + this.id + " disconnected.\n" + this.packetBuffer[i].stack);
